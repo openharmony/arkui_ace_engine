@@ -41,15 +41,15 @@ const std::vector<string> INSERT_VALUE_LIST = {
     "哈哈哈\nhaha123\n",
     "\n哈哈哈\nhaha123\n",
 };
+const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(),
+    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 const std::unordered_map<SpanType, std::function<void(RefPtr<RichEditorPattern>)>> SPAN_CONSTRUCTOR_MAP = {
     { SpanType::TEXT, [](RefPtr<RichEditorPattern> pattern) { pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);} },
     { SpanType::IMAGE, [](RefPtr<RichEditorPattern> pattern) { pattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);} },
     { SpanType::SYMBOL, [](RefPtr<RichEditorPattern> pattern) { pattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);} },
     { SpanType::BUILDER, [](RefPtr<RichEditorPattern> pattern) { pattern->AddPlaceholderSpan(BUILDER_NODE_1, {});} }
 };
-const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
-    ElementRegister::GetInstance()->MakeUniqueId(),
-    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 } // namespace
 
 class RichEditorSpanTest : public RichEditorCommonTestNg {
