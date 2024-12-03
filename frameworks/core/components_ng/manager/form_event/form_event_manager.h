@@ -39,13 +39,13 @@ public:
 
     ~FormEventManager() override = default;
 
-    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback &&callback);
+    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
-    void AddEtsCardAxisEventCallback(int32_t pointId, EtsCardAxisEventCallback &&callback);
+    void AddEtsCardAxisEventCallback(int32_t pointId, EtsCardAxisEventCallbac&& callback);
 
-    void HandleEtsCardTouchEvent(const TouchEvent &point, SerializedGesture &serializedGesture);
+    void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture& serializedGesture);
 
-    void HandleEtsCardAxisEvent(const AxisEvent &point, SerializedGesture &serializedGesture);
+    void HandleEtsCardAxisEvent(const AxisEvent& point, SerializedGesture& serializedGesture);
 
     void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 
