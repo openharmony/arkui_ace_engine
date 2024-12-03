@@ -1590,4 +1590,56 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems012, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 580.0f);
     EXPECT_EQ(pattern_->itemPosition_[2].startPos, 1060.0f);
 }
+
+/**
+ * @tc.name: ShowCachedItems024
+ * @tc.desc: Test show cached items on loop = true, cachedCount = 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, ShowCachedItems024, TestSize.Level1)
+{
+    SwiperModelNG model;
+    model.Create();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    GetSwiper();
+    model.SetLoop(true);
+    model.SetCachedIsShown(true);
+    model.SetDisplayCount(1);
+    model.SetCachedCount(1);
+    model.SetIndex(0);
+    CreateItemWithSize(100.0f, 100.0f);
+    CreateItemWithSize(150.0f, 150.0f);
+    CreateItemWithSize(200.0f, 200.0f);
+    CreateItemWithSize(250.0f, 250.0f);
+    CreateItemWithSize(300.0f, 300.0f);
+    CreateSwiperDone();
+
+    FlushLayoutTask(frameNode_);
+
+    auto swiperSize = frameNode_->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(swiperSize.Width(), 100.0f);
+    EXPECT_EQ(swiperSize.Height(), 100.0f);
+
+    auto secondChild = AceType::DynamicCast<FrameNode>(frameNode_->GetOrCreateChildByIndex(1));
+    ASSERT_NE(secondChild, nullptr);
+    auto secondChildSize = secondChild->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(secondChildSize.Width(), 100.0f);
+    EXPECT_EQ(secondChildSize.Height(), 150.0f);
+    auto fifthChild = AceType::DynamicCast<FrameNode>(frameNode_->GetOrCreateChildByIndex(4));
+    ASSERT_NE(fifthChild, nullptr);
+    auto fifthChildSize = fifthChild->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(fifthChildSize.Width(), 100.0f);
+    EXPECT_EQ(fifthChildSize.Height(), 300.0f);
+
+    pattern_->UpdateCurrentOffset(-10.0f);
+    FlushLayoutTask(frameNode_);
+    swiperSize = frameNode_->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(swiperSize.Width(), 100.0f);
+    EXPECT_EQ(swiperSize.Height(), 150.0f);
+    auto thirdChild = AceType::DynamicCast<FrameNode>(frameNode_->GetOrCreateChildByIndex(2));
+    ASSERT_NE(thirdChild, nullptr);
+    auto thirdChildSize = thirdChild->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(thirdChildSize.Width(), 100.0f);
+    EXPECT_EQ(thirdChildSize.Height(), 200.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -198,6 +198,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         itemPosition_.clear();
     }
 
+    auto cachedChildIdealSize = contentIdealSize;
+
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
         contentCrossSize_ = GetChildMaxSize(layoutWrapper, false);
@@ -215,6 +217,14 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             SetInactive(layoutWrapper, 0.0f, contentMainSize_, currentTargetIndex_);
         }
     }
+
+    if (cachedShow_) {
+        cachedChildIdealSize.SetMainSize(contentMainSize_, axis_);
+        auto cachedChildLayoutConstraint =
+            SwiperUtils::CreateChildConstraint(swiperLayoutProperty, cachedChildIdealSize, getAutoFill);
+        LayoutCachedItem(layoutWrapper, cachedChildLayoutConstraint);
+    }
+
     MeasureSwiperCustomAnimation(layoutWrapper, childLayoutConstraint);
     if (itemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
@@ -234,6 +244,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutWrapper->SetActiveChildRange(startIndex, endIndex, cachedCount_, cachedCount_);
         }
     } else {
+        AdjustItemPositionOnCachedShow();
+
         int32_t startIndex = std::min(GetLoopIndex(itemPositionInAnimation_.begin()->first), realTotalCount_ - 1);
         int32_t endIndex = std::min(GetLoopIndex(itemPositionInAnimation_.rbegin()->first), realTotalCount_ - 1);
         while (startIndex + 1 < realTotalCount_ &&
@@ -695,8 +707,6 @@ void SwiperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, const La
             }
         }
     }
-
-    LayoutCachedItem(layoutWrapper, layoutConstraint);
 }
 
 bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -791,10 +801,6 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
 
 void SwiperLayoutAlgorithm::SetInactiveOnForward(LayoutWrapper* layoutWrapper)
 {
-    if (cachedShow_) {
-        return;
-    }
-
     auto displayCount = GetDisplayCount(layoutWrapper);
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         auto endPos = pos->second.endPos;
@@ -936,8 +942,10 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         AdjustOffsetOnForward(currentEndPos);
     }
 
-    // Mark inactive in wrapper.
-    SetInactiveOnForward(layoutWrapper);
+    if (!cachedLayout) {
+        // Mark inactive in wrapper.
+        SetInactiveOnForward(layoutWrapper);
+    }
 }
 
 void SwiperLayoutAlgorithm::SetInactive(
@@ -973,10 +981,6 @@ void SwiperLayoutAlgorithm::SetInactive(
 
 void SwiperLayoutAlgorithm::SetInactiveOnBackward(LayoutWrapper* layoutWrapper)
 {
-    if (cachedShow_) {
-        return;
-    }
-
     std::list<int32_t> removeIndexes;
     auto displayCount = GetDisplayCount(layoutWrapper);
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
@@ -1054,8 +1058,10 @@ void SwiperLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, const L
         return;
     }
 
-    // Mark inactive in wrapper.
-    SetInactiveOnBackward(layoutWrapper);
+    if (!cachedLayout) {
+        // Mark inactive in wrapper.
+        SetInactiveOnBackward(layoutWrapper);
+    }
 }
 
 void SwiperLayoutAlgorithm::AdjustOffsetOnBackward(float currentStartPos)
