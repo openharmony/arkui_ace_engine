@@ -1976,11 +1976,9 @@ OffsetF MenuPattern::GetPreviewMenuAnimationOffset(
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, OffsetF());
     auto size = geometryNode->GetFrameSize();
-    auto layoutAlgorithmWrapper = host->GetLayoutAlgorithm();
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, OffsetF());
-    auto layoutAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithm, OffsetF());
-    auto placement = layoutAlgorithm->GetPlacement();
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, OffsetF());
+    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
 
     auto space = TARGET_SPACE.ConvertToPx();
     auto menuWidth = size.Width();

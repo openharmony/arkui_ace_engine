@@ -533,14 +533,14 @@ public:
         lastPosition_ = lastPosition;
     }
 
-    void UpdateLastArrowPlacement(std::optional<Placement> lastArrowPlacement)
+    void UpdateLastPlacement(std::optional<Placement> lastPlacement)
     {
-        lastArrowPlacement_ = lastArrowPlacement;
+        lastPlacement_ = lastPlacement;
     }
 
-    std::optional<Placement> GetLastArrowPlacement()
+    std::optional<Placement> GetLastPlacement()
     {
-        return lastArrowPlacement_;
+        return lastPlacement_;
     }
 
     void SetIsEmbedded()
@@ -579,6 +579,7 @@ public:
     {
         return pathParams_;
     }
+    void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
@@ -618,7 +619,6 @@ private:
 
     Offset GetTransformCenter() const;
     OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
-    void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
     void ShowPreviewMenuAnimation();
     void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
@@ -673,7 +673,7 @@ private:
     bool needHideAfterTouch_ = true;
 
     std::optional<OffsetF> lastPosition_;
-    std::optional<Placement> lastArrowPlacement_;
+    std::optional<Placement> lastPlacement_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF disappearOffset_;
