@@ -33,6 +33,7 @@ enum CtrlKeysBit : uint8_t {
 RefPtr<NG::PipelineContext> GetPipelineContext(int32_t instanceId)
 {
     auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
     return AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
 }
 
@@ -537,9 +538,6 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         }
         return false;
     }
-
-    auto container = Container::GetContainer(GetInstanceId());
-    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
 
     // process drag cancel
     if (event.code == KeyCode::KEY_ESCAPE) {
