@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
-
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -219,7 +219,7 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
 
 void MenuItemGroupPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->PutExtAttr("header", GetHeaderContent().c_str(), filter);
-    json->PutExtAttr("footer", GetFooterContent().c_str(), filter);
+    json->PutExtAttr("header", UtfUtils::Str16ToStr8(GetHeaderContent()).c_str(), filter);
+    json->PutExtAttr("footer", UtfUtils::Str16ToStr8(GetFooterContent()).c_str(), filter);
 }
 } // namespace OHOS::Ace::NG
