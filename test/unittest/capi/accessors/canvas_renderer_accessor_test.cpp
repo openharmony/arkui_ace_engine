@@ -1288,8 +1288,8 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
     auto peer = new MockImageBitmapPeer();
     arkBitmap.ptr = peer;
 
-    for (const auto& expectedW : INT32_TEST_PLAN) {
-        for (const auto& expectedH : INT32_TEST_PLAN) {
+    for (const auto& expectedW : SIZE_TEST_PLAN) {
+        for (const auto& expectedH : SIZE_TEST_PLAN) {
             peer->SetWidth(expectedW);
             peer->SetHeight(expectedH);
 
