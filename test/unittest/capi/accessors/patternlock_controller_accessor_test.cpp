@@ -14,7 +14,6 @@
  */
 
 #include "accessor_test_base.h"
-#include "node_api.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
 #include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

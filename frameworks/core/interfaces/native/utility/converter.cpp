@@ -15,6 +15,7 @@
 
 #include "converter.h"
 #include "reverse_converter.h"
+#include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -36,6 +37,36 @@ std::optional<double> FloatToDouble(const std::optional<float>& src)
 }
 
 namespace OHOS::Ace::NG::Converter {
+RefPtr<ThemeConstants> GetThemeConstants(Ark_NodeHandle node, Ark_CharPtr bundleName, Ark_CharPtr moduleName)
+{
+    auto cardId = CardScope::CurrentId();
+    if (cardId != INVALID_CARD_ID) {
+        auto container = Container::Current();
+        auto weak = container->GetCardPipeline(cardId);
+        auto cardPipelineContext = weak.Upgrade();
+        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
+        auto cardThemeManager = cardPipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(cardThemeManager, nullptr);
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
+    }
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        return themeManager->GetThemeConstants(bundleName, moduleName);
+    }
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetThemeConstants(bundleName, moduleName);
+}
+
 void AssignGradientColors(Gradient *gradient,
     const Array_Tuple_ResourceColor_Number *colors)
 {
@@ -118,7 +149,7 @@ void AssignArkValue(Ark_Length& dst, const std::string& src)
 void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 {
     dst.id = ArkValue<Ark_Number>(src.resource);
-    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
+    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
     dst.params = ArkValue<Opt_Array_String>();
 }
 
@@ -264,7 +295,7 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 {
     if (resource.id.tag == ARK_TAG_INT32) {
         id_ = resource.id.i32;
-        type_ = static_cast<NodeModifier::ResourceType>(OptConvert<int>(resource.type).value_or(0));
+        type_ = static_cast<ResourceType>(OptConvert<int>(resource.type).value_or(0));
         bundleName_ = Convert<std::string>(resource.bundleName);
         moduleName_ = Convert<std::string>(resource.moduleName);
         if (resource.params.tag != ARK_TAG_UNDEFINED) {
@@ -273,7 +304,7 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
             }
         }
 
-        themeConstants_ = NodeModifier::GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
+        themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
     } else {
         LOGE("ResourceConverter illegal id tag: id.tag = %{public}d", resource.id.tag);
     }
@@ -285,7 +316,7 @@ std::optional<std::string> ResourceConverter::ToString()
     CHECK_NULL_RETURN(themeConstants_, result);
 
     switch (type_) {
-        case NodeModifier::ResourceType::STRING:
+        case ResourceType::STRING:
             if (id_ != -1) {
                 result = themeConstants_->GetString(id_);
             } else if (!params_.empty()) {
@@ -295,13 +326,13 @@ std::optional<std::string> ResourceConverter::ToString()
             }
             break;
 
-        case NodeModifier::ResourceType::RAWFILE:
+        case ResourceType::RAWFILE:
             if (!params_.empty()) {
                 result = themeConstants_->GetRawfile(params_.front());
             }
             break;
 
-        case NodeModifier::ResourceType::MEDIA:
+        case ResourceType::MEDIA:
             if (id_ != -1) {
                 result = themeConstants_->GetMediaPath(id_);
             } else if (!params_.empty()) {
@@ -318,7 +349,7 @@ std::optional<std::string> ResourceConverter::ToString()
 std::optional<StringArray> ResourceConverter::ToStringArray()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::STRARRAY) {
+    if (type_ == ResourceType::STRARRAY) {
         if (id_ != -1) {
             return themeConstants_->GetStringArray(id_);
         } else if (params_.size() > 0) {
@@ -333,7 +364,7 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 std::optional<StringArray> ResourceConverter::ToFontFamilies()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::STRING) {
+    if (type_ == ResourceType::STRING) {
         std::optional<std::string> str;
         if (id_ != -1) {
             str = themeConstants_->GetString(id_);
@@ -345,7 +376,7 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
         if (str.has_value()) {
             return Framework::ConvertStrToFontFamilies(str.value());
         }
-    } else if (type_ == NodeModifier::ResourceType::STRARRAY) {
+    } else if (type_ == ResourceType::STRARRAY) {
         return ToStringArray();
     } else {
         LOGE("ResourceConverter::ToFontFamilies Resource type is not supported");
@@ -356,7 +387,7 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::FLOAT) {
+    if (type_ == ResourceType::FLOAT) {
         if (id_ == -1 && !params_.empty()) {
             return themeConstants_->GetDimensionByName(params_.front());
         }
@@ -371,7 +402,7 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 std::optional<CalcLength> ResourceConverter::ToCalcLength()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::STRING) {
+    if (type_ == ResourceType::STRING) {
         if (id_ != -1) {
             return CalcLength(themeConstants_->GetString(id_));
         }
@@ -389,7 +420,7 @@ std::optional<float> ResourceConverter::ToFloat()
 {
     std::optional<float> optFloat = std::nullopt;
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::FLOAT) {
+    if (type_ == ResourceType::FLOAT) {
         if (id_ == -1 && params_.size() > 0) {
             optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
         } else {
@@ -402,7 +433,7 @@ std::optional<float> ResourceConverter::ToFloat()
 std::optional<int32_t> ResourceConverter::ToInt()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::INTEGER) {
+    if (type_ == ResourceType::INTEGER) {
         return themeConstants_->GetInt(id_);
     }
     return std::nullopt;
@@ -427,7 +458,7 @@ std::optional<Color> ResourceConverter::ToColor()
     }
 
     switch (type_) {
-        case NodeModifier::ResourceType::STRING: {
+        case ResourceType::STRING: {
             Color color;
             if (Color::ParseColorString(themeConstants_->GetString(id_), color)) {
                 result = color;
@@ -435,11 +466,11 @@ std::optional<Color> ResourceConverter::ToColor()
             break;
         }
 
-        case NodeModifier::ResourceType::INTEGER:
+        case ResourceType::INTEGER:
             result = Color(ColorAlphaAdapt(themeConstants_->GetInt(id_)));
             break;
 
-        case NodeModifier::ResourceType::COLOR:
+        case ResourceType::COLOR:
             result = themeConstants_->GetColor(id_);
             break;
 

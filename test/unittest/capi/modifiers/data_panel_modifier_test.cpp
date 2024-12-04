@@ -440,7 +440,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidValues, TestSize
 // Color::RED is mocked by mocked theme constants
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     trackBackgroundColorValidResourceValues = {{ Color::RED.ToString(),
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(12345, NodeModifier::ResourceType::COLOR)),
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(12345, Converter::ResourceType::COLOR)),
         Color::RED.ToString() },
 };
 

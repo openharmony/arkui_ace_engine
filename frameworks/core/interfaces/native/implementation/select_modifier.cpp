@@ -15,7 +15,6 @@
 
 #include <variant>
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"

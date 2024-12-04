@@ -72,8 +72,8 @@ void PointLightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
 #ifdef POINT_LIGHT_ENABLE
     auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
-    auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
-    auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
+    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
+    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
     if (pointLightStyle) {
         if (pointLightStyle->lightSource) {

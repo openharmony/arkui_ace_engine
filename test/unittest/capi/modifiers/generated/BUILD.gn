@@ -25,8 +25,8 @@ ace_unittest("capi_generated_modifiers_test") {
   sources += generated_sources
   extra_deps = []
   extra_deps += [
-    "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest",
     "..:capi_deps",
+    "../..:ace_core_interfaces_native_node_linux_unittest",
     "../../stubs:capi-ut-stubs",
   ]
 }

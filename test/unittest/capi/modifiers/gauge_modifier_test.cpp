@@ -60,12 +60,12 @@ namespace  {
 
     const auto COLOR_BY_NAME = Color(0xFF5A0F78);
     const auto COLOR_BY_ID = Color(0xABCDEF01);
-    const auto RES_COLOR_NAME = NamedResourceId{"test_color", NodeModifier::ResourceType::COLOR};
-    const auto RES_COLOR_ID = IntResourceId{54321, NodeModifier::ResourceType::COLOR};
-    const auto RES_VALUE_NAME = NamedResourceId{"test_value", NodeModifier::ResourceType::FLOAT};
-    const auto RES_VALUE_ID = IntResourceId{1, NodeModifier::ResourceType::FLOAT};
+    const auto RES_COLOR_NAME = NamedResourceId{"test_color", Converter::ResourceType::COLOR};
+    const auto RES_COLOR_ID = IntResourceId{54321, Converter::ResourceType::COLOR};
+    const auto RES_VALUE_NAME = NamedResourceId{"test_value", Converter::ResourceType::FLOAT};
+    const auto RES_VALUE_ID = IntResourceId{1, Converter::ResourceType::FLOAT};
     const auto ICON_PATH = "path/test_icon.svg";
-    const auto RES_ICON_NAME = NamedResourceId{"icon", NodeModifier::ResourceType::STRING};
+    const auto RES_ICON_NAME = NamedResourceId{"icon", Converter::ResourceType::STRING};
 } // namespace
 
 class GaugeModifierTest : public ModifierTestBase<

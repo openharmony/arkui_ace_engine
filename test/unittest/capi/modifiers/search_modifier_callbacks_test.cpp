@@ -16,7 +16,6 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -120,7 +119,7 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
     options.icon = ArkValue<Opt_String>(Ark_Empty());
 
     auto controllerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getSearchControllerAccessor()->ctor();
+        fullAPI_->getAccessors()->getSearchControllerAccessor()->ctor();
     auto peerImplPtr = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -142,7 +141,7 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
     EXPECT_EQ(peerImplPtr->GetController(), controller);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getSearchControllerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getSearchControllerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(SearchControllerPeer *)>(finalizerPtr);
     EXPECT_NE(finalyzer, nullptr);
     finalyzer(reinterpret_cast<SearchControllerPeer *>(controllerPtr));

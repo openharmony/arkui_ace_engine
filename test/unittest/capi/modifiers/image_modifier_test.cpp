@@ -316,8 +316,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetResourceUrl, testing::ext::TestSi
     std::string urlStringId = "https://www.example.com/xxx_id.png";
     AddResource(resID, urlStringId);
 
-    const auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
-    const auto RES_ID = IntResourceId{resID, NodeModifier::ResourceType::STRING};
+    const auto RES_NAME = NamedResourceId{resName.c_str(), Converter::ResourceType::STRING};
+    const auto RES_ID = IntResourceId{resID, Converter::ResourceType::STRING};
 
     std::vector<std::pair<Ark_ResourceStr, std::string>> tests = {
         {CreateResourceUnion<Ark_ResourceStr>(RES_NAME), urlString},
@@ -356,7 +356,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetUndefinedResourceUrl, testing::ex
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
     // try unknown resource id
-    const auto emptyRes = IntResourceId{-1, NodeModifier::ResourceType::STRING};
+    const auto emptyRes = IntResourceId{-1, Converter::ResourceType::STRING};
     auto resUnion = CreateResourceUnion<Ark_ResourceStr>(emptyRes);
     auto imageRc = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(resUnion);
     modifier_->setImageOptions0(node_, &imageRc);

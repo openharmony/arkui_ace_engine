@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -92,8 +91,8 @@ namespace {
     const Color THEME_SCROLLBAR_COLOR(0x00FF00FF);
 
     // resource names and id
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::FLOAT};
-    const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::FLOAT};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::FLOAT};
+    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::FLOAT};
 
     // resource values
     const auto RESOURCE_OPACITY_BY_STRING = 0.4f;
@@ -223,7 +222,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidLayoutOptionsValues, TestSiz
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level1)
 {
-    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
     EXPECT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -246,7 +245,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
     EXPECT_EQ(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
     finalyzer(peerImplPtr);
 }
@@ -258,7 +257,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Level1)
 {
-    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
     EXPECT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -281,7 +280,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
     EXPECT_NE(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
     finalyzer(peerImplPtr);
 }

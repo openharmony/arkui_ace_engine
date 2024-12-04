@@ -164,9 +164,9 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_WHITE = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE }
 };
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
-const auto RES_COLOR_ID = IntResourceId{123456, NodeModifier::ResourceType::COLOR};
-const auto INVALID_ID_COLOR = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{123456, Converter::ResourceType::COLOR};
+const auto INVALID_ID_COLOR = IntResourceId{-1, Converter::ResourceType::COLOR};
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
         COLOR_RED },
@@ -184,7 +184,7 @@ const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
-const auto RES_NAME = NamedResourceId{"res_name", NodeModifier::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 

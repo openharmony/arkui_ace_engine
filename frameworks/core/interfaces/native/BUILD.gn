@@ -13,34 +13,16 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import(
-    "//foundation/arkui/ace_engine/frameworks/core/interfaces/native/generated/interface/node_interface.gni")
-
-config("ace_core_interfaces_native_node_config") {
-  include_dirs = [
-    "${ace_root}/interfaces/inner_api/ace",
-    "${ace_root}/interfaces/native",
-    "${ace_root}/interfaces/native/node",
-    "${ace_root}/frameworks/core/interfaces/native/generated/interface",
-    "${ace_root}/frameworks/core/interfaces/arkoala",
-  ]
-
-  # TODO: this is for zero sized generated structs in arkoala_api.here
-  cflags_cc = [ "-Wno-extern-c-compat" ]
-}
 
 # build core sources
 template("ace_core_interfaces_native_node") {
+  forward_variables_from(invoker, "*")
+
   ohos_source_set(target_name) {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
-    defines = invoker.defines
-    config = invoker.config
-    cflags_cc = invoker.cflags_cc
-    cflags_cc += [ "-Wno-unused-variable" ]
-    external_deps = []
+    defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    configs += [ ":ace_core_interfaces_native_node_config" ]
 
     if (ace_engine_feature_enable_point_light) {
       defines += [ "POINT_LIGHT_ENABLE" ]
@@ -48,15 +30,6 @@ template("ace_core_interfaces_native_node") {
 
     # add common source file needed by all product platform here
     sources = [
-      "implementation/canvas_renderer_peer_impl.cpp",
-      "implementation/canvas_rendering_context2d_peer_impl.cpp",
-      "implementation/custom_dialog_controller_peer_impl.cpp",
-      "implementation/drawing_rendering_context_peer_impl.cpp",
-      "implementation/image_bitmap_peer_impl.cpp",
-      "implementation/navigation_context.cpp",
-      "implementation/scroller_peer_impl.cpp",
-      "implementation/search_controller_accessor_peer_impl.cpp",
-      "implementation/video_controller_peer_impl.cpp",
       "node/alphabet_indexer_modifier.cpp",
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
@@ -157,20 +130,8 @@ template("ace_core_interfaces_native_node") {
       "node/util_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",
-      "node/view_model2.cpp",
       "node/water_flow_modifier.cpp",
-      "utility/converter_enums.cpp",
-      "utility/reverse_converter_enums.cpp",
-      "utility/validators.cpp",
     ]
-    if (defined(config.web_components_support) &&
-        config.web_components_support && !is_arkui_x) {
-      defines += [ "WEB_SUPPORTED" ]
-    }
-    if (include_generated_sources) {
-      sources += generated_sources
-      defines += [ "INCLUDE_GENERATED_SOURCES" ]
-    }
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     if (is_arkui_x) {
       deps += [
@@ -178,6 +139,11 @@ template("ace_core_interfaces_native_node") {
         "//third_party/bounds_checking_function:libsec_static",
       ]
     }
+    include_dirs = [
+      "${ace_root}/interfaces/inner_api/ace",
+      "${ace_root}/interfaces/native",
+      "${ace_root}/interfaces/native/node",
+    ]
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
@@ -198,20 +164,20 @@ template("ace_core_interfaces_native_node") {
         config.plugin_components_support) {
       sources += [ "node/plugin_modifier.cpp" ]
     }
-
+    external_deps = [
+      "graphic_2d:drawing_napi_impl",
+      "graphic_2d:librender_service_client",
+    ]
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
-
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
 
-    external_deps += [
-      "graphic_2d:drawing_napi_impl",
-      "graphic_2d:librender_service_client",
-    ]
+    cflags_cc = []
+    cflags_cc += invoker.cflags_cc
   }
 }
 
@@ -237,75 +203,4 @@ foreach(item, ace_platforms) {
       cflags_cc = []
     }
   }
-}
-
-web_components_support_for_test = true
-form_component_support_for_test = true
-
-ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-  defines = []
-  include_dirs = []
-
-  public_configs = [
-    ":ace_core_interfaces_native_node_config",
-    "$ace_root/test/unittest:ace_unittest_config",
-  ]
-
-  defines += [ "ARKUI_CAPI_UNITTEST " ]
-  defines += [ "INCLUDE_GENERATED_SOURCES" ]
-  if (ace_engine_feature_enable_point_light) {
-    defines += [ "POINT_LIGHT_ENABLE" ]
-  }
-
-  sources = [
-    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
-    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
-    "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
-    "$ace_root/frameworks/core/common/card_scope.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/form/form_model_static_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/shape/path_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/web/richtext_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/web/web_model_static_ng.cpp",
-    "common/view_model.cpp",
-    "common/view_model2.cpp",
-    "implementation/canvas_renderer_peer_impl.cpp",
-    "implementation/canvas_rendering_context2d_peer_impl.cpp",
-    "implementation/custom_dialog_controller_peer_impl.cpp",
-    "implementation/drawing_rendering_context_peer_impl.cpp",
-    "implementation/image_bitmap_peer_impl.cpp",
-    "implementation/navigation_context.cpp",
-    "implementation/scroller_peer_impl.cpp",
-    "implementation/search_controller_accessor_peer_impl.cpp",
-    "implementation/video_controller_peer_impl.cpp",
-    "node/extension_companion_node.cpp",
-    "node/node_adapter_impl.cpp",
-    "node/node_api.cpp",
-    "node/node_list_item_modifier.cpp",
-    "node/util_modifier.cpp",
-    "utility/converter_enums.cpp",
-    "utility/reverse_converter_enums.cpp",
-    "utility/validators.cpp",
-  ]
-  sources += generated_sources
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-
-  # for support securec.h and snprintf_s
-  external_deps = [ "bounds_checking_function:libsec_static" ]
-
-  if (defined(web_components_support_for_test) &&
-      web_components_support_for_test) {
-    defines += [ "WEB_SUPPORTED" ]
-  }
-
-  if (defined(form_component_support_for_test) &&
-      form_component_support_for_test) {
-    defines += [ "FORM_SUPPORTED" ]
-  }
-
-  cflags_cc = [ "-Wno-unused-variable" ]
 }

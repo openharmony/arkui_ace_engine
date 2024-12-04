@@ -13,47 +13,17 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/tab_content_modifier.h"
-#include "core/interfaces/native/node/node_image_modifier.h"
+
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 
-std::optional<std::string> TextResourceToString(ArkUINodeHandle node, const ArkUIResource* resource)
-{
-    std::optional<std::string> result;
-    if (resource) {
-        auto themeConstants = NodeModifier::GetThemeConstants(node, resource->bundleName, resource->moduleName);
-
-        if (resource->id != -1) {
-            switch (static_cast<NodeModifier::ResourceType>(resource->type)) {
-                case NodeModifier::ResourceType::STRING:
-                    result = themeConstants->GetString(resource->id);
-                    break;
-
-                default:
-                    LOGW("TextResource type = %{public}d not supported", resource->type);
-                    break;
-            }
-        }
-    }
-
-    return result;
-}
-
-void SetTabContent(ArkUINodeHandle node, const ArkUIResource* iconResource, const ArkUIResource* labelResource)
-{
-    auto icon = NodeModifier::ImageResourceToString(node, iconResource);
-    auto label = TextResourceToString(node, labelResource);
-
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TabContentModelNG::SetTabBar(frameNode, label.value_or(""), icon.value_or(""), nullptr);
-}
-
 void SetTabContentBuilder(ArkUINodeHandle node, ArkUI_Int32 methodId)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto builder = [methodId]() {
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
@@ -65,42 +35,22 @@ void SetTabContentBuilder(ArkUINodeHandle node, ArkUI_Int32 methodId)
         CHECK_NULL_VOID(vmContext);
         dispatch->CallInt(vmContext, methodId, 0, args);
     };
-
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TabContentModelNG::SetTabBar(frameNode, "", "", std::move(builder));
+    TabContentModelNG::SetTabBarBuilder(frameNode, std::move(builder));
 }
 
 void SetTabContentLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TabContentModelNG::SetTabBar(frameNode, label, "", nullptr);
-}
-
-void SetLayoutMode(ArkUINodeHandle node, ArkUI_Int32 mode)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TabContentModelNG::SetLayoutMode(frameNode, static_cast<LayoutMode>(mode));
-}
-
-void SetId(ArkUINodeHandle node, ArkUI_CharPtr id)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TabContentModelNG::SetId(frameNode, id);
+    TabContentModelNG::SetTabBarLabel(frameNode, label);
 }
 
 namespace NodeModifier {
 const ArkUITabContentModifier* GetTabContentModifier()
 {
     static const ArkUITabContentModifier modifier = {
-        SetTabContent,
         SetTabContentBuilder,
-        SetTabContentLabel,
-        SetLayoutMode,
-        SetId
+        SetTabContentLabel
     };
     return &modifier;
 }

@@ -17,7 +17,7 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_ACCESSORS_DRAWING_RENDERING_CONTEXT_ACCESSOR_TEST_H
 
 #include <string>
-#include "arkoala_api.h"
+
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {

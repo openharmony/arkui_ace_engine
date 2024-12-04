@@ -19,37 +19,21 @@
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
-#include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
-#include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
-#include "core/components_ng/pattern/form_link/form_link_model_ng.h"
-#ifdef FORM_SUPPORTED
-#include "core/components_ng/pattern/form/form_model_ng.h"
-#endif
-#include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
-#include "core/components_ng/pattern/shape/path_model_ng.h"
-#include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
-#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
-#include "core/components_ng/pattern/stepper/stepper_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
@@ -59,7 +43,6 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
@@ -69,21 +52,14 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
-#include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
-#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
-#include "core/components_ng/pattern/shape/line_model_ng.h"
-#include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -97,20 +73,9 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
-#include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
-#include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
-#include "core/components_ng/pattern/counter/counter_model_ng.h"
-#include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
-#include "core/components_ng/pattern/video/video_model_ng.h"
-#ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/web_model_ng.h"
-#endif // WEB_SUPPORTED
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -174,7 +139,7 @@ void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
     return AceType::RawPtr(frameNode);
 }
 
-void* createLoadingProgressNode(ArkUI_Int32 nodeId)
+void* createLoadingProgress(ArkUI_Int32 nodeId)
 {
     auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -246,7 +211,7 @@ void* createProgressNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createCheckboxNode(ArkUI_Int32 nodeId)
+void* createCheckBoxNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -335,12 +300,6 @@ void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& par
     auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
-}
-#else
-// Needed for generated C API
-void* createXComponentNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
 }
 #endif
 
@@ -457,7 +416,6 @@ void* createGridNode(ArkUI_Int32 nodeId)
 void* createTabsNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabsModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -556,7 +514,7 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(customSpanNode);
 }
 
-void* createQRCodeNode(ArkUI_Int32 nodeId)
+void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -596,7 +554,7 @@ void* createMarqueeNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createCheckboxGroupNode(ArkUI_Int32 nodeId)
+void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -612,402 +570,6 @@ void* createRatingNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createAbilityComponentNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createAnimatorNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createCalendarNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = CalendarModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createCommonMethodNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createCommonShapeMethodNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createCommonNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createScrollableCommonMethodNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createComponent3DNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createContainerSpanNode(ArkUI_Int32 nodeId)
-{
-    auto spanNode = SpanModelNG::CreateContainerSpanNode(nodeId);
-    CHECK_NULL_RETURN(spanNode, nullptr);
-    spanNode->IncRefCount();
-    return AceType::RawPtr(spanNode);
-}
-
-void* createCounterNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = CounterModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createDataPanelNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = DataPanelModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createEffectComponentNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createEllipseNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createFolderStackNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createFormComponentNode(ArkUI_Int32 nodeId)
-{
-#ifdef FORM_SUPPORTED
-    auto frameNode = FormModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-#else
-    return nullptr;
-#endif
-}
-
-void* createFormLinkNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = FormLinkModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createGaugeNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = GaugeModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createGridContainerNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createHyperlinkNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createLineNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = LineModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createLocationButtonNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = LocationButtonModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createMenuNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = MenuModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createMenuItemNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = MenuItemModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = MenuItemGroupView::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createNavDestinationNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = NavDestinationModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createNavRouterNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = NavRouterModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createNavigatorNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = NavigatorModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createNodeContainerNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createPasteButtonNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = PasteButtonModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createPathNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = PathModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createPatternLockNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = PatternLockModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createPluginComponentNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createPolygonNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createPolylineNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createRectNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = RectModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createRichEditorNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = RichEditorModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createRichTextNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createRootSceneNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createSaveButtonNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = SaveButtonModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createScreenNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createScrollBarNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createSecurityComponentMethodNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createShapeNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = ShapeModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createBaseSpanNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = SpanModelNG::CreateSpanNode(nodeId, "");
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createStepperNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = StepperModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createStepperItemNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = StepperItemModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createSymbolGlyphNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createSymbolSpanNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = SymbolSpanModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createVideoNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = VideoModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createWebNode(ArkUI_Int32 nodeId)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = WebModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-#else
-    return nullptr;
-#endif // WEB_SUPPORTED
-}
-
-void* createWindowSceneNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createSideBarContainerNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = SideBarContainerModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createRemoteWindowNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createUIExtensionComponentNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createLinearIndicatorNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createCustomNodeNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createIndicatorComponentNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -1017,7 +579,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createImageSpanNode,
     createImageNode,
     createToggleNode,
-    createLoadingProgressNode,
+    createLoadingProgress,
     createTextInputNode,
     createStackNode,
     createScrollNode,
@@ -1026,7 +588,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createTextAreaNode,
     createButtonNode,
     createProgressNode,
-    createCheckboxNode,
+    createCheckBoxNode,
     createColumnNode,
     createRowNode,
     createFlexNode,
@@ -1070,12 +632,12 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
-    createQRCodeNode,
+    createQRcodeNode,
     createBadgeNode,
     createTextClockNode,
     createTextTimerNode,
     createMarqueeNode,
-    createCheckboxGroupNode,
+    createCheckBoxGroupNode,
     createRatingNode,
 };
 

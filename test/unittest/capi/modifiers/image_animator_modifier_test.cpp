@@ -111,7 +111,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
         },
         {
             .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(
-                CreateResource(IMAGES_OK_STR.c_str(), NodeModifier::ResourceType::STRING)),
+                CreateResource(IMAGES_OK_STR.c_str(), Converter::ResourceType::STRING)),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
             .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),

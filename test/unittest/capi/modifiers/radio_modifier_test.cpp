@@ -30,9 +30,9 @@ using namespace Converter;
 
 namespace {
 // resource names and id
-const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR};
-const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
-const auto INVALID_ID = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
+const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
+const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
+const auto INVALID_ID = IntResourceId{-1, Converter::ResourceType::COLOR};
 
 const auto COLOR_BY_STRING = Color(0xFF123456);
 const auto COLOR_BY_NUMBER = Color(0xFF654321);

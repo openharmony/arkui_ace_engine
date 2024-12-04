@@ -64,7 +64,7 @@ ace_unittest("capi_all_accessors_test") {
   ]
   extra_deps = []
   extra_deps += [
-    "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest",
+    "..:ace_core_interfaces_native_node_linux_unittest",
     "../stubs:capi-ut-stubs",
   ]
 }

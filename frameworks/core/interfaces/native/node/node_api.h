@@ -19,7 +19,6 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 #include "core/interfaces/native/node/node_utils.h"
-#include "core/components/theme/theme_constants.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,26 +34,5 @@ void SendArkUIAsyncCustomEvent(struct ArkUICustomNodeEvent* event);
 #ifdef __cplusplus
 };
 #endif
-namespace OHOS::Ace::NG::NodeModifier {
-
-/*
- * Keep this enum in sync with the same enum in frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h
- */
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000
-};
-
-RefPtr<ThemeConstants> GetThemeConstants(ArkUINodeHandle node, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
-}
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_API_H

@@ -136,15 +136,52 @@ const char* GetImageSrc(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-
-void SetImageResource(ArkUINodeHandle node, const ArkUIResource* resource)
+RefPtr<ThemeConstants> GetThemeConstants(const char* bundleName, const char* moduleName)
 {
-    auto str = NodeModifier::ImageResourceToString(node, resource);
-    if (str) {
-        auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, str.value());
+    auto cardId = CardScope::CurrentId();
+    if (cardId != INVALID_CARD_ID) {
+        auto container = Container::Current();
+        auto weak = container->GetCardPipeline(cardId);
+        auto cardPipelineContext = weak.Upgrade();
+        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
+        auto cardThemeManager = cardPipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(cardThemeManager, nullptr);
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
     }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetThemeConstants(bundleName, moduleName);
+}
+
+void SetImageResource(
+    ArkUINodeHandle node, int id, int type, const char* name, const char* bundleName, const char* moduleName)
+{
+    auto themeConstants = GetThemeConstants(bundleName, moduleName);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!themeConstants) {
+        return;
+    }
+    std::optional<std::string> src;
+    if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
+        src = themeConstants->GetRawfile(name);
+    }
+    if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
+        if (id == -1) {
+            src = themeConstants->GetMediaPathByName(name);
+        } else {
+            src = themeConstants->GetMediaPath(id);
+        }
+    }
+    if (!src.has_value()) {
+        return;
+    }
+
+    ImageModelNG::InitImage(frameNode, src.value());
 }
 
 void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
@@ -941,29 +978,6 @@ const CJUIImageModifier* GetCJUIImageModifier()
         GetDrawingColorFilter, ResetImageSrc, SetInitialPixelMap, SetOnComplete, SetOnError,
         ResetOnError, SetImageOnFinish, ResetImageOnFinish };
     return &modifier;
-}
-
-std::optional<std::string> ImageResourceToString(ArkUINodeHandle node, const ArkUIResource* resource)
-{
-    std::optional<std::string> src;
-    if (resource) {
-        auto themeConstants = GetThemeConstants(node, resource->bundleName, resource->moduleName);
-        if (!themeConstants) {
-            return src;
-        }
-        if (resource->type == static_cast<int32_t>(ResourceType::RAWFILE)) {
-            src = themeConstants->GetRawfile(resource->name);
-        }
-        if (resource->type == static_cast<int32_t>(ResourceType::MEDIA)) {
-            if (resource->id == -1 && resource->name) {
-                src = themeConstants->GetMediaPathByName(resource->name);
-            }
-            if (resource->id != -1) {
-                src = themeConstants->GetMediaPath(resource->id);
-            }
-        }
-    }
-    return src;
 }
 
 void SetImageOnComplete(ArkUINodeHandle node, void* extraParam)

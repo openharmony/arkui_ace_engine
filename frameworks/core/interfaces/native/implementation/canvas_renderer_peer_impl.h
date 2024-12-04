@@ -19,7 +19,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/utils/string_utils.h"
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components/common/properties/paint_state.h"

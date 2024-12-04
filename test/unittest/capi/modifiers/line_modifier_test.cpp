@@ -17,7 +17,6 @@
 #include "modifiers_test_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"

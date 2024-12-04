@@ -82,7 +82,9 @@ void DisappearTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     TimePickerModelNG::SetDisappearTextStyle(frameNode, theme, pickerStyle);
 }
@@ -93,7 +95,9 @@ void TextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     TimePickerModelNG::SetNormalTextStyle(frameNode, theme, pickerStyle);
 }
@@ -104,7 +108,9 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, pickerStyle);
 }

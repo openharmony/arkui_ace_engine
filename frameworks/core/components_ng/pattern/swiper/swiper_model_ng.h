@@ -80,9 +80,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
-        const std::optional<bool> &ignoreBlank);
+        const std::optional<bool> &ignoreBlank = false);
     static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
-        const std::optional<bool> &ignoreBlank);
+        const std::optional<bool> &ignoreBlank = false);
     static void SetIndex(FrameNode* frameNode, int32_t index);
     static void SetAutoPlayInterval(FrameNode* frameNode, int32_t interval);
     static void SetDuration(FrameNode* frameNode, int32_t duration);

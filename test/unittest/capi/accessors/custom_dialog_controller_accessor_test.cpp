@@ -15,11 +15,12 @@
 
 #include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
 
-#include "node_api.h"
+#include "gmock/gmock.h"
+
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
-#include "gmock/gmock.h"
+#include "accessor_test_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -60,8 +61,6 @@ Ark_CustomDialogControllerOptions GetEmptyOptions()
     return options;
 }
 
-extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
-
 class CustomDialogControllerAccessorTest : public testing::Test {
 public:
     static void SetUpTestCase()
@@ -95,8 +94,7 @@ public:
 private:
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
         = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-            GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
-            GENERATED_ARKUI_FULL_API_VERSION)
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL, GENERATED_ARKUI_FULL_API_VERSION)
         );
 public:
     inline static const GENERATED_ArkUICustomDialogControllerAccessor *accessor_ =

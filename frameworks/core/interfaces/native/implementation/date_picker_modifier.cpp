@@ -126,7 +126,9 @@ void DisappearTextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     PickerTextStyle textStyle = Converter::Convert<PickerTextStyle>(*value);
@@ -138,7 +140,9 @@ void TextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     PickerTextStyle textStyle = Converter::Convert<PickerTextStyle>(*value);
@@ -150,7 +154,9 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     PickerTextStyle textStyle = Converter::Convert<PickerTextStyle>(*value);

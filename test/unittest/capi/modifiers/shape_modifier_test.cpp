@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

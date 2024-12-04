@@ -21,11 +21,9 @@
 
 #include "frameworks/core/components_ng/base/frame_node.h"
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-
 
 namespace OHOS::Ace::NG {
 
@@ -99,11 +97,11 @@ inline T GetAttrValue(const std::string &jsonObjAsStr, const std::string &attrKe
 
 // Resource functions
 
-using NamedResourceId = std::tuple<const char *, OHOS::Ace::NG::NodeModifier::ResourceType>;
-using IntResourceId = std::tuple<uint32_t, OHOS::Ace::NG::NodeModifier::ResourceType>;
+using NamedResourceId = std::tuple<const char *, OHOS::Ace::NG::Converter::ResourceType>;
+using IntResourceId = std::tuple<uint32_t, OHOS::Ace::NG::Converter::ResourceType>;
 
-Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceType type);
-Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::NodeModifier::ResourceType type);
+Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::Converter::ResourceType type);
+Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::Converter::ResourceType type);
 
 inline Ark_Resource CreateResource(NamedResourceId id)
 {

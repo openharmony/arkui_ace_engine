@@ -1836,7 +1836,7 @@ void GridOffsetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value
-        ? Converter::OptConvert<ArkUI_Int32>(*value) : std::nullopt;
+        ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     ViewAbstract::SetGrid(frameNode, std::nullopt, convValue, GridSizeType::UNDEFINED);
 }

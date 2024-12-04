@@ -18,7 +18,6 @@
 
 #include <utility>
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {

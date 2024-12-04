@@ -103,7 +103,7 @@ const Opt_ResourceColor OPT_COLOR_INT = { .tag = ARK_TAG_OBJECT, .value = COLOR_
 const Opt_ResourceColor OPT_COLOR_FLOAT = { .tag = ARK_TAG_OBJECT, .value = COLOR_FLOAT };
 const Opt_ResourceColor OPT_COLOR_STRING = { .tag = ARK_TAG_OBJECT, .value = COLOR_STRING };
 
-const auto RES_NAME = NamedResourceId(TEST_STRING, NodeModifier::ResourceType::MEDIA);
+const auto RES_NAME = NamedResourceId(TEST_STRING, Converter::ResourceType::MEDIA);
 
 //  default colors
 const auto OPT_RESOURCE_RESOURCE = CreateResourceUnion<Opt_ResourceStr>(RES_NAME);

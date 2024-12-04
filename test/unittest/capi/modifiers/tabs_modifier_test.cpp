@@ -15,7 +15,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -55,10 +54,10 @@ const auto COLOR_BLUE = "#FF0000FF";
 const auto COLOR_GREEN = "#FF00FF00";
 const auto COLOR_RED = "#FFFF0000";
 const auto COLOR_TRANSPARENT = "#00000000";
-const auto RES_NAME = NamedResourceId{"RES_NAME", NodeModifier::ResourceType::COLOR};
-const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
-const auto RES_STRING_FAKE_ID = IntResourceId{22222, NodeModifier::ResourceType::STRING};
-const auto RES_STRING_REGISTERED_ID = IntResourceId{33333, NodeModifier::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"RES_NAME", Converter::ResourceType::COLOR};
+const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
+const auto RES_STRING_FAKE_ID = IntResourceId{22222, Converter::ResourceType::STRING};
+const auto RES_STRING_REGISTERED_ID = IntResourceId{33333, Converter::ResourceType::STRING};
 constexpr double ANIMATION_DURATION_DEFAULT = 300.0;
 
 Ark_ScrollableBarModeOptions CreateScrollableMode(Opt_Length margin, Ark_LayoutStyle layoutStyle)

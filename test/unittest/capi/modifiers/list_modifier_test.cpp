@@ -32,11 +32,11 @@ using namespace testing::ext;
 
 namespace {
 const auto FRICTION_RES_NAME = "friction_res_name";
-const auto FRICTION_RESOURCE = CreateResource(FRICTION_RES_NAME, NodeModifier::ResourceType::FLOAT);
+const auto FRICTION_RESOURCE = CreateResource(FRICTION_RES_NAME, Converter::ResourceType::FLOAT);
 const auto FRICTION_VALUE = 1.2f;
 const auto DIVIDER_COLOR_RES_NAME = "divider_color_res_name";
 const auto DIVIDER_COLOR = "#08000000";
-const auto DIVIDER_COLOR_RESOURCE = CreateResource(DIVIDER_COLOR_RES_NAME, NodeModifier::ResourceType::COLOR);
+const auto DIVIDER_COLOR_RESOURCE = CreateResource(DIVIDER_COLOR_RES_NAME, Converter::ResourceType::COLOR);
 
 struct EventsTracker {
     static inline GENERATED_ArkUIListEventsReceiver listEventsReceiver {};

@@ -16,7 +16,6 @@
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 
 #include "accessor_test_base.h"
-#include "node_api.h"
 #include "core/components/web/web_property.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 

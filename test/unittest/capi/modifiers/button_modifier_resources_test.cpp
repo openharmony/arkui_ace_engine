@@ -15,7 +15,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_style.h"
@@ -50,20 +49,20 @@ namespace {
     using ButtonLabelResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 
     // invalid id
-    const auto INVALID_ID_STRING = IntResourceId{-1, NodeModifier::ResourceType::STRING};
-    const auto INVALID_ID_COLOR = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
+    const auto INVALID_ID_STRING = IntResourceId{-1, Converter::ResourceType::STRING};
+    const auto INVALID_ID_COLOR = IntResourceId{-1, Converter::ResourceType::COLOR};
 
     // resource names and id
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
-    const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::STRING};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::STRING};
+    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::STRING};
 
-    const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
-    const auto RES_COLOR_ID = IntResourceId{123456, NodeModifier::ResourceType::COLOR};
+    const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
+    const auto RES_COLOR_ID = IntResourceId{123456, Converter::ResourceType::COLOR};
 
     const auto RES_DIMENSION_ID = 654321; // Ark_Length.Resource
 
-    const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", NodeModifier::ResourceType::STRARRAY};
-    const auto RES_FAMILY_ID = IntResourceId{22222, NodeModifier::ResourceType::STRARRAY};
+    const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", Converter::ResourceType::STRARRAY};
+    const auto RES_FAMILY_ID = IntResourceId{22222, Converter::ResourceType::STRARRAY};
 
     // resource values
     const auto RESOURCE_BY_STRING = "ResourceByString";

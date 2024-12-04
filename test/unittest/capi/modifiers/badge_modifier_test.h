@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_SWIPER_MODIFIER_TEST_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_SWIPER_MODIFIER_TEST_H
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 
 #include "core/components/badge/badge_theme.h"

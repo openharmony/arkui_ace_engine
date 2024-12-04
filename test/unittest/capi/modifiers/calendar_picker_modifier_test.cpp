@@ -43,14 +43,14 @@ const auto ATTRIBUTE_FONT_WEIGHT_NAME = "weight";
 const auto ATTRIBUTE_HINT_RADIUS_NAME = "hintRadius";
 const auto ATTRIBUTE_SELECTED_NAME = "selected";
 
-const auto RES_COLOR_ID = IntResourceId{102001, NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{102001, Converter::ResourceType::COLOR};
 const auto RES_COLOR_ID_VALUE = Color(0xFF654321);
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
 const auto RES_COLOR_NAME_VALUE = Color(0xFF123456);
 
-const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", NodeModifier::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", Converter::ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_NAME_VALUE = "res_font_family_string_id";
-const auto RES_FONT_FAMILY_ID = IntResourceId{102002, NodeModifier::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_ID = IntResourceId{102002, Converter::ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_ID_VALUE = "res_font_family_number_id";
 
 struct CalendarAlignTest {
@@ -70,7 +70,7 @@ const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = NamedResourceId{"res_name", NodeModifier::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 

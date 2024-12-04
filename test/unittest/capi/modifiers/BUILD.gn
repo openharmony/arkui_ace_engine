@@ -129,7 +129,7 @@ ace_unittest("capi_all_modifiers_test") {
   extra_deps = []
   extra_deps += [
     ":capi_deps",
-    "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest",
+    "..:ace_core_interfaces_native_node_linux_unittest",
     "../stubs:capi-ut-stubs",
   ]
 }
@@ -151,7 +151,7 @@ source_set("capi_deps") {
   sources = [ "modifiers_test_utils.cpp" ]
   configs += [ "../..:ace_unittest_config" ]
   deps = [
-    "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest",
+    "..:ace_core_interfaces_native_node_linux_unittest",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

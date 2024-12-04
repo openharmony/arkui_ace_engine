@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "canvas_gradient_peer.h"
 

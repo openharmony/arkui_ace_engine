@@ -21,7 +21,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
-namespace OHOS::Ace::NG::ViewModel {
+namespace OHOS::Ace::NG::GeneratedViewModel {
 
 void* createColumnSplitNode(ArkUI_Int32 nodeId)
 {

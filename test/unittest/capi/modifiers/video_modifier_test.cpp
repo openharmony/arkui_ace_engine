@@ -19,7 +19,6 @@
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -280,7 +279,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
     Ark_NativePointer controllerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getVideoControllerAccessor()->ctor();
+        fullAPI_->getAccessors()->getVideoControllerAccessor()->ctor();
     auto peerImplPtr = reinterpret_cast<GeneratedModifier::VideoControllerPeerImpl*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -300,7 +299,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
     EXPECT_EQ(peerImplPtr->GetController(), controller);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getVideoControllerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getVideoControllerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(VideoControllerPeer *)>(finalizerPtr);
     EXPECT_NE(finalyzer, nullptr);
     finalyzer(reinterpret_cast<VideoControllerPeer *>(controllerPtr));

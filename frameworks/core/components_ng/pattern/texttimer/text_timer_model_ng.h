@@ -52,8 +52,8 @@ public:
     void SetFontFamily(const std::vector<std::string>& value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextTimerController> InitTextController(FrameNode* frameNode);
-    static void SetIsCountDown(FrameNode* frameNode, std::optional<bool>& isCountDown);
-    static void SetInputCount(FrameNode* frameNode, std::optional<double>& count);
+    static void SetIsCountDown(FrameNode* frameNode, const std::optional<bool>& isCountDown);
+    static void SetInputCount(FrameNode* frameNode, const std::optional<double>& count);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);

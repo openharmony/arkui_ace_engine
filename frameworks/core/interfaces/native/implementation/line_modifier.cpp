@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/base/frame_node.h"

@@ -16,7 +16,6 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "base/geometry/dimension.h"
-#include "node_api.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -40,9 +39,9 @@ using namespace testing::ext;
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
-const auto COLOR_COLOR_RES = CreateResource("color_name", NodeModifier::ResourceType::COLOR);
-const auto COLOR_ID_RES = CreateResource(1234, NodeModifier::ResourceType::COLOR);
-const auto COLOR_STRING_RES = CreateResource("color_name", NodeModifier::ResourceType::STRING);
+const auto COLOR_COLOR_RES = CreateResource("color_name", Converter::ResourceType::COLOR);
+const auto COLOR_ID_RES = CreateResource(1234, Converter::ResourceType::COLOR);
+const auto COLOR_STRING_RES = CreateResource("color_name", Converter::ResourceType::STRING);
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
@@ -70,7 +69,7 @@ const Ark_Float32 AFLT32_NEG(-5.6789f);
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
 const auto FAMILY_RES_ID = 555;
-const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, NodeModifier::ResourceType::STRARRAY);
+const auto FAMILY_NAME_RES = CreateResource(FAMILY_RES_ID, Converter::ResourceType::STRARRAY);
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE =
     Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(FAMILY_NAME_RES);
 

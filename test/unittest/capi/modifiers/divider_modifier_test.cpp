@@ -80,18 +80,18 @@ HWTEST_F(DividerModifierTest, DISABLED_DividerModifierTest001, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
 
     resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"incorrect_color", NodeModifier::ResourceType::STRING});
+        NamedResourceId{"incorrect_color", Converter::ResourceType::STRING});
     modifier_->setColor(node_, &resNameColor);
     auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal9, "#FF000000"); // Should be Color::RED, but converter from Resource works incorrect now.

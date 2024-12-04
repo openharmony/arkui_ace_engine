@@ -633,8 +633,8 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
 {
     using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
     static const std::string PROP_NAME("foregroundColor");
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR};
-    const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
+    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {

@@ -20,7 +20,6 @@
 #include "core/interfaces/native/implementation/list_scroller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "node_api.h"
 
 namespace OHOS::Ace::NG {
 
