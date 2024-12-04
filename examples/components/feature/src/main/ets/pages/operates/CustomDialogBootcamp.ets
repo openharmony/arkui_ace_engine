@@ -101,10 +101,10 @@ export struct CustomDialogBootcamp {
     Column() {
       Text('弹窗').fontSize(30)
       Row({ space: 50 }) {
-        Button("确认").onClick(() => {
+        Button('确认').onClick(() => {
           promptAction.closeCustomDialog(this.customDialogComponentId)
         })
-        Button("取消").onClick(() => {
+        Button('确认').onClick(() => {
           promptAction.closeCustomDialog(this.customDialogComponentId)
         })
       }
