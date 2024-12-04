@@ -18,9 +18,9 @@
 
 #include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
 #include "interfaces/inner_api/ace_kit/include/view/layout/layout_algorithm.h"
-
+#include "interfaces/inner_api/ace_kit/include/base/macros.h"
 namespace OHOS::AceKit {
-class BoxLayoutAlgorithm : public LayoutAlgorithm {
+class ACE_FORCE_EXPORT BoxLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(BoxLayoutAlgorithm, LayoutAlgorithm);
 
 public:

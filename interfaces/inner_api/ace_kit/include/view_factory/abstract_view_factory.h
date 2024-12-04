@@ -18,11 +18,12 @@
 
 #include <string>
 
+#include "interfaces/inner_api/ace_kit/include/base/macros.h"
 #include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
 #include "interfaces/inner_api/ace_kit/include/view/pattern.h"
 
 namespace OHOS::AceKit {
-class AbstractViewFactory {
+class ACE_FORCE_EXPORT AbstractViewFactory {
 public:
     static Ace::RefPtr<FrameNode> CreateFrameNode(const std::string& tag, int32_t nodeId,
         const Ace::RefPtr<Pattern>& pattern, bool isRoot = false, bool isLayoutNode = false);

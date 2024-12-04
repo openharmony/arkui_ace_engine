@@ -376,6 +376,12 @@
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
       OHOS::Ace::LifeCycleCheckable::~LifeCycleCheckable*;
+      OHOS::AceKit::ViewStackProcessor::*;
+      OHOS::AceKit::AbstractViewFactory::*;
+      OHOS::AceKit::BoxLayoutAlgorithm::*;
+
+      vtable?for?OHOS::AceKit::BoxLayoutAlgorithm;
+      VTT?for?OHOS::AceKit::BoxLayoutAlgorithm;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";

@@ -20,9 +20,10 @@
 
 #include "interfaces/inner_api/ace_kit/include/base/referenced.h"
 #include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
+#include "interfaces/inner_api/ace_kit/include/base/macros.h"
 
 namespace OHOS::AceKit {
-class ViewStackProcessor {
+class ACE_FORCE_EXPORT ViewStackProcessor {
 public:
     static int32_t ClaimNodeId();
     static void Push(const Ace::RefPtr<FrameNode>& node);

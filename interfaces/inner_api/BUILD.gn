@@ -13,7 +13,6 @@
 
 group("innerkits_target") {
   deps = [
-    "ace_kit:ace_kit",
     "form_render:ace_form_render",
     "ui_service_manager:ui_service_mgr",
     "ui_session:ui_session",
