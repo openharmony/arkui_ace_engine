@@ -20,6 +20,7 @@ import { ImageboxGroupBootcamp } from '../displays/ImageBootcamp';
 import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
+import { ChipBootcamp } from './ChipBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -31,6 +32,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'image', label: '图片/Image' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
+    { name: 'chip', label: '操作块/Chip' }
   ]
 };
 
@@ -48,6 +50,8 @@ export function DisplaysDestination(name: string, route: Route) {
     TextBootcamp({ title: route.label })
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
+  } else if (name === 'displays/chip'){
+    ChipBootcamp({ title: route.label })
   }
 }
 
