@@ -236,7 +236,7 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonsize));
     controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED, std::to_string(colorMode));
     if (colorMode != static_cast<int32_t>(ColorMode::DARK) && colorMode != static_cast<int32_t>(ColorMode::LIGHT)) {
-        containerPattern->SetColorConfigurationUpdate();
+        containerPattern->OnColorConfigurationUpdate();
     }
     controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE,
         std::to_string(closeButtonRightMargin));
