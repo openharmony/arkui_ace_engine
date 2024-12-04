@@ -828,6 +828,18 @@ bool IsPopupCreated()
     return true;
 }
 
+ShadowStyle GetPopupDefaultShadowStyle()
+{
+    auto shadowStyle = ShadowStyle::OuterDefaultMD;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, shadowStyle);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, shadowStyle);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, shadowStyle);
+    return popupTheme->GetPopupShadowStyle();
+}
+
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -1021,15 +1033,16 @@ void ParsePopupCommonParam(
         popupParam->SetErrorRadius(setError);
     }
 
+    auto defaultShadowStyle = GetPopupDefaultShadowStyle();
     Shadow shadow;
     auto shadowVal = popupObj->GetProperty("shadow");
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+            JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
         }
     } else {
-        JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+        JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
     }
     popupParam->SetShadow(shadow);
 
