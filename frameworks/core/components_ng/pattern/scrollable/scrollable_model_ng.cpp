@@ -39,9 +39,19 @@ void ScrollableModelNG::SetScrollBarColor(const std::string& value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value));
 }
 
+void ScrollableModelNG::ResetScrollBarColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+}
+
 void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+}
+
+void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
 }
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)

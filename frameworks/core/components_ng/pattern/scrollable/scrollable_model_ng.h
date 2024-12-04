@@ -67,6 +67,9 @@ public:
     static void SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& shape);
     static bool GetFadingEdge(FrameNode* frameNode);
     static float GetFadingEdgeLength(FrameNode* frameNode);
+
+    static void ResetScrollBarWidth(FrameNode* frameNode);
+    static void ResetScrollBarColor(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

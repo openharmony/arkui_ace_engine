@@ -5206,7 +5206,7 @@ void ResetScrollScrollBarColor(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollScrollBarColor(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowScrollBarColor(node->uiNodeHandle);
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(node->uiNodeHandle);
     }
 }
 
@@ -11956,6 +11956,7 @@ int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->resetCachedCount(node->uiNodeHandle);
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
