@@ -1244,7 +1244,9 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestSetPreviewText001, TestSi
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
     std::vector<std::tuple<int, int, std::string, int>> testPreviewList;
     testPreviewList.emplace_back(-1, -1, PREVIEW_TEXT_VALUE1, 0);
     testPreviewList.emplace_back(0, -1, PREVIEW_TEXT_VALUE1, -1);
@@ -1273,14 +1275,14 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestGetPreviewTextStyle001, T
 
     auto layoutProperty = host->layoutProperty_;
     host->layoutProperty_ = nullptr;
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
     host->layoutProperty_ = layoutProperty;
 
     ASSERT_NE(host->layoutProperty_, nullptr);
     auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
     ASSERT_NE(property, nullptr);
 
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
 
     property->UpdatePreviewTextStyle("normal");
     EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
@@ -1289,7 +1291,7 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestGetPreviewTextStyle001, T
     EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
 
     property->UpdatePreviewTextStyle("unknown");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
 }
 
 /**

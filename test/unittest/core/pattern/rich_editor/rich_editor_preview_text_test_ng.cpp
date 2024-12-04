@@ -78,6 +78,9 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
     /**
      * @tc.steps: step1. set previewText
      */
@@ -202,6 +205,10 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
+
     /**
      * @tc.steps: step1. set previewText
      */
