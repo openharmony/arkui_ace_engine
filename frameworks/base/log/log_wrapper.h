@@ -38,10 +38,14 @@
 constexpr uint32_t ACE_DOMAIN = 0xD003900;
 constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #ifdef IS_RELEASE_VERSION
+#define SEC_PARAM(...) "secure_field" // secure param
+#define SEC_PLD(placeholder, ...) "%{public}s" // secure placeholder
 #define PRINT_LOG(level, tag, fmt, ...) \
     HILOG_IMPL(LOG_CORE, LOG_##level, (tag + ACE_DOMAIN), (OHOS::Ace::g_DOMAIN_CONTENTS_MAP.at(tag)),         \
             "[(%{public}s)] " fmt, OHOS::Ace::LogWrapper::GetIdWithReason().c_str(), ##__VA_ARGS__)
 #else
+#define SEC_PARAM(...) __VA_ARGS__ // secure param
+#define SEC_PLD(placeholder, ...) #placeholder __VA_ARGS__ // secure placeholder
 #define PRINT_LOG(level, tag, fmt, ...) \
     HILOG_IMPL(LOG_CORE, LOG_##level, (tag + ACE_DOMAIN), (OHOS::Ace::g_DOMAIN_CONTENTS_MAP.at(tag)),         \
             ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                            \
@@ -49,6 +53,8 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #endif
 #define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "JSAPP", fmt, ##__VA_ARGS__)
 #else
+#define SEC_PARAM(...) __VA_ARGS__ // secure param
+#define SEC_PLD(placeholder, ...) #placeholder __VA_ARGS__ // secure placeholder
 #define PRINT_LOG(level, tag, fmt, ...)                                                                       \
     do {                                                                                                      \
         if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                  \
