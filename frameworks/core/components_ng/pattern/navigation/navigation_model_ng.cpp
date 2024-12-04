@@ -1617,6 +1617,14 @@ void NavigationModelNG::SetNavigationStack(FrameNode* frameNode)
     }
 }
 
+void NavigationModelNG::SetNavigationStack(FrameNode* frameNode, const RefPtr<NG::NavigationStack>& navigationStack)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationStack(navigationStack);
+}
+
 void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
     bool ignoreMainTitle)
 {

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -1111,4 +1112,127 @@ HWTEST_F(NavigationModifierTest, onTitleModeChangeTest, TestSize.Level1)
     eventHub->FireChangeEvent(&changeTitleModeFull);
     ASSERT_TRUE(checkInvoke.has_value());
     EXPECT_EQ(*checkInvoke, ARK_NAVIGATION_TITLE_MODE_FULL);
-}} // namespace OHOS::Ace::NG
+}
+
+/**
+ * @tc.name: setNavigationOptions1Test
+ * @tc.desc: Check the functionality of NavigationInterfaceModifier::SetNavigationOptions1Impl
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationOptions1Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationOptions1, nullptr);
+
+    auto navigationNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    // assume nothing bad with invalid and empty options
+    modifier_->setNavigationOptions1(node_, nullptr);
+    Ark_Materialized navPathStackUndef {nullptr};
+    modifier_->setNavigationOptions1(node_, &navPathStackUndef);
+
+    // get accessor, ctor, finalyzer
+    const GENERATED_ArkUIAccessors *accessors
+        = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
+    const GENERATED_ArkUINavPathStackAccessor *accessorNavPathStack
+        = accessors && accessors->getNavPathStackAccessor ? (*accessors->getNavPathStackAccessor)() : nullptr;
+    ASSERT_NE(accessorNavPathStack, nullptr);
+    ASSERT_NE(accessorNavPathStack->ctor, nullptr);
+    ASSERT_NE(accessorNavPathStack->getFinalizer, nullptr);
+    auto finalyzer = reinterpret_cast<void (*)(NavPathStackPeer *)>(accessorNavPathStack->getFinalizer());
+    ASSERT_NE(finalyzer, nullptr);
+
+    // create the NavPathStack peer and attach it to modifier
+    auto navPathStackPeer = (*accessorNavPathStack->ctor)();
+    Ark_Materialized navPathStackValid = { reinterpret_cast<Ark_NativePointer>(navPathStackPeer) };
+    modifier_->setNavigationOptions1(node_, &navPathStackValid);
+
+    EXPECT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
+    Ark_NavPathInfo arkNavPathInfo {
+        .name = Converter::ArkValue<Ark_String>("PageA"),
+        .param = Converter::ArkValue<Opt_CustomObject>(),
+        .onPop = Converter::ArkValue<Opt_Callback_PopInfo_Void>(),
+        .isEntry = Converter::ArkValue<Opt_Boolean>()
+    };
+    ASSERT_NE(accessorNavPathStack->pushPath0, nullptr);
+    accessorNavPathStack->pushPath0(navPathStackPeer, &arkNavPathInfo, nullptr);
+    EXPECT_TRUE(navigationPattern->NeedSyncWithJsStackMarked());
+
+    // detach NavPathStack and destroy it
+    modifier_->setNavigationOptions1(node_, &navPathStackUndef);
+    (*finalyzer)(navPathStackPeer);
+
+    navigationPattern = nullptr;
+    navigationNode = nullptr;
+}
+
+/**
+ * @tc.name: setNavDestinationTest
+ * @tc.desc: Check the functionality of NavigationInterfaceModifier::SetNavDestinationImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavDestinationTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationOptions1, nullptr);
+    ASSERT_NE(modifier_->setNavDestination, nullptr);
+
+    static const int32_t expectedRes = 123;
+
+    auto navigationNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    // assume nothing bad with invalid and empty options
+    modifier_->setNavigationOptions1(node_, nullptr);
+    Ark_Materialized navPathStackUndef {nullptr};
+    modifier_->setNavigationOptions1(node_, &navPathStackUndef);
+
+    // get accessor, ctor, finalyzer
+    const GENERATED_ArkUIAccessors *accessors
+        = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
+    const GENERATED_ArkUINavPathStackAccessor *accessorNavPathStack
+        = accessors && accessors->getNavPathStackAccessor ? (*accessors->getNavPathStackAccessor)() : nullptr;
+    ASSERT_NE(accessorNavPathStack, nullptr);
+    ASSERT_NE(accessorNavPathStack->ctor, nullptr);
+    ASSERT_NE(accessorNavPathStack->getFinalizer, nullptr);
+    auto finalyzer = reinterpret_cast<void (*)(NavPathStackPeer *)>(accessorNavPathStack->getFinalizer());
+    ASSERT_NE(finalyzer, nullptr);
+
+    // create the NavPathStack peer and attach it to modifier
+    auto navPathStackPeer = (*accessorNavPathStack->ctor)();
+    Ark_Materialized navPathStackValid = { reinterpret_cast<Ark_NativePointer>(navPathStackPeer) };
+    modifier_->setNavigationOptions1(node_, &navPathStackValid);
+
+    static bool wasInvoked = false;
+    auto buildFunc = [](Ark_Int32 resourceId, const Ark_String name, const Ark_CustomObject param) {
+        EXPECT_EQ(expectedRes, resourceId);
+        wasInvoked = true;
+    };
+
+    auto arkBuildFunc = Converter::ArkValue<Callback_String_Unknown_Void>(buildFunc, expectedRes);
+    modifier_->setNavDestination(node_, &arkBuildFunc);
+
+    EXPECT_FALSE(wasInvoked);
+    Ark_NavPathInfo arkNavPathInfo {
+        .name = Converter::ArkValue<Ark_String>("PageA"),
+        .param = Converter::ArkValue<Opt_CustomObject>(),
+        .onPop = Converter::ArkValue<Opt_Callback_PopInfo_Void>(),
+        .isEntry = Converter::ArkValue<Opt_Boolean>()
+    };
+    ASSERT_NE(accessorNavPathStack->pushPath0, nullptr);
+    accessorNavPathStack->pushPath0(navPathStackPeer, &arkNavPathInfo, nullptr);
+
+    MockPipelineContext::GetCurrent()->FlushBuild();
+    EXPECT_TRUE(wasInvoked);
+
+    // detach NavPathStack and destroy it
+    modifier_->setNavigationOptions1(node_, &navPathStackUndef);
+    (*finalyzer)(navPathStackPeer);
+
+    navigationPattern = nullptr;
+    navigationNode = nullptr;
+}
+} // namespace OHOS::Ace::NG
