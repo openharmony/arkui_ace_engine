@@ -194,12 +194,14 @@ public:
         bool isMoveCaret = false;
         Offset touchDownOffset;
         const Dimension minDistance = 5.0_vp;
+        std::optional<int32_t> touchFingerId = std::nullopt;
 
         void Reset()
         {
             isTouchCaret = false;
             isMoveCaret = false;
             touchDownOffset.Reset();
+            touchFingerId.reset();
         }
     };
 
@@ -1086,10 +1088,12 @@ private:
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const TouchEventInfo& info);
+    std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
+    void HandleTouchDown(const TouchLocationInfo& info);
     void HandleTouchUp();
+    void ResetTouchAndMoveCaretState();
     void HandleTouchUpAfterLongPress();
-    void HandleTouchMove(const Offset& offset);
+    void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const Offset& offset);
     Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);

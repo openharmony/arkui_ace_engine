@@ -895,6 +895,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent005, TestSize.Level1)
     touchLocationInfo.touchType_ = TouchType::DOWN;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     richEditorPattern->hasUrlSpan_ = true;
     richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->HandleTouchEvent(touchEventInfo);
@@ -915,6 +916,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent006, TestSize.Level1)
     touchLocationInfo.touchType_ = TouchType::UP;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     richEditorPattern->hasUrlSpan_ = true;
     richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->HandleTouchEvent(touchEventInfo);
