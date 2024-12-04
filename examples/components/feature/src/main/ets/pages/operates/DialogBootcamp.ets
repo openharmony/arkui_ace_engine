@@ -14,8 +14,9 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, IconBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 import { promptAction } from '@kit.ArkUI';
+
 
 @Component
 export struct DialogBootcamp {
@@ -45,8 +46,22 @@ export struct DialogBootcamp {
   @State maskRectHeight: number = 100;
   @State enableShowInSubWindow: boolean = false;
   @State showInSubWindow: boolean = false;
-  @State enableDialogShadow: boolean = false;
-  @State dialogShadow: ShadowStyle = ShadowStyle.OUTER_DEFAULT_MD;
+  @State enableShadowType: boolean = false;
+  @State shadowType: boolean = true;
+  @State enableDialogShadowStyle: boolean = false;
+  @State dialogShadowStyle: ShadowStyle = ShadowStyle.OUTER_DEFAULT_MD;
+  @State enableShadowOptionsRadius: boolean = false;
+  @State shadowOptionsRadius: number = 0;
+  @State enableShadowOptionsType: boolean = false;
+  @State shadowOptionsType: ShadowType = ShadowType.COLOR;
+  @State enableShadowOptionsColor: boolean = false;
+  @State shadowOptionsColor: ResourceColor = '#ff000000';
+  @State enableShadowOptionsOffsetX: boolean = false;
+  @State shadowOptionsOffsetX: number = 0;
+  @State enableShadowOptionsOffsetY: boolean = false;
+  @State shadowOptionsOffsetY: number = 0;
+  @State enableShadowOptionsFill: boolean = false;
+  @State shadowOptionsFill: boolean = false;
 
   build() {
     NavDestination() {
@@ -84,7 +99,15 @@ export struct DialogBootcamp {
                 },
                 isModal: useEnabled(this.enableIsModal, this.isModal),
                 showInSubWindow: useEnabled(this.enableShowInSubWindow, this.showInSubWindow),
-                shadow: useEnabled(this.enableDialogShadow, this.dialogShadow),
+                shadow: useEnabled(this.enableShadowType, this.shadowType) ?
+                useEnabled(this.enableDialogShadowStyle, this.dialogShadowStyle) : {
+                    radius: useEnabled(this.enableShadowOptionsRadius, this.shadowOptionsRadius),
+                    type: useEnabled(this.enableShadowOptionsType, this.shadowOptionsType),
+                    color: useEnabled(this.enableShadowOptionsColor, this.shadowOptionsColor),
+                    offsetX: useEnabled(this.enableShadowOptionsOffsetX, this.shadowOptionsOffsetX),
+                    offsetY: useEnabled(this.enableShadowOptionsOffsetY, this.shadowOptionsOffsetY),
+                    fill: useEnabled(this.enableShadowOptionsFill, this.shadowOptionsFill),
+                  },
                 maskRect: {
                   x: this.enableMaskRectX ? useEnabled(this.enableMaskRectX, this.maskRectX) : 0,
                   y: this.enableMaskRectY ? useEnabled(this.enableMaskRectY, this.maskRectY) : 0,
@@ -160,6 +183,7 @@ export struct DialogBootcamp {
           min: 0,
           max: 100
         })
+
         SliderBlock({
           title: 'MaskRectX',
           isEnabled: $enableMaskRectX,
@@ -167,6 +191,7 @@ export struct DialogBootcamp {
           min: 0,
           max: 100
         })
+
         SliderBlock({
           title: 'MaskRectY',
           isEnabled: $enableMaskRectY,
@@ -238,18 +263,82 @@ export struct DialogBootcamp {
         })
 
         RadioBlock({
-          title: 'shadow',
-          isEnabled: $enableDialogShadow,
-          value: $dialogShadow,
+          title: 'shadowType',
+          isEnabled: $enableShadowType,
+          value: $shadowType,
           dataSource: [
-            { label: 'OUTER_DEFAULT_XS', value: ShadowStyle.OUTER_DEFAULT_XS },
-            { label: 'OUTER_DEFAULT_SM', value: ShadowStyle.OUTER_DEFAULT_SM },
-            { label: 'OUTER_DEFAULT_MD', value: ShadowStyle.OUTER_DEFAULT_MD },
-            { label: 'OUTER_DEFAULT_LG', value: ShadowStyle.OUTER_DEFAULT_LG },
-            { label: 'OUTER_FLOATING_SM', value: ShadowStyle.OUTER_FLOATING_SM },
-            { label: 'OUTER_FLOATING_MD', value: ShadowStyle.OUTER_FLOATING_MD },
+            { label: 'shadowStyle', value: true },
+            { label: 'shadowOptions', value: false }
           ]
         })
+
+        if (this.shadowType) {
+          RadioBlock({
+            title: 'shadowStyle',
+            isEnabled: $enableDialogShadowStyle,
+            value: $dialogShadowStyle,
+            dataSource: [
+              { label: 'OUTER_DEFAULT_XS', value: ShadowStyle.OUTER_DEFAULT_XS },
+              { label: 'OUTER_DEFAULT_SM', value: ShadowStyle.OUTER_DEFAULT_SM },
+              { label: 'OUTER_DEFAULT_MD', value: ShadowStyle.OUTER_DEFAULT_MD },
+              { label: 'OUTER_DEFAULT_LG', value: ShadowStyle.OUTER_DEFAULT_LG },
+              { label: 'OUTER_FLOATING_SM', value: ShadowStyle.OUTER_FLOATING_SM },
+              { label: 'OUTER_FLOATING_MD', value: ShadowStyle.OUTER_FLOATING_MD },
+            ]
+          })
+        } else {
+
+          SliderBlock({
+            title: 'shadowOptions.radius',
+            isEnabled: $enableShadowOptionsRadius,
+            value: $shadowOptionsRadius,
+            min: 0,
+            max: 30,
+          })
+
+          RadioBlock({
+            title: 'shadowOptions.type',
+            isEnabled: $enableShadowOptionsType,
+            value: $shadowOptionsType,
+            dataSource: [
+              { label: 'COLOR', value: ShadowType.COLOR },
+              { label: 'BLUR', value: ShadowType.BLUR },
+            ]
+          })
+
+          ColorBlock({
+            title: 'shadowOptions.color',
+            isEnabled: $enableShadowOptionsColor,
+            color: $shadowOptionsColor,
+          })
+
+          SliderBlock({
+            title: 'shadowOptions.offsetX',
+            isEnabled: $enableShadowOptionsOffsetX,
+            value: $shadowOptionsOffsetX,
+            min: 0,
+            max: 40,
+          })
+
+          SliderBlock({
+            title: 'shadowOptions.offsetY',
+            isEnabled: $enableShadowOptionsOffsetY,
+            value: $shadowOptionsOffsetY,
+            min: 0,
+            max: 40,
+          })
+
+          RadioBlock({
+            title: 'shadowOptions.fill',
+            isEnabled: $enableShadowOptionsFill,
+            value: $shadowOptionsFill,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false },
+            ]
+          })
+
+        }
 
 
       }.width('100%')
