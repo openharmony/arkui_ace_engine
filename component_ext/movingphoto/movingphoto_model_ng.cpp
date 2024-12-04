@@ -205,4 +205,13 @@ void MovingPhotoModelNG::SetMovingPhotoFormat(MovingPhotoFormat format)
     CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->SetMovingPhotoFormat(format);
 }
+
+void MovingPhotoModelNG::SetDynamicRangeMode(DynamicRangeMode RangeMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->SetDynamicRangeMode(RangeMode);
+}
 } // namespace OHOS::Ace::NG

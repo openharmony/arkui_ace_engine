@@ -292,9 +292,10 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, DynamicRangeMode::HIGH, image);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, DynamicRangeMode::HIGH, image);
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set HDR.");
+    DynamicRangeModeConvert(dynamicRangeMode_);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, image);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, image);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set HDR.%{public}d", dynamicRangeMode_);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasImageSourceInfo()) {
@@ -351,6 +352,25 @@ void MovingPhotoPattern::MovingPhotoFormatConvert(MovingPhotoFormat format)
             imageFormat_ = PixelFormat::UNKNOWN;
             break;
     }
+}
+
+void MovingPhotoPattern::DynamicRangeModeConvert(DynamicRangeMode rangeMode)
+{
+    switch (rangeMode) {
+        case DynamicRangeMode::HIGH:
+            dynamicRangeMode_ = DynamicRangeMode::HIGH;
+            break;
+        case DynamicRangeMode::CONSTRAINT:
+            dynamicRangeMode_ = DynamicRangeMode::CONSTRAINT;
+            break;
+        case DynamicRangeMode::STANDARD:
+            dynamicRangeMode_ = DynamicRangeMode::STANDARD;
+            break;
+        default:
+            dynamicRangeMode_ = DynamicRangeMode::HIGH;
+            break;
+    }
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "DynamicRangeModeConvert %{public}d.", rangeMode);
 }
 
 void MovingPhotoPattern::RegisterImageEvent()
