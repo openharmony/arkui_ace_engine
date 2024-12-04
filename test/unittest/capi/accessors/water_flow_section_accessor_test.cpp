@@ -73,9 +73,12 @@ public:
  */
 HWTEST_F(WaterFlowSectionAccessorTest, LengthTest, TestSize.Level1)
 {
-    void * refPtr = reinterpret_cast<void *>(&(*(peer_->GetController())));
+    auto controller = peer_->GetController();
+    ASSERT_NE(controller, nullptr);
+    auto refPtr = controller.GetRawPtr();
+    ASSERT_NE(refPtr, nullptr);
     MockWaterFlowSections* mockSections = reinterpret_cast<MockWaterFlowSections*>(refPtr);
-    
+
     accessor_->length(peer_);
     accessor_->length(peer_);
     accessor_->length(nullptr);
