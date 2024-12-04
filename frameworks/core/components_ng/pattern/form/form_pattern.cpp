@@ -564,6 +564,10 @@ void FormPattern::OnRebuildFrame()
         return;
     }
 
+    if (isEnableSkeleton && !isTransparencyEnable_ && !shouldAddChildAtReuildFrame()) {
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -2244,5 +2248,24 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
     if (hasContainer) {
         subContainer_->RunSameCard();
     }
+}
+
+bool FormPattern::shouldAddChildAtReuildFrame() {
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_RETURN(layoutProperty, true);
+    auto externalRsNode = externalRenderContext->GetRSNode();
+    if (externalRsNode) {
+        auto externalParentRsNode = externalRsNode->GetParent();
+        if (externalParentRsNode) {
+            uint32_t externalParentRsNodeId = externalParentRsNode->GetId();
+            TAG_LOGW(AceLogTag::ACE_FORM, "external Parent RsNode Id:%{public}d", externalParentRsNodeId);
+            if (externalParentRsNodeId != 0) {
+                return false;
+            }
+        }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_FORM, "external RsNode is null");
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

@@ -261,6 +261,7 @@ private:
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
+    bool shouldAddChildAtReuildFrame();
 };
 } // namespace NG
 } // namespace Ace
