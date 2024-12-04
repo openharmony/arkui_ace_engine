@@ -303,8 +303,13 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
                 params_.emplace_back(resource.params.value.array[i].chars);
             }
         }
-
         themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
+        if (!themeConstants_) {
+            auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+            auto themeManager = context->GetThemeManager();
+            CHECK_NULL_VOID(themeManager);
+            themeConstants_ = themeManager->GetThemeConstants(bundleName_.c_str(), moduleName_.c_str());
+        }
     } else {
         LOGE("ResourceConverter illegal id tag: id.tag = %{public}d", resource.id.tag);
     }

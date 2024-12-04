@@ -125,21 +125,21 @@ namespace OHOS::Ace::NG::Converter {
 
     inline void AssignArkValue(Ark_Length& dst, const int& src)
     {
-        dst.type = ARK_TAG_INT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
     }
 
     inline void AssignArkValue(Ark_Length& dst, const float& src)
     {
-        dst.type = ARK_TAG_FLOAT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
     }
 
     inline void AssignArkValue(Ark_Length& dst, const Dimension& src)
     {
-        dst.type = ARK_TAG_FLOAT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
         dst.unit = static_cast<int32_t>(src.Unit());
     }
