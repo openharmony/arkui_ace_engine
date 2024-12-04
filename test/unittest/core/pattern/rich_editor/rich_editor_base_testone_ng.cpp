@@ -12,19 +12,130 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+bool isOnEditChangeCalled = false;
 
 class RichEditorBaseTestOneNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+    void GetFocus(const RefPtr<RichEditorPattern>& pattern);
+    void OnDrawVerify(const SelectSpanType& type, const std::string& text, SymbolSpanOptions options, Offset offset,
+        bool selected = false);
 };
+
+void RichEditorBaseTestOneNg::GetFocus(const RefPtr<RichEditorPattern>& pattern)
+{
+    ASSERT_NE(pattern, nullptr);
+    auto focushHub = pattern->GetFocusHub();
+    focushHub->currentFocus_ = true;
+    pattern->HandleFocusEvent();
+    FlushLayoutTask(richEditorNode_);
+}
+
+
+void RichEditorBaseTestOneNg::OnDrawVerify(
+    const SelectSpanType& type, const std::string& text, SymbolSpanOptions options, Offset offset, bool selected)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
+    richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
+    if (type == SelectSpanType::TYPESPAN) {
+        AddSpan(text);
+    } else if (type == SelectSpanType::TYPEIMAGE) {
+        AddImageSpan();
+    } else if (type == SelectSpanType::TYPESYMBOLSPAN) {
+        auto richEditorController = richEditorPattern->GetRichEditorController();
+        ASSERT_NE(richEditorController, nullptr);
+        richEditorController->AddSymbolSpan(options);
+    }
+
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    GetFocus(richEditorPattern);
+
+    if (!selected) {
+        GestureEvent info;
+        info.localLocation_ = offset;
+        richEditorPattern->HandleClickEvent(info);
+    } else {
+        richEditorPattern->HandleOnSelectAll();
+    }
+
+    /**
+     * @tc.steps: step2. Move handle
+     */
+    auto controller = richEditorPattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(OffsetF(1.0f, 1.0f));
+
+    /**
+     * @tc.steps: step3. Test magnifier open or close
+     * @tc.expected: magnifier is open
+     */
+    auto ret = controller->GetShowMagnifier();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Craete RichEditorOverlayModifier
+     */
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    auto scrollBarModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    auto richFieldOverlayModifier = AceType::MakeRefPtr<RichEditorOverlayModifier>(
+        richEditorPattern, AceType::WeakClaim(AceType::RawPtr(scrollBarModifier)), scrollEdgeEffect);
+    ASSERT_NE(richFieldOverlayModifier, nullptr);
+
+    /**
+     * @tc.steps: step5. Create DrawingContext
+     */
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    /**
+     * @tc.steps: step6. Do onDraw(context)
+     */
+    richFieldOverlayModifier->onDraw(context);
+
+    /**
+     * @tc.steps: step7. When handle move done
+     */
+    richEditorPattern->selectOverlay_->ProcessOverlay();
+    RectF handleRect;
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
+
+    /**
+     * @tc.steps: step8. Test magnifier open or close
+     * @tc.expected: magnifier is close
+     */
+    ret = controller->GetShowMagnifier();
+    EXPECT_FALSE(ret);
+    richEditorNode_->GetGeometryNode()->SetContentSize(contentRect.GetSize());
+}
 
 void RichEditorBaseTestOneNg::SetUp()
 {
