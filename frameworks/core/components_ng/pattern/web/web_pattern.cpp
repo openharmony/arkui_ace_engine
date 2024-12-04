@@ -3818,8 +3818,6 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             auto dipScale = pipeline->GetDipScale();
             if (dipScale != 0) {
                 diff = edgeHeight - static_cast<int32_t>(static_cast<int32_t>(edgeHeight / dipScale) * dipScale);
-            } else {
-                return RectF();
             }
         }
         y = y + offset.GetY() - edgeHeight + diff;
