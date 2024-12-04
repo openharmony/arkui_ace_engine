@@ -6663,7 +6663,12 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
     }
     CHECK_NULL_VOID(leftMousePress_);
 
-    auto localOffset = AdjustLocalOffsetOnMoveEvent(info.GetLocalLocation());
+    auto localOffset = info.GetLocalLocation();
+    const auto& globalOffset = info.GetGlobalLocation();
+    auto paintOffset = GetPaintRectGlobalOffset();
+    if (!selectOverlay_->HasRenderTransform()) {
+        localOffset = Offset(globalOffset.GetX() - paintOffset.GetX(), globalOffset.GetY() - paintOffset.GetY());
+    }
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     if (dataDetectorAdapter_->pressedByLeftMouse_) {
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
@@ -6675,34 +6680,35 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
     CHECK_NULL_VOID(focusHub->IsCurrentFocus());
 
     mouseStatus_ = MouseStatus::MOVE;
-    if (isFirstMouseSelect_) {
-        int32_t extend = paragraphs_.GetIndex(textOffset);
-        UpdateSelector(textSelector_.baseOffset, extend);
-        isFirstMouseSelect_ = false;
-    } else {
-        int32_t extend = paragraphs_.GetIndex(textOffset);
-        UpdateSelector(textSelector_.baseOffset, extend);
-        auto position = paragraphs_.GetIndex(textOffset);
+    HandleMouseSelect(localOffset);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
+{
+    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
+    auto position = paragraphs_.GetIndex(textOffset);
+    UpdateSelector(textSelector_.baseOffset, position);
+    if (!isFirstMouseSelect_) {
         AdjustCursorPosition(position);
         SetCaretPosition(position);
         AutoScrollParam param = {
-            .autoScrollEvent = AutoScrollEvent::MOUSE, .showScrollbar = true, .eventOffset = info.GetLocalLocation()
+            .autoScrollEvent = AutoScrollEvent::MOUSE, .showScrollbar = true, .eventOffset = localOffset
         };
-        AutoScrollByEdgeDetection(param, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()),
+        AutoScrollByEdgeDetection(param, OffsetF(localOffset.GetX(), localOffset.GetY()),
             EdgeDetectionStrategy::OUT_BOUNDARY);
         showSelect_ = true;
+    } else {
+        isFirstMouseSelect_ = false;
     }
     if (textSelector_.SelectNothing()) {
-        if (!caretTwinkling_) {
-            StartTwinkling();
-        }
+        StartTwinkling();
     } else {
         StopTwinkling();
     }
     isMouseSelect_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
