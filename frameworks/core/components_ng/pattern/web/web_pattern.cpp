@@ -2494,7 +2494,10 @@ void WebPattern::OnAreaChangedInner()
         isKeyboardInSafeArea_ = false;
     }
     if (layoutMode_ == WebLayoutMode::NONE && renderMode_ == RenderMode::ASYNC_RENDER) {
-        drawSize_ = size;
+        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+            drawSize_ = size;
+            TAG_LOGD(AceLogTag::ACE_WEB, "ASYNC_RENDER, drawsize_ : %{public}s", drawSize_.ToString().c_str());
+        }
         if (webOffset_ == offset) {
             return;
         }
