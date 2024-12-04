@@ -22,6 +22,12 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TransitionEffectAccessor {
 
+const auto TRANSLATE_TOKEN = "translate";
+const auto ROTATE_TOKEN = "rotate";
+const auto SCALE_TOKEN = "scale";
+const auto OPACITY_TOKEN = "opacity";
+const auto MOVE_TOKEN = "move";
+
 void DestroyPeerImpl(TransitionEffectPeer* peer)
 {
     CHECK_NULL_VOID(peer);
@@ -34,7 +40,7 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
     auto valueText = Converter::Convert<std::string>(*type);
     TransitionEffectPeer* peer = new TransitionEffectPeer();
     auto emptyDimension = Dimension();
-    if (valueText == "translate") {
+    if (valueText == TRANSLATE_TOKEN) {
         auto x = Converter::OptConvert<CalcDimension>(effect->translate.x.value);
         auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
         auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
@@ -43,7 +49,7 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
             y.value_or(emptyDimension),
             z.value_or(emptyDimension));
         peer->handler = new ChainedTranslateEffect(translate);
-    } else if (valueText == "rotate") {
+    } else if (valueText == ROTATE_TOKEN) {
         auto x = Converter::Convert<float>(effect->rotate.x.value);
         auto y = Converter::Convert<float>(effect->rotate.y.value);
         auto z = Converter::Convert<float>(effect->rotate.z.value);
@@ -58,7 +64,7 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
             centerZ.value_or(emptyDimension),
             perspective);
         peer->handler = new ChainedRotateEffect(rotate);
-    } else if (valueText == "scale") {
+    } else if (valueText == SCALE_TOKEN) {
         auto x = Converter::Convert<float>(effect->scale.x.value);
         auto y = Converter::Convert<float>(effect->scale.y.value);
         auto z = Converter::Convert<float>(effect->scale.z.value);
@@ -66,10 +72,10 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
         auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
         ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
         peer->handler = new ChainedScaleEffect(scale);
-    } else if (valueText == "opacity") {
+    } else if (valueText == OPACITY_TOKEN) {
         auto opacity = Converter::Convert<float>(effect->opacity);
         peer->handler = new ChainedOpacityEffect(opacity);
-    } else if (valueText == "move") {        
+    } else if (valueText == MOVE_TOKEN) {
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
         peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
     }
@@ -82,7 +88,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 {
     CHECK_NULL_RETURN(options, 0);
-    Ark_String type = Converter::ArkValue<Ark_String>("translate");
+    Ark_String type = Converter::ArkValue<Ark_String>(TRANSLATE_TOKEN);
     Ark_TransitionEffects effects {
         .translate = *options
     };
@@ -91,7 +97,7 @@ Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
 {
     CHECK_NULL_RETURN(options, 0);
-    Ark_String type = Converter::ArkValue<Ark_String>("rotate");
+    Ark_String type = Converter::ArkValue<Ark_String>(ROTATE_TOKEN);
     Ark_TransitionEffects effects {
         .rotate = *options
     };
@@ -100,7 +106,7 @@ Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
 Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>("scale");
+    Ark_String type = Converter::ArkValue<Ark_String>(SCALE_TOKEN);
     Ark_TransitionEffects effects {
         .scale = *options
     };
@@ -109,7 +115,7 @@ Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
 Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 {
     CHECK_NULL_RETURN(alpha, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>("opacity");
+    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN);
     Ark_TransitionEffects effects {
         .opacity = *alpha
     };
@@ -117,7 +123,7 @@ Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 }
 Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 {
-    Ark_String type = Converter::ArkValue<Ark_String>("move");
+    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
     Ark_TransitionEffects effects {
         .move = edge
     };
