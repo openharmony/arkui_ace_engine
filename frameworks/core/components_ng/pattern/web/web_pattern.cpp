@@ -3816,7 +3816,11 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
         auto pipeline = PipelineBase::GetCurrentContext();
         if (pipeline) {
             auto dipScale = pipeline->GetDipScale();
-            diff = edgeHeight = (int32_t_)((int32_t)(edgeHeight / dipScale) * dipScale);
+            if (GreatNotEqual(dipScale, 0.0)) {
+                diff = edgeHeight = (int32_t_)((int32_t)(edgeHeight / dipScale) * dipScale);
+            } else {
+                return;
+            }
         }
         y = y + offset.GetY() - edgeHeight + diff;
     }
