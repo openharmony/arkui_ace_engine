@@ -45,7 +45,7 @@ public:
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsStringTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsStringTest, TestSize.Level1)
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
@@ -72,7 +72,7 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsStringTest, 
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsResourceTest, TestSize.Level1)
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
