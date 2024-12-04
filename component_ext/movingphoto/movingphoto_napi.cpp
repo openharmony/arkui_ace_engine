@@ -90,10 +90,10 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
 
     napi_value jsDynamicRangeMode = nullptr;
     napi_get_named_property(env, argv[0], "dynamicRangeMode", &jsDynamicRangeMode);
-    auto format = DynamicRangeMode::HIGH;
+    auto rangeMode = DynamicRangeMode::HIGH;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, jsDynamicRangeMode, napi_number)) {
-        format = static_cast<DynamicRangeMode>(ExtNapiUtils::GetCInt32(env, jsDynamicRangeMode));
-        NG::MovingPhotoModelNG::GetInstance()->SetDynamicRangeMode(format);
+        rangeMode = static_cast<DynamicRangeMode>(ExtNapiUtils::GetCInt32(env, jsDynamicRangeMode));
+        NG::MovingPhotoModelNG::GetInstance()->SetDynamicRangeMode(rangeMode);
     }
 
     napi_value getUri = nullptr;
