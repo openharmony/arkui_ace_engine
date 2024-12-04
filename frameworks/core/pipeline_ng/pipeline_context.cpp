@@ -4727,21 +4727,6 @@ void PipelineContext::SetContainerModalTitleHeight(int32_t height)
     containerPattern->SetContainerModalTitleHeight(height);
 }
 
-void PipelineContext::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-    uint32_t closeButtonRightMargin, int32_t isDarkMode)
-{
-    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("Set container button style failed, Window modal is not container.");
-        return;
-    }
-    CHECK_NULL_VOID(rootNode_);
-    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
-    CHECK_NULL_VOID(containerNode);
-    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
-    CHECK_NULL_VOID(containerPattern);
-    containerPattern->SetContainerButtonStyle(buttonsize, spacingBetweenButtons, closeButtonRightMargin, isDarkMode);
-}
-
 int32_t PipelineContext::GetContainerModalTitleHeight()
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {

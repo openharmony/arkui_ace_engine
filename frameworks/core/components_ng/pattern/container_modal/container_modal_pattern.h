@@ -164,8 +164,6 @@ public:
     void UpdateGestureRowVisible();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     virtual void SetContainerModalTitleHeight(int32_t height);
-    virtual void SetContainerButtonStyle(uint32_t buttonSize, uint32_t spacingBetweenButtons,
-        uint32_t closeButtonRightMargin, int32_t colorMode) {};
     int32_t GetContainerModalTitleHeight();
     virtual bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(

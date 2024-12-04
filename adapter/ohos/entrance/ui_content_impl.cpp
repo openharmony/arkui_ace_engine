@@ -3854,9 +3854,9 @@ void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& butto
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, buttonStyle]() {
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetContainerButtonStyle(buttonStyle.buttonBackgroundSize,
+            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, buttonStyle.buttonBackgroundSize,
                 buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
         },
         TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
