@@ -327,6 +327,20 @@ void ResetTabEdgeEffect(ArkUINodeHandle node)
     TabsModelNG::SetEdgeEffect(frameNode, NUM_0);
 }
 
+void SetTabPageFlipMode(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetPageFlipMode(frameNode, pageFlipMode);
+}
+
+void ResetTabPageFlipMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetPageFlipMode(frameNode, NUM_0);
+}
+
 void SetTabWidthAuto(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -454,6 +468,8 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetTabClip,
         SetTabEdgeEffect,
         ResetTabEdgeEffect,
+        SetTabPageFlipMode,
+        ResetTabPageFlipMode,
         SetTabWidthAuto,
         ResetTabWidthAuto,
         SetTabHeightAuto,

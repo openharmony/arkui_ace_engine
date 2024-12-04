@@ -1754,4 +1754,27 @@ HWTEST_F(TabsAttrTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
     auto swiperLayoutProperty = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
     EXPECT_EQ(swiperLayoutProperty->GetIndex(), 2);
 }
+
+/**
+ * @tc.name: PageFlipModeTest001
+ * @tc.desc: PageFlipMode property test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, PageFlipModeTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    // default mode is PageFlipMode::CONTINUOUS(0)
+    EXPECT_EQ(swiperPattern_->GetPageFlipMode(), 0);
+    // mode is PageFlipMode::SINGLE(0)
+    model.SetPageFlipMode(AceType::RawPtr(frameNode_), 1);
+    EXPECT_EQ(swiperPattern_->GetPageFlipMode(), 1);
+    // exceeding the enum range will reset to default
+    model.SetPageFlipMode(AceType::RawPtr(frameNode_), -1);
+    EXPECT_EQ(swiperPattern_->GetPageFlipMode(), 0);
+    // exceeding the enum range will reset to default
+    model.SetPageFlipMode(AceType::RawPtr(frameNode_), 100);
+    EXPECT_EQ(swiperPattern_->GetPageFlipMode(), 0);
+}
 } // namespace OHOS::Ace::NG

@@ -3192,6 +3192,12 @@ var SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
+var PageFlipMode;
+(function (PageFlipMode) {
+  PageFlipMode[PageFlipMode["CONTINUOUS"] = 0] = "CONTINUOUS";
+  PageFlipMode[PageFlipMode["SINGLE"] = 1] = "SINGLE";
+})(PageFlipMode || (PageFlipMode = {}));
+
 var CheckBoxStyle;
 (function (CheckBoxStyle) {
   CheckBoxStyle["CIRCULAR_STYLE"] = 0;
