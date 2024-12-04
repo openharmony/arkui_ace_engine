@@ -1926,7 +1926,7 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     // fake drag data when enter
     delegate_->GetOrCreateDragData();
     // use summary to set fake data
-    ClearDragData();
+    SetFakeDragData();
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
     // RequestFocus to show the carret frame_caret
     WebRequestFocus();
@@ -1996,7 +1996,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(info->GetX() - offset.value_or(OffsetF()).GetX()) * viewScale;
     int32_t localY = static_cast<int32_t>(info->GetY() - offset.value_or(OffsetF()).GetY()) * viewScale;
-
+    ClearDragData();
     RefPtr<UnifiedData> aceData = info->GetData();
     // get data from ace(from udmf), and send it to chromium
     if (aceData && aceData->GetSize() >= 1) {
@@ -2110,6 +2110,17 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
         delegate_->dragData_->ClearImageFileNames();
+    }
+}
+
+void WebPattern::SetFakeDragData()
+{
+    CHECK_NULL_VOID(delegate_);
+    std::string plain = " ";
+    std::string htmlContent = " ";
+    if (delegate_->dragData_) {
+        delegate_->dragData_->SetFragmentText(plain);
+        delegate_->dragData_->SetFragmentHtml(htmlContent);
     }
 }
 
