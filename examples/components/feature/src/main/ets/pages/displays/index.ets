@@ -22,6 +22,7 @@ import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
+import { DataPanelBootcamp } from './DataPanelBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -34,7 +35,8 @@ export const displaysRoute: RouteGroup = {
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
     { name: 'counter', label: '计数器/counter'},
-    { name: 'AdvancedCounter', label: '计数器/advanced.Counter'}
+    { name: 'AdvancedCounter', label: '计数器/advanced.Counter'},
+    { name: 'dataPanel', label: '数据面板/DataPanel'}
   ]
 };
 
@@ -56,6 +58,8 @@ export function DisplaysDestination(name: string, route: Route) {
     CounterBootcamp({ title: route.label})
   }else if (name === 'displays/AdvancedCounter'){
     AdvancedCounterBootcamp({ title: route.label})
+  }else if (name === 'displays/dataPanel'){
+    DataPanelBootcamp({ title: route.label})
   }
 }
 
