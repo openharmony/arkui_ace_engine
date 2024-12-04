@@ -101,7 +101,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent001, TestSize.Level1)
      * @tc.expected: No scroll
      */
     pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::UNKNOWN));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
@@ -109,7 +109,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent001, TestSize.Level1)
      * @tc.expected: No scroll
      */
     pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_UP, KeyAction::DOWN));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
@@ -130,7 +130,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent002, TestSize.Level1)
      * @tc.expected: Page jump down with Grid height.
      */
     pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_DOWN, KeyAction::DOWN));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 100);
 
     /**
@@ -138,7 +138,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent002, TestSize.Level1)
      * @tc.expected: Page jump up with Grid height.
      */
     pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_UP, KeyAction::DOWN));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
@@ -319,7 +319,7 @@ HWTEST_F(GridCommonTestNg, MouseSelect006, TestSize.Level1)
     GetChildPattern<GridItemPattern>(frameNode_, 1)->SetSelectable(false);
     GetChildEventHub<GridItemEventHub>(frameNode_, 2)->SetEnabled(false);
     GetChildEventHub<GridItemEventHub>(frameNode_, 5)->SetOnSelect(std::move(selectCallback));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Select zone, include items(index:1,2,5,6).
@@ -478,7 +478,7 @@ HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
     eventHub_->FireOnItemDragEnter(dragInfo);
     eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
     EXPECT_EQ(pattern_->GetOriginalIndex(), 11);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
@@ -495,7 +495,7 @@ HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Move something to 3rd item.
@@ -508,7 +508,7 @@ HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, NULL_VALUE, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step4. Move one item to wrong insertIndex.
@@ -521,7 +521,7 @@ HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
     // insertIndex >= itemCount
     eventHub_->FireOnItemDragMove(dragInfo, 1, 11);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -557,7 +557,7 @@ HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
     eventHub_->FireOnItemDragEnter(dragInfo);
     eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
     EXPECT_EQ(pattern_->GetOriginalIndex(), itemCount);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
@@ -574,7 +574,7 @@ HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Move something to 3rd item.
@@ -587,7 +587,7 @@ HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
     // SupportAnimation, ClearDragState
     eventHub_->FireOnItemDrop(dragInfo, NULL_VALUE, 1, true);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step4. Move one item to wrong insertIndex.
@@ -600,7 +600,7 @@ HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
     // insertIndex >= itemCount
     eventHub_->FireOnItemDragMove(dragInfo, 1, itemCount);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -659,7 +659,7 @@ HWTEST_F(GridCommonTestNg, FireDrag003, TestSize.Level1)
     eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
     EXPECT_TRUE(isDrop);
     EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -881,7 +881,7 @@ HWTEST_F(GridCommonTestNg, FocusStep008, TestSize.Level1)
      * @tc.steps: step1. Scroll to second row
      */
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE - 1.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. UP
@@ -907,7 +907,7 @@ HWTEST_F(GridCommonTestNg, FocusStep009, TestSize.Level1)
      * @tc.steps: step1. Scroll to first row
      */
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE + 1.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. DOWN
@@ -935,7 +935,7 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
      */
     auto gridFocusNode = frameNode_->GetOrCreateFocusHub();
     gridFocusNode->RequestFocusImmediately();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 
     /**
@@ -944,7 +944,7 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
      */
     GetChildFocusHub(frameNode_, 1)->RequestFocusImmediately();
     gridFocusNode->RequestFocusImmediately();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
 
     /**
@@ -1266,11 +1266,11 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
     CreateDone();
     accessibilityProperty_->ActActionScrollForward();
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0);
     accessibilityProperty_->ActActionScrollBackward();
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0);
 
     /**
@@ -1284,11 +1284,11 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
     CreateDone();
     accessibilityProperty_->ActActionScrollForward();
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, -GRID_HEIGHT);
     accessibilityProperty_->ActActionScrollBackward();
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, 0);
 }
 
@@ -1408,20 +1408,20 @@ HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
     rect->SetHeight(Dimension(200.0f));
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CUSTOM, rect });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetPaddingSize(true), SizeF(238, 398)));
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(2);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     props->UpdateContentClip({ ContentClipMode::DEFAULT, nullptr });
     EXPECT_EQ(props->GetDefaultContentClip(), ContentClipMode::BOUNDARY);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -1442,7 +1442,7 @@ HWTEST_F(GridCommonTestNg, Focus002, TestSize.Level1)
      */
     auto gridFocusNode = frameNode_->GetOrCreateFocusHub();
     gridFocusNode->RequestFocusImmediately();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 
     /**
@@ -1450,7 +1450,7 @@ HWTEST_F(GridCommonTestNg, Focus002, TestSize.Level1)
      * @tc.expected: item 0 scroll out of viewport, lost focus
      */
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 2, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 
     /**
@@ -1458,7 +1458,7 @@ HWTEST_F(GridCommonTestNg, Focus002, TestSize.Level1)
      * @tc.expected: item 0 scroll into viewport, request focus
      */
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE * 2, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
 } // namespace OHOS::Ace::NG

@@ -224,13 +224,13 @@ void GridTestNg::AddFixedHeightItems(int32_t cnt, float height)
 void GridTestNg::ScrollTo(float position)
 {
     pattern_->ScrollTo(position);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize)
