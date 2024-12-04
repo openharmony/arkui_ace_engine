@@ -137,9 +137,15 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getAsymmetricTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->asymmetric, nullptr);
+    Ark_TransitionEffect appear;
+    Ark_TransitionEffect disappear;
+    auto peer = accessor_->asymmetric(&appear, &disappear);
+    ASSERT_NE(peer, nullptr);
+    peer = accessor_->asymmetric(nullptr, nullptr);
+    ASSERT_EQ(peer, nullptr);
 }
 
 /**

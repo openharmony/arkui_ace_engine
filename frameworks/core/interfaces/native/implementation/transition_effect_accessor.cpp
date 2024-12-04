@@ -84,8 +84,16 @@ Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
                                  const Ark_TransitionEffect* disappear)
 {
-    LOGE("TransitionEffectAccessor::AsymmetricImpl Not implemented.");
-    return 0;
+    CHECK_NULL_RETURN(appear, nullptr);
+    CHECK_NULL_RETURN(disappear, nullptr);
+    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_Literal_TransitionEffect_appear_disappear assym;
+    assym.appear = *appear;
+    assym.disappear = *disappear;
+    Ark_TransitionEffects effects {
+        .asymmetric = assym
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
