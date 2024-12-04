@@ -263,7 +263,7 @@ export struct TextBootcamp {
           isEnabled: this.enableMaxLines,
           value: this.maxLines,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         SliderBlock({
@@ -271,7 +271,7 @@ export struct TextBootcamp {
           isEnabled: this.enableLineHeight,
           value: this.lineHeight,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 10
         })
 
         RadioBlock({
@@ -310,7 +310,7 @@ export struct TextBootcamp {
           isEnabled: this.enableBaselineOffset,
           value: this.baselineOffset,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         SliderBlock({
@@ -318,7 +318,7 @@ export struct TextBootcamp {
           isEnabled: this.enableLetterSpacing,
           value: this.letterSpacing,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         SliderBlock({
@@ -326,7 +326,7 @@ export struct TextBootcamp {
           isEnabled: this.enableMinFontSize,
           value: this.minFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         SliderBlock({
@@ -334,7 +334,7 @@ export struct TextBootcamp {
           isEnabled: this.enableMaxFontSize,
           value: this.maxFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -359,7 +359,7 @@ export struct TextBootcamp {
           isEnabled: this.enableFontSize,
           value: this.fontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -421,7 +421,7 @@ export struct TextBootcamp {
           isEnabled: this.enableTextShadowRadius,
           value: this.textShadowRadius,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 360
         })
 
         RadioBlock({
@@ -446,7 +446,7 @@ export struct TextBootcamp {
           isEnabled: this.enableTextShadowOffsetX,
           value: this.textShadowOffsetX,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         SliderBlock({
@@ -454,7 +454,7 @@ export struct TextBootcamp {
           isEnabled: this.enableTextShadowOffsetY,
           value: this.textShadowOffsetY,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -483,7 +483,7 @@ export struct TextBootcamp {
           isEnabled: this.enableTextIndent,
           value: this.textIndent,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         RadioBlock({
@@ -601,7 +601,7 @@ export struct TextBootcamp {
           isEnabled: this.enableLineSpacingValue,
           value: this.lineSpacingValue,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         RadioBlock({
@@ -662,7 +662,7 @@ export struct TextBootcamp {
           isEnabled: this.enableMaxFontScale,
           value: this.maxFontScale,
           min: 1,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -680,7 +680,7 @@ export struct TextBootcamp {
           isEnabled: this.enableFontValueSize,
           value: this.fontValueSize,
           min: 1,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
