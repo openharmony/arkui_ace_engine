@@ -1222,15 +1222,9 @@ OffsetF GestureEventHub::GetDragPreviewInitPositionToScreen(
     }
 
     if (data.isMenuShow) {
-        OffsetF menuPreviewCenter;
-        auto ret = SubwindowManager::GetInstance()->GetMenuPreviewCenter(menuPreviewCenter);
-        if (ret && GetPreviewMode() != MenuPreviewMode::NONE) {
-            previewOffset = menuPreviewCenter - pixelMapHalfSize + data.dragMovePosition;
-            return previewOffset;
-        } else {
-            previewOffset += data.dragMovePosition;
-            return previewOffset;
-        }
+        OffsetF menuPreviewCenter = frameNodeOffset_ + OffsetF(frameNodeSize_.Width(), frameNodeSize_.Height()) / 2.0f;
+        menuPreviewCenter += DragDropFuncWrapper::GetCurrentWindowOffset(context);
+        previewOffset = menuPreviewCenter - pixelMapHalfSize + data.dragMovePosition;
     }
     return previewOffset;
 }
