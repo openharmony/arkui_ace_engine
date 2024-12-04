@@ -87,7 +87,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 {
-    CHECK_NULL_RETURN(options, 0);
+    CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(TRANSLATE_TOKEN);
     Ark_TransitionEffects effects {
         .translate = *options
@@ -96,7 +96,7 @@ Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 }
 Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
 {
-    CHECK_NULL_RETURN(options, 0);
+    CHECK_NULL_RETURN(options, nullptr);
     Ark_String type = Converter::ArkValue<Ark_String>(ROTATE_TOKEN);
     Ark_TransitionEffects effects {
         .rotate = *options
