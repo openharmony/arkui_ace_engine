@@ -105,9 +105,9 @@ public:
         movingPhotoFormat_ = format;
     }
 
-    void SetDynamicRangeMode(DynamicRangeMode RangeMode)
+    void SetDynamicRangeMode(DynamicRangeMode rangeMode)
     {
-        dynamicRangeMode_ = RangeMode;
+        dynamicRangeMode_ = rangeMode;
     }
 
     int64_t GetCurrentDateModified()
@@ -151,6 +151,7 @@ private:
     void UpdatePlayMode();
     void HandleImageAnalyzerMode();
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
+    void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
