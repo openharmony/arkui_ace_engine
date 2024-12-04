@@ -80,6 +80,7 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         target->textLineStyle->UpdateLineHeight(typingTextStyle.GetLineHeight());
         return;
     }
+    
     if (source->fontStyle->HasFontSize()) {
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
     }
