@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapMockAccessor {
 void DestroyPeerImpl(PixelMapMockPeer* peer)
 {
+    delete peer;
 }
 PixelMapMockPeer* CtorImpl()
 {
@@ -34,6 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ReleaseImpl(PixelMapMockPeer* peer)
 {
+    // do nothing
 }
 } // PixelMapMockAccessor
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor()
