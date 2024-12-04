@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_utils.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
@@ -1922,7 +1923,8 @@ bool RichEditorPattern::SymbolSpanUpdateStyle(
 void RichEditorPattern::UpdateSpanStyle(
     int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle, range=[%{public}d,%{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle, [%{public}d,%{public}d], %{public}s",
+        start, end, ToBriefString(textStyle, imageStyle, updateSpanStyle_).c_str());
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "textStyle=%{public}s, imageStyle=%{public}s",
         textStyle.ToString().c_str(), imageStyle.ToString().c_str());
     auto host = GetHost();
