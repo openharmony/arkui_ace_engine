@@ -6635,11 +6635,12 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 std::optional<TouchLocationInfo> RichEditorPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)
 {
-    auto touchInfos = info.GetChangedTouches();
+    const auto& touchInfos = info.GetChangedTouches();
     CHECK_NULL_RETURN(!touchInfos.empty(), std::nullopt);
     CHECK_NULL_RETURN(moveCaretState_.touchFingerId, touchInfos.front());
-    for (auto touchInfo : touchInfos) {
-        if (touchInfo.GetFingerId() == moveCaretState_.touchFingerId.value()) {
+    const int32_t touchFingerId = moveCaretState_.touchFingerId.value();
+    for (const auto& touchInfo : touchInfos) {
+        if (touchInfo.GetFingerId() == touchFingerId) {
             return touchInfo;
         }
     }
