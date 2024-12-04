@@ -426,7 +426,7 @@ public:
                         CHECK_NULL_VOID(container);
                         auto context = container->GetPipelineContext();
                         CHECK_NULL_VOID(context);
-                        context->OnVirtualKeyboardAreaChange(Rect());
+                        context->OnVirtualKeyboardAreaChange(Rect(), 0, 0);
                     }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
                 return;
             }
