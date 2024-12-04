@@ -3533,6 +3533,8 @@ void TextPattern::DumpInfo()
         dumpLog.AddDesc(std::string("Content: ").append(
             UtfUtils::Str16ToStr8(textLayoutProp->GetContent().value_or(u" "))));
     }
+    dumpLog.AddDesc(std::string("isSpanStringMode: ").append(std::to_string(isSpanStringMode_)));
+    dumpLog.AddDesc(std::string("externalParagraph: ").append(std::to_string(externalParagraph_.has_value())));
     DumpTextStyleInfo();
     DumpTextLayoutProperty();
     if (contentMod_) {
@@ -4322,6 +4324,10 @@ void TextPattern::ProcessSpanString()
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->StartAITask();
     }
+
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContent(textForDisplay_);
 }
 
 void TextPattern::OnSensitiveStyleChange(bool isSensitive)
