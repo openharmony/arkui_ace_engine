@@ -196,13 +196,12 @@ private:
     std::list<std::function<void()>> persistAfterLayoutTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
     std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
-    std::list<RefPtr<FrameNode>> singleDirtyNodesToFlush_;
+    std::set<RefPtr<FrameNode>> singleDirtyNodesToFlush_;
     std::queue<bool> layoutWithImplicitAnimation_;
 
     uint32_t currentPageId_ = 0;
     bool is64BitSystem_ = false;
     bool isLayouting_ = false;
-    int32_t layoutedCount_ = 0;
     int32_t multiLayoutCount_ = 0;
 
     FrameInfo* frameInfo_ = nullptr;

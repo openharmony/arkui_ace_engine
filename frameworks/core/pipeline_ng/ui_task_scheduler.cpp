@@ -235,11 +235,11 @@ void UITaskScheduler::FlushTask()
     ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
     // update for first entry from flushVSync
     // and reset to avoid infinite add
-    layoutedCount_ = 0;
+    int32_t layoutedCount = 0;
     multiLayoutCount_ = 1;
     singleDirtyNodesToFlush_.clear();
     do {
-        if (RequestFrameOnLayoutCountExceeds()) {
+        if (layoutedCount >= ENDORSE_LAYOUT_COUNT && RequestFrameOnLayoutCountExceeds()) {
             break;
         }
         FlushLayoutTask();
@@ -249,7 +249,7 @@ void UITaskScheduler::FlushTask()
         if (!afterLayoutTasks_.empty()) {
             FlushAfterLayoutTask();
         }
-        layoutedCount_++;
+        layoutedCount++;
         multiLayoutCount_--;
         FlushSafeAreaPaddingProcess();
         auto triggeredByImplicitAnimation =
@@ -265,7 +265,6 @@ void UITaskScheduler::FlushTask()
     layoutWithImplicitAnimation_ = std::queue<bool>();
     FlushAllSingleNodeTasks();
     multiLayoutCount_ = 0;
-    layoutedCount_ = 0;
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
 }
@@ -291,18 +290,11 @@ void UITaskScheduler::FlushAllSingleNodeTasks()
 
 void UITaskScheduler::AddSingleNodeToFlush(const RefPtr<FrameNode>& dirtyNode)
 {
-    if (std::find(singleDirtyNodesToFlush_.begin(), singleDirtyNodesToFlush_.end(), dirtyNode) !=
-        singleDirtyNodesToFlush_.end()) {
-        return;
-    }
-    singleDirtyNodesToFlush_.emplace_back(dirtyNode);
+    singleDirtyNodesToFlush_.insert(dirtyNode);
 }
 
 bool UITaskScheduler::RequestFrameOnLayoutCountExceeds()
 {
-    if (layoutedCount_ < ENDORSE_LAYOUT_COUNT) {
-        return false;
-    }
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
