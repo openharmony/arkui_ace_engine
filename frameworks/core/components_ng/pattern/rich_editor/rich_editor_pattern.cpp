@@ -406,7 +406,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
     }
     if (!caretVisible_) {
         StartTwinkling();
-        if (previewLongPress_ && isIME) {
+        if (!isEditing_ && isIME) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
             RequestKeyboard(false, true, true);
             HandleOnEditChanged(true);
@@ -6549,6 +6549,7 @@ void RichEditorPattern::HandleTouchUp()
     ResetTouchAndMoveCaretState();
     isMoveCaretAnywhere_ = false;
     editingLongPress_ = false;
+    previewLongPress_ = false;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
