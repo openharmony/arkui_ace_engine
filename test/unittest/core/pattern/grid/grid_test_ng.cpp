@@ -81,6 +81,7 @@ void GridTestNg::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    positionController_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     MockAnimationManager::GetInstance().Reset();
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(0);
@@ -95,6 +96,7 @@ void GridTestNg::GetGrid()
     eventHub_ = frameNode_->GetEventHub<GridEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<GridLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
+    positionController_ = pattern_->GetOrCreatePositionController();
 }
 
 GridModelNG GridTestNg::CreateGrid()
@@ -321,4 +323,25 @@ RefPtr<FrameNode> GridTestNg::GetItem(int32_t idx, bool asCache)
     return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(idx, asCache));
 }
 
+void GridTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
+{
+    positionController_->ScrollToIndex(index, smooth, align, extraOffset);
+    FlushUITasks();
+}
+
+bool GridTestNg::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+{
+    bool result = positionController_->AnimateTo(position, duration, curve, smooth, canOverScroll);
+    FlushUITasks();
+    return result;
+}
+
+AssertionResult GridTestNg::Position(float expectOffset)
+{
+    if (!MockAnimationManager::GetInstance().AllFinished()) {
+        MockAnimationManager::GetInstance().Tick();
+    }
+    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
+}
 } // namespace OHOS::Ace::NG
