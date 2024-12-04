@@ -251,7 +251,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enablePlaceholderFontSize,
           value: this.placeholderFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -313,7 +313,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableMaxLength,
           value: this.maxLength,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         ColorBlock({
@@ -327,7 +327,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableFontSize,
           value: this.fontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -417,7 +417,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableCaretStyleWidth,
           value: this.caretStyleWidth,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         ColorBlock({
@@ -431,7 +431,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableCaretPosition,
           value: this.caretPosition,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -480,7 +480,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableMaxLines,
           value: this.maxLines,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         RadioBlock({
@@ -539,7 +539,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableShowCounterOptionsThresholdPercentage,
           value: this.showCounterOptionsThresholdPercentage,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 100
         })
 
         RadioBlock({
@@ -582,7 +582,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableLineHeight,
           value: this.lineHeight,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 10
         })
 
         RadioBlock({
@@ -621,7 +621,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableLetterSpacing,
           value: this.letterSpacing,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         RadioBlock({
@@ -652,7 +652,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableTextIndent,
           value: this.textIndent,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         SliderBlock({
@@ -660,7 +660,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableMinFontSize,
           value: this.minFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 100
         })
 
         SliderBlock({
@@ -668,7 +668,7 @@ export struct TextInputBootcamp {
           isEnabled: this.enableMaxFontSize,
           value: this.maxFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 100
         })
 
         RadioBlock({
