@@ -217,7 +217,7 @@ bool ContainerModalViewEnhance::GetContainerModalComponentRect(PipelineContext *
     return pattern->GetContainerModalComponentRect(floatContainerModal, floatButtons);
 }
 
-void ContainerModalPatternEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
+void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
     uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode)
 {
     CHECK_NULL_VOID(pipeline);
