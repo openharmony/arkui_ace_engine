@@ -19,24 +19,13 @@
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-
-struct GridItemIndexInfo {
-    int32_t mainIndex = -1;
-    int32_t crossIndex = -1;
-    int32_t mainSpan = -1;
-    int32_t crossSpan = -1;
-    int32_t mainStart = -1;
-    int32_t mainEnd = -1;
-    int32_t crossStart = -1;
-    int32_t crossEnd = -1;
-};
 
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
@@ -254,7 +243,7 @@ public:
 
     void ResetFocusedIndex()
     {
-        focusIndex_ = std::nullopt;
+        focusHandler_.ResetFocusIndex();
     }
 
     SizeF GetChildrenExpandedSize() override;
@@ -273,25 +262,11 @@ private:
     SizeF GetContentSize() const;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    WeakPtr<FocusHub> GetNextFocusSimplified(FocusStep step, const RefPtr<FocusHub>& current); // focus algo rewritten
-    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
-    std::pair<int32_t, int32_t> GetNextIndexByStep(
-        int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);
-    WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount,
-        int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
-    WeakPtr<FocusHub> SearchIrregularFocusableChild(int32_t tarMainIndex, int32_t tarCrossIndex);
-    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex = -1);
-    std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
-    void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
-    void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
-    std::pair<bool, bool> IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex);
-    std::pair<FocusStep, FocusStep> GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
+
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
     void HandleFocusEvent();
     void HandleBlurEvent();
-    bool ScrollToLastFocusIndex(KeyCode keyCode);
-    int32_t GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode);
+    bool OnKeyEvent(const KeyEvent& event);
 
     void ClearMultiSelect() override;
     bool IsItemSelected(const GestureEvent& info) override;
@@ -317,44 +292,31 @@ private:
 
     inline bool UseIrregularLayout() const;
 
-    int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
-    double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
-    double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
-    void ResetAllDirectionsStep();
-    void FireFocus();
     bool IsInViewport(int32_t index) const;
 
     std::string GetIrregularIndexesString() const;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
-
     bool scrollable_ = true;
     bool forceOverScroll_ = false;
+    bool isSmoothScrolling_ = false;
+    bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 
     RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
-    bool isLeftStep_ = false;
-    bool isRightStep_ = false;
-    bool isUpStep_ = false;
-    bool isDownStep_ = false;
-    bool isLeftEndStep_ = false;
-    bool isRightEndStep_ = false;
-    bool isSmoothScrolling_ = false;
-    bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
-    bool needTriggerFocus_ = false;
-    bool triggerFocus_ = false;
     KeyEvent keyEvent_;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;
-    std::optional<int32_t> focusIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
-    GridItemIndexInfo curFocusIndexInfo_;
     std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
     GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
+
+    GridFocus focusHandler_ = GridFocus(*this, info_);
+    friend class GridFocus;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 
