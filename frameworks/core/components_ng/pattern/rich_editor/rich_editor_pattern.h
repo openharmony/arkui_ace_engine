@@ -419,7 +419,9 @@ public:
  
         // lost focus in floating window mode
         auto windowMode = GetWindowMode();
-        if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed windowMode = %{public}d", windowMode);
+        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             FocusHub::LostFocusToViewRoot();
         }
     }

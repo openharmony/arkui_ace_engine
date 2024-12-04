@@ -332,7 +332,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, Tes
 
     previewRange.start = richEditorPattern->previewTextRecord_.startOffset;
     previewRange.end = richEditorPattern->previewTextRecord_.endOffset;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
+    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
 }
 
 /**

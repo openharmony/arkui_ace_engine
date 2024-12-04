@@ -373,7 +373,8 @@ void DragDropManager::UpdateDragAllowDrop(
             // the application does not config the drag behavior, use move when moving within
             // draggedFrameNode or frameNode is disabled, otherwise use copy
             auto eventHub = dragFrameNode->GetEventHub<EventHub>();
-            if (draggedFrameNode_ == dragFrameNode || !(eventHub && eventHub->IsEnabled())) {
+            if (draggedFrameNode_ == dragFrameNode || !(eventHub && eventHub->IsEnabled()) ||
+                CheckExtraSituation(dragFrameNode)) {
                 UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
             } else {
                 UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
@@ -393,6 +394,19 @@ void DragDropManager::UpdateDragAllowDrop(
             break;
         }
     }
+}
+
+bool DragDropManager::CheckExtraSituation(const RefPtr<FrameNode>& dragFrameNode) const
+{
+    return CheckInRichEditor(dragFrameNode);
+}
+
+bool DragDropManager::CheckInRichEditor(const RefPtr<FrameNode>& dragFrameNode) const
+{
+    CHECK_NULL_RETURN(dragFrameNode && draggedFrameNode_, false);
+    auto parent = draggedFrameNode_->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG, false);
+    return dragFrameNode == parent;
 }
 
 void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle, int32_t eventId)
