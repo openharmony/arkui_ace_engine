@@ -103,33 +103,45 @@ export struct ChipGroupBootcamp {
         ],
         itemStyle: {
           size:
-          useEnabled(this.enableChipGroupItemStyleSize, this.chipGroupItemStyleSize),
+          useEnabled(this.enableChipGroupItemStyleSize,
+            this.chipGroupItemStyleSize),
           backgroundColor:
-          useEnabled(this.enableChipGroupItemStyleBackgroundColor, this.chipGroupItemStyleBackgroundColor),
+          useEnabled(this.enableChipGroupItemStyleBackgroundColor,
+            this.chipGroupItemStyleBackgroundColor),
           fontColor:
-          useEnabled(this.enableChipGroupItemStyleFontColor, this.chipGroupItemStyleFontColor),
+          useEnabled(this.enableChipGroupItemStyleFontColor, t
+          his.chipGroupItemStyleFontColor),
           selectedBackgroundColor:
-          useEnabled(this.enableChipGroupItemStyleSelectedBackgroundColor, this.chipGroupItemStyleSelectedBackgroundColor),
+          useEnabled(this.enableChipGroupItemStyleSelectedBackgroundColor,
+            this.chipGroupItemStyleSelectedBackgroundColor),
           selectedFontColor:
-          useEnabled(this.enableChipGroupItemStyleSelectedFontColor, this.chipGroupItemStyleSelectedFontColor),
+          useEnabled(this.enableChipGroupItemStyleSelectedFontColor,
+            this.chipGroupItemStyleSelectedFontColor),
         },
         selectedIndexes:
-        useEnabled(this.enableChipGroupSelectedIndexes, this.chipGroupSelectedIndexes),
+        useEnabled(this.enableChipGroupSelectedIndexes,
+          this.chipGroupSelectedIndexes),
         multiple:
-        useEnabled(this.enableChipGroupMultiple, this.chipGroupMultiple),
+        useEnabled(this.enableChipGroupMultiple,
+          this.chipGroupMultiple),
         chipGroupSpace: {
           itemSpace:
-          useEnabled(this.enableChipGroupChipGroupSpaceItemSpace, this.chipGroupChipGroupSpaceItemSpace),
+          useEnabled(this.enableChipGroupChipGroupSpaceItemSpace,
+            this.chipGroupChipGroupSpaceItemSpace),
           startSpace:
-          useEnabled(this.enableChipGroupChipGroupSpaceStartSpace, this.chipGroupChipGroupSpaceStartSpace),
+          useEnabled(this.enableChipGroupChipGroupSpaceStartSpace,
+            this.chipGroupChipGroupSpaceStartSpace),
           endSpace:
-          useEnabled(this.enableChipGroupChipGroupSpaceEndSpace, this.chipGroupChipGroupSpaceEndSpace)
+          useEnabled(this.enableChipGroupChipGroupSpaceEndSpace,
+            this.chipGroupChipGroupSpaceEndSpace)
         },
         chipGroupPadding: {
           top:
-          useEnabled(this.enableChipGroupChipGroupPaddingTop, this.chipGroupChipGroupPaddingTop) as number,
+          useEnabled(this.enableChipGroupChipGroupPaddingTop,
+            this.chipGroupChipGroupPaddingTop) as number,
           bottom:
-          useEnabled(this.enableChipGroupChipGroupPaddingBottom, this.chipGroupChipGroupPaddingBottom) as number },
+          useEnabled(this.enableChipGroupChipGroupPaddingBottom,
+            this.chipGroupChipGroupPaddingBottom) as number },
         onChange: (activatedChipsIndex:Array<number>) => {
           console.log('chips on clicked, activated index ' + activatedChipsIndex)
         },
