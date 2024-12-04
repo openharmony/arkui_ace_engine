@@ -783,6 +783,9 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
     }
+    if (GetTag() == V2::ROOT_ETS_TAG) {
+        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(GetContext()->GetDensity())));
+    }
     DumpAlignRulesInfo();
     DumpDragInfo();
     DumpOverlayInfo();
