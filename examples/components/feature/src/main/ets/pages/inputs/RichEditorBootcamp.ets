@@ -296,7 +296,7 @@ export struct RichEditorBootcamp {
           isEnabled: this.enablePlaceholderStyleFontSize,
           value: this.placeholderStyleFontSize,
           min: 1,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
