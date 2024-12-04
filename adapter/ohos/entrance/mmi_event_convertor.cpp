@@ -545,9 +545,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {
             TAG_LOGD(AceLogTag::ACE_DRAG,
-                "action point info: id: %{public}d, pointerId: %{public}d, x: %{public}d, y: %{public}d, action: "
+                "action point info: id: %{public}d, pointerId: %{public}d, action: "
                 "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
-                pointerEvent->GetId(), actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(),
+                pointerEvent->GetId(), actionId, pointerEvent->GetPointerAction(),
                 item.GetPressure(), item.GetTiltX(), item.GetTiltY());
         }
         auto ids = pointerEvent->GetPointerIds();

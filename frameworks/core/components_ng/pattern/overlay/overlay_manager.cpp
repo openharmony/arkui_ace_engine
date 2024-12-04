@@ -5755,7 +5755,7 @@ void OverlayManager::RemoveEventColumn()
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(columnNode);
     hasEvent_ = false;
-    TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn success, id %{public}d.", columnNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn success.");
 }
 
 void OverlayManager::ResetRootNode(int32_t sessionId)

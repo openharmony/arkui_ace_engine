@@ -544,24 +544,19 @@ void DragDropManager::PrintDragFrameNode(
     CHECK_NULL_VOID(dragFrameNode);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    Point point = pointerEvent.GetPoint();
     if (preTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
-            "Current windowId is %{public}d, pointerEventId is %{public}d, drag position is (%{private}f, "
-            "%{private}f), PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s, New find "
-            "targetNode is %{public}s, depth is %{public}d, id is %{public}s.",
-            container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
-            static_cast<float>(point.GetY()), preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth(),
-            preTargetFrameNode_->GetInspectorId()->c_str(), dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth(),
-            dragFrameNode->GetInspectorId()->c_str());
+            "Current windowId is %{public}d, pointerEventId is %{public}d, "
+            "PreTargetFrameNode is %{public}s, depth is %{public}d, New find "
+            "targetNode is %{public}s, depth is %{public}d.",
+            container->GetWindowId(), pointerEvent.pointerEventId, preTargetFrameNode_->GetTag().c_str(),
+            preTargetFrameNode_->GetDepth(), dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
     } else {
         TAG_LOGI(AceLogTag::ACE_DRAG,
-            "Current windowId is %{public}d, pointerEventId is %{public}d, drag position is (%{private}f, "
-            "%{private}f), PreTargetFrameNode is nullptr, New find targetNode is %{public}s, depth is %{public}d, id "
-            "is %{public}s.",
-            container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
-            static_cast<float>(point.GetY()), dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth(),
-            dragFrameNode->GetInspectorId()->c_str());
+            "Current windowId is %{public}d, pointerEventId is %{public}d "
+            "PreTargetFrameNode is nullptr, New find targetNode is %{public}s, depth is %{public}d.",
+            container->GetWindowId(), pointerEvent.pointerEventId, dragFrameNode->GetTag().c_str(),
+            dragFrameNode->GetDepth());
     }
 }
 
@@ -573,18 +568,16 @@ void DragDropManager::PrintGridDragFrameNode(
     CHECK_NULL_VOID(container);
     if (preGridTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
-            "Current windowId is %{public}d, drag position is (%{private}f, %{private}f),"
-            "PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s,"
-            "New find targetNode is %{public}s, depth is %{public}d, id is %{public}s.",
-            container->GetWindowId(), globalX, globalY, preGridTargetFrameNode_->GetTag().c_str(),
-            preGridTargetFrameNode_->GetDepth(), preGridTargetFrameNode_->GetInspectorId()->c_str(),
-            dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth(), dragFrameNode->GetInspectorId()->c_str());
+            "Current windowId is %{public}d,"
+            "PreTargetFrameNode is %{public}s, depth is %{public}d,"
+            "New find targetNode is %{public}s, depth is %{public}d.",
+            container->GetWindowId(), preGridTargetFrameNode_->GetTag().c_str(),
+            preGridTargetFrameNode_->GetDepth(), dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
     } else {
         TAG_LOGI(AceLogTag::ACE_DRAG,
-            "Current windowId is %{public}d, drag position is (%{private}f, %{private}f), "
-            "PreTargetFrameNode is nullptr, New find targetNode is %{public}s, depth is %{public}d, id is %{public}s.",
-            container->GetWindowId(), globalX, globalY, dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth(),
-            dragFrameNode->GetInspectorId()->c_str());
+            "Current windowId is %{public}d, "
+            "PreTargetFrameNode is nullptr, New find targetNode is %{public}s, depth is %{public}d.",
+            container->GetWindowId(), dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
     }
 }
 
@@ -621,11 +614,8 @@ void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
     UpdateDragListener(Point(-1, -1));
     if (preTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Leave the current window, windowId is %{public}d,"
-            "drag Position is (%{private}f, %{private}f),"
-            "PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s",
-            container->GetWindowId(), static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
-            preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth(),
-            preTargetFrameNode_->GetInspectorId()->c_str());
+            "PreTargetFrameNode is %{public}s, depth is %{public}d",
+            container->GetWindowId(), preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth());
         FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
         preTargetFrameNode_ = nullptr;
     }
@@ -715,11 +705,9 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         if (preTargetFrameNode_) {
             TAG_LOGI(AceLogTag::ACE_DRAG,
                 "Not find drag target node, current windowId is %{public}d,"
-                "pointerEventId is %{public}d, drag Position is (%{private}f, %{private}f), "
-                "PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s",
-                container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
-                static_cast<float>(point.GetY()), preTargetFrameNode_->GetTag().c_str(),
-                preTargetFrameNode_->GetDepth(), preTargetFrameNode_->GetInspectorId()->c_str());
+                "pointerEventId is %{public}d. PreTargetFrameNode is %{public}s, depth is %{public}d.",
+                container->GetWindowId(), pointerEvent.pointerEventId, preTargetFrameNode_->GetTag().c_str(),
+                preTargetFrameNode_->GetDepth());
             FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo);
             preTargetFrameNode_ = nullptr;
         }
@@ -794,11 +782,9 @@ void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const st
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, pointerEventId is %{public}d, "
-        "drag position is (%{private}f, %{private}f). TargetNode is %{public}s, id is %{public}s",
-        container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
-        static_cast<float>(point.GetY()), dragFrameNode->GetTag().c_str(),
-        dragFrameNode->GetInspectorId()->c_str());
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "Current windowId is %{public}d, pointerEventId is %{public}d. TargetNode is %{public}s.",
+        container->GetWindowId(), pointerEvent.pointerEventId, dragFrameNode->GetTag().c_str());
     if (IsUIExtensionComponent(dragFrameNode)) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
@@ -1226,10 +1212,9 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not find drag target node, current windowId is %{public}d,"
-                "drag Position is (%{private}f, %{private}f),"
-                "PreGridTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s",
-                container->GetWindowId(), globalX, globalY, preGridTargetFrameNode_->GetTag().c_str(),
-                preGridTargetFrameNode_->GetDepth(), preGridTargetFrameNode_->GetInspectorId()->c_str());
+                "PreGridTargetFrameNode is %{public}s, depth is %{public}d.",
+                container->GetWindowId(), preGridTargetFrameNode_->GetTag().c_str(),
+                preGridTargetFrameNode_->GetDepth());
             FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
                 getDraggedIndex(preGridTargetFrameNode_));
             preGridTargetFrameNode_ = nullptr;
