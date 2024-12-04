@@ -1087,7 +1087,6 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleFocusEvent001, TestSize.Level1)
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->isCaretInContentArea_ = true;
 
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = true;
