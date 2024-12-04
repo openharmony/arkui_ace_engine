@@ -20,7 +20,7 @@ import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 
 export interface ComposeTitleBarMenuItem {
-  value: ResourceStr;
+  value: ResourceStrss;
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
