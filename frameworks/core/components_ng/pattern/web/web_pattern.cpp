@@ -3819,7 +3819,7 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             if (GreatNotEqual(dipScale, 0.0)) {
                 diff = edgeHeight - (int32_t_)((int32_t)(edgeHeight / dipScale) * dipScale);
             } else {
-                return;
+                return RectF();
             }
         }
         y = y + offset.GetY() - edgeHeight + diff;
