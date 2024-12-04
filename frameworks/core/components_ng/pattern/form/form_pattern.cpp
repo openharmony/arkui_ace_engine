@@ -565,6 +565,7 @@ void FormPattern::OnRebuildFrame()
     }
 
     if (isSkeletonAnimEnable_ && !isTransparencyEnable_ && !ShouldAddChildAtReuildFrame()) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "should not add child");
         return;
     }
 
@@ -2253,7 +2254,7 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
 bool FormPattern::ShouldAddChildAtReuildFrame()
 {
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
-    CHECK_NULL_RETURN(layoutProperty, true);
+    CHECK_NULL_RETURN(externalRenderContext, true);
     auto externalRsNode = externalRenderContext->GetRSNode();
     if (externalRsNode) {
         auto externalParentRsNode = externalRsNode->GetParent();
