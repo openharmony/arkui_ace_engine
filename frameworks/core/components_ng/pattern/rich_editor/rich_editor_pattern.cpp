@@ -620,11 +620,23 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
 {
-    CHECK_NULL_VOID(textSelector_.IsValid());
-    CHECK_NULL_VOID(SelectOverlayIsOn());
-    CHECK_NULL_VOID(!IsPreviewTextInputting());
-    CalculateHandleOffsetAndShowOverlay();
-    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    bool needToRefreshSelectOverlay = textSelector_.IsValid() && SelectOverlayIsOn() && !IsPreviewTextInputting();
+    CHECK_NULL_VOID(needToRefreshSelectOverlay);
+    auto overlayTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto selectOverlay = pattern->selectOverlay_;
+        CHECK_NULL_VOID(selectOverlay);
+        pattern->CalculateHandleOffsetAndShowOverlay();
+        selectOverlay->ProcessOverlay({ .menuIsShow = selectOverlay->IsCurrentMenuVisibile(), .animation = true });
+    };
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterRenderTask(overlayTask);
+    } else {
+        overlayTask();
+    }
 }
 
 void RichEditorPattern::FireOnReady()
@@ -2663,28 +2675,20 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
         StopTwinkling();
         return;
     }
-    if (CheckTripClickEvent(info)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleTripleClickEvent");
-        HandleTripleClickEvent(info);
-        return;
-    }
 
     selectionMenuOffsetClick_ = OffsetF(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
-    } else if (hasClicked_) {
-        hasClicked_ = false;
-        TimeStamp clickTimeStamp = info.GetTimeStamp();
-        std::chrono::duration<float, std::ratio<1, InputAIChecker::SECONDS_TO_MILLISECONDS>> timeout =
-            clickTimeStamp - lastClickTimeStamp_;
-        lastClickTimeStamp_ = info.GetTimeStamp();
-        if (timeout.count() < DOUBLE_CLICK_INTERVAL_MS) {
-            HandleDoubleClickEvent(info);
-            return;
-        }
     }
-    HandleSingleClickEvent(info);
+    multipleClickRecognizer_->Start(info);
+    if (multipleClickRecognizer_->IsTripleClick()) {
+        HandleTripleClickEvent(info);
+    } else if (multipleClickRecognizer_->IsDoubleClick()) {
+        HandleDoubleClickEvent(info);
+    } else {
+        HandleSingleClickEvent(info);
+    }
 }
 
 bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info)
@@ -10198,6 +10202,7 @@ bool RichEditorPattern::HandleOnDeleteComb(bool backward)
 
 void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleTripleClickEvent");
     CHECK_EQUAL_VOID(IsPreviewTextInputting(), true);
     CHECK_EQUAL_VOID(IsDragging(), true);
     auto focusHub = GetFocusHub();
