@@ -66,18 +66,14 @@ private:
         int32_t curMainIndex = -1, int32_t curCrossIndex = -1);
     WeakPtr<FocusHub> SearchIrregularFocusableChild(int32_t tarMainIndex, int32_t tarCrossIndex);
     std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
-    void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
     std::pair<bool, bool> IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex);
     std::pair<FocusStep, FocusStep> GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
-    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
     int32_t GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode);
     void ResetAllDirectionsStep();
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
+    bool IsInViewport(int32_t index) const;
 
     std::optional<int32_t> focusIndex_;
     GridItemIndexInfo curFocusIndexInfo_;

@@ -292,8 +292,6 @@ private:
 
     inline bool UseIrregularLayout() const;
 
-    bool IsInViewport(int32_t index) const;
-
     std::string GetIrregularIndexesString() const;
 
     bool supportAnimation_ = false;
@@ -307,6 +305,7 @@ private:
 
     float endHeight_ = 0.0f;
     KeyEvent keyEvent_;
+    GridFocus focusHandler_ { *this, info_ };
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;
@@ -315,8 +314,6 @@ private:
     GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
 
-    GridFocus focusHandler_ = GridFocus(*this, info_);
-    friend class GridFocus;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

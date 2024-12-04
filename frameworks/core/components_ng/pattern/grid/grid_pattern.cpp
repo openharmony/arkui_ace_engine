@@ -715,20 +715,6 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
-bool GridPattern::IsInViewport(int32_t index) const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    CHECK_NULL_RETURN(gridLayoutProperty, true);
-    int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
-    bool showCachedItems = gridLayoutProperty->GetShowCachedItemsValue(false);
-    if (!showCachedItems) {
-        return index >= info_.startIndex_ && index <= info_.endIndex_;
-    }
-    return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
-}
-
 void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();

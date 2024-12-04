@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "grid_focus.h"
-
-#include "grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_focus.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::pair<bool, bool> GridFocus::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
@@ -730,7 +729,7 @@ void GridFocus::ProcessFocusEvent(const KeyEvent& event, bool indexChanged)
             if (childFocusHub && !childFocusHub->IsCurrentFocus()) {
                 childFocusHub->RequestFocusImmediately();
             }
-            grid_.MarkDirtyNodeSelf();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         return;
     }
@@ -749,7 +748,7 @@ void GridFocus::FireFocus()
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusHub->IsCurrentFocus());
     CHECK_NULL_VOID(focusIndex_.has_value());
-    if (grid_.IsInViewport(focusIndex_.value())) {
+    if (IsInViewport(focusIndex_.value())) {
         auto child = host->GetChildByIndex(focusIndex_.value());
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
@@ -777,7 +776,7 @@ bool GridFocus::ScrollToLastFocusIndex(KeyCode keyCode)
     CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
     CHECK_NULL_RETURN(focusIndex_.has_value(), false);
 
-    if (!grid_.IsInViewport(focusIndex_.value())) {
+    if (!IsInViewport(focusIndex_.value())) {
         grid_.StopAnimate();
         needTriggerFocus_ = true;
         // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
@@ -795,6 +794,7 @@ bool GridFocus::ScrollToLastFocusIndex(KeyCode keyCode)
     }
     return false;
 }
+
 void GridFocus::HandleFocusEvent(const WeakPtr<FocusHub>& child)
 {
     auto childFocusHub = child.Upgrade();
@@ -811,5 +811,19 @@ void GridFocus::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
     auto nextFocus = focusNode.Upgrade();
     CHECK_NULL_VOID(nextFocus);
     grid_.UpdateStartIndex(GetFocusNodeIndex(nextFocus));
+}
+
+bool GridFocus::IsInViewport(int32_t index) const
+{
+    auto host = grid_.GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, true);
+    int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
+    bool showCachedItems = gridLayoutProperty->GetShowCachedItemsValue(false);
+    if (!showCachedItems) {
+        return index >= info_.startIndex_ && index <= info_.endIndex_;
+    }
+    return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
 }
 } // namespace OHOS::Ace::NG
