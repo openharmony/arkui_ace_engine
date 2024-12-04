@@ -69,6 +69,7 @@ protected:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetCustomContentTransition(const JSCallbackInfo& info);
     static void SetOnContentDidScroll(const JSCallbackInfo& info);
+    static void SetPageFlipMode(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
 };
 

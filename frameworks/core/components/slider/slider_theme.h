@@ -46,6 +46,7 @@ public:
         static constexpr Dimension INSET_HOT_BLOCK_SHADOW_WIDTH = 6.0_vp;
         static constexpr Dimension FOCUS_SIDE_DISTANCE = 2.0_vp;
         static constexpr double DEFAULT_SLIDER_PPI = 775.0;
+        static constexpr int32_t SLIDER_TIP_DELAY_TIME = 2000;
 
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -106,6 +107,7 @@ public:
                 theme->unselectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_unselected", "");
                 theme->unselectedDesc_ = pattern->GetAttr<std::string>("slider_accessibility_unselectedDesc", "");
                 theme->disabledDesc_ = pattern->GetAttr<std::string>("slider_accessibility_disabledDesc", "");
+                theme->tipDelayTime_ = pattern->GetAttr<int32_t>("slider_tip_delay_time", SLIDER_TIP_DELAY_TIME);
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -289,6 +291,10 @@ public:
     {
         return disabledDesc_;
     }
+    int32_t GetTipDelayTime() const
+    {
+        return tipDelayTime_;
+    }
 
 protected:
     SliderTheme() = default;
@@ -335,6 +341,7 @@ private:
     double moveAnimationDuration_ = 0.0;
     double disabledAlpha_ = 1.0;
     double sliderPPI_ = 0.0;
+    int32_t tipDelayTime_ = 0;
 
     // accessibility
     std::string selectedTxt_ = "";

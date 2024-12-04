@@ -44,6 +44,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -789,11 +790,12 @@ public:
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
+    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t isDarkMode) override;
     int32_t GetContainerModalTitleHeight();
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
-
     void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
 
     const SerializedGesture& GetSerializedGesture() const override;
@@ -832,6 +834,11 @@ public:
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
     {
         return formVisibleMgr_;
+    }
+
+    const RefPtr<FormEventManager>& GetFormEventManager() const
+    {
+        return formEventMgr_;
     }
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
@@ -1027,6 +1034,7 @@ protected:
         const bool supportAvoidance = false, bool forceChange = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
+    void FlushDirtyPropertyNodesWhenExist();
 
     void SetIsLayouting(bool layouting)
     {
@@ -1105,6 +1113,9 @@ private:
         {
             if (!nodeLeft || !nodeRight) {
                 return false;
+            }
+            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+                return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -1251,6 +1262,7 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;

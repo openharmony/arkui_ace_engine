@@ -392,6 +392,7 @@ ohos_source_set("ace_base") {
     "//third_party/icu/icu4c:static_icui18n",
     "//third_party/icu/icu4c:static_icuuc",
   ]
+  external_deps = [ "zlib:shared_libz" ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -860,11 +861,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_accessibility_property.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/group_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp",
@@ -924,6 +920,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/one_step_drag_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/paragraph_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_base_controller.cpp",
@@ -1094,6 +1091,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text_drag/text_drag_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_drag/text_drag_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/content_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/text_component_decorator.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_controller.cpp",

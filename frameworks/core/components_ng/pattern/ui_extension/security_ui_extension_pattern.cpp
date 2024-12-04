@@ -190,10 +190,16 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
-        if (sessionWrapper_->GetWant()->IsEquals(want)) {
+        auto sessionWant = sessionWrapper_->GetWant();
+        if (sessionWant == nullptr) {
+            PLATFORM_LOGW("The sessionWrapper want is nulllptr.");
             return;
         }
-        PLATFORM_LOGI("The old want is %{private}s.", sessionWrapper_->GetWant()->ToString().c_str());
+        if (sessionWant->IsEquals(want)) {
+            return;
+        }
+        PLATFORM_LOGI("The old want bundle = %{public}s, ability = %{public}s",
+            sessionWant->GetElement().GetBundleName().c_str(), sessionWant->GetElement().GetAbilityName().c_str());
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChild(contentNode_);
@@ -434,6 +440,21 @@ void SecurityUIExtensionPattern::HandleFocusEvent()
         WeakClaim(this), sessionWrapper_);
 }
 
+void SecurityUIExtensionPattern::SetEventProxyFlag(int32_t flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (flag != static_cast<int32_t>(EventProxyFlag::EVENT_NONE)
+        && platformEventProxy_ == nullptr) {
+        platformEventProxy_ = MakeRefPtr<PlatformEventProxy>();
+        platformEventProxy_->SetHostNode(host);
+    }
+
+    if (platformEventProxy_ != nullptr) {
+        platformEventProxy_->SetEventProxyFlag(flag);
+    }
+}
+
 void SecurityUIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
@@ -497,6 +518,7 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     }
 
     state_ = AbilityState::DESTRUCTION;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         PLATFORM_LOGI("DestroySession.");
         sessionWrapper_->DestroySession();
@@ -515,6 +537,7 @@ void SecurityUIExtensionPattern::FireOnErrorCallback(
 {
     state_ = AbilityState::NONE;
     PlatformPattern::FireOnErrorCallback(code, name, message);
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         sessionWrapper_->DestroySession();
     }

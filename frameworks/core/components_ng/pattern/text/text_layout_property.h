@@ -109,7 +109,7 @@ public:
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextShadow, std::vector<Shadow>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
@@ -202,16 +202,6 @@ public:
         return V2::GetTextStyleInJson(font);
     }
     std::string GetCopyOptionString() const;
-
-    void UpdateTextColorByRender(const Color &value)
-    {
-        auto& groupProperty = GetOrCreateFontStyle();
-        if (groupProperty->CheckTextColor(value)) {
-            return;
-        }
-        groupProperty->UpdateTextColor(value);
-        UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
-    }
 
     void OnPropertyChangeMeasure() override
     {

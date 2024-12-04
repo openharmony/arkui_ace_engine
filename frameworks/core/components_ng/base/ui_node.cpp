@@ -399,7 +399,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    depth_ = -1;
+    SetDepth(1);
 }
 
 namespace {

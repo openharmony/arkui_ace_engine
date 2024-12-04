@@ -1731,7 +1731,6 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->SetHasFilter(false);
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -2071,7 +2070,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
         width = pixelMap->GetWidth();
         height = pixelMap->GetHeight();
     }
-    auto offset = frameNode->GetPositionToWindowWithTransform();
+    auto offset = DragDropFuncWrapper::GetPaintRectCenter(frameNode) - OffsetF(width / 2.0f, height / 2.0f);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     
@@ -2099,7 +2098,8 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = { imageNode, DragDropFuncWrapper::GetFrameNodeOffsetToScreen(frameNode),
+    gatherNodeChildInfo = {
+        imageNode, offset + DragDropFuncWrapper::GetCurrentWindowOffset(frameNode->GetContextRefPtr()),
         width, height, width / 2.0f, height / 2.0f };
     return imageNode;
 }

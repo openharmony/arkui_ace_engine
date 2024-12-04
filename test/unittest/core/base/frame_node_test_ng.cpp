@@ -1961,4 +1961,118 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg_OnAutoEventParamUpdate, TestSize.Level
     node->OnAutoEventParamUpdate("{\"$origin\":\"Tom\",\"$exposureCfg\":{\"ratio\":0.8,\"duration\":3000}}");
     EXPECT_EQ(parentNode->GetTag(), "RelativeContainer");
 }
+
+/**
+ * @tc.name: FrameNodeTestNg065
+ * @tc.desc: Test GetIsLayoutNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg065, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool isLayoutNode = false;
+    frameNode->isLayoutNode_ = isLayoutNode;
+    bool result = frameNode->GetIsLayoutNode();
+    EXPECT_EQ(result, isLayoutNode);
+
+    isLayoutNode = false;
+    frameNode->isLayoutNode_ = isLayoutNode;
+    result = frameNode->GetIsLayoutNode();
+    EXPECT_EQ(result, isLayoutNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg066
+ * @tc.desc: Test GetIsFind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg066, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool isFind = true;
+    frameNode->isFind_ = isFind;
+    bool result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+
+    isFind = false;
+    frameNode->isFind_ = isFind;
+    result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg067
+ * @tc.desc: Test SetIsFind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg067, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool isFind = true;
+    frameNode->SetIsFind(isFind);
+    bool result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+
+    isFind = false;
+    frameNode->SetIsFind(isFind);
+    result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg068
+ * @tc.desc: Test OnForegroundColorUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg068, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    auto pattern = frameNode->GetPattern();
+    const Color& value = Color::RED;
+    frameNode->OnForegroundColorUpdate(value);
+    pattern->OnForegroundColorUpdate(value);
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg069
+ * @tc.desc: Test CheckAutoSave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg069, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    auto pattern_ = frameNode->GetPattern();
+    EXPECT_NE(pattern_, nullptr);
+    bool result = frameNode->CheckAutoSave();
+    EXPECT_EQ(result, pattern_->CheckAutoSave());
+
+    pattern_ = nullptr;
+    result = frameNode->CheckAutoSave();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg070
+ * @tc.desc: Test RenderCustomChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg070, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    int64_t deadline = 1;
+    bool result = frameNode->RenderCustomChild(deadline);
+    bool res = frameNode->UINode::RenderCustomChild(deadline);
+    EXPECT_EQ(result, res);
+}
+
 } // namespace OHOS::Ace::NG

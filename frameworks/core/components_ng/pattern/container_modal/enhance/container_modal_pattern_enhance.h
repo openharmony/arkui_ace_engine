@@ -34,6 +34,8 @@ public:
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override;
     void EnableContainerModalGesture(bool isEnable) override;
+    void CallContainerModalNative(const std::string& name, const std::string& value) override;
+    void OnContainerModalEvent(const std::string& name, const std::string& value) override;
     void ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow);
     RefPtr<FrameNode> GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode);
     /* event */
@@ -62,7 +64,8 @@ public:
     CalcLength GetControlButtonRowWidth() override;
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
     bool GetContainerModalComponentRect(RectF& containerModal, RectF& buttons);
-
+    void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t colorMode) override;
     void OnMaxButtonClick();
     void OnMinButtonClick();
     void OnCloseButtonClick();

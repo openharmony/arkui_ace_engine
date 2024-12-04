@@ -999,4 +999,27 @@ void TabsModelNG::SetBarBackgroundEffect(FrameNode* frameNode, const EffectOptio
         target->UpdateBackgroundEffect(effectOption);
     }
 }
+
+void TabsModelNG::SetPageFlipMode(int32_t pageFlipMode)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetPageFlipMode(pageFlipMode);
+}
+
+void TabsModelNG::SetPageFlipMode(FrameNode* frameNode, int32_t options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetPageFlipMode(options);
+}
 } // namespace OHOS::Ace::NG

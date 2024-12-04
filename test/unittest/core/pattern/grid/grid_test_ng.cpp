@@ -81,7 +81,7 @@ void GridTestNg::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldNodes(); // Each testcase will create new list at begin
+    ClearOldNodes(); // Each testCase will create new list at begin
     MockAnimationManager::GetInstance().Reset();
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(0);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(0);
@@ -157,7 +157,7 @@ void GridTestNg::CreateFocusableGridItems(int32_t itemNumber, float width, float
 
 void GridTestNg::CreateFixedItems(int32_t itemNumber, GridItemStyle gridItemStyle)
 {
-    CreateGridItems(itemNumber, ITEM_WIDTH, ITEM_HEIGHT, gridItemStyle);
+    CreateGridItems(itemNumber, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE, gridItemStyle);
 }
 
 void GridTestNg::CreateFixedHeightItems(int32_t itemNumber, float height, GridItemStyle gridItemStyle)
@@ -200,12 +200,12 @@ void GridTestNg::CreateBigItem(
 
 void GridTestNg::CreateBigColItem(int32_t colStart, int32_t colEnd)
 {
-    CreateBigItem(NULL_VALUE, NULL_VALUE, colStart, colEnd, NULL_VALUE, ITEM_HEIGHT);
+    CreateBigItem(NULL_VALUE, NULL_VALUE, colStart, colEnd, NULL_VALUE, ITEM_MAIN_SIZE);
 }
 
 void GridTestNg::CreateBigRowItem(int32_t rowStart, int32_t rowEnd)
 {
-    CreateBigItem(rowStart, rowEnd, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
+    CreateBigItem(rowStart, rowEnd, NULL_VALUE, NULL_VALUE, 60.0f, NULL_VALUE);
 }
 
 void GridTestNg::AddFixedHeightItems(int32_t cnt, float height)
@@ -237,12 +237,12 @@ GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, std::function<float
 
     RepeatVirtualScrollModelNG repeatModel;
     std::function<void(uint32_t)> createFunc = [this, getSize](uint32_t idx) {
-        CreateGridItem(FILL_VALUE, getSize(idx));
+        CreateFocusableGridItems(1, FILL_VALUE, getSize(idx), GridItemStyle::NONE);
         ViewStackProcessor::GetInstance()->Pop();
     };
     std::function<void(const std::string&, uint32_t)> updateFunc = [this, getSize](
                                                                        const std::string& value, uint32_t idx) {
-        CreateGridItem(FILL_VALUE, getSize(idx));
+        CreateFocusableGridItems(1, FILL_VALUE, getSize(idx), GridItemStyle::NONE);
         ViewStackProcessor::GetInstance()->Finish();
     };
     std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
@@ -308,7 +308,7 @@ private:
     const std::function<float(int32_t)> getHeight_;
 };
 
-void GridTestNg::CreateLazyForEachItems(int32_t itemNumber, std::function<float(uint32_t)>&& getHeight)
+void GridTestNg::CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(uint32_t)>&& getHeight)
 {
     RefPtr<LazyForEachActuator> mockLazy = AceType::MakeRefPtr<GridMockLazy>(itemNumber, std::move(getHeight));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());

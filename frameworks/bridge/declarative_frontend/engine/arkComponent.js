@@ -3199,8 +3199,11 @@ class ArkComponent {
     this._nativePtrChanged = false;
   }
   setNodePtr(nodePtr) {
+    if (nodePtr === this.nativePtr) {
+      return;
+    }
     this.nativePtr = nodePtr;
-    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+    this._weakPtr = (nodePtr !== undefined && nodePtr !== null) ? getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr) : undefined;
   }
   setInstanceId(instanceId) {
     this._instanceId = instanceId;
@@ -28429,6 +28432,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, value);
     return this;
   }
+  pageFlipMode(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -29006,6 +29013,22 @@ class SwiperOnContentDidScrollModifier extends ModifierWithKey {
   }
 }
 SwiperOnContentDidScrollModifier.identity = Symbol('swiperOnContentDidScroll');
+class SwiperPageFlipModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperPageFlipMode(node);
+    } else {
+      getUINativeModule().swiper.setSwiperPageFlipMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperPageFlipModeModifier.identity = Symbol('swiperPageFlipMode');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {
@@ -29136,6 +29159,10 @@ class ArkTabsComponent extends ArkComponent {
   }
   edgeEffect(value) {
     modifierWithKey(this._modifiersWithKeys, TabEdgeEffectModifier.identity, TabEdgeEffectModifier, value);
+    return this;
+  }
+  pageFlipMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TabPageFlipModeModifier.identity, TabPageFlipModeModifier, value);
     return this;
   }
   width(value) {
@@ -29477,6 +29504,19 @@ class TabEdgeEffectModifier extends ModifierWithKey {
   }
 }
 TabClipModifier.identity = Symbol('tabedgeEffect');
+class TabPageFlipModeModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabPageFlipMode(node);
+    } else {
+      getUINativeModule().tabs.setTabPageFlipMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabPageFlipModeModifier.identity = Symbol('tabPageFlipMode');
 class TabWidthModifier extends ModifierWithKey {
     constructor(value) {
         super(value);

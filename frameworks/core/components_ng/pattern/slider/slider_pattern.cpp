@@ -196,7 +196,7 @@ void SliderPattern::InitSliderAccessibilityEnabledRegister()
 
 void SliderPattern::InitAccessibilityVirtualNodeTask()
 {
-    if (CheckCreateAccessibilityVirtualNode() && !isInitAccessibilityVirtualNode_) {
+    if (!isInitAccessibilityVirtualNode_ && CheckCreateAccessibilityVirtualNode()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContextRefPtr();
@@ -228,7 +228,7 @@ void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const Accessibil
 
 void SliderPattern::AccessibilityVirtualNodeRenderTask()
 {
-    if (CheckCreateAccessibilityVirtualNode() && isInitAccessibilityVirtualNode_) {
+    if (isInitAccessibilityVirtualNode_ && CheckCreateAccessibilityVirtualNode()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContextRefPtr();
@@ -250,9 +250,8 @@ bool SliderPattern::CheckCreateAccessibilityVirtualNode()
     bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
     if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier() || !isShowSteps) {
         return false;
-    } else {
-        return true;
     }
+    return true;
 }
 
 bool SliderPattern::InitAccessibilityVirtualNode()
@@ -1098,8 +1097,8 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1,
-        pipeline->IsFormRender() ? FORM_PAN_DISTANCE : DEFAULT_PAN_DISTANCE, pipeline->IsFormRender());
+    gestureHub->AddPanEvent(
+        panEvent_, panDirection, 1, pipeline->IsFormRender() ? FORM_PAN_DISTANCE : DEFAULT_PAN_DISTANCE);
 }
 
 RefPtr<PanEvent> SliderPattern::CreatePanEvent()

@@ -64,7 +64,6 @@ group("core_pattern_unittest") {
     "navigator:navigator_test_ng",
     "navrouter:navrouter_test_ng",
     "node_container:node_container_test_ng",
-    "option:option_test_ng",
     "overlay:overlay_manager_test_ng",
     "panel:panel_test_ng",
     "particle:particle_test_ng",

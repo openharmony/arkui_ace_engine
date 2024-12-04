@@ -91,6 +91,7 @@ public:
 
 private:
     void InitProperty();
+    void InitPropertyColors(RefPtr<GaugePaintProperty>& paintProperty);
     void UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty);
     
     void PaintCircularAndIndicator(RSCanvas& canvas);

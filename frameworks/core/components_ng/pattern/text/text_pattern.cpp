@@ -2405,6 +2405,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.wordBreak = static_cast<int32_t>(node->GetWordBreakValue(WordBreak::BREAK_WORD));
     textStyle.lineBreakStrategy = static_cast<int32_t>(node->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
     textStyle.textShadows = node->GetTextShadowValue({});
+    textStyle.textBackgroundStyle = node->GetTextBackgroundStyle();
     return textStyle;
 }
 
@@ -4526,6 +4527,9 @@ void TextPattern::UpdateFontColor(const Color& value)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto& fontStyle = textLayoutProperty->GetOrCreateFontStyle();
+    CHECK_NULL_VOID(fontStyle);
+    CHECK_NULL_VOID(!fontStyle->CheckTextColor(value));
     textLayoutProperty->UpdateTextColor(value);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

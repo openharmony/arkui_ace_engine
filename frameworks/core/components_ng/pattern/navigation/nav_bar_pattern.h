@@ -57,7 +57,7 @@ public:
     {
         return !isHideTitlebar_ && titleMode_ == NavigationTitleMode::FREE;
     }
-    OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
+    OffsetF GetShowMenuOffset(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& menuNode);
 
     float GetTitleBarHeightLessThanMaxBarHeight() const;
 

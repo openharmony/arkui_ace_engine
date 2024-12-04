@@ -217,6 +217,8 @@ private:
     void ResetDotModifier();
     void ResetOverlongModifier();
     void UpdateFocusable() const;
+    void CheckDragAndUpdate(
+        const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;

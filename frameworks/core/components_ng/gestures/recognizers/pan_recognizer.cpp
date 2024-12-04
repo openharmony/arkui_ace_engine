@@ -700,7 +700,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     NGGestureRecognizer::Transform(
         localPoint, GetAttachedNode(), false, isPostEventResult_, touchPoint.postEventNodeId);
     info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
-    info.SetPointerId(touchPoint.id);
+    info.SetPointerId(inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.id : lastTouchEvent_.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
     info.SetIsInterpolated(touchPoint.isInterpolated);
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);

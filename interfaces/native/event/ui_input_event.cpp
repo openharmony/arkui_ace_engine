@@ -247,12 +247,13 @@ int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    *length = keyEvent->keyCodesLength;
-    if (keyEvent->keyCodesLength > *length) {
-        return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
-    }
     if (!keyEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto inputLength = *length;
+    *length = keyEvent->keyCodesLength;
+    if (keyEvent->keyCodesLength > inputLength) {
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
     }
     for (int i = 0; i < keyEvent->keyCodesLength; i++) {
         pressedKeyCodes[i] = keyEvent->pressedKeyCodes[i];

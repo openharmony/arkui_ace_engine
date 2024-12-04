@@ -223,15 +223,10 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        auto geometryNode = frameNode->GetGeometryNode();
-        if (geometryNode) {
-            frameNodeSize_ = geometryNode->GetFrameSize();
-        } else {
-            frameNodeSize_ = SizeF(0.0f, 0.0f);
-        }
-        auto rectCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
-        frameNodeOffset_ = OffsetF(
-            rectCenter.GetX() - frameNodeSize_.Width() / 2.0f, rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
+        auto rect = DragDropFuncWrapper::GetPaintRectToScreen(frameNode) -
+            DragDropFuncWrapper::GetCurrentWindowOffset(PipelineContext::GetCurrentContextSafelyWithCheck());
+        frameNodeOffset_ = rect.GetOffset();
+        frameNodeSize_ = rect.GetSize();
 #ifdef WEB_SUPPORTED
         if (frameTag == V2::WEB_ETS_TAG) {
             auto webPattern = frameNode->GetPattern<WebPattern>();
@@ -456,7 +451,7 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
     SetPixelMap(thumbnailPixelMap);
 }
 
-void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
+void GestureEventHub::HandleNotAllowDrag(const GestureEvent& info)
 {
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -470,53 +465,23 @@ void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
-    auto eventHub = eventHub_.Upgrade();
-    CHECK_NULL_VOID(eventHub);
-    if (!eventHub->HasOnDragStart()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not set onDragStart event.");
-        return;
-    }
-
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (!IsAllowedDrag(eventHub)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG,
-            "FrameNode is not allow drag, tag is %{public}s"
-            "draggable is %{public}d, drag start event is %{public}d,"
-            "default support drag is %{public}d, user set is %{public}d.",
-            frameNode->GetTag().c_str(), frameNode->IsDraggable(), eventHub->HasOnDragStart(),
-            pattern->DefaultSupportDrag(), frameNode->IsUserSet());
-        HandleNotallowDrag(info);
-        return;
-    }
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto eventManager = pipeline->GetEventManager();
-    CHECK_NULL_VOID(eventManager);
-    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && eventManager->IsLastMoveBeforeUp()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Drag stop because user release mouse button");
+    if (!frameNode || !pipeline || !CheckAllowDrag(info, pipeline, frameNode)) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "Check not allow drag");
+        HandleNotAllowDrag(info);
         return;
     }
+    
+    // set drag drop status is moving
     DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
+
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         SetMouseDragMonitorState(true);
     }
-
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-        event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-    } else {
-        event->SetX(info.GetGlobalPoint().GetX());
-        event->SetY(info.GetGlobalPoint().GetY());
-    }
-    event->SetScreenX(info.GetScreenLocation().GetX());
-    event->SetScreenY(info.GetScreenLocation().GetY());
-    event->SetDisplayX(info.GetScreenLocation().GetX());
-    event->SetDisplayY(info.GetScreenLocation().GetY());
-    event->SetSourceTool(info.GetSourceTool());
+    
+    // create drag event
+    auto event = CreateDragEvent(info, pipeline, frameNode);
 
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
@@ -524,12 +489,16 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     DragDropInfo dragPreviewInfo;
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
+
     bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
     CalcFrameNodeOffsetAndSize(frameNode, isMenuShow);
+    
+    // set drag pointer status
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
+
     if (dragPreviewInfo.inspectorId != "") {
         ACE_SCOPED_TRACE("drag: handling with inspector");
         auto dragPreviewPixelMap = GetDragPreviewPixelMap();
@@ -1253,15 +1222,9 @@ OffsetF GestureEventHub::GetDragPreviewInitPositionToScreen(
     }
 
     if (data.isMenuShow) {
-        OffsetF menuPreviewCenter;
-        auto ret = SubwindowManager::GetInstance()->GetMenuPreviewCenter(menuPreviewCenter);
-        if (ret && GetPreviewMode() != MenuPreviewMode::NONE) {
-            previewOffset = menuPreviewCenter - pixelMapHalfSize + data.dragMovePosition;
-            return previewOffset;
-        } else {
-            previewOffset += data.dragMovePosition;
-            return previewOffset;
-        }
+        OffsetF menuPreviewCenter = frameNodeOffset_ + OffsetF(frameNodeSize_.Width(), frameNodeSize_.Height()) / 2.0f;
+        menuPreviewCenter += DragDropFuncWrapper::GetCurrentWindowOffset(context);
+        previewOffset = menuPreviewCenter - pixelMapHalfSize + data.dragMovePosition;
     }
     return previewOffset;
 }
@@ -1344,6 +1307,61 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     dragDropManager->DoDragStartAnimation(
         subWindowOverlayManager, info, eventHub->GetGestureEventHub(), data.isMenuShow);
     return true;
+}
+
+bool GestureEventHub::CheckAllowDrag(const GestureEvent& info, const RefPtr<PipelineBase>& context,
+    const RefPtr<FrameNode>& frameNode)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_RETURN(eventHub, false);
+    CHECK_NULL_RETURN(frameNode, false);
+    if (!eventHub->HasOnDragStart()) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "FrameNode is not set onDragStart event.");
+        return false;
+    }
+    if (!IsAllowedDrag(eventHub)) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        TAG_LOGE(AceLogTag::ACE_DRAG,
+            "FrameNode is not allow drag, tag is %{public}s"
+            "draggable is %{public}d, drag start event is %{public}d,"
+            "default support drag is %{public}d, user set is %{public}d.",
+            frameNode->GetTag().c_str(), frameNode->IsDraggable(), eventHub->HasOnDragStart(),
+            pattern->DefaultSupportDrag(), frameNode->IsUserSet());
+        return false;
+    }
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, false);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && eventManager->IsLastMoveBeforeUp()) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "Drag stop because user release mouse button");
+        return false;
+    }
+
+    return true;
+}
+
+RefPtr<OHOS::Ace::DragEvent> GestureEventHub::CreateDragEvent(const GestureEvent& info,
+    const RefPtr<PipelineBase>& context, const RefPtr<FrameNode>& frameNode)
+{
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    CHECK_NULL_RETURN(frameNode, event);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        CHECK_NULL_RETURN(pipeline, event);
+        event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+        event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+    } else {
+        event->SetX(info.GetGlobalPoint().GetX());
+        event->SetY(info.GetGlobalPoint().GetY());
+    }
+    event->SetScreenX(info.GetScreenLocation().GetX());
+    event->SetScreenY(info.GetScreenLocation().GetY());
+    event->SetDisplayX(info.GetScreenLocation().GetX());
+    event->SetDisplayY(info.GetScreenLocation().GetY());
+    event->SetSourceTool(info.GetSourceTool());
+    return event;
 }
 
 void GestureEventHub::SetMouseDragMonitorState(bool state)

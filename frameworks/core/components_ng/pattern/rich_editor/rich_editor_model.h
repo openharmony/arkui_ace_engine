@@ -79,6 +79,7 @@ struct UpdateSpanStyle {
         updateTextDecorationStyle.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
+        updateTextBackgroundStyle.reset();
 
         updateLineHeight.reset();
         updateLetterSpacing.reset();
@@ -108,6 +109,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
+    std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
@@ -364,8 +366,9 @@ public:
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
-    virtual void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const NG::SelectMenuParam& menuParam) {}
     virtual void SetBarState(DisplayMode mode) {}
+    virtual void SetPreviewMenuParam(NG::TextSpanType spanType, std::function<void()>& buildFunc,
+        const NG::SelectMenuParam& menuParam) {}
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

@@ -47,7 +47,6 @@ public:
     int32_t FindFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     std::vector<RefPtr<FrameNode>> GetFlatListItems();
     void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
-    void CreateLazyForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
     AssertionResult VerifyForEachItemsOrder(std::list<std::string> expectKeys);
     AssertionResult VerifyLazyForEachItemsOrder(std::list<std::string> expectKeys);
     RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
@@ -170,31 +169,6 @@ void ListCommonTestNg::CreateForEachList(
         forEachModelNG.CreateNewChildStart(std::to_string(index));
         CreateListItems(1);
         forEachModelNG.CreateNewChildFinish(std::to_string(index));
-    }
-}
-
-void ListCommonTestNg::CreateLazyForEachList(
-    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
-{
-    ListModelNG model = CreateList();
-    model.SetLanes(lanes);
-    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
-    const RefPtr<LazyForEachActuator> lazyForEachActuator = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    LazyForEachModelNG lazyForEachModelNG;
-    lazyForEachModelNG.Create(lazyForEachActuator);
-    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    node->SetParent(weakList); // for InitAllChildrenDragManager
-    lazyForEachModelNG.OnMove(std::move(onMove));
-    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
-    for (int32_t index = 0; index < itemNumber; index++) {
-        CreateListItem();
-        auto listItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        lazyForEachNode->builder_->cachedItems_.try_emplace(
-            index, LazyForEachChild(std::to_string(index), listItemNode));
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
@@ -1633,7 +1607,8 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
         actualFrom = from;
         actualTo = to;
     };
-    CreateLazyForEachList(3, 1, onMoveEvent);
+    ListModelNG model = CreateList();
+    CreateItemsInLazyForEach(3, 100.0f, std::move(onMoveEvent));
     CreateDone();
 
     /**
@@ -1726,7 +1701,9 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
         actualFrom = from;
         actualTo = to;
     };
-    CreateLazyForEachList(4, 2, onMoveEvent); // 2 lanes
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateItemsInLazyForEach(4, 100.0f, std::move(onMoveEvent));
     CreateDone();
 
     /**

@@ -479,7 +479,7 @@ let BarState;
   BarState[BarState.On = 2] = 'On';
 })(BarState || (BarState = {}));
 
-let EdgeEffect;
+var EdgeEffect;
 (function (EdgeEffect) {
   EdgeEffect[EdgeEffect.Spring = 0] = 'Spring';
   EdgeEffect[EdgeEffect.Fade = 1] = 'Fade';
@@ -622,6 +622,18 @@ let FlexWrap;
   FlexWrap[FlexWrap.Wrap = 1] = 'Wrap';
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
+
+var BlurStyle;
+(function (BlurStyle) {
+  BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
+  BlurStyle[BlurStyle.MediumLight = 101] = 'MediumLight';
+  BlurStyle[BlurStyle.LargeLight = 102] = 'LargeLight';
+  BlurStyle[BlurStyle.XlargeLight = 103] = 'XlargeLight';
+  BlurStyle[BlurStyle.SmallDark = 104] = 'SmallDark';
+  BlurStyle[BlurStyle.MediumDark = 105] = 'MediumDark';
+  BlurStyle[BlurStyle.LargeDark = 106] = 'LargeDark';
+  BlurStyle[BlurStyle.XlargeDark = 107] = 'XlargeDark';
+})(BlurStyle || (BlurStyle = {}));
 
 let Edge;
 (function (Edge) {
@@ -925,6 +937,13 @@ let SwiperDisplayMode;
   SwiperDisplayMode[SwiperDisplayMode.STRETCH = 0] = 'STRETCH';
   SwiperDisplayMode[SwiperDisplayMode.AUTO_LINEAR = 1] = 'AUTO_LINEAR';
 })(SwiperDisplayMode || (SwiperDisplayMode = {}));
+
+var EdgeEffect;
+(function (EdgeEffect) {
+  EdgeEffect[EdgeEffect.Spring = 0] = 'Spring';
+  EdgeEffect[EdgeEffect.Fade = 1] = 'Fade';
+  EdgeEffect[EdgeEffect.None = 2] = 'None';
+})(EdgeEffect || (EdgeEffect = {}));
 
 let DatePickerType;
 (function (DatePickerType) {
@@ -1438,7 +1457,7 @@ let ListItemAlign;
   ListItemAlign[ListItemAlign.End = 2] = 'End';
 })(ListItemAlign || (ListItemAlign = {}));
 
-let BlurStyle;
+var BlurStyle;
 (function (BlurStyle) {
   BlurStyle[BlurStyle.NoMaterial = 0] = 'NoMaterial';
   BlurStyle[BlurStyle.Thin = 1] = 'Thin';
@@ -1458,15 +1477,6 @@ let BlurStyle;
   BlurStyle[BlurStyle.COMPONENT_THICK = 11] = 'COMPONENT_THICK';
   BlurStyle[BlurStyle.COMPONENT_ULTRA_THICK = 12] = 'COMPONENT_ULTRA_THICK';
   BlurStyle[BlurStyle.NONE = 0] = 'NONE';
-  // the following ones were previously defined
-  BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
-  BlurStyle[BlurStyle.MediumLight = 101] = 'MediumLight';
-  BlurStyle[BlurStyle.LargeLight = 102] = 'LargeLight';
-  BlurStyle[BlurStyle.XlargeLight = 103] = 'XlargeLight';
-  BlurStyle[BlurStyle.SmallDark = 104] = 'SmallDark';
-  BlurStyle[BlurStyle.MediumDark = 105] = 'MediumDark';
-  BlurStyle[BlurStyle.LargeDark = 106] = 'LargeDark';
-  BlurStyle[BlurStyle.XlargeDark = 107] = 'XlargeDark';
 })(BlurStyle || (BlurStyle = {}));
 
 let BlurStyleActivePolicy;
@@ -3181,6 +3191,12 @@ let SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode.SELF_ONLY = 0] = 'SELF_ONLY';
   SwiperNestedScrollMode[SwiperNestedScrollMode.SELF_FIRST = 1] = 'SELF_FIRST';
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
+
+let PageFlipMode;
+(function (PageFlipMode) {
+  PageFlipMode[PageFlipMode.CONTINUOUS = 0] = "CONTINUOUS";
+  PageFlipMode[PageFlipMode.SINGLE = 1] = "SINGLE";
+})(PageFlipMode || (PageFlipMode = {}));
 
 let CheckBoxStyle;
 (function (CheckBoxStyle) {

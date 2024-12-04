@@ -1289,4 +1289,66 @@ HWTEST_F(SwiperEventTestNg, UpdateSwiperPanEvent001, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
 }
+
+/**
+ * @tc.name: MouseAxisEventWithPageFlipMode001
+ * @tc.desc: PageFlipMode property test with CONTINUOUS mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AttrPageFlipModeTest001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    // default mode is PageFlipMode::CONTINUOUS(0)
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 0);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+    info.SetMainDelta(-10.f);
+    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    panEvent->actionStart_(info);
+    EXPECT_TRUE(pattern_->isFirstAxisAction_);
+    panEvent->actionUpdate_(info);
+    EXPECT_FALSE(pattern_->isFirstAxisAction_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    pattern_->usePropertyAnimation_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 2);
+}
+
+/**
+ * @tc.name: MouseAxisEventWithPageFlipMode002
+ * @tc.desc: PageFlipMode property test with SINGLE mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AttrPageFlipModeTest002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetPageFlipMode(1);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    // mode is PageFlipMode::SINGLE(0)
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 1);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+    info.SetMainDelta(-10.f);
+    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    panEvent->actionStart_(info);
+    EXPECT_TRUE(pattern_->isFirstAxisAction_);
+    // axis update event will flip page, and isFirstAxisAction_ will be marked
+    panEvent->actionUpdate_(info);
+    EXPECT_FALSE(pattern_->isFirstAxisAction_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    // propertyAnimation running will block page flipping
+    pattern_->usePropertyAnimation_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    // frameAnimation running will block page flipping
+    pattern_->usePropertyAnimation_ = false;
+    pattern_->translateAnimationIsRunning_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+}
 } // namespace OHOS::Ace::NG

@@ -67,6 +67,7 @@ constexpr uint8_t MUTF8_3B_SECOND = 0x80;
 constexpr uint8_t MUTF8_3B_THIRD = 0x80;
 
 constexpr uint8_t MUTF8_4B_FIRST = 0xf0;
+constexpr uint8_t MUTF8_4B_FIRST_MASK = 0xf8;
 
 constexpr size_t MAX_U16 = 0xffff;
 constexpr size_t CONST_2 = 2;
