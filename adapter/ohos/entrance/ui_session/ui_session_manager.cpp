@@ -76,6 +76,22 @@ void UiSessionManager::ReportComponentChangeEvent(const std::string& key, const 
     }
 }
 
+void UiSessionManager::ReportComponentChangeEvent(
+    int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value)
+{
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr && GetComponentChangeEventRegistered()) {
+            auto data = InspectorJsonUtil::Create();
+            data->Put("nodeId", nodeId);
+            data->Put(key.data(), value->ToString().data());
+            reportService->ReportComponentChangeEvent(data->ToString());
+        } else {
+            LOGW("report component event failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
 void UiSessionManager::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
 {
     auto jsonValue = InspectorJsonUtil::Create(true);
