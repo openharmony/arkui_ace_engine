@@ -47,36 +47,30 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Align001, TestSize.Level1)
     ScrollToIndex(5, smooth, align);
     EXPECT_TRUE(Position(-200.0f));
 
-    if (smooth) {
-        // Scroll to the item out of view
-        ScrollToIndex(12, smooth, align);
-        EXPECT_TRUE(Position(-600.0f));
-        EXPECT_FALSE(pattern_->IsAtBottom());
-
-        // Scroll back
-        ScrollToIndex(3, smooth, align);
-        EXPECT_TRUE(Position(0));
-    } else {
-        // Scroll to the item out of view
-        ScrollToIndex(12, smooth, align);
-        EXPECT_TRUE(Position(-600.0f));
-        EXPECT_TRUE(pattern_->IsAtBottom());
-
-        // Scroll back
-        ScrollToIndex(3, smooth, align);
-        EXPECT_TRUE(Position(-100.0f));
-    }
-
-    // Scroll to the last item
-    ScrollToIndex(LAST_ITEM, smooth, align);
+    // Scroll to the item out of view
+    ScrollToIndex(12, smooth, align);
     EXPECT_TRUE(Position(-600.0f));
     EXPECT_TRUE(pattern_->IsAtBottom());
 
+    // Scroll back
+    ScrollToIndex(3, smooth, align);
+    EXPECT_TRUE(Position(-100.0f));
+
     // Scroll with invalid index
     ScrollToIndex(-100, smooth, align);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(Position(-100.0f));
     ScrollToIndex(100, smooth, align);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(Position(-100.0f));
+
+    // Scroll to the last item
+    ScrollToIndex(LAST_ITEM, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(Position(-100.0f));
+        EXPECT_FALSE(pattern_->IsAtBottom());
+    } else {
+        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(pattern_->IsAtBottom());
+    }
 }
 
 /**
@@ -158,22 +152,16 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Align003, TestSize.Level1)
     ScrollToIndex(15, smooth, align);
     EXPECT_TRUE(Position(-400.0f));
 
-    if (smooth) {
-        // Scroll back
-        ScrollToIndex(5, smooth, align);
-        EXPECT_TRUE(Position(100));
+    // Scroll back
+    ScrollToIndex(5, smooth, align);
+    EXPECT_TRUE(Position(0));
 
-        // Scroll to the last item
-        ScrollToIndex(LAST_ITEM, smooth, align);
+    // Scroll to the last item
+    ScrollToIndex(LAST_ITEM, smooth, align);
+    if (smooth) {
         EXPECT_TRUE(Position(0));
         EXPECT_FALSE(pattern_->IsAtBottom());
     } else {
-        // Scroll back
-        ScrollToIndex(5, smooth, align);
-        EXPECT_TRUE(Position(0));
-
-        // Scroll to the last item
-        ScrollToIndex(LAST_ITEM, smooth, align);
         EXPECT_TRUE(Position(-600.0f));
         EXPECT_TRUE(pattern_->IsAtBottom());
     }
@@ -437,7 +425,8 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_ExtraOffset001, TestSize.Level1)
     EXPECT_TRUE(Position(0));
 
     ScrollToIndex(17, smooth, ScrollAlign::START, extraOffset);
-    EXPECT_TRUE(Position(-700.0f));
+    FlushUITasks();
+    EXPECT_TRUE(Position(-600.0f));
 
     ScrollToIndex(17, smooth, ScrollAlign::END, extraOffset);
     EXPECT_TRUE(Position(-400.0f));
@@ -463,21 +452,13 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_ExtraOffset001, TestSize.Level1)
     EXPECT_TRUE(Position(-200.0f));
 
     ScrollToIndex(2, smooth, ScrollAlign::END, extraOffset);
-    if (smooth) {
-        EXPECT_TRUE(Position(100.0f));
-    } else {
-        EXPECT_TRUE(Position(0));
-    }
+    EXPECT_TRUE(Position(0));
 
     ScrollToIndex(17, smooth, ScrollAlign::END, extraOffset);
     EXPECT_TRUE(Position(-600.0f));
 
     ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END, extraOffset);
-    if (smooth) {
-        EXPECT_TRUE(Position(0));
-    } else {
-        EXPECT_TRUE(Position(-600.0f));
-    }
+    EXPECT_TRUE(Position(-600.0f));
 }
 
 /**
@@ -506,11 +487,7 @@ HWTEST_P(GridScrollerTestNg, AnimateTo001, TestSize.Level1)
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     AnimateTo(Dimension(1000.0f), 0, nullptr, smooth);
-    if (smooth) {
-        EXPECT_TRUE(Position(-1000.0f));
-    } else {
-        EXPECT_TRUE(Position(-600.0f));
-    }
+    EXPECT_TRUE(Position(-600.0f));
 
     /**
      * @tc.steps: step3. AnimateTo the top
@@ -545,7 +522,7 @@ HWTEST_P(GridScrollerTestNg, AnimateTo002, TestSize.Level1)
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     AnimateTo(Dimension(1000.0f), 1000.0f, Curves::EASE, false);
-    EXPECT_TRUE(Position(-1000.0f));
+    EXPECT_TRUE(Position(-600.0f));
 
     /**
      * @tc.steps: step3. AnimateTo the top
@@ -745,11 +722,11 @@ HWTEST_F(GridScrollerTestNg, AnimateTo006, TestSize.Level1)
     EXPECT_TRUE(Position(-400.f));
     EXPECT_TRUE(Position(-600.0f));
     EXPECT_TRUE(Position(-800.f)); // Tick doesn't advance new animations created within the same tick
-    EXPECT_TRUE(Position(-1000.f));
-    EXPECT_TRUE(Position(-1000.f));
-    EXPECT_TRUE(Position(-1000.f));
-    EXPECT_TRUE(Position(-1000.f));
-    EXPECT_TRUE(Position(-1000.0f));
+    EXPECT_TRUE(Position(-600.f));
+    EXPECT_TRUE(Position(-600.f));
+    EXPECT_TRUE(Position(-600.f));
+    EXPECT_TRUE(Position(-600.f));
+    EXPECT_TRUE(Position(-600.0f));
 }
 
 /**
