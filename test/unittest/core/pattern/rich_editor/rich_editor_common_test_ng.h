@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RICH_EDITOR_RICH_EDITOR_COMMON_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RICH_EDITOR_RICH_EDITOR_COMMON_TEST_NG_H
+
+#include "gtest/gtest.h"
 
 #define private public
 #define protected public
