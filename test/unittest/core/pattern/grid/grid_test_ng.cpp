@@ -341,6 +341,7 @@ AssertionResult GridTestNg::Position(float expectOffset)
 {
     if (!MockAnimationManager::GetInstance().AllFinished()) {
         MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
     }
     return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
 }
