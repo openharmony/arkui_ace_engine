@@ -1562,7 +1562,7 @@ HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.OnAnimationEndImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1588,6 +1588,9 @@ HWTEST_F(SwiperModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
             }
         };
     };
+
+    // the start animation before is required for the end of animation testing
+    eventHub->FireAnimationStartEvent(0, 0, {});
 
     ASSERT_NE(modifier_->setOnAnimationEnd, nullptr);
 
