@@ -205,7 +205,7 @@ export struct SearchBootcamp {
           isEnabled: this.enablePlaceholderFontSize,
           value: this.placeholderFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -246,7 +246,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableTextFontSize,
           value: this.textFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -310,7 +310,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableSearchIconSize,
           value: this.searchIconSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         ColorBlock({
@@ -337,7 +337,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableCancelButtonIconSize,
           value: this.cancelButtonIconSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         ColorBlock({
@@ -359,7 +359,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableCaretStyleWidth,
           value: this.caretStyleWidth,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         ColorBlock({
@@ -417,7 +417,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableMaxLength,
           value: this.maxLength,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
@@ -440,7 +440,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableLineHeight,
           value: this.lineHeight,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 10
         })
 
         RadioBlock({
@@ -479,7 +479,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableLetterSpacing,
           value: this.letterSpacing,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         //输入(fontFeature
@@ -495,7 +495,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableTextIndent,
           value: this.textIndent,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 20
         })
 
         SliderBlock({
@@ -503,7 +503,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableMinFontSize,
           value: this.minFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         SliderBlock({
@@ -511,7 +511,7 @@ export struct SearchBootcamp {
           isEnabled: this.enableMaxFontSize,
           value: this.maxFontSize,
           min: 0,
-          max: Number.POSITIVE_INFINITY
+          max: 200
         })
 
         RadioBlock({
