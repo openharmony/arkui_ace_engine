@@ -559,7 +559,9 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
     if (closeToView) {
         MeasureToTarget(jumpIdx);
     }
-    Jump(jumpIdx, align, inView || closeToView);
+
+    const bool noSkip = inView || closeToView;
+    Jump(jumpIdx, align, noSkip);
     if (info_->extraOffset_) {
         info_->delta_ += *info_->extraOffset_;
     }
@@ -570,6 +572,10 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         ClearFront();
         ClearBack(mainLen_);
     }
+    if (noSkip) {
+        return;
+    }
+    info_->EstimateTotalOffset(info_->startIndex_, info_->StartIndex());
 }
 
 void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)

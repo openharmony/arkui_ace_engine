@@ -951,6 +951,37 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CopySpanStyle004
+ * @tc.desc: test CopySpanStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto source = AceType::MakeRefPtr<SpanItem>();
+    auto target = AceType::MakeRefPtr<SpanItem>();
+
+    LeadingMargin leadingMargin;
+    source->textLineStyle->UpdateLeadingMargin(leadingMargin);
+    source->fontStyle->UpdateFontSize(FONT_SIZE_VALUE);
+    source->textLineStyle->UpdateLineHeight(LINE_HEIGHT_VALUE);
+
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+    style.SetFontSize(FONT_SIZE_VALUE);
+
+    layoutAlgorithm->typingTextStyle_ = style;
+    layoutAlgorithm->CopySpanStyle(source, target);
+    EXPECT_EQ(target->fontStyle->GetFontSize(), FONT_SIZE_VALUE);
+}
+
+/**
  * @tc.name: GetSelection001
  * @tc.desc: test GetSelection
  * @tc.type: FUNC

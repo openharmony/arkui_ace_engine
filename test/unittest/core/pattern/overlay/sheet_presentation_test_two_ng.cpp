@@ -1729,4 +1729,737 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus003, TestSize.Level1)
     EXPECT_FALSE(sheetLayoutAlgorithm->isHoverMode_);
     EXPECT_EQ(sheetLayoutAlgorithm->hoverModeArea_, HoverModeAreaType::BOTTOM_SCREEN);
 }
+
+/**
+ * @tc.name: UpdateBackBlurStyle001
+ * @tc.desc: Test SheetPresentationPattern::OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, UpdateBackBlurStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheet renderContext.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. set sheetBackgroundBlurStyle_ of sheetTheme to THIN.
+     * @tc.expected: the sheet renderContext backgroundColor is TRANSPARENT
+     * @tc.expected: the sheet renderContext blurStyle is THIN
+     */
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetBackgroundBlurStyle_ = 1;
+    SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    renderContext = sheetNode->GetRenderContext();
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    auto styleOption = renderContext->GetBackBlurStyle();
+    EXPECT_EQ(backgroundColor, Color::TRANSPARENT);
+    EXPECT_EQ(styleOption->blurStyle, BlurStyle::THIN);
+
+    /**
+     * @tc.steps: step4. set sheetBackgroundBlurStyle_ of sheetTheme to THIN.
+     * @tc.expected: the sheet renderContext backgroundColor is TRANSPARENT
+     * @tc.expected: the sheet renderContext blurStyle is REGULAR
+     */
+    sheetTheme->sheetBackgroundBlurStyle_ = 2;
+    sheetStyle.backgroundColor = Color::BLUE;
+    SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    renderContext = sheetNode->GetRenderContext();
+    backgroundColor = renderContext->GetBackgroundColorValue();
+    styleOption = renderContext->GetBackBlurStyle();
+    EXPECT_EQ(backgroundColor, Color::TRANSPARENT);
+    EXPECT_EQ(styleOption->blurStyle, BlurStyle::REGULAR);
+
+    /**
+     * @tc.steps: step5. set sheetBackgroundBlurStyle_ of sheetTheme to THIN.
+     * @tc.expected: the sheet renderContext backgroundColor is BLUE
+     * @tc.expected: the sheet renderContext blurStyle is NO_MATERIAL
+     */
+    sheetTheme->sheetBackgroundBlurStyle_ = 0;
+    BlurStyleOption styleOption_;
+    styleOption_.blurStyle = BlurStyle::NO_MATERIAL;
+    sheetStyle.backgroundBlurStyle = styleOption_;
+    sheetStyle.backgroundColor = Color::BLUE;
+    SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    renderContext = sheetNode->GetRenderContext();
+    backgroundColor = renderContext->GetBackgroundColorValue();
+    styleOption = renderContext->GetBackBlurStyle();
+    EXPECT_EQ(backgroundColor, Color::BLUE);
+    EXPECT_EQ(styleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: Layout001
+ * @tc.desc: Test SheetPresentationLayoutAlgorithm::Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, Layout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = "Title";
+    style.sheetSubtitle = "Subtitle";
+    style.sheetType = SheetType::SHEET_CENTER;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheet LayoutAlgorithm.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
+
+    /**
+     * @tc.steps: step3. set sheetType_ and width.
+     * @tc.expected: the sheet sheetOffsetX_ is 250
+     */
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_BOTTOMLANDSPACE;
+    sheetLayoutAlgorithm->sheetMaxWidth_ = 1000.0f;
+    sheetLayoutAlgorithm->sheetWidth_ = 500.0f;
+    sheetNode->Layout();
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 250);
+
+    /**
+     * @tc.steps: step4. set sheetType_ and width.
+     * @tc.expected: the sheet sheetOffsetX_ is 150
+     */
+    sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_CENTER;
+    sheetLayoutAlgorithm->sheetMaxWidth_ = 800.0f;
+    sheetLayoutAlgorithm->sheetWidth_ = 500.0f;
+    sheetNode->Layout();
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 150);
+
+    /**
+     * @tc.steps: step5. set sheetType_ and width.
+     * @tc.expected: the sheet sheetOffsetX_ is 0
+     */
+    sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_POPUP;
+    sheetNode->Layout();
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 0);
+
+    /**
+     * @tc.steps: step6. set sheetType_ and width and height.
+     * @tc.expected: the sheet sheetOffsetX_ is 300
+     * @tc.expected: the sheet sheetOffsetY_ is 500
+     */
+    sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
+    sheetLayoutAlgorithm->sheetMaxWidth_ = 800.0f;
+    sheetLayoutAlgorithm->sheetWidth_ = 400.0f;
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 1000.0f;
+    sheetLayoutAlgorithm->sheetHeight_ = 600.0f;
+    sheetLayoutAlgorithm->sheetStyle_.bottomOffset->SetX(100.0f);
+    sheetLayoutAlgorithm->sheetStyle_.bottomOffset->SetY(100.0f);
+    sheetNode->Layout();
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 300);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 500);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CalculateSheetOffsetInOtherScenes001
+ * @tc.desc: Test CalculateSheetOffsetInOtherScenes function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, CalculateSheetOffsetInOtherScenes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = "MESSAGE";
+    style.sheetSubtitle = "MESSAGE";
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set some parameters of sheetLayoutAlgorithm.
+     */
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0, 500.0));
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_CENTER;
+    sheetLayoutAlgorithm->isHoverMode_ = true;
+    std::vector<Rect> currentFoldCreaseRegion;
+    Rect rect;
+    rect.SetRect(0, 1000, 2000, 3000);
+    currentFoldCreaseRegion.insert(currentFoldCreaseRegion.end(), rect);
+    sheetPattern->currentFoldCreaseRegion_ = currentFoldCreaseRegion;
+    sheetLayoutAlgorithm->isKeyBoardShow_ = true;
+    sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+
+    /**
+     * @tc.steps: step3. excute CalculateSheetOffsetInOtherScenes function.
+     * @tc.expected: The first result of the trinocular operator
+     */
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(layoutWrapper.GetRawPtr());
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_,
+        SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() + (1000 - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() - 500) / 2);
+
+    /**
+     * @tc.steps: step4. set some parameters of sheetLayoutAlgorithm.
+     */
+    sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    auto geometryNode_new = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode_new, nullptr);
+    geometryNode_new->SetFrameSize(SizeF(100.0, 600.0));
+    sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_CENTER;
+    sheetLayoutAlgorithm->isHoverMode_ = true;
+    currentFoldCreaseRegion.clear();
+    rect.SetRect(0, 1500, 2000, 3000);
+    currentFoldCreaseRegion.insert(currentFoldCreaseRegion.end(), rect);
+    sheetPattern->currentFoldCreaseRegion_ = currentFoldCreaseRegion;
+    sheetLayoutAlgorithm->isKeyBoardShow_ = false;
+    sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 2000.0f;
+
+    /**
+     * @tc.steps: step5. excute CalculateSheetOffsetInOtherScenes function.
+     * @tc.expected: The second result of the trinocular operator
+     */
+    layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(layoutWrapper.GetRawPtr());
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_,
+        4500 + (2000 - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 4500 - 600) / 2);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ComputeSheetOffset001
+ * @tc.desc: Test OverlayManager::ComputeSheetOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetNode.
+     * @tc.expected: sheetNode is not nullptr.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step3. get sheetPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step4. set API11.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+
+    /**
+     * @tc.steps: step5. set SheetType to SHEET_BOTTOMLANDSPACE.
+     * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE and pageHeight_ is 800.
+     */
+    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOMLANDSPACE);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOMLANDSPACE);
+    sheetPattern->pageHeight_ = 800.0f;
+
+    /**
+     * @tc.steps: step6. excute ComputeSheetOffset function.
+     * @tc.expected: sheetHeight_ is (pageHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx()).
+     */
+    overlayManager->ComputeSheetOffset(sheetStyle, sheetNode);
+    EXPECT_EQ(overlayManager->sheetHeight_, 800 - SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+
+    /**
+     * @tc.steps: step7. set API12.
+     */
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+
+    /**
+     * @tc.steps: step8. set SheetType to SHEET_BOTTOMLANDSPACE.
+     * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE and pageHeight_ is 1000 and frameSize height is 500.
+     */
+    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    sheetPattern->pageHeight_ = 1000.0f;
+    auto sheetSize = SizeF({ 500, 500 });
+    sheetNode->GetGeometryNode()->SetFrameSize(sheetSize);
+
+    /**
+     * @tc.steps: step9. excute ComputeSheetOffset function.
+     * @tc.expected: sheetHeight_ is ((pageHeight_ + sheetSize.height) / 2).
+     */
+    overlayManager->ComputeSheetOffset(sheetStyle, sheetNode);
+    EXPECT_EQ(overlayManager->sheetHeight_, 750);
+
+    /**
+     * @tc.steps: step10. set SheetType to SHEET_BOTTOMLANDSPACE.
+     * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE.
+     */
+    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    sheetPattern->pageHeight_ = 1200.0f;
+
+    /**
+     * @tc.steps: step11. excute ComputeSheetOffset function.
+     * @tc.expected: sheetHeight_ is pageHeight_.
+     */
+    overlayManager->ComputeSheetOffset(sheetStyle, sheetNode);
+    EXPECT_EQ(overlayManager->sheetHeight_, 1200);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: ComputeDetentsSheetOffset001
+ * @tc.desc: Test OverlayManager::ComputeDetentsSheetOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, ComputeDetentsSheetOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, set builder height is 500, get sheetNode.
+     * @tc.expected: sheetNode is not nullptr.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+        frameNode->AddChild(childFrameNode);
+        auto size = SizeF({ 500, 500 });
+        frameNode->GetGeometryNode()->SetFrameSize(size);
+        return frameNode;
+    };
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> { return nullptr; };
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step3. get sheetPattern and layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. set API10.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
+
+    /**
+     * @tc.steps: step5. set detent.sheetMode is MEDIUM and pageHeight_ is 800.
+     */
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.detents.emplace_back(detent);
+    sheetPattern->pageHeight_ = 800.0f;
+
+    /**
+     * @tc.steps: step6. excute ComputeDetentsSheetOffset function.
+     * @tc.expected: sheetHeight_ is (pageHeight_ * MEDIUM_SIZE_PRE)
+     */
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    overlayManager->ComputeDetentsSheetOffset(sheetStyle, sheetNode);
+    EXPECT_EQ(overlayManager->sheetHeight_, 800 * MEDIUM_SIZE_PRE);
+
+    /**
+     * @tc.steps: step7. set API12.
+     */
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+
+    /**
+     * @tc.steps: step8. set detent.sheetMode is AUTO and pageHeight_ is 1000.
+     * @tc.expected: sheetHeight_ is builder height because fit_content
+     */
+    detent.sheetMode = SheetMode::AUTO;
+    sheetStyle.detents.clear();
+    sheetStyle.detents.emplace_back(detent);
+    sheetPattern->pageHeight_ = 1000.0f;
+    overlayManager->sheetHeight_ = 0.0f;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    overlayManager->ComputeDetentsSheetOffset(sheetStyle, sheetNode);
+    EXPECT_EQ(overlayManager->sheetHeight_, 500);
+
+    /**
+     * @tc.steps: step9. set detent.sheetMode is AUTO and pageHeight_ is 500.
+     * @tc.expected: sheetHeight_ is (pageHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() -
+     * sheetPattern->GetSheetTopSafeArea())
+     */
+    detent.sheetMode = SheetMode::AUTO;
+    sheetStyle.detents.clear();
+    sheetStyle.detents.emplace_back(detent);
+    sheetPattern->pageHeight_ = 500.0f;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    overlayManager->ComputeDetentsSheetOffset(sheetStyle, sheetNode);
+    EXPECT_EQ(overlayManager->sheetHeight_,
+        500 - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetPattern->GetSheetTopSafeArea());
+    SheetPresentationTestTwoNg::TearDownTestCase();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: SheetHoverStatus004
+ * @tc.desc: Test Measure function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.enableHoverMode = true;
+    style.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. create sheet property and style.
+     * @tc.expected: layoutProperty and LayoutAlgorithm are not nullptr.
+     */
+    auto dirty = sheetNode->CreateLayoutWrapper();
+    ASSERT_NE(dirty, nullptr);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetLayoutAlgorithm->isKeyBoardShow_ = true;
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 2420;
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
+    layoutProperty->propSheetStyle_ = style;
+
+    /**
+     * @tc.steps: step3. set layout constraint.
+     */
+    sheetNode->Measure(sheetNode->GetLayoutConstraint());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    manager->keyboardInset_ = KEYBOARD_INSET;
+    pipeline->isHalfFoldHoverStatus_ = true;
+    sheetLayoutAlgorithm->sheetStyle_ = style;
+
+    /**
+     * @tc.steps: step4. set sheetType and run measure task.
+     * @tc.expected: sheetHeight_ has been measured and is not zero.
+     */
+    sheetLayoutAlgorithm->InitParameter();
+    EXPECT_TRUE(sheetLayoutAlgorithm->isHoverMode_);
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(0, 1064, 2294, 171);
+    rects.insert(rects.end(), rect);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->currentFoldCreaseRegion_ = rects;
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800, 1800));
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(sheetNode));
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 560);
+}
+
+/**
+ * @tc.name: SheetHoverStatus005
+ * @tc.desc: Test Layout function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set up bind sheet and theme
+     */
+    SetOnBindSheet();
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto dirty = sheetNode->CreateLayoutWrapper();
+    ASSERT_NE(dirty, nullptr);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. set up layoutAlgorithm states
+     */
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
+    sheetLayoutAlgorithm->isHoverMode_ = true;
+    sheetLayoutAlgorithm->isKeyBoardShow_ = true;
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 2420;
+    sheetLayoutAlgorithm->sheetMaxWidth_ = 2420;
+    sheetLayoutAlgorithm->sheetWidth_ = 1420;
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
+
+    /**
+     * @tc.steps: step3. run layout task.
+     * @tc.expected: sheetOffsetY_ has been layout and offset is not zero.
+     */
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(0, 1064, 2294, 171);
+    rects.insert(rects.end(), rect);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->currentFoldCreaseRegion_ = rects;
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800, 1800));
+    sheetLayoutAlgorithm->Layout(AceType::RawPtr(sheetNode));
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, -348);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500);
+}
+
+/**
+ * @tc.name: SheetHoverStatus006
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap and AvoidSafeArea function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set up bind sheet and theme.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheet builder and set sheet theme.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.enableHoverMode = true;
+    sheetStyle.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    
+    /**
+     * @tc.steps: step3. Set sheet type and run IsCurSheetNeedHalfFoldHover.
+     * @tc.expected: sheet is in half fold status.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isHalfFoldHoverStatus_ = true;
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
+    EXPECT_TRUE(sheetPattern->IsCurSheetNeedHalfFoldHover());
+
+    /**
+     * @tc.steps: step4. run OnDirtyLayoutWrapperSwap.
+     * @tc.expected: sheet do not need avoid keybord.
+     */
+    auto dirty = sheetNode->CreateLayoutWrapper();
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_EQ(sheetPattern->sheetHeightUp_, 0.0f);
+}
+
+/**
+ * @tc.name: SheetHoverStatus007
+ * @tc.desc: Test GetSheetHeightBeforeDragUpdate and GetMaxSheetHeightBeforeDragUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set up bind sheet and theme.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheet style.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.enableHoverMode = true;
+    sheetStyle.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    SheetPresentationTestTwoNg::SetUpTestCase();
+
+    /**
+     * @tc.steps: step3. set sheet theme.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    
+    /**
+     * @tc.steps: step4. Set sheet type and run IsCurSheetNeedHalfFoldHover.
+     * @tc.expected: sheet is in half fold status.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->isHalfFoldHoverStatus_ = true;
+    SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
+    EXPECT_TRUE(sheetPattern->IsCurSheetNeedHalfFoldHover());
+
+    /**
+     * @tc.steps: step5. Compute sheetHeight and max sheetHeight before drag.
+     * @tc.expected: sheetHeight can be computed correctly.
+     */
+    sheetPattern->pageHeight_ = 2040;
+    sheetPattern->sheetOffsetY_ = 1000;
+    auto sheetHeight = sheetPattern->GetSheetHeightBeforeDragUpdate();
+    auto sheetMaxHeight = sheetPattern->GetMaxSheetHeightBeforeDragUpdate();
+    EXPECT_EQ(sheetHeight, 1040);
+    EXPECT_EQ(sheetMaxHeight, 1040);
+}
 } // namespace OHOS::Ace::NG

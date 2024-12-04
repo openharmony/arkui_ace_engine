@@ -22,6 +22,8 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/select/select_theme.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
@@ -31,18 +33,28 @@ struct ItemDividerInfo {
     float strokeWidth = 0.0f;
     float startMargin = 0.0f;
     float endMargin = 0.0f;
-    Color color = Color::TRANSPARENT;
     float width = 0.0f;
     float topMargin = 0.0f;
+    Color color = Color::TRANSPARENT;
 };
 class ACE_EXPORT MenuItemPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(MenuItemPaintMethod, NodePaintMethod)
 public:
-    MenuItemPaintMethod() = default;
+    MenuItemPaintMethod(bool isOption = false) : isOption_(isOption) {}
     ~MenuItemPaintMethod() override = default;
+
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
+
 private:
-    void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, ItemDividerInfo info);
+    void DrawPathWithBrush(RSCanvas& canvas, const RSPath& path, const Color& color);
+    void HandleMenuItem(PaintWrapper* paintWrapper, const RefPtr<MenuItemPaintProperty>& props,
+        const RefPtr<SelectTheme>& selectTheme, RSPath& path, RSCanvas& canvas);
+    void HandleOption(PaintWrapper* paintWrapper, const RefPtr<MenuItemPaintProperty>& props,
+        const RefPtr<SelectTheme>& selectTheme, RSPath& path, RSCanvas& canvas);
+    void PaintCustomDivider(SizeF optionSize, float horInterval, float iconHorInterval,
+        PaintWrapper* paintWrapper, RSPath& path);
+
+    bool isOption_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPaintMethod);
 };

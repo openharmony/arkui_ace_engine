@@ -91,6 +91,7 @@ public:
         imageNodeList_ = imageNodeList;
     }
     void TextColorModifier(const Color& value);
+    void ContentModifierDump();
 
 protected:
     OffsetF GetPaintOffset() const

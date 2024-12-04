@@ -2227,10 +2227,11 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         auto it = info_.FindInMatrix(updateIdx);
         it = info_.FindStartLineInMatrix(it, updateIdx);
         if (it != info_.gridMatrix_.end()) {
-            info_.ClearMatrixToEnd(updateIdx, it->first);
-            info_.ClearHeightsFromMatrix(it->first);
+            const int32_t line = it->first;
+            info_.ClearMatrixToEnd(updateIdx, line);
+            info_.ClearHeightsFromMatrix(line);
             if (updateIdx <= info_.startIndex_) {
-                ReloadFromUpdateIdxToStartIndex(mainSize, crossSize, it->first, layoutWrapper);
+                ReloadFromUpdateIdxToStartIndex(mainSize, crossSize, line, layoutWrapper);
             }
         }
     }

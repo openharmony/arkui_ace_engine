@@ -544,6 +544,7 @@ private:
 
     void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     RefPtr<FrameNode> CreateDragBarItemNode();
+    void SetMouseStyle(MouseFormat format);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

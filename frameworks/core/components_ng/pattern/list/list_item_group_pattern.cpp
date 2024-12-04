@@ -646,6 +646,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
         .backwardCachedIndex = backwardCachedIndex_,
         .deadline = deadline,
     };
+    itemGroup->SetContentOffset(listSizeValues.contentStartOffset, listSizeValues.contentEndOffset);
     itemGroup->SetCacheParam(param);
     itemGroup->SetListLayoutProperty(listLayoutProperty);
     itemGroup->SetListMainSize(listSizeValues.startPos, listSizeValues.endPos, listSizeValues.referencePos,

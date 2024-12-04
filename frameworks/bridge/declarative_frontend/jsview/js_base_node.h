@@ -46,14 +46,18 @@ public:
     void PostTouchEvent(const JSCallbackInfo& info);
     void UpdateStart(const JSCallbackInfo& info);
     void UpdateEnd(const JSCallbackInfo& info);
+    void OnRecycleWithBindThis(const JSCallbackInfo& info);
+    void OnReuseWithBindThis(const JSCallbackInfo& info);
     void Dispose(const JSCallbackInfo&  /*info*/)
     {
         viewNode_.Reset();
+        realNode_.Reset();
     }
 
 private:
     TouchEvent InitTouchEvent(const JSCallbackInfo& info);
     RefPtr<NG::FrameNode> viewNode_;
+    RefPtr<NG::UINode> realNode_;
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     std::string surfaceId_;

@@ -1719,6 +1719,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onLoad(callback: (event?: object) => void): this;
     onDestroy(event: () => void): this;
     enableSecure(value: boolean): this;
+    hdrBrightness(value: number): this;
 }
 declare class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1845,6 +1846,10 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     onAnimationEnd(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this;
     onGestureSwipe(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this;
     nestedScroll(value: SwiperNestedScrollMode): this;
+    indicatorInteractive(value: boolean): this;
+    customContentTransition(transition: SwiperContentAnimatedTransition): this;
+    onContentDidScroll(handler: ContentDidScrollCallback): this;
+    pageFlipMode(value: PageFlipMode): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1871,6 +1876,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;
+    pageFlipMode(value: PageFlipMode): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

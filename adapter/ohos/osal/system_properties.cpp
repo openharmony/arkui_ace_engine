@@ -930,6 +930,12 @@ double SystemProperties::GetSrollableFriction()
     return StringUtils::StringToDouble(ret);
 }
 
+double SystemProperties::GetScrollableDistance()
+{
+    auto ret = system::GetParameter("persist.scrollable.distance", "");
+    return StringUtils::StringToDouble(ret);
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;

@@ -810,9 +810,11 @@ void MenuWrapperPattern::StopPreviewMenuAnimation()
         previewScaleContext = previewPositionContext;
     }
 
-    AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0), [previewPositionContext, previewScaleContext,
-                                                                    menuContext, animationInfo = animationInfo_]() {
-        auto previewOffset = animationInfo.previewOffset;
+    auto option = AnimationOption(Curves::LINEAR, 0);
+    AnimationUtils::Animate(option, [previewPositionContext, previewScaleContext, menuContext,
+                                        previewStopOffset = previewDisappearStartOffset_,
+                                        animationInfo = animationInfo_]() {
+        auto previewOffset = previewStopOffset.NonOffset() ? animationInfo.previewOffset : previewStopOffset;
         if (previewPositionContext && !previewOffset.NonOffset()) {
             previewPositionContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(previewOffset.GetX()), Dimension(previewOffset.GetY())));

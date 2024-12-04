@@ -204,6 +204,7 @@ public:
 private:
     void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, const PaintHandleParams& params);
     void PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo);
+    void PaintHandleLine(RSCanvas& canvas, const HandleDrawInfo& handleInfo, Color handleColor);
 
     void PaintSingleHandle(RSCanvas& canvas);
     bool PaintSingleHandleWithPoints(RSCanvas& canvas);

@@ -7949,6 +7949,7 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     if (frameCallback->Get(vm, "onFrame")->IsFunction(vm)) {
         onFrameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
                                   delayMillis](int64_t nanoTimestamp) -> void {
+            LocalScope scope(vm);
             Local<FunctionRef> onFrameFunc = frameCallbackObj->Get(vm, "onFrame");
 
             auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);
@@ -7960,6 +7961,7 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     if (frameCallback->Get(vm, "onIdle")->IsFunction(vm)) {
         onIdleCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
                                  delayMillis](int64_t nanoTimestamp) -> void {
+            LocalScope scope(vm);
             Local<FunctionRef> onIdleFunc = frameCallbackObj->Get(vm, "onIdle");
 
             auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);

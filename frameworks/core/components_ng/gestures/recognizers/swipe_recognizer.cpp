@@ -210,6 +210,11 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         }
         if (event.sourceTool == SourceTool::MOUSE) {
             resultSpeed_ = 0.0;
+            auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+            if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
             return;
         }
@@ -280,7 +285,7 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {
         isShiftKeyPressed =
-            pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_RIGHT);
+            event.HasKey(KeyCode::KEY_SHIFT_LEFT) || event.HasKey(KeyCode::KEY_SHIFT_RIGHT);
         hasDifferentDirectionGesture = pipeline->HasDifferentDirectionGesture();
     }
     auto currentOffset = event.ConvertToOffset(isShiftKeyPressed, hasDifferentDirectionGesture);
@@ -438,7 +443,8 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     if (lastTouchEvent_.tiltY.has_value()) {
         info->SetTiltY(lastTouchEvent_.tiltY.value());
     }
-    info->SetSourceTool(lastTouchEvent_.sourceTool);
+    info->SetSourceTool(
+        inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.sourceTool : lastTouchEvent_.sourceTool);
     if (prevAngle_) {
         info->SetAngle(prevAngle_.value());
     }

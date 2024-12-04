@@ -55,7 +55,7 @@ private:
     std::mutex formUtilsMutex_;
     std::shared_ptr<FormUtils> formUtils_;
     std::weak_ptr<Rosen::RSTransaction> rsTransaction_;
-    bool isRotate_;
+    bool isRotate_ = false;
 };
 
 } // namespace OHOS::Ace

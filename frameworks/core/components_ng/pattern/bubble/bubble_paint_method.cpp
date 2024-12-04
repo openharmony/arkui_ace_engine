@@ -235,6 +235,7 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
     RSPen paint;
     RSFilter filter;
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
@@ -262,6 +263,7 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
     RSPen paint;
     RSFilter filter;
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
@@ -829,13 +831,16 @@ void BubblePaintMethod::InitEdgeSize(Edge& edge)
 
 void BubblePaintMethod::ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode)
 {
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameNodeSize = geometryNode->GetFrameSize();
+    CHECK_NULL_VOID(frameNodeSize.IsPositive());
     auto path = AceType::MakeRefPtr<Path>();
     path->SetValue(clipPath_);
     path->SetBasicShapeType(BasicShapeType::PATH);
     auto renderContext = frameNode->GetRenderContext();
-    if (childSize_.IsPositive() && renderContext) {
-        renderContext->UpdateClipShape(path);
-    }
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipShape(path);
 }
 
 } // namespace OHOS::Ace::NG

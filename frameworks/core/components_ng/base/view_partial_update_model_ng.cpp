@@ -78,6 +78,8 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetSetActiveFunc(std::move(info.setActiveFunc));
     customNode->SetOnDumpInfoFunc(std::move(info.onDumpInfoFunc));
     customNode->SetOnDumpInspectorFunc(std::move(info.onDumpInspectorFunc));
+    customNode->SetOnRecycleFunc(std::move(info.recycleFunc));
+    customNode->SetOnReuseFunc(std::move(info.reuseFunc));
     return customNode;
 }
 

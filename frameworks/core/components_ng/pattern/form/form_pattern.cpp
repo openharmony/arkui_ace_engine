@@ -1599,8 +1599,8 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
+    isManuallyClick_ = false;
     if ("router" == type) {
-        isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();

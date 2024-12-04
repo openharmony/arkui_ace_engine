@@ -196,4 +196,13 @@ void MovingPhotoModelNG::SetImageAIOptions(void* options)
     CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->SetImageAIOptions(options);
 }
+
+void MovingPhotoModelNG::SetMovingPhotoFormat(MovingPhotoFormat format)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->SetMovingPhotoFormat(format);
+}
 } // namespace OHOS::Ace::NG

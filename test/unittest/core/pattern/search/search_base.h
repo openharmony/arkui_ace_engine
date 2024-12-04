@@ -76,17 +76,24 @@ constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DIVIDER_INDEX = 5;
 const std::string EMPTY_VALUE;
+const std::u16string EMPTY_VALUE_U16;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
+const std::u16string PLACEHOLDER_U16 = u"DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR_BLUE = Color::BLUE;
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR_RED = Color::RED;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const std::string DEFAULT_FILTER_TEXT = "CabcdefgABhCDEFG0123a456A789";
+const std::u16string DEFAULT_FILTER_TEXT_U16 = u"CabcdefgABhCDEFG0123a456A789";
 const std::string NUMBER_FILTER = "^[0-9]*$";
+const std::u16string NUMBER_FILTER_U16 = u"^[0-9]*$";
 const std::string NUM_FILTER = "[0-9]";
+const std::u16string NUM_FILTER_U16 = u"[0-9]";
 const std::string FILTER_NUM_TEXT = "0123456789";
+const std::u16string FILTER_NUM_TEXT_U16 = u"0123456789";
 const Dimension DEFAULT_INDENT_SIZE = Dimension(5, DimensionUnit::VP);
 
 class SearchBases : public testing::Test {

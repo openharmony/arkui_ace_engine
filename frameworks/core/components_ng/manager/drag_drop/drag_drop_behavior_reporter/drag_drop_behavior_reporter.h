@@ -21,7 +21,6 @@
 
 #include "core/common/container_consts.h"
 
-
 namespace OHOS::Ace::NG {
 enum class DragStartResult : int32_t {
     UNKNOW = -1,

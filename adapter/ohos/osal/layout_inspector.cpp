@@ -384,7 +384,7 @@ void LayoutInspector::HandleStartRecord()
         std::lock_guard<std::mutex> lock(LayoutInspector::recMutex_);
         NG::InspectorTreeMap recTreeNodes;
         NG::InspectorTreeMap offScreenTreeNodes;
-        NG::Inspector::GetInspectorTree(recTreeNodes);
+        NG::Inspector::GetRecordAllPagesNodes(recTreeNodes);
         TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get nodes size:%{public}zu", recTreeNodes.size());
         NG::Inspector::GetOffScreenTreeNodes(offScreenTreeNodes);
         TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get offscreen nodes size:%{public}zu", offScreenTreeNodes.size());

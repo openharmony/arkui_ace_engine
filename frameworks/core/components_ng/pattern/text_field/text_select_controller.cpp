@@ -17,6 +17,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -26,7 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
-const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+const std::u16string WIDE_NEWLINE = UtfUtils::Str8ToStr16(NEWLINE);
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
@@ -39,7 +40,7 @@ void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t s
 
 void TextSelectController::UpdateCaretIndex(int32_t index)
 {
-    auto newIndex = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
+    auto newIndex = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetTextUtf16Value().length()));
     caretInfo_.index = newIndex;
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
     firstHandleInfo_.index = newIndex;
@@ -68,7 +69,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
             rect.SetLeft(contentRect_.GetX());
             break;
         case TextAlign::CENTER:
-            if (layoutProperty->GetPlaceholderValue("").empty() || !paragraph_) {
+            if (layoutProperty->GetPlaceholderValue(u"").empty() || !paragraph_) {
                 rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() / 2.0f);
             } else {
                 CaretMetricsF caretMetrics;
@@ -273,8 +274,8 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const O
 
     if (!smartSelect && !paragraph_->GetWordBoundary(pos, start, end)) {
         start = pos;
-        end = std::min(static_cast<int32_t>(contentController_->GetWideText().length()),
-            pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
+        end = std::min(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()),
+            pos + GetGraphemeClusterLength(contentController_->GetTextUtf16Value(), pos, true));
     }
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_TEXT,
@@ -316,15 +317,15 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
 
 bool TextSelectController::IsLineBreakOrEndOfParagraph(int32_t pos) const
 {
-    CHECK_NULL_RETURN(pos < static_cast<int32_t>(contentController_->GetWideText().length()), true);
-    auto data = contentController_->GetWideText();
+    CHECK_NULL_RETURN(pos < static_cast<int32_t>(contentController_->GetTextUtf16Value().length()), true);
+    auto data = contentController_->GetTextUtf16Value();
     CHECK_NULL_RETURN(data[pos] == WIDE_NEWLINE[0], false);
     return true;
 }
 
 void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end)
 {
-    auto data = contentController_->GetWideText();
+    auto data = contentController_->GetTextUtf16Value();
     bool leftContinue = true;
     bool rightContinue = true;
     int32_t offset = 0;
@@ -341,7 +342,7 @@ void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, 
         }
         if (rightContinue) {
             if (data[pos + offset] == WIDE_NEWLINE[0] ||
-                pos + offset >= static_cast<int32_t>(contentController_->GetWideText().length())) {
+                pos + offset >= static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
                 end = pos + offset;
                 rightContinue = false;
             }
@@ -350,7 +351,7 @@ void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, 
     }
 }
 
-int32_t TextSelectController::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
+int32_t TextSelectController::GetGraphemeClusterLength(const std::u16string& text, int32_t extend, bool checkPrev)
 {
     char16_t aroundChar = 0;
     if (checkPrev) {
@@ -474,7 +475,7 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
 
     auto textRectRightBoundary = contentRect_.GetX() + contentRect_.Width();
     if (GreatNotEqual(handleRect.GetX() + handleRect.Width(), textRectRightBoundary) &&
-        GreatNotEqual(contentRect_.Width(), 0.0) && !textFiled->GetTextValue().empty()) {
+        GreatNotEqual(contentRect_.Width(), 0.0) && !textFiled->GetTextUtf16Value().empty()) {
         handleRect.SetLeft(textRectRightBoundary - handleRect.Width());
     }
 }
@@ -543,7 +544,7 @@ void TextSelectController::MoveCaretToContentRect(
     if (isEditorValueChanged) {
         textAffinity_ = textAffinity;
     }
-    index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
+    index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetTextUtf16Value().length()));
     CaretMetricsF CaretMetrics;
     caretInfo_.index = index;
     firstHandleInfo_.index = index;
@@ -568,7 +569,7 @@ void TextSelectController::MoveCaretToContentRect(
     if (isEditorValueChanged) {
         auto textRect = textFiled->GetTextRect();
         if (GreatNotEqual(textRect.Width(), contentRect_.Width()) && GreatNotEqual(contentRect_.Width(), 0.0) &&
-            caretInfo_.index < static_cast<int32_t>(contentController_->GetWideText().length())) {
+            caretInfo_.index < static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
             boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
             if (SystemProperties::GetDebugEnabled()) {
                 TAG_LOGD(AceLogTag::ACE_TEXT, "caretInfo_.index = %{public}d, boundaryAdjustment =%{public}f",
@@ -682,7 +683,7 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
 
 void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity)
 {
-    index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
+    index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetTextUtf16Value().length()));
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
     auto caretTextAffinity = HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM;
@@ -748,7 +749,7 @@ bool TextSelectController::NeedAIAnalysis(int32_t& index, const CaretUpdateType 
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textFiled, false);
 
-    if (!InputAIChecker::NeedAIAnalysis(contentController_->GetTextValue(), targetType, timeout)) {
+    if (!InputAIChecker::NeedAIAnalysis(contentController_->GetTextUtf16Value().empty(), targetType, timeout)) {
         return false;
     }
     if (IsClickAtBoundary(index, touchOffset) && targetType == CaretUpdateType::PRESSED) {
@@ -811,7 +812,7 @@ bool TextSelectController::AdjustWordSelection(
 
 bool TextSelectController::IsClickAtBoundary(int32_t index, const OHOS::Ace::Offset& touchOffset)
 {
-    if (InputAIChecker::IsSingleClickAtBoundary(index, contentController_->GetWideText().length())) {
+    if (InputAIChecker::IsSingleClickAtBoundary(index, contentController_->GetTextUtf16Value().length())) {
         return true;
     }
 
@@ -845,7 +846,7 @@ bool TextSelectController::IsTouchAtLineEnd(const Offset& localOffset)
 {
     CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), false);
     auto index = ConvertTouchOffsetToPosition(localOffset);
-    if (index == static_cast<int32_t>(contentController_->GetWideText().length())) {
+    if (index == static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
         return true;
     }
     auto pattern = pattern_.Upgrade();

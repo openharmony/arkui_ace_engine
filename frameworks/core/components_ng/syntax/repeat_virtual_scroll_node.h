@@ -92,9 +92,6 @@ public:
     void DoSetActiveChildRange(
         int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
-    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
-        RefPtr<FrameNode>& frameNode);
-
     /**
      * those items with index in cachedItems are marked active
      * those items with index in cachedItems are marked inactive
@@ -178,6 +175,13 @@ private:
     // drop UINode with given key from L1 but keep in L2
     // detach from tree and request tree sync
     void DropFromL1(const std::string& key);
+
+    // check whether UINode (index) is in the L1 cache range
+    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
+        RefPtr<FrameNode>& frameNode);
+
+    // process params sent by parent
+    void CheckActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
 
     // RepeatVirtualScrollNode is not instance of FrameNode
     // needs to propagate active state to all items inside

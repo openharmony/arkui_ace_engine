@@ -48,7 +48,7 @@ adapter/ohos/entrance/ace_viewport_config.h @arkuiframework
 adapter/ohos/entrance/BUILD.gn @arkui_architecture
 adapter/ohos/entrance/capability_registry.cpp @arkuiframework
 adapter/ohos/entrance/capability_registry.h @arkuiframework
-adapter/ohos/entrance/cj_utils/
+adapter/ohos/entrance/cj_utils/ @arkui_cj
 adapter/ohos/entrance/data_ability_helper_standard.cpp @arkuiframework
 adapter/ohos/entrance/data_ability_helper_standard.h @arkuiframework
 adapter/ohos/entrance/dialog_container.cpp @arkuipopupwindow
@@ -125,6 +125,11 @@ adapter/ohos/osal/input_manager.cpp @arkuievent
 adapter/ohos/osal/input_method_manager_ohos.cpp @huawei_g_five
 adapter/ohos/osal/js_accessibility_manager.cpp @arkuiabilitygroup
 adapter/ohos/osal/js_accessibility_manager.h @arkuiabilitygroup
+adapter/ohos/osal/js_third_accessibility_hover_ng.cpp @arkuiabilitygroup
+adapter/ohos/osal/js_third_accessibility_hover_ng.h @arkuiabilitygroup
+adapter/ohos/osal/js_third_provider_interaction_operation.cpp @arkuiabilitygroup
+adapter/ohos/osal/js_third_provider_interaction_operation.h @arkuiabilitygroup
+adapter/ohos/osal/js_third_provider_interaction_operation_utils.h @arkuiabilitygroup
 adapter/ohos/osal/layout_inspector.cpp @arkuiabilitygroup
 adapter/ohos/osal/log_wrapper.cpp @arkuiframework
 adapter/ohos/osal/long_frame_report_impl.cpp @arkuiframework
@@ -207,7 +212,7 @@ advanced_ui_component/treeview/ @guozonghao11
 component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
 component_ext/ext_common/
-component_ext/movingphoto/ @hanyujia1
+component_ext/movingphoto/ @wangrunsen
 
 [Examples]
 examples/ @arkuipopupwindow
@@ -284,7 +289,7 @@ frameworks/base/window/foldable_window.h @arkuipopupwindow
 [Frameworks Bridge]
 frameworks/bridge/BUILD.gn @arkui_architecture
 frameworks/bridge/card_frontend/ @arkuiframework
-frameworks/bridge/cj_frontend/
+frameworks/bridge/cj_frontend/ @arkui_cj
 frameworks/bridge/codec/ @arkuiframework
 frameworks/bridge/common/accessibility/ @arkuiabilitygroup
 frameworks/bridge/common/BUILD.gn @arkui_architecture
@@ -1225,8 +1230,8 @@ frameworks/bridge/declarative_frontend/jsview/js_search.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_search.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.cpp @harylee
 frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.h @harylee
-frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.cpp
-frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.h
+frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.cpp @arkuiabilitygroup
+frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.h @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/jsview/js_select.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_select.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.cpp @arkuilayout
@@ -2841,6 +2846,8 @@ interfaces/native/native_animate.h @arkui_superman
 interfaces/native/native_dialog.h @arkuipopupwindow
 interfaces/native/native_gesture.h @arkuievent
 interfaces/native/native_interface.h @arkuiframework
+interfaces/native/native_interface_accessibility.cpp @arkuiabilitygroup
+interfaces/native/native_interface_accessibility.h @arkuiabilitygroup
 interfaces/native/native_interface_xcomponent.cpp @arkuilayout
 interfaces/native/native_interface_xcomponent.h @arkuilayout
 interfaces/native/native_node.h @arkui_architecture
@@ -3089,6 +3096,8 @@ test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
 test/unittest/core/pattern/xcomponent/ @arkuilayout
+test/unittest/core/pattern/test_ng.cpp @arkuiscroll
+test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkuiframework
 test/unittest/core/property/ @chenjiafeng-openharmony
 test/unittest/core/render/ @arkuiframework

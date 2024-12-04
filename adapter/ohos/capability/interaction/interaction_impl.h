@@ -61,6 +61,8 @@ public:
 
     int32_t UnRegisterCoordinationListener() override;
 
+    int32_t SetDraggableState(bool state) override;
+
 private:
     std::shared_ptr<CoordinationListenerImpl> consumer_;
 };

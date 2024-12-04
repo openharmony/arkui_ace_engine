@@ -390,13 +390,13 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0055, TestSize.Level1)
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
-    pipeline->isTabJustTriggerOnKeyEvent_ = true;
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
     focusHub->currentFocus_ = true;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -419,16 +419,15 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0056, TestSize.Level1)
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
-    RectF childRect;
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
     focusHub->focusAlgorithm_.scopeType = ScopeType::PROJECT_AREA;
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::LEFT, childRect));
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::SHIFT_TAB, childRect));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::LEFT));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::SHIFT_TAB));
     focusHub->focusAlgorithm_.getNextFocusNode = [](FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&) {};
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::TAB, childRect));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::TAB));
 }
 
 /**
@@ -1217,24 +1216,24 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0084, TestSize.Level1)
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
-    pipeline->isTabJustTriggerOnKeyEvent_ = true;
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
     focusHub->currentFocus_ = true;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.code = KeyCode::TV_CONTROL_UP;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.code = KeyCode::TV_CONTROL_DOWN;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.code = KeyCode::TV_CONTROL_LEFT;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.code = KeyCode::TV_CONTROL_RIGHT;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.code = KeyCode::KEY_MOVE_HOME;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.code = KeyCode::KEY_MOVE_END;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
     keyEvent.code = KeyCode::KEY_FOCUS;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -1340,7 +1339,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0094, TestSize.Level1)
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->isTabJustTriggerOnKeyEvent_ = false;
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = false;
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     context->isFocusingByTab_ = false;
     EXPECT_TRUE(focusHub->HandleFocusByTabIndex(keyEvent));
@@ -1750,12 +1749,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isFocusActive_ = true;
-    pipeline->isTabJustTriggerOnKeyEvent_ = true;
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
-    EXPECT_FALSE(parentFocusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(parentFocusHub->HandleEvent(keyEvent));
 }
 
 /**

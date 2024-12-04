@@ -1701,7 +1701,7 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg003, TestSize.Level1)
     richEditorPattern->selectOverlay_->hasTransform_ = false;
     richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
     richEditorPattern->selectOverlay_->OnHandleMove(RectF(1.0f, 0.0f, 10.0f, 10.0f), true);
-    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle.GetOffset().GetX(), 1.0f);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
 }
 
 /**

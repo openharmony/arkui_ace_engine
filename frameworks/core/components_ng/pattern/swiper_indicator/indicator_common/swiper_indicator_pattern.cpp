@@ -959,6 +959,32 @@ RectF SwiperIndicatorPattern::CalcBoundsRect() const
     return boundsRect;
 }
 
+void SwiperIndicatorPattern::CheckDragAndUpdate(
+    const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex)
+{
+    CHECK_NULL_VOID(swiperPattern);
+
+    if (!swiperPattern->IsTouchDownOnOverlong()) {
+        return;
+    }
+
+    auto bottomTouchLoop = swiperPattern->GetTouchBottomTypeLoop();
+    auto turnPageRateAbs = std::abs(swiperPattern->GetTurnPageRate());
+    auto totalCount = swiperPattern->RealTotalCount();
+    auto loopDrag = (animationStartIndex == 0 && animationEndIndex == totalCount - 1 && turnPageRateAbs < HALF_FLOAT &&
+                        turnPageRateAbs > 0.0f) ||
+                    (animationStartIndex == animationEndIndex && animationEndIndex == totalCount - 1 &&
+                        turnPageRateAbs > HALF_FLOAT);
+    auto nonLoopDrag = bottomTouchLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE &&
+                       ((gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT && turnPageRateAbs > HALF_FLOAT) ||
+                           (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT && turnPageRateAbs < HALF_FLOAT &&
+                               turnPageRateAbs > 0.0f));
+
+    if (loopDrag || nonLoopDrag) {
+        overlongDotIndicatorModifier_->UpdateCurrentStatus();
+    }
+}
+
 void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod)
 {
@@ -990,20 +1016,11 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
         keepStatus = true;
     }
 
-    auto bottomTouchLoop = swiperPattern->GetTouchBottomTypeLoop();
-    auto turnPageRateAbs = std::abs(swiperPattern->GetTurnPageRate());
-    auto totalCount = swiperPattern->RealTotalCount();
-    auto loopDrag = (animationStartIndex == 0 && animationEndIndex == totalCount - 1 && turnPageRateAbs < HALF_FLOAT &&
-                        turnPageRateAbs > 0.0f) ||
-                    (animationStartIndex == animationEndIndex && animationEndIndex == totalCount - 1 &&
-                        turnPageRateAbs > HALF_FLOAT);
-    auto nonLoopDrag = bottomTouchLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE &&
-                       ((gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT && turnPageRateAbs > HALF_FLOAT) ||
-                           (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT && turnPageRateAbs < HALF_FLOAT &&
-                               turnPageRateAbs > 0.0f));
+    CheckDragAndUpdate(swiperPattern, animationStartIndex, animationEndIndex);
 
-    if (isSwiperTouchDown && (loopDrag || nonLoopDrag)) {
-        overlongDotIndicatorModifier_->UpdateCurrentStatus();
+    if (!swiperPattern->IsLoop() && animationStartIndex == 0 &&
+        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+        overlongPaintMethod->SetTouchBottomTypeLoop(TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
     }
 
     overlongPaintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());

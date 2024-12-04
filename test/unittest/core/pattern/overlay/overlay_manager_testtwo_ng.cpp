@@ -1300,4 +1300,47 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowMenuClearAnimation, TestSize.Level1)
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
+/**
+ * @tc.name: ResetDragMoveVector
+ * @tc.desc: Test reset drag move vector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, ResetDragMoveVector, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    ASSERT_EQ(rootNode_->GetChildren().size(), 1);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    ASSERT_EQ(menuPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+    ASSERT_NE(mainMenu, nullptr);
+    ASSERT_NE(menuNode, nullptr);
+    mainMenu->MountToParent(menuNode);
+    menuNode->MountToParent(rootNode_);
+
+    /**
+     * @tc.steps: step2. set drag move vector
+     */
+    overlayManager->dragMoveVector_ = OffsetF(1.0f, 1.0f);
+    overlayManager->lastDragMoveVector_ = OffsetF(1.0f, 1.0f);
+
+    /**
+     * @tc.steps: step3. ShowMenuAnimation
+     */
+    overlayManager->ShowMenuAnimation(menuNode);
+    
+    EXPECT_EQ(overlayManager->dragMoveVector_, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(overlayManager->lastDragMoveVector_, OffsetF(0.0f, 0.0f));
+}
+
 } // namespace OHOS::Ace::NG

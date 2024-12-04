@@ -49,7 +49,6 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_F
                                 static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                 static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
                                 static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -59,38 +58,19 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TABS_ETS_TAG, nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
-    auto hasTabBarNode = tabsNode->HasTabBarNode();
     InitTabsNode(tabsNode, swiperController);
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
-    if (!hasTabBarNode) {
-        auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
-        CHECK_NULL_VOID(tabsFrameNode);
-        auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
-        tabsLayoutProperty->UpdateIndex(index < 0 ? 0 : index);
-        return;
-    }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    auto preIndex = tabsLayoutProperty->GetIndexValue(0);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
-    if (tabsPattern->GetInterceptStatus() && preIndex != index) {
-        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
-        if (ret.has_value() && !ret.value()) {
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    if (tabsLayoutProperty->GetIndex().has_value()) {
+        auto preIndex = tabsLayoutProperty->GetIndex().value();
+        if (preIndex == index || index < 0) {
             return;
         }
     }
-    if ((index != preIndex) && (index >= 0)) {
-        AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
-        SetIndex(index);
-        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-        tabBarPattern->SetMaskAnimationByCreate(true);
-        tabBarPattern->UpdateImageColor(index);
-        tabBarPattern->UpdateSymbolStats(index, -1);
-        tabBarPattern->UpdateSymbolStats(-1, preIndex);
-    }
+    tabsLayoutProperty->UpdateIndexSetByUser(index);
 }
 
 RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode>& swiperNode,
@@ -535,17 +515,11 @@ void TabsModelNG::Pop()
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    auto index = tabsLayoutProperty->GetIndexValue(0);
+    CHECK_NULL_VOID(tabsLayoutProperty);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
 
     auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
     auto tabsFocusNode = tabsNode->GetFocusHub();
@@ -558,15 +532,6 @@ void TabsModelNG::Pop()
             tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
         }
     }
-
-    auto tabContentNum = swiperNode->TotalChildCount();
-    if (index > tabContentNum - 1 || index < 0) {
-        index = 0;
-    }
-    tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->SetClickRepeat(false);
-    tabBarPattern->UpdateTextColorAndFontWeight(index);
-    swiperLayoutProperty->UpdateIndex(index);
 
     tabBarNode->MarkModifyDone();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -1033,5 +998,28 @@ void TabsModelNG::SetBarBackgroundEffect(FrameNode* frameNode, const EffectOptio
         }
         target->UpdateBackgroundEffect(effectOption);
     }
+}
+
+void TabsModelNG::SetPageFlipMode(int32_t pageFlipMode)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetPageFlipMode(pageFlipMode);
+}
+
+void TabsModelNG::SetPageFlipMode(FrameNode* frameNode, int32_t options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetPageFlipMode(options);
 }
 } // namespace OHOS::Ace::NG

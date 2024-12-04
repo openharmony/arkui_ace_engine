@@ -383,7 +383,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
     CHECK_NULL_VOID(recordingCanvas);
     SkPaint paint;
-    SkSamplingOptions option;
+    SkSamplingOptions option { SkFilterMode::kLinear, SkMipmapMode::kLinear };
     SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
 
     CHECK_NULL_VOID(pixelMap_);
@@ -394,7 +394,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 #ifdef ENABLE_ROSEN_BACKEND
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
-    RSSamplingOptions options;
+    RSSamplingOptions options { RSFilterMode::LINEAR, RSMipmapMode::LINEAR };
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
 
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();

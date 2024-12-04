@@ -54,6 +54,16 @@ const std::string AM = "上午";
 const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
+const std::string SPACE = " ";
+void InitDatePickerSettingData(DatePickerSettingData& settingData)
+{
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+}
 } // namespace
 
 class DatePickerTestNgAdd : public testing::Test {
@@ -158,13 +168,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0028, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(3, 6, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -190,11 +195,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0028, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -212,13 +231,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0029, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -244,11 +258,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0029, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(ENORMOUS_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + std::to_string(ENORMOUS_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -266,13 +294,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0030, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -298,11 +321,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0030, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -320,13 +357,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0031, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -352,11 +384,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0031, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -374,13 +420,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0032, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 7, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -406,11 +447,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0032, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(ENORMOUS_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(ENORMOUS_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -428,13 +483,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0033, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -460,11 +510,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0033, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + std::to_string(MEDIUM_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -482,13 +546,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0034, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -514,11 +573,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0034, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -536,13 +609,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0035, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -568,11 +636,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0035, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -590,13 +672,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0036, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 4, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -622,11 +699,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0036, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -644,13 +735,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0037, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -676,11 +762,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0037, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -698,13 +798,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0038, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -730,11 +825,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0038, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -752,13 +861,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0039, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -784,11 +888,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0039, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -806,13 +924,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0040, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -838,11 +951,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0040, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -860,13 +987,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0041, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -892,11 +1014,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0041, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + std::to_string(HUGE_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -914,13 +1050,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0042, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -946,11 +1077,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0042, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -968,13 +1113,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0043, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -1000,11 +1140,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0043, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -1022,13 +1176,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0044, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(4, 6, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -1054,11 +1203,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0044, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -1076,13 +1239,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0045, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -1108,11 +1266,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0045, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        columnValueText + SPACE + AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -1130,13 +1302,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0046, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -1162,11 +1329,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0046, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+    EXPECT_EQ(accessibilityProperty->GetText(), columnValueText + SPACE + AM + ZERO + std::to_string(BIG_SHOWCOUNT) +
+                                                    COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -1184,13 +1365,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0047, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
     DialogProperties dialogProperties;
@@ -1216,11 +1392,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0047, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -1238,13 +1428,8 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0048, TestSize.Level1)
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
     DatePickerSettingData settingData;
-    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
-    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
-    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    InitDatePickerSettingData(settingData);
     settingData.timePickerProperty["selected"] = PickerTime(5, 5, 1);
-    settingData.isLunar = false;
-    settingData.showTime = true;
-    settingData.useMilitary = false;
     settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
     settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
     DialogProperties dialogProperties;
@@ -1270,11 +1455,25 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0048, TestSize.Level1)
     auto customNode = dialogPattern->GetCustomNode();
     auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        columnValueText + SPACE + AM + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -1340,6 +1539,69 @@ HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0049, TestSize.Level1)
     dialogViewNode =
         DatePickerDialogView::CreateNextPrevButtonNode(timePickerSwitchEvent, dateNode, buttonInfos, columnNode);
     ASSERT_NE(dialogNode, nullptr);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewShow0050
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNgAdd, DatePickerDialogViewShow0050, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    DatePickerSettingData settingData;
+    InitDatePickerSettingData(settingData);
+    settingData.timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps2: Test the date and time of datePicker.
+     * @tc.expected: The texts of datePicker are equal to selected  date and time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+
+    auto datePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    ASSERT_NE(datePickerNode, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(datePickerNode->GetFirstChild());
+    ASSERT_NE(stackMonthDays, nullptr);
+    auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+    ASSERT_NE(blendMonthDays, nullptr);
+    auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+    ASSERT_NE(monthDaysColumnNode, nullptr);
+    auto columnAccessibilityProperty =
+        monthDaysColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(columnAccessibilityProperty, nullptr);
+    auto columnValueText = columnAccessibilityProperty->GetText();
+    auto textDateTime =
+        columnValueText + SPACE + AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(SMALL_SHOWCOUNT);
+    auto accessibilityPropertyDate = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
+    ASSERT_NE(accessibilityPropertyDate, nullptr);
+    EXPECT_EQ(accessibilityPropertyDate->GetText(), textDateTime);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 } // namespace OHOS::Ace::NG

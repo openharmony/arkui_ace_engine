@@ -172,6 +172,7 @@ ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node, ArkUI_Bool isExpanded)
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto parent = GetParentNode(currentNode);
+    CHECK_NULL_RETURN(parent, nullptr);
     auto index = -1;
     if (isExpanded) {
         parent->GetAllChildrenWithBuild(false);
@@ -562,7 +563,7 @@ ArkUI_Int32 GetNodeTag(ArkUINodeHandle node)
     return uiNode->IsCNode();
 }
 
-void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size)
+void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Int32* size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(handle);
     CHECK_NULL_VOID(frameNode);

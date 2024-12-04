@@ -20,15 +20,14 @@
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
-class GridLayoutTestNg : public GridTestNg {
-};
+class GridLayoutTestNg : public GridTestNg {};
 
 /**
  * @tc.name: AdaptiveLayout001
@@ -37,26 +36,26 @@ class GridLayoutTestNg : public GridTestNg {
  */
 HWTEST_F(GridLayoutTestNg, AdaptiveLayout001, TestSize.Level1)
 {
-    float itemWidth = 100.f;
+    float itemWidth = 50.f;
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::ROW);
     model.SetEditable(true);
-    model.SetCellLength(ITEM_HEIGHT);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(4);
     model.SetMaxCount(2);
-    CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateGridItems(10, itemWidth, ITEM_MAIN_SIZE);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
      * @tc.expected: would let minCount = 1, maxCount = Infinity;
      */
-    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t colsNumber = 4;
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = index % colsNumber * itemWidth;
-        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
@@ -70,7 +69,7 @@ HWTEST_F(GridLayoutTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level
 {
     CreateGrid();
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto focusHub = GetChildFocusHub(frameNode_, 0);
     auto GetInnerFocusPaintRect = focusHub->getInnerFocusRectFunc_;
@@ -113,8 +112,8 @@ HWTEST_F(GridLayoutTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSiz
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateBigItem(1, 2, 1, 2);
-    CreateFocusableGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Find target child with specified index parameters.
@@ -170,7 +169,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. call InitGridCeils
@@ -196,7 +195,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout002, TestSize.Level1)
     model.SetColumnsTemplate("");
     model.SetRowsTemplate("");
     CreateFixedItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Change to smaller mainSize
@@ -223,7 +222,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
     model.SetColumnsTemplate(emptyString);
     model.SetRowsTemplate(emptyString);
     CreateFixedItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Change to smaller mainSize
@@ -247,20 +246,20 @@ HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, LayoutRTL001, TestSize.Level1)
 {
-    float itemWidth = 120.f;
+    float itemWidth = 60.f;
     GridModelNG model = CreateGrid();
     model.SetIsRTL(TextDirection::RTL);
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-    CreateGridItems(12, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateGridItems(12, itemWidth, ITEM_MAIN_SIZE);
+    CreateDone();
 
-    int32_t colsNumber = 4; // 4 * 120(itemWidth) = 480(gridWidth)
+    int32_t colsNumber = 4;
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = GRID_WIDTH - index % colsNumber * itemWidth - itemWidth;
-        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
@@ -272,27 +271,27 @@ HWTEST_F(GridLayoutTestNg, LayoutRTL001, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL001, TestSize.Level1)
 {
-    float itemWidth = 100.f;
+    float itemWidth = 50.f;
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::ROW);
     model.SetEditable(true);
-    model.SetCellLength(ITEM_HEIGHT);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(4);
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
-    CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateGridItems(10, itemWidth, ITEM_MAIN_SIZE);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
      * @tc.expected: would let minCount = 1, maxCount = Infinity;
      */
-    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t colsNumber = 4;
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = GRID_WIDTH - index % colsNumber * itemWidth - itemWidth;
-        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
@@ -304,28 +303,28 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL001, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL002, TestSize.Level1)
 {
-    float itemWidth = 100.f;
+    float itemWidth = 50.f;
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::COLUMN);
     model.SetEditable(true);
-    model.SetCellLength(ITEM_HEIGHT);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(4);
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
-    CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateGridItems(10, itemWidth, ITEM_MAIN_SIZE);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
      * @tc.expected: would let minCount = 1, maxCount = Infinity;
      */
-    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t colsNumber = 4;
     int32_t rowsNumber = 4;
     for (int32_t index = 0; index < 8; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = GRID_WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
-        float offsetY = index % colsNumber * ITEM_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        float offsetY = index % colsNumber * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
@@ -337,27 +336,27 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL002, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL003, TestSize.Level1)
 {
-    float itemWidth = 100.f;
+    float itemWidth = 50.f;
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
     model.SetEditable(true);
-    model.SetCellLength(ITEM_HEIGHT);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(4);
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
-    CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateGridItems(10, itemWidth, ITEM_MAIN_SIZE);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
      * @tc.expected: would let minCount = 1, maxCount = Infinity;
      */
-    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t colsNumber = 4;
     for (int32_t index = 0; index < 10; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = index % colsNumber * itemWidth + (GRID_WIDTH - colsNumber * itemWidth);
-        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
@@ -369,28 +368,28 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL003, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL004, TestSize.Level1)
 {
-    float itemWidth = 100.f;
+    float itemWidth = 50.0f;
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
     model.SetEditable(true);
-    model.SetCellLength(ITEM_HEIGHT);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(4);
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
-    CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateGridItems(10, itemWidth, ITEM_MAIN_SIZE);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
      * @tc.expected: would let minCount = 1, maxCount = Infinity;
      */
-    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t colsNumber = 4;
     int32_t rowsNumber = 4;
     for (int32_t index = 0; index < 8; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = GRID_WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
-        float offsetY = GRID_HEIGHT - index % colsNumber * ITEM_HEIGHT - ITEM_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        float offsetY = GRID_HEIGHT - index % colsNumber * ITEM_MAIN_SIZE - ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
@@ -402,20 +401,20 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL004, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch001, TestSize.Level1)
 {
-    float itemWidth = 80.0f;
-    float itemHeight = 150.0f;
+    float itemWidth = 40.0f;
+    float itemHeight = 75.0f;
     GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("repeat(auto-stretch, 80)");
-    model.SetRowsTemplate("repeat(auto-stretch, 150)");
-    model.SetRowsGap(Dimension(10));
-    model.SetColumnsGap(Dimension(10));
+    model.SetColumnsTemplate("repeat(auto-stretch, 40)");
+    model.SetRowsTemplate("repeat(auto-stretch, 75)");
+    model.SetRowsGap(Dimension(5));
+    model.SetColumnsGap(Dimension(5));
     CreateGridItems(25, itemWidth, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
 
     int32_t rowsNumber = 5;
     int32_t columnsNumber = 5;
-    float realColumnsGap = 20.f;
-    float realRowsGap = 12.5f;
+    float realColumnsGap = 10.0f;
+    float realRowsGap = 6.25f;
     for (int32_t index = 0; index < 25; index++) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = index % columnsNumber * (itemWidth + realColumnsGap);
@@ -438,24 +437,24 @@ HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(10));
-    CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH, ITEM_HEIGHT * 5 + 10 * 4));
+    CreateGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH, ITEM_MAIN_SIZE * 5 + 10 * 4));
 
     auto padding = 10.f;
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH - padding, ITEM_HEIGHT * 5 + 10 * 4));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH - padding, ITEM_MAIN_SIZE * 5 + 10 * 4));
 
     ClearOldNodes();
     model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::COLUMN);
     model.SetRowsTemplate("1fr 1fr");
     model.SetColumnsGap(Dimension(10));
-    CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_WIDTH * 5 + 10 * 4, GRID_HEIGHT));
+    CreateGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, GRID_HEIGHT));
 
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_WIDTH * 5 + 10 * 4, GRID_HEIGHT - padding));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, GRID_HEIGHT - padding));
 }
 } // namespace OHOS::Ace::NG

@@ -110,6 +110,26 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleMoveStart002
+ * @tc.desc: test OnHandleMoveStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    richEditorPattern->selectOverlay_->OnBind(manager);
+    richEditorPattern->selectOverlay_->isSingleHandle_ = true;
+    richEditorPattern->selectOverlay_->OnHandleMoveStart(info, true);
+    EXPECT_TRUE(richEditorPattern->isCursorAlwaysDisplayed_);
+}
+
+/**
  * @tc.name: OnOverlayTouchDown001
  * @tc.desc: test OnOverlayTouchDown
  * @tc.type: FUNC
@@ -121,6 +141,23 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     TouchEventInfo info("text");
     richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
+    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
+}
+
+/**
+ * @tc.name: OnOverlayTouchDown002
+ * @tc.desc: test OnOverlayTouchDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEventInfo info("text");
+    info.SetSourceTool(SourceTool::MOUSE);
+    richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
+    EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
     EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
 }
 
@@ -194,6 +231,39 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnOverlayClick003
+ * @tc.desc: test OnOverlayClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent event;
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->selectOverlay_->isSingleHandle_ = true;
+    richEditorPattern->selectOverlay_->OnOverlayClick(event, true);
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->needRefreshMenu_);
+}
+
+/**
+ * @tc.name: OnOverlayClick004
+ * @tc.desc: test OnOverlayClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent event;
+    richEditorPattern->selectOverlay_->isSingleHandle_ = true;
+    richEditorPattern->selectOverlay_->OnOverlayClick(event, true);
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->needRefreshMenu_);
+}
+
+/**
  * @tc.name: OnHandleMouseEvent001
  * @tc.desc: test OnHandleMouseEvent
  * @tc.type: FUNC
@@ -225,4 +295,107 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMouseEvent002, TestSize.Level1)
     EXPECT_EQ(event.GetAction(), MouseAction::RELEASE);
 }
 
+/**
+ * @tc.name: OnAncestorNodeChanged
+ * @tc.desc: test OnAncestorNodeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    richEditorNode_->parent_ = frameNode;
+    FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
+    richEditorNode_->changeInfoFlag_ = FRAME_NODE_CHANGE_END_SCROLL;
+    richEditorPattern->selectOverlay_->OnAncestorNodeChanged(flag);
+    EXPECT_NE(richEditorNode_->changeInfoFlag_, FRAME_NODE_CHANGE_INFO_NONE);
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    AddImageSpan();
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+    richEditorPattern->selectOverlay_->OnHandleMove(RectF(1.0f, 0.0f, 10.0f, 10.0f), false);
+    EXPECT_NE(richEditorPattern->textSelector_.firstHandle.GetOffset().GetX(), 1.0f);
+}
+
+/**
+ * @tc.name: OnHandleMove002
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    AddImageSpan();
+    richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+    richEditorPattern->selectOverlay_->OnHandleMove(RectF(1.0f, 0.0f, 10.0f, 10.0f), false);
+    EXPECT_NE(richEditorPattern->textSelector_.firstHandle.GetOffset().GetX(), 1.0f);
+}
+
+/**
+ * @tc.name: OnHandleMoveDone001
+ * @tc.desc: test OnHandleMoveDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    richEditorPattern->selectOverlay_->OnBind(manager);
+    RectF handleRect;
+    richEditorPattern->selectOverlay_->isSingleHandle_ = true;
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, false);
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->originalMenuIsShow_);
+}
+
+/**
+ * @tc.name: OnHandleMoveDone002
+ * @tc.desc: test OnHandleMoveDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    richEditorPattern->selectOverlay_->OnBind(manager);
+    RectF handleRect;
+    richEditorPattern->selectOverlay_->isSingleHandle_ = false;
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->originalMenuIsShow_);
+}
 } // namespace OHOS::Ace::NG

@@ -27,10 +27,8 @@ constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
 
-uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
+uint32_t GetMaxGridCounts(int32_t currentColumns)
 {
-    CHECK_NULL_RETURN(columnInfo, GRID_COUNTS_8);
-    auto currentColumns = columnInfo->GetParent()->GetColumns();
     auto maxGridCounts = GRID_COUNTS_8;
     switch (currentColumns) {
         case GRID_COUNTS_4:
@@ -72,9 +70,8 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childLayoutConstraint_ = layoutProperty->CreateChildConstraint();
     isCardStyle_ = IsCardStyleForListItemGroup(layoutWrapper);
     if (isCardStyle_) {
-        auto maxWidth = GetListItemGroupMaxWidth(contentConstraint.parentIdealSize, layoutProperty) -
-                        layoutProperty->CreatePaddingAndBorder().Width();
-        contentIdealSize.SetCrossSize(maxWidth, axis_);
+        UpdateListItemGroupMaxWidth(contentConstraint.parentIdealSize, layoutProperty, contentIdealSize);
+        listLayoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     }
     UpdateListItemConstraint(contentIdealSize, childLayoutConstraint_);
     referencePos_ = UpdateReferencePos(layoutProperty, forwardLayout_, referencePos_);
@@ -133,22 +130,25 @@ void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(int32_t cacheCount)
     }
 }
 
-float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
-    const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty)
+void ListItemGroupLayoutAlgorithm::UpdateListItemGroupMaxWidth(
+    const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty, OptionalSizeF& contentIdealSize)
 {
-    RefPtr<GridColumnInfo> columnInfo;
-    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::LIST_CARD);
-    columnInfo->GetParent()->BuildColumnWidth();
-    auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
-    auto parentWidth = parentIdealSize.CrossSize(axis_).value() + layoutProperty->CreatePaddingAndBorder().Width();
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::LIST_CARD);
+    CHECK_NULL_VOID(columnInfo);
+    auto columnParent = columnInfo->GetParent();
+    CHECK_NULL_VOID(columnParent);
+    columnParent->BuildColumnWidth();
+    auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnParent->GetColumns())));
+    float paddingWidth = layoutProperty->CreatePaddingAndBorder().Width();
+    auto parentWidth = parentIdealSize.CrossSize(axis_).value() + paddingWidth;
     auto maxWidth = std::min(parentWidth, maxGridWidth);
-    if (LessNotEqual(maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width())) {
+    if (LessNotEqual(maxGridWidth, paddingWidth)) {
         TAG_LOGI(AceLogTag::ACE_LIST,
             "ListItemGroup reset to parentWidth since grid_col width:%{public}f, border:%{public}f",
-            maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width());
+            maxGridWidth, paddingWidth);
         maxWidth = parentWidth;
     }
-    return maxWidth;
+    contentIdealSize.SetCrossSize(maxWidth - paddingWidth, axis_);
 }
 
 void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -175,11 +175,11 @@ void RichEditorCommonTestNg::OnDrawVerify(
     ASSERT_NE(richEditorPattern, nullptr);
     auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
     richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
-    if (SelectSpanType::TYPESPAN == type) {
+    if (type == SelectSpanType::TYPESPAN) {
         AddSpan(text);
-    } else if (SelectSpanType::TYPEIMAGE == type) {
+    } else if (type == SelectSpanType::TYPEIMAGE) {
         AddImageSpan();
-    } else if (SelectSpanType::TYPESYMBOLSPAN == type) {
+    } else if (type == SelectSpanType::TYPESYMBOLSPAN) {
         auto richEditorController = richEditorPattern->GetRichEditorController();
         ASSERT_NE(richEditorController, nullptr);
         richEditorController->AddSymbolSpan(options);

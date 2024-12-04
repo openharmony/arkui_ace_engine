@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
@@ -170,6 +171,7 @@ public:
         curPlaceholderType_ = type;
     }
     void PostDelayRemovePlaceholder(uint32_t delay);
+    void SetEventProxyFlag(int32_t flag);
     void ReplacePlaceholderByContent();
     void OnExtensionEvent(UIExtCallbackEventId eventId);
     void OnUeaAccessibilityEventAsync();
@@ -305,6 +307,7 @@ private:
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
     RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
+    RefPtr<PlatformEventProxy> platformEventProxy_;
     ErrorMsg lastError_;
     AbilityState state_ = AbilityState::NONE;
     bool isTransferringCaller_ = false;

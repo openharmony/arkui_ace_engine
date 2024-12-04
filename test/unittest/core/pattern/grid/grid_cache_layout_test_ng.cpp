@@ -41,25 +41,25 @@ void GridCacheLayoutTestNg::CreateItems1()
      * 8:  [15], [15], [16], [17]
      * 9:  [18], [18], [18], [18]
      */
-    CreateBigItem(0, 0, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(1, 1, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(2, 2, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(3, 3, 0, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(3, 4, 2, 3, ITEM_WIDTH, ITEM_HEIGHT * 2);
-    CreateBigItem(4, 4, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(4, 4, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(5, 5, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(5, 5, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(5, 5, 2, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(6, 6, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(6, 6, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(6, 6, 2, 2, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(6, 6, 3, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(7, 7, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(8, 8, 0, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(8, 8, 2, 2, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(8, 8, 3, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(9, 9, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(0, 0, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(1, 1, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(2, 2, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(3, 3, 0, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(3, 4, 2, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE * 2);
+    CreateBigItem(4, 4, 0, 0, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(4, 4, 1, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(5, 5, 0, 0, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(5, 5, 1, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(5, 5, 2, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(6, 6, 0, 0, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(6, 6, 1, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(6, 6, 2, 2, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(6, 6, 3, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(7, 7, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(8, 8, 0, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(8, 8, 2, 2, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(8, 8, 3, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(9, 9, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
 }
 
 void GridCacheLayoutTestNg::CreateItems2()
@@ -73,25 +73,25 @@ void GridCacheLayoutTestNg::CreateItems2()
      * 5:  [16], [16], [16], [16], [17], [17]
      * 6:  [18], [18], [18], [18]
      */
-    CreateBigItem(0, 0, 0, 5, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(1, 1, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(1, 2, 4, 5, ITEM_WIDTH, ITEM_HEIGHT * 2);
-    CreateBigItem(2, 2, 0, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(2, 2, 2, 2, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(2, 2, 3, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(3, 3, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(3, 3, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(3, 3, 2, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(3, 3, 4, 4, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(3, 3, 5, 5, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(4, 4, 0, 0, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(4, 4, 1, 1, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(4, 4, 2, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(4, 4, 4, 4, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(4, 4, 5, 5, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(5, 5, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(5, 5, 4, 5, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateBigItem(6, 6, 0, 3, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateBigItem(0, 0, 0, 5, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(1, 1, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(1, 2, 4, 5, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE * 2);
+    CreateBigItem(2, 2, 0, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(2, 2, 2, 2, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(2, 2, 3, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(3, 3, 0, 0, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(3, 3, 1, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(3, 3, 2, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(3, 3, 4, 4, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(3, 3, 5, 5, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(4, 4, 0, 0, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(4, 4, 1, 1, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(4, 4, 2, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(4, 4, 4, 4, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(4, 4, 5, 5, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(5, 5, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(5, 5, 4, 5, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateBigItem(6, 6, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
 }
 
 /**
@@ -101,29 +101,29 @@ void GridCacheLayoutTestNg::CreateItems2()
  */
 HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(30, [](uint32_t idx) { return ITEM_HEIGHT; });
+    GridModelNG model = CreateRepeatGrid(30, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetCachedCount(10); // 10 lines
     model.SetLayoutOptions({});
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 30);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 11);
 
     for (int32_t i = 0; i < 10; i++) {
-        pattern_->ScrollBy(ITEM_HEIGHT);
+        pattern_->ScrollBy(ITEM_MAIN_SIZE);
         FlushLayoutTask(frameNode_);
     }
 
     int32_t colsNumber = 3;
-    float itemWidth = 160.f;
-    float totalHeight = ITEM_HEIGHT * 10;
+    float itemWidth = 80;
+    float totalHeight = ITEM_MAIN_SIZE * 10;
     for (int32_t index = 29; index >= 0; index--) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = index % colsNumber * itemWidth;
-        float offsetY = -totalHeight + floor(index / colsNumber) * ITEM_HEIGHT + GRID_HEIGHT;
-        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        float offsetY = -totalHeight + floor(index / colsNumber) * ITEM_MAIN_SIZE + GRID_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
@@ -139,24 +139,24 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateItems1();
     model.SetCachedCount(10); // 10 lines
-    CreateDone(frameNode_);
+    CreateDone();
 
     for (int32_t i = 0; i < 25; i++) {
-        pattern_->ScrollBy(100);
+        pattern_->ScrollBy(50);
         FlushLayoutTask(frameNode_);
     }
 
-    float totalHeight = ITEM_HEIGHT * 10;
+    float totalHeight = ITEM_MAIN_SIZE * 10;
     for (int32_t index = 18; index >= 0; index--) {
         auto child = frameNode_->GetChildByIndex(index);
         auto childProps = AceType::DynamicCast<GridItemLayoutProperty>(child->GetLayoutProperty());
         RectF childRect = GetChildRect(frameNode_, index);
         float width = childProps->GetCrossSpan(Axis::VERTICAL) * GRID_WIDTH / 4;
-        float height = childProps->GetMainSpan(Axis::VERTICAL) * ITEM_HEIGHT;
-        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_HEIGHT + GRID_HEIGHT;
+        float height = childProps->GetMainSpan(Axis::VERTICAL) * ITEM_MAIN_SIZE;
+        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_MAIN_SIZE + GRID_HEIGHT;
         // multi-line item's mainIndex may be translated to its last line during scrolling.
         if (index == 4) {
-            offsetY -= ITEM_HEIGHT;
+            offsetY -= ITEM_MAIN_SIZE;
         }
         float offsetX = childProps->GetCrossIndex().value_or(0) * GRID_WIDTH / 4;
         RectF expectRect = RectF(offsetX, offsetY, width, height);
@@ -175,24 +175,24 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
     CreateItems2();
     model.SetCachedCount(6); // 6 lines
-    CreateDone(frameNode_);
+    CreateDone();
 
     for (int32_t i = 0; i < 14; i++) {
         pattern_->ScrollBy(100);
         FlushLayoutTask(frameNode_);
     }
 
-    float totalHeight = ITEM_HEIGHT * 7;
+    float totalHeight = ITEM_MAIN_SIZE * 7;
     for (int32_t index = 18; index >= 0; index--) {
         auto child = frameNode_->GetChildByIndex(index);
         auto childProps = AceType::DynamicCast<GridItemLayoutProperty>(child->GetLayoutProperty());
         RectF childRect = GetChildRect(frameNode_, index);
         float width = childProps->GetCrossSpan(Axis::VERTICAL) * GRID_WIDTH / 6;
-        float height = childProps->GetMainSpan(Axis::VERTICAL) * ITEM_HEIGHT;
-        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_HEIGHT + GRID_HEIGHT;
+        float height = childProps->GetMainSpan(Axis::VERTICAL) * ITEM_MAIN_SIZE;
+        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_MAIN_SIZE + GRID_HEIGHT;
         // multi-line item's mainIndex may be translated to its last line during scrolling.
         if (index == 2) {
-            offsetY -= ITEM_HEIGHT;
+            offsetY -= ITEM_MAIN_SIZE;
         }
         float offsetX = childProps->GetCrossIndex().value_or(0) * GRID_WIDTH / 6;
         RectF expectRect = RectF(offsetX, offsetY, width, height);
@@ -207,11 +207,11 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines003, TestSize.Level1)
  */
 HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(100, [](uint32_t idx) { return ITEM_HEIGHT; });
+    GridModelNG model = CreateRepeatGrid(100, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions({});
     model.SetCachedCount(1); // 6 lines
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 11);
 
@@ -235,11 +235,11 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
  */
 HWTEST_F(GridCacheLayoutTestNg, Create005, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(100, [](uint32_t idx) { return ITEM_HEIGHT; });
+    GridModelNG model = CreateRepeatGrid(100, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions({});
     model.SetCachedCount(1, true); // 6 lines
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 11);
 
@@ -247,7 +247,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create005, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 88));
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 88)->IsActive());
-    EXPECT_EQ(GetChildHeight(frameNode_, 88), 200.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 88), 100);
 }
 
 /**
@@ -257,37 +257,37 @@ HWTEST_F(GridCacheLayoutTestNg, Create005, TestSize.Level1)
  */
 HWTEST_F(GridCacheLayoutTestNg, ShowCache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 100.0f; });
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(1, true);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 8)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 9)->IsActive());
-    EXPECT_EQ(GetChildWidth(frameNode_, 8), 235.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 8), 840.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 8), 115);
+    EXPECT_EQ(GetChildY(frameNode_, 8), 440);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 440);
 
-    UpdateCurrentOffset(-400.0f);
+    UpdateCurrentOffset(-200);
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.endIndex_, 11);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 13)->IsActive());
-    EXPECT_EQ(GetChildY(frameNode_, 10), 650.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 11), 650.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 12), 860.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 13), 860.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 10), 350);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 350);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 460);
+    EXPECT_EQ(GetChildY(frameNode_, 13), 460);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
-    EXPECT_EQ(GetChildY(frameNode_, 0), -400.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 1), -400.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -200);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -200);
 }
 
 /**
@@ -297,46 +297,46 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache001, TestSize.Level1)
  */
 HWTEST_F(GridCacheLayoutTestNg, ShowCache002, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 100.0f; });
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(2, true);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 7);
-    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 11), 1050.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 440);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 550);
 
-    UpdateCurrentOffset(-550.0f);
+    UpdateCurrentOffset(-275);
     EXPECT_EQ(info.startIndex_, 4);
     EXPECT_EQ(info.endIndex_, 13);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildWidth(frameNode_, 15), 235.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 15), 245.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 15), 115.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 125.0f);
 
-    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(200.0f), CalcLength(800.0f)));
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f), CalcLength(400.0f)));
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildWidth(frameNode_, 14), 95.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 15), 95.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 15), 105.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 3), 95.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 3), 105.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 14), 45.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 15), 45.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 55.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 3), 45.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 3), 55.0f);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 14)->IsActive());
-    EXPECT_EQ(GetChildY(frameNode_, 2), -340.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 14), 920.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -165.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 495.0f);
     EXPECT_EQ(info.gridMatrix_.size(), 9);
 
-    UpdateCurrentOffset(-300.0f);
+    UpdateCurrentOffset(-175.0f);
     EXPECT_EQ(info.startIndex_, 8);
     EXPECT_EQ(info.endIndex_, 15);
-    EXPECT_EQ(GetChildY(frameNode_, 4), -430.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 5), 105.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 16), 830.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 19), 1040.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 19), 95.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 4), -230.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 5), 55.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 430.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 19), 540.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 19), 45.0f);
 }
 
 /**
@@ -346,27 +346,27 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache002, TestSize.Level1)
  */
 HWTEST_F(GridCacheLayoutTestNg, ShowCache003, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 100.0f; });
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(3, true);
     ViewAbstract::SetPadding(CalcLength(5));
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 7);
     EXPECT_EQ(GetChildX(frameNode_, 0), 5.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 230.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 1), 230.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 1), 245.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 110);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 110);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 125);
     EXPECT_EQ(GetChildX(frameNode_, 8), 5.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 8), 230.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 9), 245.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 9), 230.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 9), 845.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 11), 1055.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 11), 230.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 8), 110);
+    EXPECT_EQ(GetChildX(frameNode_, 9), 125);
+    EXPECT_EQ(GetChildWidth(frameNode_, 9), 110);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 445);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 555);
+    EXPECT_EQ(GetChildWidth(frameNode_, 11), 110);
 }
 
 /**
@@ -376,12 +376,12 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache003, TestSize.Level1)
  */
 HWTEST_F(GridCacheLayoutTestNg, Cache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 100.0f; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(2); // 2 lines
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
@@ -395,7 +395,7 @@ HWTEST_F(GridCacheLayoutTestNg, Cache001, TestSize.Level1)
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList) {
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
-        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
+        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 100);
     }
     FlushLayoutTask(frameNode_);
     // preload next line
@@ -405,7 +405,7 @@ HWTEST_F(GridCacheLayoutTestNg, Cache001, TestSize.Level1)
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList2) {
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
-        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
+        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 100);
     }
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
@@ -432,7 +432,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetCachedCount(1);
     CreateFixedItems(40);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive()); // the fifth row
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive()); // the sixth row
 
@@ -440,7 +440,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.steps: step2. Scroll down
      * @tc.expected: The item(index:0) above view is active, the item(index:20) below view is active
      */
-    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
     pattern_->ScrollToIndex(4, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());

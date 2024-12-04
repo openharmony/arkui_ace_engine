@@ -171,6 +171,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
     JSClass<JSXComponent>::StaticMethod("renderFit", &JSXComponent::JsRenderFit);
     JSClass<JSXComponent>::StaticMethod("enableSecure", &JSXComponent::JsEnableSecure);
+    JSClass<JSXComponent>::StaticMethod("hdrBrightness", &JSXComponent::JsHdrBrightness);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -693,6 +694,19 @@ void JSXComponent::JsEnableSecure(const JSCallbackInfo& args)
     if (args[0]->IsBoolean()) {
         bool isSecure = args[0]->ToBoolean();
         XComponentModel::GetInstance()->EnableSecure(isSecure);
+    }
+}
+
+void JSXComponent::JsHdrBrightness(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set hdrBrightness on SurfaceNode when type is SURFACE
+    if (args[0]->IsNumber()) {
+        float hdrBrightness = args[0]->ToNumber<float>();
+        XComponentModel::GetInstance()->HdrBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
     }
 }
 } // namespace OHOS::Ace::Framework

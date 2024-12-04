@@ -262,6 +262,11 @@ public:
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
 
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
     void CleanVisibleAreaInnerCallback()
     {
         eventHub_->CleanVisibleAreaCallback(false);
@@ -1142,6 +1147,8 @@ public:
     RefPtr<UINode> GetCurrentPageRootNode() override;
 
     std::list<RefPtr<FrameNode>> GetActiveChildren();
+
+    void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
 
 protected:
     void DumpInfo() override;

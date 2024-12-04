@@ -366,7 +366,7 @@ void GetSpanTextBackgroundStyle(ArkUINodeHandle node, ArkUITextBackgroundStyleOp
     options->topLeft = styleOptions.backgroundRadius->radiusTopLeft->Value();
     options->topRight = styleOptions.backgroundRadius->radiusTopRight->Value();
     options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
-    options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
+    options->bottomRight= styleOptions.backgroundRadius->radiusBottomRight->Value();
 }
 
 void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length)

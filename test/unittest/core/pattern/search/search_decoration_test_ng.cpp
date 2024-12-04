@@ -69,7 +69,9 @@ constexpr float ZERO = 0.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr int32_t TEXTFIELD_INDEX = 0;
 const std::string EMPTY_VALUE;
+const std::u16string EMPTY_VALUE_U16;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
+const std::u16string PLACEHOLDER_U16 = u"DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
 } // namespace
@@ -108,7 +110,7 @@ void SearchDecorationTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
 }
 
 void SearchDecorationTestNg::TearDownTestSuite()
@@ -181,7 +183,7 @@ HWTEST_F(SearchDecorationTestNg, LetterSpacingPattern002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    pattern->UpdateChangeEvent("search");
+    pattern->UpdateChangeEvent(u"search");
     pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
 
@@ -224,7 +226,7 @@ HWTEST_F(SearchDecorationTestNg, LineHeightPattern002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    pattern->UpdateChangeEvent("search");
+    pattern->UpdateChangeEvent(u"search");
     pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
 
@@ -267,7 +269,7 @@ HWTEST_F(SearchDecorationTestNg, TextDecorationPattern002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    pattern->UpdateChangeEvent("search");
+    pattern->UpdateChangeEvent(u"search");
     pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
 

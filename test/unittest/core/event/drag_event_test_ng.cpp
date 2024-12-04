@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 void DragEventTestNg::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "DragEventTestNg SetUpTestCase";
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void DragEventTestNg::TearDownTestSuite()
@@ -1966,5 +1967,45 @@ HWTEST_F(DragEventTestNg, GetSetPressedKeyCodesTest001, TestSize.Level1)
     auto pressedKeyCodes = dragEvent->GetPressedKeyCodes();
     EXPECT_EQ(pressedKeyCodes.size(), 2);
     EXPECT_EQ(pressedKeyCodes[1], KeyCode::KEY_DPAD_RIGHT);
+}
+
+/**
+ * @tc.name: SetResponseRegionFullTest
+ * @tc.desc: Test ResetResponseRegion function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, ReSetResponseRegion, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Set frameNode response region.
+     */
+    auto setRect = DimensionRect(Dimension(100.0f), Dimension(100.0f));
+    auto originRect = DimensionRect(Dimension(1.0f), Dimension(1.0f));
+    dragEventActuator->isResponseRegionFull_ = true;
+    dragEventActuator->responseRegion_ = { originRect };
+    gestureEventHub->responseRegion_ = { setRect };
+    ASSERT_EQ(gestureEventHub->responseRegion_.size(), 1);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].width_, setRect.width_);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].height_, setRect.height_);
+
+    /**
+     * @tc.steps: step3. call ResetResponseRegion.
+     */
+    dragEventActuator->ResetResponseRegion();
+    EXPECT_EQ(dragEventActuator->isResponseRegionFull_, false);
+    ASSERT_EQ(gestureEventHub->responseRegion_.size(), 1);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].width_, originRect.width_);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].height_, originRect.height_);
 }
 } // namespace OHOS::Ace::NG

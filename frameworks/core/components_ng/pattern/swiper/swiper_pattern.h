@@ -44,6 +44,11 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+enum class PageFlipMode {
+    CONTINUOUS = 0,
+    SINGLE,
+};
+
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
@@ -632,6 +637,13 @@ public:
 
     bool IsAutoPlay() const;
 
+    void SetPageFlipMode(int32_t pageFlipMode);
+
+    int32_t GetPageFlipMode() const
+    {
+        return static_cast<int32_t>(pageFlipMode_);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -1095,6 +1107,7 @@ private:
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> runningTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
     std::optional<int32_t> oldRealTotalCount_;
@@ -1163,6 +1176,9 @@ private:
     std::set<int32_t> cachedItems_;
     LayoutConstraintF layoutConstraint_;
     bool requestLongPredict_ = false;
+
+    PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
+    bool isFirstAxisAction_ = true;
 };
 } // namespace OHOS::Ace::NG
 

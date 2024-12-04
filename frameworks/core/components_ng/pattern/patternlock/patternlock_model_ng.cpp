@@ -106,6 +106,16 @@ void PatternLockModelNG::SetEnableWaveEffect(bool enableWaveEffect)
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, EnableWaveEffect, enableWaveEffect);
 }
 
+void PatternLockModelNG::SetEnableForeground(bool enableForeground)
+{
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, EnableForeground, enableForeground);
+}
+
+void PatternLockModelNG::SetSkipUnselectedPoint(bool isSkipUnselectedPoint)
+{
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, SkipUnselectedPoint, isSkipUnselectedPoint);
+}
+
 void PatternLockModelNG::SetActiveColor(FrameNode* frameNode, const Color& activeColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveColor, activeColor, frameNode);
@@ -159,6 +169,16 @@ void PatternLockModelNG::SetActiveCircleRadius(FrameNode* frameNode, const Dimen
 void PatternLockModelNG::SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableWaveEffect, enableWaveEffect, frameNode);
+}
+
+void PatternLockModelNG::SetEnableForeground(FrameNode* frameNode, bool enableForeground)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableForeground, enableForeground, frameNode);
+}
+
+void PatternLockModelNG::SetSkipUnselectedPoint(FrameNode* frameNode, bool isSkipUnselectedPoint)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SkipUnselectedPoint, isSkipUnselectedPoint, frameNode);
 }
 
 } // namespace OHOS::Ace::NG

@@ -1133,6 +1133,27 @@ void ResetOnContentDidScroll(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetOnContentDidScroll(frameNode, nullptr);
 }
+
+void SetSwiperPageFlipMode(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetPageFlipMode(frameNode, pageFlipMode);
+}
+
+void ResetSwiperPageFlipMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetPageFlipMode(frameNode, NUM_0);
+}
+
+ArkUI_Int32 GetSwiperSwiperPageFlipMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return SwiperModelNG::GetPageFlipMode(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1151,10 +1172,11 @@ const ArkUISwiperModifier* GetSwiperModifier()
         GetSwiperShowIndicator, GetSwiperShowDisplayArrow, GetSwiperEffectMode, SetIndicatorInteractive,
         ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
         SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
-        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
-        SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
-        SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
-        SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
+        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController, SetSwiperOnChange,
+        ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart, SetSwiperOnAnimationEnd,
+        ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe, SetOnContentDidScroll,
+        ResetOnContentDidScroll, GetIndicatorInteractive, SetSwiperPageFlipMode, ResetSwiperPageFlipMode,
+        GetSwiperSwiperPageFlipMode };
     return &modifier;
 }
 

@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/search_modifier.h"
 
+#include "base/utils/utf_helper.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -490,7 +491,7 @@ void SetSearchOnSubmitWithEvent(ArkUINodeHandle node, void* callback)
     CHECK_NULL_VOID(frameNode);
     if (callback) {
         auto onSubmit =
-            reinterpret_cast<std::function<void(const std::string&, NG::TextFieldCommonEvent&)>*>(callback);
+            reinterpret_cast<std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>*>(callback);
         SearchModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnSubmit(frameNode, nullptr);
@@ -509,7 +510,7 @@ void SetSearchOnCopy(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onCopy = reinterpret_cast<std::function<void(const std::u16string&)>*>(callback);
         SearchModelNG::SetOnCopy(frameNode, std::move(*onCopy));
     } else {
         SearchModelNG::SetOnCopy(frameNode, nullptr);
@@ -528,7 +529,7 @@ void SetSearchOnCut(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onCut = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onCut = reinterpret_cast<std::function<void(const std::u16string&)>*>(callback);
         SearchModelNG::SetOnCut(frameNode, std::move(*onCut));
     } else {
         SearchModelNG::SetOnCut(frameNode, nullptr);
@@ -548,7 +549,7 @@ void SetSearchOnPaste(ArkUINodeHandle node, void* callback)
     CHECK_NULL_VOID(frameNode);
     if (callback) {
         auto onPasteWithEvent = reinterpret_cast<std::function<void(
-                const std::string&, NG::TextCommonEvent&)>*>(callback);
+                const std::u16string&, NG::TextCommonEvent&)>*>(callback);
         SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(*onPasteWithEvent));
     } else {
         SearchModelNG::SetOnPasteWithEvent(frameNode, nullptr);
@@ -567,7 +568,7 @@ void SetSearchOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::string&, PreviewText&)>*>(callback);
+        auto onSubmit = reinterpret_cast<std::function<void(const std::u16string&, PreviewText&)>*>(callback);
         SearchModelNG::SetOnChange(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnChange(frameNode, nullptr);
@@ -806,17 +807,16 @@ void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallb
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
-    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
-        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
-        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+        NG::OnCreateMenuCallback onCreateMenu = *(reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback));
+        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenu));
     } else {
         SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
-        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+        NG::OnMenuItemClickCallback onMenuItemClick =
+            *(reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback));
+        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
     } else {
         SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
@@ -909,12 +909,13 @@ void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text, NG::TextFieldCommonEvent& commonEvent) {
+    auto onEvent = [extraParam](const std::u16string& text, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_SUBMIT;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
         SendArkUIAsyncEvent(&event);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onEvent));
@@ -924,12 +925,13 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text, PreviewText&) {
+    auto onEvent = [extraParam](const std::u16string& text, PreviewText&) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CHANGE;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
         SendArkUIAsyncEvent(&event);
     };
     SearchModelNG::SetOnChange(frameNode, std::move(onEvent));
@@ -939,12 +941,13 @@ void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_COPY;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
         SendArkUIAsyncEvent(&event);
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onEvent));
@@ -954,12 +957,13 @@ void SetOnSearchCut(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CUT;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
         SendArkUIAsyncEvent(&event);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onEvent));
@@ -969,12 +973,13 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text, NG::TextCommonEvent& textEvent) {
+    auto onEvent = [extraParam](const std::u16string& text, NG::TextCommonEvent& textEvent) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_PASTE;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
         SendArkUIAsyncEvent(&event);
     };
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onEvent));

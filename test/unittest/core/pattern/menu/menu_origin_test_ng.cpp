@@ -383,7 +383,7 @@ HWTEST_F(MenuTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
      */
     int testIndex = SELECTED_INDEX;
     auto selectFunc = [optionPattern, testIndex](int index) { optionPattern->index_ = testIndex; };
-    auto optionEventHub = frameNode->GetEventHub<OptionEventHub>();
+    auto optionEventHub = frameNode->GetEventHub<MenuItemEventHub>();
     optionEventHub->SetOnSelect(selectFunc);
     optionPattern->RegisterOnClick();
 
@@ -2551,5 +2551,50 @@ HWTEST_F(MenuTestNg, MenuViewTestNg006, TestSize.Level1)
     auto menuWrapperNode4 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
     ASSERT_NE(menuWrapperNode4, nullptr);
     EXPECT_EQ(menuWrapperNode4->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: MenuViewTestNg003
+ * @tc.desc: Test menu view init pan event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node, menu node and preview node.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    ASSERT_NE(menuNode, nullptr);
+    ASSERT_NE(previewNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    auto previewEventHub = previewNode->GetEventHub<EventHub>();
+    ASSERT_NE(previewEventHub, nullptr);
+    auto previewGestureEventHub = previewEventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(previewGestureEventHub, nullptr);
+    EXPECT_TRUE(previewGestureEventHub->IsPanEventEmpty());
+
+    /**
+     * @tc.steps: step2. init menu pan event.
+     */
+    auto menuPreviewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    ASSERT_NE(menuPreviewPattern, nullptr);
+    auto hub = previewNode->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    menuPreviewPattern->InitPanEvent(gestureHub);
+
+    /**
+     * @tc.steps: step3. check menu preview pan event.
+     */
+    EXPECT_FALSE(previewGestureEventHub->IsPanEventEmpty());
 }
 } // namespace OHOS::Ace::NG
