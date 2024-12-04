@@ -21,11 +21,13 @@
 #define protected public
 
 #include "include/core/SkStream.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/declaration/svg/svg_animate_declaration.h"
 #include "core/components/declaration/svg/svg_circle_declaration.h"
 #include "core/components/declaration/svg/svg_declaration.h"
@@ -60,10 +62,12 @@
 #include "core/components_ng/svg/parse/svg_mask.h"
 #include "core/components_ng/svg/parse/svg_path.h"
 #include "core/components_ng/svg/parse/svg_pattern.h"
+#include "core/components_ng/svg/parse/svg_polygon.h"
 #include "core/components_ng/svg/parse/svg_rect.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/parse/svg_use.h"
 #include "core/components_ng/svg/svg_dom.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -377,5 +381,167 @@ HWTEST_F(SvgNodeTestNg, SvgFeCompositeTest001, TestSize.Level1)
     svgFeComposite->ParseAndSetSpecializedAttr("k4", "40");
     EXPECT_FLOAT_EQ(svgFeComposite->feCompositeAttr_.k3, 30);
     EXPECT_FLOAT_EQ(svgFeComposite->feCompositeAttr_.k4, 40);
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest001
+ * @tc.desc: test LinearGradient spread reflect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest001, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgGradient>(SvgGradient::CreateLinearGradient());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    const std::string gradienttransform("scale(1.5)");
+    svgLinearGradient->SetAttr("gradienttransform", gradienttransform);
+    svgLinearGradient->SetAttr("spreadmethod", "reflect");
+    auto gradient = svgLinearGradient->GetGradient();
+    auto spreadMethod = gradient.GetSpreadMethod();
+    MockContainer::TearDown();
+    EXPECT_EQ(static_cast<int32_t>(spreadMethod), static_cast<int32_t>(OHOS::Ace::SpreadMethod::REPEAT));
+    EXPECT_EQ(gradient.GetGradientTransform(), gradienttransform);
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest002
+ * @tc.desc: test LinearGradient spread pad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest002, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgGradient>(SvgGradient::CreateLinearGradient());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    svgLinearGradient->SetAttr("spreadmethod", "pad");
+    auto gradient = svgLinearGradient->GetGradient();
+    auto spreadMethod = gradient.GetSpreadMethod();
+    MockContainer::TearDown();
+    EXPECT_EQ(static_cast<int32_t>(spreadMethod), static_cast<int32_t>(OHOS::Ace::SpreadMethod::PAD));
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest003
+ * @tc.desc: test LinearGradient spread repeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest003, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgGradient>(SvgGradient::CreateLinearGradient());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    svgLinearGradient->SetAttr("spreadmethod", "repeat");
+    auto gradient = svgLinearGradient->GetGradient();
+    auto spreadMethod = gradient.GetSpreadMethod();
+    MockContainer::TearDown();
+    EXPECT_EQ(static_cast<int32_t>(spreadMethod), static_cast<int32_t>(OHOS::Ace::SpreadMethod::REFLECT));
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest004
+ * @tc.desc: test LinearGradient spread reflect apiLess or equal 12
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest004, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgGradient>(SvgGradient::CreateLinearGradient());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    svgLinearGradient->SetAttr("gradienttransform", "scale(1.5)");
+    svgLinearGradient->SetAttr("spreadmethod", "reflect");
+    auto gradient = svgLinearGradient->GetGradient();
+    auto spreadMethod = gradient.GetSpreadMethod();
+    MockContainer::TearDown();
+    EXPECT_EQ(static_cast<int32_t>(spreadMethod), static_cast<int32_t>(OHOS::Ace::SpreadMethod::REFLECT));
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest005
+ * @tc.desc: test LinearGradient spread pad, apiLess or equal 12
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest005, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgGradient>(SvgGradient::CreateLinearGradient());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    svgLinearGradient->SetAttr("spreadmethod", "pad");
+    auto gradient = svgLinearGradient->GetGradient();
+    auto spreadMethod = gradient.GetSpreadMethod();
+    MockContainer::TearDown();
+    EXPECT_EQ(static_cast<int32_t>(spreadMethod), static_cast<int32_t>(OHOS::Ace::SpreadMethod::PAD));
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest006
+ * @tc.desc: test LinearGradient spread repeat, apiLess or equal 12
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest006, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgGradient>(SvgGradient::CreateLinearGradient());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    svgLinearGradient->SetAttr("spreadmethod", "repeat");
+    auto gradient = svgLinearGradient->GetGradient();
+    auto spreadMethod = gradient.GetSpreadMethod();
+    MockContainer::TearDown();
+    EXPECT_EQ(static_cast<int32_t>(spreadMethod), static_cast<int32_t>(OHOS::Ace::SpreadMethod::REPEAT));
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest001, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    Size viewPort(100, 100);
+    auto rsPath = svgPolygon->AsPath(viewPort);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest002
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest002, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    svgPolygon->polyAttr_.points = "abc";
+    Size viewPort(100, 100);
+    auto rsPath = svgPolygon->AsPath(viewPort);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest003
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest003, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    svgPolygon->polyAttr_.points = "200 210";
+    Size viewPort(100, 100);
+    auto rsPath = svgPolygon->AsPath(viewPort);
+    EXPECT_EQ(rsPath.IsValid(), false);
 }
 } // namespace OHOS::Ace::NG
