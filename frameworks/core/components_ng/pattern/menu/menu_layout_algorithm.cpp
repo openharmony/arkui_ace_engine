@@ -241,6 +241,14 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
     }
     return maxGridCounts;
 }
+
+RefPtr<NG::MenuTheme> GetMenuTheme(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    return pipelineContext->GetTheme<NG::MenuTheme>();
+}
 } // namespace
 
 MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag,
@@ -317,9 +325,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    auto menuTheme = GetMenuTheme(menuNode);
     CHECK_NULL_VOID(menuTheme);
     auto beforeAnimationScale = menuPattern->GetPreviewBeforeAnimationScale();
     auto afterAnimationScale = menuPattern->GetPreviewAfterAnimationScale();
@@ -352,6 +358,10 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     }
     dumpInfo_.defaultPlacement = PlacementUtils::ConvertPlacementToString(placement_);
     InitSpace(props, menuPattern);
+    auto previewRect = menuPattern->GetPreviewRect();
+    previewOriginOffset_ = menuPattern->GetPreviewOriginOffset();
+    previewOffset_ = previewRect.GetOffset();
+    previewSize_ = previewRect.GetSize();
 }
 
 void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern)
@@ -826,9 +836,44 @@ void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameN
     }
 }
 
-void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& menuWindowRect,
-    RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage)
+void MenuLayoutAlgorithm::CheckPreviewSize(
+    const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<MenuPattern>& menuPattern)
 {
+    CHECK_NULL_VOID(previewLayoutWrapper && menuPattern);
+    auto previewNode = previewLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(previewNode);
+    auto tag = previewNode->GetTag();
+    auto isPreview = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_VOID(isPreview);
+
+    auto previewGeometryNode = previewNode->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+
+    if (menuPattern->GetIsFirstShow()) {
+        menuPattern->SetPreviewIdealSize(previewSize);
+        return;
+    }
+
+    if (previewSize != menuPattern->GetPreviewIdealSize()) {
+        auto menuWrapper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto constraint = menuWrapperPattern->GetChildLayoutConstraint();
+        CHECK_NULL_VOID(constraint.maxSize.IsPositive() && constraint.percentReference.IsPositive());
+        auto layoutProperty = previewLayoutWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        previewLayoutWrapper->Measure(constraint);
+        menuPattern->SetPreviewIdealSize(previewGeometryNode->GetMarginFrameSize());
+    }
+}
+
+void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& menuWindowRect,
+    RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, const RefPtr<LayoutWrapper>& menuLayoutWrapper)
+{
+    CHECK_NULL_VOID(child);
     auto hostNode = child->GetHostNode();
     auto geometryNode = child->GetGeometryNode();
     if (!hostNode || !geometryNode) {
@@ -842,7 +887,14 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
         return;
     }
 
-    if (isImageNode && isShowHoverImage) {
+    CHECK_NULL_VOID(menuLayoutWrapper);
+    auto menuNode = menuLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    CheckPreviewSize(child, menuPattern);
+
+    if (isImageNode && menuPattern->GetIsShowHoverImage()) {
         return;
     }
 
@@ -877,7 +929,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         if (!hostNode || !geometryNode) {
             continue;
         }
-        GetPreviewNodeTotalSize(child, param_.menuWindowRect, previewLayoutWrapper, size, isShowHoverImage);
+        GetPreviewNodeTotalSize(child, param_.menuWindowRect, previewLayoutWrapper, size, menuLayoutWrapper);
         auto menuPattern = hostNode->GetPattern<MenuPattern>();
         if (hostNode->GetTag() == V2::MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
             menuLayoutWrapper = child;
@@ -1326,6 +1378,7 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
     auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
+    menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
 }
 
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
