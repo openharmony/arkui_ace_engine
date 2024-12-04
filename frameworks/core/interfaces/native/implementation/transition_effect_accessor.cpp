@@ -31,7 +31,49 @@ void DestroyPeerImpl(TransitionEffectPeer* peer)
 TransitionEffectPeer* CtorImpl(const Ark_String* type,
                                const Ark_TransitionEffects* effect)
 {
-    return new TransitionEffectPeer();
+    auto valueText = Converter::Convert<std::string>(*type);
+    TransitionEffectPeer* peer = new TransitionEffectPeer();
+    auto emptyDimension = Dimension();
+    if (valueText == "translate") {
+        auto x = Converter::OptConvert<CalcDimension>(effect->translate.x.value);
+        auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
+        auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
+        TranslateOptions translate(
+            x.value_or(emptyDimension),
+            y.value_or(emptyDimension),
+            z.value_or(emptyDimension));
+        peer->handler = new ChainedTranslateEffect(translate);
+    } else if (valueText == "rotate") {
+        auto x = Converter::Convert<float>(effect->rotate.x.value);
+        auto y = Converter::Convert<float>(effect->rotate.y.value);
+        auto z = Converter::Convert<float>(effect->rotate.z.value);
+        auto centerX = Converter::OptConvert<CalcDimension>(effect->rotate.centerX.value);
+        auto centerY = Converter::OptConvert<CalcDimension>(effect->rotate.centerY.value);
+        auto centerZ = Converter::OptConvert<CalcDimension>(effect->rotate.centerZ.value);
+        auto perspective = Converter::Convert<float>(effect->rotate.centerZ.value);
+        auto angle = Converter::OptConvert<float>(effect->rotate.angle);
+        RotateOptions rotate(x, y, z, angle.value_or(0),
+            centerX.value_or(emptyDimension),
+            centerY.value_or(emptyDimension),
+            centerZ.value_or(emptyDimension),
+            perspective);
+        peer->handler = new ChainedRotateEffect(rotate);
+    } else if (valueText == "scale") {
+        auto x = Converter::Convert<float>(effect->scale.x.value);
+        auto y = Converter::Convert<float>(effect->scale.y.value);
+        auto z = Converter::Convert<float>(effect->scale.z.value);
+        auto centerX = Converter::OptConvert<CalcDimension>(effect->scale.centerX.value);
+        auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
+        ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
+        peer->handler = new ChainedScaleEffect(scale);
+    } else if (valueText == "opacity") {
+        auto opacity = Converter::Convert<float>(effect->opacity);
+        peer->handler = new ChainedOpacityEffect(opacity);
+    } else if (valueText == "move") {        
+        auto move = Converter::OptConvert<TransitionEdge>(effect->move);
+        peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
+    }
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,7 +82,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 {
     CHECK_NULL_RETURN(options, 0);
-    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_String type = Converter::ArkValue<Ark_String>("translate");
     Ark_TransitionEffects effects {
         .translate = *options
     };
@@ -49,7 +91,7 @@ Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
 {
     CHECK_NULL_RETURN(options, 0);
-    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_String type = Converter::ArkValue<Ark_String>("rotate");
     Ark_TransitionEffects effects {
         .rotate = *options
     };
@@ -58,7 +100,7 @@ Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
 Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
-    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_String type = Converter::ArkValue<Ark_String>("scale");
     Ark_TransitionEffects effects {
         .scale = *options
     };
@@ -67,7 +109,7 @@ Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
 Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 {
     CHECK_NULL_RETURN(alpha, nullptr);
-    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_String type = Converter::ArkValue<Ark_String>("opacity");
     Ark_TransitionEffects effects {
         .opacity = *alpha
     };
@@ -75,7 +117,7 @@ Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 }
 Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 {
-    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_String type = Converter::ArkValue<Ark_String>("move");
     Ark_TransitionEffects effects {
         .move = edge
     };
@@ -86,14 +128,8 @@ Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
 {
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
-    auto type = Converter::ArkValue<Ark_String>("static");
-    Ark_Literal_TransitionEffect_appear_disappear assym;
-    assym.appear = *appear;
-    assym.disappear = *disappear;
-    Ark_TransitionEffects effects {
-        .asymmetric = assym
-    };
-    return CtorImpl(&type, &effects);
+    LOGE("TransitionEffectAccessor::AsymmetricImpl Not implemented.");
+    return nullptr;
 }
 Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
