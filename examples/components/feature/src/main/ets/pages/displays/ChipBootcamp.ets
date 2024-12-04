@@ -108,38 +108,48 @@ export struct ChipBootcamp {
             width: useEnabled(this.enableChipOptionPrefixIconSizeWidth, this.chipOptionPrefixIconSizeWidth),
             height: useEnabled(this.enableChipOptionPrefixIconSizeHeight, this.chipOptionPrefixIconSizeHeight) },
             fillColor: useEnabled(this.enableChipOptionPrefixIconFillColor, this.chipOptionPrefixIconFillColor),
-            activatedFillColor: useEnabled(this.enableChipOptionPrefixIconActivatedFillColor, this.chipOptionPrefixIconActivatedFillColor)
+            activatedFillColor: useEnabled(this.enableChipOptionPrefixIconActivatedFillColor,
+              this.chipOptionPrefixIconActivatedFillColor)
         },
         label: {
           text: useEnabled(this.enableChipOptionLabelText, this.chipOptionLabelText) as string,
           fontSize: useEnabled(this.enableChipOptionLabelFontSize, this.chipOptionLabelFontSize),
           fontColor: useEnabled(this.enableChipOptionLabelFontColor, this.chipOptionLabelFontColor),
-          activatedFontColor: useEnabled(this.enableChipOptionLabelActivatedFontColor, this.chipOptionLabelActivatedFontColor),
-          fontFamily: "HarmonyOS Sans",
+          activatedFontColor: useEnabled(this.enableChipOptionLabelActivatedFontColor,
+            this.chipOptionLabelActivatedFontColor),
           labelMargin: {
             left: useEnabled(this.enableChipOptionLabelLabelMarginLeft, this.chipOptionLabelLabelMarginLeft),
             right: useEnabled(this.enableChipOptionLabelLabelMarginRight, this.chipOptionLabelLabelMarginRight)},
           localizedLabelMargin: {
             start: {
-              value: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginStartValue, this.chipOptionLabelLocalizedLabelMarginStartValue) as number,
-              unit: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginStartUnit, this.chipOptionLabelLocalizedLabelMarginStartUnit) as LengthUnit
+              value: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginStartValue,
+                this.chipOptionLabelLocalizedLabelMarginStartValue) as number,
+              unit: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginStartUnit,
+                this.chipOptionLabelLocalizedLabelMarginStartUnit) as LengthUnit
             },
             end: {
-              value: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginEndValue, this.chipOptionLabelLocalizedLabelMarginEndValue) as number,
-              unit: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginEndUnit, this.chipOptionLabelLocalizedLabelMarginEndUnit) as LengthUnit
+              value: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginEndValue,
+                this.chipOptionLabelLocalizedLabelMarginEndValue) as number,
+              unit: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginEndUnit,
+                this.chipOptionLabelLocalizedLabelMarginEndUnit) as LengthUnit
             }
           }
         },
         suffixIcon: {
           src: useEnabled(this.enableChipOptionSuffixIconSrc, this.chipOptionSuffixIconSrc) as ResourceStr,
           size: {
-            width: useEnabled(this.enableChipOptionSuffixIconSizeWidth, this.chipOptionSuffixIconSizeWidth),
-            height: useEnabled(this.enableChipOptionSuffixIconSizeHeight, this.chipOptionSuffixIconSizeHeight) },
-          fillColor: useEnabled(this.enableChipOptionSuffixIconFillColor, this.chipOptionSuffixIconFillColor),
-          activatedFillColor: useEnabled(this.enableChipOptionSuffixIconActivatedFillColor, this.chipOptionSuffixIconActivatedFillColor)
+            width: useEnabled(this.enableChipOptionSuffixIconSizeWidth,
+              this.chipOptionSuffixIconSizeWidth),
+            height: useEnabled(this.enableChipOptionSuffixIconSizeHeight,
+              this.chipOptionSuffixIconSizeHeight) },
+          fillColor: useEnabled(this.enableChipOptionSuffixIconFillColor,
+            this.chipOptionSuffixIconFillColor),
+          activatedFillColor: useEnabled(this.enableChipOptionSuffixIconActivatedFillColor,
+            this.chipOptionSuffixIconActivatedFillColor)
         },
         backgroundColor: useEnabled(this.enableChipOptionBackgroundColor, this.chipOptionBackgroundColor),
-        activatedBackgroundColor: useEnabled(this.enableChipOptionActivatedBackgroundColor, this.chipOptionActivatedBackgroundColor),
+        activatedBackgroundColor: useEnabled(this.enableChipOptionActivatedBackgroundColor,
+          this.chipOptionActivatedBackgroundColor),
         borderRadius: useEnabled(this.enableChipOptionBorderRadius, this.chipOptionBorderRadius),
         allowClose: useEnabled(this.enableChipOptionAllowClose, this.chipOptionAllowClose),
         onClose: ()=>{
