@@ -71,53 +71,65 @@ export struct ChipGroupBootcamp {
         items: [
           {
             prefixIcon: { src: $r('app.media.app_icon') },
-            label: { text: "操作块1" },
+            label: { text: '操作块1' },
             suffixIcon: { src: $r('sys.media.ohos_ic_public_cut') },
             allowClose: false
           },
           {
             prefixIcon: { src: $r('sys.media.ohos_ic_public_copy') },
-            label: { text: "操作块2" },
+            label: { text: '操作块2' },
             allowClose: true
           },
           {
             prefixIcon: { src: $r('sys.media.ohos_ic_public_clock') },
-            label: { text: "操作块3" },
+            label: { text: '操作块3' },
             allowClose: true
           },
           {
             prefixIcon: { src: $r('sys.media.ohos_ic_public_cast_stream') },
-            label: { text: "操作块4" },
+            label: { text: '操作块4' },
             allowClose: true
           },
           {
             prefixIcon: { src: $r('sys.media.ohos_ic_public_cast_mirror') },
-            label: { text: "操作块5" },
+            label: { text: '操作块5' },
             allowClose: true
           },
           {
             prefixIcon: { src: $r('sys.media.ohos_ic_public_cast_stream') },
-            label: { text: "操作块6" },
+            label: { text: '操作块6' },
             allowClose: true
           },
         ],
         itemStyle: {
-          size: useEnabled(this.enableChipGroupItemStyleSize, this.chipGroupItemStyleSize),
-          backgroundColor: useEnabled(this.enableChipGroupItemStyleBackgroundColor, this.chipGroupItemStyleBackgroundColor),
-          fontColor: useEnabled(this.enableChipGroupItemStyleFontColor, this.chipGroupItemStyleFontColor),
-          selectedBackgroundColor: useEnabled(this.enableChipGroupItemStyleSelectedBackgroundColor, this.chipGroupItemStyleSelectedBackgroundColor),
-          selectedFontColor: useEnabled(this.enableChipGroupItemStyleSelectedFontColor, this.chipGroupItemStyleSelectedFontColor),
+          size:
+          useEnabled(this.enableChipGroupItemStyleSize, this.chipGroupItemStyleSize),
+          backgroundColor:
+          useEnabled(this.enableChipGroupItemStyleBackgroundColor, this.chipGroupItemStyleBackgroundColor),
+          fontColor:
+          useEnabled(this.enableChipGroupItemStyleFontColor, this.chipGroupItemStyleFontColor),
+          selectedBackgroundColor:
+          useEnabled(this.enableChipGroupItemStyleSelectedBackgroundColor, this.chipGroupItemStyleSelectedBackgroundColor),
+          selectedFontColor:
+          useEnabled(this.enableChipGroupItemStyleSelectedFontColor, this.chipGroupItemStyleSelectedFontColor),
         },
-        selectedIndexes: useEnabled(this.enableChipGroupSelectedIndexes, this.chipGroupSelectedIndexes),
-        multiple: useEnabled(this.enableChipGroupMultiple, this.chipGroupMultiple),
+        selectedIndexes:
+        useEnabled(this.enableChipGroupSelectedIndexes, this.chipGroupSelectedIndexes),
+        multiple:
+        useEnabled(this.enableChipGroupMultiple, this.chipGroupMultiple),
         chipGroupSpace: {
-          itemSpace: useEnabled(this.enableChipGroupChipGroupSpaceItemSpace, this.chipGroupChipGroupSpaceItemSpace),
-          startSpace: useEnabled(this.enableChipGroupChipGroupSpaceStartSpace, this.chipGroupChipGroupSpaceStartSpace),
-          endSpace: useEnabled(this.enableChipGroupChipGroupSpaceEndSpace, this.chipGroupChipGroupSpaceEndSpace)
+          itemSpace:
+          useEnabled(this.enableChipGroupChipGroupSpaceItemSpace, this.chipGroupChipGroupSpaceItemSpace),
+          startSpace:
+          useEnabled(this.enableChipGroupChipGroupSpaceStartSpace, this.chipGroupChipGroupSpaceStartSpace),
+          endSpace:
+          useEnabled(this.enableChipGroupChipGroupSpaceEndSpace, this.chipGroupChipGroupSpaceEndSpace)
         },
         chipGroupPadding: {
-          top: useEnabled(this.enableChipGroupChipGroupPaddingTop, this.chipGroupChipGroupPaddingTop) as number,
-          bottom: useEnabled(this.enableChipGroupChipGroupPaddingBottom, this.chipGroupChipGroupPaddingBottom) as number },
+          top:
+          useEnabled(this.enableChipGroupChipGroupPaddingTop, this.chipGroupChipGroupPaddingTop) as number,
+          bottom:
+          useEnabled(this.enableChipGroupChipGroupPaddingBottom, this.chipGroupChipGroupPaddingBottom) as number },
         onChange: (activatedChipsIndex:Array<number>) => {
           console.log('chips on clicked, activated index ' + activatedChipsIndex)
         },
