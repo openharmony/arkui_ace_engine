@@ -22,9 +22,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class ListLayoutTestNg : public ListTestNg {
 public:
     void UpdateContentModifier();
@@ -32,6 +29,9 @@ public:
     void UpdateDividerMap();
     void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
     void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
+    AssertionResult IsExist(int32_t index);
+    AssertionResult IsExistAndActive(int32_t index);
+    AssertionResult IsExistAndInActive(int32_t index);
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -86,6 +86,36 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawLine(_, _)).Times(expectLineNumber); // DrawLine
     paintMethod->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+}
+
+AssertionResult ListLayoutTestNg::IsExist(int32_t index)
+{
+    if (GetChildFrameNode(frameNode_, index)) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult ListLayoutTestNg::IsExistAndActive(int32_t index)
+{
+    if (!GetChildFrameNode(frameNode_, index)) {
+        return AssertionFailure();
+    }
+    if (GetChildFrameNode(frameNode_, index)->IsActive()) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult ListLayoutTestNg::IsExistAndInActive(int32_t index)
+{
+    if (!GetChildFrameNode(frameNode_, index)) {
+        return AssertionFailure();
+    }
+    if (GetChildFrameNode(frameNode_, index)->IsActive()) {
+        return AssertionFailure();
+    }
+    return AssertionSuccess();
 }
 
 /**
@@ -1986,5 +2016,141 @@ HWTEST_F(ListLayoutTestNg, ListGetChildrenExpandedSize001, TestSize.Level1)
     CreateListItems(13);
     CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+}
+
+/**
+ * @tc.name: Cache001
+ * @tc.desc: Test List cache, will preload cache number items
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Cache001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(10, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // in view
+    EXPECT_TRUE(IsExistAndActive(3));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(4));
+    EXPECT_TRUE(IsExistAndInActive(5));
+    // below cache
+    EXPECT_FALSE(IsExist(6));
+
+    /**
+     * @tc.steps: step1. Scroll the List
+     * @tc.expected: Preload top/bottom items that out of view
+     */
+    ScrollTo(300.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // above cache
+    EXPECT_FALSE(IsExist(0));
+    // above view
+    EXPECT_TRUE(IsExistAndInActive(1));
+    EXPECT_TRUE(IsExistAndInActive(2));
+    // in view, change to active
+    EXPECT_TRUE(IsExistAndActive(4));
+    EXPECT_TRUE(IsExistAndActive(5));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(7));
+    EXPECT_TRUE(IsExistAndInActive(8));
+    // below cache
+    EXPECT_FALSE(IsExist(9));
+}
+
+/**
+ * @tc.name: Cache002
+ * @tc.desc: Test List cache with lanes, will preload cache number row
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Cache002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(20, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // in view
+    EXPECT_TRUE(IsExistAndActive(6));
+    EXPECT_TRUE(IsExistAndActive(7));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(8));
+    EXPECT_TRUE(IsExistAndInActive(9));
+    EXPECT_TRUE(IsExistAndInActive(10));
+    EXPECT_TRUE(IsExistAndInActive(11));
+    // below cache
+    EXPECT_FALSE(IsExist(12));
+    EXPECT_FALSE(IsExist(13));
+
+    /**
+     * @tc.steps: step1. Scroll the List
+     * @tc.expected: Preload top/bottom items that out of view
+     */
+    ScrollTo(300.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // above cache
+    EXPECT_FALSE(IsExist(0));
+    EXPECT_FALSE(IsExist(1));
+    // above view
+    EXPECT_TRUE(IsExistAndInActive(2));
+    EXPECT_TRUE(IsExistAndInActive(3));
+    EXPECT_TRUE(IsExistAndInActive(4));
+    EXPECT_TRUE(IsExistAndInActive(5));
+    // in view, change to active
+    EXPECT_TRUE(IsExistAndActive(8));
+    EXPECT_TRUE(IsExistAndActive(9));
+    EXPECT_TRUE(IsExistAndActive(10));
+    EXPECT_TRUE(IsExistAndActive(11));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(14));
+    EXPECT_TRUE(IsExistAndInActive(15));
+    EXPECT_TRUE(IsExistAndInActive(16));
+    EXPECT_TRUE(IsExistAndInActive(17));
+    // below cache
+    EXPECT_FALSE(IsExist(18));
+    EXPECT_FALSE(IsExist(19));
+}
+
+/**
+ * @tc.name: Cache003
+ * @tc.desc: Test List cache with ListItemGroup, will preload cache number group
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    CreateItemGroupsInLazyForEach(10);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // in view
+    EXPECT_TRUE(IsExistAndActive(1));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(2));
+    EXPECT_TRUE(IsExistAndInActive(3));
+    // below cache
+    EXPECT_FALSE(IsExist(4));
+
+    /**
+     * @tc.steps: step1. Scroll the List
+     * @tc.expected: Preload top/bottom groups that out of view
+     */
+    ScrollTo(600.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // above cache
+    EXPECT_FALSE(IsExist(0));
+    // above view
+    EXPECT_TRUE(IsExistAndInActive(1));
+    EXPECT_TRUE(IsExistAndInActive(2));
+    // in view, change to active
+    EXPECT_TRUE(IsExistAndActive(3));
+    EXPECT_TRUE(IsExistAndActive(4));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(5));
+    EXPECT_TRUE(IsExistAndInActive(6));
+    // below cache
+    EXPECT_FALSE(IsExist(7));
 }
 } // namespace OHOS::Ace::NG

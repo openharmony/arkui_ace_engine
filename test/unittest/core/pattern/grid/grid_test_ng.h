@@ -52,7 +52,7 @@ public:
     void GetGrid();
     GridModelNG CreateGrid();
     GridModelNG CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
-    void CreateLazyForEachItems(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
 
     /**
      * @param height -2 corresponds to 100% height

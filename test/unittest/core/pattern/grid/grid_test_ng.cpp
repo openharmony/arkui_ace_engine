@@ -81,7 +81,7 @@ void GridTestNg::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldNodes(); // Each testcase will create new list at begin
+    ClearOldNodes(); // Each testCase will create new list at begin
     MockAnimationManager::GetInstance().Reset();
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(0);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(0);
@@ -308,7 +308,7 @@ private:
     const std::function<float(int32_t)> getHeight_;
 };
 
-void GridTestNg::CreateLazyForEachItems(int32_t itemNumber, std::function<float(uint32_t)>&& getHeight)
+void GridTestNg::CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(uint32_t)>&& getHeight)
 {
     RefPtr<LazyForEachActuator> mockLazy = AceType::MakeRefPtr<GridMockLazy>(itemNumber, std::move(getHeight));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
