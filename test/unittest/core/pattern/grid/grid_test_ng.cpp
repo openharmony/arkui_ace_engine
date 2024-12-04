@@ -86,6 +86,7 @@ void GridTestNg::TearDown()
     MockAnimationManager::GetInstance().Reset();
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(0);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(0);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
 }
 
 void GridTestNg::GetGrid()
@@ -221,6 +222,12 @@ void GridTestNg::AddFixedHeightItems(int32_t cnt, float height)
     }
 }
 
+void GridTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
+{
+    pattern_->ScrollToEdge(scrollEdgeType, false);
+    FlushUITasks();
+}
+
 void GridTestNg::ScrollTo(float position)
 {
     pattern_->ScrollTo(position);
@@ -343,6 +350,13 @@ AssertionResult GridTestNg::Position(float expectOffset)
         MockAnimationManager::GetInstance().Tick();
         FlushUITasks();
     }
+    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
+}
+
+AssertionResult GridTestNg::VelocityPosition(float velocity, float expectOffset)
+{
+    MockAnimationManager::GetInstance().TickByVelocity(velocity);
+    FlushUITasks();
     return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
 }
 } // namespace OHOS::Ace::NG
