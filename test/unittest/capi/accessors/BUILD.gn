@@ -51,6 +51,7 @@ ace_unittest("capi_all_accessors_test") {
     "tabs_controller_accessor_test.cpp",
     "text_clock_controller_accessor_test.cpp",
     "text_timer_controller_accessor_test.cpp",
+    "transition_effect_accessor_test.cpp",
     "video_controller_accessor_test.cpp",
     "water_flow_section_accessor_test.cpp",
     "web_context_menu_param_accessor_test.cpp",

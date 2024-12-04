@@ -16,13 +16,17 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-
-struct TransitionEffectPeer {};
+#include "transition_effect_peer_impl.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TransitionEffectAccessor {
+
 void DestroyPeerImpl(TransitionEffectPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 TransitionEffectPeer* CtorImpl(const Ark_String* type,
                                const Ark_TransitionEffects* effect)
@@ -35,38 +39,68 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 {
-    return 0;
+    CHECK_NULL_RETURN(options, 0);
+    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_TransitionEffects effects {
+        .translate = *options
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
 {
-    return 0;
+    CHECK_NULL_RETURN(options, 0);
+    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_TransitionEffects effects {
+        .rotate = *options
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
 {
-    return 0;
+    CHECK_NULL_RETURN(options, nullptr);
+    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_TransitionEffects effects {
+        .scale = *options
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 {
-    return 0;
+    CHECK_NULL_RETURN(alpha, 0);
+    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_TransitionEffects effects {
+        .opacity = *alpha
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 {
-    return 0;
+    CHECK_NULL_RETURN(edge, 0);
+    auto type = Converter::ArkValue<Ark_String>("static");
+    Ark_TransitionEffects effects {
+        .move = edge
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
                                  const Ark_TransitionEffect* disappear)
 {
+    LOGE("TransitionEffectAccessor::AsymmetricImpl Not implemented.");
     return 0;
 }
 Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, nullptr);
+    LOGE("TransitionEffectAccessor::AnimationImpl Return value must be TransitionEffect here.");
+    return nullptr;
 }
 Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
                               const Ark_TransitionEffect* transitionEffect)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, nullptr);
+    LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
+    return nullptr;
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()

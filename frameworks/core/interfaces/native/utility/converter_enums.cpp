@@ -1226,4 +1226,17 @@ void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestination
         default: LOGE("Unexpected enum value in Ark_NavDestinationMode: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src)
+{
+    switch (src) {
+        case ARK_TRANSITION_EDGE_TOP: dst = TransitionEdge::TOP; break;
+        case ARK_TRANSITION_EDGE_BOTTOM: dst = TransitionEdge::BOTTOM; break;
+        case ARK_TRANSITION_EDGE_START: dst = TransitionEdge::START; break;
+        case ARK_TRANSITION_EDGE_END: dst = TransitionEdge::END; break;
+        default:
+            LOGE("Unknown transition edge type: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
