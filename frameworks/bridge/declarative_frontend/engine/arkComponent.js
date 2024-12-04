@@ -3199,8 +3199,11 @@ class ArkComponent {
     this._nativePtrChanged = false;
   }
   setNodePtr(nodePtr) {
+    if (nodePtr === this.nativePtr) {
+      return;
+    }
     this.nativePtr = nodePtr;
-    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+    this._weakPtr = (nodePtr !== undefined && nodePtr !== null) ? getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr) : undefined;
   }
   setInstanceId(instanceId) {
     this._instanceId = instanceId;
