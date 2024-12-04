@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
-
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "test/mock/core/render/mock_paragraph.h"
