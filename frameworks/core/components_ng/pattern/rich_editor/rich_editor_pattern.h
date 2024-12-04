@@ -1075,6 +1075,7 @@ private:
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);
+    void HandleMouseSelect(const Offset& localOffset);
     void HandleMouseLeftButtonPress(const MouseInfo& info);
     void HandleMouseLeftButtonRelease(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
