@@ -281,9 +281,9 @@ OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
     return EdgesParamOptions {
         .value = EdgesParam {
             .top = OptConvert<Dimension>(src.top),
-            .left = OptConvert<Dimension>(src.start),
+            .start = OptConvert<Dimension>(src.start),
             .bottom = OptConvert<Dimension>(src.bottom),
-            .right = OptConvert<Dimension>(src.end),
+            .end = OptConvert<Dimension>(src.end),
         },
         .isLocalized = true
     };
