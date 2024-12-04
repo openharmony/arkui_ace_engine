@@ -564,7 +564,7 @@ void FormPattern::OnRebuildFrame()
         return;
     }
 
-    if (isEnableSkeleton && !isTransparencyEnable_ && !shouldAddChildAtReuildFrame()) {
+    if (isSkeletonAnimEnable_ && !isTransparencyEnable_ && !ShouldAddChildAtReuildFrame()) {
         return;
     }
 
@@ -2250,7 +2250,8 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
     }
 }
 
-bool FormPattern::shouldAddChildAtReuildFrame() {
+bool FormPattern::ShouldAddChildAtReuildFrame()
+{
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_RETURN(layoutProperty, true);
     auto externalRsNode = externalRenderContext->GetRSNode();
