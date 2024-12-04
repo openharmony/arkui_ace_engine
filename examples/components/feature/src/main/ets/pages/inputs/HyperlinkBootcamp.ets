@@ -44,7 +44,7 @@ export struct HyperlinkBootcamp {
   Content() {
     Column() {
       Row(){
-        Hyperlink('https://example.com/') {
+        Hyperlink('') {
           Image($r('app.media.background'))
             .width(200)
             .height(100)
@@ -52,7 +52,7 @@ export struct HyperlinkBootcamp {
       }
 
       Row(){
-        Hyperlink('https://example.com/', 'Go to the developer website') {}
+        Hyperlink('', 'Go to the developer website') {}
           .color(useEnabled(this.enableColor,this.color))
       }.width('100%').height('100%').justifyContent(FlexAlign.Center)
 
