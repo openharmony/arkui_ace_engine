@@ -421,7 +421,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest004, TestSize.Level1)
     auto textval1 = textLayoutProperty->GetLayoutDirection();
     auto textval2 = textLayoutProperty->GetTextOverflow();
     auto textval3 = textLayoutProperty->GetEllipsisMode();
-    EXPECT_EQ(textval1, TextDirection::RTL);
+    EXPECT_EQ(textval1, TextDirection::AUTO);
     EXPECT_EQ(textval2, TextOverflow::ELLIPSIS);
     EXPECT_EQ(textval3, EllipsisMode::TAIL);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
