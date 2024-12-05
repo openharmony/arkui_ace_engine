@@ -2980,7 +2980,6 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
     int32_t pointX = 0;
     int32_t pointY = 0;
     int64_t nodeId = -1;
-    int32_t action = 0;
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
         if (*arg == "-w") {
             useWindowId = true;
@@ -3011,7 +3010,6 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
         } else {
             if (mode == DumpMode::NODE) {
                 mode = DumpMode::HANDLE_EVENT;
-                action = StringUtils::StringToInt(*arg);
                 break;
             } else {
                 mode = DumpMode::NODE;
