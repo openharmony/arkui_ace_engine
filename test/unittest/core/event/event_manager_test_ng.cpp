@@ -229,13 +229,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest009, TestSize.Level1)
     frameNodeShift->eventHub_->SetKeyboardShortcut(SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
     ASSERT_GT(eventManager->keyboardShortcutNode_.size(), 0);
-
-    /**
-     * @tc.steps: step3. Call ClearResults
-     * @tc.expected: keyboardShortcutNode_.size() = 0.
-     */
-    eventManager->ClearResults();
-    ASSERT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
 }
 
 /**

@@ -1183,6 +1183,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent002, TestSize.Level1)
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     focusHub->SetFocusType(FocusType::NODE);
+    focusHub->currentFocus_ = true;
     auto onKeyEventCallback = [](KeyEventInfo& eventInfo) -> bool {
         eventInfo.SetStopPropagation(true);
         return false;
@@ -1555,6 +1556,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableKey001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
 
     /**
      * @tc.steps2: call the function OnKey with FocusType::NODE.
