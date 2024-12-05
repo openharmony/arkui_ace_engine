@@ -147,16 +147,17 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
+        bool isColorAvailable = false;
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
             if (basisTheme) {
-                color = basisTheme->Colors()->GetByIndex(i);
-                TokenThemeStorage::GetInstance()->GetThemeColorSet(isDark)[i] = true;
-            } else {
-                TokenThemeStorage::GetInstance()->GetThemeColorSet(isDark)[i] = false;
+                color = basisTheme->Colors()->GetByIndex(i);                
+                isColorAvailable = true;
             }
         } else {
-            TokenThemeStorage::GetInstance()->GetThemeColorSet(isDark)[i] = true;
+            isColorAvailable = true;
         }
+        TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(isDark, i, isColorAvailable);
+        
         colors.push_back(static_cast<ArkUI_Uint32>(color.GetValue()));
     }
 
