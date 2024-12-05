@@ -1878,9 +1878,12 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg062, TestSize.Level1)
     sideBarContainerModelInstance.SetControlButtonHeight(AceType::RawPtr(sideBarNode), HEIGHT);
     sideBarContainerModelInstance.SetControlButtonLeft(AceType::RawPtr(sideBarNode), LEFT);
     sideBarContainerModelInstance.SetControlButtonTop(AceType::RawPtr(sideBarNode), TOP);
-    sideBarContainerModelInstance.SetControlButtonShowIconInfo(AceType::RawPtr(sideBarNode), SHOW_ICON_STR, false, nullptr);
-    sideBarContainerModelInstance.SetControlButtonHiddenIconInfo(AceType::RawPtr(sideBarNode), HIDDEN_ICON_STR, false, nullptr);
-    sideBarContainerModelInstance.SetControlButtonSwitchingIconInfo(AceType::RawPtr(sideBarNode), SWITCHING_ICON_STR, false, nullptr);
+    sideBarContainerModelInstance.SetControlButtonShowIconInfo(AceType::RawPtr(sideBarNode),
+        SHOW_ICON_STR, false, nullptr);
+    sideBarContainerModelInstance.SetControlButtonHiddenIconInfo(AceType::RawPtr(sideBarNode),
+        HIDDEN_ICON_STR, false, nullptr);
+    sideBarContainerModelInstance.SetControlButtonSwitchingIconInfo(AceType::RawPtr(sideBarNode),
+        SWITCHING_ICON_STR, false, nullptr);
     sideBarContainerModelInstance.SetShowControlButton(AceType::RawPtr(sideBarNode), SHOW_CONTROL_BUTTON);
     sideBarContainerModelInstance.SetAutoHide(AceType::RawPtr(sideBarNode), AUTO_HIDE);
     sideBarContainerModelInstance.SetMinContentWidth(AceType::RawPtr(sideBarNode), MIN_CONTENT_WIDTH);
