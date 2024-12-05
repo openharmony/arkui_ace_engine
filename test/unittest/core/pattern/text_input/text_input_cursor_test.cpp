@@ -604,6 +604,15 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
      */
     auto textFiledController = pattern_->GetTextFieldController();
     textFiledController->CaretPosition(5);
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 5;
+            start = 0;
+            end = 5;
+            return true;
+    });
+    pattern_->paragraph_ = paragraph;
     pattern_->HandleSelectionLeftWord();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
@@ -613,6 +622,13 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
      * @tc.steps: Move the handles and selection right word.
      *            Verify the selection data.
      */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 5;
+            start = 5;
+            end = 26;
+            return true;
+    });
     pattern_->HandleSelectionRightWord();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
@@ -637,6 +653,15 @@ HWTEST_F(TextInputCursorTest, OnHandleMove004, TestSize.Level1)
      * @tc.steps: Move the handles and selection leftword "please".
      *            Verify the selection data.
      */
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 6;
+            start = 0;
+            end = 6;
+            return true;
+    });
+    pattern_->paragraph_ = paragraph;
     pattern_->HandleSetSelection(6, 6, false);
     pattern_->HandleSelect(select[0]);
     FlushLayoutTask(frameNode_);
@@ -647,6 +672,13 @@ HWTEST_F(TextInputCursorTest, OnHandleMove004, TestSize.Level1)
      * @tc.steps: Move the handles and selection rightword "input".
      *            Verify the selection data.
      */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 7;
+            start = 7;
+            end = 13;
+            return true;
+    });
     pattern_->HandleSetSelection(7, 7, false);
     pattern_->HandleSelect(select[1]);
     FlushLayoutTask(frameNode_);
@@ -742,6 +774,15 @@ HWTEST_F(TextInputCursorTest, CursonMoveLeftWordTest001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
     GetFocus();
 
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 0;
+            start = 0;
+            end = 26;
+            return true;
+    });
+    pattern_->paragraph_ = paragraph;
     auto ret = pattern_->CursorMoveLeftWord();
 
     /**
@@ -757,6 +798,13 @@ HWTEST_F(TextInputCursorTest, CursonMoveLeftWordTest001, TestSize.Level1)
      */
     pattern_->HandleSetSelection(3, 5, false);
     FlushLayoutTask(frameNode_);
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 5;
+            start = 0;
+            end = 5;
+            return true;
+    });
     ret = pattern_->CursorMoveLeftWord();
 
     /**
@@ -940,6 +988,15 @@ HWTEST_F(TextInputCursorTest, CursorMoveRightWordTest001, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 0;
+            start = 0;
+            end = 26;
+            return true;
+    });
+    pattern_->paragraph_ = paragraph;
     auto ret = pattern_->CursorMoveRightWord();
 
     /**
@@ -966,6 +1023,13 @@ HWTEST_F(TextInputCursorTest, CursorMoveRightWordTest001, TestSize.Level1)
     /**
      * @tc.steps: steps3. Continue moving to the right word.
      */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 26;
+            start = 0;
+            end = 26;
+            return true;
+    });
     ret = pattern_->CursorMoveRightWord();
 
     /**
@@ -982,6 +1046,13 @@ HWTEST_F(TextInputCursorTest, CursorMoveRightWordTest001, TestSize.Level1)
     ret = pattern_->CursorMoveLineBegin();
     pattern_->HandleSetSelection(0, DEFAULT_TEXT.length(), false);
     FlushLayoutTask(frameNode_);
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 0;
+            start = 0;
+            end = 26;
+            return true;
+    });
     ret = pattern_->CursorMoveRightWord();
 
     /**
@@ -1283,6 +1354,15 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
      */
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(5);
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 5;
+            start = 0;
+            end = 5;
+            return true;
+    });
+    pattern_->paragraph_ = paragraph;
     pattern_->HandleSelectionLeftWord();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->CheckPreviewTextValidate(PREVIEW_THR.text, PREVIEW_THR.range), -1);
