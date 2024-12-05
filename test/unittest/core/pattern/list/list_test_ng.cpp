@@ -394,32 +394,16 @@ AssertionResult ListTestNg::VelocityPosition(float velocity, float expectOffset)
     return VelocityPosition(frameNode_, velocity, expectOffset);
 }
 
-void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
-{
-    positionController_->ScrollToIndex(index, smooth, align, std::nullopt);
-    FlushUITasks();
-}
-
-AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
-{
-    return ScrollToIndex(index, smooth, align, std::nullopt, expectOffset);
-}
-
-AssertionResult ListTestNg::ScrollToIndex(
-    int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset, float expectOffset)
+void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     positionController_->ScrollToIndex(index, smooth, align, extraOffset);
     FlushUITasks();
-    return Position(-expectOffset);
 }
 
-AssertionResult ListTestNg::JumpToItemInGroup(
-    int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset)
+void ListTestNg::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
-    MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->JumpToItemInGroup(index, indexInGroup, smooth, align);
     FlushUITasks();
-    return Position(-expectOffset);
 }
 
 class ListItemMockLazy : public Framework::MockLazyForEachBuilder {

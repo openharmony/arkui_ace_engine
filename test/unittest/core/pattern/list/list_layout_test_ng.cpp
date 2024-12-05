@@ -428,6 +428,8 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     EXPECT_EQ(item2Rect.Bottom(), LIST_HEIGHT - contentEndOffset - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group1 = GetChildFrameNode(frameNode_, 1);
     groupRect = group1->GetGeometryNode()->GetFrameRect();
     groupPos = groupRect.Top();
@@ -435,6 +437,8 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
     item2Rect = GetChildRect(group1, 3);
@@ -494,12 +498,16 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     EXPECT_EQ(item2Rect.Bottom(), LIST_HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
     item1Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
     item2Rect = GetChildRect(group2, 3);
@@ -2189,7 +2197,8 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest001, TestSize.Level1)
      * @tc.steps: step2. Scroll to last item.
      * @tc.expected: current offset is 200
      */
-    EXPECT_TRUE(ScrollToIndex(5, false, ScrollAlign::END, 200.f));
+    ScrollToIndex(5, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-200.0f));
 
     /**
      * @tc.steps: step3. Delete last item.
@@ -2219,7 +2228,8 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest002, TestSize.Level1)
      * @tc.steps: step2. Scroll to last item.
      * @tc.expected: current offset is 500
      */
-    EXPECT_TRUE(ScrollToIndex(5, false, ScrollAlign::START, 500.f));
+    ScrollToIndex(5, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-500.0f));
 
     /**
      * @tc.steps: step3. Delete last 4 item.

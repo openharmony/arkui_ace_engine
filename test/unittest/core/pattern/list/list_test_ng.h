@@ -96,12 +96,8 @@ public:
     AssertionResult VelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset);
     AssertionResult Position(float expectOffset);
     AssertionResult VelocityPosition(float velocity, float expectOffset);
-    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align);
-    AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
-    AssertionResult ScrollToIndex(
-        int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset, float expectOffset);
-    AssertionResult JumpToItemInGroup(
-        int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset = 0.0);
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset = std::nullopt);
+    void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     void CreateItemsInLazyForEach(
         int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove = nullptr);
     void CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove = nullptr);
