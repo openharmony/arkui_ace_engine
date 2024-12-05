@@ -732,6 +732,7 @@ private:
     void ResetClipShape();
     void UpdateSheetWhenSheetTypeChanged();
     void GetCurrentScrollHeight();
+    void RecoverScrollOrResizeAvoidStatus();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
