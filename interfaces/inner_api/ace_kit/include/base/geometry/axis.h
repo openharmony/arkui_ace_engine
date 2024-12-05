@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_SIZE_H
-#define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_SIZE_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_GEOMETRY_AXIS_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_GEOMETRY_AXIS_H
 
-#include "interfaces/inner_api/ace_kit/include/base/geometry/ng/size_t.h"
+namespace OHOS::Ace {
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_SIZE_H
+enum class Axis {
+    VERTICAL = 0,
+    HORIZONTAL,
+    FREE,
+    NONE,
+};
+
+enum class RotateAxis {
+    AXIS_X,
+    AXIS_Y,
+    AXIS_Z,
+};
+
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_GEOMETRY_AXIS_H
