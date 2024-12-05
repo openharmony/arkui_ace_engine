@@ -77,17 +77,18 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
     static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate);
     static void SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGap);
     static void SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap);
-    static void SetScrollBarMode(FrameNode* frameNode, DisplayMode scrollBarMode);
-    static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& scrollBarWidth);
-    static void SetScrollBarColor(FrameNode* frameNode, const Color& scrollBarColor);
+    static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& scrollBarMode);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static void SetShowCached(FrameNode* frameNode, bool show);
-    static void SetLayoutDirection(FrameNode* frameNode, FlexDirection layoutDirection);
+    static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& layoutDirection);
     static void SetMaxCount(FrameNode* frameNode, int32_t maxCount);
     static void SetMinCount(FrameNode* frameNode, int32_t minCount);
     static void SetCellLength(FrameNode* frameNode, int32_t cellLength);
@@ -95,11 +96,12 @@ public:
     static void SetMultiSelectable(FrameNode* frameNode, bool multiSelectable);
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
 
-    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(
+        FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
-    static void SetFriction(FrameNode* frameNode, double friction);
-    static void SetAlignItems(FrameNode* frameNode, GridItemAlignment itemAlign);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
+    static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
     static float GetColumnsGap(FrameNode* frameNode);
@@ -110,8 +112,28 @@ public:
         const RefPtr<ScrollProxy>& scrollProxy);
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
 
+    static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
+
+    static void SetGridItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc);
+    static void SetGridItemAdapterCallFinish(FrameNode* frameNode, int start, int end);
+    static void SetGridItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc);
+    static RefPtr<FrameNode> CreateGrid(int32_t nodeId);
+
+    static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
+    static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);
+    static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
+    static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value);
+    static void SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value);
+    static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
+    static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
+    static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
+
 private:
-    void AddDragFrameNodeToManager() const;
+    static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

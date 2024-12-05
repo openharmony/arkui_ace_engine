@@ -87,6 +87,8 @@ public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
     static constexpr int32_t LAST_ITEM = -1;
 
+    static constexpr uint32_t INITIAL_RANGE_SECOND = 2;
+
     ListLayoutAlgorithm() = default;
 
     ~ListLayoutAlgorithm() override = default;
@@ -324,7 +326,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
+    bool RequestForward(LayoutWrapper* layoutWrapper, int32_t currentIndex, float currentEndPos, float chainOffset);
     void LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
+    bool RequestBackward(LayoutWrapper* layoutWrapper, int32_t currentIndex, float currentStartPos, float chainOffset);
     void LayoutBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
 
     void BeginLayoutForward(float startPos, LayoutWrapper* layoutWrapper);
@@ -421,6 +425,27 @@ public:
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
+
+    const std::pair<int32_t, int32_t>& GetItemAdapterRange() const
+    {
+        return range_;
+    }
+
+    void SetTotalItemCount(int32_t count, bool needUpdate = true)
+    {
+        totalItemCount_ = count;
+        needUpdateTotalItemCount_ = needUpdate;
+    }
+
+    void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
+    {
+        requestFeature_ = requestFeature;
+    }
+
+    void SetLazyFeature(bool isLazy)
+    {
+        isLazyFeature_ = isLazy;
+    }
 
 protected:
     virtual void UpdateListItemConstraint(
@@ -566,6 +591,7 @@ private:
     bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
+    bool needUpdateTotalItemCount_ = true;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
@@ -584,6 +610,10 @@ private:
     OffsetF paddingOffset_;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
+
+    std::pair<int32_t, int32_t> range_ = { -1, -1 };
+    std::pair<bool, bool> requestFeature_ = { false, false };
+    bool isLazyFeature_ = false;
 
     std::function<float(int32_t)> chainOffsetFunc_;
     float chainInterval_ = 0.0f;

@@ -18,6 +18,7 @@
 
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -86,6 +87,16 @@ public:
         ResetNumberOfLines();
     }
 
+    std::string GetFontFeatureStr() const {
+        auto fontFeatureOpt = GetFontFeature();
+        std::string fontFeaturesStr = "";
+        if (fontFeatureOpt.has_value()) {
+            auto fontFeatures = fontFeatureOpt.value();
+            fontFeaturesStr = UnParseFontFeatureSetting(fontFeatures);
+        }
+        return fontFeaturesStr;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
@@ -97,11 +108,12 @@ public:
         json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
         json->PutExtAttr("errorText", propErrorText_.value_or("").c_str(), filter);
         json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
-        json->PutExtAttr("showCounter", propShowCounter_.value_or(false), filter);
+        json->PutExtAttr("isShowCounter", propShowCounter_.value_or(false), filter);
         json->PutExtAttr("highlightBorder", propShowHighlightBorder_.value_or(true), filter);
         json->PutExtAttr("showUnderline", propShowUnderline_.value_or(false), filter);
         json->PutExtAttr("passwordRules", propPasswordRules_.value_or("").c_str(), filter);
         json->PutExtAttr("enableAutoFill", propEnableAutoFill_.value_or(true), filter);
+        json->PutExtAttr("selectionMenuHidden", propSelectionMenuHidden_.value_or(false), filter);
         auto jsonCancelButton = JsonUtil::Create(true);
         jsonCancelButton->Put("style", static_cast<int32_t>(propCleanNodeStyle_.value_or(CleanNodeStyle::INPUT)));
         auto jsonIconOptions = JsonUtil::Create(true);
@@ -132,6 +144,7 @@ public:
         json->PutExtAttr("textOverflow",
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
+        json->PutExtAttr("fontFeature", GetFontFeatureStr().c_str(), filter);
     }
 
     const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const

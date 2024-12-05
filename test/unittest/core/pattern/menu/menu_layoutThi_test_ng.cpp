@@ -761,11 +761,10 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg052, TestSize.Level1)
     auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
     ASSERT_NE(menuAlgorithm, nullptr);
 
-    SizeF windowSizeF = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     Rect windowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuAlgorithm->wrapperRect_ = windowRect;
-    menuAlgorithm->param_.windowGlobalSizeF = windowSizeF;
-    menuAlgorithm->wrapperSize_ = windowSizeF;
+    menuAlgorithm->param_.windowGlobalSizeF = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);;
+    menuAlgorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);;
     menuAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FIRST, OFFSET_FIRST);
     menuAlgorithm->param_.previewMenuGap = TARGET_SECURITY.ConvertToPx();
@@ -775,8 +774,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg052, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     menuAlgorithm->InitializeLayoutRegionMargin(menuPattern);
-    MarginPropertyF marginProperty = { OFFSET_SECOND, 0.0f, OFFSET_SECOND, 0.0f };
-    EXPECT_EQ(menuAlgorithm->layoutRegionMargin_, marginProperty);
+    EXPECT_EQ(menuAlgorithm->layoutRegionMargin_, (MarginPropertyF{ OFFSET_SECOND, 0.0f, OFFSET_SECOND, 0.0f}));
 
     menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 

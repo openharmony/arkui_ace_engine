@@ -107,9 +107,53 @@ void ScrollBarModelNG::SetEnableNestedScroll(bool enableNestedSroll)
     }
 }
 
-void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, bool enableNestedSroll)
+RefPtr<FrameNode> ScrollBarModelNG::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
+    return FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollBarPattern>(); });
+}
+
+RefPtr<ScrollProxy> ScrollBarModelNG::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy)
+{
+    auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(proxy);
+    if (!scrollBarProxy) {
+        scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    }
+    auto pattern = AceType::DynamicCast<NG::ScrollBarPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, scrollBarProxy);
+    scrollBarProxy->RegisterScrollBar(pattern);
+    pattern->SetScrollBarProxy(scrollBarProxy);
+    return scrollBarProxy;
+}
+
+void ScrollBarModelNG::SetDirection(FrameNode* frameNode, const std::optional<Axis>& direction)
+{
+    if (direction) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, direction.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ScrollBarLayoutProperty, Axis, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+}
+
+void ScrollBarModelNG::SetState(FrameNode* frameNode, const std::optional<DisplayMode>& state)
+{
+    if (state) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, DisplayMode, state.value(), frameNode);
+        const auto visible = (state.value() == DisplayMode::OFF) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, visible, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ScrollBarLayoutProperty, DisplayMode, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ScrollBarLayoutProperty, Visibility, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+}
+
+void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, const std::optional<bool>& enable)
 {
     CHECK_NULL_VOID(frameNode);
+    const auto enableNestedSroll = enable.value_or(false);
     auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
     CHECK_NULL_VOID(scrollBarPattern);
     auto enableNested = scrollBarPattern->GetEnableNestedSorll();

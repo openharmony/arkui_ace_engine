@@ -47,7 +47,7 @@ void CheckBoxGroupPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, c
         DEFAULT_CHECKMARK_SIZE).ToString().c_str());
     markJsValue->Put("strokeWidth", GetCheckBoxGroupCheckMarkWidth().value_or(
         checkboxTheme->GetCheckStroke()).ToString().c_str());
-    json->PutExtAttr("mark", markJsValue->ToString().c_str(), filter);
+    json->PutExtAttr("mark", markJsValue, filter);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         json->PutExtAttr("checkboxShape",
             std::to_string((int)(GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE))).c_str(), filter);

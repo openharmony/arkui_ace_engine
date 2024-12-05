@@ -30,8 +30,9 @@ public:
     static void SetObjectFit(ImageFit value);
     static void SetVerticalAlign(VerticalAlign verticalAlign);
     static void SetBaselineOffset(const Dimension& value);
-    static void SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign);
-    static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
+    static void SetObjectFit(FrameNode* frameNode, const std::optional<ImageFit>& value);
+    static void SetVerticalAlign(FrameNode* frameNode, const std::optional<VerticalAlign>& verticalAlign);
+    static void SetBaselineOffset(FrameNode* frameNode, const std::optional<Dimension>& value);
     static float GetBaselineOffset(FrameNode* frameNode, int32_t unit);
     static void SetPlaceHolderStyle(TextBackgroundStyle& radius);
     static void Create();

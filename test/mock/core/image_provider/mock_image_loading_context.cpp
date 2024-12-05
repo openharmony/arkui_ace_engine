@@ -84,6 +84,11 @@ RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
     return MakeRefPtr<MockCanvasImage>();
 }
 
+RefPtr<ImageObject> ImageLoadingContext::MoveImageObject()
+{
+    return nullptr;
+}
+
 void ImageLoadingContext::CallbackAfterMeasureIfNeed() {}
 
 void ImageLoadingContext::LoadImageData() {}

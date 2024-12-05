@@ -37,24 +37,24 @@ public:
     virtual ~MenuItemModel() = default;
 
     // createMenuItem with custom
-    virtual void Create(const RefPtr<NG::UINode>& customNode);
-    virtual void Create(const MenuItemProperties& props);
-    virtual void SetSelected(bool isSelected = false);
-    virtual void SetSelectIcon(bool isShow = false);
-    virtual void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)> &&symbolApply);
-    virtual void SetSelectIconSrc(const std::string& src);
-    virtual void SetOnChange(std::function<void(bool)>&& onChange);
-    virtual void SetFontSize(const Dimension& fontSize);
-    virtual void SetFontWeight(FontWeight weight);
-    virtual void SetFontStyle(Ace::FontStyle style);
-    virtual void SetFontColor(const std::optional<Color>& color);
-    virtual void SetFontFamily(const std::vector<std::string>& families);
-    virtual void SetLabelFontSize(const Dimension& fontSize);
-    virtual void SetLabelFontWeight(FontWeight weight);
-    virtual void SetLabelFontStyle(Ace::FontStyle style);
-    virtual void SetLabelFontColor(const std::optional<Color>& color);
-    virtual void SetLabelFontFamily(const std::vector<std::string>& families);
-    virtual void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent);
+    virtual void Create(const RefPtr<NG::UINode>& customNode) = 0;
+    virtual void Create(const MenuItemProperties& props) = 0;
+    virtual void SetSelected(bool isSelected = false) = 0;
+    virtual void SetSelectIcon(bool isShow = false) = 0;
+    virtual void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)> &&symbolApply) = 0;
+    virtual void SetSelectIconSrc(const std::string& src) = 0;
+    virtual void SetOnChange(std::function<void(bool)>&& onChange) = 0;
+    virtual void SetFontSize(const Dimension& fontSize) = 0;
+    virtual void SetFontWeight(FontWeight weight) = 0;
+    virtual void SetFontStyle(Ace::FontStyle style) = 0;
+    virtual void SetFontColor(const std::optional<Color>& color) = 0;
+    virtual void SetFontFamily(const std::vector<std::string>& families) = 0;
+    virtual void SetLabelFontSize(const Dimension& fontSize) = 0;
+    virtual void SetLabelFontWeight(FontWeight weight) = 0;
+    virtual void SetLabelFontStyle(Ace::FontStyle style) = 0;
+    virtual void SetLabelFontColor(const std::optional<Color>& color) = 0;
+    virtual void SetLabelFontFamily(const std::vector<std::string>& families) = 0;
+    virtual void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) = 0;
 
 private:
     static std::unique_ptr<MenuItemModel> instance_;

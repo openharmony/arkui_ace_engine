@@ -793,7 +793,7 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const Color& caretColor)
+    void SetCaretColor(const std::optional<Color>& caretColor)
     {
         caretColor_ = caretColor;
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
@@ -801,7 +801,7 @@ public:
 
     Color GetCaretColor();
 
-    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const std::optional<Color>& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
     }

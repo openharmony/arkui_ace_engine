@@ -63,4 +63,56 @@ bool SaveButtonModelNG::GetTextResource(int32_t textStyle, std::string& text)
     text = theme->GetSaveDescriptions(textStyle);
     return true;
 }
+
+bool SaveButtonModelNG::GetIconResourceStatic(int32_t iconStyle, InternalResource::ResourceId& id)
+{
+    if ((iconStyle < 0) || (static_cast<uint32_t>(iconStyle) >= ICON_RESOURCE_TABLE.size())) {
+        return false;
+    }
+    id = static_cast<InternalResource::ResourceId>(ICON_RESOURCE_TABLE[iconStyle]);
+    return true;
+}
+
+bool SaveButtonModelNG::GetTextResourceStatic(int32_t textStyle, std::string& text)
+{
+    auto theme = GetTheme();
+    if (theme == nullptr) {
+        return false;
+    }
+    text = theme->GetSaveDescriptions(textStyle);
+    return true;
+}
+
+RefPtr<FrameNode> SaveButtonModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SAVE_BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+
+    return frameNode;
+}
+
+bool SaveButtonModelNG::InitSaveButton(FrameNode* frameNode,
+    const SaveButtonStyle& style, bool isArkuiComponent)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+
+    auto text = style.text.value_or(SaveButtonSaveDescription::TEXT_NULL);
+    auto icon = style.icon.value_or(SaveButtonIconStyle::ICON_NULL);
+    auto backgroundType = style.backgroundType.value_or(ButtonType::CAPSULE);
+
+    if ((text == SaveButtonSaveDescription::TEXT_NULL) && (icon == SaveButtonIconStyle::ICON_NULL)) {
+        // set default values
+        text = SaveButtonStyle::DEFAULT_TEXT;
+        icon = SaveButtonStyle::DEFAULT_ICON;
+        backgroundType = SaveButtonStyle::DEFAULT_BACKGROUND_TYPE;
+    }
+
+    SecurityComponentElementStyle secCompStyle = {
+        .text = static_cast<int32_t>(text),
+        .icon = static_cast<int32_t>(icon),
+        .backgroundType = static_cast<int32_t>(backgroundType)
+    };
+    return SecurityComponentModelNG::InitSecurityComponent(frameNode, secCompStyle, isArkuiComponent,
+        SaveButtonModelNG::GetIconResourceStatic, SaveButtonModelNG::GetTextResourceStatic);
+}
 } // namespace OHOS::Ace::NG

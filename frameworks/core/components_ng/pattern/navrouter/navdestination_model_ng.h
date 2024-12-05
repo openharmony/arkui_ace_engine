@@ -40,18 +40,28 @@ public:
     void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetHideToolBar(bool hideToolBar, bool animated) override;
-    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
-    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);
     static void SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode);
+    static void SetNavDestinationMode(FrameNode* frameNode,  const std::optional<NavDestinationMode>& mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+    static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>&recoverable);
+    static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
+    static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onShow);
+    static void SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed);
+    static void SetOnWillAppear(FrameNode* frameNode, std::function<void()>&& willAppear);
+    static void SetOnWillDisAppear(FrameNode* frameNode, std::function<void()>&& willDisAppear);
+    static void SetOnWillShow(FrameNode* frameNode, std::function<void()>&& willShow);
+    static void SetOnWillHide(FrameNode* frameNode, std::function<void()>&& willHide);
+    static void SetOnReady(FrameNode* frameNode, std::function<void(RefPtr<NavDestinationContext>)>&& onReady);
 
     void SetNavDestinationMode(NavDestinationMode mode) override;
     void SetRecoverable(bool recoverable) override;
@@ -70,6 +80,7 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
+    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

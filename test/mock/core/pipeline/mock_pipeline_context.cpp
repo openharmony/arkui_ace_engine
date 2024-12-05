@@ -393,7 +393,16 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
-void PipelineContext::FlushBuild() {}
+void PipelineContext::FlushBuild()
+{
+    FlushOnceVsyncTask();
+    isRebuildFinished_ = false;
+    FlushDirtyNodeUpdate();
+    isRebuildFinished_ = true;
+    FlushBuildFinishCallbacks();
+}
+
+void PipelineContext::FlushDirtyNodeUpdate() {}
 
 void PipelineContext::FlushBuildFinishCallbacks()
 {
@@ -858,6 +867,8 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 }
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
+
+void PipelineContext::FlushDirtyPropertyNodes() {}
 
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================

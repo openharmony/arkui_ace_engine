@@ -143,7 +143,9 @@ private:
     int32_t GetAnimationDuration() const;
     TabBarMode GetTabBarMode() const;
     Dimension GetBarWidth() const;
+    Dimension GetBarWidthAttr() const;
     Dimension GetBarHeight() const;
+    Dimension GetBarHeightAttr() const;
     bool GetBarAdaptiveHeight() const;
     Color GetBarBackgroundColor() const;
     BlurStyle GetBarBackgroundBlurStyle() const;

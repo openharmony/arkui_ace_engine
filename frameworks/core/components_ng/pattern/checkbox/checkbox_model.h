@@ -29,18 +29,18 @@ public:
     virtual ~CheckBoxModel() = default;
 
     virtual void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
-        const std::string& tagName);
-    virtual void SetSelect(bool isSelected);
-    virtual void SetSelectedColor(const Color& color);
+        const std::string& tagName) = 0;
+    virtual void SetSelect(bool isSelected) = 0;
+    virtual void SetSelectedColor(const Color& color) = 0;
     virtual void SetUnSelectedColor(const Color& color) {}
     virtual void SetBuilder(std::optional<std::function<void(void)>>& buildFunc) {};
     virtual void SetCheckMarkColor(const Color& color) {}
     virtual void SetCheckMarkSize(const Dimension& size) {}
     virtual void SetCheckMarkWidth(const Dimension& width) {}
-    virtual void SetOnChange(NG::ChangeEvent&& onChange);
-    virtual void SetWidth(const Dimension& width);
-    virtual void SetHeight(const Dimension& height);
-    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
+    virtual void SetOnChange(NG::ChangeEvent&& onChange) = 0;
+    virtual void SetWidth(const Dimension& width) = 0;
+    virtual void SetHeight(const Dimension& height) = 0;
+    virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) = 0;
     virtual void SetChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetCheckboxStyle(CheckBoxStyle checkboxStyle) {};

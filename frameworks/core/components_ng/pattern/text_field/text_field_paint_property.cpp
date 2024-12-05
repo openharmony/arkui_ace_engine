@@ -29,7 +29,6 @@ void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
 
-    json->PutExtAttr("placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str(), filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("color", propCursorColor_.value_or(textFieldTheme->GetCursorColor()).ColorToString().c_str());
     jsonValue->Put("width", propCursorWidth_.value_or(textFieldTheme->GetCursorWidth()).ToString().c_str());

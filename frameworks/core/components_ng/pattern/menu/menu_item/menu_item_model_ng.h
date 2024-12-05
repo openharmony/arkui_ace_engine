@@ -40,21 +40,22 @@ public:
     void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) override;
     void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelected(FrameNode* frameNode, bool isSelected = false);
     static void SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color);
-    static void SetLabelFontSize(FrameNode* frameNode, const Dimension& fontSize);
-    static void SetLabelFontWeight(FrameNode* frameNode, FontWeight weight);
-    static void SetLabelFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
-    static void SetLabelFontStyle(FrameNode* frameNode, Ace::FontStyle style);
+    static void SetLabelFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
+    static void SetLabelFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight);
+    static void SetLabelFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families);
+    static void SetLabelFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
-    static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
-    static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
-    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
-    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight);
+    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families);
     static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
-    static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
+    static void SetSelectIconSrc(FrameNode* frameNode, const std::optional<std::string>& src);
     static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
-
+    static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
 };

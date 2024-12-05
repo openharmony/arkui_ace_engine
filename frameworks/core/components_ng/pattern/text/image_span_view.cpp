@@ -31,9 +31,22 @@ void ImageSpanView::SetVerticalAlign(VerticalAlign verticalAlign)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign);
 }
 
-void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign)
+void ImageSpanView::SetObjectFit(FrameNode* frameNode, const std::optional<ImageFit>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, frameNode);
+    }
+}
+
+void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, const std::optional<VerticalAlign>& verticalAlign)
+{
+    if (verticalAlign) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, frameNode);
+    }
 }
 
 void ImageSpanView::SetBaselineOffset(const Dimension& value)
@@ -41,9 +54,13 @@ void ImageSpanView::SetBaselineOffset(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value);
 }
 
-void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
+void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, frameNode);
+    }
 }
 
 float ImageSpanView::GetBaselineOffset(FrameNode* frameNode, int32_t unit)

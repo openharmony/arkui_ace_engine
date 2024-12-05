@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+import("capi/capi_common.gni")
 
 group("unittest") {
   testonly = true
@@ -35,8 +36,30 @@ group("linux_unittest") {
   testonly = true
   deps = [
     "base:linux_base_unittest(${host_toolchain})",
+    "capi:linux_capi_unittest(${host_toolchain})",
     "core:linux_core_unittest(${host_toolchain})",
   ]
+}
+
+group("linux_unittest_capi") {
+  testonly = true
+  deps = [ "capi:linux_capi_unittest(${host_toolchain})" ]
+}
+
+action("run_linux_unittest_capi") {
+  testonly = true
+  script = "scripts/run.py"
+  args = [
+    "--path",
+    "capi",
+    "--output",
+    rebase_path("$root_out_dir/tests/test_result.json", root_build_dir),
+  ]
+  if (capi_asan || capi_theme_debug) {
+    args += [ "--debug" ]
+  }
+  outputs = [ "$root_out_dir/tests/test_result.json" ]
+  deps = [ ":linux_unittest_capi" ]
 }
 
 config("ace_coverage_config") {
@@ -457,6 +480,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components/common/properties/text_style_parser.cpp",
     "$ace_root/frameworks/core/components/panel/sliding_events.cpp",
     "$ace_root/frameworks/core/components/picker/picker_data.cpp",
+    "$ace_root/frameworks/core/components/picker/picker_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components_v2/grid/grid_event.cpp",
     "$ace_root/frameworks/core/components_v2/grid_layout/grid_container_utils.cpp",
@@ -621,7 +645,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_paint_op.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/custom_paint_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/canvas/offscreen_canvas_paint_method.cpp",
@@ -870,6 +893,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/panel/sliding_panel_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/panel/sliding_panel_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/date_time_animation_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_accessibility_property.cpp",
@@ -887,6 +915,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/progress/progress_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/progress/progress_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/progress/progress_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_model_ng.cpp",
@@ -982,6 +1015,13 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/line_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/line_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/rect_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_paint_method.cpp",
@@ -1081,6 +1121,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_property.cpp",
@@ -1157,9 +1198,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
+    "$ace_root/test/mock/core/pattern/mock_canvas_pattern.cpp",
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_time_picker_haptic_controller.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
+    "$ace_root/test/mock/core/render/mock_drawing_painter.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(
@@ -1168,7 +1211,10 @@ ohos_source_set("ace_components_pattern") {
         vendor_configs.ace_engine_advanced_split_mode_pattern_test_sources
   }
 
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = [
+    "$ace_root/frameworks/core/components/qrcode:qrcodegen",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+  ]
   external_deps = [ "bounds_checking_function:libsec_static" ]
   configs = [ ":ace_unittest_config" ]
 }

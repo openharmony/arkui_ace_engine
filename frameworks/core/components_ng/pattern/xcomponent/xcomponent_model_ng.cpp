@@ -290,8 +290,8 @@ XComponentType XComponentModelNG::GetType(FrameNode* frameNode)
     return layoutProperty->GetXComponentTypeValue(XComponentType::SURFACE);
 }
 
-RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
-    const std::optional<std::string>& libraryname)
+RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::optional<std::string>& id,
+    XComponentType type, const std::optional<std::string>& libraryname)
 {
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     auto frameNode = FrameNode::CreateFrameNode(
@@ -322,7 +322,7 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     return frameNode;
 }
 
-void XComponentModelNG::SetXComponentId(FrameNode* frameNode, const std::string& id)
+void XComponentModelNG::SetXComponentId(FrameNode* frameNode, const std::optional<std::string>& id)
 {
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
@@ -413,12 +413,21 @@ void XComponentModelNG::SetImageAIOptions(void* options)
     xcPattern->SetImageAIOptions(options);
 }
 
-void XComponentModelNG::SetXComponentLibraryname(FrameNode* frameNode, const std::string& libraryname)
+void XComponentModelNG::SetXComponentLibraryname(FrameNode* frameNode, const std::optional<std::string>& libraryname)
 {
     CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetLibraryName(libraryname);
+}
+
+void XComponentModelNG::SetXComponentController(FrameNode* frameNode,
+    std::shared_ptr<InnerXComponentController> controller)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetXComponentController(controller);
 }
 
 void XComponentModelNG::SetControllerOnCreated(FrameNode* frameNode, SurfaceCreatedEvent&& onCreated)

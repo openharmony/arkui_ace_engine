@@ -477,6 +477,14 @@ void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& 
     timePickerRowPattern->SetSelectedTime(value);
 }
 
+void TimePickerModelNG::SetHasSecond(FrameNode* frameNode, bool hasSecond)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetHasSecond(hasSecond);
+}
+
 void TimePickerModelNG::SetDisappearTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {

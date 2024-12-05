@@ -52,7 +52,7 @@ public:
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelect(FrameNode* frameNode, bool isSelected);
-    static void SetSelectedColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
@@ -63,7 +63,7 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
-    static void SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle);
+    static void SetCheckboxStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxStyle);
     static void SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name);
     static void SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName);
 

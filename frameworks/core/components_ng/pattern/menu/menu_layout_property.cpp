@@ -99,6 +99,8 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         expandingMode = "SubMenuExpandingMode.STACK";
     }
     json->Put("subMenuExpandingMode", expandingMode);
+    auto jsonBorder = JsonUtil::Create(true);
+    GetBorderRadius().value_or(BorderRadiusProperty()).ToJsonValue(jsonBorder, json, filter);
     DividerToJsonValue(json);
 }
 } // namespace OHOS::Ace::NG

@@ -62,29 +62,36 @@ public:
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetNestedScroll(FrameNode* frameNode,
+        const std::optional<NestedScrollMode>& forward, const std::optional<NestedScrollMode>& backward);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static float GetFriction(FrameNode* frameNode);
-    static void SetFriction(FrameNode* frameNode, double friction);
+    static void SetFriction(FrameNode* frameNode, const std::optional<float> friction);
     static ScrollSnapOptions GetScrollSnap(FrameNode* frameNode);
     static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    static void SetScrollSnap(FrameNode* frameNode, std::optional<ScrollSnapAlign> scrollSnapAlignOpt,
+        const std::optional<Dimension>& intervalSize, const std::vector<Dimension>& snapPaginations,
+        const std::optional<bool>& enableSnapToStart, const std::optional<bool>& enableSnapToEnd);
     static int32_t GetScrollBar(FrameNode* frameNode);
-    static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
+    static void SetScrollBar(FrameNode* frameNode, const std::optional<DisplayMode> barState);
     static int32_t GetAxis(FrameNode* frameNode);
-    static void SetAxis(FrameNode* frameNode, Axis axis);
+    static void SetAxis(FrameNode* frameNode, const std::optional<Axis>& axis);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
-    static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& color);
     static float GetScrollBarWidth(FrameNode* frameNode);
-    static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& dimension);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
-    static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
+        const std::optional<bool>& alwaysEnabled);
     static int32_t GetEnablePaging(FrameNode* frameNode);
     static void SetEnablePaging(FrameNode* frameNode, bool enablePaging);
     static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& event);
+    static void SetOnScrollEnd(FrameNode* frameNode, ScrollEndEvent&& event);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event);
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
@@ -97,6 +104,7 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetInitialOffset(FrameNode* frameNode, const OffsetT<CalcDimension>& offset);
     static void SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy);
+    static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

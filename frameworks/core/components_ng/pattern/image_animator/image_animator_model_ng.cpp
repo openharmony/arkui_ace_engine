@@ -19,7 +19,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr int32_t DEFAULT_DURATION = 1000;
+    constexpr int32_t DEFAULT_DURATION { 1000 };
+    constexpr int32_t DEFAULT_STATUS { static_cast<int32_t>(Animator::Status::IDLE) };
+    constexpr int32_t DEFAULT_FILL_MODE  { static_cast<int32_t>(FillMode::FORWARDS) };
+    constexpr int32_t DEFAULT_ITERATIONS { 1 };
 }
 
 void ImageAnimatorModelNG::Create()
@@ -168,39 +171,43 @@ void ImageAnimatorModelNG::SetImages(FrameNode* frameNode, const std::vector<Ima
 {
     CHECK_NULL_VOID(frameNode);
     std::vector<ImageProperties> imageList = images;
-    auto imageAnimatorPattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
-    imageAnimatorPattern->SetImages(std::move(imageList));
+    GetImageAnimatorPattern(frameNode)->SetImages(std::move(imageList));
 }
 
 void ImageAnimatorModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
 {
+    CHECK_NULL_VOID(frameNode);
     GetImageAnimatorPattern(frameNode)->SetIsReverse(isReverse);
 }
 
-void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, int32_t duration)
+void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, const std::optional<int32_t>& duration)
 {
     CHECK_NULL_VOID(frameNode);
-    AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern())->SetDuration(duration);
+    GetImageAnimatorPattern(frameNode)->SetDuration(duration.value_or(DEFAULT_DURATION));
 }
 
-void ImageAnimatorModelNG::SetState(FrameNode* frameNode, int32_t state)
+void ImageAnimatorModelNG::SetState(FrameNode* frameNode, const std::optional<int32_t>& state)
 {
-    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<Animator::Status>(state));
+    CHECK_NULL_VOID(frameNode);
+    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<Animator::Status>(state.value_or(DEFAULT_STATUS)));
 }
 
 void ImageAnimatorModelNG::SetFixedSize(FrameNode* frameNode, bool fixedSize)
 {
+    CHECK_NULL_VOID(frameNode);
     GetImageAnimatorPattern(frameNode)->SetFixedSize(fixedSize);
 }
 
-void ImageAnimatorModelNG::SetFillMode(FrameNode* frameNode, int32_t fillMode)
+void ImageAnimatorModelNG::SetFillMode(FrameNode* frameNode, const std::optional<int32_t>& fillMode)
 {
-    GetImageAnimatorPattern(frameNode)->SetFillMode(static_cast<FillMode>(fillMode));
+    CHECK_NULL_VOID(frameNode);
+    GetImageAnimatorPattern(frameNode)->SetFillMode(static_cast<FillMode>(fillMode.value_or(DEFAULT_FILL_MODE)));
 }
 
-void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, int32_t iteration)
+void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, const std::optional<int32_t>& iteration)
 {
-    GetImageAnimatorPattern(frameNode)->SetIteration(iteration);
+    CHECK_NULL_VOID(frameNode);
+    GetImageAnimatorPattern(frameNode)->SetIteration(iteration.value_or(DEFAULT_ITERATIONS));
 }
 
 bool ImageAnimatorModelNG::IsReverse(FrameNode* frameNode)
@@ -264,7 +271,7 @@ void ImageAnimatorModelNG::SetOnStart(FrameNode* frameNode, std::function<void()
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetStartEvent(onStart);
+    eventHub->SetStartEvent(std::move(onStart));
 }
 
 void ImageAnimatorModelNG::SetOnPause(FrameNode* frameNode, std::function<void()>&& onPause)
@@ -272,7 +279,7 @@ void ImageAnimatorModelNG::SetOnPause(FrameNode* frameNode, std::function<void()
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetPauseEvent(onPause);
+    eventHub->SetPauseEvent(std::move(onPause));
 }
 
 void ImageAnimatorModelNG::SetOnRepeat(FrameNode* frameNode, std::function<void()>&& onRepeat)
@@ -280,7 +287,7 @@ void ImageAnimatorModelNG::SetOnRepeat(FrameNode* frameNode, std::function<void(
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetRepeatEvent(onRepeat);
+    eventHub->SetRepeatEvent(std::move(onRepeat));
 }
 
 void ImageAnimatorModelNG::SetOnCancel(FrameNode* frameNode, std::function<void()>&& onCancel)
@@ -288,7 +295,7 @@ void ImageAnimatorModelNG::SetOnCancel(FrameNode* frameNode, std::function<void(
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetCancelEvent(onCancel);
+    eventHub->SetCancelEvent(std::move(onCancel));
 }
 
 void ImageAnimatorModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& onFinish)
@@ -296,7 +303,7 @@ void ImageAnimatorModelNG::SetOnFinish(FrameNode* frameNode, std::function<void(
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetStopEvent(onFinish);
+    eventHub->SetStopEvent(std::move(onFinish));
 }
 
 } // namespace OHOS::Ace::NG

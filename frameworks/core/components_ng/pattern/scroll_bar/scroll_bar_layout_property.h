@@ -63,7 +63,7 @@ public:
             { DisplayMode::AUTO, "BarState.Auto" },
             { DisplayMode::ON, "BarState.On" }
             };
-        json->PutExtAttr("direction", directionMap[GetAxisValue(Axis::VERTICAL)].c_str(), filter);
+        json->PutExtAttr("scrollBarDirection", directionMap[GetAxisValue(Axis::VERTICAL)].c_str(), filter);
         json->PutExtAttr("state", stateMap[GetDisplayModeValue(DisplayMode::AUTO)].c_str(), filter);
     }
 

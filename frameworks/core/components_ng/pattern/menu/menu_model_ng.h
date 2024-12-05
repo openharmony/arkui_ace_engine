@@ -36,20 +36,22 @@ public:
     void SetExpandingMode(const SubMenuExpandingMode& expandingMode) override;
     void SetItemDivider(const V2::ItemDivider& divider) override;
     void SetItemGroupDivider(const V2::ItemDivider& divider) override;
+
+    static RefPtr<FrameNode>CreateFrameNode(int32_t nodeId);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
-    static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
-    static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
-    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
-    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
-    static void SetBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight);
+    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families);
+    static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
     static void ResetBorderRadius(FrameNode* frameNode);
     static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
-    static void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
-    static void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
-    static void SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode);
+    static void SetItemDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
+    static void SetItemGroupDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
+    static void SetExpandingMode(FrameNode* frameNode, const std::optional<SubMenuExpandingMode>& expandingMode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H

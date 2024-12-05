@@ -26,6 +26,7 @@ public:
     void Create() override;
     void SetCommands(const std::string& pathCmd) override;
     
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetCommands(FrameNode* frameNode, const std::string& pathCmd);
 };
 
