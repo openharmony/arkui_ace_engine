@@ -75,30 +75,9 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
     int32_t start, int32_t end,
     int32_t cacheStart, int32_t cacheEnd)
 {
-    TAG_LOGD(AceLogTag::ACE_REPEAT,
-        "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
-        "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
-        GetId(), start, end, cacheStart, cacheEnd, start - cacheStart, end + cacheEnd);
-
-    ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d; cacheStart: [%d], cacheEnd: [%d]",
+    ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start[%d] - end[%d]; cacheStart[%d], cacheEnd[%d]",
         start, end, cacheStart, cacheEnd);
-
-    // get normalized active range (with positive indices only)
-    const int32_t signed_totalCount_ = static_cast<int32_t>(totalCount_);
-    int32_t nStart = start - cacheStart;
-    int32_t nEnd = end + cacheEnd;
-    if (signed_totalCount_ > 0) {
-        nStart = (nStart + signed_totalCount_) % signed_totalCount_;
-        nEnd = (nEnd + signed_totalCount_) % signed_totalCount_;
-    }
-    nStart = std::max(nStart, 0);
-    nEnd = std::max(nEnd, 0);
-
-    // memorize active range
-    caches_.SetLastActiveRange(static_cast<uint32_t>(nStart), static_cast<uint32_t>(nEnd));
-
-    // notify TS side
-    onSetActiveRange_(nStart, nEnd);
+    CheckActiveRange(start, end, cacheStart, cacheEnd);
 
     bool needSync = caches_.RebuildL1([start, end, cacheStart, cacheEnd, this](
         int32_t index, const RefPtr<UINode>& node) -> bool {
@@ -159,6 +138,43 @@ bool RepeatVirtualScrollNode::CheckNode4IndexInL1(int32_t index, int32_t start, 
         }
     }
     return false;
+}
+
+void RepeatVirtualScrollNode::CheckActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+{
+    // get normalized active range (with positive indices only)
+    const int32_t signed_totalCount = static_cast<int32_t>(totalCount_);
+    int32_t nStart = start - cacheStart;
+    int32_t nEnd = end + cacheEnd;
+    const int32_t divider = 2;
+
+    if (start > end) { // swiper-loop scenario
+        nStart = std::min(nStart, signed_totalCount);
+        nEnd = std::max(nEnd, 0);
+        if (nStart <= nEnd) { // overlapped
+            nStart = signed_totalCount / divider + 1;
+            nEnd = signed_totalCount / divider;
+        }
+    } else {
+        if (nStart >= signed_totalCount || nEnd < 0) {
+            nStart = 0;
+            nEnd = 0;
+        } else {
+            nStart = std::max(nStart, 0);
+            // start <= end <= totalCount - 1
+            nEnd = std::min(std::max(nEnd, nStart), signed_totalCount - 1);
+        }
+    }
+
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).DoSetActiveChildRange start: %{public}d - end: %{public}d; "
+        "cacheStart: %{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d",
+        static_cast<int32_t>(GetId()), start, end, cacheStart, cacheEnd, nStart, nEnd);
+
+    // memorize active range
+    caches_.SetLastActiveRange(static_cast<uint32_t>(nStart), static_cast<uint32_t>(nEnd));
+
+    // notify TS side
+    onSetActiveRange_(nStart, nEnd);
 }
 
 void RepeatVirtualScrollNode::DropFromL1(const std::string& key)
