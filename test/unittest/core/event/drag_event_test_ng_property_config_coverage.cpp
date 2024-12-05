@@ -488,7 +488,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest040, TestSize.Le
     ASSERT_NE(pipelineContext, nullptr);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPreDragStatus(PreDragStatus::PREVIEW_LANDING_STARTED);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::PREVIEW_LANDING_STARTED);
     dragEventActuator->HandleTouchUpEvent();
     dragEventActuator->SetResponseRegionFull();
     dragEventActuator->ResetResponseRegion();

@@ -1326,7 +1326,7 @@ bool OverlayManager::IsContextMenuBindedOnOrigNode()
     CHECK_NULL_RETURN(mainPipeline, false);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
-    auto draggingNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    auto draggingNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(draggingNode, false);
     auto eventHub = draggingNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
@@ -7038,7 +7038,7 @@ BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const
     CHECK_NULL_RETURN(mainPipeline, borderRadius);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, borderRadius);
-    auto dragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    auto dragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(dragFrameNode, borderRadius);
     return DragEventActuator::GetDragFrameNodeBorderRadius(dragFrameNode);
 }

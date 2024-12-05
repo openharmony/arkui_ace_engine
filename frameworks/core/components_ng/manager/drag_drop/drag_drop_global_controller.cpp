@@ -64,4 +64,27 @@ void DragDropGlobalController::ResetDragDropInitiatingStatus()
     currentDragNode_ = nullptr;
 }
 
+void DragDropGlobalController::SetPrepareDragFrameNode(const WeakPtr<FrameNode>& prepareDragFrameNode)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    prepareDragFrameNode_ = prepareDragFrameNode;
+}
+
+const WeakPtr<FrameNode> DragDropGlobalController::GetPrepareDragFrameNode() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return prepareDragFrameNode_;
+}
+
+void DragDropGlobalController::SetPreDragStatus(PreDragStatus preDragStatus)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    preDragStatus_ = preDragStatus;
+}
+
+PreDragStatus DragDropGlobalController::GetPreDragStatus() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return preDragStatus_;
+}
 } // namespace OHOS::Ace
