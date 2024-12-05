@@ -1795,12 +1795,12 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20, GridItemStyle::NONE);
     CreateDone(frameNode_);
 
     int32_t targetIndex = 19;
     auto& info = pattern_->info_;
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     pattern_->ScrollToIndex(targetIndex, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
