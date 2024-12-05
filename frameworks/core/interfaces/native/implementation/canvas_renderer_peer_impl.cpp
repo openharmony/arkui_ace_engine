@@ -320,14 +320,16 @@ void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const RefPtr<Pix
     pattern_->TransferFromImageBitmap(pixelMap);
 }
 #else
-void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData)
+void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const double width, const double height)
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl pattern "
              "not bound to component.");
         return;
     }
-    pattern_->TransferFromImageBitmap(imageData);
+    auto imageData = pattern_->GetImageData(0, 0, width, height);
+    CHECK_NULL_VOID(imageData);
+    pattern_->TransferFromImageBitmap(*imageData);
 }
 #endif
 void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const Color& color)

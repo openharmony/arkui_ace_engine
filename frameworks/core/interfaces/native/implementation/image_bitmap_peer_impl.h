@@ -19,6 +19,8 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components/common/properties/paint_state.h"
 
+using PixelMapRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>;
+
 struct ImageBitmapPeer {
 public:
     ImageBitmapPeer();
@@ -29,21 +31,16 @@ public:
     double GetWidth();
 
     void LoadImage(const std::string& src);
-
-    std::shared_ptr<OHOS::Ace::ImageData> GetImageData() const
+    const PixelMapRefPtr& GetPixelMap() const
     {
-        return imageData_;
-    }
-
-    void SetImageData(const std::shared_ptr<OHOS::Ace::ImageData>& imageData)
-    {
-        imageData_ = imageData;
+        return pixelMap_;
     }
 
 private:
     void LoadImage(const OHOS::Ace::ImageSourceInfo& sourceInfo);
 
     void OnImageDataReady();
+    void OnImageLoadSuccess();
     void OnImageLoadFail(const std::string& errorMsg);
 
 protected:
@@ -56,5 +53,5 @@ private:
     double height;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
-    std::shared_ptr<OHOS::Ace::ImageData> imageData_;
+    PixelMapRefPtr pixelMap_;
 };

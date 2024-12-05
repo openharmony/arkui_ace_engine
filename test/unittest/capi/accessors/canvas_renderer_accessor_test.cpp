@@ -132,6 +132,10 @@ std::vector<int32_t> INT32_TEST_PLAN = {
     100, 0, -100, 12, -56,
 };
 
+std::vector<int32_t> SIZE_TEST_PLAN = {
+    -100, -10, 0, 10, 12, 56, 100
+};
+
 typedef std::tuple<PathCmd, double, double> Path2DTestStep;
 static const std::vector<Path2DTestStep> PATH2D_TEST_PLAN = {
     { PathCmd::MOVE_TO, 0, 0 },
@@ -205,7 +209,13 @@ public:
     MockCanvasPattern() = default;
     ~MockCanvasPattern() override = default;
 };
-
+struct MockImageBitmapPeer : public ImageBitmapPeer {
+public:
+    MockImageBitmapPeer() = default;
+    ~MockImageBitmapPeer() override = default;
+    using ImageBitmapPeer::SetHeight;
+    using ImageBitmapPeer::SetWidth;
+};
 } // namespace
 
 class CanvasRendererAccessorTest
@@ -1267,7 +1277,7 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
@@ -1275,22 +1285,23 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestS
     ASSERT_NE(accessor_->transferFromImageBitmap, nullptr);
 
     Ark_Materialized arkBitmap;
-    auto peer = new ImageBitmapPeer();
+    auto peer = new MockImageBitmapPeer();
     arkBitmap.ptr = peer;
 
-    for (const auto& expectedX : INT32_TEST_PLAN) {
-        for (const auto& expectedY : INT32_TEST_PLAN) {
-            auto imageData = std::make_shared<OHOS::Ace::ImageData>();
-            imageData->x = expectedX;
-            imageData->y = expectedY;
-            peer->SetImageData(imageData);
+    for (const auto& expectedW : SIZE_TEST_PLAN) {
+        for (const auto& expectedH : SIZE_TEST_PLAN) {
+            peer->SetWidth(expectedW);
+            peer->SetHeight(expectedH);
 
             holder->SetUp();
             accessor_->transferFromImageBitmap(peer_, &arkBitmap);
-
+            if (expectedW <= 0 || expectedH <= 0) {
+                EXPECT_FALSE(holder->isCalled);
+                continue;
+            }
             EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->imageData->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->imageData->y, expectedY));
+            EXPECT_EQ(holder->imageData->dirtyWidth, expectedW);
+            EXPECT_EQ(holder->imageData->dirtyHeight, expectedH);
         }
     }
     holder->TearDown();

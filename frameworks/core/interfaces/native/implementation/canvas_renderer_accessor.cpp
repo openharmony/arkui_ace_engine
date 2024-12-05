@@ -686,6 +686,24 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
                                  const Ark_ImageBitmap* bitmap)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(bitmap);
+    auto bitmapPeer = reinterpret_cast<ImageBitmapPeer*>(bitmap->ptr);
+    CHECK_NULL_VOID(bitmapPeer);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = bitmapPeer->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    peerImpl->TriggerTransferFromImageBitmapImpl(pixelMap);
+#else
+    auto width = bitmapPeer->GetWidth();
+    auto height = bitmapPeer->GetHeight();
+    if (NonPositive(width) || (NonPositive(height))) {
+        return;
+    }
+    peerImpl->TriggerTransferFromImageBitmapImpl(width, height);
+#endif
 }
 void SaveLayerImpl(CanvasRendererPeer* peer)
 {
