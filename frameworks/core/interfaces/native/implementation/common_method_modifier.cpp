@@ -306,6 +306,8 @@ OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
             .left = OptConvert<Dimension>(src.start),
             .bottom = OptConvert<Dimension>(src.bottom),
             .right = OptConvert<Dimension>(src.end),
+            .start = OptConvert<Dimension>(src.start),
+            .end = OptConvert<Dimension>(src.end),
         },
         .isLocalized = true
     };
@@ -469,24 +471,24 @@ void AssignCast(std::optional<PixelRoundPolicyOneRule>& dst, const Ark_PixelRoun
 }
 
 template<>
-uint8_t Convert(const Ark_PixelRoundPolicy& src)
+uint16_t Convert(const Ark_PixelRoundPolicy& src)
 {
-    uint8_t dst = 0;
+    uint16_t dst = 0;
     if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.start); rule) {
         auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_START : PixelRoundPolicy::FORCE_CEIL_START;
-        dst |= static_cast<uint8_t>(policy);
+        dst |= static_cast<uint16_t>(policy);
     }
     if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.end); rule) {
         auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_END : PixelRoundPolicy::FORCE_CEIL_END;
-        dst |= static_cast<uint8_t>(policy);
+        dst |= static_cast<uint16_t>(policy);
     }
     if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.top); rule) {
         auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_TOP : PixelRoundPolicy::FORCE_CEIL_TOP;
-        dst |= static_cast<uint8_t>(policy);
+        dst |= static_cast<uint16_t>(policy);
     }
     if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.bottom); rule) {
         auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_BOTTOM : PixelRoundPolicy::FORCE_CEIL_BOTTOM;
-        dst |= static_cast<uint8_t>(policy);
+        dst |= static_cast<uint16_t>(policy);
     }
     return dst;
 }
@@ -1330,7 +1332,7 @@ void PixelRoundImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<uint8_t>(*value);
+    auto convValue = Converter::Convert<uint16_t>(*value);
     ViewAbstract::SetPixelRound(frameNode, convValue);
 }
 void BackgroundImageSizeImpl(Ark_NativePointer node,
