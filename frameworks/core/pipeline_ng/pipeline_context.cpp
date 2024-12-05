@@ -90,6 +90,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     PipelineContext::aliveInstanceSet_.emplace(instanceId);
 #endif
     window_->OnHide();
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -100,6 +103,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     PipelineContext::aliveInstanceSet_.emplace(instanceId);
 #endif
     window_->OnHide();
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()

@@ -390,6 +390,7 @@ void NavigationPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(host);
     InitPageNode(host);
     InitFoldState();
+    RegisterContainerModalButtonsRectChangeListener(host);
 }
 
 void NavigationPattern::InitFoldState()
@@ -407,6 +408,7 @@ void NavigationPattern::OnDetachFromMainTree()
     isFullPageNavigation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UnregisterContainerModalButtonsRectChangeListener(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
@@ -472,6 +474,7 @@ void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host
     }
 
     isFullPageNavigation_ = isFullPage;
+    MarkAllNavDestinationDirtyIfNeeded(host);
     UpdateSystemBarStyleOnFullPageStateChange(windowManager);
     if (isFullPageNavigation_) {
         RegisterPageVisibilityChangeCallback();
@@ -3208,5 +3211,61 @@ void NavigationPattern::SetMouseStyle(MouseFormat format)
     pipeline->SetMouseStyleHoldNode(frameNodeId);
     pipeline->ChangeMouseStyle(frameNodeId, format, windowId);
     pipeline->FreeMouseStyleHoldNode(frameNodeId);
+}
+
+void NavigationPattern::RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->AddButtonsRectChangeListener(hostNode->GetId(), [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->isFullPageNavigation_) {
+            return;
+        }
+        pattern->MarkAllNavDestinationDirtyIfNeeded(pattern->GetHost());
+    });
+}
+
+void NavigationPattern::UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveButtonsRectChangeListener(hostNode->GetId());
+}
+
+void NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode)
+{
+    auto groupNode = AceType::DynamicCast<NavigationGroupNode>(hostNode);
+    CHECK_NULL_VOID(groupNode);
+    auto pipeline = groupNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetContainerCustomTitleVisible()) {
+        return;
+    }
+    auto contentNode = AceType::DynamicCast<FrameNode>(groupNode->GetContentNode());
+    CHECK_NULL_VOID(contentNode);
+    auto& childrens = contentNode->GetChildren();
+    for (auto& child : childrens) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(child);
+        if (!navDestination) {
+            continue;
+        }
+        if (!navDestination->IsVisible()) {
+            navDestination->SetNeedForceMeasure(true);
+            continue;
+        }
+        navDestination->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
+        if (titleBarNode) {
+            titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

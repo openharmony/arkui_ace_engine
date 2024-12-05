@@ -590,6 +590,8 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navigationLayoutProperty);
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
@@ -598,6 +600,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     FitScrollFullWindow(size);
+    pattern->SetNavigationSize(size);
 
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);

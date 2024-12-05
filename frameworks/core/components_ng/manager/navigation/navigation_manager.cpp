@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -311,5 +312,40 @@ const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRe
     auto ret = navigationRecoveryInfo_[navigationId];
     navigationRecoveryInfo_.erase(navigationId);
     return ret;
+}
+
+void NavigationManager::OnContainerModalButtonsRectChange()
+{
+    for (auto& pair : buttonsRectChangeListeners_) {
+        if (pair.second) {
+            pair.second();
+        }
+    }
+}
+
+void NavigationManager::AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener)
+{
+    if (!hasRegisterListener_) {
+        auto pipeline = pipeline_.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        auto containerModalListener =
+            [weakMgr = WeakClaim(this)](const RectF&, const RectF&) {
+                auto mgr = weakMgr.Upgrade();
+                CHECK_NULL_VOID(mgr);
+                mgr->OnContainerModalButtonsRectChange();
+            };
+        ContainerModalViewEnhance::AddButtonsRectChangeListener(
+            AceType::RawPtr(pipeline), std::move(containerModalListener));
+        hasRegisterListener_ = true;
+    }
+    buttonsRectChangeListeners_.emplace(id, listener);
+}
+
+void NavigationManager::RemoveButtonsRectChangeListener(int32_t id)
+{
+    auto it = buttonsRectChangeListeners_.find(id);
+    if (it != buttonsRectChangeListeners_.end()) {
+        buttonsRectChangeListeners_.erase(it);
+    }
 }
 } // namespace OHOS::Ace::NG
