@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/particle/particle_model.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
   
@@ -34,17 +33,6 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
     void updateEmitterPosition(std::vector<EmitterProperty>& property);
-
-    void GetEmitterJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& item) const;
-    void GetColorJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
-    void GetOpacityJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
-    void GetScaleJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
-    void GetVelocityJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
-    void GetAccelerationJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
-    void GetSpinJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
-
-    std::unique_ptr<JsonValue> GetFloatObjectJson(const ParticleFloatPropertyOption& updaterObject) const;
-    std::unique_ptr<JsonValue> GetDefaultFloatObjectJson(const float start, const float end) const;
 
     bool HaveUnVisibleParent() const
     {
@@ -82,6 +70,24 @@ public:
     }
 
 private:
+    void GetEmitterJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& item) const;
+    void GetColorJson(const std::unique_ptr<JsonValue>& objectParticlesJson,
+        const ParticleOption& particleOption) const;
+    void GetOpacityJson(const std::unique_ptr<JsonValue>& objectParticlesJson,
+        const ParticleOption& particleOption) const;
+    void GetScaleJson(const std::unique_ptr<JsonValue>& objectParticlesJson,
+        const ParticleOption& particleOption) const;
+    void GetVelocityJson(const std::unique_ptr<JsonValue>& objectParticlesJson,
+        const ParticleOption& particleOption) const;
+    void GetAccelerationJson(const std::unique_ptr<JsonValue>& objectParticlesJson,
+        const ParticleOption& particleOption) const;
+    void GetSpinJson(const std::unique_ptr<JsonValue>& objectParticlesJson, const ParticleOption& particleOption) const;
+
+    std::unique_ptr<JsonValue> ParseEmitterParticleJson(const ParticleOption& particleOption) const;
+    std::unique_ptr<JsonValue> ParseColorUpdater(ParticleColorPropertyUpdater& updater) const;
+    std::unique_ptr<JsonValue> ParseFloatObjectJson(const ParticleFloatPropertyOption& updaterObject) const;
+    void ParseParticleObject(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
     bool haveUnVisibleParent_ = false;
     std::vector<ParticleDisturbance> disturbance_;
     std::vector<EmitterProperty> emitterProperty_;
