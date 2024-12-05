@@ -7780,44 +7780,22 @@ SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY = '___ob_map_set';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- *
- * This file includes only framework internal classes and functions
- * non are part of SDK. Do not access from app.
- *
- *
- * ObserveV2 is the singleton object for observing state variable access and
- * change
- */
-// in the case of ForEach, Repeat, AND If, two or more UINodes / elmtIds can render at the same time
+// in the case of ForEach, Repeat, AND If, two or more UINodes / elementIds can render at the same time
 // e.g. ForEach -> ForEach child Text, Repeat -> Nested Repeat, child Text
-// Therefore, ObserveV2 needs to keep a strack of currently renderign ids / components
-// in the same way as thsi is also done for PU stateMgmt with ViewPU.currentlyRenderedElmtIdStack_
+// Therefore, ObserveV2 needs to keep a stack of currently rendering ids / components
+// in the same way as this is also done for PU stateMgmt with ViewPU.currentlyRenderedElmtIdStack_
 class StackOfRenderedComponents {
     constructor() {
         this.stack_ = new Array();
     }
     push(id, cmp) {
-        this.stack_.push(new StackOfRenderedComponentsItem(id, cmp));
+        this.stack_.push([id, cmp]);
     }
     pop() {
-        const item = this.stack_.pop();
-        return item ? [item.id_, item.cmp_] : undefined;
+        return this.stack_.pop();
     }
     top() {
-        if (this.stack_.length) {
-            const item = this.stack_[this.stack_.length - 1];
-            return [item.id_, item.cmp_];
-        }
-        else {
-            return undefined;
-        }
-    }
-}
-class StackOfRenderedComponentsItem {
-    constructor(id, cmp) {
-        this.id_ = id;
-        this.cmp_ = cmp;
+        return this.stack_.length ? this.stack_[this.stack_.length - 1] : undefined;
     }
 }
 class ObserveV2 {
