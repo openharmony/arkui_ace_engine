@@ -21,18 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RootSceneModifier {
 Ark_NativePointer ConstructImpl()
 {
-    return 0;
+    return nullptr;
 }
 } // RootSceneModifier
 namespace RootSceneInterfaceModifier {
 void SetRootSceneOptionsImpl(Ark_NativePointer node,
                              const Ark_RootSceneSession* session)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(session);
-    //auto convValue = Converter::OptConvert<type_name>(*session);
-    //RootSceneModelNG::SetSetRootSceneOptions(frameNode, convValue);
+    // Nothing to do on the ArkUI side. RootSceneSession is empty interface in "root_scene.d.ts"
 }
 } // RootSceneInterfaceModifier
 const GENERATED_ArkUIRootSceneModifier* GetRootSceneModifier()
