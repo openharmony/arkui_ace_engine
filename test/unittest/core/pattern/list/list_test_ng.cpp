@@ -71,7 +71,6 @@ void ListTestNg::TearDownTestSuite()
 void ListTestNg::SetUp()
 {
     MockAnimationManager::GetInstance().Reset();
-    MockAnimationManager::GetInstance().SetTicks(TICK);
 }
 
 void ListTestNg::TearDown()
@@ -361,6 +360,10 @@ RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
 
 AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
+    if (!MockAnimationManager::GetInstance().AllFinished()) {
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
+    }
     Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
     if (AceType::InstanceOf<ListItemPattern>(frameNode->GetPattern())) {
         auto pattern = frameNode->GetPattern<ListItemPattern>();
@@ -374,19 +377,11 @@ AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float e
     return IsEqual(-(pattern->GetTotalOffset()), expectOffset);
 }
 
-AssertionResult ListTestNg::TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset)
-{
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    return Position(frameNode, expectOffset);
-}
-
-AssertionResult ListTestNg::TickByVelocityPosition(
-    const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
+AssertionResult ListTestNg::VelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
 {
     MockAnimationManager::GetInstance().TickByVelocity(velocity);
     FlushUITasks();
-    return Position(frameNode, expectOffset);
+    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
 }
 
 AssertionResult ListTestNg::Position(float expectOffset)
@@ -394,14 +389,15 @@ AssertionResult ListTestNg::Position(float expectOffset)
     return Position(frameNode_, expectOffset);
 }
 
-AssertionResult ListTestNg::TickPosition(float expectOffset)
+AssertionResult ListTestNg::VelocityPosition(float velocity, float expectOffset)
 {
-    return TickPosition(frameNode_, expectOffset);
+    return VelocityPosition(frameNode_, velocity, expectOffset);
 }
 
-AssertionResult ListTestNg::TickByVelocityPosition(float velocity, float expectOffset)
+void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
-    return TickByVelocityPosition(frameNode_, velocity, expectOffset);
+    positionController_->ScrollToIndex(index, smooth, align, std::nullopt);
+    FlushUITasks();
 }
 
 AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
@@ -412,10 +408,9 @@ AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlig
 AssertionResult ListTestNg::ScrollToIndex(
     int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset, float expectOffset)
 {
-    MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->ScrollToIndex(index, smooth, align, extraOffset);
     FlushUITasks();
-    return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
+    return Position(-expectOffset);
 }
 
 AssertionResult ListTestNg::JumpToItemInGroup(
@@ -424,7 +419,7 @@ AssertionResult ListTestNg::JumpToItemInGroup(
     MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->JumpToItemInGroup(index, indexInGroup, smooth, align);
     FlushUITasks();
-    return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
+    return Position(-expectOffset);
 }
 
 class ListItemMockLazy : public Framework::MockLazyForEachBuilder {

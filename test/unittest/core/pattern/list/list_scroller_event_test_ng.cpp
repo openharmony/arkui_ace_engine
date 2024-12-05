@@ -339,7 +339,7 @@ HWTEST_F(ListScrollerEventTestNg, Event003, TestSize.Level1)
      * @tc.steps: step4. Scroll up to start
      */
     isTrigger = false;
-    ScrollTo(0.f);
+    ScrollTo(0);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -800,7 +800,7 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
     info.AddTouchLocationInfo(std::move(touch));
     pattern_->OnTouchDown(info);
     EXPECT_EQ(pattern_->chainAnimation_->GetControlIndex(), 4);
-    pattern_->OnScrollCallback(0.f, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
     FlushUITasks();
     pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE);
     FlushUITasks();
