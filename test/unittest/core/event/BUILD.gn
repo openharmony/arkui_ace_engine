@@ -19,7 +19,6 @@ ace_unittest("event_manager_test_ng") {
   flutter_skia = true
   render = true
   sources = [
-    "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
@@ -72,10 +71,7 @@ ace_unittest("gesture_event_hub_test_ng") {
 ace_unittest("input_event_hub_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [
-    "$ace_root/frameworks/core/event/mouse_event.cpp",
-    "input_event_hub_test_ng.cpp",
-  ]
+  sources = [ "input_event_hub_test_ng.cpp" ]
 }
 
 ace_unittest("long_press_event_test_ng") {
