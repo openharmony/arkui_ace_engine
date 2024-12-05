@@ -832,7 +832,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         algo.getNextFocusNode(FocusStep::TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
-        EXPECT_EQ(pattern_->focusIndex_, i);
+        EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
     }
     for (int i = 48; i >= 0; --i) {
@@ -840,7 +840,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         algo.getNextFocusNode(FocusStep::SHIFT_TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
-        EXPECT_EQ(pattern_->focusIndex_, i);
+        EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
     }
 }

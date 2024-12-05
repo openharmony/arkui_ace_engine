@@ -135,6 +135,7 @@ build_component_ng("pattern_ng") {
     "grid/grid_adaptive/grid_adaptive_layout_algorithm.cpp",
     "grid/grid_content_modifier.cpp",
     "grid/grid_event_hub.cpp",
+    "grid/grid_focus.cpp",
     "grid/grid_item_accessibility_property.cpp",
     "grid/grid_item_layout_algorithm.cpp",
     "grid/grid_item_layout_property.cpp",

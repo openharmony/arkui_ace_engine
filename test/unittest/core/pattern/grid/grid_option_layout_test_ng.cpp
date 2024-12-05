@@ -249,7 +249,7 @@ HWTEST_F(GridOptionLayoutTestNg, SearchIrregularFocusableChildInScroll001, TestS
      */
     int32_t tarMainIndex = 1;
     int32_t tarCrossIndex = 1;
-    auto IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    auto IrregularFocusableChild = pattern_->focusHandler_.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     RefPtr<FocusHub> result = IrregularFocusableChild.Upgrade();
     EXPECT_EQ(result, nullptr);
 }
@@ -279,13 +279,14 @@ HWTEST_F(GridOptionLayoutTestNg, SearchIrregularFocusableChildInScroll002, TestS
     CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
 
+    auto& focus = pattern_->focusHandler_;
     /**
      * @tc.steps: step2. Find target child with specified index parameters.
      * @tc.expected: Can not find the target focus child.
      */
     int32_t tarMainIndex = 1;
     int32_t tarCrossIndex = 1;
-    auto IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    auto IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     RefPtr<FocusHub> result = IrregularFocusableChild.Upgrade();
     EXPECT_EQ(result, nullptr);
 
@@ -293,62 +294,62 @@ HWTEST_F(GridOptionLayoutTestNg, SearchIrregularFocusableChildInScroll002, TestS
      * @tc.steps: step3. Call the function when isLeftStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isLeftStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isLeftStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isLeftStep_ = false;
+    focus.isLeftStep_ = false;
 
     /**
      * @tc.steps: step4. Call the function when isRightStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
     tarCrossIndex = 0;
-    pattern_->isRightStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isRightStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isRightStep_ = false;
+    focus.isRightStep_ = false;
 
     /**
      * @tc.steps: step5. Call the function when isUpStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isUpStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isUpStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isUpStep_ = false;
+    focus.isUpStep_ = false;
 
     /**
      * @tc.steps: step6. Call the function when isDownStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isDownStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isDownStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isDownStep_ = false;
+    focus.isDownStep_ = false;
 
     /**
      * @tc.steps: step7. Call the function when isLeftEndStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isLeftEndStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isLeftEndStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isLeftEndStep_ = false;
+    focus.isLeftEndStep_ = false;
 
     /**
      * @tc.steps: step8. Call the function when isRightEndStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isRightEndStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isRightEndStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isRightEndStep_ = false;
+    focus.isRightEndStep_ = false;
 }
 
 /**
