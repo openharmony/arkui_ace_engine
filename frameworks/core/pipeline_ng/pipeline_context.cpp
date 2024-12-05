@@ -3425,16 +3425,16 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (!windowId) {
         windowId = static_cast<int32_t>(GetFocusWindowId());
     }
-    int32_t currentStyle = 0;
-    mouseStyle->GetPointerStyle(windowId, currentStyle);
-    if (currentStyle != 0 && static_cast<int32_t>(format) == 0) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle "
-            "[%{public}d,%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
-            nodeId, mouseStyleNodeId_.value_or(-1), static_cast<int32_t>(format), currentStyle, windowId, isByPass);
-    }
     if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
+    int32_t currentStyle = static_cast<int32_t>(format);
+    if (lastMouseStyle_ != 0 && currentStyle == 0) {
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle "
+            "[%{public}d,%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
+            nodeId, mouseStyleNodeId_.value_or(-1), currentStyle, lastMouseStyle_, windowId, isByPass);
+    }
+    lastMouseStyle_ = currentStyle;
     return mouseStyle->ChangePointerStyle(windowId, format);
 }
 
