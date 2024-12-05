@@ -146,8 +146,37 @@ void OnWillScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
+    auto callValue = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
+    auto call = [arkCallback = CallbackHelper(callValue.value())](
+        const Dimension& xOffset,
+        const Dimension& yOffset,
+        const ScrollState& scrollState,
+        const ScrollSource& scrollSource) {
+
+        auto retriever = [](const Ark_Int32 resourceId, Ark_OffsetResult value, uint8_t* data) {
+            memcpy(data, (uint8_t*)&value, sizeof(Ark_OffsetResult));
+        };
+        Callback_OffsetResult_Void valueRetriever;
+        valueRetriever.call = retriever;
+        valueRetriever.data = new uint8_t[sizeof(Ark_OffsetResult)];
+
+        arkCallback.Invoke(
+            Converter::ArkValue<Ark_Number>(xOffset),
+            Converter::ArkValue<Ark_Number>(yOffset), 
+            Converter::ArkValue<Ark_ScrollState>(scrollState),
+            Converter::ArkValue<Ark_ScrollSource>(scrollSource),
+            valueRetriever);
+
+        Ark_OffsetResult ArkRes;
+        memcpy((uint8_t*)&ArkRes, valueRetriever.data, sizeof(Ark_OffsetResult));
+        TwoDimensionScrollResult retVal = {
+            Converter::Convert<Dimension>(ArkRes.xOffset),
+            Converter::Convert<Dimension>(ArkRes.yOffset)};
+        delete [] valueRetriever.data;
+
+        return retVal;
+    };
+    ScrollModelNG::SetOnWillScroll(frameNode, call);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Opt_ScrollOnWillScrollCallback* value)
@@ -155,7 +184,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
+    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
