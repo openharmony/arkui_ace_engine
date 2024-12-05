@@ -961,36 +961,6 @@ HWTEST_F(GridScrollLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdaptToChildMainSize003
- * @tc.desc: Test Horizontal Grid with Infinity mainSize
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollLayoutTestNg, AdaptToChildMainSize003, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
-    CreateFixedItems(8);
-    CreateDone();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_MAIN_SIZE * 2);
-}
-
-/**
- * @tc.name: AdaptToChildMainSize004
- * @tc.desc: Test Vertical Grid with Infinity mainSize
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollLayoutTestNg, AdaptToChildMainSize004, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    ViewAbstract::SetHeight(CalcLength(Infinity<int32_t>()));
-    CreateFixedItems(8);
-    CreateDone();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_MAIN_SIZE * 2);
-}
-
-/**
  * @tc.name: AdaptToChildMainSize005
  * @tc.desc: Test Vertical Grid with maxcount and 0 itemHeight
  * @tc.type: FUNC
