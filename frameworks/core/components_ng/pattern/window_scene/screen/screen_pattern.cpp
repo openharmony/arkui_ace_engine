@@ -222,6 +222,10 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto window = static_cast<RosenWindow*>(container->GetWindow());
     CHECK_NULL_RETURN(window, false);
     auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
+    if (rootScene->GetClassType() != "RootScene") {
+        LOGE("class type is %{public}s", rootScene->GetClassType().c_str());
+        return true;
+    }
     CHECK_NULL_RETURN(rootScene, false);
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
