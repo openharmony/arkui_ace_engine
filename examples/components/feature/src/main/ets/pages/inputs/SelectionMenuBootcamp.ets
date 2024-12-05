@@ -148,9 +148,9 @@ export struct SelectionMenuBootcamp {
 
   @State expandedMenuOptions: Array<ExpandedMenuOptions> =
     [
-      { startIcon: $r("app.media.icon"), content: '词典', action: () => {} },
-      { startIcon: $r("app.media.icon"), content: '翻译', action: () => {} },
-      { startIcon: $r("app.media.icon"), content: '搜索', action: () => {} }
+      { startIcon: $r('app.media.icon'), content: '词典', action: () => {} },
+      { startIcon: $r('app.media.icon'), content: '翻译', action: () => {} },
+      { startIcon: $r('app.media.icon'), content: '搜索', action: () => {} }
     ]
   @State onCut: SelectionMenuOptions = {
     controller: this.controller,
