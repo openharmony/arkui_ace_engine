@@ -2105,7 +2105,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     auto& DMManager = Rosen::DisplayManager::GetInstance();
     auto window = container->GetUIWindow(instanceId_);
-    int32_t displayId = 0;
+    uint64_t displayId = 0;
     if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
         displayId = window->GetDisplayId();
         listenedDisplayId_ = displayId;
@@ -2558,9 +2558,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    if (window_ && window_->GetDisplayId() != DISPLAY_ID_INVALID) {
-        container->SetCurrentDisplayId(window_->GetDisplayId());
-    }
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (container->IsSubContainer()) {
         auto rect = NG::RectF(config.Left(), config.Top(), config.Width(), config.Height());
         SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
@@ -2588,17 +2587,34 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             container->UpdateResourceOrientation(modifyConfig.Orientation());
         }
     };
+    auto updateDisplayIdAndAreaTask = [container, context, rsWindow = window_]() {
+        CHECK_NULL_VOID(rsWindow);
+        auto displayId = rsWindow->GetDisplayId();
+        if (displayId != DISPLAY_ID_INVALID && container->GetCurrentDisplayId() != displayId) {
+            container->SetCurrentDisplayId(displayId);
+            auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+            if (context && currentDisplay) {
+                Rosen::DMRect availableArea;
+                Rosen::DMError ret = currentDisplay->GetAvailableArea(availableArea);
+                if (ret == Rosen::DMError::DM_OK) {
+                    context->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
+                }
+            }
+        }
+    };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
         updateDeviceOrientationTask();
+        updateDisplayIdAndAreaTask();
     } else {
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
         taskExecutor->PostTask(
             std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
+        taskExecutor->PostTask(
+            std::move(updateDisplayIdAndAreaTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayIdAndArea");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
-    auto pipelineContext = container->GetPipelineContext();
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> updatingInsets;
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
@@ -2951,7 +2967,11 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
     float density = 1.0f;
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    uint64_t displayId = 0;
+    if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
+        displayId = window->GetDisplayId();
+    }
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (defaultDisplay) {
         auto displayInfo = defaultDisplay->GetDisplayInfo();
         if (displayInfo) {
