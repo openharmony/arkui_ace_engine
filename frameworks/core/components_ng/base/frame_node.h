@@ -731,10 +731,7 @@ public:
     // Called to perform layout children.
     void Layout() override;
 
-    int32_t GetTotalChildCount() const override
-    {
-        return UINode::TotalChildCount();
-    }
+    int32_t GetTotalChildCount() const override;
 
     int32_t GetTotalChildCountWithoutExpanded() const
     {

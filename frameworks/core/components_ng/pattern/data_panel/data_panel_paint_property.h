@@ -83,10 +83,12 @@ public:
             return;
         }
         auto jsonDashArray = JsonUtil::CreateArray(true);
-        for (size_t i = 0; i < propValues_.value().size(); ++i) {
-            auto index = std::to_string(i);
-            double value = propValues_.value()[i];
-            jsonDashArray->Put(index.c_str(), value);
+        if (propValues_.has_value()) {
+            for (size_t i = 0; i < propValues_.value().size(); ++i) {
+                auto index = std::to_string(i);
+                double value = propValues_.value()[i];
+                jsonDashArray->Put(index.c_str(), value);
+            }
         }
         bool closeEffect = false;
         if (propEffect_.has_value()) {

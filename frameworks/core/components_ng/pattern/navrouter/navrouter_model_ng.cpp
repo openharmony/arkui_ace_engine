@@ -48,13 +48,31 @@ void NavRouterModelNG::SetNavRouteMode(int32_t mode)
     navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(mode));
 }
 
-void NavRouterModelNG::SetNavRouteMode(FrameNode* frameNode, int32_t mode)
+RefPtr<FrameNode> NavRouterModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        V2::NAVROUTER_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
+void NavRouterModelNG::SetNavRouteMode(FrameNode* frameNode, const std::optional<int32_t>& mode)
 {
     CHECK_NULL_VOID(frameNode);
     auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
     CHECK_NULL_VOID(navRouterGroupNode);
     auto navRouterPattern = navRouterGroupNode->GetPattern<NavRouterPattern>();
     CHECK_NULL_VOID(navRouterPattern);
-    navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(mode));
+    auto defaultValue = static_cast<int32_t>(NavRouteMode::PUSH_WITH_RECREATE);
+    navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(
+        mode.value_or(defaultValue)));
+}
+
+void NavRouterModelNG::SetOnStateChange(FrameNode* frameNode, std::function<void(bool isActivated)>&& onStateChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navRouterEventHub = AceType::DynamicCast<NavRouterEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navRouterEventHub);
+    navRouterEventHub->SetOnStateChange(std::move(onStateChange));
 }
 } // namespace OHOS::Ace::NG

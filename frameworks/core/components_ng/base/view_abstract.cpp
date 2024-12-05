@@ -209,9 +209,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
-void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
@@ -229,9 +233,13 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
-void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src)
+void ViewAbstract::SetBackgroundImage(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
+    if (src) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImage, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
@@ -242,9 +250,13 @@ void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
 }
 
-void ViewAbstract::SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat)
+void ViewAbstract::SetBackgroundImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat, frameNode);
+    if (imageRepeat) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageRepeat, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
@@ -255,9 +267,13 @@ void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
 }
 
-void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(FrameNode *frameNode, const std::optional<BackgroundImageSize>& bgImgSize)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize, frameNode);
+    if (bgImgSize) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageSize, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
@@ -2039,7 +2055,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
+void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dimension>& radius, const std::optional<BlurOption>& blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2047,7 +2063,7 @@ void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlur(radius, blurOption);
+        target->UpdateBackBlur(radius.value_or(Dimension()), blurOption.value_or(BlurOption()));
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -2374,9 +2390,14 @@ void ViewAbstract::SetBrightness(const Dimension& brightness)
     ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
 }
 
-void ViewAbstract::SetBrightness(FrameNode* frameNode, const Dimension& brightness)
+void ViewAbstract::SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness, frameNode);
+    if (brightness.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontBrightness, frameNode);
+    }
 }
 
 void ViewAbstract::SetGrayScale(const Dimension& grayScale)
@@ -2387,9 +2408,14 @@ void ViewAbstract::SetGrayScale(const Dimension& grayScale)
     ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
 }
 
-void ViewAbstract::SetGrayScale(FrameNode* frameNode, const Dimension& grayScale)
+void ViewAbstract::SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale, frameNode);
+    if (grayScale.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontGrayScale, frameNode);
+    }
 }
 
 void ViewAbstract::SetContrast(const Dimension& contrast)
@@ -2400,9 +2426,14 @@ void ViewAbstract::SetContrast(const Dimension& contrast)
     ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
 }
 
-void ViewAbstract::SetContrast(FrameNode* frameNode, const Dimension& contrast)
+void ViewAbstract::SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast, frameNode);
+    if (contrast.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontContrast, frameNode);
+    }
 }
 
 void ViewAbstract::SetSaturate(const Dimension& saturate)
@@ -2413,9 +2444,14 @@ void ViewAbstract::SetSaturate(const Dimension& saturate)
     ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
 }
 
-void ViewAbstract::SetSaturate(FrameNode* frameNode, const Dimension& saturate)
+void ViewAbstract::SetSaturate(FrameNode* frameNode, const std::optional<Dimension>& saturate)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSaturate, saturate, frameNode);
+    if (saturate.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSaturate, saturate.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontSaturate, frameNode);
+    }
 }
 
 void ViewAbstract::SetSepia(const Dimension& sepia)
@@ -2426,9 +2462,14 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
 }
 
-void ViewAbstract::SetSepia(FrameNode* frameNode, const Dimension& sepia)
+void ViewAbstract::SetSepia(FrameNode* frameNode, const std::optional<Dimension>& sepia)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSepia, sepia, frameNode);
+    if (sepia.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSepia, sepia.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontSepia, frameNode);
+    }
 }
 
 void ViewAbstract::SetInvert(const InvertVariant& invert)
@@ -2439,9 +2480,14 @@ void ViewAbstract::SetInvert(const InvertVariant& invert)
     ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
 }
 
-void ViewAbstract::SetInvert(FrameNode* frameNode, const InvertVariant& invert)
+void ViewAbstract::SetInvert(FrameNode *frameNode, const std::optional<InvertVariant>& invert)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert, frameNode);
+    if (invert.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontInvert, frameNode);
+    }
 }
 
 void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
@@ -2465,9 +2511,14 @@ void ViewAbstract::SetHueRotate(float hueRotate)
     ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
 }
 
-void ViewAbstract::SetHueRotate(FrameNode* frameNode, float hueRotate)
+void ViewAbstract::SetHueRotate(FrameNode *frameNode, const std::optional<float>& hueRotate)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontHueRotate, hueRotate, frameNode);
+    if (hueRotate.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontHueRotate, hueRotate.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontHueRotate, frameNode);
+    }
 }
 
 void ViewAbstract::SetColorBlend(const Color& colorBlend)
@@ -2478,9 +2529,15 @@ void ViewAbstract::SetColorBlend(const Color& colorBlend)
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
 }
 
-void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend)
+void ViewAbstract::SetColorBlend(FrameNode *frameNode, const std::optional<Color>& colorBlend)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (colorBlend.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontColorBlend, frameNode);
+    }
 }
 
 void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
@@ -2711,6 +2768,16 @@ void ViewAbstract::SetFreeze(bool freeze)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze);
+}
+
+void ViewAbstract::SetFreeze(FrameNode* frameNode, const std::optional<bool>& freeze)
+{
+    if (freeze.has_value()) {
+        ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze.value());
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_RENDER_CONTEXT(target, Freeze);
+    }
 }
 
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
@@ -3106,19 +3173,34 @@ void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleO
     }
 }
 
-void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option)
+void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, const std::optional<PixStretchEffectOption>& option)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
+    if (option.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, PixelStretchEffect, frameNode);
+    }
 }
 
-void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)
+void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, std::optional<double> radio)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio, frameNode);
+    if (radio.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, LightUpEffect, frameNode);
+    }
 }
 
-void ViewAbstract::SetSphericalEffect(FrameNode* frameNode, double radio)
+void ViewAbstract::SetSphericalEffect(FrameNode* frameNode, std::optional<double> radio)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(SphericalEffect, radio, frameNode);
+    if (radio.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SphericalEffect, radio.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, SphericalEffect, frameNode);
+    }
 }
 
 void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
@@ -3147,6 +3229,16 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
     if (target) {
         target->UpdateUseEffect(useEffect);
         target->UpdateUseEffectType(effectType);
+    }
+}
+
+void ViewAbstract::SetUseEffect(FrameNode* frameNode, const std::optional<bool>& useEffect)
+{
+    if (useEffect.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
     }
 }
 
@@ -3355,10 +3447,14 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
 }
 
-void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
+    }
 }
 
 void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
@@ -3369,10 +3465,14 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
 }
 
-void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
+    }
 }
 
 void ViewAbstract::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
@@ -3595,12 +3695,16 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateForegroundEffect(radius);
+        if (radius) {
+            target->UpdateForegroundEffect(*radius);
+        } else {
+            target->ResetForegroundEffect();
+        }
     }
 }
 
@@ -3633,6 +3737,9 @@ void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption 
 
 void ViewAbstract::SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree)
 {
+    rate = NonNegative(rate) ? rate : 0.0;
+    lightUpDegree = GreatOrEqual(rate, -1.0) ? lightUpDegree : 0.0;
+    lightUpDegree = LessOrEqual(rate, 1.0) ? lightUpDegree : 0.0;
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpRate, rate, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree, frameNode);
 }
@@ -3689,6 +3796,15 @@ void ViewAbstract::SetSharedTransition(
     CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
+        if (option) {
+            option->duration = option->duration < 0 ? CommonAnimationStyle::DEFAULT_ANIMATION_DURATION :
+                option->duration;
+            option->delay = option->delay < 0 ? 0 : option->delay;
+            option->zIndex = option->zIndex < 0 ? 0 : option->zIndex;
+            if (!option->curve) {
+                option->curve = Curves::LINEAR;
+            }
+        }
         target->SetSharedTransitionOptions(option);
         target->SetShareId(shareId);
     }
@@ -3732,9 +3848,14 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     }
 }
 
-void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
+void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, const std::optional<bool>& useShadowBatching)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching, frameNode);
+    if (useShadowBatching.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseShadowBatching, frameNode);
+    }
 }
 
 void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
@@ -5044,6 +5165,13 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstract::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
 void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -5057,6 +5185,13 @@ void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
@@ -5085,6 +5220,13 @@ void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string&
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->RemoveCustomProperty(key);
+}
+
+void ViewAbstract::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(flag.value_or(false));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG

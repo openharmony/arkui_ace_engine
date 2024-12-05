@@ -13,9 +13,31 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+struct RowOptions {
+    std::optional<Dimension> space;
+};
+}
+
+namespace Converter {
+template<>
+RowOptions Convert(const Ark_RowOptions& src)
+{
+    return {
+        .space = OptConvert<Dimension>(src.space),
+    };
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowModifier {
@@ -30,8 +52,10 @@ void SetRowOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //RowModelNG::SetSetRowOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto opts = Converter::OptConvert<RowOptions>(*options);
+    auto space = opts ? opts->space : std::nullopt;
+    RowModelNG::SetSpace(frameNode, space.value_or(0.0_px));
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
@@ -40,18 +64,16 @@ void AlignItemsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RowModelNG::SetAlignItems(frameNode, convValue);
+    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
+    RowModelNG::SetAlignItems(frameNode, flexAlign);
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         Ark_FlexAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RowModelNG::SetJustifyContent(frameNode, convValue);
+    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
+    RowModelNG::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
@@ -59,16 +81,43 @@ void PointLightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RowModelNG::SetPointLight(frameNode, convValue);
+#ifdef POINT_LIGHT_ENABLE
+    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
+    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
+    CHECK_NULL_VOID(themeConstants);
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelNG::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
+#endif
 }
 void ReverseImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RowModelNG::SetReverse(frameNode, convValue);
+    RowModelNG::SetIsReverse(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()

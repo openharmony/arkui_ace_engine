@@ -143,10 +143,13 @@ public:
 
     void LocalizedPaddingOrMarginChange(const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding);
     void UpdatePadding(const PaddingProperty& value);
+    void ResetPadding();
     void UpdateSafeAreaPadding(const PaddingProperty& value);
     void ResetSafeAreaPadding();
 
     void UpdateMargin(const MarginProperty& value);
+
+    void ResetMargin();
 
     void UpdateBorderWidth(const BorderWidthProperty& value);
 

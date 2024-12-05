@@ -27,19 +27,19 @@ class ShapeAbstractModel {
 public:
     static ShapeAbstractModel* GetInstance();
     virtual ~ShapeAbstractModel() = default;
-    virtual void SetStroke(const Color& color);
-    virtual void SetFill(const Color& color);
-    virtual void SetStrokeDashOffset(const Ace::Dimension& dashOffset);
-    virtual void SetStrokeLineCap(int lineCapStyle);
-    virtual void SetStrokeLineJoin(int lineJoinStyle);
-    virtual void SetStrokeMiterLimit(double miterLimit);
-    virtual void SetStrokeOpacity(double opacity);
-    virtual void SetFillOpacity(double opacity);
-    virtual void SetStrokeWidth(const Ace::Dimension& lineWidth);
-    virtual void SetStrokeDashArray(const std::vector<Ace::Dimension>& dashArray);
-    virtual void SetAntiAlias(bool antiAlias);
-    virtual void SetWidth(Dimension& width);
-    virtual void SetHeight(Dimension& height);
+    virtual void SetStroke(const Color& color) = 0;
+    virtual void SetFill(const Color& color) = 0;
+    virtual void SetStrokeDashOffset(const Ace::Dimension& dashOffset) = 0;
+    virtual void SetStrokeLineCap(int lineCapStyle) = 0;
+    virtual void SetStrokeLineJoin(int lineJoinStyle) = 0;
+    virtual void SetStrokeMiterLimit(double miterLimit) = 0;
+    virtual void SetStrokeOpacity(double opacity) = 0;
+    virtual void SetFillOpacity(double opacity) = 0;
+    virtual void SetStrokeWidth(const Ace::Dimension& lineWidth) = 0;
+    virtual void SetStrokeDashArray(const std::vector<Ace::Dimension>& dashArray) = 0;
+    virtual void SetAntiAlias(bool antiAlias) = 0;
+    virtual void SetWidth(Dimension& width) = 0;
+    virtual void SetHeight(Dimension& height) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_ABSTRACT_MODEL_H

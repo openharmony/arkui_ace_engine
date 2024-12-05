@@ -13,9 +13,89 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/shape/rect_model_ng.h"
+#include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG {
+struct RectOptions {
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+    std::optional<Dimension> radiusWidth;
+    std::optional<Dimension> radiusHeight;
+};
+struct RectRadius {
+    std::optional<Dimension> radiusWidth;
+    std::optional<Dimension> radiusHeight;
+};
+} // OHOS::Ace::NG
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+RectOptions Convert(const Ark_RectOptions& src)
+{
+    RectOptions rectOptions;
+    rectOptions.width = Converter::OptConvert<Dimension>(src.width);
+    rectOptions.height = Converter::OptConvert<Dimension>(src.height);
+    auto radius = Converter::OptConvert<RectRadius>(src.radius);
+    if (radius->radiusWidth) {
+        rectOptions.radiusWidth = radius->radiusWidth;
+    }
+    if (radius->radiusHeight) {
+        rectOptions.radiusHeight = radius->radiusHeight;
+    }
+    return rectOptions;
+}
+
+template<>
+RectOptions Convert(const Ark_RoundedRectOptions& src)
+{
+    RectOptions rectOptions;
+    rectOptions.width = Converter::OptConvert<Dimension>(src.width);
+    rectOptions.height = Converter::OptConvert<Dimension>(src.height);
+    rectOptions.radiusWidth = Converter::OptConvert<Dimension>(src.radiusWidth);
+    rectOptions.radiusHeight = Converter::OptConvert<Dimension>(src.radiusHeight);
+    return rectOptions;
+}
+
+template<>
+RectRadius Convert(const Ark_Number& src)
+{
+    RectRadius radiusStruct;
+    radiusStruct.radiusWidth = Converter::OptConvert<Dimension>(src);
+    radiusStruct.radiusHeight = Converter::OptConvert<Dimension>(src);
+    return radiusStruct;
+}
+
+template<>
+RectRadius Convert(const Ark_String& src)
+{
+    RectRadius radiusStruct;
+    radiusStruct.radiusWidth = Converter::OptConvert<Dimension>(src);
+    radiusStruct.radiusHeight = Converter::OptConvert<Dimension>(src);
+    return radiusStruct;
+}
+
+template<>
+RectRadius Convert(const Array_CustomObject& src)
+{
+    RectRadius radiusStruct;
+    radiusStruct.radiusWidth = std::make_optional<Dimension>(Dimension(0));
+    radiusStruct.radiusHeight = std::make_optional<Dimension>(Dimension(0));
+    return radiusStruct;
+}
+
+template<>
+Dimension Convert(const Array_CustomObject& src)
+{
+    return Dimension(0);
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RectModifier {
@@ -30,8 +110,24 @@ void SetRectOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //RectModelNG::SetSetRectOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto opt = Converter::OptConvert<RectOptions>(*options);
+    CHECK_NULL_VOID(opt);
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
+    }
+
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
+    }
+
+    if (!opt->radiusWidth || !opt->radiusHeight) {
+        return;
+    }
+    const Dimension rx = opt->radiusWidth.value();
+    const Dimension ry = opt->radiusHeight.value();
+    RectModelNG::SetRadiusWidth(frameNode, rx);
+    RectModelNG::SetRadiusHeight(frameNode, ry);
 }
 } // RectInterfaceModifier
 namespace RectAttributeModifier {
@@ -41,8 +137,9 @@ void RadiusWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RectModelNG::SetRadiusWidth(frameNode, convValue);
+    auto radiusWidth = Converter::OptConvert<Dimension>(*value);
+    CHECK_NULL_VOID(radiusWidth);
+    RectModelNG::SetRadiusWidth(frameNode, radiusWidth.value());
 }
 void RadiusHeightImpl(Ark_NativePointer node,
                       const Ark_Union_Number_String* value)
@@ -50,8 +147,9 @@ void RadiusHeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RectModelNG::SetRadiusHeight(frameNode, convValue);
+    auto radiusHeight = Converter::OptConvert<Dimension>(*value);
+    CHECK_NULL_VOID(radiusHeight);
+    RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value());
 }
 void RadiusImpl(Ark_NativePointer node,
                 const Ark_Union_Number_String_Array_Any* value)
@@ -59,8 +157,10 @@ void RadiusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RectModelNG::SetRadius(frameNode, convValue);
+    auto radius = Converter::OptConvert<Dimension>(*value);
+    CHECK_NULL_VOID(radius);
+    RectModelNG::SetRadiusWidth(frameNode, radius.value());
+    RectModelNG::SetRadiusHeight(frameNode, radius.value());
 }
 } // RectAttributeModifier
 const GENERATED_ArkUIRectModifier* GetRectModifier()

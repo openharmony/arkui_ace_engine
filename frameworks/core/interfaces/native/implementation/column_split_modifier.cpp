@@ -14,9 +14,35 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 
+namespace OHOS::Ace::NG {
+namespace {
+struct DividerOptions {
+    std::optional<Dimension> startMargin;
+    std::optional<Dimension> endMargin;
+};
+}
+}
+namespace OHOS::Ace::NG::Converter {
+template<>
+ItemDivider Convert(const Ark_ColumnSplitDividerStyle& src)
+{
+    ItemDivider divider;
+    auto margin = OptConvert<Dimension>(src.startMargin);
+    if (margin.has_value()) {
+        divider.startMargin = margin.value();
+    }
+    margin = OptConvert<Dimension>(src.endMargin);
+    if (margin.has_value()) {
+        divider.endMargin = margin.value();
+    }
+    return divider;
+}
+}
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnSplitModifier {
 Ark_NativePointer ConstructImpl()
@@ -27,11 +53,7 @@ Ark_NativePointer ConstructImpl()
 namespace ColumnSplitInterfaceModifier {
 void SetColumnSplitOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //ColumnSplitModelNG::SetSetColumnSplitOptions(frameNode, convValue);
+    // keep it empty because ColumnSplit doesn`t have any options
 }
 } // ColumnSplitInterfaceModifier
 namespace ColumnSplitAttributeModifier {
@@ -40,8 +62,7 @@ void ResizeableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //ColumnSplitModelNG::SetResizeable(frameNode, convValue);
+    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, Converter::Convert<bool>(value));
 }
 void DividerImpl(Ark_NativePointer node,
                  const Ark_Union_ColumnSplitDividerStyle_Null* value)
@@ -49,8 +70,8 @@ void DividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ColumnSplitModelNG::SetDivider(frameNode, convValue);
+    auto divider = Converter::OptConvert<ItemDivider>(*value);
+    LinearSplitModelNG::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()

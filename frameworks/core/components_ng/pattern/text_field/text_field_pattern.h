@@ -1515,6 +1515,11 @@ public:
         isFocusedBeforeClick_ = isFocusedBeforeClick;
     }
 
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHapticFeedback_;
+    }
+
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
@@ -1797,6 +1802,7 @@ private:
     bool IsAutoFillUserName(const AceAutoFillType& autoFillType);
     bool HasAutoFillPasswordNode();
     bool IsTriggerAutoFillPassword();
+    std::string GetLineBreakStrategy() const;
 
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);
@@ -1842,7 +1848,7 @@ private:
     bool enableTouchAndHoverEffect_ = true;
     bool isOnHover_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     bool isTransparent_ = false;
     bool contChange_ = false;
     bool counterChange_ = false;

@@ -94,6 +94,14 @@ void RatingModelNG::SetOnChange(RatingChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void RatingModelNG::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -111,14 +119,24 @@ RefPtr<FrameNode> RatingModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-void RatingModelNG::SetStars(FrameNode* frameNode, int32_t value)
+void RatingModelNG::SetStars(FrameNode* frameNode, const std::optional<int32_t>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Stars, value, frameNode);
+    if (value.has_value()) {
+        int32_t iValue = value.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Stars, iValue, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Stars, frameNode);
+    }
 }
 
-void RatingModelNG::SetStepSize(FrameNode* frameNode, double value)
+void RatingModelNG::SetStepSize(FrameNode* frameNode, const std::optional<double>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, StepSize, value, frameNode);
+    if (value.has_value()) {
+        double dValue = value.value();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, StepSize, dValue, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RatingRenderProperty, StepSize, frameNode);
+    }
 }
 
 void RatingModelNG::SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag)
@@ -138,8 +156,13 @@ void RatingModelNG::SetSecondarySrc(FrameNode* frameNode, const std::string& val
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             RatingLayoutProperty, SecondaryImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
     } else {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value), frameNode);
+        if (value.empty()) {
+            ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+                RatingLayoutProperty, SecondaryImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value), frameNode);
+        }
     }
 }
 
@@ -169,9 +192,20 @@ void RatingModelNG::SetChangeValue(FrameNode* frameNode, double value)
     pattern->SetRatingScore(value);
 }
 
-void RatingModelNG::SetRatingOptions(FrameNode* frameNode, double rating, bool indicator)
+void RatingModelNG::SetRatingOptions(FrameNode* frameNode, const std::optional<double>& rating,
+                                     const std::optional<bool>& indicator)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, indicator, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, rating, frameNode);
+    if (indicator.has_value()) {
+        bool bIndicator = indicator.value();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, bIndicator, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, frameNode);
+    }
+    if (rating.has_value()) {
+        double dRating =  rating.value();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, dRating, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

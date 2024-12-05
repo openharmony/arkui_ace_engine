@@ -92,22 +92,36 @@ void QRCodeModelNG::SetQRCodeValue(FrameNode* frameNode, const std::string& valu
     ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Value, value, frameNode);
 }
 
-void QRCodeModelNG::SetQRCodeColor(FrameNode* frameNode, const Color& color)
+void QRCodeModelNG::SetQRCodeColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Color, color, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Color, *color, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(QRCodePaintProperty, Color, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    }
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
-void QRCodeModelNG::SetQRBackgroundColor(FrameNode* frameNode, const Color& color)
+void QRCodeModelNG::SetQRBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, *color, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
-void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const double opacity)
+void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opacity, frameNode);
+    if (opacity) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, *opacity, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

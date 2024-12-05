@@ -29,6 +29,7 @@ public:
     
     static void StartPoint(FrameNode* frameNode, const ShapePoint& value);
     static void EndPoint(FrameNode* frameNode, const ShapePoint& value);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG

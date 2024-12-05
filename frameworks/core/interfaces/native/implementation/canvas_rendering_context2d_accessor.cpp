@@ -14,17 +14,72 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+
+#include "canvas_rendering_context2d_peer_impl.h"
+#include "drawing_rendering_context_peer_impl.h"
+
 #include "arkoala_api_generated.h"
+
+namespace {
+constexpr auto ERROR_VALUE = -1;
+} // namespace
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
+{
+    dst = Converter::OptConvert<bool>(src.antialias);
+}
+inline void AssignCast(std::optional<bool>& dst, const Ark_RenderingContextSettings& src)
+{
+    dst = Converter::OptConvert<bool>(src.antialias);
+}
+template<>
+inline void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
+{
+    switch (src) {
+        case ARK_IMAGE_ANALYZER_TYPE_TEXT: dst = ImageAnalyzerType::TEXT; break;
+        case ARK_IMAGE_ANALYZER_TYPE_SUBJECT: dst = ImageAnalyzerType::SUBJECT; break;
+        default: LOGE("Unexpected enum value in Ark_ImageAnalyzerType: %{public}d", src);
+    }
+}
+template<>
+std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
+{
+    std::vector<ImageAnalyzerType> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto opt = Converter::OptConvert<ImageAnalyzerType>(*(src.array + i));
+        if (opt) {
+            dst.push_back(*opt);
+        }
+    }
+    return dst;
+}
+
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
 void DestroyPeerImpl(CanvasRenderingContext2DPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl *>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 CanvasRenderingContext2DPeer* CtorImpl(const Opt_RenderingContextSettings* settings)
 {
-    return new CanvasRenderingContext2DPeer();
+    CHECK_NULL_RETURN(settings, nullptr);
+
+    auto peerImpl = Referenced::MakeRefPtr<CanvasRenderingContext2DPeerImpl>();
+    peerImpl->IncRefCount();
+    auto antialias = Converter::OptConvert<bool>(*settings);
+    if (antialias) {
+        peerImpl->SetAntiAlias(*antialias);
+    }
+    return reinterpret_cast<CanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,14 +89,33 @@ void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
                    const Opt_String* type,
                    const Opt_CustomObject* quality)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(type);
+    CHECK_NULL_VOID(quality);
+
+    auto dataUrl = Converter::OptConvert<std::string>(*type);
+    if (!dataUrl) {
+        return;
+    }
+    LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerToDataURL Opt_CustomObject not implemented.");
 }
 void StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(config);
+
+    auto vector = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
+    peerImpl->TriggerStartImageAnalyzer(vector);
 }
 void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerStopImageAnalyzer();
 }
 void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
                     const Callback_Void* callback)
@@ -61,11 +135,15 @@ void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
 }
 Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)
 {
-    return 0;
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, ::ERROR_VALUE);
+    return peerImpl->TriggerGetHeight();
 }
 Ark_Int32 GetWidthImpl(CanvasRenderingContext2DPeer* peer)
 {
-    return 0;
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, ::ERROR_VALUE);
+    return peerImpl->TriggerGetWidth();
 }
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()

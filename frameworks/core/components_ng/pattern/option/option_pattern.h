@@ -89,13 +89,13 @@ public:
         pasteButton_ = pasteButton;
     }
 
-    void SetBgColor(const Color& color);
+    void SetBgColor(const std::optional<Color>& color);
     // set font props
-    void SetFontSize(const Dimension& value);
-    void SetItalicFontStyle(const Ace::FontStyle& value);
-    void SetFontWeight(const FontWeight& value);
+    void SetFontSize(const std::optional<Dimension>& value);
+    void SetItalicFontStyle(const std::optional<Ace::FontStyle>& value);
+    void SetFontWeight(const std::optional<FontWeight>& value);
     void SetFontFamily(const std::vector<std::string>& value);
-    void SetFontColor(const Color& color);
+    void SetFontColor(const std::optional<Color>& color);
 
     Color GetBgColor();
     // get font props

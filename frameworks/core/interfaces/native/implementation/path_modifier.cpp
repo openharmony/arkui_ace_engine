@@ -13,9 +13,35 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/path_model_ng.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+
+
+namespace OHOS::Ace::NG {
+namespace {
+struct PathOptions {
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+    std::optional<std::string> commands;
+};
+}
+
+namespace Converter {
+template<>
+PathOptions Convert(const Ark_PathOptions& src)
+{
+    return {
+        .width = Converter::OptConvert<Dimension>(src.width),
+        .height = Converter::OptConvert<Dimension>(src.height),
+        .commands = OptConvert<std::string>(src.commands),
+    };
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathModifier {
@@ -30,8 +56,17 @@ void SetPathOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //PathModelNG::SetSetPathOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto opt = Converter::OptConvert<PathOptions>(*options);
+    if (opt && opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, *(opt->width));
+    }
+    if (opt && opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, *(opt->height));
+    }
+    if (opt && opt->commands) {
+        PathModelNG::SetCommands(frameNode, *(opt->commands));
+    }
 }
 } // PathInterfaceModifier
 namespace PathAttributeModifier {
@@ -41,8 +76,7 @@ void CommandsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //PathModelNG::SetCommands(frameNode, convValue);
+    PathModelNG::SetCommands(frameNode, Converter::Convert<std::string>(*value));
 }
 } // PathAttributeModifier
 const GENERATED_ArkUIPathModifier* GetPathModifier()

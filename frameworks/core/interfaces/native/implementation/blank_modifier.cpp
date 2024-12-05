@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "base/log/log_wrapper.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankModifier {
@@ -30,10 +32,13 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = min ? Converter::OptConvert<type>(*min) : std::nullopt;
-    //BlankModelNG::SetSetBlankOptions(frameNode, convValue);
+    auto minDim = Converter::OptConvert<Dimension>(*min);
+    Validator::ValidateNonNegative(minDim);
+    Validator::ValidateNonPercent(minDim);
+    BlankModelNG::SetBlankMin(frameNode, minDim.value_or(0.0_px));
 }
 } // BlankInterfaceModifier
+
 namespace BlankAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
                const Ark_ResourceColor* value)
@@ -41,10 +46,15 @@ void ColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //BlankModelNG::SetColor(frameNode, convValue);
+    auto color = Converter::OptConvert<Color>(*value);
+    if (color) {
+        BlankModelNG::SetColor(frameNode, color.value());
+    } else {
+        LOGI("#### BlankAttribute::ColorImpl: color is empty");
+    }
 }
 } // BlankAttributeModifier
+
 const GENERATED_ArkUIBlankModifier* GetBlankModifier()
 {
     static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {

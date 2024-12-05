@@ -40,11 +40,11 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetImages(FrameNode* frameNode, const std::vector<ImageProperties>& images);
     static void SetIsReverse(FrameNode* frameNode, bool isReverse);
-    static void SetDuration(FrameNode* frameNode, int32_t duration);
-    static void SetState(FrameNode* frameNode, int32_t state);
+    static void SetDuration(FrameNode* frameNode, const std::optional<int32_t>& duration);
+    static void SetState(FrameNode* frameNode, const std::optional<int32_t>& state);
     static void SetFixedSize(FrameNode* frameNode, bool fixedSize);
-    static void SetFillMode(FrameNode* frameNode, int32_t fillMode);
-    static void SetIteration(FrameNode* frameNode, int32_t iteration);
+    static void SetFillMode(FrameNode* frameNode, const std::optional<int32_t>& fillMode);
+    static void SetIteration(FrameNode* frameNode, const std::optional<int32_t>& iteration);
     static bool IsReverse(FrameNode* frameNode);
     static int32_t GetDuration(FrameNode* frameNode);
     static int32_t GetState(FrameNode* frameNode);

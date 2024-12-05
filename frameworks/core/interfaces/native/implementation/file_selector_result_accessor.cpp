@@ -14,13 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorResultAccessor {
 void DestroyPeerImpl(FileSelectorResultPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 FileSelectorResultPeer* CtorImpl()
 {
@@ -33,6 +37,10 @@ Ark_NativePointer GetFinalizerImpl()
 void HandleFileListImpl(FileSelectorResultPeer* peer,
                         const Array_String* fileList)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(fileList);
+    auto vector = Converter::Convert<std::vector<std::string>>(*fileList);
+    peer->handler->HandleFileList(vector);
 }
 } // FileSelectorResultAccessor
 const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor()

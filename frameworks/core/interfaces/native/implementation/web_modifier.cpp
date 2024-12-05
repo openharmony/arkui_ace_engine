@@ -14,8 +14,180 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#ifdef WEB_SUPPORTED
+#include "core/components_ng/pattern/web/web_model_ng.h"
+#endif // WEB_SUPPORTED
+#include "core/interfaces/native/implementation/web_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+namespace {
+#ifdef WEB_SUPPORTED
+void EraseSpace(std::string& data)
+{
+    auto iter = data.begin();
+    while (iter != data.end()) {
+        if (isspace(*iter)) {
+            iter = data.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+#endif // WEB_SUPPORTED
+} // namespace
+
+namespace OHOS::Ace {
+using ScriptItem = std::pair<std::string, std::vector<std::string>>;
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG::Converter {
+#ifdef WEB_SUPPORTED
+template<>
+void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src)
+{
+    switch (src) {
+        case ARK_MIXED_MODE_ALL: dst = MixedModeContent::MIXED_CONTENT_ALWAYS_ALLOW; break;
+        case ARK_MIXED_MODE_COMPATIBLE: dst = MixedModeContent::MIXED_CONTENT_COMPATIBILITY_MODE; break;
+        case ARK_MIXED_MODE_NONE: dst = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW; break;
+        default: LOGE("Unexpected enum value in Ark_MixedMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WebCacheMode>& dst, const Ark_CacheMode& src)
+{
+    switch (src) {
+        case ARK_CACHE_MODE_DEFAULT: dst = WebCacheMode::DEFAULT; break;
+        case ARK_CACHE_MODE_NONE: dst = WebCacheMode::USE_CACHE_ELSE_NETWORK; break;
+        case ARK_CACHE_MODE_ONLINE: dst = WebCacheMode::USE_NO_CACHE; break;
+        case ARK_CACHE_MODE_ONLY: dst = WebCacheMode::USE_CACHE_ONLY; break;
+        default: LOGE("Unexpected enum value in Ark_CacheMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src)
+{
+    switch (src) {
+        case ARK_WEB_DARK_MODE_OFF: dst = WebDarkMode::Off; break;
+        case ARK_WEB_DARK_MODE_ON: dst = WebDarkMode::On; break;
+        case ARK_WEB_DARK_MODE_AUTO: dst = WebDarkMode::Auto; break;
+        default: LOGE("Unexpected enum value in Ark_WebDarkMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& src)
+{
+    switch (src) {
+        case ARK_OVER_SCROLL_MODE_NEVER: dst = OverScrollMode::NEVER; break;
+        case ARK_OVER_SCROLL_MODE_ALWAYS: dst = OverScrollMode::ALWAYS; break;
+        default: LOGE("Unexpected enum value in Ark_OverScrollMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src)
+{
+    switch (src) {
+        case ARK_WEB_LAYOUT_MODE_NONE: dst = WebLayoutMode::NONE; break;
+        case ARK_WEB_LAYOUT_MODE_FIT_CONTENT: dst = WebLayoutMode::FIT_CONTENT; break;
+        default: LOGE("Unexpected enum value in Ark_WebLayoutMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src)
+{
+    switch (src) {
+        case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL: dst = WebKeyboardAvoidMode::RESIZE_VISUAL; break;
+        case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT: dst = WebKeyboardAvoidMode::RESIZE_CONTENT; break;
+        case ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT: dst = WebKeyboardAvoidMode::OVERLAYS_CONTENT; break;
+        default: LOGE("Unexpected enum value in Ark_WebKeyboardAvoidMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src)
+{
+    switch (src) {
+        case ARK_RENDER_MODE_ASYNC_RENDER: dst = RenderMode::ASYNC_RENDER; break;
+        case ARK_RENDER_MODE_SYNC_RENDER: dst = RenderMode::SYNC_RENDER; break;
+        default: LOGE("Unexpected enum value in Ark_RenderMode: %{public}d", src);
+    }
+}
+
+template<>
+ScriptItem Convert(const Ark_ScriptItem& src)
+{
+    ScriptItem item = std::make_pair(
+        Converter::Convert<std::string>(src.script),
+        Converter::Convert<std::vector<std::string>>(src.scriptRules)
+    );
+    return item;
+}
+
+template<>
+ScriptItems Convert(const Array_ScriptItem& src)
+{
+    auto items = Converter::Convert<std::vector<ScriptItem>>(src);
+    ScriptItems scriptItems;
+    for (auto item : items) {
+        if (scriptItems.find(item.first) == scriptItems.end()) {
+            scriptItems.insert(item);
+        }
+    }
+    return scriptItems;
+}
+
+template<>
+NestedScrollOptionsExt Convert(const Ark_NestedScrollOptionsExt& src)
+{
+    NestedScrollOptionsExt nestedOpt = {
+        .scrollUp = NestedScrollMode::SELF_FIRST,
+        .scrollDown = NestedScrollMode::SELF_FIRST,
+        .scrollLeft = NestedScrollMode::SELF_FIRST,
+        .scrollRight = NestedScrollMode::SELF_FIRST,
+    };
+    nestedOpt.scrollDown = Converter::OptConvert<NestedScrollMode>(src.scrollDown).value_or(nestedOpt.scrollDown);
+    nestedOpt.scrollRight = Converter::OptConvert<NestedScrollMode>(src.scrollRight).value_or(nestedOpt.scrollRight);
+    nestedOpt.scrollUp = Converter::OptConvert<NestedScrollMode>(src.scrollUp).value_or(nestedOpt.scrollUp);
+    nestedOpt.scrollLeft = Converter::OptConvert<NestedScrollMode>(src.scrollLeft).value_or(nestedOpt.scrollLeft);
+    return nestedOpt;
+}
+
+template<>
+NestedScrollOptionsExt Convert(const Ark_NestedScrollOptions& src)
+{
+    NestedScrollOptionsExt nestedOpt = {
+        .scrollUp = NestedScrollMode::SELF_FIRST,
+        .scrollDown = NestedScrollMode::SELF_FIRST,
+        .scrollLeft = NestedScrollMode::SELF_FIRST,
+        .scrollRight = NestedScrollMode::SELF_FIRST,
+    };
+    nestedOpt.scrollDown = Converter::OptConvert<NestedScrollMode>(src.scrollForward)
+        .value_or(nestedOpt.scrollDown);
+    nestedOpt.scrollRight = Converter::OptConvert<NestedScrollMode>(src.scrollForward)
+        .value_or(nestedOpt.scrollRight);
+    nestedOpt.scrollUp = Converter::OptConvert<NestedScrollMode>(src.scrollBackward)
+        .value_or(nestedOpt.scrollUp);
+    nestedOpt.scrollLeft = Converter::OptConvert<NestedScrollMode>(src.scrollBackward)
+        .value_or(nestedOpt.scrollLeft);
+    return nestedOpt;
+}
+
+template<>
+MenuOptionsParam Convert(const Ark_ExpandedMenuItemOptions& src)
+{
+    MenuOptionsParam menuOption;
+    menuOption.content = Converter::OptConvert<std::string>(src.content);
+    menuOption.icon = Converter::OptConvert<std::string>(src.startIcon);
+    LOGE("Converter ExpandedMenuItemOptions `action` property supporting is not implemented yet");
+    return menuOption;
+}
+#endif // WEB_SUPPORTED
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebModifier {
@@ -28,78 +200,112 @@ namespace WebInterfaceModifier {
 void SetWebOptionsImpl(Ark_NativePointer node,
                        const Ark_WebOptions* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetSetWebOptions(frameNode, convValue);
+    auto webSrc = Converter::OptConvert<std::string>(value->src);
+    WebModelNG::SetWebSrc(frameNode, webSrc);
+    auto renderMode = Converter::OptConvert<RenderMode>(value->renderMode);
+    WebModelNG::SetRenderMode(frameNode, renderMode);
+    auto incognitoMode = Converter::OptConvert<bool>(value->incognitoMode);
+    WebModelNG::SetIncognitoMode(frameNode, incognitoMode);
+    auto sharedRenderProcessToken = Converter::OptConvert<std::string>(value->sharedRenderProcessToken);
+    WebModelNG::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
+    Converter::VisitUnion(value->controller,
+        [frameNode](const Ark_WebController& controller) {
+            auto peerImplPtr = reinterpret_cast<GeneratedModifier::WebControllerPeerImpl *>(controller.ptr);
+            CHECK_NULL_VOID(peerImplPtr);
+            WebModelNG::SetWebController(frameNode, peerImplPtr->GetController());
+        },
+        [](const auto& value) {
+            LOGE("WebInterfaceModifier::SetWebOptionsImpl WebviewController option is not supported");
+        },
+        []() {}
+    );
+#endif // WEB_SUPPORTED
 }
 } // WebInterfaceModifier
 namespace WebAttributeModifier {
 void JavaScriptAccessImpl(Ark_NativePointer node,
                           Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetJavaScriptAccess(frameNode, convValue);
+    WebModelNG::SetJsEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void FileAccessImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetFileAccess(frameNode, convValue);
+    WebModelNG::SetFileAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnlineImageAccessImpl(Ark_NativePointer node,
                            Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetOnlineImageAccess(frameNode, convValue);
+    WebModelNG::SetOnLineImageAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void DomStorageAccessImpl(Ark_NativePointer node,
                           Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetDomStorageAccess(frameNode, convValue);
+    WebModelNG::SetDomStorageAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void ImageAccessImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetImageAccess(frameNode, convValue);
+    WebModelNG::SetImageAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void MixedModeImpl(Ark_NativePointer node,
                    Ark_MixedMode value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetMixedMode(frameNode, convValue);
+    auto convValue = Converter::OptConvert<MixedModeContent>(value);
+    WebModelNG::SetMixedMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void ZoomAccessImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetZoomAccess(frameNode, convValue);
+    WebModelNG::SetZoomAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void GeolocationAccessImpl(Ark_NativePointer node,
                            Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetGeolocationAccess(frameNode, convValue);
+    WebModelNG::SetGeolocationAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void JavaScriptProxyImpl(Ark_NativePointer node,
                          const Ark_JavaScriptProxy* value)
@@ -107,136 +313,147 @@ void JavaScriptProxyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetJavaScriptProxy(frameNode, convValue);
+    LOGE("WebInterfaceModifier::JavaScriptProxyImpl method is not implemented");
 }
 void PasswordImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetPassword(frameNode, convValue);
+    // deprecated
 }
 void CacheModeImpl(Ark_NativePointer node,
                    Ark_CacheMode value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetCacheMode(frameNode, convValue);
+    auto convValue = Converter::OptConvert<WebCacheMode>(value);
+    WebModelNG::SetCacheMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void DarkModeImpl(Ark_NativePointer node,
                   Ark_WebDarkMode value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetDarkMode(frameNode, convValue);
+    auto convValue = Converter::OptConvert<WebDarkMode>(value);
+    WebModelNG::SetDarkMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void ForceDarkAccessImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetForceDarkAccess(frameNode, convValue);
+    WebModelNG::SetForceDarkAccess(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void MediaOptionsImpl(Ark_NativePointer node,
                       const Ark_WebMediaOptions* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetMediaOptions(frameNode, convValue);
+    WebModelNG::SetAudioResumeInterval(frameNode, Converter::OptConvert<int32_t>(value->resumeInterval));
+    WebModelNG::SetAudioExclusive(frameNode, Converter::OptConvert<bool>(value->audioExclusive));
+#endif // WEB_SUPPORTED
 }
 void TableDataImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetTableData(frameNode, convValue);
+    // deprecated
 }
 void WideViewModeAccessImpl(Ark_NativePointer node,
                             Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetWideViewModeAccess(frameNode, convValue);
+    // deprecated
 }
 void OverviewModeAccessImpl(Ark_NativePointer node,
                             Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetOverviewModeAccess(frameNode, convValue);
+    WebModelNG::SetOverviewModeAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OverScrollModeImpl(Ark_NativePointer node,
                         Ark_OverScrollMode value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetOverScrollMode(frameNode, convValue);
+    auto convValue = Converter::OptConvert<OverScrollMode>(value);
+    WebModelNG::SetOverScrollMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void TextZoomAtioImpl(Ark_NativePointer node,
                       const Ark_Number* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetTextZoomAtio(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    WebModelNG::SetTextZoomRatio(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void TextZoomRatioImpl(Ark_NativePointer node,
                        const Ark_Number* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetTextZoomRatio(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    WebModelNG::SetTextZoomRatio(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void DatabaseAccessImpl(Ark_NativePointer node,
                         Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetDatabaseAccess(frameNode, convValue);
+    WebModelNG::SetDatabaseAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void InitialScaleImpl(Ark_NativePointer node,
                       const Ark_Number* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetInitialScale(frameNode, convValue);
+    auto convValue = Converter::Convert<float>(*value);
+    WebModelNG::InitialScale(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void UserAgentImpl(Ark_NativePointer node,
                    const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetUserAgent(frameNode, convValue);
+    WebModelNG::SetUserAgent(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void MetaViewportImpl(Ark_NativePointer node,
                       Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetMetaViewport(frameNode, convValue);
+    WebModelNG::SetMetaViewport(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnPageEndImpl(Ark_NativePointer node,
                    const Callback_OnPageEndEvent_Void* value)
@@ -529,10 +746,12 @@ void OnContextMenuHideImpl(Ark_NativePointer node,
 void MediaPlayGestureAccessImpl(Ark_NativePointer node,
                                 Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetMediaPlayGestureAccess(frameNode, convValue);
+    WebModelNG::SetMediaPlayGestureAccess(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnSearchResultReceiveImpl(Ark_NativePointer node,
                                const Callback_OnSearchResultReceiveEvent_Void* value)
@@ -600,10 +819,12 @@ void OnWindowExitImpl(Ark_NativePointer node,
 void MultiWindowAccessImpl(Ark_NativePointer node,
                            Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetMultiWindowAccess(frameNode, convValue);
+    WebModelNG::SetMultiWindowAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnInterceptKeyEventImpl(Ark_NativePointer node,
                              const Callback_KeyEvent_Boolean* value)
@@ -617,133 +838,164 @@ void OnInterceptKeyEventImpl(Ark_NativePointer node,
 void WebStandardFontImpl(Ark_NativePointer node,
                          const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetWebStandardFont(frameNode, convValue);
+    WebModelNG::SetWebStandardFont(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void WebSerifFontImpl(Ark_NativePointer node,
                       const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetWebSerifFont(frameNode, convValue);
+    WebModelNG::SetWebSerifFont(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void WebSansSerifFontImpl(Ark_NativePointer node,
                           const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetWebSansSerifFont(frameNode, convValue);
+    WebModelNG::SetWebSansSerifFont(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void WebFixedFontImpl(Ark_NativePointer node,
                       const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetWebFixedFont(frameNode, convValue);
+    WebModelNG::SetWebFixedFont(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void WebFantasyFontImpl(Ark_NativePointer node,
                         const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetWebFantasyFont(frameNode, convValue);
+    WebModelNG::SetWebFantasyFont(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void WebCursiveFontImpl(Ark_NativePointer node,
                         const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetWebCursiveFont(frameNode, convValue);
+    WebModelNG::SetWebCursiveFont(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void DefaultFixedFontSizeImpl(Ark_NativePointer node,
                               const Ark_Number* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetDefaultFixedFontSize(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    WebModelNG::SetDefaultFixedFontSize(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void DefaultFontSizeImpl(Ark_NativePointer node,
                          const Ark_Number* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetDefaultFontSize(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    WebModelNG::SetDefaultFontSize(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void MinFontSizeImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetMinFontSize(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    WebModelNG::SetMinFontSize(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void MinLogicalFontSizeImpl(Ark_NativePointer node,
                             const Ark_Number* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetMinLogicalFontSize(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    WebModelNG::SetMinLogicalFontSize(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void DefaultTextEncodingFormatImpl(Ark_NativePointer node,
                                    const Ark_String* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //WebModelNG::SetDefaultTextEncodingFormat(frameNode, convValue);
+    EraseSpace(convValue);
+    WebModelNG::SetDefaultTextEncodingFormat(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void ForceDisplayScrollBarImpl(Ark_NativePointer node,
                                Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetForceDisplayScrollBar(frameNode, convValue);
+    WebModelNG::SetOverlayScrollbarEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void BlockNetworkImpl(Ark_NativePointer node,
                       Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetBlockNetwork(frameNode, convValue);
+    WebModelNG::SetBlockNetwork(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void HorizontalScrollBarAccessImpl(Ark_NativePointer node,
                                    Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetHorizontalScrollBarAccess(frameNode, convValue);
+    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void VerticalScrollBarAccessImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetVerticalScrollBarAccess(frameNode, convValue);
+    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
                                 const Callback_OnTouchIconUrlReceivedEvent_Void* value)
@@ -784,18 +1036,22 @@ void OnDataResubmittedImpl(Ark_NativePointer node,
 void PinchSmoothImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetPinchSmooth(frameNode, convValue);
+    WebModelNG::SetPinchSmoothModeEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void AllowWindowOpenMethodImpl(Ark_NativePointer node,
                                Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetAllowWindowOpenMethod(frameNode, convValue);
+    WebModelNG::SetAllowWindowOpenMethod(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnAudioStateChangedImpl(Ark_NativePointer node,
                              const Callback_OnAudioStateChangedEvent_Void* value)
@@ -890,46 +1146,55 @@ void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node,
 void JavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                    const Array_ScriptItem* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetJavaScriptOnDocumentStart(frameNode, convValue);
+    auto convValue = Converter::Convert<ScriptItems>(*value);
+    WebModelNG::JavaScriptOnDocumentStart(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void JavaScriptOnDocumentEndImpl(Ark_NativePointer node,
                                  const Array_ScriptItem* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetJavaScriptOnDocumentEnd(frameNode, convValue);
+    auto convValue = Converter::Convert<ScriptItems>(*value);
+    WebModelNG::JavaScriptOnDocumentEnd(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void LayoutModeImpl(Ark_NativePointer node,
                     Ark_WebLayoutMode value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetLayoutMode(frameNode, convValue);
+    auto convValue = Converter::OptConvert<WebLayoutMode>(value);
+    WebModelNG::SetLayoutMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_Union_NestedScrollOptions_NestedScrollOptionsExt* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetNestedScroll(frameNode, convValue);
+    auto convValue = Converter::OptConvert<NestedScrollOptionsExt>(*value);
+    WebModelNG::SetNestedScrollExt(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void EnableNativeEmbedModeImpl(Ark_NativePointer node,
                                Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetEnableNativeEmbedMode(frameNode, convValue);
+    WebModelNG::SetNativeEmbedModeEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
                                       const Callback_NativeEmbedDataInfo_Void* value)
@@ -961,11 +1226,12 @@ void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
 void CopyOptionsImpl(Ark_NativePointer node,
                      Ark_CopyOptions value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetCopyOptions(frameNode, convValue);
+    auto convValue = Converter::OptConvert<CopyOptions>(value);
+    WebModelNG::SetCopyOptionMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
                               const OnOverrideUrlLoadingCallback* value)
@@ -979,27 +1245,34 @@ void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
 void TextAutosizingImpl(Ark_NativePointer node,
                         Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetTextAutosizing(frameNode, convValue);
+    WebModelNG::SetTextAutosizing(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void EnableNativeMediaPlayerImpl(Ark_NativePointer node,
                                  const Ark_NativeMediaPlayerConfig* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetEnableNativeMediaPlayer(frameNode, convValue);
+    auto enable = Converter::Convert<bool>(value->enable);
+    auto shouldOverlay = Converter::Convert<bool>(value->shouldOverlay);
+    WebModelNG::SetNativeVideoPlayerConfig(frameNode, enable, shouldOverlay);
+#endif // WEB_SUPPORTED
 }
 void EnableSmoothDragResizeImpl(Ark_NativePointer node,
                                 Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetEnableSmoothDragResize(frameNode, convValue);
+    WebModelNG::SetSmoothDragResizeEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
                                       const OnRenderProcessNotRespondingCallback* value)
@@ -1022,11 +1295,18 @@ void OnRenderProcessRespondingImpl(Ark_NativePointer node,
 void SelectionMenuOptionsImpl(Ark_NativePointer node,
                               const Array_ExpandedMenuItemOptions* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetSelectionMenuOptions(frameNode, convValue);
+    auto convValue = Converter::Convert<std::vector<MenuOptionsParam>>(*value);
+    WebMenuOptionsParam optionParam;
+    for (auto menuOption : convValue) {
+        optionParam.menuOption.push_back(menuOption);
+    }
+    LOGE("WebInterfaceModifier::SelectionMenuOptionsImpl `action` property supporting is not implemented yet");
+    WebModelNG::SetSelectionMenuOptions(frameNode, optionParam);
+#endif // WEB_SUPPORTED
 }
 void OnViewportFitChangedImpl(Ark_NativePointer node,
                               const OnViewportFitChangedCallback* value)
@@ -1058,11 +1338,12 @@ void OnAdsBlockedImpl(Ark_NativePointer node,
 void KeyboardAvoidModeImpl(Ark_NativePointer node,
                            Ark_WebKeyboardAvoidMode value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetKeyboardAvoidMode(frameNode, convValue);
+    auto convValue = Converter::OptConvert<WebKeyboardAvoidMode>(value);
+    WebModelNG::SetKeyboardAvoidMode(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_EditMenuOptions* value)
@@ -1076,20 +1357,26 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    WebModelNG::SetEnabledHapticFeedback(frameNode, convValue);
+#endif // WEB_SUPPORTED
 }
 void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                  const Ark_String* tag,
                                  const Ark_String* type)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(tag);
-    //auto convValue = Converter::OptConvert<type>(tag); // for enums
-    //WebModelNG::SetRegisterNativeEmbedRule(frameNode, convValue);
+    CHECK_NULL_VOID(tag);
+    CHECK_NULL_VOID(type);
+    auto convValueTag = Converter::Convert<std::string>(*tag);
+    auto convValueType = Converter::Convert<std::string>(*type);
+    WebModelNG::RegisterNativeEmbedRule(frameNode, convValueTag, convValueType);
+#endif // WEB_SUPPORTED
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_WebElementType elementType,

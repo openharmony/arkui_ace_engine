@@ -14,13 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/implementation/permission_request_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PermissionRequestAccessor {
 void DestroyPeerImpl(PermissionRequestPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 PermissionRequestPeer* CtorImpl()
 {
@@ -32,16 +36,30 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void DenyImpl(PermissionRequestPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->Deny();
 }
 void GetOriginImpl(PermissionRequestPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->GetOrigin();
+    // origin value need to be returned
+    LOGE("PermissionRequestAccessor::GetOriginImpl - return value need to be supported");
 }
 void GetAccessibleResourceImpl(PermissionRequestPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->GetResources();
+    // accessible resource value need to be returned
+    LOGE("PermissionRequestAccessor::GetAccessibleResourceImpl - return value need to be supported");
 }
 void GrantImpl(PermissionRequestPeer* peer,
                const Array_String* resources)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(resources);
+    auto res = Converter::Convert<std::vector<std::string>>(*resources);
+    peer->handler->Grant(res);
 }
 } // PermissionRequestAccessor
 const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor()

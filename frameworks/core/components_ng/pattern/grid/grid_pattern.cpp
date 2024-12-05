@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
@@ -85,6 +84,10 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
     }
+    if (adapter_) {
+        result->SetItemAdapterFeature(adapter_->requestFeature);
+        result->SetLazyFeature(!!adapter_->requestItemFunc);
+    }
     return result;
 }
 
@@ -122,7 +125,6 @@ void GridPattern::OnModifyDone()
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
-
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
     }
@@ -210,7 +212,6 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         }
     }
-
     DrawSelectedZone(selectedZone);
 }
 
@@ -450,10 +451,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     auto eventhub = GetEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
-    Dimension offset(0, DimensionUnit::VP);
     Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
-    auto offsetVpValue = offsetPx.ConvertToVp();
-    offset.SetValue(offsetVpValue);
+    Dimension offset(offsetPx.ConvertToVp(), DimensionUnit::VP);
     scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
     if (!isInitialized_ || info_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
@@ -487,9 +486,34 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
+    if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
+        CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());
+    }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     return paintProperty->GetFadingEdge().value_or(false) || paintProperty->HasContentClip();
+}
+
+void GridPattern::CheckGridItemRange(const std::pair<int32_t, int32_t>& range)
+{
+    if (!adapter_) {
+        return;
+    }
+    adapter_->requestFeature.first = false;
+    adapter_->requestFeature.second = false;
+    LOGI("CheckGridItemRange, range: %{public}d, %{public}d.", adapter_->range.first, adapter_->range.second);
+    if (adapter_->range.first != range.first || adapter_->range.second != range.second) {
+        if (adapter_->range.first > range.first) {
+            adapter_->requestFeature.first = true;
+        }
+        if (adapter_->range.second < range.second) {
+            adapter_->requestFeature.second = true;
+        }
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.", range.first, range.second);
+            adapter_->requestItemFunc(range.first, range.second);
+        }
+    }
 }
 
 void GridPattern::CheckScrollable()

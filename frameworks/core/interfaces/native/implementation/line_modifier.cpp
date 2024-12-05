@@ -13,9 +13,31 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG {
+struct LineOptions {
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+};
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+LineOptions Convert(const Ark_LineOptions& src)
+{
+    LineOptions options;
+    options.width = Converter::OptConvert<Dimension>(src.width);
+    options.height = Converter::OptConvert<Dimension>(src.height);
+    return options;
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineModifier {
@@ -25,13 +47,22 @@ Ark_NativePointer ConstructImpl()
 }
 } // LineModifier
 namespace LineInterfaceModifier {
+
 void SetLineOptionsImpl(Ark_NativePointer node,
                         const Opt_LineOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //LineModelNG::SetSetLineOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto opt = Converter::OptConvert<LineOptions>(*options);
+    CHECK_NULL_VOID(opt);
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
+    }
+
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
+    }
 }
 } // LineInterfaceModifier
 namespace LineAttributeModifier {

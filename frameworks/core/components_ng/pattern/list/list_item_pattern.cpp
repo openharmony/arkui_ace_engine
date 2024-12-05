@@ -899,6 +899,8 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
 {
     json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
     json->PutExtAttr("selected", isSelected_, filter);
+    json->PutExtAttr("itemStyle", GetListItemStyle() == V2::ListItemStyle::NONE ?
+        "ListItemStyle.NONE" : "ListItemStyle.CARD", filter);
 }
 
 void ListItemPattern::SetAccessibilityAction()

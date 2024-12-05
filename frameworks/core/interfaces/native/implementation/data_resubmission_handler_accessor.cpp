@@ -14,13 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/implementation/data_resubmission_handler_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataResubmissionHandlerAccessor {
 void DestroyPeerImpl(DataResubmissionHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 DataResubmissionHandlerPeer* CtorImpl()
 {
@@ -32,9 +36,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ResendImpl(DataResubmissionHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->Resend();
 }
 void CancelImpl(DataResubmissionHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->Cancel();
 }
 } // DataResubmissionHandlerAccessor
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()

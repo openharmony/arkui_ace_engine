@@ -14,8 +14,40 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+
+namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+void AssignCast(std::optional<CalendarEdgeAlign>& dst, const Ark_CalendarAlign& src)
+{
+    switch (src) {
+        case ARK_CALENDAR_ALIGN_START: dst = CalendarEdgeAlign::EDGE_ALIGN_START; break;
+        case ARK_CALENDAR_ALIGN_CENTER: dst = CalendarEdgeAlign::EDGE_ALIGN_CENTER; break;
+        case ARK_CALENDAR_ALIGN_END: dst = CalendarEdgeAlign::EDGE_ALIGN_END; break;
+        default: LOGE("Unexpected enum value in Ark_CalendarAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<CalendarSettingData>& dst, const Ark_CalendarOptions& src)
+{
+    CalendarSettingData options;
+    options.dayRadius = Converter::OptConvert<Dimension>(src.hintRadius);
+    auto selected = Converter::OptConvert<PickerDate>(src.selected);
+    if (selected) {
+        options.selectedDate = selected.value();
+    }
+    dst = options;
+}
+
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarPickerModifier {
@@ -30,8 +62,9 @@ void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //CalendarPickerModelNG::SetSetCalendarPickerOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto data = Converter::OptConvert<CalendarSettingData>(*options);
+    CalendarPickerModelNG::SetCalendarData(frameNode, data);
 }
 } // CalendarPickerInterfaceModifier
 namespace CalendarPickerAttributeModifier {
@@ -41,8 +74,8 @@ void TextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CalendarPickerModelNG::SetTextStyle(frameNode, convValue);
+    auto textStyle = Converter::Convert<PickerTextStyle>(*value);
+    CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Callback_Date_Void* value)
@@ -50,8 +83,33 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CalendarPickerModelNG::SetOnChange(frameNode, convValue);
+
+    auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& selectedStr) {
+        auto json = JsonUtil::ParseJsonString(selectedStr);
+
+        Ark_Date result {0};
+        if (json && !json->IsNull()) {
+            uint32_t year = 0;
+            auto yearJson = json->GetValue("year");
+            if (yearJson && yearJson->IsNumber()) {
+                year = yearJson->GetUInt();
+            }
+            uint32_t month = 0;
+            auto monthJson = json->GetValue("month");
+            if (monthJson && monthJson->IsNumber()) {
+                month = monthJson->GetUInt();
+            }
+            uint32_t day = 0;
+            auto dayJson = json->GetValue("day");
+            if (dayJson && dayJson->IsNumber()) {
+                day = dayJson->GetUInt();
+            }
+            auto pickerDate = PickerDate(year, month, day);
+            result = Converter::ArkValue<Ark_Date>(pickerDate);
+        }
+        arkCallback.Invoke(result);
+    };
+    CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(onChange));
 }
 void EdgeAlignImpl(Ark_NativePointer node,
                    Ark_CalendarAlign alignType,
@@ -59,9 +117,12 @@ void EdgeAlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(alignType);
-    //auto convValue = Converter::OptConvert<type>(alignType); // for enums
-    //CalendarPickerModelNG::SetEdgeAlign(frameNode, convValue);
+    std::optional<DimensionOffset> convOffset;
+    if (offset) {
+        convOffset = Converter::OptConvert<DimensionOffset>(*offset);
+    }
+    auto convAlignType = Converter::OptConvert<CalendarEdgeAlign>(alignType);
+    CalendarPickerModelNG::SetEdgeAlign(frameNode, convAlignType, convOffset);
 }
 } // CalendarPickerAttributeModifier
 const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()

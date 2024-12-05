@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LoadingProgressModifier {
@@ -41,16 +42,15 @@ void ColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //LoadingProgressModelNG::SetColor(frameNode, convValue);
+    auto color = Converter::OptConvert<Color>(*value);
+    LoadingProgressModelNG::SetColor(frameNode, color);
 }
 void EnableLoadingImpl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //LoadingProgressModelNG::SetEnableLoading(frameNode, convValue);
+    LoadingProgressModelNG::SetEnableLoading(frameNode, Converter::Convert<bool>(value));
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
@@ -60,6 +60,7 @@ void ContentModifierImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //LoadingProgressModelNG::SetContentModifier(frameNode, convValue);
+    LOGE("ARKOALA LoadingProgressAttributeModifier::ContentModifierImpl -> Method is not implemented");
 }
 } // LoadingProgressAttributeModifier
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()

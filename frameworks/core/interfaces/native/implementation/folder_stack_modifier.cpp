@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FolderStackModifier {
@@ -30,8 +33,14 @@ void SetFolderStackOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //FolderStackModelNG::SetSetFolderStackOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto arkOpts = Converter::OptConvert<Ark_FolderStackOptions>(*options);
+    if (arkOpts) {
+        auto list = Converter::OptConvert<std::vector<std::string>>(arkOpts->upperItems);
+        if (list) {
+            FolderStackModelNG::SetUpdateUpperItems(frameNode, *list);
+        }
+    }
 }
 } // FolderStackInterfaceModifier
 namespace FolderStackAttributeModifier {
@@ -40,9 +49,7 @@ void AlignContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //FolderStackModelNG::SetAlignContent(frameNode, convValue);
+    FolderStackModelNG::SetAlignment(frameNode, Converter::OptConvert<Alignment>(value));
 }
 void OnFolderStateChangeImpl(Ark_NativePointer node,
                              const OnFoldStatusChangeCallback* value)
@@ -50,8 +57,14 @@ void OnFolderStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FolderStackModelNG::SetOnFolderStateChange(frameNode, convValue);
+    auto onChange = [frameNode](const FolderEventInfo& folderEventInfo) {
+        Ark_OnFoldStatusChangeInfo eventInfo;
+        eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
+
+        GetFullAPI()->getEventsAPI()->getFolderStackEventsReceiver()->
+                      onFolderStateChange(frameNode->GetId(), eventInfo);
+    };
+    FolderStackModelNG::SetOnFolderStateChange(frameNode, std::move(onChange));
 }
 void OnHoverStatusChangeImpl(Ark_NativePointer node,
                              const OnHoverStatusChangeCallback* value)
@@ -59,24 +72,28 @@ void OnHoverStatusChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FolderStackModelNG::SetOnHoverStatusChange(frameNode, convValue);
+    auto onChange = [frameNode](const FolderEventInfo& folderEventInfo) {
+        Ark_HoverEventParam eventInfo;
+        eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
+
+        GetFullAPI()->getEventsAPI()->getFolderStackEventsReceiver()->
+                      onHoverStatusChange(frameNode->GetId(), eventInfo);
+    };
+    FolderStackModelNG::SetOnHoverStatusChange(frameNode, std::move(onChange));
 }
 void EnableAnimationImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //FolderStackModelNG::SetEnableAnimation(frameNode, convValue);
+    FolderStackModelNG::SetEnableAnimation(frameNode, Converter::Convert<bool>(value));
 }
 void AutoHalfFoldImpl(Ark_NativePointer node,
                       Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //FolderStackModelNG::SetAutoHalfFold(frameNode, convValue);
+    FolderStackModelNG::SetAutoHalfFold(frameNode, Converter::Convert<bool>(value));
 }
 } // FolderStackAttributeModifier
 const GENERATED_ArkUIFolderStackModifier* GetFolderStackModifier()

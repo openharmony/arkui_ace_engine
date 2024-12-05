@@ -1279,4 +1279,15 @@ void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     contentModifier_->GetSimplifyDumpInfo(arrayModifier);
     json->PutRef("CanvasModifier", std::move(arrayModifier));
 }
+
+void CanvasPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("enableAnalyzer", isEnableAnalyzer_);
+    json->PutExtAttr("canvas", jsonValue->ToString().c_str(), filter);
+}
 } // namespace OHOS::Ace::NG

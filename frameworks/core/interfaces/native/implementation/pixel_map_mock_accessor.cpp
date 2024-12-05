@@ -14,13 +14,16 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+struct PixelMapMockPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapMockAccessor {
 void DestroyPeerImpl(PixelMapMockPeer* peer)
 {
+    delete peer;
 }
 PixelMapMockPeer* CtorImpl()
 {
@@ -32,6 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ReleaseImpl(PixelMapMockPeer* peer)
 {
+    // do nothing
 }
 } // PixelMapMockAccessor
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor()

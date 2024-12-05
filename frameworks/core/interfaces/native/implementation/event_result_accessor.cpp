@@ -14,13 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/implementation/event_result_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventResultAccessor {
 void DestroyPeerImpl(EventResultPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 EventResultPeer* CtorImpl()
 {
@@ -33,6 +37,10 @@ Ark_NativePointer GetFinalizerImpl()
 void SetGestureEventResult0Impl(EventResultPeer* peer,
                                 Ark_Boolean result)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->SetGestureEventResult(
+        Converter::Convert<bool>(result)
+    );
 }
 void SetGestureEventResult1Impl(EventResultPeer* peer,
                                 Ark_Boolean result,

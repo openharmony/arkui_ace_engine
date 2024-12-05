@@ -30,8 +30,11 @@ public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled);
 
     static void SetScrollBarMode(DisplayMode value);
+    static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value);
     static void SetScrollBarColor(const std::string& value);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetScrollBarWidth(const std::string& value);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
 
     static void SetOnScroll(OnScrollEvent&& onScroll);
     static void SetOnWillScroll(OnWillScrollEvent&& onScroll);
@@ -47,7 +50,8 @@ public:
         const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
     static void SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& rect);
 
-    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(
+        FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled);
     static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
@@ -67,6 +71,8 @@ public:
     static void SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& shape);
     static bool GetFadingEdge(FrameNode* frameNode);
     static float GetFadingEdgeLength(FrameNode* frameNode);
+    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

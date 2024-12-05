@@ -14,13 +14,18 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockControllerAccessor {
 void DestroyPeerImpl(TextClockControllerPeer* peer)
 {
+    if (peer) {
+        peer->controller = nullptr;
+        delete peer;
+    }
 }
 TextClockControllerPeer* CtorImpl()
 {
@@ -32,9 +37,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void StartImpl(TextClockControllerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->controller);
+    peer->controller->Start();
 }
 void StopImpl(TextClockControllerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->controller);
+    peer->controller->Stop();
 }
 } // TextClockControllerAccessor
 const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor()

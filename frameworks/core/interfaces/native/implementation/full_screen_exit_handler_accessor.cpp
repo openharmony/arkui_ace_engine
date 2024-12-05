@@ -14,13 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/implementation/full_screen_exit_handler_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FullScreenExitHandlerAccessor {
 void DestroyPeerImpl(FullScreenExitHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 FullScreenExitHandlerPeer* CtorImpl()
 {
@@ -32,6 +36,8 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ExitFullScreenImpl(FullScreenExitHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->ExitFullScreen();
 }
 } // FullScreenExitHandlerAccessor
 const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAccessor()

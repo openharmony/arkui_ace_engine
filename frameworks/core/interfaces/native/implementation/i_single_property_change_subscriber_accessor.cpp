@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+struct ISinglePropertyChangeSubscriberPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ISinglePropertyChangeSubscriberAccessor {

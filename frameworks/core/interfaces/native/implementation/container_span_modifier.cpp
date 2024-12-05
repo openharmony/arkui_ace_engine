@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -27,11 +29,7 @@ Ark_NativePointer ConstructImpl()
 namespace ContainerSpanInterfaceModifier {
 void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //ContainerSpanModelNG::SetSetContainerSpanOptions(frameNode, convValue);
+    // No implementation is required
 }
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
@@ -41,8 +39,8 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ContainerSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
+    auto convValue = Converter::Convert<TextBackgroundStyle>(*value);
+    SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, convValue);
 }
 } // ContainerSpanAttributeModifier
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()

@@ -14,7 +14,8 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -31,8 +32,7 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RefreshModelNG::SetSetRefreshOptions(frameNode, convValue);
+    LOGE("ARKOALA RefreshInterfaceModifier::SetRefreshOptionsImpl is not implemented yet");
 }
 } // RefreshInterfaceModifier
 namespace RefreshAttributeModifier {
@@ -42,8 +42,8 @@ void OnStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RefreshModelNG::SetOnStateChange(frameNode, convValue);
+    LOGE("ARKOALA RefreshInterfaceModifier::OnStateChangeImpl is not implemented yet");
 }
 void OnRefreshingImpl(Ark_NativePointer node,
                       const Callback_Void* value)
@@ -51,8 +51,8 @@ void OnRefreshingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RefreshModelNG::SetOnRefreshing(frameNode, convValue);
+    LOGE("ARKOALA RefreshInterfaceModifier::OnRefreshingImpl is not implemented yet");
 }
 void RefreshOffsetImpl(Ark_NativePointer node,
                        const Ark_Number* value)
@@ -60,8 +60,8 @@ void RefreshOffsetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RefreshModelNG::SetRefreshOffset(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    RefreshModelNG::SetRefreshOffset(frameNode, convValue);
 }
 void PullToRefreshImpl(Ark_NativePointer node,
                        Ark_Boolean value)
@@ -69,7 +69,7 @@ void PullToRefreshImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //RefreshModelNG::SetPullToRefresh(frameNode, convValue);
+    RefreshModelNG::SetPullToRefresh(frameNode, convValue);
 }
 void OnOffsetChangeImpl(Ark_NativePointer node,
                         const Callback_Number_Void* value)
@@ -77,16 +77,17 @@ void OnOffsetChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RefreshModelNG::SetOnOffsetChange(frameNode, convValue);
+    LOGE("ARKOALA RefreshInterfaceModifier::OnOffsetChangeImpl is not implemented yet");
 }
 void PullDownRatioImpl(Ark_NativePointer node,
                        const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RefreshModelNG::SetPullDownRatio(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    RefreshModelNG::SetPullDownRatio(frameNode, convValue);
 }
 } // RefreshAttributeModifier
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()

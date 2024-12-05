@@ -14,7 +14,10 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -29,8 +32,12 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //BaseSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
+    auto convValue = Converter::Convert<TextBackgroundStyle>(*value);
+    if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
+        SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, convValue);
+    } else {
+        ImageSpanView::SetPlaceHolderStyle(frameNode, convValue);
+    }
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
                         const Ark_LengthMetrics* value)
@@ -38,8 +45,13 @@ void BaselineOffsetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //BaseSpanModelNG::SetBaselineOffset(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonPercent(convValue);
+    if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
+        SpanModelNG::SetBaselineOffset(frameNode, convValue);
+    } else {
+        ImageSpanView::SetBaselineOffset(frameNode, convValue);
+    }
 }
 } // BaseSpanModifier
 const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier()

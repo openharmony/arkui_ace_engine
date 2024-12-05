@@ -37,6 +37,25 @@ typedef enum {
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } SwiperArrow;
 
+namespace {
+constexpr int32_t DEFAULT_INTERVAL = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_AUTOPLAY_INTERVAL);
+constexpr int32_t DEFAULT_DURATION = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_ANIMATION_DURATION);
+constexpr int32_t DEFAULT_CACHED_COUNT = OHOS::Ace::DEFAULT_SWIPER_CACHED_SIZE;
+
+static const Dimension &TrimToPositive(const Dimension &val)
+{
+    static Dimension zeroVp(0, DimensionUnit::VP);
+    return val.IsNegative() ? zeroVp : val;
+}
+template<typename T>
+static void SetIfNullopt(std::optional<T> &opt, const T &value)
+{
+    if (!opt) {
+        opt = value;
+    }
+}
+} // namespace
+
 RefPtr<SwiperController> SwiperModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -425,6 +444,7 @@ void SwiperModelNG::SetCustomContentTransition(SwiperContentAnimatedTransition& 
 
 void SwiperModelNG::SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition)
 {
+    transition.timeout = transition.timeout < 0 ? DEFAULT_DURATION : transition.timeout;
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperCustomContentTransition(transition);
@@ -447,38 +467,45 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
-void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
+void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
+    const std::optional<bool> &ignoreBlank)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, TrimToPositive(nextMargin), frameNode);
+    CHECK_NULL_VOID(ignoreBlank);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetNextMarginIgnoreBlank(ignoreBlank);
+    pattern->SetNextMarginIgnoreBlank(*ignoreBlank);
 }
 
-void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlank)
+void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
+    const std::optional<bool> &ignoreBlank)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank, frameNode);
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, TrimToPositive(prevMargin), frameNode);
+    CHECK_NULL_VOID(ignoreBlank);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
+    pattern->SetPrevMarginIgnoreBlank(*ignoreBlank);
 }
 
-void SwiperModelNG::SetIndex(FrameNode* frameNode, uint32_t index)
+void SwiperModelNG::SetIndex(FrameNode* frameNode, int32_t index)
 {
+    index = index < 0 ? DEFAULT_INTERVAL: index;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, Index, index, frameNode);
 }
 
-void SwiperModelNG::SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval)
+void SwiperModelNG::SetAutoPlayInterval(FrameNode* frameNode, int32_t interval)
 {
+    interval = interval < 0 ? DEFAULT_INTERVAL: interval;
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, AutoPlayInterval, interval, frameNode);
 }
 
-void SwiperModelNG::SetDuration(FrameNode* frameNode, uint32_t duration)
+void SwiperModelNG::SetDuration(FrameNode* frameNode, int32_t duration)
 {
+    duration = duration < 0 ? DEFAULT_DURATION : duration;
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Duration, duration, frameNode);
 }
 
@@ -488,7 +515,7 @@ void SwiperModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCachedCount(cachedCount);
-
+    cachedCount = cachedCount < 0 ? DEFAULT_CACHED_COUNT : cachedCount;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount, frameNode);
 }
 
@@ -521,7 +548,7 @@ void SwiperModelNG::SetDisableSwipe(FrameNode* frameNode, bool disableSwipe)
 
 void SwiperModelNG::SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ItemSpace, itemSpace, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ItemSpace, TrimToPositive(itemSpace), frameNode);
 }
 
 void SwiperModelNG::SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode)
@@ -536,7 +563,7 @@ void SwiperModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect)
 
 void SwiperModelNG::SetMinSize(FrameNode* frameNode, const Dimension& minSize)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MinSize, minSize, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MinSize, TrimToPositive(minSize), frameNode);
 }
 
 void SwiperModelNG::SetDisplayCount(FrameNode* frameNode, int32_t displayCount)
@@ -560,29 +587,46 @@ void SwiperModelNG::SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
 
 void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters)
 {
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+
     if (swiperArrowParameters.isShowBackground.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, IsShowBackground, swiperArrowParameters.isShowBackground.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBackground, frameNode);
     }
     if (swiperArrowParameters.backgroundSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, BackgroundSize, swiperArrowParameters.backgroundSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, frameNode);
     }
     if (swiperArrowParameters.backgroundColor.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, BackgroundColor, swiperArrowParameters.backgroundColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundColor, frameNode);
     }
     if (swiperArrowParameters.arrowSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, frameNode);
     }
     if (swiperArrowParameters.arrowColor.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, ArrowColor, swiperArrowParameters.arrowColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, frameNode);
     }
     if (swiperArrowParameters.isSidebarMiddle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             SwiperLayoutProperty, IsSidebarMiddle, swiperArrowParameters.isSidebarMiddle.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsSidebarMiddle, frameNode);
     }
 }
 
@@ -636,7 +680,24 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetSwiperParameters(swiperParameters);
+
+    SwiperParameters p = swiperParameters;
+    if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
+        if (auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>(); theme) {
+            auto defaultSize = theme->GetSize();
+            SetIfNullopt(p.colorVal, theme->GetColor());
+            SetIfNullopt(p.selectedColorVal, theme->GetSelectedColor());
+            SetIfNullopt(p.itemWidth, defaultSize);
+            SetIfNullopt(p.itemHeight, defaultSize);
+            SetIfNullopt(p.selectedItemWidth, defaultSize);
+            SetIfNullopt(p.selectedItemHeight, defaultSize);
+        }
+    }
+    if (!p.maxDisplayCountVal) {
+        p.maxDisplayCountVal = 0;
+    }
+
+    pattern->SetSwiperParameters(p);
 }
 
 void SwiperModelNG::SetBindIndicator(FrameNode* frameNode, bool bind)
@@ -663,6 +724,15 @@ void SwiperModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const B
         event(&eventInfo);
     });
 }
+
+void SwiperModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateChangeEvent(std::move(onChange));
+}
+
 
 void SwiperModelNG::SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart)
 {

@@ -13,18 +13,25 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "tabs_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsControllerAccessor {
 void DestroyPeerImpl(TabsControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 TabsControllerPeer* CtorImpl()
 {
-    return new TabsControllerPeer();
+    auto peerImpl = Referenced::MakeRefPtr<TabsControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<TabsControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,11 +40,24 @@ Ark_NativePointer GetFinalizerImpl()
 void ChangeIndexImpl(TabsControllerPeer* peer,
                      const Ark_Number* value)
 {
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(value);
+    auto index = Converter::Convert<Ark_Int32>(*value);
+    peerImpl->TriggerChangeIndex(index);
 }
 void PreloadItemsImpl(TabsControllerPeer* peer,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(indices);
+    auto indexVectOpt = Converter::OptConvert<std::vector<int32_t>>(*indices);
+    if (indexVectOpt) {
+        std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
+        peerImpl->TriggerPreloadItems(indexSet);
+    }
 }
 void SetTabBarTranslateImpl(TabsControllerPeer* peer,
                             const Ark_TranslateOptions* translate)

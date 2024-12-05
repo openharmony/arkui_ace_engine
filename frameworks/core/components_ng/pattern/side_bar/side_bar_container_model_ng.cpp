@@ -243,26 +243,64 @@ void SideBarContainerModelNG::SetOnChangeEvent(std::function<void(const bool)>&&
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
-void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth)
+RefPtr<FrameNode> SideBarContainerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
+    DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
+    DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SIDE_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SideBarContainerPattern>(); });
+    CHECK_NULL_RETURN(frameNode, frameNode);
+    return frameNode;
+}
+
+void SideBarContainerModelNG::SetSideBarContainerType(FrameNode* frameNode,
+    const std::optional<SideBarContainerType>& type)
+{
+    if (type.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarContainerType, type.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarContainerType, frameNode);
+    }
+}
+
+void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& sideBarWidth)
 {
     MarkNeedInitRealSideBarWidth(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth, frameNode);
+    if (sideBarWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, frameNode);
+    }
 }
 
-void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth)
+void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& minSideBarWidth)
 {
     MarkNeedInitRealSideBarWidth(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth, frameNode);
+    if (minSideBarWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth,
+            minSideBarWidth.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, frameNode);
+    }
 }
 
-void SideBarContainerModelNG::SetControlButtonWidth(FrameNode* frameNode, const Dimension& width)
+void SideBarContainerModelNG::SetControlButtonWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, width, frameNode);
+    if (width.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, width.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, frameNode);
+    }
 }
 
-void SideBarContainerModelNG::SetControlButtonHeight(FrameNode* frameNode, const Dimension& height)
+void SideBarContainerModelNG::SetControlButtonHeight(FrameNode* frameNode, const std::optional<Dimension>& height)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, height, frameNode);
+    if (height.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, height.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, frameNode);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonLeft(FrameNode* frameNode, const Dimension& left)
@@ -323,25 +361,41 @@ void SideBarContainerModelNG::SetAutoHide(FrameNode* frameNode, bool autoHide)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, AutoHide, autoHide, frameNode);
 }
 
-void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dimension& maxSideBarWidth)
+void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& maxSideBarWidth)
 {
     MarkNeedInitRealSideBarWidth(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth, frameNode);
-}
-
-void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth)
-{
-    if (minContentWidth.IsNonNegative()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+    if (maxSideBarWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth,
+            maxSideBarWidth.value(), frameNode);
     } else {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            SideBarContainerLayoutProperty, MinContentWidth, DEFAULT_MIN_CONTENT_WIDTH, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, frameNode);
     }
 }
 
-void SideBarContainerModelNG::SetSideBarPosition(FrameNode* frameNode, SideBarPosition sideBarPosition)
+void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const std::optional<Dimension>& minContentWidth)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarPosition, sideBarPosition, frameNode);
+    if (minContentWidth.has_value()) {
+        if (minContentWidth->IsNonNegative()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth,
+                minContentWidth.value(), frameNode);
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth,
+                DEFAULT_MIN_CONTENT_WIDTH, frameNode);
+        }
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, frameNode);
+    }
+}
+
+void SideBarContainerModelNG::SetSideBarPosition(FrameNode* frameNode,
+    const std::optional<SideBarPosition>& sideBarPosition)
+{
+    if (sideBarPosition.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarPosition,
+            sideBarPosition.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarPosition, frameNode);
+    }
 }
 
 void SideBarContainerModelNG::SetShowSideBar(FrameNode* frameNode, bool isShow)
@@ -349,9 +403,14 @@ void SideBarContainerModelNG::SetShowSideBar(FrameNode* frameNode, bool isShow)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowSideBar, isShow, frameNode);
 }
 
-void SideBarContainerModelNG::SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
+void SideBarContainerModelNG::SetDividerStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth, frameNode);
+    if (strokeWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth,
+            strokeWidth.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, frameNode);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerColor(FrameNode* frameNode, const Color& color)
@@ -367,6 +426,14 @@ void SideBarContainerModelNG::SetDividerStartMargin(FrameNode* frameNode, const 
 void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
+}
+
+void SideBarContainerModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 
 void SideBarContainerModelNG::ResetControlButtonLeft(FrameNode* frameNode)

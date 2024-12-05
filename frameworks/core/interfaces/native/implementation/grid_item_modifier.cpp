@@ -13,9 +13,29 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+inline void AssignCast(std::optional<GridItemStyle>& dst, const Ark_GridItemStyle& src)
+{
+    switch (src) {
+        case static_cast<Ark_GridItemStyle>(GridItemStyle::NONE): dst = GridItemStyle::NONE; break;
+        case static_cast<Ark_GridItemStyle>(GridItemStyle::PLAIN): dst = GridItemStyle::PLAIN; break;
+        default: LOGE("Unexpected enum value in Ark_GridItemStyle: %{public}d", src);
+    }
+}
+
+template<>
+inline void AssignCast(std::optional<GridItemStyle>& dst, const Ark_GridItemOptions& src)
+{
+    dst = Converter::OptConvert<GridItemStyle>(src.style);
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridItemModifier {
@@ -30,8 +50,11 @@ void SetGridItemOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridItemModelNG::SetSetGridItemOptions(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    std::optional<GridItemStyle> style = Converter::OptConvert<GridItemStyle>(*value);
+    if (style) {
+        GridItemModelNG::SetGridItemStyle(frameNode, style.value());
+    }
 }
 } // GridItemInterfaceModifier
 namespace GridItemAttributeModifier {
@@ -41,8 +64,7 @@ void RowStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridItemModelNG::SetRowStart(frameNode, convValue);
+    GridItemModelNG::SetRowStart(frameNode, Converter::Convert<int32_t>(*value));
 }
 void RowEndImpl(Ark_NativePointer node,
                 const Ark_Number* value)
@@ -50,8 +72,7 @@ void RowEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridItemModelNG::SetRowEnd(frameNode, convValue);
+    GridItemModelNG::SetRowEnd(frameNode, Converter::Convert<int32_t>(*value));
 }
 void ColumnStartImpl(Ark_NativePointer node,
                      const Ark_Number* value)
@@ -59,8 +80,7 @@ void ColumnStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridItemModelNG::SetColumnStart(frameNode, convValue);
+    GridItemModelNG::SetColumnStart(frameNode, Converter::Convert<int32_t>(*value));
 }
 void ColumnEndImpl(Ark_NativePointer node,
                    const Ark_Number* value)
@@ -68,32 +88,28 @@ void ColumnEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridItemModelNG::SetColumnEnd(frameNode, convValue);
+    GridItemModelNG::SetColumnEnd(frameNode, Converter::Convert<int32_t>(*value));
 }
 void ForceRebuildImpl(Ark_NativePointer node,
                       Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //GridItemModelNG::SetForceRebuild(frameNode, convValue);
+    GridItemModelNG::SetForceRebuild(frameNode, Converter::Convert<bool>(value));
 }
 void SelectableImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //GridItemModelNG::SetSelectable(frameNode, convValue);
+    GridItemModelNG::SetSelectable(frameNode, Converter::Convert<bool>(value));
 }
 void SelectedImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //GridItemModelNG::SetSelected(frameNode, convValue);
+    GridItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
 }
 void OnSelectImpl(Ark_NativePointer node,
                   const Callback_Boolean_Void* value)
@@ -101,8 +117,10 @@ void OnSelectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridItemModelNG::SetOnSelect(frameNode, convValue);
+    auto onSelect = [frameNode](bool isSelected) {
+        GetFullAPI()->getEventsAPI()->getGridItemEventsReceiver()->onSelect(frameNode->GetId(), isSelected);
+    };
+    GridItemModelNG::SetOnSelect(frameNode, onSelect);
 }
 } // GridItemAttributeModifier
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()

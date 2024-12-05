@@ -14,8 +14,25 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+struct EllipseOptions {
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+};
+
+template<>
+inline EllipseOptions Convert(const Ark_EllipseOptions& src)
+{
+    EllipseOptions ellipseOptions;
+    ellipseOptions.width = Converter::OptConvert<Dimension>(src.width);
+    ellipseOptions.height = Converter::OptConvert<Dimension>(src.height);
+    return ellipseOptions;
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EllipseModifier {
@@ -30,8 +47,14 @@ void SetEllipseOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //EllipseModelNG::SetSetEllipseOptions(frameNode, convValue);
+    auto opt = options ? Converter::OptConvert<Converter::EllipseOptions>(*options) : std::nullopt;
+
+    if (opt && opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, *opt->width);
+    }
+    if (opt && opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, *opt->height);
+    }
 }
 } // EllipseInterfaceModifier
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier()

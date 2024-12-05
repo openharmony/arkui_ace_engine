@@ -90,6 +90,7 @@ public:
     void SetDivider(const ItemDivider& divider) override;
     void HasUserDefinedOpacity() override;
 
+    static void InitialSetupSinglePicker(FrameNode* frameNode, uint32_t columnKind);
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
@@ -100,10 +101,11 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
-    static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetDefaultPickerItemHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static bool IsSingle(FrameNode* frameNode);
     static bool GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue);
+    static void SetIsCascade(FrameNode* frameNode, bool isCascade);
     static bool IsCascade(FrameNode* frameNode);
     static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
     static uint32_t GetMaxCount(FrameNode* frameNode);
@@ -120,7 +122,7 @@ public:
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
-    static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetGradientHeight(FrameNode* frameNode, std::optional<Dimension> valueOpt);
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static int32_t GetSelectedSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);
@@ -130,6 +132,8 @@ public:
     static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
     static int32_t GetTextPickerRangeType(FrameNode* frameNode);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static const std::string GetSelectedObjectStr(FrameNode* frameNode,
+        const std::string value, const uint32_t index);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
@@ -139,9 +143,10 @@ private:
     void SetCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
-
+    static void ValidateData(
+        NG::TextCascadePickerOptions& options, const std::vector<std::string>& values, uint32_t index,
+        std::vector<std::string>& selectedValues, std::vector<uint32_t>& valuesIndex);
     static inline uint32_t showCount_ = 0;
-    std::vector<uint32_t> kinds_;
     static inline bool isCascade_ = false;
     static inline std::vector<NG::RangeContent> rangeValue_;
     static inline std::vector<NG::TextCascadePickerOptions> options_;

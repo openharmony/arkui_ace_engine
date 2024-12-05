@@ -126,6 +126,14 @@ public:
         jsonConstructor->Put("reverse", GetReverse().value_or(false) ? "true" : "false");
         jsonConstructor->Put("direction",
             (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
+        static const std::array<std::string, 4> SLIDER_MODE_TO_STRING = {
+            "SliderStyle.OutSet",
+            "SliderStyle.InSet",
+            "SliderStyle.NONE",
+            "SliderStyle.Capsule",
+        };
+        jsonConstructor->Put("style", SLIDER_MODE_TO_STRING.at(static_cast<int32_t>
+            (GetSliderMode().value_or(SliderModel::SliderMode::OUTSET))) .c_str());
         json->PutExtAttr("constructor", jsonConstructor, filter);
         json->PutExtAttr("blockColor",
             GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str(), filter);

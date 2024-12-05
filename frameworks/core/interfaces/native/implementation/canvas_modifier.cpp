@@ -14,8 +14,26 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
+#include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+GeneratedModifier::DrawingRenderingContextPeerImpl* Convert(const Ark_Materialized &src)
+{
+    return reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl *>(src.ptr);
+}
+template<>
+GeneratedModifier::CanvasRenderingContext2DPeerImpl* Convert(const Ark_Materialized &src)
+{
+    return reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl *>(src.ptr);
+}
+
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {
@@ -25,13 +43,47 @@ Ark_NativePointer ConstructImpl()
 }
 } // CanvasModifier
 namespace CanvasInterfaceModifier {
+
+template<typename T>
+void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(context);
+    auto renderingContext2D = Converter::OptConvert<CanvasRenderingContext2DPeerImpl*>(*context);
+    auto renderingDrawing = Converter::OptConvert<DrawingRenderingContextPeerImpl*>(*context);
+
+    RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
+    CHECK_NULL_VOID(pattern);
+
+    if (renderingContext2D) {
+        CanvasRenderingContext2DPeerImpl* peerImplPtr = *renderingContext2D;
+        CHECK_NULL_VOID(peerImplPtr);
+        peerImplPtr->SetInstanceId(Container::CurrentId());
+        peerImplPtr->SetCanvasPattern(pattern);
+        peerImplPtr->UpdateAntiAlias();
+        peerImplPtr->UpdateDensity();
+    } else if (renderingDrawing) {
+        DrawingRenderingContextPeerImpl* peerImplPtr = *renderingDrawing;
+        CHECK_NULL_VOID(peerImplPtr);
+
+        peerImplPtr->SetInstanceId(Container::CurrentId());
+        peerImplPtr->SetCanvasPattern(pattern);
+    } else {
+        CanvasModelNG::DetachRenderContext(frameNode);
+    }
+}
+
 void SetCanvasOptions0Impl(Ark_NativePointer node,
                            const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = context ? Converter::OptConvert<type>(*context) : std::nullopt;
-    //CanvasModelNG::SetSetCanvasOptions0(frameNode, convValue);
+    CHECK_NULL_VOID(context);
+
+    ContextSetOptionsHelper(frameNode, context);
+
+    LOGE("ARKOALA CanvasInterfaceModifier::SetCanvasOptions0Impl - CustomObject is not supported "
+        "method DrawingRenderingContextAccessor::CtorImpl.");
 }
 void SetCanvasOptions1Impl(Ark_NativePointer node,
                            const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
@@ -39,9 +91,12 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(context);
-    //auto convValue = Converter::OptConvert<type>(context); // for enums
-    //CanvasModelNG::SetSetCanvasOptions1(frameNode, convValue);
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(imageAIOptions);
+
+    ContextSetOptionsHelper(frameNode, context);
+
+    LOGE("CanvasInterfaceModifier::SetCanvasOptions1Impl - Ark_ImageAIOptions is not supported.");
 }
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
@@ -51,16 +106,18 @@ void OnReadyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CanvasModelNG::SetOnReady(frameNode, convValue);
+
+    auto onEvent = [frameNode]() {
+        GetFullAPI()->getEventsAPI()->getCanvasEventsReceiver()->onReady(frameNode->GetId());
+    };
+    CanvasModelNG::SetOnReady(frameNode, std::move(onEvent));
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //CanvasModelNG::SetEnableAnalyzer(frameNode, convValue);
+    CanvasModelNG::EnableAnalyzer(frameNode, Converter::Convert<bool>(value));
 }
 } // CanvasAttributeModifier
 const GENERATED_ArkUICanvasModifier* GetCanvasModifier()

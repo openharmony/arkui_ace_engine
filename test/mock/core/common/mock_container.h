@@ -43,7 +43,7 @@ public:
         return displayInfo_;
     }
 
-    static void SetUp();
+    static void SetUp(RefPtr<PipelineBase> pipelineContext = nullptr);
     static void TearDown();
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);

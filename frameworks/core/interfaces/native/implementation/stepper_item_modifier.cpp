@@ -14,9 +14,22 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
+#include "core/interfaces/native/utility/converter.h"
 
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<StepperItemModelNG::ItemState>& dst, const Ark_ItemState& src)
+{
+    switch (src) {
+        case ARK_ITEM_STATE_NORMAL: dst = StepperItemModelNG::ItemState::NORMAL; break;
+        case ARK_ITEM_STATE_DISABLED: dst = StepperItemModelNG::ItemState::DISABLED; break;
+        case ARK_ITEM_STATE_WAITING: dst = StepperItemModelNG::ItemState::WAITING; break;
+        case ARK_ITEM_STATE_SKIP: dst = StepperItemModelNG::ItemState::SKIP; break;
+        default: LOGE("Unexpected enum value in Ark_ItemState: %{public}d", src);
+    }
+}
+}
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperItemModifier {
 Ark_NativePointer ConstructImpl()
@@ -27,11 +40,7 @@ Ark_NativePointer ConstructImpl()
 namespace StepperItemInterfaceModifier {
 void SetStepperItemOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //StepperItemModelNG::SetSetStepperItemOptions(frameNode, convValue);
+    // No implementation is required
 }
 } // StepperItemInterfaceModifier
 namespace StepperItemAttributeModifier {
@@ -42,7 +51,7 @@ void PrevLabelImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //StepperItemModelNG::SetPrevLabel(frameNode, convValue);
+    StepperItemModelNG::SetPrevLabel(frameNode, convValue);
 }
 void NextLabelImpl(Ark_NativePointer node,
                    const Ark_String* value)
@@ -51,15 +60,19 @@ void NextLabelImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //StepperItemModelNG::SetNextLabel(frameNode, convValue);
+    StepperItemModelNG::SetNextLabel(frameNode, convValue);
 }
 void StatusImpl(Ark_NativePointer node,
                 const Opt_ItemState* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //StepperItemModelNG::SetStatus(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<StepperItemModelNG::ItemState>(*value) : std::nullopt;
+    if (convValue.has_value()) {
+        StepperItemModelNG::SetStatus(frameNode, StepperItemModelNG::ITEM_STATE.at(convValue.value()));
+    } else {
+        StepperItemModelNG::SetStatus(frameNode, std::nullopt);
+    }
 }
 } // StepperItemAttributeModifier
 const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier()

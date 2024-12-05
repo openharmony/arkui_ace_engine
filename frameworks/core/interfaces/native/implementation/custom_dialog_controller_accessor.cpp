@@ -14,17 +14,54 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomDialogControllerAccessor {
 void DestroyPeerImpl(CustomDialogControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CustomDialogControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 CustomDialogControllerPeer* CtorImpl(const Ark_CustomDialogControllerOptions* value)
 {
-    return new CustomDialogControllerPeer();
+    auto peerImpl = AceType::MakeRefPtr<CustomDialogControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    auto result = reinterpret_cast<CustomDialogControllerPeer*>(AceType::RawPtr(peerImpl));
+    CHECK_NULL_RETURN(value, result);
+
+    LOGE("CustomDialogControllerAccessor::CtorImpl unsupported options: builder, cancel, onWillDismiss");
+    LOGE("CustomDialogControllerAccessor::CtorImpl partially supported options: openAnimation, closeAnimation");
+
+    peerImpl->SetAutoCancel(value->autoCancel);
+    peerImpl->SetDialogAlignment(value->alignment);
+    peerImpl->SetOffset(value->offset);
+    peerImpl->SetCustomStyle(value->customStyle);
+    peerImpl->SetGridCount(value->gridCount);
+    peerImpl->SetMaskColor(value->maskColor);
+    peerImpl->SetMaskRect(value->maskRect);
+    peerImpl->SetOpenAnimation(value->openAnimation);
+    peerImpl->SetCloseAnimation(value->closeAnimation);
+    peerImpl->SetShowInSubWindow(value->showInSubWindow);
+    peerImpl->SetBackgroundColor(value->backgroundColor);
+    peerImpl->SetCornerRadius(value->cornerRadius);
+    peerImpl->SetIsModal(value->isModal);
+    peerImpl->SetWidth(value->width);
+    peerImpl->SetHeight(value->height);
+    peerImpl->SetBorderWidth(value->borderWidth);
+    peerImpl->SetBorderColor(value->borderColor);
+    peerImpl->SetBorderStyle(value->borderStyle);
+    peerImpl->SetShadow(value->shadow);
+    peerImpl->SetBlurStyle(value->backgroundBlurStyle);
+    peerImpl->SetKeyboardAvoidMode(value->keyboardAvoidMode);
+    peerImpl->SetEnableHoverMode(value->enableHoverMode);
+    peerImpl->SetHoverModeArea(value->hoverModeArea);
+
+    return result;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,9 +69,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void OpenImpl(CustomDialogControllerPeer* peer)
 {
+    LOGE("CustomDialogControllerAccessor::OpenImpl method is not implemented");
 }
 void CloseImpl(CustomDialogControllerPeer* peer)
 {
+    LOGE("CustomDialogControllerAccessor::CloseImpl method is not implemented");
 }
 } // CustomDialogControllerAccessor
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()

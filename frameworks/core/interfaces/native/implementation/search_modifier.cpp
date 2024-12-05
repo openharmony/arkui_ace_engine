@@ -13,9 +13,112 @@
  * limitations under the License.
  */
 
+#include <variant>
+
+#include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"
+#include "core/components/common/properties/text_style_parser.h"
+#include "base/utils/utils.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+void resetNegative(std::optional<OHOS::Ace::Dimension> &dim)
+{
+    if (dim && dim->IsNegative()) {
+        dim.value().Reset();
+    }
+}
+
+void resetPercent(std::optional<OHOS::Ace::Dimension> &dim)
+{
+    if (dim && dim->Unit() == OHOS::Ace::DimensionUnit::PERCENT) {
+        dim.reset();
+    }
+}
+struct SearchButtonOptions {
+    std::optional< OHOS::Ace::Dimension> width;
+    std::optional<Color> color;
+};
+
+struct SearchOptions {
+    std::optional<std::string> value;
+    std::optional<std::string> placeholder;
+    std::optional<std::string> icon;
+    std::optional<Ark_NativePointer> controller;
+};
+
+using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
+using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
+using UnionIconOptionsObject = std::variant<Ark_IconOptions, Ark_CustomObject>;
+} // namespace
+
+namespace Converter {
+template<>
+SearchOptions Convert(const Ark_SearchOptions& src)
+{
+    SearchOptions options;
+    options.value = Converter::OptConvert<std::string>(src.value);
+    options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
+    options.icon = Converter::OptConvert<std::string>(src.icon);
+    options.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
+    return options;
+}
+
+template<typename T>
+void AssignTo(Ark_IconOptions& dst, const Opt_IconOptions& src)
+{
+    dst = src.value;
+}
+template<>
+NG::IconOptions Convert(const Ark_IconOptions& src)
+{
+    NG::IconOptions options;
+    auto iconColor = Converter::OptConvert<Color>(src.color);
+    auto iconSize = Converter::OptConvert<Dimension>(src.size);
+    auto iconSrc = Converter::OptConvert<UnionStringResource>(src.src);
+    if (iconSrc) {
+        if (auto srcArkStr = std::get_if<Ark_String>(&iconSrc.value());
+            srcArkStr != nullptr) {
+            auto srcStr = Converter::Convert<std::string>(*srcArkStr);
+            if (!srcStr.empty()) {
+                options.UpdateSrc(srcStr, "", "");
+            }
+        } else if (auto srcArkStr = std::get_if<Ark_Resource>(&iconSrc.value());
+            srcArkStr != nullptr) {
+            auto srcStr = Converter::OptConvert<std::string>(*srcArkStr);
+            auto moduleName = Converter::Convert<std::string>(srcArkStr->moduleName);
+            auto bundleName = Converter::Convert<std::string>(srcArkStr->bundleName);
+            if (!srcStr->empty()) {
+                options.UpdateSrc(*srcStr, moduleName, bundleName);
+            }
+        }
+    }
+    if (iconColor) {
+        options.UpdateColor(iconColor.value());
+    }
+    resetNegative(iconSize);
+    resetPercent(iconSize);
+    if (iconSize) {
+        options.UpdateSize(iconSize.value());
+    }
+    return options;
+}
+template<>
+SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
+{
+    SearchButtonOptions buttonOptions;
+    buttonOptions.color = OptConvert<Color> (src.fontColor);
+    buttonOptions.width = OptConvert<Dimension> (src.fontSize);
+    return buttonOptions;
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchModifier {
@@ -30,8 +133,20 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //SearchModelNG::SetSetSearchOptions(frameNode, convValue);
+    auto searchOptions = options ? Converter::OptConvert<SearchOptions>(*options) : std::nullopt;
+    if (searchOptions) {
+        SearchModelNG::SetTextValue(frameNode, searchOptions->value);
+        SearchModelNG::SetPlaceholder(frameNode, searchOptions->placeholder);
+        SearchModelNG::SetIcon(frameNode, searchOptions->icon);
+        auto internalSearchController = SearchModelNG::GetSearchController(frameNode);
+        CHECK_NULL_VOID(searchOptions->controller);
+        auto peerImplPtr = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl *>(
+            searchOptions->controller.value());
+        CHECK_NULL_VOID(peerImplPtr);
+
+        // pass the internal controller to external management
+        peerImplPtr->SetController(internalSearchController);
+    }
 }
 } // SearchInterfaceModifier
 namespace SearchAttributeModifier {
@@ -41,8 +156,8 @@ void FontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetFontColor(frameNode, convValue);
+    auto fontColor = Converter::OptConvert<Color>(*value);
+    SearchModelNG::SetTextColor(frameNode, fontColor);
 }
 void SearchIconImpl(Ark_NativePointer node,
                     const Ark_Union_IconOptions_SymbolGlyphModifier* value)
@@ -50,8 +165,16 @@ void SearchIconImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetSearchIcon(frameNode, convValue);
+    auto iconObjOpt = Converter::OptConvert<UnionIconOptionsObject>(*value);
+    if (iconObjOpt) {
+        auto arkIconOpt = std::get_if<Ark_IconOptions>(&iconObjOpt.value());
+        if (arkIconOpt != nullptr) {
+            auto options = Converter::OptConvert<NG::IconOptions>(*arkIconOpt);
+            SearchModelNG::SetSearchImageIcon(frameNode, options);
+        } else {
+            LOGE("ARKOALA SearchAttributeModifier.SearchIcon -> handling CustomObject not implemented.");
+        }
+    }
 }
 void CancelButtonImpl(Ark_NativePointer node,
                       const Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
@@ -59,8 +182,18 @@ void CancelButtonImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetCancelButton(frameNode, convValue);
+    auto cancelOptions = Converter::OptConvert<UnionButtonOptions>(*value);
+    if (cancelOptions) {
+        auto options = std::get_if<Ark_CancelButtonOptions>(&cancelOptions.value());
+        if (options != nullptr) {
+            auto cancelButtonStyle = Converter::OptConvert<CancelButtonStyle>(options->style);
+            auto iconOptions = Converter::OptConvert<NG::IconOptions>(options->icon);
+            SearchModelNG::SetCancelImageIcon(frameNode, iconOptions);
+            SearchModelNG::SetCancelButtonStyle(frameNode, cancelButtonStyle);
+        } else {
+            LOGE("ARKOALA SearchAttributeModifier.CancelButton -> handling OptCustomObject not implemented.");
+        }
+    }
 }
 void TextIndentImpl(Ark_NativePointer node,
                     const Ark_Length* value)
@@ -68,8 +201,8 @@ void TextIndentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetTextIndent(frameNode, convValue);
+    auto indentValue = Converter::OptConvert<Dimension>(*value);
+    SearchModelNG::SetTextIndent(frameNode, indentValue);
 }
 void OnEditChangeImpl(Ark_NativePointer node,
                       const Callback_Boolean_Void* value)
@@ -77,8 +210,10 @@ void OnEditChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnEditChange(frameNode, convValue);
+    auto onEditEvent = [frameNode](const bool value) {
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onEditChange(frameNode->GetId(), value);
+    };
+    SearchModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
                                  const Ark_ResourceColor* value)
@@ -86,8 +221,8 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetSelectedBackgroundColor(frameNode, convValue);
+    auto placeHolderColor = Converter::OptConvert<Color>(*value);
+    SearchModelNG::SetSelectedBackgroundColor(frameNode, placeHolderColor);
 }
 void CaretStyleImpl(Ark_NativePointer node,
                     const Ark_CaretStyle* value)
@@ -95,8 +230,11 @@ void CaretStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetCaretStyle(frameNode, convValue);
+    auto caretStyle = Converter::Convert<Converter::CaretStyle>(*value);
+    SearchModelNG::SetCaretColor(frameNode, caretStyle.color);
+    resetNegative(caretStyle.width);
+    resetPercent(caretStyle.width);
+    SearchModelNG::SetCaretWidth(frameNode, caretStyle.width);
 }
 void PlaceholderColorImpl(Ark_NativePointer node,
                           const Ark_ResourceColor* value)
@@ -104,33 +242,33 @@ void PlaceholderColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetPlaceholderColor(frameNode, convValue);
+    auto placeHolderColor = Converter::OptConvert<Color>(*value);
+    SearchModelNG::SetPlaceholderColor(frameNode, placeHolderColor);
 }
 void PlaceholderFontImpl(Ark_NativePointer node,
                          const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SearchModelNG::SetPlaceholderFont(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto fontValue = Converter::OptConvert<Font>(*value);
+    SearchModelNG::SetPlaceholderFont(frameNode, fontValue);
 }
 void TextFontImpl(Ark_NativePointer node,
                   const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SearchModelNG::SetTextFont(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto fontValue = Converter::OptConvert<Font>(*value);
+    SearchModelNG::SetTextFont(frameNode, fontValue);
 }
 void EnterKeyTypeImpl(Ark_NativePointer node,
                       Ark_EnterKeyType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetEnterKeyType(frameNode, convValue);
+    SearchModelNG::SetSearchEnterKeyType(frameNode, Converter::OptConvert<TextInputAction>(value));
 }
 void OnSubmit0Impl(Ark_NativePointer node,
                    const Callback_String_Void* value)
@@ -138,8 +276,11 @@ void OnSubmit0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnSubmit0(frameNode, convValue);
+    auto onSubmit = [frameNode](const std::string& value, NG::TextFieldCommonEvent&) {
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onSubmit0(frameNode->GetId(), arkStringValue);
+    };
+    SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
 void OnSubmit1Impl(Ark_NativePointer node,
                    const SearchSubmitCallback* value)
@@ -156,8 +297,13 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnChange(frameNode, convValue);
+    auto onChange = [frameNode](const std::string& text, PreviewText& prevText) {
+        auto textArkString = Converter::ArkValue<Ark_String>(text);
+        auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onChange(frameNode->GetId(),
+            textArkString, textArkPrevText);
+    };
+    SearchModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
                                const OnTextSelectionChangeCallback* value)
@@ -165,8 +311,13 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnTextSelectionChange(frameNode, convValue);
+    auto onTextSelectionChange = [frameNode](int32_t selectionStart, int32_t selectionEnd) {
+        auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
+        auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onTextSelectionChange(frameNode->GetId(),
+            arkSelectionStart, arkSelectionEnd);
+    };
+    SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
 void OnContentScrollImpl(Ark_NativePointer node,
                          const OnContentScrollCallback* value)
@@ -174,8 +325,14 @@ void OnContentScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnContentScroll(frameNode, convValue);
+    auto onContentScroll = [frameNode](float totalOffsetX, float totalOffsetY) {
+        auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
+        auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onContentScroll(frameNode->GetId(),
+            arkTotalOffsetX,
+            arkTotalOffsetY);
+    };
+    SearchModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
 void OnCopyImpl(Ark_NativePointer node,
                 const Callback_String_Void* value)
@@ -183,8 +340,11 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnCopy(frameNode, convValue);
+    auto onCopy = [frameNode](const std::string& value) {
+        auto textArkString = Converter::ArkValue<Ark_String>(value);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onCopy(frameNode->GetId(), textArkString);
+    };
+    SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void OnCutImpl(Ark_NativePointer node,
                const Callback_String_Void* value)
@@ -192,8 +352,11 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnCut(frameNode, convValue);
+    auto onCut = [frameNode](const std::string& value) {
+        auto textArkString = Converter::ArkValue<Ark_String>(value);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onCut(frameNode->GetId(), textArkString);
+    };
+    SearchModelNG::SetOnCut(frameNode, std::move(onCut));
 }
 void OnPasteImpl(Ark_NativePointer node,
                  const OnPasteCallback* value)
@@ -203,15 +366,14 @@ void OnPasteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SearchModelNG::SetOnPaste(frameNode, convValue);
+    LOGE("ARKOALA SearchAttributeModifier.OnPasteImpl -> Method is not implemented.");
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetCopyOption(frameNode, convValue);
+    SearchModelNG::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
 }
 void MaxLengthImpl(Ark_NativePointer node,
                    const Ark_Number* value)
@@ -219,33 +381,34 @@ void MaxLengthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetMaxLength(frameNode, convValue);
+    auto maxLength = Converter::Convert<int>(*value);
+    if (GreatOrEqual(maxLength, 0)) {
+        SearchModelNG::SetMaxLength(frameNode, maxLength);
+    } else {
+        SearchModelNG::ResetMaxLength(frameNode);
+    }
 }
 void TextAlignImpl(Ark_NativePointer node,
                    Ark_TextAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetTextAlign(frameNode, convValue);
+    SearchModelNG::SetTextAlign(frameNode, Converter::OptConvert<TextAlign>(value));
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
                                Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //SearchModelNG::SetEnableKeyboardOnFocus(frameNode, convValue);
+    SearchModelNG::RequestKeyboardOnFocus(frameNode, Converter::Convert<bool>(value));
 }
 void SelectionMenuHiddenImpl(Ark_NativePointer node,
                              Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //SearchModelNG::SetSelectionMenuHidden(frameNode, convValue);
+    auto isHidden = Converter::Convert<bool>(value);
+    SearchModelNG::SetSelectionMenuHidden(frameNode, isHidden);
 }
 void MinFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -253,8 +416,10 @@ void MinFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetMinFontSize(frameNode, convValue);
+    auto optValue = Converter::OptConvert<Dimension>(*value);
+    resetNegative(optValue);
+    resetPercent(optValue);
+    SearchModelNG::SetAdaptMinFontSize(frameNode, optValue);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -262,8 +427,10 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetMaxFontSize(frameNode, convValue);
+    auto optValue = Converter::OptConvert<Dimension>(*value);
+    resetNegative(optValue);
+    resetPercent(optValue);
+    SearchModelNG::SetAdaptMaxFontSize(frameNode, optValue);
 }
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_TextDecorationOptions* value)
@@ -271,8 +438,10 @@ void DecorationImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetDecoration(frameNode, convValue);
+    auto options = Converter::Convert<Converter::TextDecorationOptions>(*value);
+    SearchModelNG::SetTextDecoration(frameNode, options.textDecoration);
+    SearchModelNG::SetTextDecorationColor(frameNode, options.color);
+    SearchModelNG::SetTextDecorationStyle(frameNode, options.textDecorationStyle);
 }
 void LetterSpacingImpl(Ark_NativePointer node,
                        const Ark_Union_Number_String_Resource* value)
@@ -280,8 +449,10 @@ void LetterSpacingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetLetterSpacing(frameNode, convValue);
+    auto spacing = Converter::OptConvert<Dimension>(*value);
+    resetNegative(spacing);
+    resetPercent(spacing);
+    SearchModelNG::SetLetterSpacing(frameNode, spacing);
 }
 void LineHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String_Resource* value)
@@ -289,17 +460,16 @@ void LineHeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetLineHeight(frameNode, convValue);
+    auto optValue = Converter::OptConvert<Dimension>(*value);
+    resetNegative(optValue);
+    SearchModelNG::SetLineHeight(frameNode, optValue);
 }
 void TypeImpl(Ark_NativePointer node,
               Ark_SearchType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetType(frameNode, convValue);
+    SearchModelNG::SetType(frameNode, Converter::OptConvert<TextInputType>(value));
 }
 void FontFeatureImpl(Ark_NativePointer node,
                      const Ark_String* value)
@@ -307,8 +477,8 @@ void FontFeatureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //SearchModelNG::SetFontFeature(frameNode, convValue);
+    auto fontFeatureSettings = Converter::Convert<std::string>(*value);
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
 }
 void OnWillInsertImpl(Ark_NativePointer node,
                       const Callback_InsertValue_Boolean* value)
@@ -316,8 +486,16 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnWillInsert(frameNode, convValue);
+    auto onWillInsert = [frameNode](const InsertValueInfo& value) -> bool {
+        Ark_InsertValue insertValue = {
+            .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
+        };
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onWillInsert(frameNode->GetId(), insertValue);
+        LOGE("ARKOALA SearchAttributeModifier.OnWillInsert -> Method work incorrect.");
+        return true;
+    };
+    SearchModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
 void OnDidInsertImpl(Ark_NativePointer node,
                      const Callback_InsertValue_Void* value)
@@ -325,8 +503,14 @@ void OnDidInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnDidInsert(frameNode, convValue);
+    auto onDidInsert = [frameNode](const InsertValueInfo& value) {
+        Ark_InsertValue insertValue = {
+            .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
+        };
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onWillInsert(frameNode->GetId(), insertValue);
+    };
+    SearchModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
 void OnWillDeleteImpl(Ark_NativePointer node,
                       const Callback_DeleteValue_Boolean* value)
@@ -334,8 +518,17 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnWillDelete(frameNode, convValue);
+    auto onWillDelete = [frameNode](const DeleteValueInfo& value) -> bool {
+        Ark_DeleteValue deleteValue = {
+            .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
+            .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
+        };
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onWillDelete(frameNode->GetId(), deleteValue);
+        LOGE("ARKOALA SearchAttributeModifier.OnWillDelete -> Method work incorrect.");
+        return true;
+    };
+    SearchModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
 }
 void OnDidDeleteImpl(Ark_NativePointer node,
                      const Callback_DeleteValue_Void* value)
@@ -343,8 +536,15 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnDidDelete(frameNode, convValue);
+    auto onDidDelete = [frameNode](const DeleteValueInfo& value) {
+        Ark_DeleteValue deleteValue = {
+            .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
+            .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
+        };
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onDidDelete(frameNode->GetId(), deleteValue);
+    };
+    SearchModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_EditMenuOptions* value)
@@ -354,22 +554,21 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SearchModelNG::SetEditMenuOptions(frameNode, convValue);
+    LOGE("ARKOALA SearchAttributeModifier.EditMenuOptionsImpl -> Method is not implemented.");
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
                            Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //SearchModelNG::SetEnablePreviewText(frameNode, convValue);
+    SearchModelNG::SetEnablePreviewText(frameNode, Converter::Convert<bool>(value));
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //SearchModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    SearchModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
 }
 void SearchButtonImpl(Ark_NativePointer node,
                       const Ark_String* value,
@@ -377,9 +576,18 @@ void SearchButtonImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetSearchButton(frameNode, convValue);
+    if (value) {
+        auto buttonText = Converter::Convert<std::string>(*value);
+        SearchModelNG::SetSearchButton(frameNode, buttonText);
+    }
+    CHECK_NULL_VOID(option);
+    auto buttonOptions = Converter::OptConvert<SearchButtonOptions>(*option);
+    if (buttonOptions) {
+        SearchModelNG::SetSearchButtonFontColor(frameNode, buttonOptions->color);
+        resetNegative(buttonOptions->width);
+        resetPercent(buttonOptions->width);
+        SearchModelNG::SetSearchButtonFontSize(frameNode, buttonOptions->width);
+    }
 }
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
@@ -387,9 +595,13 @@ void InputFilterImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetInputFilter(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(error);
+    auto valueString = Converter::OptConvert<std::string>(*value);
+    auto errorEvent = [frameNode](const std::string& val) {
+        auto errortArkString = Converter::ArkValue<Ark_String>(val);
+    };
+    SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const Callback_Any* value,

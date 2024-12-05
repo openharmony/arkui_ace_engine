@@ -14,9 +14,41 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG {
+namespace Converter {
+    template<>
+    V2::GridContainerSize Convert(const Ark_GridColColumnOption& value)
+    {
+        V2::GridContainerSize toValue;
+        toValue.lg = Converter::OptConvert<int32_t>(value.lg).value();
+        toValue.md = Converter::OptConvert<int32_t>(value.md).value();
+        toValue.sm = Converter::OptConvert<int32_t>(value.sm).value();
+        toValue.xl = Converter::OptConvert<int32_t>(value.xl).value();
+        toValue.xs = Converter::OptConvert<int32_t>(value.xs).value();
+        toValue.xxl = Converter::OptConvert<int32_t>(value.xxl).value();
+        return toValue;
+    }
+    template<>
+    V2::GridContainerSize Convert(const Ark_Number& value)
+    {
+        V2::GridContainerSize toValue;
+        int32_t iValue = Converter::Convert<int32_t>(value);
+        toValue.lg = iValue;
+        toValue.md = iValue;
+        toValue.sm = iValue;
+        toValue.xl = iValue;
+        toValue.xs = iValue;
+        toValue.xxl = iValue;
+        return toValue;
+    }
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridColModifier {
 Ark_NativePointer ConstructImpl()
@@ -30,8 +62,32 @@ void SetGridColOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = option ? Converter::OptConvert<type>(*option) : std::nullopt;
-    //GridColModelNG::SetSetGridColOptions(frameNode, convValue);
+    std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
+    bool reset {false};
+    if (option) {
+        auto optGridColOptions = Converter::OptConvert<Ark_GridColOptions>(*option);
+        if (optGridColOptions) {
+            Ark_GridColOptions arkGridColOptions = optGridColOptions.value();
+            gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.span);
+            Validator::ValidateNonNegative(gcSizeValue);
+            GridColModelNG::SetSpan(frameNode, gcSizeValue);
+            gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.offset);
+            Validator::ValidateNonNegative(gcSizeValue);
+            GridColModelNG::SetOffset(frameNode, gcSizeValue);
+            gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.order);
+            Validator::ValidateNonNegative(gcSizeValue);
+            GridColModelNG::SetOrder(frameNode, gcSizeValue);
+        } else {
+            reset = true;
+        }
+    } else {
+        reset = true;
+    }
+    if (reset) {
+        GridColModelNG::SetSpan(frameNode, std::nullopt);
+        GridColModelNG::SetOffset(frameNode, std::nullopt);
+        GridColModelNG::SetOrder(frameNode, std::nullopt);
+    }
 }
 } // GridColInterfaceModifier
 namespace GridColAttributeModifier {
@@ -41,8 +97,14 @@ void SpanImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridColModelNG::SetSpan(frameNode, convValue);
+    std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
+    if (value) {
+        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
+        Validator::ValidateNonNegative(gcSizeValue);
+        GridColModelNG::SetSpan(frameNode, gcSizeValue);
+    } else {
+        GridColModelNG::SetSpan(frameNode, std::nullopt);
+    }
 }
 void GridColOffsetImpl(Ark_NativePointer node,
                        const Ark_Union_Number_GridColColumnOption* value)
@@ -50,8 +112,14 @@ void GridColOffsetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridColModelNG::SetGridColOffset(frameNode, convValue);
+    if (value) {
+        auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
+        CHECK_NULL_VOID(gcSizeValue);
+        Validator::ValidateNonNegative(gcSizeValue);
+        GridColModelNG::SetOffset(frameNode, gcSizeValue);
+    } else {
+        GridColModelNG::SetOffset(frameNode, std::nullopt);
+    }
 }
 void OrderImpl(Ark_NativePointer node,
                const Ark_Union_Number_GridColColumnOption* value)
@@ -59,8 +127,14 @@ void OrderImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GridColModelNG::SetOrder(frameNode, convValue);
+    if (value) {
+        auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
+        CHECK_NULL_VOID(gcSizeValue);
+        Validator::ValidateNonNegative(gcSizeValue);
+        GridColModelNG::SetOrder(frameNode, gcSizeValue);
+    } else {
+        GridColModelNG::SetOrder(frameNode, std::nullopt);
+    }
 }
 } // GridColAttributeModifier
 const GENERATED_ArkUIGridColModifier* GetGridColModifier()

@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CheckboxGroupModifier {
@@ -30,8 +32,15 @@ void SetCheckboxGroupOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //CheckboxGroupModelNG::SetSetCheckboxGroupOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    if (options->tag != ARK_TAG_UNDEFINED) {
+        auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto group = Converter::OptConvert<Ark_CharPtr>(options->value.group);
+        if (group) {
+            eventHub->SetGroupName(group.value());
+        }
+    }
 }
 } // CheckboxGroupInterfaceModifier
 namespace CheckboxGroupAttributeModifier {
@@ -40,8 +49,7 @@ void SelectAllImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //CheckboxGroupModelNG::SetSelectAll(frameNode, convValue);
+    CheckBoxGroupModelNG::SetSelectAll(frameNode, static_cast<bool>(value));
 }
 void SelectedColorImpl(Ark_NativePointer node,
                        const Ark_ResourceColor* value)
@@ -49,8 +57,9 @@ void SelectedColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetSelectedColor(frameNode, convValue);
+    if (auto color = Converter::OptConvert<Color>(*value); color) {
+        CheckBoxGroupModelNG::SetSelectedColor(frameNode, color.value());
+    }
 }
 void UnselectedColorImpl(Ark_NativePointer node,
                          const Ark_ResourceColor* value)
@@ -58,8 +67,9 @@ void UnselectedColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetUnselectedColor(frameNode, convValue);
+    if (auto color = Converter::OptConvert<Color>(*value); color) {
+        CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, color.value());
+    }
 }
 void MarkImpl(Ark_NativePointer node,
               const Ark_MarkStyle* value)
@@ -67,8 +77,15 @@ void MarkImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetMark(frameNode, convValue);
+    if (auto color = Converter::OptConvert<Color>(value->strokeColor); color) {
+        CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, color.value());
+    }
+    if (auto size = Converter::OptConvert<Dimension>(value->size); size) {
+        CheckBoxGroupModelNG::SetCheckMarkSize(frameNode, size.value());
+    }
+    if (auto strokeWidth = Converter::OptConvert<Dimension>(value->strokeWidth); strokeWidth) {
+        CheckBoxGroupModelNG::SetCheckMarkWidth(frameNode, strokeWidth.value());
+    }
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const OnCheckboxGroupChangeCallback* value)
@@ -76,17 +93,20 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetOnChange(frameNode, convValue);
+    auto onEvent = [frameNode](const BaseEventInfo* info) {
+        Ark_CheckboxGroupResult result;
+        GetFullAPI()->getEventsAPI()->getCheckboxGroupEventsReceiver()->onChange(frameNode->GetId(), result);
+    };
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onEvent));
 }
 void CheckboxShapeImpl(Ark_NativePointer node,
                        Ark_CheckBoxShape value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CheckboxGroupModelNG::SetCheckboxShape(frameNode, convValue);
+    CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, static_cast<CheckBoxStyle>(value));
 }
 } // CheckboxGroupAttributeModifier
 const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
@@ -103,5 +123,4 @@ const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
     };
     return &ArkUICheckboxGroupModifierImpl;
 }
-
 }

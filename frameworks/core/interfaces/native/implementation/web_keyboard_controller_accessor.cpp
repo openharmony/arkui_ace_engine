@@ -14,13 +14,18 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebKeyboardControllerAccessor {
 void DestroyPeerImpl(WebKeyboardControllerPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 WebKeyboardControllerPeer* CtorImpl()
 {
@@ -33,21 +38,47 @@ Ark_NativePointer GetFinalizerImpl()
 void InsertTextImpl(WebKeyboardControllerPeer* peer,
                     const Ark_String* text)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(text);
+    peer->handler->InsertText(
+        Converter::Convert<std::string>(*text)
+    );
 }
 void DeleteForwardImpl(WebKeyboardControllerPeer* peer,
                        const Ark_Number* length)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(length);
+    auto lengthOpt = Converter::OptConvert<int32_t>(*length);
+    Validator::ValidatePositive(lengthOpt);
+    if (lengthOpt) {
+        peer->handler->DeleteForward(lengthOpt.value());
+    }
 }
 void DeleteBackwardImpl(WebKeyboardControllerPeer* peer,
                         const Ark_Number* length)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(length);
+    auto lengthOpt = Converter::OptConvert<int32_t>(*length);
+    Validator::ValidatePositive(lengthOpt);
+    if (lengthOpt) {
+        peer->handler->DeleteBackward(lengthOpt.value());
+    }
 }
 void SendFunctionKeyImpl(WebKeyboardControllerPeer* peer,
                          const Ark_Number* key)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(key);
+    peer->handler->SendFunctionKey(
+        Converter::Convert<int32_t>(*key)
+    );
 }
 void CloseImpl(WebKeyboardControllerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->Close();
 }
 } // WebKeyboardControllerAccessor
 const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAccessor()

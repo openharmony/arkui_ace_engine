@@ -40,6 +40,7 @@ public:
     MOCK_METHOD1(SetRenderFit, void(RenderFit));
     MOCK_METHOD1(SetSecurityLayer, void(bool));
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
+    MOCK_METHOD(void, UpdateBackgroundEffect, (const std::optional<EffectOption>&), (override));
 
     void SetVisible(bool visible) override
     {
@@ -101,6 +102,15 @@ public:
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurRadius = radius;
+        // see ./components_ng/render/adapter/rosen_render_context.cpp
+        // RosenRenderContext::UpdateBackBlur
+        backdropBlurOption = blurOption;
+    }
+
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
     {
         const auto& groupProperty = GetOrCreateForeground();
@@ -135,6 +145,7 @@ public:
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
     std::function<void()> transitionOutCallback_;
+    BlurOption backdropBlurOption;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

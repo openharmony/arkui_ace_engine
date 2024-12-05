@@ -37,17 +37,19 @@ public:
     void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
     void SetEnableWaveEffect(bool enableWaveEffect) override;
 
-    static void SetActiveColor(FrameNode* frameNode, const Color& activeColor);
-    static void SetCircleRadius(FrameNode* frameNode, const Dimension& radius);
-    static void SetSelectedColor(FrameNode* frameNode, const Color& selectedColor);
-    static void SetSideLength(FrameNode* frameNode, const Dimension& sideLength);
-    static void SetAutoReset(FrameNode* frameNode, bool isAutoReset);
-    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth);
-    static void SetRegularColor(FrameNode* frameNode, const Color& color);
-    static void SetPathColor(FrameNode* frameNode, const Color& color);
-    static void SetActiveCircleColor(FrameNode* frameNode, const Color& activeCircleColor);
-    static void SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius);
-    static void SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor);
+    static void SetCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
+    static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
+    static void SetSideLength(FrameNode* frameNode, const std::optional<Dimension>& sideLength);
+    static void SetAutoReset(FrameNode* frameNode, const std::optional<bool>& isAutoReset);
+    static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& lineWidth);
+    static void SetRegularColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetPathColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetActiveCircleColor(FrameNode* frameNode, const std::optional<Color>& activeCircleColor);
+    static void SetActiveCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& activeCircleRadius);
+    static void SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect);
+    static const RefPtr<V2::PatternLockController> GetController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

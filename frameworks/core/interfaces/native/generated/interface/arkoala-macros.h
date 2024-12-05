@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 
-#include "raw_input_injector.h"
+#ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_MACROS_H
+#define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_MACROS_H
 
-int32_t main(int32_t argc, char** argv)
-{
-    OHOS::Ace::RawInputInjector injector;
-    return injector.ExecuteInject(argc, argv);
-}
+#if defined(KOALA_WINDOWS)
+#define IDLIZE_API_EXPORT __declspec(dllexport)
+#else
+#define IDLIZE_API_EXPORT __attribute__((visibility("default")))
+#endif
+
+#define EXTERN_C extern "C"
+
+#endif // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_MACROS_H

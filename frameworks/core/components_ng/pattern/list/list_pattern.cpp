@@ -244,7 +244,77 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isInitialized_ = true;
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
+    CheckListItemRange(listLayoutAlgorithm->GetItemAdapterRange());
     return true;
+}
+
+void ListPattern::CheckListItemRange(const std::pair<int32_t, int32_t>& range)
+{
+    if (!adapter_) {
+        return;
+    }
+    adapter_->requestFeature.first = false;
+    adapter_->requestFeature.second = false;
+    if (adapter_->range.first != range.first || adapter_->range.second != range.second) {
+        if (adapter_->range.first > range.first) {
+            adapter_->requestFeature.first = true;
+        }
+        if (adapter_->range.second < range.second) {
+            adapter_->requestFeature.second = true;
+        }
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.", range.first, range.second);
+            adapter_->requestItemFunc(range.first, range.second);
+        }
+    }
+}
+
+void ListPattern::CheckScrollItemRange()
+{
+    if (itemPosition_.empty() && !adapter_) {
+        return;
+    }
+    auto startPos = startMainPos_ - currentDelta_;
+    auto endPos = endMainPos_ - currentDelta_;
+    if (startIndex_ == 0) {
+        startPos += GetChainDelta(0);
+    }
+    if (endIndex_ == maxListItemIndex_) {
+        endPos += GetChainDelta(endIndex_);
+    }
+    if (Positive(startPos)) {
+        // request more items.
+        float requestItemNum = startPos /
+                               (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) *
+                               itemPosition_.size();
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.",
+                static_cast<int32_t>(adapter_->range.first - std::ceil(requestItemNum)), adapter_->range.second);
+            adapter_->requestItemFunc(adapter_->range.first - std::ceil(requestItemNum), adapter_->range.second);
+        }
+        return;
+    }
+
+    if (LessNotEqual(endPos, contentMainSize_)) {
+        // request more items.
+        float requestItemNum = (contentMainSize_ - endPos) /
+                               (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) *
+                               itemPosition_.size();
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.", adapter_->range.first,
+                static_cast<int32_t>(adapter_->range.second + std::ceil(requestItemNum)));
+            adapter_->requestItemFunc(adapter_->range.first, adapter_->range.second + std::ceil(requestItemNum));
+        }
+        adapter_->requestFeature.second = true;
+    }
+}
+
+RefPtr<FrameNode> ListPattern::GetOrCreateChildByIndex(uint32_t index)
+{
+    if (adapter_ && adapter_->getItemFunc) {
+        return adapter_->getItemFunc(index);
+    }
+    return nullptr;
 }
 
 void ListPattern::UpdateListDirectionInCardStyle()
@@ -620,6 +690,11 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     if (predictSnapEndPos_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
+    }
+    if (adapter_) {
+        listLayoutAlgorithm->SetTotalItemCount(adapter_->totalCount, false);
+        listLayoutAlgorithm->SetItemAdapterFeature(adapter_->requestFeature);
+        listLayoutAlgorithm->SetLazyFeature(!!adapter_->requestItemFunc);
     }
     return listLayoutAlgorithm;
 }
