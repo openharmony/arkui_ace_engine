@@ -1510,6 +1510,14 @@ void RichEditorPattern::CopyGestureOption(const RefPtr<SpanNode>& source, RefPtr
         auto tmpLongPressFunc = sourceItem->onLongPress;
         targetItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
+    if (sourceItem->onDoubleClick) {
+        auto tmpDoubleClickFunc = sourceItem->onDoubleClick;
+        targetItem->SetDoubleClickEvent(std::move(tmpDoubleClickFunc));
+    }
+    if (sourceItem->onHover) {
+        auto tmpHoverFunc = sourceItem->onHover;
+        targetItem->SetHoverEvent(std::move(tmpHoverFunc));
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
