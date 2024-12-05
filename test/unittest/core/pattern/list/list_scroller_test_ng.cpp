@@ -299,7 +299,7 @@ HWTEST_P(ListScrollerTestNg, ScrollToIndex_AddItem001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
     AddItems(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetChildren().size(), TOTAL_ITEM_NUMBER + 1);
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE + ITEM_MAIN_SIZE);
 
@@ -621,7 +621,7 @@ HWTEST_P(ListScrollerTestNg, AnimateTo001, TestSize.Level1)
      */
     bool smooth = GetParam();
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
@@ -629,7 +629,7 @@ HWTEST_P(ListScrollerTestNg, AnimateTo001, TestSize.Level1)
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -637,7 +637,7 @@ HWTEST_P(ListScrollerTestNg, AnimateTo001, TestSize.Level1)
      * @tc.expected: AnimateTo the top
      */
     positionController_->AnimateTo(Dimension(0), 0, nullptr, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -660,7 +660,7 @@ HWTEST_P(ListScrollerTestNg, AnimateTo002, TestSize.Level1)
      */
     bool smooth = GetParam();
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
@@ -668,7 +668,7 @@ HWTEST_P(ListScrollerTestNg, AnimateTo002, TestSize.Level1)
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     positionController_->AnimateTo(Dimension(0), 0, nullptr, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -693,7 +693,7 @@ HWTEST_P(ListScrollerTestNg, AnimateTo003, TestSize.Level1)
      */
     bool smooth = GetParam();
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
@@ -701,7 +701,7 @@ HWTEST_P(ListScrollerTestNg, AnimateTo003, TestSize.Level1)
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     positionController_->AnimateTo(Dimension(0), 0, nullptr, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -723,7 +723,7 @@ HWTEST_P(ListScrollerTestNg, ScrollBy001, TestSize.Level1)
      */
     bool smooth = GetParam();
     positionController_->ScrollBy(0, ITEM_MAIN_SIZE, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
@@ -731,7 +731,7 @@ HWTEST_P(ListScrollerTestNg, ScrollBy001, TestSize.Level1)
      * @tc.expected: ScrollBy the bottom, can not over scroll
      */
     positionController_->ScrollBy(0, CONTENT_MAIN_SIZE, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -739,7 +739,7 @@ HWTEST_P(ListScrollerTestNg, ScrollBy001, TestSize.Level1)
      * @tc.expected: Not scroll
      */
     positionController_->ScrollBy(0, 0, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -747,7 +747,7 @@ HWTEST_P(ListScrollerTestNg, ScrollBy001, TestSize.Level1)
      * @tc.expected: ScrollBy the top
      */
     positionController_->ScrollBy(0, -CONTENT_MAIN_SIZE, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -768,7 +768,7 @@ HWTEST_P(ListScrollerTestNg, ScrollToEdge001, TestSize.Level1)
      */
     bool smooth = GetParam();
     model.ScrollToEdge(AceType::RawPtr(frameNode_), ScrollEdgeType::SCROLL_BOTTOM, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -777,7 +777,7 @@ HWTEST_P(ListScrollerTestNg, ScrollToEdge001, TestSize.Level1)
      */
     pattern_->axis_ = Axis::NONE;
     model.ScrollToEdge(AceType::RawPtr(frameNode_), ScrollEdgeType::SCROLL_TOP, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
@@ -799,7 +799,7 @@ HWTEST_P(ListScrollerTestNg, ScrollPage001, TestSize.Level1)
      */
     bool smooth = GetParam();
     positionController_->ScrollPage(false, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-LIST_HEIGHT));
 
     /**
@@ -807,7 +807,7 @@ HWTEST_P(ListScrollerTestNg, ScrollPage001, TestSize.Level1)
      * @tc.expected: Scroll up
      */
     positionController_->ScrollPage(true, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -830,7 +830,7 @@ HWTEST_F(ListScrollerTestNg, AnimateTo004, TestSize.Level1)
      * @tc.expected: AnimateTo the position
      */
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 1000.0f, Curves::EASE, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
@@ -838,7 +838,7 @@ HWTEST_F(ListScrollerTestNg, AnimateTo004, TestSize.Level1)
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 1000.0f, Curves::EASE, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -846,7 +846,7 @@ HWTEST_F(ListScrollerTestNg, AnimateTo004, TestSize.Level1)
      * @tc.expected: AnimateTo the top
      */
     positionController_->AnimateTo(Dimension(0), 1000.0f, Curves::EASE, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -870,7 +870,7 @@ HWTEST_F(ListScrollerTestNg, AnimateTo005, TestSize.Level1)
     bool canOverScroll = true;
     MockAnimationManager::GetInstance().SetTicks(5);
     positionController_->AnimateTo(Dimension(1000.0f), 1000.0f, Curves::EASE, false, canOverScroll);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-200.0f));
     EXPECT_TRUE(Position(-400.0f));
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
@@ -895,7 +895,7 @@ HWTEST_F(ListScrollerTestNg, ScrollBy002, TestSize.Level1)
     const double x = 1.0;
     const double y = 2.0;
     model.SetScrollBy(AceType::RawPtr(frameNode_), x, y);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-(y)));
     model.SetScrollBy(AceType::RawPtr(frameNode_), x, 0.0);
     EXPECT_TRUE(Position(-(y)));
@@ -918,7 +918,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToEdge002, TestSize.Level1)
      * @tc.expected: Scroll to bottom with animation
      */
     positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -926,7 +926,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToEdge002, TestSize.Level1)
      * @tc.expected: Scroll to top with animation
      */
     positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -950,7 +950,7 @@ HWTEST_F(ListScrollerTestNg, Fling001, TestSize.Level1)
     const float finalPosition = 100.0f;
     const float flingVelocity = finalPosition * FRICTION * FRICTION_SCALE;
     positionController_->Fling(flingVelocity);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-finalPosition / TICK));
     EXPECT_TRUE(Position(-finalPosition));
 
@@ -959,7 +959,7 @@ HWTEST_F(ListScrollerTestNg, Fling001, TestSize.Level1)
      * @tc.expected: Scroll up
      */
     positionController_->Fling(-flingVelocity);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-finalPosition / TICK));
     EXPECT_TRUE(Position(0));
 }
@@ -987,7 +987,7 @@ HWTEST_F(ListScrollerTestNg, GetInfo001, TestSize.Level1)
      * @tc.steps: step1. AnimateTo the position
      */
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset(0, ITEM_MAIN_SIZE)));
     EXPECT_FALSE(positionController_->IsAtEnd());
     EXPECT_TRUE(IsEqual(positionController_->GetItemRect(0), Rect()));
@@ -997,7 +997,7 @@ HWTEST_F(ListScrollerTestNg, GetInfo001, TestSize.Level1)
      * @tc.steps: step2. AnimateTo bottom
      */
     positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset(0, VERTICAL_SCROLLABLE_DISTANCE)));
     EXPECT_TRUE(positionController_->IsAtEnd());
     EXPECT_TRUE(IsEqual(positionController_->GetItemRect(0), Rect()));

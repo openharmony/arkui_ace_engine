@@ -1001,7 +1001,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign014, TestSize.Level1)
      * @tc.expected: Not start snap Animation.
      */
     pattern_->StartSnapAnimation(0, 0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollable_->state_, Scrollable::AnimationState::IDLE);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
 
@@ -1011,7 +1011,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign014, TestSize.Level1)
      */
     layoutProperty_->UpdateContentEndOffset(150);
     pattern_->StartSnapAnimation(0, 0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollable_->state_, Scrollable::AnimationState::IDLE);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
 }
