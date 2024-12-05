@@ -222,8 +222,8 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto window = static_cast<RosenWindow*>(container->GetWindow());
     CHECK_NULL_RETURN(window, false);
     auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
+    LOGE("class type is %{public}s", rootScene->GetClassType().c_str());
     if (rootScene->GetClassType() != "RootScene") {
-        LOGE("class type is %{public}s", rootScene->GetClassType().c_str());
         return true;
     }
     CHECK_NULL_RETURN(rootScene, false);
