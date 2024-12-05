@@ -1858,4 +1858,137 @@ HWTEST_F(PatternLockTestNg, PatternLockReplacePlaceHolderTest001, TestSize.Level
     EXPECT_EQ(zh_CN_result2, zh_CN_replace2);
     EXPECT_EQ(zh_CN_result_nod, zh_CN_replace_nod);
 }
+
+/**
+ * @tc.name: PatternLockSkipUnselectedPointTest001
+ * @tc.desc: Test PatternLockAccessibility .
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockSkipUnselectedPointTest001, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {
+        model.SetCircleRadius(CIRCLE_RADIUS);
+        model.SetRegularColor(REGULAR_COLOR);
+        model.SetSelectedColor(SELECTED_COLOR);
+        model.SetActiveColor(ACTIVE_COLOR);
+        model.SetPathColor(PATH_COLOR);
+        model.SetStrokeWidth(PATH_STROKE_WIDTH);
+        model.SetAutoReset(true);
+        model.SetSideLength(SIDE_LENGTH);
+        model.SetActiveCircleColor(ACTIVE_CIRCLE_COLOR);
+        model.SetActiveCircleRadius(ACTIVE_CIRCLE_RADIUS);
+        model.SetEnableWaveEffect(false);
+        model.SetSkipUnselectedPoint(true);
+    });
+    /**
+     * @tc.case: case1 InitVirtualNode .
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->CreateNodePaintMethod();
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->skipUnselectedPoint_, true);
+}
+
+/**
+ * @tc.name: PatternLockSkipUnselectedPointTest002
+ * @tc.desc: Test PatternLock pattern method AddPassPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockSkipUnselectedPointTest002, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {
+        model.SetSkipUnselectedPoint(false);
+    });
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->InitSkipUnselectedPoint();
+
+    /**
+     * @tc.case: case1: selectedPoint(1, 1) and link Point(1, 3) auto select Point(1, 2)
+     */
+    pattern_->choosePoint_.clear();
+    pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->AddPassPoint(1, 3);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetColumn(), 1);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetRow(), 2);
+    /**
+     * @tc.case: case2: selectedPoint(1, 1) and link Point(3, 1) auto select Point(2, 1)
+     */
+    pattern_->choosePoint_.clear();
+    pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->AddPassPoint(3, 1);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetColumn(), 2);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetRow(), 1);
+    /**
+     * @tc.case: case3: selectedPoint(1, 1) and link Point(3, 3) auto select Point(2, 2)
+     */
+    pattern_->choosePoint_.clear();
+    pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->AddPassPoint(3, 3);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetColumn(), 2);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetRow(), 2);
+}
+
+/**
+ * @tc.name: PatternLockSkipUnselectedPointTest003
+ * @tc.desc: Test PatternLock pattern method AddPassPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockSkipUnselectedPointTest003, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {
+        model.SetSkipUnselectedPoint(true);
+    });
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->InitSkipUnselectedPoint();
+
+    /**
+     * @tc.case: case1: selectedPoint(1, 1) and link Point(1, 3), skip unselected Point(1, 2)
+     */
+    pattern_->choosePoint_.clear();
+    pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->AddPassPoint(1, 3);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetColumn(), 1);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetRow(), 1);
+    /**
+     * @tc.case: case2: selectedPoint(1, 1) and link Point(3, 1), skip unselected Point(1, 2)
+     */
+    pattern_->choosePoint_.clear();
+    pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->AddPassPoint(3, 1);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetColumn(), 1);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetRow(), 1);
+    /**
+     * @tc.case: case3: selectedPoint(1, 1) and link Point(3, 3), skip unselected Point(1, 2)
+     */
+    pattern_->choosePoint_.clear();
+    pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->AddPassPoint(3, 3);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetColumn(), 1);
+    EXPECT_EQ(pattern_->choosePoint_.back().GetRow(), 1);
+}
+
+
+/**
+ * @tc.name: PatternLockEnableForegroundTest001
+ * @tc.desc: Test PatternLockAccessibility .
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockEnableForegroundTest001, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {
+        model.SetCircleRadius(CIRCLE_RADIUS);
+        model.SetRegularColor(REGULAR_COLOR);
+        model.SetSelectedColor(SELECTED_COLOR);
+        model.SetActiveColor(ACTIVE_COLOR);
+        model.SetPathColor(PATH_COLOR);
+        model.SetStrokeWidth(PATH_STROKE_WIDTH);
+        model.SetAutoReset(true);
+        model.SetSideLength(SIDE_LENGTH);
+        model.SetActiveCircleColor(ACTIVE_CIRCLE_COLOR);
+        model.SetActiveCircleRadius(ACTIVE_CIRCLE_RADIUS);
+        model.SetEnableWaveEffect(false);
+        model.SetEnableForeground(true);
+    });
+    EXPECT_TRUE(paintProperty_->GetEnableForegroundValue());
+}
 } // namespace OHOS::Ace::NG
