@@ -536,9 +536,7 @@ void RichEditorPattern::HandleEnabled()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (IsDisabled()) {
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        auto richEditorTheme = GetTheme<RichEditorTheme>();
         CHECK_NULL_VOID(richEditorTheme);
         auto disabledAlpha = richEditorTheme->GetDisabledAlpha();
         renderContext->OnOpacityUpdate(disabledAlpha);
@@ -3647,9 +3645,7 @@ void RichEditorPattern::ClearDragDropEvent()
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<RichEditorTheme>();
+    auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(theme);
     auto touchX = event->GetX();
     auto touchY = event->GetY();
@@ -5110,11 +5106,7 @@ void RichEditorPattern::CreateTextSpanNode(
 
 void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
     Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
     spanNode->UpdateTextColor(textColor);
@@ -6961,27 +6953,21 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 
 Color RichEditorPattern::GetUrlHoverColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, Color());
-    auto theme = pipeline->GetTheme<RichEditorTheme>();
+    auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, Color());
     return theme->GetUrlHoverColor();
 }
 
 Color RichEditorPattern::GetUrlPressColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, Color());
-    auto theme = pipeline->GetTheme<RichEditorTheme>();
+    auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, Color());
     return theme->GetUrlPressColor();
 }
 
 Color RichEditorPattern::GetUrlSpanColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, Color());
-    auto theme = pipeline->GetTheme<RichEditorTheme>();
+    auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, Color());
     return theme->GetUrlDefaultColor();
 }
@@ -7593,9 +7579,7 @@ void RichEditorPattern::DumpInfo()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto richEditorTheme = context->GetTheme<RichEditorTheme>();
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
     dumpLog.AddDesc(std::string("caret offset: ").append(GetCaretRect().GetOffset().ToString()));
     dumpLog.AddDesc(std::string("caret height: ")
@@ -7823,9 +7807,7 @@ void RichEditorPattern::RefreshSelectOverlay(bool isMousePressed, bool selectedT
 
 bool RichEditorPattern::IsShowHandle()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, false);
     return !richEditorTheme->IsRichEditorShowHandle();
 }
@@ -8069,11 +8051,7 @@ void RichEditorPattern::InitScrollablePattern()
     SetScrollBar(barState);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        auto richEditorTheme = GetTheme<RichEditorTheme>();
         CHECK_NULL_VOID(richEditorTheme);
         scrollBar->SetMinHeight(richEditorTheme->GetScrollbarMinHeight());
     }
@@ -8090,9 +8068,7 @@ void RichEditorPattern::InitScrollablePattern()
 
 void RichEditorPattern::ProcessInnerPadding()
 {
-    auto context = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RichEditorTheme>();
+    auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(theme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -9082,11 +9058,7 @@ Color RichEditorPattern::GetCaretColor()
     if (caretColor_.has_value()) {
         return caretColor_.value();
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, SYSTEM_CARET_COLOR);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, SYSTEM_CARET_COLOR);
-    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, SYSTEM_CARET_COLOR);
     return richEditorTheme->GetCaretColor();
 }
@@ -9097,11 +9069,7 @@ Color RichEditorPattern::GetSelectedBackgroundColor()
     if (selectedBackgroundColor_.has_value()) {
         selectedBackgroundColor = selectedBackgroundColor_.value();
     } else {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, SYSTEM_SELECT_BACKGROUND_COLOR);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_RETURN(pipeline, SYSTEM_SELECT_BACKGROUND_COLOR);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        auto richEditorTheme = GetTheme<RichEditorTheme>();
         CHECK_NULL_RETURN(richEditorTheme, SYSTEM_SELECT_BACKGROUND_COLOR);
         selectedBackgroundColor = richEditorTheme->GetSelectedBackgroundColor();
     }
@@ -10112,11 +10080,7 @@ int32_t RichEditorPattern::CalcLineBeginPosition()
 
 float RichEditorPattern::GetTextThemeFontSize()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0f);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, 0.0f);
-    auto theme = context->GetTheme<TextTheme>();
+    auto theme = GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
     auto textStyle = theme->GetTextStyle();
     return textStyle.GetFontSize().ConvertToPx();
@@ -11204,9 +11168,7 @@ void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto richEditorTheme = context->GetTheme<RichEditorTheme>();
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
     json->Put("caret offset", GetCaretRect().GetOffset().ToString().c_str());
     json->Put("caret height",
