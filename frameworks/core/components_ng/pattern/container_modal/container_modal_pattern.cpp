@@ -312,7 +312,9 @@ void ContainerModalPattern::OnWindowForceUnfocused() {}
 
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     isFocus_ = isFocus;
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
