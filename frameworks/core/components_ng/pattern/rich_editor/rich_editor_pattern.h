@@ -1438,8 +1438,6 @@ private:
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
     bool isTextPreviewSupported_ = true;
-    float lastFontScale_ = -1;
-    bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
     bool isMoveCaretAnywhere_ = false;

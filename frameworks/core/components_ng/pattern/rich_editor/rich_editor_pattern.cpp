@@ -2945,7 +2945,6 @@ void RichEditorPattern::HandleBlurEvent()
     } else {
         CloseSelectOverlay();
     }
-    isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
     }
@@ -2965,13 +2964,6 @@ void RichEditorPattern::HandleFocusEvent()
     }
     if (textSelector_.SelectNothing()) {
         StartTwinkling();
-    }
-    bool isFontScaleChanged = false;
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
-    if (pipelineContext) {
-        auto currentFontScale = pipelineContext->GetFontScale() * pipelineContext->GetDipScale();
-        isFontScaleChanged = !NearEqual(lastFontScale_, currentFontScale);
-        lastFontScale_ = currentFontScale;
     }
     auto host = GetHost();
     if (host) {
