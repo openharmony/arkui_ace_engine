@@ -81,6 +81,7 @@ const s2 = '80vp';
 const t2 = '30vp';
 const u2 = '30vp';
 const v2 = '44vp';
+const k5 = 40000;
 const w2 = new Map([
     [IconType.BADGE, j1],
     [IconType.NORMAL_ICON, l1],
@@ -91,6 +92,24 @@ const w2 = new Map([
     [IconType.LONGITUDINAL, v1],
     [IconType.VERTICAL, w1]
 ]);
+class Util {
+    static l5(l5) {
+        if (!Util.m5(l5)) {
+            return false;
+        }
+        let resource = l5;
+        return resource.type === k5;
+    }
+    static m5(resource) {
+        if (!resource) {
+            return false;
+        }
+        if (typeof resource === 'string' || typeof resource === 'undefined') {
+            return false;
+        }
+        return true;
+    }
+}
 class z2 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -99,7 +118,7 @@ class z2 extends ViewPU {
         }
         this.e3 = new SynchedPropertySimpleOneWayPU(params.iconStyle, this, "iconStyle");
         this.f3 = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
-        this.g3 = new SynchedPropertyObjectOneWayPU(params.symbolIcon, this, "symbolIcon");
+        this.j5 = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, "symbolStyle");
         this.h3 = new SynchedPropertyObjectOneWayPU(params.primaryText, this, "primaryText");
         this.i3 = new SynchedPropertyObjectOneWayPU(params.secondaryText, this, "secondaryText");
         this.j3 = new SynchedPropertyObjectOneWayPU(params.description, this, "description");
@@ -114,7 +133,7 @@ class z2 extends ViewPU {
         this.setInitiallyProvidedValue(params);
         this.declareWatch("iconStyle", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
-        this.declareWatch("symbolIcon", this.onPropChange);
+        this.declareWatch("symbolStyle", this.onPropChange);
         this.declareWatch("primaryText", this.onPropChange);
         this.declareWatch("secondaryText", this.onPropChange);
         this.declareWatch("description", this.onPropChange);
@@ -127,8 +146,8 @@ class z2 extends ViewPU {
         if (params.icon === undefined) {
             this.f3.set(null);
         }
-        if (params.symbolIcon === undefined) {
-            this.g3.set(null);
+        if (params.symbolStyle === undefined) {
+            this.j5.set(null);
         }
         if (params.primaryText === undefined) {
             this.h3.set(null);
@@ -158,7 +177,7 @@ class z2 extends ViewPU {
     updateStateVars(params) {
         this.e3.reset(params.iconStyle);
         this.f3.reset(params.icon);
-        this.g3.reset(params.symbolIcon);
+        this.j5.reset(params.symbolStyle);
         this.h3.reset(params.primaryText);
         this.i3.reset(params.secondaryText);
         this.j3.reset(params.description);
@@ -170,7 +189,7 @@ class z2 extends ViewPU {
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.e3.purgeDependencyOnElmtId(rmElmtId);
         this.f3.purgeDependencyOnElmtId(rmElmtId);
-        this.g3.purgeDependencyOnElmtId(rmElmtId);
+        this.j5.purgeDependencyOnElmtId(rmElmtId);
         this.h3.purgeDependencyOnElmtId(rmElmtId);
         this.i3.purgeDependencyOnElmtId(rmElmtId);
         this.j3.purgeDependencyOnElmtId(rmElmtId);
@@ -186,7 +205,7 @@ class z2 extends ViewPU {
     aboutToBeDeleted() {
         this.e3.aboutToBeDeleted();
         this.f3.aboutToBeDeleted();
-        this.g3.aboutToBeDeleted();
+        this.j5.aboutToBeDeleted();
         this.h3.aboutToBeDeleted();
         this.i3.aboutToBeDeleted();
         this.j3.aboutToBeDeleted();
@@ -213,11 +232,11 @@ class z2 extends ViewPU {
     set icon(newValue) {
         this.f3.set(newValue);
     }
-    get symbolIcon() {
-        return this.g3.get();
+    get symbolStyle() {
+        return this.j5.get();
     }
-    set symbolIcon(newValue) {
-        this.g3.set(newValue);
+    set symbolStyle(newValue) {
+        this.j5.set(newValue);
     }
     get primaryText() {
         return this.h3.get();
@@ -291,7 +310,7 @@ class z2 extends ViewPU {
         this.descriptionColor = theme.colors.fontTertiary;
     }
     onPropChange() {
-        if (this.icon === null && this.symbolIcon === null && this.iconStyle === null) {
+        if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
             this.itemRowSpace = a2;
         }
         else {
@@ -304,16 +323,17 @@ class z2 extends ViewPU {
     createIcon(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.iconStyle !== null && w2.has(this.iconStyle)) {
+            if (this.iconStyle != null && w2.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.symbolIcon !== null) {
+                        if (this.symbolStyle != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolIcon));
+                                    SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
                                     SymbolGlyph.fontSize(w2.get(this.iconStyle));
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     SymbolGlyph.focusable(false);
                                     SymbolGlyph.draggable(false);
@@ -321,42 +341,63 @@ class z2 extends ViewPU {
                                 }, SymbolGlyph);
                             });
                         }
-                        else if (this.icon !== null) {
+                        else if (this.icon != null) {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
-                                    if (this.iconStyle <= IconType.PREVIEW) {
+                                    if (Util.l5(ObservedObject.GetRawObject(this.icon))) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                Image.create(this.icon);
-                                                Image.objectFit(ImageFit.Contain);
-                                                Image.width(w2.get(this.iconStyle));
-                                                Image.height(w2.get(this.iconStyle));
-                                                Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                                Image.focusable(false);
-                                                Image.draggable(false);
-                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                                Image.flexShrink(0);
-                                            }, Image);
+                                                SymbolGlyph.create(this.icon);
+                                                SymbolGlyph.fontSize(w2.get(this.iconStyle));
+                                                SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                                SymbolGlyph.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                SymbolGlyph.focusable(false);
+                                                SymbolGlyph.draggable(false);
+                                                SymbolGlyph.flexShrink(0);
+                                            }, SymbolGlyph);
                                         });
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                Image.create(this.icon);
-                                                Image.objectFit(ImageFit.Contain);
-                                                Image.constraintSize({
-                                                    minWidth: b2,
-                                                    maxWidth: w2.get(this.iconStyle),
-                                                    minHeight: b2,
-                                                    maxHeight: w2.get(this.iconStyle)
-                                                });
-                                                Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                                Image.focusable(false);
-                                                Image.draggable(false);
-                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                                Image.flexShrink(0);
-                                            }, Image);
+                                                If.create();
+                                                if (this.iconStyle <= IconType.PREVIEW) {
+                                                    this.ifElseBranchUpdateFunction(0, () => {
+                                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                            Image.create(this.icon);
+                                                            Image.objectFit(ImageFit.Contain);
+                                                            Image.width(w2.get(this.iconStyle));
+                                                            Image.height(w2.get(this.iconStyle));
+                                                            Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.focusable(false);
+                                                            Image.draggable(false);
+                                                            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.flexShrink(0);
+                                                        }, Image);
+                                                    });
+                                                }
+                                                else {
+                                                    this.ifElseBranchUpdateFunction(1, () => {
+                                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                            Image.create(this.icon);
+                                                            Image.objectFit(ImageFit.Contain);
+                                                            Image.constraintSize({
+                                                                minWidth: b2,
+                                                                maxWidth: w2.get(this.iconStyle),
+                                                                minHeight: b2,
+                                                                maxHeight: w2.get(this.iconStyle)
+                                                            });
+                                                            Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.focusable(false);
+                                                            Image.draggable(false);
+                                                            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.flexShrink(0);
+                                                        }, Image);
+                                                    });
+                                                }
+                                            }, If);
+                                            If.pop();
                                         });
                                     }
                                 }, If);
@@ -400,7 +441,7 @@ class z2 extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.secondaryText !== null) {
+            if (this.secondaryText != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.secondaryText);
@@ -420,7 +461,7 @@ class z2 extends ViewPU {
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.description !== null) {
+            if (this.description != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.description);
@@ -493,7 +534,7 @@ class b3 extends ViewPU {
         this.z3 = new SynchedPropertyObjectOneWayPU(params.checkBox, this, "checkBox");
         this.a4 = new SynchedPropertyObjectOneWayPU(params.radio, this, "radio");
         this.b4 = new SynchedPropertyObjectOneWayPU(params.image, this, "image");
-        this.c4 = new SynchedPropertyObjectOneWayPU(params.symbol, this, "symbol");
+        this.j5 = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, "symbolStyle");
         this.d4 = new SynchedPropertyObjectOneWayPU(params.text, this, "text");
         this.e4 = new ObservedPropertySimplePU(false, this, "switchState");
         this.f4 = new ObservedPropertySimplePU(false, this, "radioState");
@@ -519,7 +560,7 @@ class b3 extends ViewPU {
         this.declareWatch("checkBox", this.onPropChange);
         this.declareWatch("radio", this.onPropChange);
         this.declareWatch("image", this.onPropChange);
-        this.declareWatch("symbol", this.onPropChange);
+        this.declareWatch("symbolStyle", this.onPropChange);
         this.declareWatch("text", this.onPropChange);
         this.finalizeConstruction();
     }
@@ -548,8 +589,8 @@ class b3 extends ViewPU {
         if (params.image === undefined) {
             this.b4.set(null);
         }
-        if (params.symbol === undefined) {
-            this.c4.set(null);
+        if (params.symbolStyle === undefined) {
+            this.j5.set(null);
         }
         if (params.text === undefined) {
             this.d4.set(null);
@@ -588,7 +629,7 @@ class b3 extends ViewPU {
         this.z3.reset(params.checkBox);
         this.a4.reset(params.radio);
         this.b4.reset(params.image);
-        this.c4.reset(params.symbol);
+        this.j5.reset(params.symbolStyle);
         this.d4.reset(params.text);
         this.h4.reset(params.rightWidth);
     }
@@ -601,7 +642,7 @@ class b3 extends ViewPU {
         this.z3.purgeDependencyOnElmtId(rmElmtId);
         this.a4.purgeDependencyOnElmtId(rmElmtId);
         this.b4.purgeDependencyOnElmtId(rmElmtId);
-        this.c4.purgeDependencyOnElmtId(rmElmtId);
+        this.j5.purgeDependencyOnElmtId(rmElmtId);
         this.d4.purgeDependencyOnElmtId(rmElmtId);
         this.e4.purgeDependencyOnElmtId(rmElmtId);
         this.f4.purgeDependencyOnElmtId(rmElmtId);
@@ -628,7 +669,7 @@ class b3 extends ViewPU {
         this.z3.aboutToBeDeleted();
         this.a4.aboutToBeDeleted();
         this.b4.aboutToBeDeleted();
-        this.c4.aboutToBeDeleted();
+        this.j5.aboutToBeDeleted();
         this.d4.aboutToBeDeleted();
         this.e4.aboutToBeDeleted();
         this.f4.aboutToBeDeleted();
@@ -696,11 +737,11 @@ class b3 extends ViewPU {
     set image(newValue) {
         this.b4.set(newValue);
     }
-    get symbol() {
-        return this.c4.get();
+    get symbolStyle() {
+        return this.j5.get();
     }
-    set symbol(newValue) {
-        this.c4.set(newValue);
+    set symbolStyle(newValue) {
+        this.j5.set(newValue);
     }
     get text() {
         return this.d4.get();
@@ -804,17 +845,17 @@ class b3 extends ViewPU {
         this.activedColor = theme.colors.interactiveActive;
     }
     onPropChange() {
-        if (this.switch !== null) {
+        if (this.switch != null) {
             this.switchState = this.switch.isCheck;
         }
-        if (this.radio !== null) {
+        if (this.radio != null) {
             this.radioState = this.radio.isCheck;
         }
-        if (this.checkBox !== null) {
+        if (this.checkBox != null) {
             this.checkBoxState = this.checkBox.isCheck;
         }
-        if ((this.button === null && this.image === null && this.symbol === null && this.text !== null) &&
-            ((this.icon !== null) || (this.icon === null && this.arrow !== null))) {
+        if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
+            ((this.icon != null) || (this.icon == null && this.arrow != null))) {
             this.rowSpace = d2;
         }
         else {
@@ -900,12 +941,13 @@ class b3 extends ViewPU {
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (param.icon?.c3) {
+            if (param.icon?.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
-                        SymbolGlyph.attributeModifier.bind(this)(param.icon?.c3);
+                        SymbolGlyph.attributeModifier.bind(this)(param.icon?.symbolStyle);
                         SymbolGlyph.fontSize(e2);
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.focusable(true);
                         SymbolGlyph.draggable(false);
                     }, SymbolGlyph);
@@ -914,13 +956,32 @@ class b3 extends ViewPU {
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create(param.icon?.value);
-                        Image.height(e2);
-                        Image.width(e2);
-                        Image.focusable(true);
-                        Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.draggable(false);
-                    }, Image);
+                        If.create();
+                        if (Util.l5(param.icon?.value)) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    SymbolGlyph.create(param.icon?.value);
+                                    SymbolGlyph.fontSize(e2);
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Image.create(param.icon?.value);
+                                    Image.height(e2);
+                                    Image.width(e2);
+                                    Image.focusable(true);
+                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Image.draggable(false);
+                                }, Image);
+                            });
+                        }
+                    }, If);
+                    If.pop();
                 });
             }
         }, If);
@@ -929,18 +990,38 @@ class b3 extends ViewPU {
     }
     createImage(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create(this.image);
-            Image.height(i2);
-            Image.width(i2);
-            Image.draggable(false);
-            Image.margin({ end: LengthMetrics.vp(g1) });
-        }, Image);
+            If.create();
+            if (Util.l5(ObservedObject.GetRawObject(this.image))) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        SymbolGlyph.create(this.image);
+                        SymbolGlyph.fontSize(i2);
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.draggable(false);
+                        SymbolGlyph.margin({ end: LengthMetrics.vp(g1) });
+                    }, SymbolGlyph);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Image.create(this.image);
+                        Image.height(i2);
+                        Image.width(i2);
+                        Image.draggable(false);
+                        Image.margin({ end: LengthMetrics.vp(g1) });
+                    }, Image);
+                });
+            }
+        }, If);
+        If.pop();
     }
     createSymbol(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
-            SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbol));
+            SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
             SymbolGlyph.fontSize(i2);
+            SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
             SymbolGlyph.draggable(false);
             SymbolGlyph.margin({ end: LengthMetrics.vp(g1) });
         }, SymbolGlyph);
@@ -989,12 +1070,13 @@ class b3 extends ViewPU {
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.arrow?.c3) {
+            if (this.arrow?.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
-                        SymbolGlyph.attributeModifier.bind(this)(this.arrow?.c3);
+                        SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
                         SymbolGlyph.fontSize(g2);
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.focusable(true);
                         SymbolGlyph.draggable(false);
                     }, SymbolGlyph);
@@ -1003,14 +1085,33 @@ class b3 extends ViewPU {
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create(this.arrow?.value);
-                        Image.height(e2);
-                        Image.width(g2);
-                        Image.focusable(true);
-                        Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.draggable(false);
-                        Image.matchTextDirection(true);
-                    }, Image);
+                        If.create();
+                        if (Util.l5(this.arrow?.value)) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    SymbolGlyph.create(this.arrow?.value);
+                                    SymbolGlyph.fontSize(g2);
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Image.create(this.arrow?.value);
+                                    Image.height(e2);
+                                    Image.width(g2);
+                                    Image.focusable(true);
+                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Image.draggable(false);
+                                    Image.matchTextDirection(true);
+                                }, Image);
+                            });
+                        }
+                    }, If);
+                    If.pop();
                 });
             }
         }, If);
@@ -1174,12 +1275,13 @@ class b3 extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.arrow?.c3) {
+                        if (this.arrow?.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.attributeModifier.bind(this)(this.arrow?.c3);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
                                     SymbolGlyph.fontSize(g2);
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.focusable(false);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -1188,14 +1290,33 @@ class b3 extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.arrow?.value);
-                                    Image.height(e2);
-                                    Image.width(g2);
-                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(false);
-                                    Image.draggable(false);
-                                    Image.matchTextDirection(true);
-                                }, Image);
+                                    If.create();
+                                    if (Util.l5(this.arrow?.value)) {
+                                        this.ifElseBranchUpdateFunction(0, () => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                SymbolGlyph.create(this.arrow?.value);
+                                                SymbolGlyph.fontSize(g2);
+                                                SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                                SymbolGlyph.focusable(false);
+                                                SymbolGlyph.draggable(false);
+                                            }, SymbolGlyph);
+                                        });
+                                    }
+                                    else {
+                                        this.ifElseBranchUpdateFunction(1, () => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                Image.create(this.arrow?.value);
+                                                Image.height(e2);
+                                                Image.width(g2);
+                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                Image.focusable(false);
+                                                Image.draggable(false);
+                                                Image.matchTextDirection(true);
+                                            }, Image);
+                                        });
+                                    }
+                                }, If);
+                                If.pop();
                             });
                         }
                     }, If);
@@ -1225,12 +1346,13 @@ class b3 extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.arrow?.c3) {
+                        if (this.arrow?.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.attributeModifier.bind(this)(this.arrow?.c3);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
                                     SymbolGlyph.fontSize(g2);
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.focusable(false);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -1239,14 +1361,33 @@ class b3 extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.arrow?.value);
-                                    Image.height(e2);
-                                    Image.width(g2);
-                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(false);
-                                    Image.draggable(false);
-                                    Image.matchTextDirection(true);
-                                }, Image);
+                                    If.create();
+                                    if (Util.l5(this.arrow?.value)) {
+                                        this.ifElseBranchUpdateFunction(0, () => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                SymbolGlyph.create(this.arrow?.value);
+                                                SymbolGlyph.fontSize(g2);
+                                                SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                                SymbolGlyph.focusable(false);
+                                                SymbolGlyph.draggable(false);
+                                            }, SymbolGlyph);
+                                        });
+                                    }
+                                    else {
+                                        this.ifElseBranchUpdateFunction(1, () => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                Image.create(this.arrow?.value);
+                                                Image.height(e2);
+                                                Image.width(g2);
+                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                Image.focusable(false);
+                                                Image.draggable(false);
+                                                Image.matchTextDirection(true);
+                                            }, Image);
+                                        });
+                                    }
+                                }, If);
+                                If.pop();
                             });
                         }
                     }, If);
@@ -1276,63 +1417,63 @@ class b3 extends ViewPU {
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.button !== null) {
+            if (this.button != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.createButton.bind(this)();
                 });
             }
-            else if (this.symbol !== null) {
+            else if (this.symbolStyle != null) {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.createSymbol.bind(this)();
                 });
             }
-            else if (this.image !== null) {
+            else if (this.image != null) {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.createImage.bind(this)();
                 });
             }
-            else if (this.icon !== null && this.text !== null) {
+            else if (this.icon != null && this.text != null) {
                 this.ifElseBranchUpdateFunction(3, () => {
                     this.createText.bind(this)();
                     this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
                 });
             }
-            else if (this.arrow !== null && this.text === null) {
+            else if (this.arrow != null && this.text == null) {
                 this.ifElseBranchUpdateFunction(4, () => {
                     this.createArrow.bind(this)();
                 });
             }
-            else if (this.arrow !== null && this.text !== null) {
+            else if (this.arrow != null && this.text != null) {
                 this.ifElseBranchUpdateFunction(5, () => {
                     this.createTextArrow.bind(this)();
                 });
             }
-            else if (this.text !== null) {
+            else if (this.text != null) {
                 this.ifElseBranchUpdateFunction(6, () => {
                     this.createText.bind(this)();
                 });
             }
-            else if (this.radio !== null) {
+            else if (this.radio != null) {
                 this.ifElseBranchUpdateFunction(7, () => {
                     this.createRadio.bind(this)();
                 });
             }
-            else if (this.checkBox !== null) {
+            else if (this.checkBox != null) {
                 this.ifElseBranchUpdateFunction(8, () => {
                     this.createCheckBox.bind(this)();
                 });
             }
-            else if (this.switch !== null) {
+            else if (this.switch != null) {
                 this.ifElseBranchUpdateFunction(9, () => {
                     this.createSwitch.bind(this)();
                 });
             }
-            else if (this.icon !== null) {
+            else if (this.icon != null) {
                 this.ifElseBranchUpdateFunction(10, () => {
                     this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.subIcon !== null) {
+                        if (this.subIcon != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__subIcon"] ? this["__subIcon"] : this["subIcon"]) }));
                             });
@@ -1642,7 +1783,7 @@ export class ComposeListItem extends ViewPU {
         this.contentItemDirection = this.decideContentItemDirection();
         if (this.contentItem === undefined) {
             if (this.operateItem?.image !== undefined ||
-                this.operateItem?.symbol !== undefined ||
+                this.operateItem?.symbolStyle !== undefined ||
                 this.operateItem?.icon !== undefined ||
                 this.operateItem?.subIcon !== undefined) {
                 this.itemHeight = i2 + o1;
@@ -1714,7 +1855,7 @@ export class ComposeListItem extends ViewPU {
             }
             return q2;
         }
-        else if (this.operateItem?.symbol) {
+        else if (this.operateItem?.symbolStyle) {
             return o2;
         }
         else if (this.operateItem?.image) {
@@ -1739,7 +1880,7 @@ export class ComposeListItem extends ViewPU {
         if (this.operateItem?.button) {
             return FlexDirection.Column;
         }
-        else if (this.operateItem?.symbol) {
+        else if (this.operateItem?.symbolStyle) {
             return FlexDirection.Row;
         }
         else if (this.operateItem?.image) {
@@ -1883,7 +2024,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new z2(this, {}, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 972, d3: 11 });
+                                let componentCall = new z2(this, {}, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 1047, d3: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -1912,7 +2053,7 @@ export class ComposeListItem extends ViewPU {
                             if (isInitialRender) {
                                 let componentCall = new z2(this, {
                                     icon: this.contentItem?.icon,
-                                    symbolIcon: this.contentItem?.symbolIcon,
+                                    symbolStyle: this.contentItem?.symbolStyle,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
@@ -1920,12 +2061,12 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 975, d3: 11 });
+                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 1050, d3: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
                                         icon: this.contentItem?.icon,
-                                        symbolIcon: this.contentItem?.symbolIcon,
+                                        symbolStyle: this.contentItem?.symbolStyle,
                                         iconStyle: this.contentItem?.iconStyle,
                                         primaryText: this.contentItem?.primaryText,
                                         secondaryText: this.contentItem?.secondaryText,
@@ -1940,7 +2081,7 @@ export class ComposeListItem extends ViewPU {
                             else {
                                 this.updateStateVarsOfChildByElmtId(elmtId, {
                                     icon: this.contentItem?.icon,
-                                    symbolIcon: this.contentItem?.symbolIcon,
+                                    symbolStyle: this.contentItem?.symbolStyle,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
@@ -1986,7 +2127,7 @@ export class ComposeListItem extends ViewPU {
                                     checkBox: this.operateItem?.checkbox,
                                     radio: this.operateItem?.radio,
                                     image: this.operateItem?.image,
-                                    symbol: this.operateItem?.symbol,
+                                    symbolStyle: this.operateItem?.symbolStyle,
                                     text: this.operateItem?.text,
                                     arrow: this.operateItem?.arrow,
                                     parentCanFocus: this.x4,
@@ -1997,7 +2138,7 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.z4,
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.f5,
-                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 988, d3: 11 });
+                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 1063, d3: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2008,7 +2149,7 @@ export class ComposeListItem extends ViewPU {
                                         checkBox: this.operateItem?.checkbox,
                                         radio: this.operateItem?.radio,
                                         image: this.operateItem?.image,
-                                        symbol: this.operateItem?.symbol,
+                                        symbolStyle: this.operateItem?.symbolStyle,
                                         text: this.operateItem?.text,
                                         arrow: this.operateItem?.arrow,
                                         parentCanFocus: this.canFocus,
@@ -2032,7 +2173,7 @@ export class ComposeListItem extends ViewPU {
                                     checkBox: this.operateItem?.checkbox,
                                     radio: this.operateItem?.radio,
                                     image: this.operateItem?.image,
-                                    symbol: this.operateItem?.symbol,
+                                    symbolStyle: this.operateItem?.symbolStyle,
                                     text: this.operateItem?.text,
                                     arrow: this.operateItem?.arrow,
                                     rightWidth: this.calculatedRightWidth()
