@@ -3154,7 +3154,18 @@ void RichEditorPattern::UpdateModifierCaretOffsetAndHeight()
 
 void RichEditorPattern::NotifyCaretChange()
 {
-    IF_TRUE(!IsSelected(), TriggerAvoidOnCaretChange());
+    CHECK_NULL_VOID(IsSelected());
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->TriggerAvoidOnCaretChange();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorNotifyCaretChange");
 }
 
 TextAlign RichEditorPattern::GetTextAlignByDirection()
