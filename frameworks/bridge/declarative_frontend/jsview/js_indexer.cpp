@@ -111,6 +111,8 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         selectedVal = selectedProperty->ToNumber<int32_t>();
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
         JSIndexerTheme::ApplyTheme();
+        JSRef<JSVal> changeEventVal = paramObj->GetProperty("$selected");
+        ParseIndexerSelectedObject(args, changeEventVal);
     } else if (length > 0 && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
         auto selectedValueProperty = selectedObj->GetProperty("value");
@@ -349,15 +351,23 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
 
 void JSIndexer::SetSelected(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1) {
-        int32_t selected = 0;
-        if (ParseJsInteger<int32_t>(args[0], selected)) {
-            IndexerModel::GetInstance()->SetSelected(selected);
-        }
-        if (args.Length() > 1 && args[1]->IsFunction()) {
-            ParseIndexerSelectedObject(args, args[1], true);
-        }
+    if (args.Length() < 1) {
+        return;
     }
+    int32_t selected = 0;
+    auto selectedVal = args[0];
+    JSRef<JSVal> changeEventVal;
+    if (selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (args.Length() > 1) {
+        changeEventVal = args[1];
+    }
+    if (ParseJsInteger<int32_t>(selectedVal, selected)) {
+        IndexerModel::GetInstance()->SetSelected(selected);
+    }
+    ParseIndexerSelectedObject(args, changeEventVal, true);
 }
 
 void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
