@@ -48,6 +48,7 @@ public:
         copy->propMaxNavBarWidth_ = CloneMaxNavBarWidth();
         copy->propMinContentWidth_ = CloneMinContentWidth();
         copy->propNavBarPosition_ = CloneNavBarPosition();
+        copy->propEnableModeChangeAnimation_ = CloneEnableModeChangeAnimation();
         copy->propHideNavBar_ = CloneHideNavBar();
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
@@ -65,6 +66,7 @@ public:
         ResetMaxNavBarWidth();
         ResetMinContentWidth();
         ResetNavBarPosition();
+        ResetEnableModeChangeAnimation();
         ResetHideNavBar();
         ResetNoPixMap();
         ResetImageSource();
@@ -99,6 +101,7 @@ public:
         if (HasImageSource()) {
             json->PutExtAttr("backButtonIcon", GetImageSourceValue().GetSrc().c_str(), filter);
         }
+        json->PutExtAttr("enableModeChangeAnimation", GetEnableModeChangeAnimation().value_or(true), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
@@ -108,6 +111,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxNavBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarPosition, NavBarPosition, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableModeChangeAnimation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideNavBar, bool, PROPERTY_UPDATE_MEASURE);
     // back button icon
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);

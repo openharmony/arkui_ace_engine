@@ -3432,6 +3432,10 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetMinContentWidth));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinContentWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetMinContentWidth));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableModeChangeAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetEnableModeChangeAnimation));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableModeChangeAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetEnableModeChangeAnimation));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideTitleBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetHideTitleBar));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideTitleBar"),
