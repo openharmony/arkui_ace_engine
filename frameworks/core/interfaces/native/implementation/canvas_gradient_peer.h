@@ -30,5 +30,6 @@ public:
 
 private:
     std::shared_ptr<OHOS::Ace::Gradient> gradient_ = nullptr;
+    bool isColorStopValid_ = false;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
