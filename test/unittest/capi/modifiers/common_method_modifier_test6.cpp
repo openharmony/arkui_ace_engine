@@ -31,18 +31,24 @@ namespace {
     const auto ATTRIBUTE_CLICK_EFFECT_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_ALLOW_DROP_NAME = "allowDrop";
     const auto ATTRIBUTE_ALLOW_DROP_DEFAULT_VALUE = "";
-    // const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
-    // const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "";
-    // const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
-    // const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = "";
-    // const auto ATTRIBUTE_MOTION_PATH_NAME = "motionPath";
-    // const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = "";
-    // const auto ATTRIBUTE_KEY_NAME = "id";
-    // const auto ATTRIBUTE_KEY_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
+    const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
+    const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_MOTION_PATH_NAME = "motionPath";
+    const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_KEY_NAME = "id";
+    const auto ATTRIBUTE_KEY_DEFAULT_VALUE = "";
 }
 struct ClickEffect {
     ClickEffectLevel level;
     float scale = 0.0f;
+};
+struct MotionPathOptionTest {
+    std::string path = "";
+    std::optional<float> from = 0.0f;
+    std::optional<float> to = 1.0f;
+    std::optional<bool> rotatable = false;
 };
 namespace Converter {
     template<>
@@ -80,6 +86,16 @@ namespace Converter {
     {
         return {.level = Converter::ArkValue<Ark_ClickEffectLevel>(value.level),
             .scale = Converter::ArkValue<Opt_Number>(value.scale)};
+    }
+    template<>
+    Ark_MotionPathOptions ArkValue(const MotionPathOptionTest& src)
+    {
+        Ark_MotionPathOptions dst;
+        dst.path = ArkValue<Ark_String>(src.path);
+        dst.from = ArkValue<Opt_Number>(src.from);
+        dst.to = ArkValue<Opt_Number>(src.to);
+        dst.rotatable = ArkValue<Opt_Boolean>(src.rotatable);
+        return dst;
     }
 }
 class CommonMethodModifierTest6 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -182,15 +198,15 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestDefaultValues, TestSize.Le
 HWTEST_F(CommonMethodModifierTest6, setClickEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setClickEffect, nullptr);
-    using OneTestStep = std::tuple<Ark_Union_ClickEffect_Undefined, std::string>;
+    using OneTestStep = std::tuple<Ark_Union_ClickEffect_Null, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Undefined, Ark_ClickEffect>(
+        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
             Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::LIGHT, .scale = 0.5f}))),
             "{\"level\":\"0\",\"scale\":\"0.500000\"}"},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Undefined, Ark_ClickEffect>(
+        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
             Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::MIDDLE, .scale = 1.5f}))),
             "{\"level\":\"1\",\"scale\":\"1.500000\"}"},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Undefined, Ark_ClickEffect>(
+        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
             Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::HEAVY, .scale = 2.5f}))),
             "{\"level\":\"2\",\"scale\":\"2.500000\"}"},
     };
@@ -210,13 +226,13 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestValidValues, TestSize.Leve
 HWTEST_F(CommonMethodModifierTest6, setClickEffectTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setClickEffect, nullptr);
-    using OneTestStep = std::tuple<Ark_Union_ClickEffect_Undefined, std::string>;
+    using OneTestStep = std::tuple<Ark_Union_ClickEffect_Null, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Undefined, Ark_Undefined>(Ark_Undefined()), ""},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Undefined, Ark_ClickEffect>(
+        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_Undefined>(Ark_Undefined()), ""},
+        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
             Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::UNDEFINED, .scale = 1.5f}))),
             "{\"level\":\"0\",\"scale\":\"1.500000\"}"},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Undefined, Ark_ClickEffect>(
+        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
             Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::HEAVY, .scale = -2.5f}))),
             "{\"level\":\"2\",\"scale\":\"-2.500000\"}"},
     };
@@ -264,4 +280,173 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setAllowDropTestInvalidValues, Test
 {
     LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined.CustomObject is not supported.\n");
 }
+
+//////////// Draggable
+/*
+ * @tc.name: setDraggableTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setDraggableTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_DRAGGABLE_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setDraggableTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setDraggableTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDraggable, nullptr);
+    using OneTestStep = std::tuple<Ark_Boolean, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_Boolean>(true), "true"},
+        {Converter::ArkValue<Ark_Boolean>(false), "false"},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setDraggable(node_, inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_DRAGGABLE_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+//////////// DragPreview
+/*
+ * @tc.name: setDragPreviewTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setDragPreviewTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_DRAG_PREVIEW_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setDragPreviewTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setDragPreviewTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDragPreview, nullptr);
+    LOGE("ARKOALA: CommonMethod::setsetDragPreview: Ark_Union_CustomBuilder_DragItemInfo_String.DragDropInfo.pixelMap is not supported.\n");
+}
+
+//////////// MotionPath
+/*
+ * @tc.name: setMotionPathTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setMotionPathTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_MOTION_PATH_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setMotionPathTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMotionPath, nullptr);
+    using OneTestStep = std::tuple<Ark_MotionPathOptions, std::string>;
+    MotionPathOptionTest defaultValue;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_MotionPathOptions>(defaultValue), ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE},
+        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest({.path = "path", .from = 1.0f, .to = 2.0f, .rotatable = true})),
+            ""},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMotionPath(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MOTION_PATH_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setMotionPathTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMotionPath, nullptr);
+    using OneTestStep = std::tuple<Ark_MotionPathOptions, std::string>;
+    MotionPathOptionTest defaultValue;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest({.path = "path", .from = 2.0f, .to = 1.0f, .rotatable = true})),
+            ""},
+        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest({.path = "path", .from = -2.0f, .to = -1.0f, .rotatable = true})),
+            ""},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMotionPath(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MOTION_PATH_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+//////////// Key
+/*
+ * @tc.name: setKeyTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setKeyTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_KEY_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_KEY_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setKeyTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setKeyTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setKey, nullptr);
+    using OneTestStep = std::tuple<Ark_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_String>("1"), "1"},
+        {Converter::ArkValue<Ark_String>("2"), "2"},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setKey(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_KEY_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setKeyTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setKeyTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setKey, nullptr);
+    using OneTestStep = std::tuple<Ark_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_String>(""), ATTRIBUTE_KEY_DEFAULT_VALUE},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setKey(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_KEY_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+// GENERATED_ArkUICommonMethodModifier
 }

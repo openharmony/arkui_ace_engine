@@ -3392,9 +3392,14 @@ void ViewAbstract::SetBloom(FrameNode* frameNode, const float value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, value, frameNode);
 }
 
-void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath)
+void ViewAbstract::SetMotionPath(FrameNode* frameNode, const std::optional<MotionPathOption>& motionPath)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath, frameNode);
+    if (motionPath.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, MotionPath, frameNode);
+    }
 }
 
 void ViewAbstract::SetFocusOnTouch(FrameNode* frameNode, bool isSet)
@@ -3734,15 +3739,16 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::optional<std::s
 
 }
 
-void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
+void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::optional<std::string>& inspectorId)
 {
-    if (frameNode) {
-        if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
-            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
-                frameNode->GetInspectorIdValue(), frameNode->GetId());
-        }
-        frameNode->UpdateInspectorId(inspectorId);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_EQUAL_VOID(inspectorId.has_value(), false);
+    CHECK_EQUAL_VOID(inspectorId.value().empty(), true);
+    if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId.value()) {
+        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+            frameNode->GetInspectorIdValue(), frameNode->GetId());
     }
+    frameNode->UpdateInspectorId(inspectorId.value());
 }
 
 void ViewAbstract::SetRestoreId(FrameNode* frameNode, int32_t restoreId)
@@ -3846,10 +3852,16 @@ void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreview
     frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
-void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
+void ViewAbstract::SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& dragDropInfo)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreview(dragDropInfo);
+    if (dragDropInfo.has_value()) {
+        frameNode->SetDragPreview(dragDropInfo.value());
+    } else {
+        // Reset
+        NG::DragDropInfo dragPreviewInfo;
+        frameNode->SetDragPreview(dragPreviewInfo);
+    }
 }
 
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
@@ -3969,19 +3981,20 @@ void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEven
     gestureHub->SetMonopolizeEvents(monopolizeEvents);
 }
 
-void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
+void ViewAbstract::SetDraggable(FrameNode* frameNode, const std::optional<bool>& draggable)
 {
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (draggable) {
+    bool vDraggable = draggable.has_value() && draggable.value();
+    if (vDraggable) {
         if (!frameNode->IsDraggable()) {
             gestureHub->InitDragDropEvent();
         }
     } else {
         gestureHub->RemoveDragEvent();
     }
-    frameNode->SetCustomerDraggable(draggable);
+    frameNode->SetCustomerDraggable(vDraggable);
 }
 
 void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)

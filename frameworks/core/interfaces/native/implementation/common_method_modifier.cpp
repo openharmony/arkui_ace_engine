@@ -1152,6 +1152,33 @@ template<>
         default: dst.reset(); // Handle unexpected values by resetting the optional
     }
 }
+<<<<<<< HEAD
+=======
+template<>
+void AssignCast(std::optional<ClickEffectLevel>& dst, const Ark_ClickEffectLevel& src)
+{
+    auto arkVal = Convert<ClickEffectLevel>(src);
+    dst = arkVal == ClickEffectLevel::UNDEFINED ? std::nullopt :
+        std::optional<ClickEffectLevel>(arkVal);
+}
+template<>
+void AssignCast(std::optional<DragDropInfo>& dst, const Callback_Any& src)
+{
+    LOGE("ARKOALA: Convert to [DragDropInfo] from [Callback_Any] is not supported\n");
+}
+template<>
+void AssignCast(std::optional<DragDropInfo>& dst, const Ark_DragItemInfo& src)
+{
+    LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
+}
+template<>
+void AssignCast(std::optional<DragDropInfo>& dst, const Ark_String& src)
+{
+    auto vDst = DragDropInfo();
+    vDst.extraInfo = Convert<std::string>(src);
+    dst = vDst;
+}
+>>>>>>> cb43f4d0ca (Intermediate commit)
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -2656,7 +2683,9 @@ void ClickEffectImpl(Ark_NativePointer node,
     }
     const std::optional<ClickEffectLevel>& level = Converter::OptConvert<ClickEffectLevel>(convValue.value().level);
     const std::optional<float> scaleValue = Converter::OptConvert<float>(convValue.value().scale);
-    ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);}
+    ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);
+}
+
 void OnDragStartImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
 {
@@ -2727,16 +2756,15 @@ void DraggableImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetDraggable(frameNode, convValue);
+    ViewAbstract::SetDraggable(frameNode, convValue);
 }
 void DragPreviewImpl(Ark_NativePointer node,
                      const Ark_Union_CustomBuilder_DragItemInfo_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetDragPreview(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<DragDropInfo>(*value) : std::nullopt;
+    ViewAbstract::SetDragPreview(frameNode, convValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
@@ -2808,9 +2836,8 @@ void MotionPathImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMotionPath(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<MotionPathOption>(*value) : std::nullopt;
+    ViewAbstract::SetMotionPath(frameNode, convValue);
 }
 void ShadowImpl(Ark_NativePointer node,
                 const Ark_Union_ShadowOptions_ShadowStyle* value)
@@ -2906,9 +2933,8 @@ void KeyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetKey(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<std::string>(*value) : std::nullopt;
+    ViewAbstract::SetInspectorId(frameNode, convValue);
 }
 void IdImpl(Ark_NativePointer node,
             const Ark_String* value)
