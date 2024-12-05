@@ -29,8 +29,8 @@ namespace {
     const auto ATTRIBUTE_TRANSFORM_DEFAULT_VALUE = "{}";
     const auto ATTRIBUTE_CLICK_EFFECT_NAME = "clickEffect";
     const auto ATTRIBUTE_CLICK_EFFECT_DEFAULT_VALUE = "";
-    // const auto ATTRIBUTE_ALLOW_DROP_NAME = "allowDrop";
-    // const auto ATTRIBUTE_ALLOW_DROP_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_ALLOW_DROP_NAME = "allowDrop";
+    const auto ATTRIBUTE_ALLOW_DROP_DEFAULT_VALUE = "";
     // const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
     // const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "";
     // const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
@@ -231,5 +231,37 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestInvalidValues, TestSize.Le
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CLICK_EFFECT_NAME);
     auto expectedValue = "";
     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+}
+
+//////////// AllowDrop
+/*
+ * @tc.name: setAllowDropTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, setAllowDropTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_ALLOW_DROP_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_ALLOW_DROP_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setAllowDropTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setAllowDropTestValidValues, TestSize.Level1)
+{
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined.CustomObject is not supported.\n");
+}
+
+/*
+ * @tc.name: setAllowDropTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setAllowDropTestInvalidValues, TestSize.Level1)
+{
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined.CustomObject is not supported.\n");
 }
 }

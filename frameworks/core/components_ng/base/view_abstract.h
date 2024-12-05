@@ -589,7 +589,7 @@ public:
     static void SetGrid(FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
-    static void SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop);
+    static void SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop);
     static void SetInspectorId(FrameNode* frameNode, const std::string& inspectorId);
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);

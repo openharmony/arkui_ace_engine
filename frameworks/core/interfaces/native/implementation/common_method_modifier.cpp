@@ -2719,6 +2719,7 @@ void AllowDropImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAllowDrop(frameNode, convValue);
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined.CustomObject is not supported.\n");
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
