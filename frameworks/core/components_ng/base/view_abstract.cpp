@@ -1778,9 +1778,13 @@ void ViewAbstract::SetPivot(const DimensionOffset& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
 }
 
-void ViewAbstract::SetPivot(FrameNode* frameNode, const DimensionOffset& value)
+void ViewAbstract::SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, value, frameNode);
+    if (optValue.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, TransformCenter, frameNode);
+    }
 }
 
 void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
@@ -1806,7 +1810,25 @@ void ViewAbstract::SetRotate(const NG::Vector5F& value)
 
 void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, value, frameNode);
+}
+
+void  ViewAbstract::SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::Vector5F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    int32_t indX = 0;
+    int32_t indY = 1;
+    int32_t indZ = 2;
+    int32_t indA = 3;
+    int32_t indP = 4;
+    rotateVec.x = (value.size() > indX && value[indX].has_value()) ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
+    rotateVec.y = (value.size() > indY && value[indY].has_value()) ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
+    rotateVec.z = (value.size() > indZ && value[indZ].has_value()) ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
+    rotateVec.w = (value.size() > indA && value[indA].has_value()) ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
+    rotateVec.v = (value.size() > indP && value[indP].has_value()) ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
 }
 
 void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)

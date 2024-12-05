@@ -531,12 +531,13 @@ public:
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
-    static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
+    static void SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& value);
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
         bool followWithoutTransition, bool doRegisterSharedTransition);
     static const std::string GetGeometryTransition(FrameNode* frameNode,
         bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
+    static void SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, const std::optional<PixStretchEffectOption>& option);

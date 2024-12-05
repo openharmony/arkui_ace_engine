@@ -130,7 +130,7 @@ OffsetF GridProperty::GetContainerPosition()
 
 void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
+    const char* GRID_SIZE_TYPE[] = { "default", "xs", "sm", "md", "lg" };
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
