@@ -1723,6 +1723,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onDestroy(event: () => void): this;
     enableSecure(value: boolean): this;
     hdrBrightness(value: number): this;
+    enableTransparentLayer(value: boolean): this;
 }
 declare class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
