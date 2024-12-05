@@ -108,6 +108,15 @@ protected:
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
     virtual void OnTextGenstureSelectionEnd() {}
     virtual void DoTextSelectionTouchCancel() {}
+    int32_t GetSelectingFingerId()
+    {
+        return selectingFingerId_;
+    }
+
+    bool IsGestureSelectingText()
+    {
+        return isSelecting_;
+    }
 private:
     void ResetGestureSelection()
     {
@@ -116,6 +125,7 @@ private:
         isStarted_ = false;
         startOffset_.Reset();
         isSelecting_ = false;
+        selectingFingerId_ = -1;
     }
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;
@@ -124,6 +134,7 @@ private:
     bool isSelecting_ = false;
     Dimension minMoveDistance_ = 5.0_vp;
     Offset startOffset_;
+    int32_t selectingFingerId_ = -1;
 };
 
 class TextBase : public SelectOverlayClient {

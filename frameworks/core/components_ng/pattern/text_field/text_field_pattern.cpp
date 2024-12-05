@@ -9163,11 +9163,12 @@ std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(
     if (touchInfos.empty()) {
         return std::nullopt;
     }
-    if (!moveCaretState_.isMoveCaret) {
+    if (!moveCaretState_.isMoveCaret && !IsGestureSelectingText()) {
         return touchInfos.front();
     }
+    auto fingerId = moveCaretState_.isMoveCaret ? moveCaretState_.touchFingerId : GetSelectingFingerId();
     for (auto touchInfo : touchInfos) {
-        if (touchInfo.GetFingerId() == moveCaretState_.touchFingerId) {
+        if (touchInfo.GetFingerId() == fingerId) {
             return touchInfo;
         }
     }
