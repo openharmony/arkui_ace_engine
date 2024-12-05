@@ -224,7 +224,7 @@ public:
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
     static void SetSystemBarEffect(bool systemBarEffect);
-    static void SetSystemBarEffect(FrameNode *frameNode, bool enable);
+    static void SetSystemBarEffect(FrameNode *frameNode, const std::optional<bool>& enable);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
@@ -521,7 +521,7 @@ public:
     static void SetHasBorderImageRepeat(FrameNode* frameNode, bool tag);
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
-    static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
+    static void SetLinearGradientBlur(FrameNode* frameNode, const std::optional<NG::LinearGradientBlurPara>& blurPara);
     static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
     static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
@@ -615,8 +615,8 @@ public:
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, const std::optional<bool>& useShadowBatching);
-    static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
-    static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode);
+    static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);

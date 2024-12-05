@@ -2525,9 +2525,14 @@ void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
     ACE_UPDATE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect);
 }
 
-void ViewAbstract::SetSystemBarEffect(FrameNode *frameNode, bool enable)
+void ViewAbstract::SetSystemBarEffect(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, enable, frameNode);
+    if (enable.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, enable.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, SystemBarEffect, frameNode);
+    }
 }
 
 void ViewAbstract::SetHueRotate(float hueRotate)
@@ -3166,9 +3171,15 @@ void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleO
     }
 }
 
-void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode, const NG::LinearGradientBlurPara& blurPara)
+void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode,
+                                         const std::optional<NG::LinearGradientBlurPara>& blurPara)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara, frameNode);
+    if (blurPara.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, LinearGradientBlur, frameNode);
+    }
 }
 
 void ViewAbstract::SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset)
@@ -3920,14 +3931,24 @@ void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, const std::optiona
     }
 }
 
-void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
+void ViewAbstract::SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode, frameNode);
+    if (blendMode.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendMode, frameNode);
+    }
 }
 
-void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
+void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType, frameNode);
+    if (blendApplyType) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendApplyType, frameNode);
+    }
 }
 
 void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
