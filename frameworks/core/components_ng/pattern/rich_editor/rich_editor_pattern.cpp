@@ -6760,6 +6760,7 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
 
 void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 {
+    CHECK_NULL_VOID(!IsPreviewTextInputting());
     if (info.GetAction() == MouseAction::MOVE) {
         HandleMouseLeftButtonMove(info);
     } else if (info.GetAction() == MouseAction::PRESS) {
@@ -6771,6 +6772,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 
 void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
 {
+    CHECK_NULL_VOID(!IsPreviewTextInputting());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsFocusable()) {
