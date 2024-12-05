@@ -26,7 +26,8 @@ class MockTaskExecutor : public TaskExecutor {
 public:
     MockTaskExecutor() = default;
     MockTaskExecutor(bool delayRun): delayRun_(delayRun) {}
-    
+    MOCK_CONST_METHOD4(PostTask, bool(Task&&, TaskType, const std::string&, PriorityType));
+
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         PriorityType priorityType = PriorityType::LOW) const override
     {
