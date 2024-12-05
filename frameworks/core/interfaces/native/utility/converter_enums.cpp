@@ -1274,7 +1274,7 @@ void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
         case ARK_BLEND_MODE_SATURATION: dst = BlendMode::SATURATION; break;
         case ARK_BLEND_MODE_COLOR: dst = BlendMode::COLOR; break;
         case ARK_BLEND_MODE_LUMINOSITY: dst = BlendMode::LUMINOSITY; break;
-        default: dst.reset(); // Handle unexpected values by resetting the optional
+        default: LOGE("Unknown transition Ark_BlendMode type: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

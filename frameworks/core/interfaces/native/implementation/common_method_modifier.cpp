@@ -1118,12 +1118,7 @@ template<>
 GradientDirection Convert(const Ark_GradientDirection& value)
 {
     auto optVal = OptConvert<GradientDirection>(value);
-    if (optVal.has_value()) {
-        auto result = optVal.value();
-        return result;
-    } else {
-        return GradientDirection::NONE;
-    }
+    return optVal.has_value() ? optVal.value() : GradientDirection::NONE;
 }
 template<>
 std::pair<float, float> Convert(const Ark_FractionStop& value)
