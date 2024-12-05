@@ -2153,4 +2153,66 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
     // below cache
     EXPECT_FALSE(IsExist(7));
 }
+
+/**
+ * @tc.name: ListAddDelChildTest001
+ * @tc.desc: Test list del child in snap end mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(6);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to last item.
+     * @tc.expected: current offset is 200
+     */
+    EXPECT_TRUE(ScrollToIndex(5, false, ScrollAlign::END, 200.f));
+
+    /**
+     * @tc.steps: step3. Delete last item.
+     * @tc.expected: current offset is 100
+     */
+    frameNode_->RemoveChildAtIndex(5);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 100.f);
+}
+
+/**
+ * @tc.name: ListAddDelChildTest002
+ * @tc.desc: Test list del child in snap end mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(9);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to last item.
+     * @tc.expected: current offset is 500
+     */
+    EXPECT_TRUE(ScrollToIndex(5, false, ScrollAlign::START, 500.f));
+
+    /**
+     * @tc.steps: step3. Delete last 4 item.
+     * @tc.expected: current offset is 100
+     */
+    for (int32_t i = 0; i < 4; i++) {
+        frameNode_->RemoveChildAtIndex(8 - i);
+    }
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 100.f);
+}
 } // namespace OHOS::Ace::NG
