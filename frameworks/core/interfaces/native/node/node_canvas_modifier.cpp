@@ -26,7 +26,7 @@ void SetCanvasOnReady(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.componentAsyncEvent.subKind = ON_CANVAS_READY;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     CanvasModelNG::SetOnReady(frameNode, std::move(onChange));
 }

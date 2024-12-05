@@ -380,7 +380,7 @@ void SetCalendarPickerOnChange(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[NUM_0].u32 = selectedDate.year;
         event.componentAsyncEvent.data[NUM_1].u32 = selectedDate.month;
         event.componentAsyncEvent.data[NUM_2].u32 = selectedDate.day;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(onEvent));
 }

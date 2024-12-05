@@ -408,7 +408,7 @@ void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam)
                 event.componentAsyncEvent.data[1].i32 = minute->GetInt();
             }
         }
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TimePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }

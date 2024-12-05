@@ -1952,7 +1952,7 @@ void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_CHANGE;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
 }
@@ -1967,7 +1967,7 @@ void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXT_INPUT_SUBMIT;
         event.componentAsyncEvent.data[0].i32 = value;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
@@ -1983,7 +1983,7 @@ void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_CUT;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -1999,7 +1999,7 @@ void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_PASTE;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
@@ -2015,7 +2015,7 @@ void SetOnTextInputSelectionChange(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
 }
@@ -2030,7 +2030,7 @@ void SetOnTextInputEditChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXT_INPUT_EDIT_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(isEditing);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
 }
@@ -2050,7 +2050,7 @@ void SetOnTextInputContentSizeChange(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 = NearEqual(density, 0.0) ? 0.0f : width / density;
         //1 height
         event.componentAsyncEvent.data[1].f32 = NearEqual(density, 0.0) ? 0.0f : height / density;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnContentSizeChange(frameNode, std::move(onChange));
 }
@@ -2066,7 +2066,7 @@ void SetOnTextInputInputFilterError(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_INPUT_FILTER_ERROR;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetInputFilterError(frameNode, std::move(onInputFilterError));
 }
@@ -2082,7 +2082,7 @@ void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_TEXT_INPUT_CONTENT_SCROLL;
         event.componentAsyncEvent.data[0].f32 = totalOffsetX;
         event.componentAsyncEvent.data[1].f32 = totalOffsetY;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
 }
@@ -2101,7 +2101,7 @@ void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam)
         event.mixedEvent.numberDataLength = 1;
         event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(insertValueUtf8.c_str());
         event.mixedEvent.stringPtrDataLength = 1;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         return event.mixedEvent.numberReturnData[0].i32;
     };
     TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
@@ -2121,7 +2121,7 @@ void SetTextInputOnDidInsert(ArkUINodeHandle node, void* extraParam)
         event.mixedEvent.numberDataLength = 1;
         event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(insertValueUtf8.c_str());
         event.mixedEvent.stringPtrDataLength = 1;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
@@ -2141,7 +2141,7 @@ void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam)
         event.mixedEvent.numberDataLength = 2;
         event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(deleteValueUtf8.c_str());
         event.mixedEvent.stringPtrDataLength = 1;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         return event.mixedEvent.numberReturnData[0].i32;
     };
     TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
@@ -2162,7 +2162,7 @@ void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam)
         event.mixedEvent.numberDataLength = 2;
         event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(deleteValueUtf8.c_str());
         event.mixedEvent.stringPtrDataLength = 1;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
