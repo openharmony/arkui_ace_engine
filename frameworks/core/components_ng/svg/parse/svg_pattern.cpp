@@ -31,7 +31,7 @@ void SvgPattern::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, c
 {
     auto patternUnits = patternAttr_.patternUnits;
 
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         auto scaleX = viewPort.Width() / patternAttr_.width.ConvertToPx();
         auto scaleY = viewPort.Height() / patternAttr_.height.ConvertToPx();
         canvas.Save();
