@@ -233,13 +233,6 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
 
 bool FocusHub::HandleEvent(const NonPointerEvent& event)
 {
-    if (!IsCurrentFocus()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "node: %{public}s/%{public}d cannot handle key event because is not current focus",
-            GetFrameName().c_str(), GetFrameId());
-        return false;
-    }
-
     FocusEvent focusEvent(event);
     bool shiftTabPressed = focusEvent.intension == FocusIntension::SHIFT_TAB;
     bool leftArrowPressed = focusEvent.intension == FocusIntension::LEFT;
