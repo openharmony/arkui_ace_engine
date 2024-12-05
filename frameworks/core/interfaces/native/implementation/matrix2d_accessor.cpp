@@ -16,7 +16,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "matrix2d_peer.h"
 
