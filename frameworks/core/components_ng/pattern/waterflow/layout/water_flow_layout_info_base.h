@@ -53,6 +53,11 @@ public:
     virtual float CalibrateOffset() = 0;
 
     /**
+     * @return estimated total content height.
+     */
+    virtual float EstimateTotalHeight() const = 0;
+
+    /**
      * @brief Get which cross-axis lane the item is in.
      *
      * @param itemIndex
@@ -89,6 +94,9 @@ public:
      */
     virtual bool ReachEnd(float prevPos, bool firstLayout) const = 0;
 
+    /**
+     * @note should take unconsumed delta into account.
+     */
     virtual bool OutOfBounds() const = 0;
 
     /**
