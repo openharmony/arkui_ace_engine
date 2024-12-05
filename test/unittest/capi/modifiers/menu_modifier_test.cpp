@@ -162,6 +162,11 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
         "900" }
 };
 
+const std::string DIVIDER_DEFAULT = "0.00vp";
+const std::vector<std::pair<Ark_Number, std::string>> DIVIDER_VALUES = {
+    { Converter::ArkValue<Ark_Number>(1), "1.00px" },
+    { Converter::ArkValue<Ark_Number>(-1), DIVIDER_DEFAULT }};
+
 class MenuModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuModifier,
     &GENERATED_ArkUINodeModifiers::getMenuModifier, GENERATED_ARKUI_MENU> {
 public:
@@ -417,11 +422,11 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
 }
 
 /**
- * @tc.name: setMenuItemDividerTest
+ * @tc.name: setMenuItemDividerColorTest
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemDividerTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemDividerColorTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -432,17 +437,10 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTest, TestSize.Level1)
     Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE))
     };
-    auto divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
-    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
-    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00vp");
-    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00vp");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
 
@@ -450,24 +448,145 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTest, TestSize.Level1)
     dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456))
     };
-    divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FF123456");
 
+    // set color as string
     dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
         (Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"))
     };
-    divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#11223344");
+
+    // set color as resource
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
+        dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>(value)};
+        divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+        modifier_->setMenuItemDivider(node_, &divider);
+        fullJson = GetJsonValue(node_);
+        dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+        colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+        EXPECT_EQ(colorCheckValue, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setMenuItemDividerStrokeTest
+ * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModifierTest, setMenuItemDividerStrokeTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    EXPECT_EQ(dividerObject, nullptr);
+
+    // set valid strokeWidth value
+    Ark_LengthMetrics arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[0])
+    };
+    Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, get<1>(DIVIDER_VALUES[0]));
+
+    // set invalid strokeWidth value
+    arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[1])
+    };
+    dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, get<1>(DIVIDER_VALUES[1]));
+}
+
+/**
+ * @tc.name: setMenuItemDividerStartMarginTest
+ * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModifierTest, setMenuItemDividerStartMarginTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    EXPECT_EQ(dividerObject, nullptr);
+
+    // set valid startMargin value
+    Ark_LengthMetrics arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[0])
+    };
+    Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
+
+    // set invalid startMargin value
+    arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[1])
+    };
+    dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, get<1>(DIVIDER_VALUES[1]));
+}
+
+/**
+ * @tc.name: setMenuItemDividerEndMarginTest
+ * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModifierTest, setMenuItemDividerEndMarginTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    EXPECT_EQ(dividerObject, nullptr);
+
+    // set valid endMargin value
+    Ark_LengthMetrics arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[0])
+    };
+    Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
+
+    // set invalid endMargin value
+    arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[1])
+    };
+    dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
+    endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, get<1>(DIVIDER_VALUES[1]));
 }
 
 /**
@@ -493,29 +612,31 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerUndefinedTest, TestSize.Level1)
 
     // set undefined values
     Ark_DividerStyleOptions dividerOptions = {
-        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty())
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty())
     };
-    divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
     strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
+    EXPECT_EQ(strokeWidthCheckValue, DIVIDER_DEFAULT);
     startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00vp");
+    EXPECT_EQ(startMarginCheckValue, DIVIDER_DEFAULT);
     endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00vp");
+    EXPECT_EQ(endMarginCheckValue, DIVIDER_DEFAULT);
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#00000000");
+    EXPECT_EQ(colorCheckValue, COLOR_TRANSPARENT);
 }
 
 /**
- * @tc.name: setMenuItemGroupDividerTest
+ * @tc.name: setMenuItemGroupDividerColorTest
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerColorTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -526,17 +647,10 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTest, TestSize.Level1)
     Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE))
     };
-    auto divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
-    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
-    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00vp");
-    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00vp");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
 
@@ -544,24 +658,145 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTest, TestSize.Level1)
     dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456))
     };
-    divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FF123456");
 
+    // set color as string
     dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
         (Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"))
     };
-    divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#11223344");
+
+    // set color as resource
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
+        dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>(value)};
+        divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+        modifier_->setMenuItemGroupDivider(node_, &divider);
+        fullJson = GetJsonValue(node_);
+        dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+        colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+        EXPECT_EQ(colorCheckValue, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setMenuItemGroupDividerStrokeTest
+ * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStrokeTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    EXPECT_EQ(dividerObject, nullptr);
+
+    // set valid strokeWidth value
+    Ark_LengthMetrics arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[0])
+    };
+    Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemGroupDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, get<1>(DIVIDER_VALUES[0]));
+
+    // set invalid strokeWidth value
+    arkStroke = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[1])
+    };
+    dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemGroupDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, get<1>(DIVIDER_VALUES[1]));
+}
+
+/**
+ * @tc.name: setMenuItemGroupDividerStartMarginTest
+ * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStartMarginTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    EXPECT_EQ(dividerObject, nullptr);
+
+    // set valid startMargin value
+    Ark_LengthMetrics arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[0])
+    };
+    Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemGroupDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
+
+    // set invalid startMargin value
+    arkStartMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[1])
+    };
+    dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemGroupDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, get<1>(DIVIDER_VALUES[1]));
+}
+
+/**
+ * @tc.name: setMenuItemGroupDividerEndMarginTest
+ * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerEndMarginTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    EXPECT_EQ(dividerObject, nullptr);
+
+    // set valid endMargin value
+    Ark_LengthMetrics arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[0])
+    };
+    Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemGroupDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, get<1>(DIVIDER_VALUES[0]));
+
+    // set invalid endMargin value
+    arkEndMargin = {.unit = Converter::ArkValue<Ark_LengthUnit>(ARK_LENGTH_UNIT_PX),
+        .value = get<0>(DIVIDER_VALUES[1])
+    };
+    dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    modifier_->setMenuItemGroupDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
+    endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, get<1>(DIVIDER_VALUES[1]));
 }
 
 /**
@@ -587,21 +822,23 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerUndefinedTest, TestSize.Level1
 
     // set undefined values
     Ark_DividerStyleOptions dividerOptions = {
-        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty())
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty())
     };
-    divider =
-        Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
+    divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
     strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
+    EXPECT_EQ(strokeWidthCheckValue, DIVIDER_DEFAULT);
     startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00vp");
+    EXPECT_EQ(startMarginCheckValue, DIVIDER_DEFAULT);
     endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00vp");
+    EXPECT_EQ(endMarginCheckValue, DIVIDER_DEFAULT);
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#00000000");
+    EXPECT_EQ(colorCheckValue, COLOR_TRANSPARENT);
 }
 
 /**
