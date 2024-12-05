@@ -2309,9 +2309,8 @@ void TransformImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetTransform(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<Matrix4>(*value) : std::nullopt;
+    ViewAbstract::SetTransformMatrix(frameNode, convValue);
 }
 void OnAppearImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -2650,10 +2649,14 @@ void ClickEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetClickEffect(frameNode, convValue);
-}
+    auto convValue = value ? Converter::OptConvert<Ark_ClickEffect>(*value) : std::nullopt;
+    if (!convValue.has_value()) {
+        ViewAbstract::SetClickEffectLevel(frameNode, std::nullopt, std::nullopt);
+        return;
+    }
+    const std::optional<ClickEffectLevel>& level = Converter::OptConvert<ClickEffectLevel>(convValue.value().level);
+    const std::optional<float> scaleValue = Converter::OptConvert<float>(convValue.value().scale);
+    ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);}
 void OnDragStartImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
 {

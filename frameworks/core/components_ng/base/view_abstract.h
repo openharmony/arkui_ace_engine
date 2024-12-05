@@ -494,7 +494,7 @@ public:
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void ResetPosition(FrameNode* frameNode);
-    static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
+    static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
@@ -621,7 +621,8 @@ public:
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
-    static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
+    static void SetClickEffectLevel(FrameNode* frameNode, const std::optional<ClickEffectLevel>& level,
+                                    const std::optional<float>& scaleValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 

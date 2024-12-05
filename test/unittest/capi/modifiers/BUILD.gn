@@ -38,6 +38,7 @@ ace_unittest("capi_all_modifiers_test") {
     "common_method_modifier_test3.cpp",
     "common_method_modifier_test4.cpp",
     "common_method_modifier_test5.cpp",
+    "common_method_modifier_test6.cpp",
     "common_modifier_test.cpp",
     "common_shape_method_modifier_resources_test.cpp",
     "common_shape_method_modifier_test.cpp",

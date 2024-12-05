@@ -3076,9 +3076,14 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     }
 }
 
-void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix)
+void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
+    if (matrix.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, TransformMatrix, frameNode);
+    }
 }
 
 void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
@@ -3982,12 +3987,22 @@ void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEff
     eventHub->SetHoverEffect(hoverEffect);
 }
 
-void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue)
+void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const std::optional<ClickEffectLevel>& level,
+                                       const std::optional<float>& scaleValue)
 {
-    ClickEffectInfo clickEffectInfo;
-    clickEffectInfo.level = level;
-    clickEffectInfo.scaleNumber = scaleValue;
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    if (level.has_value() || scaleValue.has_value()) {
+        ClickEffectInfo clickEffectInfo;
+        if (level.has_value()) {
+            clickEffectInfo.level = level.value();
+        }
+        if (scaleValue.has_value()) {
+            clickEffectInfo.scaleNumber = scaleValue.value();
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, ClickEffectLevel, frameNode);
+    }
 }
 
 void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
