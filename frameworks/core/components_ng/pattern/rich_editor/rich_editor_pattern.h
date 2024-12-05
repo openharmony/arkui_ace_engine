@@ -693,6 +693,7 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
+    RectF GetCaretRelativeRect();
     // Add for Scroll
 
     void OnAttachToFrameNode() override;

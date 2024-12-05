@@ -1958,6 +1958,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("addBuilderSpan", &JSRichEditorController::AddPlaceholderSpan);
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
+    JSClass<JSRichEditorController>::CustomMethod("getCaretRect", &JSRichEditorController::GetCaretRect);
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
     JSClass<JSRichEditorController>::CustomMethod(
         "updateParagraphStyle", &JSRichEditorController::UpdateParagraphStyle);
@@ -2214,6 +2215,21 @@ void JSRichEditorBaseController::GetCaretOffset(const JSCallbackInfo& args)
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
     }
+}
+
+void JSRichEditorBaseController::GetCaretRect(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto caretRect = controller->GetCaretRect();
+    CHECK_EQUAL_VOID(caretRect.IsEmpty(), false);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty<float>("x", caretRect.GetOffset().GetX());
+    obj->SetProperty<float>("y", caretRect.GetOffset().GetY());
+    obj->SetProperty<float>("width", caretRect.Width());
+    obj->SetProperty<float>("height", caretRect.Height());
+    args.SetReturnValue(obj);
 }
 
 void JSRichEditorBaseController::SetCaretOffset(const JSCallbackInfo& args)
@@ -2770,6 +2786,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "setCaretOffset", &JSRichEditorStyledStringController::SetCaretOffset);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getCaretOffset", &JSRichEditorStyledStringController::GetCaretOffset);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "getCaretRect", &JSRichEditorStyledStringController::GetCaretRect);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getTypingStyle", &JSRichEditorStyledStringController::GetTypingStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(

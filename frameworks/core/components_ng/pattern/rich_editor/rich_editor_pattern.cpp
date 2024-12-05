@@ -11304,4 +11304,13 @@ void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(selectOverlayInfo);
     json->Put("selectOverlay info", selectOverlayInfo->ToString().c_str());
 }
+
+RectF RichEditorPattern::GetCaretRelativeRect()
+{
+    CHECK_NULL_RETURN(caretTwinkling_, RectF(0, 0, 0, 0));
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    constexpr float CARET_WIDTH = 2.0f;
+    return RectF(caretOffset.GetX(), caretOffset.GetY(),
+        static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()), caretHeight);
+}
 } // namespace OHOS::Ace::NG
