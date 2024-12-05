@@ -40,11 +40,6 @@ struct TextEditingValueNG {
         return text.empty();
     }
 
-    std::wstring GetWideText() const
-    {
-        return StringUtils::ToWstring(text);
-    }
-
     void CursorMoveLeft()
     {
         caretPosition = std::max(0, caretPosition - 1);
@@ -52,60 +47,55 @@ struct TextEditingValueNG {
 
     void CursorMoveRight()
     {
-        caretPosition = std::min(static_cast<int32_t>(GetWideText().length()), caretPosition + 1);
+        caretPosition = std::min(static_cast<int32_t>(text.length()), caretPosition + 1);
     }
 
     void CursorMoveToPosition(int32_t position)
     {
-        caretPosition = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
+        caretPosition = std::clamp(position, 0, static_cast<int32_t>(text.length()));
     }
 
-    std::string GetValueBeforeCursor() const
+    std::u16string GetValueBeforeCursor() const
     {
-        auto wideText = GetWideText();
-        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition <= 0) {
-            return "";
+        if (caretPosition > static_cast<int32_t>(text.length()) || caretPosition <= 0) {
+            return u"";
         }
-        return StringUtils::ToString(wideText.substr(0, caretPosition));
+        return text.substr(0, caretPosition);
     }
 
-    std::string GetValueAfterCursor() const
+    std::u16string GetValueAfterCursor() const
     {
-        auto wideText = GetWideText();
-        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition < 0) {
-            return "";
+        if (caretPosition > static_cast<int32_t>(text.length()) || caretPosition < 0) {
+            return u"";
         }
-        return StringUtils::ToString(wideText.substr(caretPosition));
+        return text.substr(caretPosition);
     }
 
-    std::string GetValueBeforePosition(int32_t position) const
+    std::u16string GetValueBeforePosition(int32_t position) const
     {
-        auto wideText = GetWideText();
-        position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
+        position = std::clamp(position, 0, static_cast<int32_t>(text.length()));
         LOGI("GetValueBeforePosition %{public}d", position);
-        return StringUtils::ToString(wideText.substr(0, position));
+        return text.substr(0, position);
     }
 
-    std::string GetValueAfterPosition(int32_t position) const
+    std::u16string GetValueAfterPosition(int32_t position) const
     {
-        auto wideText = GetWideText();
-        position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
+        position = std::clamp(position, 0, static_cast<int32_t>(text.length()));
         LOGI("GetValueAfterPosition %{public}d", position);
-        return StringUtils::ToString(wideText.substr(position));
+        return text.substr(position);
     }
 
-    std::string GetSelectedText(int32_t start, int32_t end) const
+    std::u16string GetSelectedText(int32_t start, int32_t end) const
     {
-        auto wideText = GetWideText();
-        auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
-        auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
-            static_cast<int32_t>(wideText.length()));
-        return StringUtils::ToString(wideText.substr(min, max - min));
+        auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(text.length()));
+        auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(text.length())), 0,
+            static_cast<int32_t>(text.length()));
+        return text.substr(min, max - min);
     }
 
     bool CaretAtLast() const
     {
-        return static_cast<int32_t>(GetWideText().length()) == caretPosition;
+        return static_cast<int32_t>(text.length()) == caretPosition;
     }
 
     char16_t LastChar() const
@@ -119,9 +109,9 @@ struct TextEditingValueNG {
         return text[std::max(0, caretPosition - 1)];
     }
 
-    std::string ToString() const
+    std::u16string ToString() const
     {
-        return GetValueBeforeCursor() + "|" + GetValueAfterCursor();
+        return GetValueBeforeCursor() + u"|" + GetValueAfterCursor();
     }
 
     void Reset()
@@ -130,7 +120,7 @@ struct TextEditingValueNG {
         caretPosition = 0;
     }
 
-    std::string text;
+    std::u16string text;
     int32_t caretPosition = 0;
 };
 

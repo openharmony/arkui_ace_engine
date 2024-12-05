@@ -74,7 +74,7 @@ void TextFieldController::SetTextSelection(
     }
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto wideText = textFieldPattern->GetWideText();
+    auto wideText = textFieldPattern->GetTextUtf16Value();
     int32_t length = static_cast<int32_t>(wideText.length());
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);

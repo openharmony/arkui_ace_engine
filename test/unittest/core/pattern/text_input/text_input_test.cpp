@@ -705,7 +705,7 @@ HWTEST_F(TextFieldUXTest, HandleOnShowMenu001, TestSize.Level1)
     /**
      * @tc.steps: step10. Inset value
      */
-    pattern_->InsertValue("abc");
+    pattern_->InsertValue(u"abc");
 
     /**
      * @tc.steps: step11. Test menu open or close

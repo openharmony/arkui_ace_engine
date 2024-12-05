@@ -42,7 +42,7 @@ public:
      * return deleted UTF-16 bytes length.
      * Why UTF-16? TextSelectController->GetCaretIndex() returns UTF-16 index.
      */
-    static int32_t Delete(int32_t startIndex, int32_t length, std::string& content, bool isBackward);
+    static int32_t Delete(int32_t startIndex, int32_t length, std::u16string& content, bool isBackward);
     static bool IsEmoji(uint32_t codePoint);
     static bool IsEmojiModifierBase(uint32_t codePoint);
     static bool IsVariationSelector(uint32_t codePoint);
@@ -50,19 +50,21 @@ public:
     static bool IsEmojiModifier(uint32_t codePoint);
     static bool IsTagSpec(uint32_t codePoint);
     static bool IsKeycapBase(uint32_t codePoint);
-    static bool IsIndexInEmoji(int32_t index, const std::string& content, int32_t& startIndex, int32_t& endIndex);
+    static bool IsIndexInEmoji(int32_t index, const std::u16string& content, int32_t& startIndex, int32_t& endIndex);
     static EmojiRelation GetIndexRelationToEmoji(int32_t index,
         const std::string& content, int32_t& startIndex, int32_t& endIndex);
-    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::string& content);
-    static bool IsIndexAfterOrInEmoji(int32_t index, const std::string& content);
-    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::string& content,
+    static EmojiRelation GetIndexRelationToEmoji(int32_t index,
+        const std::u16string& content, int32_t& startIndex, int32_t& endIndex);
+    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content);
+    static bool IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content);
+    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content,
         int32_t& startIndex, int32_t& endIndex);
-    static bool IsIndexAfterOrInEmoji(int32_t index, const std::string& content,
+    static bool IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content,
         int32_t& startIndex, int32_t& endIndex);
-    static std::wstring SubWstring(int32_t index, int32_t length,
-        const std::wstring& content, bool includeHalf = false);
-    static TextEmojiSubStringRange CalSubWstringRange(int32_t index, int32_t length,
-        const std::wstring& content, bool includeHalf);
+    static std::u16string SubU16string(int32_t index, int32_t length,
+        const std::u16string& content, bool includeHalf = false);
+    static TextEmojiSubStringRange CalSubU16stringRange(int32_t index, int32_t length,
+        const std::u16string& content, bool includeHalf);
     static int32_t GetCharacterNum(const std::string& content);
     static std::string ConvertU8stringUnpairedSurrogates(const std::string& value);
 

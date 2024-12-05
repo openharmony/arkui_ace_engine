@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "unicode/unistr.h"
 
 namespace OHOS::Ace {
@@ -48,16 +49,16 @@ constexpr int32_t STATE_FINISHED = 20;
 
 } // namespace
 
-int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::string& content, bool isBackward)
+int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16string& content, bool isBackward)
 {
-    std::u16string u16 = StringUtils::Str8ToStr16(content);
+    std::u16string u16 = content;
     // startIndex from selectController_->GetCaretIndex() is an utf-16 index
     // so we need an u16string to get the correct index
     std::u16string remainString = u"";
     std::u32string u32ContentToDelete;
     if (isBackward) {
         if (startIndex == static_cast<int32_t>(u16.length())) {
-            u32ContentToDelete = StringUtils::ToU32string(content);
+            u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(content));
         } else {
             remainString = u16.substr(startIndex, u16.length() - startIndex);
             std::u16string temp = u16.substr(0, startIndex);
@@ -71,10 +72,10 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::stri
                 break;
             }
         }
-        content = StringUtils::U32StringToString(u32ContentToDelete) + StringUtils::Str16ToStr8(remainString);
+        content = StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32ContentToDelete)) + remainString;
     } else {
         if (startIndex == 0) {
-            u32ContentToDelete = StringUtils::ToU32string(content);
+            u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(content));
         } else {
             remainString = u16.substr(0, startIndex);
             std::u16string temp = u16.substr(startIndex, u16.length() - startIndex);
@@ -88,15 +89,15 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::stri
                 break;
             }
         }
-        content = StringUtils::Str16ToStr8(remainString) + StringUtils::U32StringToString(u32ContentToDelete);
+        content = remainString + StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32ContentToDelete));
     }
-    int32_t deletedLength = static_cast<int32_t>(u16.length() - StringUtils::Str8ToStr16(content).length());
+    int32_t deletedLength = static_cast<int32_t>(u16.length() - content.length());
     //we need length to update the cursor
     return deletedLength;
 }
 
 bool TextEmojiProcessor::IsIndexInEmoji(int32_t index,
-    const std::string& content, int32_t& startIndex, int32_t& endIndex)
+    const std::u16string& content, int32_t& startIndex, int32_t& endIndex)
 {
     int32_t emojiStartIndex;
     int32_t emojiEndIndex;
@@ -137,9 +138,14 @@ int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
 EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
     const std::string& content, int32_t& startIndex, int32_t& endIndex)
 {
+    return GetIndexRelationToEmoji(index, StringUtils::Str8ToStr16(content), startIndex, endIndex);
+}
+
+EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
+    const std::u16string& u16Content, int32_t& startIndex, int32_t& endIndex)
+{
     endIndex = index;
     startIndex = index;
-    std::u16string u16Content = StringUtils::Str8ToStr16(content);
     if (index < 0 || index > static_cast<int32_t>(u16Content.length())) {
         return EmojiRelation::NO_EMOJI;
     }
@@ -188,7 +194,7 @@ EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
     return EmojiRelation::NO_EMOJI;
 }
 
-bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, const std::string& content)
+bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content)
 {
     int32_t emojiStartIndex;
     int32_t emojiEndIndex;
@@ -197,7 +203,7 @@ bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, const std::string
         || relation == EmojiRelation::MIDDLE_EMOJI;
 }
 
-bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::string& content)
+bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content)
 {
     int32_t emojiStartIndex;
     int32_t emojiEndIndex;
@@ -206,7 +212,7 @@ bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::string&
         || relation == EmojiRelation::MIDDLE_EMOJI;
 }
 
-bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, const std::string& content,
+bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content,
     int32_t& startIndex, int32_t& endIndex)
 {
     int32_t emojiStartIndex;
@@ -223,7 +229,7 @@ bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, const std::string
     return false;
 }
 
-bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::string& content,
+bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content,
     int32_t& startIndex, int32_t& endIndex)
 {
     int32_t emojiStartIndex;
@@ -240,19 +246,19 @@ bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::string&
     return false;
 }
 
-std::wstring TextEmojiProcessor::SubWstring(
-    int32_t index, int32_t length, const std::wstring& content, bool includeHalf)
+std::u16string TextEmojiProcessor::SubU16string(
+    int32_t index, int32_t length, const std::u16string& content, bool includeHalf)
 {
-    TextEmojiSubStringRange range = CalSubWstringRange(index, length, content, includeHalf);
+    TextEmojiSubStringRange range = CalSubU16stringRange(index, length, content, includeHalf);
     int32_t rangeLength = range.endIndex - range.startIndex;
     if (rangeLength == 0) {
-        return L"";
+        return u"";
     }
     return content.substr(range.startIndex, rangeLength);
 }
 
-TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
-    int32_t index, int32_t length, const std::wstring& content, bool includeHalf)
+TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
+    int32_t index, int32_t length, const std::u16string& content, bool includeHalf)
 {
     int32_t startIndex = index;
     int32_t endIndex = index + length;
@@ -260,9 +266,8 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
     int32_t emojiEndIndex = index;
     // need to be converted to string for processing
     // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
-    std::string curStr = StringUtils::ToString(content);
     // exclude right overflow emoji
-    if (!includeHalf && IsIndexInEmoji(endIndex - 1, curStr, emojiStartIndex, emojiEndIndex) &&
+    if (!includeHalf && IsIndexInEmoji(endIndex - 1, content, emojiStartIndex, emojiEndIndex) &&
         emojiEndIndex > index + length) {
         emojiEndIndex = emojiStartIndex;
         length = emojiEndIndex - index;
@@ -270,7 +275,7 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
         endIndex = index + length;
     }
     // process left emoji
-    if (IsIndexBeforeOrInEmoji(startIndex, curStr, emojiStartIndex, emojiEndIndex)) {
+    if (IsIndexBeforeOrInEmoji(startIndex, content, emojiStartIndex, emojiEndIndex)) {
         if (startIndex != emojiStartIndex && !includeHalf) {
             startIndex = emojiEndIndex; // exclude current emoji
         }
@@ -279,7 +284,7 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
         }
     }
     // process right emoji
-    if (IsIndexAfterOrInEmoji(endIndex, curStr, emojiStartIndex, emojiEndIndex)) {
+    if (IsIndexAfterOrInEmoji(endIndex, content, emojiStartIndex, emojiEndIndex)) {
         if (endIndex != emojiEndIndex && !includeHalf) {
             endIndex = emojiStartIndex; // exclude current emoji
         }

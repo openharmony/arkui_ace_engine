@@ -14,9 +14,12 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_search_ffi.h"
+#include <optional>
+#include <string>
 
 #include "cj_lambda.h"
 
+#include "base/utils/utf_helper.h"
 #include "bridge/cj_frontend/cppview/search_controller.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
@@ -58,6 +61,14 @@ void handleFont(
     font.fontFamilies = ConvertStrToFontFamilies(fontFamily);
     font.fontStyle = FONT_STYLE[fontStyle];
 }
+
+std::optional<std::u16string> OptionalStr8ToStr16(const std::optional<std::string> optStr)
+{
+    if (optStr.has_value()) {
+        return UtfUtils::Str8ToStr16(optStr.value());
+    }
+    return std::nullopt;
+}
 } // namespace
 
 extern "C" {
@@ -71,11 +82,12 @@ void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value)
         LOGI("icon url not found");
     }
     if (value.controllerID == -1) {
-        SearchModel::GetInstance()->Create(key, tip, src);
+        SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
     } else {
         auto self_ = FFIData::GetData<SearchController>(value.controllerID);
         if (self_ != nullptr) {
-            auto controller = SearchModel::GetInstance()->Create(key, tip, src);
+            auto controller = SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip),
+                src);
             self_->SetController(controller);
         } else {
             LOGE("invalid scrollerID");
@@ -93,11 +105,12 @@ void FfiOHOSAceFrameworkSearchCreateByIconRes(
     std::optional<std::string> tip = placeholder;
     std::optional<std::string> src = iconUrl;
     if (controllerId == -1) {
-        SearchModel::GetInstance()->Create(key, tip, src);
+        SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
     } else {
         auto nativeController = FFIData::GetData<SearchController>(controllerId);
         if (nativeController != nullptr) {
-            auto controller = SearchModel::GetInstance()->Create(key, tip, src);
+            auto controller = SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip),
+                src);
             nativeController->SetController(controller);
         } else {
             LOGE("Invalid controller id.");
@@ -205,28 +218,38 @@ void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
 {
-    auto onChange = [lambda = CJLambda::Create(callback)](
-                        const std::string& value, PreviewText& previewText) -> void { lambda(value.c_str()); };
+    auto onChange = [lambda = CJLambda::Create(callback)]
+        (const std::u16string& value, PreviewText& previewText) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkSearchOnCopy(void (*callback)(const char* value))
 {
-    auto onCopy = [lambda = CJLambda::Create(callback)](const std::string& value) -> void { lambda(value.c_str()); };
+    auto onCopy = [lambda = CJLambda::Create(callback)](const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     SearchModel::GetInstance()->SetOnCopy(std::move(onCopy));
 }
 
 void FfiOHOSAceFrameworkSearchOnCut(void (*callback)(const char* value))
 {
-    auto onCut = [lambda = CJLambda::Create(callback)](const std::string& value) -> void { lambda(value.c_str()); };
+    auto onCut = [lambda = CJLambda::Create(callback)](const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     SearchModel::GetInstance()->SetOnCut(std::move(onCut));
 }
 
 void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* value))
 {
-    auto onPaste = [lambda = CJLambda::Create(callback)](const std::string& val, NG::TextCommonEvent& info) -> void {
+    auto onPaste = [lambda = CJLambda::Create(callback)](const std::u16string& val, NG::TextCommonEvent& info) -> void {
         LOGI("OnPaste called.");
-        lambda(val.c_str());
+        const std::string valStr = UtfUtils::Str16ToStr8(val);
+        lambda(valStr.c_str());
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -413,7 +436,8 @@ void FfiOHOSAceFrameworkSearchOnDidInsert(void (*callback)(double insertOffset, 
 {
     auto onDidInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> void {
         double insertOffset = Info.insertOffset;
-        const char* insertValue = Info.insertValue.c_str();
+        const std::string insertStr = UtfUtils::Str16ToStr8(Info.insertValue);
+        const char* insertValue = insertStr.c_str();
         lambda(insertOffset, insertValue);
     };
     SearchModel::GetInstance()->SetOnDidInsertValueEvent(onDidInsert);
@@ -425,7 +449,8 @@ void FfiOHOSAceFrameworkSearchOnDidDelete(
     auto onDidDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> void {
         double deleteOffset = Info.deleteOffset;
         int32_t direction = static_cast<int32_t>(Info.direction);
-        const char* deleteValue = Info.deleteValue.c_str();
+        const std::string deleteStr = UtfUtils::Str16ToStr8(Info.deleteValue);
+        const char* deleteValue = deleteStr.c_str();
         lambda(deleteOffset, direction, deleteValue);
     };
     SearchModel::GetInstance()->SetOnDidDeleteEvent(onDidDelete);
@@ -435,7 +460,8 @@ void FfiOHOSAceFrameworkSearchOnWillInsert(bool (*callback)(double insertOffset,
 {
     auto onWillInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> bool {
         double insertOffset = Info.insertOffset;
-        const char* insertValue = Info.insertValue.c_str();
+        const std::string insertStr = UtfUtils::Str16ToStr8(Info.insertValue);
+        const char* insertValue = insertStr.c_str();
         return lambda(insertOffset, insertValue);
     };
     SearchModel::GetInstance()->SetOnWillInsertValueEvent(onWillInsert);
@@ -447,7 +473,8 @@ void FfiOHOSAceFrameworkSearchOnWillDelete(
     auto onWillDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> bool {
         double deleteOffset = Info.deleteOffset;
         int32_t direction = static_cast<int32_t>(Info.direction);
-        const char* deleteValue = Info.deleteValue.c_str();
+        const std::string deleteStr = UtfUtils::Str16ToStr8(Info.deleteValue);
+        const char* deleteValue = deleteStr.c_str();
         return lambda(deleteOffset, direction, deleteValue);
     };
     SearchModel::GetInstance()->SetOnWillDeleteEvent(onWillDelete);
@@ -474,8 +501,10 @@ void FfiOHOSAceFrameworkSearchOnEditChange(void (*callback)(bool value))
 
 void FfiOHOSAceFrameworkSearchSetInputFilter(const char* value, void (*callback)(const char* value))
 {
-    auto inputFilter = [lambda = CJLambda::Create(callback)](
-                           const std::string& value) -> void { lambda(value.c_str()); };
+    auto inputFilter = [lambda = CJLambda::Create(callback)](const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     SearchModel::GetInstance()->SetInputFilter(value, inputFilter);
 }
 

@@ -26,8 +26,8 @@ namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT SearchModelImpl : public OHOS::Ace::SearchModel {
 public:
-    RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& icon) override;
+    RefPtr<TextFieldControllerBase> Create(const std::optional<std::u16string>& value,
+        const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon) override;
     void RequestKeyboardOnFocus(bool needToRequest) override {};
     void SetSearchButton(const std::string& text) override;
     void SetCaretWidth(const Dimension& value) override {}
@@ -60,19 +60,19 @@ public:
     void SetHeight(const Dimension& value) override;
     void SetBackBorder() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
-    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
-    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
+    void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
+    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnScroll(std::function<void(float, float)>&& func) override {};
-    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
-    void SetOnCut(std::function<void(const std::string&)>&& func) override;
-    void SetOnPaste(std::function<void(const std::string&)>&& func) override;
-    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override {};
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnCut(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnPaste(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override {};
     void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override {};
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override {};
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
-    void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
+    void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent) override {};
     void SetSelectionMenuHidden(bool selectionMenuHidden) override {};
 
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override {};

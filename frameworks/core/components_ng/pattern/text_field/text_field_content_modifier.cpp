@@ -139,7 +139,7 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     TextStyle textStyle;
-    if (!textFieldPattern->GetTextValue().empty()) {
+    if (!textFieldPattern->GetTextUtf16Value().empty()) {
         textStyle = CreateTextStyleUsingTheme(
             textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
     } else {
@@ -174,9 +174,9 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(
         OffsetF(textFieldPattern->GetTextRect().GetX(), textFieldPattern->GetTextRect().GetY()));
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
-    textValue_ = AceType::MakeRefPtr<PropertyString>("");
-    errorTextValue_ = AceType::MakeRefPtr<PropertyString>("");
-    placeholderValue_ = AceType::MakeRefPtr<PropertyString>("");
+    textValue_ = AceType::MakeRefPtr<PropertyU16String>(u"");
+    errorTextValue_ = AceType::MakeRefPtr<PropertyU16String>(u"");
+    placeholderValue_ = AceType::MakeRefPtr<PropertyU16String>(u"");
     textRectY_ = AceType::MakeRefPtr<PropertyFloat>(textFieldPattern->GetTextRect().GetY());
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(textFieldPattern->GetTextRect().GetX());
     textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
@@ -372,21 +372,21 @@ void TextFieldContentModifier::SetContentSize(SizeF& value)
     }
 }
 
-void TextFieldContentModifier::SetTextValue(std::string& value)
+void TextFieldContentModifier::SetTextValue(std::u16string& value)
 {
     if (textValue_->Get() != value) {
         textValue_->Set(value);
     }
 }
 
-void TextFieldContentModifier::SetErrorTextValue(const std::string& value)
+void TextFieldContentModifier::SetErrorTextValue(const std::u16string& value)
 {
     if (errorTextValue_->Get() != value) {
         errorTextValue_->Set(value);
     }
 }
 
-void TextFieldContentModifier::SetPlaceholderValue(std::string&& value)
+void TextFieldContentModifier::SetPlaceholderValue(std::u16string&& value)
 {
     if (placeholderValue_->Get() != value) {
         placeholderValue_->Set(value);

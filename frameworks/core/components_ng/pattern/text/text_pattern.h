@@ -382,7 +382,7 @@ public:
     std::string GetBindSelectionMenuInJson() const;
     virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
 
-    const std::vector<std::string>& GetDragContents() const
+    const std::vector<std::u16string>& GetDragContents() const
     {
         return dragContents_;
     }
@@ -562,7 +562,7 @@ public:
     void SetStyledString(const RefPtr<SpanString>& value);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
-    std::string GetSelectedText(int32_t start, int32_t end) const;
+    std::u16string GetSelectedText(int32_t start, int32_t end) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();

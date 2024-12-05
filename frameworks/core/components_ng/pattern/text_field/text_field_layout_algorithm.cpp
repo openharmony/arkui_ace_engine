@@ -46,7 +46,7 @@ constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
 constexpr Dimension INLINE_MIN_WITH = 16.0_vp;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
-    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder)
+    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::u16string& textContent, bool& showPlaceHolder)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -60,14 +60,14 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
 
-    if (!pattern->GetTextValue().empty()) {
+    if (!pattern->GetTextUtf16Value().empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
-        textContent = pattern->GetTextValue();
+        textContent = pattern->GetTextUtf16Value();
         UpdateTextStyleTextOverflowAndWordBreak(textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty);
     } else {
         UpdatePlaceholderTextStyle(
             frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
-        textContent = textFieldLayoutProperty->GetPlaceholderValue("");
+        textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
         showPlaceHolder = true;
     }
 
@@ -579,7 +579,7 @@ float TextFieldLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWra
         auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(frameNode->GetChildIndex(counterNode));
         if (counterNodeLayoutWrapper) {
             auto textLength =
-                static_cast<uint32_t>(showPlaceHolder_ ? 0 : StringUtils::ToWstring(textContent_).length());
+                static_cast<uint32_t>(showPlaceHolder_ ? 0 : textContent_.length());
             auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLength().value());
             LayoutConstraintF textContentConstraint;
             textContentConstraint.UpdateIllegalSelfIdealSizeWithCheck(OptionalSizeF(contentWidth, std::nullopt));
@@ -660,7 +660,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
     FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
 
     Dimension fontSize;
-    if (layoutProperty->GetPlaceholderValue("").empty()) {
+    if (layoutProperty->GetPlaceholderValue(u"").empty()) {
         if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
             fontSize = layoutProperty->GetFontSizeValue(Dimension());
         } else {
@@ -787,7 +787,7 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
 }
 
 ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content, const float fontSize) const
+    const TextStyle& textStyle, const std::u16string& content, const float fontSize) const
 {
     return {
         .direction = GetTextDirection(content, direction_),
@@ -800,7 +800,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
     };
 }
 
-void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
+void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
     int32_t nakedCharPosition, CreateParagraphData paragraphData)
 {
     auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
@@ -821,8 +821,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paragraph_->Build();
 }
 
-void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const std::vector<std::string>& contents,
-    const std::string& content, bool needObscureText, CreateParagraphData paragraphData)
+void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const std::vector<std::u16string>& contents,
+    const std::u16string& content, bool needObscureText, CreateParagraphData paragraphData)
 {
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
@@ -843,28 +843,28 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_VOID(paragraph_);
     for (size_t i = 0; i < contents.size(); i++) {
-        std::string splitStr = contents[i];
+        std::u16string splitStr = contents[i];
         if (splitStr.empty()) {
             continue;
         }
         if (style->GetMaxLines() == 1) {
-            std::replace(splitStr.begin(), splitStr.end(), '\n', ' ');
+            std::replace(splitStr.begin(), splitStr.end(), u'\n', u' ');
         }
         auto& style = textStyles[i];
         paragraph_->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
         if (needObscureText) {
             paragraph_->AddText(
-                TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(splitStr).length())));
+                TextFieldPattern::CreateObscuredText(static_cast<int32_t>(splitStr.length())));
         } else {
-            paragraph_->AddText(StringUtils::Str8ToStr16(splitStr));
+            paragraph_->AddText(splitStr);
         }
         paragraph_->PopStyle();
     }
     paragraph_->Build();
 }
 
-void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle, std::string content,
+void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle, std::u16string content,
     bool needObscureText, int32_t nakedCharPosition, CreateParagraphData paragraphData)
 {
     auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
@@ -886,7 +886,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     inlineParagraph_->Build();
 }
 
-TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content, TextDirection direction)
+TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::u16string& content, TextDirection direction)
 {
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
@@ -894,8 +894,7 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
 
     bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
-    auto showingTextForWString = StringUtils::ToWstring(content);
-    for (const auto& charOfShowingText : showingTextForWString) {
+    for (const auto& charOfShowingText : content) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
             return TextDirection::LTR;
         }
@@ -997,7 +996,7 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     SetAdaptFontSizeLineHeight(lineHeight, textStyle);
     textStyle.SetLineHeight(Dimension(), false);
     bool result = false;
-    const std::string& text = textContent_.empty() ? "a" : textContent_;
+    const std::u16string& text = textContent_.empty() ? u"a" : textContent_;
     switch (layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
         case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
             if (pattern->IsInlineMode()) {
@@ -1045,7 +1044,7 @@ bool TextFieldLayoutAlgorithm::IsNeedAdaptFontSize(const TextStyle& textStyle,
     return TextAdaptFontSizer::IsNeedAdaptFontSize(textStyle, contentConstraint);
 }
 
-bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content,
+bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, const std::u16string& content,
     const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     double maxFontSize = 0.0;
@@ -1110,7 +1109,7 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptExceedLimit(const SizeF& maxSiz
     return didExceedMaxLines;
 }
 
-bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::string& content,
+bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::u16string& content,
     const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     double maxFontSize = 0.0;
@@ -1173,7 +1172,7 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& max
     return didExceedMaxLines;
 }
 
-bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
     if (!CreateParagraphEx(textStyle, content, contentConstraint, layoutWrapper)) {
@@ -1238,7 +1237,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& placeholderTextStyle, bool isDisabled)
 {
-    if (layoutProperty->GetPlaceholderValue("").empty()) {
+    if (layoutProperty->GetPlaceholderValue(u"").empty()) {
         if (layoutProperty->HasAdaptMinFontSize()) {
             placeholderTextStyle.SetAdaptMinFontSize(layoutProperty->GetAdaptMinFontSize().value());
         }

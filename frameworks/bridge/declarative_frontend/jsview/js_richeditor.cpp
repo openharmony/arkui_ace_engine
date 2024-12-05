@@ -1252,7 +1252,7 @@ void JSRichEditor::CreateJsRichEditorCommonEvent(const JSCallbackInfo& info)
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(2);
         JSRef<JSObject> object = objectTemplate->NewInstance();
-        object->SetProperty<std::string>("text", event.GetText());
+        object->SetProperty<std::u16string>("text", event.GetText());
         object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
         object->Wrap<NG::TextFieldCommonEvent>(&event);
         JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));

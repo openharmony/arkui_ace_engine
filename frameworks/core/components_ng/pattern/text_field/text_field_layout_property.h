@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_LAYOUT_PROPERTY_H
 
+#include "base/utils/utf_helper.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
@@ -95,7 +96,7 @@ public:
         }
         json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
         json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
-        json->PutExtAttr("errorText", propErrorText_.value_or("").c_str(), filter);
+        json->PutExtAttr("errorText", UtfUtils::Str16ToStr8(propErrorText_.value_or(u"")).c_str(), filter);
         json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
         json->PutExtAttr("showCounter", propShowCounter_.value_or(false), filter);
         json->PutExtAttr("highlightBorder", propShowHighlightBorder_.value_or(true), filter);
@@ -171,7 +172,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, NumberOfLines, int32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::u16string, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreviewText, PreviewText, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_GROUP(PlaceholderFontStyle, FontStyle);
@@ -195,8 +196,8 @@ public:
         PlaceholderTextLineStyle, MaxLength, PlaceholderMaxLength, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         PlaceholderTextLineStyle, MaxLines, PlaceholderMaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ErrorText, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::u16string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ErrorText, std::u16string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowErrorText, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextContentType, TextContentType, PROPERTY_UPDATE_MEASURE);

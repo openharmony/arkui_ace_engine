@@ -15,6 +15,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textarea_ffi.h"
 
+#include "base/utils/utf_helper.h"
+
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
@@ -57,7 +59,10 @@ void FfiOHOSAceFrameworkTextAreaCreate(const char* placeholder, const char* text
         LOGE("FfiTextArea invalid controllerId");
         return;
     }
-    auto nativeController = TextFieldModel::GetInstance()->CreateTextArea(placeholder, text);
+    std::string placeHolderStr8(placeholder);
+    std::string textStr8(text);
+    auto nativeController = TextFieldModel::GetInstance()->CreateTextArea(UtfUtils::Str8ToStr16(placeHolderStr8),
+        UtfUtils::Str8ToStr16(textStr8));
     controller->SetController(nativeController);
 }
 
