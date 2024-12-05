@@ -71,7 +71,7 @@ export struct GaugeBootcamp {
   descriptionBuilder() {
     Text('说明文本')
       .maxFontSize('30sp')
-      .minFontSize("10.0vp")
+      .minFontSize('10.0vp')
       .fontColor('#fffa2a2d')
       .fontWeight(FontWeight.Medium)
       .width('100%')
