@@ -559,7 +559,7 @@ public:
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
     static void SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value);
-    static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);
     static void SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
@@ -569,7 +569,7 @@ public:
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
-    static void SetFlexBasis(FrameNode* frameNode, const Dimension& value);
+    static void SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void ResetFlexShrink(FrameNode* frameNode);
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
@@ -581,7 +581,8 @@ public:
     static void SetMaxWidth(FrameNode* frameNode, const CalcLength& maxWidth);
     static void SetMinHeight(FrameNode* frameNode, const CalcLength& minHeight);
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
-    static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
+    static void SetAlignRules(FrameNode* frameNode, const std::optional<std::map<AlignDirection,
+        AlignRule>>& alignRules);
     static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo);
     static ChainInfo GetChainStyle(FrameNode* frameNode);
     static void ResetChainStyle(FrameNode* frameNode);
@@ -593,7 +594,7 @@ public:
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
-    static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
+    static void SetMotionBlur(FrameNode* frameNode, const std::optional<MotionBlurOption>& motionBlurOption);
     static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
@@ -606,7 +607,7 @@ public:
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
         FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
-    static void SetTransition(FrameNode* frameNode, const TransitionOptions& options);
+    static void SetTransition(FrameNode* frameNode, const std::optional<TransitionOptions>& options);
     static void CleanTransition(FrameNode* frameNode);
     static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect,
         NG::TransitionFinishCallback&& finishCallback = nullptr);
@@ -655,7 +656,7 @@ public:
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
-    static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
+    static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
 
     static bool GetFocusable(FrameNode* frameNode);
@@ -752,17 +753,19 @@ public:
     static float GetLayoutWeight(FrameNode* frameNode);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
-    static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
+    static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
+    static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+        const std::optional<float>& vertical);
     static BiasPair GetBias(FrameNode* frameNode);
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
     static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
+        const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
     static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
-    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
-        bool arrowKeyStepOut);
     static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
-        const uint32_t focusPriority);
+        const std::optional<uint32_t>& focusPriority);
     static void ResetBias(FrameNode* frameNode);
     static void ResetAlignRules(FrameNode* frameNode);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
@@ -780,7 +783,9 @@ public:
     static void SetPositionLocalizedEdges(bool needLocalized);
     static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
+    static void SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart);
     static void ResetMarkAnchorStart();
+    static void ResetMarkAnchorStart(FrameNode* frameNode);
     static void SetOffsetLocalizedEdges(bool needLocalized);
     static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);

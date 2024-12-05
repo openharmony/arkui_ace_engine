@@ -233,6 +233,8 @@ public:
 
     void UpdateFlexBasis(const Dimension& flexBasis);
 
+    void ResetFlexBasis();
+
     void UpdateAlignSelf(const FlexAlign& flexAlign);
 
     void ResetAlignSelf();

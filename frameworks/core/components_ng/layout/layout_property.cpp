@@ -1199,6 +1199,17 @@ void LayoutProperty::UpdateFlexBasis(const Dimension& flexBasis)
     }
 }
 
+void LayoutProperty::ResetFlexBasis()
+{
+    if (!flexItemProperty_) {
+        return;
+    }
+    if (flexItemProperty_->HasFlexBasis()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    flexItemProperty_->ResetFlexBasis();
+}
+
 void LayoutProperty::UpdateAlignSelf(const FlexAlign& flexAlign)
 {
     if (!flexItemProperty_) {

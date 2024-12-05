@@ -36,7 +36,7 @@ class ACE_EXPORT FocusBox : public virtual AceType {
 public:
     friend class FocusHub;
 
-    void SetStyle(const FocusBoxStyle& style);
+    void SetStyle(const std::optional<FocusBoxStyle>& style);
     bool HasCustomStyle() const;
     static std::unique_ptr<JsonValue> ToJsonValue(const FocusBox& box);
 
