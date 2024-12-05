@@ -1271,6 +1271,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     if (accessibilityProperty->HasAccessibilityRole()) {
         nodeInfo.SetComponentType(accessibilityProperty->GetAccessibilityRole());
     }
+    if (accessibilityProperty->HasAccessibilityCustomRole()) {
+        nodeInfo.SetCustomComponentType(accessibilityProperty->GetAccessibilityCustomRole());
+    }
 
     UpdateAccessibilityTextValueInfo(accessibilityProperty, nodeInfo);
 
