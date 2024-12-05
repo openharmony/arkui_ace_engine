@@ -527,7 +527,6 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
 void BubbleView::GetPopupMaxWidthAndHeight(
     const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupNodeId)
 {
-    CHECK_NULL_VOID(popupNodeId);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupNodeId);
     CHECK_NULL_VOID(popupNode);
     auto pipelineContext = popupNode->GetContextRefPtr();
