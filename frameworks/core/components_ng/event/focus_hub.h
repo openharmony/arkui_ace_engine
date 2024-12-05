@@ -78,6 +78,7 @@ enum class SwitchingStartReason : int32_t {
     LOST_FOCUS_TO_VIEW_ROOT = 3,
     REMOVE_SELF = 4,
     REMOVE_CHILD = 5,
+    LOST_FOCUS_TO_TABSTOP = 6,
 };
 enum class SwitchingEndReason : int32_t {
     DEFAULT = 0,
@@ -85,6 +86,7 @@ enum class SwitchingEndReason : int32_t {
     DEPENDENCE_SELF = 2,
     NO_FOCUSABLE_CHILD = 3,
     NODE_FOCUS = 4,
+    TAB_STOP = 5,
 };
 enum class SwitchingUpdateReason : int32_t {
     DEFAULT = 0,
@@ -507,6 +509,7 @@ public:
     RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
     RefPtr<FocusHub> GetRootFocusHub();
+    RefPtr<FocusHub> GetFocusLeaf();
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
 
@@ -516,6 +519,7 @@ public:
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
     static void LostFocusToViewRoot();
+    void LostFocusToTabStop(const RefPtr<FocusHub>& focusNode);
 
     bool IsViewRootScope();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
@@ -563,6 +567,11 @@ public:
 
     void SetFocusable(bool focusable, bool isExplicit = true);
 
+    void SetTabStop(bool tabStop)
+    {
+        tabStop_ = tabStop;
+    }
+
     bool GetFocusable() const
     {
         return focusable_;
@@ -578,6 +587,11 @@ public:
     bool IsCurrentFocus() const
     {
         return currentFocus_;
+    }
+
+    bool IsTabStop() const
+    {
+        return tabStop_;
     }
     bool IsCurrentFocusWholePath();
 
@@ -783,6 +797,7 @@ public:
     /* Manipulation on node-tree is forbidden in operation. */
     template <bool isReverse = false>
     bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation);
+    bool AnyChildFocusHub(bool isReverse, const std::function<bool(const RefPtr<FocusHub>&)>& operation);
     template <bool isReverse = false>
     void AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation);
 
@@ -1040,6 +1055,8 @@ protected:
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
     bool RequestNextFocusOfKeyTab(const KeyEvent& keyEvent);
+    bool RequestNextFocusOfKeyEnter();
+    bool RequestNextFocusOfKeyEsc();
     bool OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent);
 
     bool AcceptFocusOfSpecifyChild(FocusStep step);
@@ -1066,8 +1083,14 @@ protected:
 
 private:
     friend class FocusView;
+
+    friend class FocusManager;
  
     bool CalculatePosition();
+
+    bool IsLeafFocusScope();
+
+    void ClearLastFocusNode();
 
     void SetScopeFocusAlgorithm();
 
@@ -1148,6 +1171,8 @@ private:
     bool isFocusScope_ { false };
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
+    bool tabStop_ { false };
+    bool isSwitchByEnter_ { false };
 };
 } // namespace OHOS::Ace::NG
 

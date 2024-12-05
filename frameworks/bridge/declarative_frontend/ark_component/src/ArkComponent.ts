@@ -2197,6 +2197,16 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TabStopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    getUINativeModule().common.setTabStop(node, this.value);
+  }
+}
+
 class TouchableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -3762,6 +3772,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
     } else {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, undefined);
+    }
+    return this;
+  }
+
+  tabStop(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, undefined);
     }
     return this;
   }
