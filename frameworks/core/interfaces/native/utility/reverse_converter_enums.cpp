@@ -461,4 +461,15 @@ void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src)
         default: dst = static_cast<Ark_ScrollAlign>(-1);
     }
 }
+
+void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src)
+{
+    switch (src) {
+        case TransitionEdge::TOP: dst = ARK_TRANSITION_EDGE_TOP; break;
+        case TransitionEdge::BOTTOM: dst = ARK_TRANSITION_EDGE_BOTTOM; break;
+        case TransitionEdge::START: dst = ARK_TRANSITION_EDGE_START; break;
+        case TransitionEdge::END: dst = ARK_TRANSITION_EDGE_END; break;
+        default: dst = static_cast<Ark_TransitionEdge>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
