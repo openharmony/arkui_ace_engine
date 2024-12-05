@@ -364,9 +364,15 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     if (length < 1 || length > 2) {
         return;
     }
-
     int32_t index = 0;
     auto jsIndex = info[0];
+    if (jsIndex->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsIndex);
+        jsIndex = obj->GetProperty("value");
+        auto changeEventVal = obj->GetProperty("$value");
+        ParseSwiperIndexObject(info, changeEventVal);
+    }
+
     if (length > 0 && jsIndex->IsNumber()) {
         index = jsIndex->ToNumber<int32_t>();
     }

@@ -195,7 +195,7 @@ void JSTabs::SetOnGestureSwipe(const JSCallbackInfo& info)
 
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
-    CHECK_NULL_VOID(changeEventVal->IsFunction());
+    CHECK_NULL_VOID(!changeEventVal->IsUndefined() && changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -251,6 +251,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
 #ifndef NG_BUILD
             tabController->SetInitialIndex(index);
 #endif
+            changeEventVal = obj->GetProperty("$index");
         } else if (indexVal->IsObject()) {
             JSRef<JSObject> indexObj = JSRef<JSObject>::Cast(indexVal);
             auto indexValueProperty = indexObj->GetProperty("value");
@@ -263,9 +264,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
     }
 
     TabsModel::GetInstance()->Create(barPosition, index, tabController, tabsController);
-    if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
-        ParseTabsIndexObject(info, changeEventVal);
-    }
+    ParseTabsIndexObject(info, changeEventVal);
 }
 
 void JSTabs::Pop()
