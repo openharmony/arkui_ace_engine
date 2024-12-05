@@ -749,6 +749,10 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
         columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        auto accessibilityProperty = columnNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
+        }
         // set filter
         if (container->IsScenceBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);

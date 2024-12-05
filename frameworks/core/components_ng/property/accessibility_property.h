@@ -521,6 +521,8 @@ public:
 
     static bool IsTagInModalDialog(const RefPtr<FrameNode>& node);
 
+    static bool HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl);
@@ -574,6 +576,9 @@ public:
     bool HasUserCheckable();
     bool IsUserCheckable();
     void ResetUserCheckable();
+
+    virtual bool IsAccessibilityHoverPriority() const;
+    void SetAccessibilityHoverPriority(bool hoverPriority);
 
 private:
     // node should be not-null
@@ -641,6 +646,7 @@ protected:
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     bool accessibilityTextPreferred_ = false;
+    bool accessibilityHoverPriority_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;
