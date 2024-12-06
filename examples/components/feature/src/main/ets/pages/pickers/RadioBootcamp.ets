@@ -54,17 +54,17 @@ export struct RadioBootcamp {
   @State enableCheked: boolean = false;
   @State cheked: boolean = false;
   @State enableRadioWidth: boolean = false;
-  @State radioWidth : number = 10;
-  @State enableCheckedBackgroundColor : boolean = false
-  @State checkedBackgroundColor : ResourceColor = '#007DFF'
-  @State enableUncheckedBorderColor : boolean = false
-  @State uncheckedBorderColor : ResourceColor = '#182431'
-  @State enableIndicatorColor : boolean = false
-  @State indicatorColor : ResourceColor = '#FFFFFF'
-  @State enableIndicatorType : boolean = false
-  @State indicatorType : RadioIndicatorType = RadioIndicatorType.TICK
-  @State enableContentModifier : boolean = false
-  @State contentModifier : MyRadioStyle = new MyRadioStyle(1, '#004AAF')
+  @State radioWidth: number = 10;
+  @State enableCheckedBackgroundColor: boolean = false
+  @State checkedBackgroundColor: ResourceColor = '#007DFF'
+  @State enableUncheckedBorderColor: boolean = false
+  @State uncheckedBorderColor: ResourceColor = '#182431'
+  @State enableIndicatorColor: boolean = false
+  @State indicatorColor: ResourceColor = '#FFFFFF'
+  @State enableIndicatorType: boolean = false
+  @State indicatorType: RadioIndicatorType = RadioIndicatorType.TICK
+  @State enableContentModifier: boolean = false
+  @State contentModifier: MyRadioStyle = new MyRadioStyle(1, '#004AAF')
 
   build() {
     NavDestination() {
@@ -91,37 +91,41 @@ export struct RadioBootcamp {
   }
 
   @Builder
-  Content(){
-    Column(){
-      Row(){
-        if(this.enableContentModifier){
+  Content() {
+    Column() {
+      Row() {
+        if (this.enableContentModifier) {
           Radio({
-            value:'Radio1',
+            value: 'Radio1',
             group: 'radioGroup',
-            indicatorType : useEnabled(this.enableIndicatorType,this.indicatorType),
-            indicatorBuilder:()=>{this.indicatorBuilder()}
+            indicatorType: useEnabled(this.enableIndicatorType, this.indicatorType),
+            indicatorBuilder: () => {
+              this.indicatorBuilder()
+            }
           })
-            .checked(useEnabled(this.enableCheked,this.cheked))
+            .checked(useEnabled(this.enableCheked, this.cheked))
             .width(useEnabled(this.enableRadioWidth, this.radioWidth))
             .radioStyle({
-              checkedBackgroundColor: useEnabled(this.enableCheckedBackgroundColor,this.checkedBackgroundColor),
-              uncheckedBorderColor: useEnabled(this.enableUncheckedBorderColor,this.uncheckedBorderColor),
-              indicatorColor: useEnabled(this.enableIndicatorColor,this.indicatorColor),
+              checkedBackgroundColor: useEnabled(this.enableCheckedBackgroundColor, this.checkedBackgroundColor),
+              uncheckedBorderColor: useEnabled(this.enableUncheckedBorderColor, this.uncheckedBorderColor),
+              indicatorColor: useEnabled(this.enableIndicatorColor, this.indicatorColor),
             })
             .contentModifier(this.contentModifier)
-        }else {
+        } else {
           Radio({
-            value:'Radio1',
+            value: 'Radio1',
             group: 'radioGroup',
-            indicatorType : useEnabled(this.enableIndicatorType,this.indicatorType),
-            indicatorBuilder:()=>{this.indicatorBuilder()}
+            indicatorType: useEnabled(this.enableIndicatorType, this.indicatorType),
+            indicatorBuilder: () => {
+              this.indicatorBuilder()
+            }
           })
-            .checked(useEnabled(this.enableCheked,this.cheked))
+            .checked(useEnabled(this.enableCheked, this.cheked))
             .width(useEnabled(this.enableRadioWidth, this.radioWidth))
             .radioStyle({
-              checkedBackgroundColor: useEnabled(this.enableCheckedBackgroundColor,this.checkedBackgroundColor),
-              uncheckedBorderColor: useEnabled(this.enableUncheckedBorderColor,this.uncheckedBorderColor),
-              indicatorColor: useEnabled(this.enableIndicatorColor,this.indicatorColor),
+              checkedBackgroundColor: useEnabled(this.enableCheckedBackgroundColor, this.checkedBackgroundColor),
+              uncheckedBorderColor: useEnabled(this.enableUncheckedBorderColor, this.uncheckedBorderColor),
+              indicatorColor: useEnabled(this.enableIndicatorColor, this.indicatorColor),
             })
         }
       }
@@ -130,8 +134,8 @@ export struct RadioBootcamp {
 
   @Builder
   Parameters() {
-    Scroll(){
-      Column({ space:8 }){
+    Scroll() {
+      Column({ space: 8 }) {
         RadioBlock({
           title: 'indicatorType',
           isEnabled: this.enableIndicatorType,
