@@ -6829,26 +6829,25 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
 void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
 {
     Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
-    InitSelection(textOffset);
-    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
-    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto [pos, affinity] = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
+    auto it = std::find_if(spans_.begin(), spans_.end(),
+        [pos = static_cast<int32_t>(pos), affinity = affinity](const RefPtr<SpanItem>& spanItem) {
+            CHECK_NULL_RETURN(spanItem->spanItemType == SpanItemType::IMAGE, false);
+            return pos == (affinity == TextAffinity::UPSTREAM ? spanItem->position : spanItem->rangeStart);
+        });
+    bool isMouseOnImage = it != spans_.end();
+    auto selectRange = affinity == TextAffinity::UPSTREAM ? std::pair<int32_t, int32_t>(pos - 1, pos)
+                                                          : std::pair<int32_t, int32_t>(pos, pos + 1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
-    SetCaretPosition(selectEnd);
 
-    auto isNeedSelected = false;
-    if (selectEnd == selectStart + 1) {
-        auto selectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-        auto&& results = selectInfo.GetSelection().resultObjects;
-        // select image or builder
-        isNeedSelected = results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE;
-    }
-    if (isNeedSelected && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (isMouseOnImage && InRangeRect(info.GetGlobalLocation(), selectRange)) {
         selectedType_ = TextSpanType::IMAGE;
-        FireOnSelect(selectStart, selectEnd);
+        textSelector_.Update(selectRange.first, selectRange.second);
+        FireOnSelect(selectRange.first, selectRange.second);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
     }
@@ -7526,6 +7525,11 @@ void RichEditorPattern::ResetSelection()
 
 bool RichEditorPattern::BetweenSelection(const Offset& globalOffset)
 {
+    return InRangeRect(globalOffset, { textSelector_.GetTextStart(), textSelector_.GetTextEnd() });
+}
+
+bool RichEditorPattern::InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range)
+{
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto offset = host->GetPaintRectOffsetNG();
@@ -7534,13 +7538,13 @@ bool RichEditorPattern::BetweenSelection(const Offset& globalOffset)
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
     }
     auto eventHub = host->GetEventHub<EventHub>();
-    if (GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
+    if (GreatNotEqual(range.second, range.first)) {
         // Determine if the pan location is in the selected area
-        auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+        auto rangeRects = paragraphs_.GetRects(range.first, range.second);
         auto panOffset = OffsetF(localOffset.GetX(), localOffset.GetY()) - GetTextRect().GetOffset() +
                          OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-        for (const auto& selectedRect : selectedRects) {
-            if (selectedRect.IsInRegion(PointF(panOffset.GetX(), panOffset.GetY()))) {
+        for (const auto& rangeRect : rangeRects) {
+            if (rangeRect.IsInRegion(PointF(panOffset.GetX(), panOffset.GetY()))) {
                 return true;
             }
         }
