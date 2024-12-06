@@ -765,6 +765,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
     }
+    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(std::string("SafeArea Padding: ")
+                                           .append(layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str()));
+    }
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
@@ -4062,6 +4066,11 @@ bool FrameNode::ParentExpansive()
     CHECK_NULL_RETURN(parentLayoutProperty, false);
     auto&& parentOpts = parentLayoutProperty->GetSafeAreaExpandOpts();
     return parentOpts && parentOpts->Expansive();
+}
+
+void FrameNode::ProcessSafeAreaPadding()
+{
+    pattern_->ProcessSafeAreaPadding();
 }
 
 void FrameNode::UpdateFocusState()

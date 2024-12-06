@@ -90,6 +90,8 @@ public:
         return false;
     }
 
+    virtual void ProcessSafeAreaPadding() {}
+
     virtual bool IsNeedPercent() const
     {
         return false;
@@ -609,6 +611,8 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        host->ResetSafeAreaPadding();
+        layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}

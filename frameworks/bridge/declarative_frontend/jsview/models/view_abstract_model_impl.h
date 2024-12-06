@@ -50,6 +50,12 @@ public:
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
+    void SetSafeAreaPadding(const CalcDimension& value) override {}
+    void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) override {}
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {}
+    void ResetSafeAreaPadding() override {}
     void SetMargin(const CalcDimension& value) override;
     void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;

@@ -234,7 +234,9 @@ public:
     void AdjustNotExpandNode();
     void AdjustFixedSizeNode(RectF& frame);
     void ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame);
-
+    ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false);
+    void ResetSafeAreaPadding();
+    
     bool SkipSyncGeometryNode() const
     {
         return needSkipSyncGeometryNode_;
@@ -259,6 +261,10 @@ protected:
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
     float GetPageCurrentOffset();
+    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace);
+    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false);
+    void ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafeAreaPadding,
+        const PaddingPropertyF& parentInnerSpace, const RectF& adjustingRect, ExpandEdges& rollingExpand);
 
     WeakPtr<FrameNode> hostNode_;
 

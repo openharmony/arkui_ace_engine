@@ -226,11 +226,53 @@ void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation)
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
+    FlushSafeAreaPaddingProcess();
     if (!triggeredByImplicitAnimation && !afterLayoutCallbacksInImplicitAnimationTask_.empty()) {
         FlushAfterLayoutCallbackInImplicitAnimationTask();
     }
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::AddSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    safeAreaPaddingProcessTasks_.insert(node);
+}
+
+void UITaskScheduler::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    safeAreaPaddingProcessTasks_.erase(node);
+}
+
+void UITaskScheduler::FlushSafeAreaPaddingProcess()
+{
+    if (safeAreaPaddingProcessTasks_.empty()) {
+        return;
+    }
+    auto iter = safeAreaPaddingProcessTasks_.begin();
+    while (iter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *iter;
+        if (!node) {
+            iter = safeAreaPaddingProcessTasks_.erase(iter);
+        } else {
+            node->ProcessSafeAreaPadding();
+            ++iter;
+        }
+    }
+    // clear caches after all process tasks
+    iter = safeAreaPaddingProcessTasks_.begin();
+    while (iter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *iter;
+        if (!node) {
+            iter = safeAreaPaddingProcessTasks_.erase(iter);
+        } else {
+            const auto& geometryNode = node->GetGeometryNode();
+            if (geometryNode) {
+                geometryNode->ResetAccumulatedSafeAreaPadding();
+            }
+            ++iter;
+        }
+    }
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)
