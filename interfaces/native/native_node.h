@@ -4656,16 +4656,16 @@ typedef enum {
     NODE_SWIPER_INDICATOR_INTERACTIVE,
 
     /**
-    * @brief Sets the page flipping mode using the mouse wheel.
-    *
-    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32: page flipping mode using the mouse wheel. The parameter type is {@link ArkUI_PageFlipMode}. \n
-    * \n
-    * Format of the return value {@link ArkUI_PageFlipMode}:\n
-    * .value[0].i32: page flipping mode using the mouse wheel. \n
-    *
-    * @since 14
-    */
+     * @brief Sets the page flipping mode using the mouse wheel.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: page flipping mode using the mouse wheel. The parameter type is {@link ArkUI_PageFlipMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_PageFlipMode}:\n
+     * .value[0].i32: page flipping mode using the mouse wheel. \n
+     *
+     * @since 14
+     */
     NODE_SWIPER_PAGE_FLIP_MODE,
 
     /**

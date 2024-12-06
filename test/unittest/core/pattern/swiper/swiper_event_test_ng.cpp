@@ -1264,7 +1264,7 @@ HWTEST_F(SwiperEventTestNg, UpdateSwiperPanEvent001, TestSize.Level1)
  * @tc.desc: PageFlipMode property test with CONTINUOUS mode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AttrPageFlipModeTest001, TestSize.Level1)
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
 {
     SwiperModelNG model = CreateSwiper();
     CreateSwiperItems();
@@ -1291,7 +1291,7 @@ HWTEST_F(SwiperTestNg, AttrPageFlipModeTest001, TestSize.Level1)
  * @tc.desc: PageFlipMode property test with SINGLE mode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AttrPageFlipModeTest002, TestSize.Level1)
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
 {
     SwiperModelNG model = CreateSwiper();
     model.SetPageFlipMode(1);
