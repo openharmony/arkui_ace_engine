@@ -20,10 +20,13 @@
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
 
+#include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1066,5 +1069,71 @@ HWTEST_F(TextModifierTest, setTextOptionsTestContentValidValues, TestSize.Level1
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
+}
+
+/*
+ * @tc.name: setTextOptionsTestContentNull
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestContentNull, TestSize.Level1)
+{
+    // no crash should happen
+    auto textOptions = Converter::ArkValue<Opt_TextOptions>();
+    modifier_->setTextOptions(node_, nullptr, &textOptions);
+}
+
+/*
+ * @tc.name: setTextOptionsTestContentEmpty
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestContentEmpty, TestSize.Level1)
+{
+    // no crash should happen
+    auto textOptions = Converter::ArkValue<Opt_TextOptions>();
+    auto emptyContent = Converter::ArkValue<Opt_Union_String_Resource>();
+    modifier_->setTextOptions(node_, &emptyContent, &textOptions);
+}
+
+/*
+ * @tc.name: setTextOptionsTestValueValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestValueValidValues, TestSize.Level1)
+{
+    auto text = ArkUnion<Opt_Union_String_Resource, Ark_String>("text");
+
+    TextControllerPeer peer;
+    Ark_TextOptions textOptions = {
+        .controller = { .ptr = reinterpret_cast<Ark_NativePointer>(&peer) }
+    };
+    auto textOptionsOpt = Converter::ArkValue<Opt_TextOptions>(textOptions);
+    modifier_->setTextOptions(node_, &text, &textOptionsOpt);
+
+    // get controller from node
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto baseController = pattern->GetTextController();
+    auto textController = AceType::DynamicCast<TextController>(baseController);
+    ASSERT_NE(textController.GetRawPtr(), nullptr);
+
+    // check that controller in peer is properly set
+    EXPECT_EQ(peer.controller.GetRawPtr(), textController.GetRawPtr());
+}
+
+/*
+ * @tc.name: setTextOptionsTestValueNull
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestValueNull, TestSize.Level1)
+{
+    // no crash should happen
+    auto text = ArkUnion<Opt_Union_String_Resource, Ark_String>("text");
+    modifier_->setTextOptions(node_, &text, nullptr);
 }
 }

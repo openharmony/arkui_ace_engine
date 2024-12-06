@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -40,6 +41,10 @@ struct FontSettingOptions {
     std::optional<bool> enableVariableFontWeight;
 };
 
+struct TextOptions {
+    TextControllerPeer* peer;
+};
+
 template<>
 inline FontSettingOptions Convert(const Ark_FontSettingOptions& src)
 {
@@ -57,6 +62,15 @@ void AssignCast(std::optional<TextSelectableMode>& dst, const Ark_TextSelectable
         case ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE: dst = TextSelectableMode::UNSELECTABLE; break;
         default: LOGE("Unexpected enum value in Ark_TextSelectableMode: %{public}d", src);
     }
+}
+
+template<>
+TextOptions Convert(const Ark_TextOptions& src)
+{
+    TextOptions options;
+    auto nativePtr = Converter::Convert<Ark_NativePointer>(src.controller);
+    options.peer = reinterpret_cast<TextControllerPeer*>(nativePtr);
+    return options;
 }
 
 std::optional<int32_t> FontWeightToInt(const FontWeight& src)
@@ -92,15 +106,23 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(content);
 
-    auto text = Converter::OptConvert<std::u16string>(*content);
-    if (text) {
-        TextModelNG::InitText(frameNode, text.value());
+    if (content) {
+        auto text = Converter::OptConvert<std::u16string>(*content);
+        if (text) {
+            TextModelNG::InitText(frameNode, text.value());
+        }
     }
 
-    if (value && value->tag != ARK_TAG_UNDEFINED) {
-        LOGW("TextInterfaceModifier::SetTextOptionsImpl with options is not implemented");
+    if (value) {
+        // obtain internal controller
+        auto internalController = TextModelNG::InitTextController(frameNode);
+
+        // pass internal controller to peer
+        auto textOptions = Converter::OptConvert<Converter::TextOptions>(*value);
+        if (textOptions && textOptions->peer) {
+            textOptions->peer->controller = AceType::DynamicCast<TextController>(internalController);
+        }
     }
 }
 } // TextInterfaceModifier
@@ -413,8 +435,8 @@ void CaretColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextModelNG::SetCaretColor(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Color>(*value);
+    TextModelNG::SetCaretColor(frameNode, convValue);
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
                                  const Ark_ResourceColor* value)
@@ -422,8 +444,8 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextModelNG::SetSelectedBackgroundColor(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Color>(*value);
+    TextModelNG::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void EllipsisModeImpl(Ark_NativePointer node,
                       Ark_EllipsisMode value)

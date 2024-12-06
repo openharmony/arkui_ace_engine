@@ -133,8 +133,8 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
-    static void SetCaretColor(FrameNode* frameNode, const Color& value);
-    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);

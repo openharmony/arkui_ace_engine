@@ -36,6 +36,8 @@ enum ResID {
     FONT_FAMILY_RESOURCE_1_ID,
     FONT_FAMILY_RESOURCE_2_ID,
     COLORS_RES_0_ID,
+    COLORS_ALPHA_20RES_0_ID,
+    COLORS_ALPHA_20RES_1_ID,
     RES_DATA_FOR_LENGTH_0_ID,
     RES_DATA_FOR_LENGTH_1_ID,
     RES_DATA_FOR_LENGTH_2_ID,
@@ -128,6 +130,8 @@ inline constexpr auto FONT_FAMILY_RESOURCE_0_STR = "FONT_FAMILY_RESOURCE_0_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_1_STR = "FONT_FAMILY_RESOURCE_1_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_2_STR = "FONT_FAMILY_RESOURCE_2_STR";
 inline constexpr auto COLORS_RES_0_STR = "COLORS_RES_0_STR";
+inline constexpr auto COLORS_ALPHA_20RES_0_STR = "COLORS_ALPHA_20RES_0_STR";
+inline constexpr auto COLORS_ALPHA_20RES_1_STR = "COLORS_ALPHA_20RES_1_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_0_STR = "RES_DATA_FOR_LENGTH_0_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_1_STR = "RES_DATA_FOR_LENGTH_1_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_2_STR = "RES_DATA_FOR_LENGTH_2_STR";
@@ -244,14 +248,24 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFamilyStr
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsStrValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsStrInvalidValues;
 
+// Fixture 'ColorsAlpha20Str' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsAlpha20StrValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsAlpha20StrInvalidValues;
+
 // Fixture 'ColorsNum' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsNumValidValues;
+
+// Fixture 'ColorsAlpha20Num' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsAlpha20NumValidValues;
 
 // Fixture 'TextMaxLength' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMaxLengthValidValues;
 
 // Fixture 'ColorsRes' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsResValidValues;
+
+// Fixture 'ColorsAlpha20Res' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsAlpha20ResValidValues;
 
 // Fixture 'TextAlignType' for type 'Ark_TextAlign'
 extern std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureTextAlignTypeValidValues;
@@ -288,6 +302,10 @@ extern std::vector<std::tuple<std::string, Ark_ProgressType>> testFixtureProgres
 // Fixture 'ColorsEnum' for type 'Ark_Color'
 extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues;
+
+// Fixture 'ColorsAlpha20Enum' for type 'Ark_Color'
+extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsAlpha20EnumValidValues;
+extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsAlpha20EnumInvalidValues;
 
 // Fixture 'VariableFontWeightEnum' for type 'Ark_FontWeight'
 extern std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureVariableFontWeightEnumValidValues;

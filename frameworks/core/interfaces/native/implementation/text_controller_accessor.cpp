@@ -14,15 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-
-struct TextControllerPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextControllerAccessor {
 void DestroyPeerImpl(TextControllerPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->controller = nullptr;
+    delete peer;
 }
 TextControllerPeer* CtorImpl()
 {
@@ -34,13 +36,17 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void CloseSelectionMenuImpl(TextControllerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->controller);
+    peer->controller->CloseSelectionMenu();
 }
 void SetStyledStringImpl(TextControllerPeer* peer,
                          const Ark_StyledString* value)
 {
+    LOGW("TextControllerAccessor::SetStyledStringImpl is not implemented");
 }
 Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
 {
+    LOGW("TextControllerAccessor::GetLayoutManagerImpl is not implemented");
     return 0;
 }
 } // TextControllerAccessor

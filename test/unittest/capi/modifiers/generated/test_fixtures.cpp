@@ -31,6 +31,8 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { FONT_FAMILY_RESOURCE_1_ID, FONT_FAMILY_RESOURCE_1_STR, "Arial, Sans Serif" },
     { FONT_FAMILY_RESOURCE_2_ID, FONT_FAMILY_RESOURCE_2_STR, "" },
     { COLORS_RES_0_ID, COLORS_RES_0_STR, Color(0xA1FAC0DE) },
+    { COLORS_ALPHA_20RES_0_ID, COLORS_ALPHA_20RES_0_STR, Color(0xA1FAC0DE) },
+    { COLORS_ALPHA_20RES_1_ID, COLORS_ALPHA_20RES_1_STR, Color(0xFFFAC0DE) },
     { RES_DATA_FOR_LENGTH_0_ID, RES_DATA_FOR_LENGTH_0_STR, 432.0_vp },
     { RES_DATA_FOR_LENGTH_1_ID, RES_DATA_FOR_LENGTH_1_STR, 123.0_fp },
     { RES_DATA_FOR_LENGTH_2_ID, RES_DATA_FOR_LENGTH_2_STR, 22.55_px },
@@ -146,12 +148,12 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStrin
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringResNoEmptyValidValues = {
     { "ResId:STRING_RES_NO_EMPTY_0_ID", CreateResource(STRING_RES_NO_EMPTY_0_ID, Converter::ResourceType::STRING),
         "abc" },
-    { "ResName:STRING_RES_NO_EMPTY_0_STR",
-        CreateResource(STRING_RES_NO_EMPTY_0_STR, Converter::ResourceType::STRING), "abc" },
+    { "ResName:STRING_RES_NO_EMPTY_0_STR", CreateResource(STRING_RES_NO_EMPTY_0_STR, Converter::ResourceType::STRING),
+        "abc" },
     { "ResId:STRING_RES_NO_EMPTY_1_ID", CreateResource(STRING_RES_NO_EMPTY_1_ID, Converter::ResourceType::STRING),
         "xyz" },
-    { "ResName:STRING_RES_NO_EMPTY_1_STR",
-        CreateResource(STRING_RES_NO_EMPTY_1_STR, Converter::ResourceType::STRING), "xyz" },
+    { "ResName:STRING_RES_NO_EMPTY_1_STR", CreateResource(STRING_RES_NO_EMPTY_1_STR, Converter::ResourceType::STRING),
+        "xyz" },
 };
 
 // Fixture 'StringEmptyUndefined' for type 'Ark_String'
@@ -171,17 +173,16 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStrin
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFontFamilyResourceValidValues = {
     { "ResId:FONT_FAMILY_RESOURCE_0_ID", CreateResource(FONT_FAMILY_RESOURCE_0_ID, Converter::ResourceType::STRING),
         "Arial" },
-    { "ResName:FONT_FAMILY_RESOURCE_0_STR",
-        CreateResource(FONT_FAMILY_RESOURCE_0_STR, Converter::ResourceType::STRING), "Arial" },
+    { "ResName:FONT_FAMILY_RESOURCE_0_STR", CreateResource(FONT_FAMILY_RESOURCE_0_STR, Converter::ResourceType::STRING),
+        "Arial" },
     { "ResId:FONT_FAMILY_RESOURCE_1_ID", CreateResource(FONT_FAMILY_RESOURCE_1_ID, Converter::ResourceType::STRING),
         "Arial, Sans Serif" },
-    { "ResName:FONT_FAMILY_RESOURCE_1_STR",
-        CreateResource(FONT_FAMILY_RESOURCE_1_STR, Converter::ResourceType::STRING), "Arial, Sans Serif" },
+    { "ResName:FONT_FAMILY_RESOURCE_1_STR", CreateResource(FONT_FAMILY_RESOURCE_1_STR, Converter::ResourceType::STRING),
+        "Arial, Sans Serif" },
 };
 
 std::vector<std::tuple<std::string, Ark_Resource>> testFixtureFontFamilyResourceInvalidValues = {
-    { "ResId:FONT_FAMILY_RESOURCE_2_ID",
-        CreateResource(FONT_FAMILY_RESOURCE_2_ID, Converter::ResourceType::STRING) },
+    { "ResId:FONT_FAMILY_RESOURCE_2_ID", CreateResource(FONT_FAMILY_RESOURCE_2_ID, Converter::ResourceType::STRING) },
     { "ResName:FONT_FAMILY_RESOURCE_2_STR",
         CreateResource(FONT_FAMILY_RESOURCE_2_STR, Converter::ResourceType::STRING) },
 };
@@ -215,12 +216,44 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsStrInvalidValu
     { "\"RgbA(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("RgbA(255, 100, 255, 0.5)") },
 };
 
+// Fixture 'ColorsAlpha20Str' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsAlpha20StrValidValues = {
+    { "\"#123\"", Converter::ArkValue<Ark_String>("#123"), "#33112233" },
+    { "\"#11223344\"", Converter::ArkValue<Ark_String>("#11223344"), "#11223344" },
+    { "\"#123456\"", Converter::ArkValue<Ark_String>("#123456"), "#33123456" },
+    { "\"65535\"", Converter::ArkValue<Ark_String>("65535"), "#3300FFFF" },
+    { "\"#abcdef\"", Converter::ArkValue<Ark_String>("#abcdef"), "#33ABCDEF" },
+    { "\"#aBcdeF\"", Converter::ArkValue<Ark_String>("#aBcdeF"), "#33ABCDEF" },
+    { "\"rgb(255, 100, 55)\"", Converter::ArkValue<Ark_String>("rgb(255, 100, 55)"), "#33FF6437" },
+    { "\"rgba(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("rgba(255, 100, 255, 0.5)"), "#80FF64FF" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsAlpha20StrInvalidValues = {
+    { "\"invalid\"", Converter::ArkValue<Ark_String>("invalid") },
+    { "\"\"", Converter::ArkValue<Ark_String>("") },
+    { "\"rgb(270, 0xf1, 755.5f)\"", Converter::ArkValue<Ark_String>("rgb(270, 0xf1, 755.5f)") },
+    { "\"RgbA(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("RgbA(255, 100, 255, 0.5)") },
+};
+
 // Fixture 'ColorsNum' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsNumValidValues = {
     { "0", Converter::ArkValue<Ark_Number>(0), "#00000000" },
     { "1", Converter::ArkValue<Ark_Number>(1), "#FF000001" },
     { "65535", Converter::ArkValue<Ark_Number>(65535), "#FF00FFFF" },
     { "-1", Converter::ArkValue<Ark_Number>(-1), "#FFFFFFFF" },
+    { "0xBE7AC0DE", Converter::ArkValue<Ark_Number>(0xBE7AC0DE), "#BE7AC0DE" },
+    { "std::numeric_limits<float>::quiet_NaN()",
+        Converter::ArkValue<Ark_Number>(std::numeric_limits<float>::quiet_NaN()), "#80000000" },
+    { "std::numeric_limits<float>::infinity()", Converter::ArkValue<Ark_Number>(std::numeric_limits<float>::infinity()),
+        "#80000000" },
+};
+
+// Fixture 'ColorsAlpha20Num' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsAlpha20NumValidValues = {
+    { "0", Converter::ArkValue<Ark_Number>(0), "#00000000" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "#33000001" },
+    { "65535", Converter::ArkValue<Ark_Number>(65535), "#3300FFFF" },
+    { "-1", Converter::ArkValue<Ark_Number>(-1), "#33FFFFFF" },
     { "0xBE7AC0DE", Converter::ArkValue<Ark_Number>(0xBE7AC0DE), "#BE7AC0DE" },
     { "std::numeric_limits<float>::quiet_NaN()",
         Converter::ArkValue<Ark_Number>(std::numeric_limits<float>::quiet_NaN()), "#80000000" },
@@ -246,6 +279,18 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureTextMax
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsResValidValues = {
     { "ResId:COLORS_RES_0_ID", CreateResource(COLORS_RES_0_ID, Converter::ResourceType::COLOR), "#A1FAC0DE" },
     { "ResName:COLORS_RES_0_STR", CreateResource(COLORS_RES_0_STR, Converter::ResourceType::COLOR), "#A1FAC0DE" },
+};
+
+// Fixture 'ColorsAlpha20Res' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsAlpha20ResValidValues = {
+    { "ResId:COLORS_ALPHA_20RES_0_ID", CreateResource(COLORS_ALPHA_20RES_0_ID, Converter::ResourceType::COLOR),
+        "#A1FAC0DE" },
+    { "ResName:COLORS_ALPHA_20RES_0_STR", CreateResource(COLORS_ALPHA_20RES_0_STR, Converter::ResourceType::COLOR),
+        "#A1FAC0DE" },
+    { "ResId:COLORS_ALPHA_20RES_1_ID", CreateResource(COLORS_ALPHA_20RES_1_ID, Converter::ResourceType::COLOR),
+        "#33FAC0DE" },
+    { "ResName:COLORS_ALPHA_20RES_1_STR", CreateResource(COLORS_ALPHA_20RES_1_STR, Converter::ResourceType::COLOR),
+        "#33FAC0DE" },
 };
 
 // Fixture 'TextAlignType' for type 'Ark_TextAlign'
@@ -423,6 +468,27 @@ std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEn
 };
 
 std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues = {
+    { "static_cast<Ark_Color>(-1)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(-1)) },
+    { "static_cast<Ark_Color>(INT_MAX)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX)) },
+};
+
+// Fixture 'ColorsAlpha20Enum' for type 'Ark_Color'
+std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsAlpha20EnumValidValues = {
+    { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#33FFFFFF" },
+    { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLACK), "#33000000" },
+    { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE), "#330000FF" },
+    { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_Color>(ARK_COLOR_BROWN), "#33A52A2A" },
+    { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GRAY), "#33808080" },
+    { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREEN), "#33008000" },
+    { "ARK_COLOR_GREY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREY), "#33808080" },
+    { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_Color>(ARK_COLOR_ORANGE), "#33FFA500" },
+    { "ARK_COLOR_PINK", Converter::ArkValue<Ark_Color>(ARK_COLOR_PINK), "#33FFC0CB" },
+    { "ARK_COLOR_RED", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED), "#33FF0000" },
+    { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW), "#33FFFF00" },
+    { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+};
+
+std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsAlpha20EnumInvalidValues = {
     { "static_cast<Ark_Color>(-1)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(-1)) },
     { "static_cast<Ark_Color>(INT_MAX)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX)) },
 };
@@ -605,12 +671,12 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureResDa
         "-4.50fp" },
     { "ResId:RES_DATA_FOR_LENGTH_10_ID", CreateResource(RES_DATA_FOR_LENGTH_10_ID, Converter::ResourceType::FLOAT),
         "-5.60px" },
-    { "ResName:RES_DATA_FOR_LENGTH_10_STR",
-        CreateResource(RES_DATA_FOR_LENGTH_10_STR, Converter::ResourceType::FLOAT), "-5.60px" },
+    { "ResName:RES_DATA_FOR_LENGTH_10_STR", CreateResource(RES_DATA_FOR_LENGTH_10_STR, Converter::ResourceType::FLOAT),
+        "-5.60px" },
     { "ResId:RES_DATA_FOR_LENGTH_11_ID", CreateResource(RES_DATA_FOR_LENGTH_11_ID, Converter::ResourceType::FLOAT),
         "-80.00%" },
-    { "ResName:RES_DATA_FOR_LENGTH_11_STR",
-        CreateResource(RES_DATA_FOR_LENGTH_11_STR, Converter::ResourceType::FLOAT), "-80.00%" },
+    { "ResName:RES_DATA_FOR_LENGTH_11_STR", CreateResource(RES_DATA_FOR_LENGTH_11_STR, Converter::ResourceType::FLOAT),
+        "-80.00%" },
 };
 
 // Fixture 'LengthResPositive' for type 'Ark_Length'
@@ -845,44 +911,44 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegN
 
 // Fixture 'DimensionsResNonNeg' for type 'Ark_Resource'
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegValidValues = {
-    { "ResId:DIMENSIONS_RES_NON_NEG_0_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_0_ID, Converter::ResourceType::FLOAT), "123.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_0_ID", CreateResource(DIMENSIONS_RES_NON_NEG_0_ID, Converter::ResourceType::FLOAT),
+        "123.00vp" },
     { "ResName:DIMENSIONS_RES_NON_NEG_0_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_0_STR, Converter::ResourceType::FLOAT), "123.00vp" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_1_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_1_ID, Converter::ResourceType::FLOAT), "0.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_1_ID", CreateResource(DIMENSIONS_RES_NON_NEG_1_ID, Converter::ResourceType::FLOAT),
+        "0.00vp" },
     { "ResName:DIMENSIONS_RES_NON_NEG_1_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_1_STR, Converter::ResourceType::FLOAT), "0.00vp" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_2_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_2_ID, Converter::ResourceType::FLOAT), "1.23vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_2_ID", CreateResource(DIMENSIONS_RES_NON_NEG_2_ID, Converter::ResourceType::FLOAT),
+        "1.23vp" },
     { "ResName:DIMENSIONS_RES_NON_NEG_2_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_2_STR, Converter::ResourceType::FLOAT), "1.23vp" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_3_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_3_ID, Converter::ResourceType::FLOAT), "123.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_3_ID", CreateResource(DIMENSIONS_RES_NON_NEG_3_ID, Converter::ResourceType::FLOAT),
+        "123.00fp" },
     { "ResName:DIMENSIONS_RES_NON_NEG_3_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_3_STR, Converter::ResourceType::FLOAT), "123.00fp" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_4_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_4_ID, Converter::ResourceType::FLOAT), "0.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_4_ID", CreateResource(DIMENSIONS_RES_NON_NEG_4_ID, Converter::ResourceType::FLOAT),
+        "0.00fp" },
     { "ResName:DIMENSIONS_RES_NON_NEG_4_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_4_STR, Converter::ResourceType::FLOAT), "0.00fp" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_5_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_5_ID, Converter::ResourceType::FLOAT), "1.23fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_5_ID", CreateResource(DIMENSIONS_RES_NON_NEG_5_ID, Converter::ResourceType::FLOAT),
+        "1.23fp" },
     { "ResName:DIMENSIONS_RES_NON_NEG_5_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_5_STR, Converter::ResourceType::FLOAT), "1.23fp" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_6_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_6_ID, Converter::ResourceType::FLOAT), "123.00px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_6_ID", CreateResource(DIMENSIONS_RES_NON_NEG_6_ID, Converter::ResourceType::FLOAT),
+        "123.00px" },
     { "ResName:DIMENSIONS_RES_NON_NEG_6_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_6_STR, Converter::ResourceType::FLOAT), "123.00px" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_7_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_7_ID, Converter::ResourceType::FLOAT), "0.00px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_7_ID", CreateResource(DIMENSIONS_RES_NON_NEG_7_ID, Converter::ResourceType::FLOAT),
+        "0.00px" },
     { "ResName:DIMENSIONS_RES_NON_NEG_7_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_7_STR, Converter::ResourceType::FLOAT), "0.00px" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_8_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_8_ID, Converter::ResourceType::FLOAT), "1.23px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_8_ID", CreateResource(DIMENSIONS_RES_NON_NEG_8_ID, Converter::ResourceType::FLOAT),
+        "1.23px" },
     { "ResName:DIMENSIONS_RES_NON_NEG_8_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_8_STR, Converter::ResourceType::FLOAT), "1.23px" },
-    { "ResId:DIMENSIONS_RES_NON_NEG_9_ID",
-        CreateResource(DIMENSIONS_RES_NON_NEG_9_ID, Converter::ResourceType::FLOAT), "20.00%" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_9_ID", CreateResource(DIMENSIONS_RES_NON_NEG_9_ID, Converter::ResourceType::FLOAT),
+        "20.00%" },
     { "ResName:DIMENSIONS_RES_NON_NEG_9_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_9_STR, Converter::ResourceType::FLOAT), "20.00%" },
 };

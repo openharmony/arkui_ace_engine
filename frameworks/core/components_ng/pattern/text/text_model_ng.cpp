@@ -1047,9 +1047,13 @@ TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
     return value;
 }
 
-void TextModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
+void TextModelNG::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, frameNode);
+    }
 }
 
 Color TextModelNG::GetCaretColor(FrameNode* frameNode)
@@ -1072,14 +1076,18 @@ void TextModelNG::ResetCaretColor(FrameNode* frameNode)
     }
 }
 
-void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
+void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    Color color = value;
-    if (color.GetAlpha() == DEFAULT_ALPHA) {
-        // Default setting of 20% opacity
-        color = color.ChangeOpacity(DEFAULT_OPACITY);
+    if (value) {
+        Color color = value.value();
+        if (color.GetAlpha() == DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            color = color.ChangeOpacity(DEFAULT_OPACITY);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, color, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, color, frameNode);
 }
 
 Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
