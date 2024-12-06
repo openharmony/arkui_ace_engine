@@ -226,10 +226,10 @@ std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
 
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 {
-    if (!isStarted_ || info.GetTouches().empty()) {
+    if (!isStarted_ || info.GetChangedTouches().empty()) {
         return;
     }
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touchType = info.GetChangedTouches().front().GetTouchType();
     switch (touchType) {
         case TouchType::UP:
             EndGestureSelection();
@@ -247,11 +247,15 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 
 void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
 {
-    auto localOffset = info.GetTouches().front().GetLocalLocation();
-    if (!isSelecting_ && LessOrEqual((localOffset - startOffset_).GetDistance(), minMoveDistance_.ConvertToPx())) {
-        return;
+    auto locationInfo = info.GetChangedTouches().front();
+    auto localOffset = locationInfo.GetLocalLocation();
+    if (!isSelecting_) {
+        if (LessOrEqual((localOffset - startOffset_).GetDistance(), minMoveDistance_.ConvertToPx())) {
+            return;
+        }
+        isSelecting_ = true;
+        selectingFingerId_ = locationInfo.GetFingerId();
     }
-    isSelecting_ = true;
     auto index = GetTouchIndex({ localOffset.GetX(), localOffset.GetY() });
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);
