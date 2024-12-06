@@ -221,16 +221,29 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(container, false);
     auto window = static_cast<RosenWindow*>(container->GetWindow());
     CHECK_NULL_RETURN(window, false);
-    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
-    CHECK_NULL_RETURN(rootScene, false);
+    auto RsWindow = window->GetRSWindow();
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
     float density = GetDensityInCurrentResolution();
-    rootScene->SetDisplayDensity(density);
-    int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
-    rootScene->SetDisplayOrientation(orientation);
-    rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+    LOGI("type: %{public}s", RsWindow->GetClassType().c_str());
+    if (RsWindow->GetClassType() == "RootScene") {
+        auto rootScene = static_cast<Rosen::RootScene*>(RsWindow.GetRefPtr());
+        CHECK_NULL_RETURN(rootScene, false);
+        rootScene->SetDisplayDensity(density);
+        int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+        rootScene->SetDisplayOrientation(orientation);
+        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+    } else if (RsWindow->GetClassType() == "ScreenScene") {
+        auto screenScene = static_cast<Rosen::ScreenScene*>(RsWindow.GetRefPtr());
+        CHECK_NULL_RETURN(screenScene, false);
+        screenScene->SetDisplayDensity(density);
+        int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+        screenScene->SetDisplayOrientation(orientation);
+        screenScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+    } else {
+        LOGE("others type");
+    }
     return true;
 }
 
