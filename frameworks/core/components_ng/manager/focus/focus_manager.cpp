@@ -439,12 +439,9 @@ FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub,
     SwitchingStartReason reason)
 {
     RefPtr<FocusHub> hub = focusHub;
-    while (!focusHub ||!focusHub->GetFocusManager()) {
+    if (!hub || !hub->GetFocusManager()) {
         auto curFocusView = FocusView::GetCurrentFocusView();
-        CHECK_NULL_BREAK(curFocusView);
-        auto curFocusViewHub = curFocusView->GetFocusHub();
-        CHECK_NULL_BREAK(curFocusViewHub);
-        hub = curFocusViewHub;
+        auto hub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     }
 
     auto mng = hub ? hub->GetFocusManager() : GetCurrentFocusManager();
