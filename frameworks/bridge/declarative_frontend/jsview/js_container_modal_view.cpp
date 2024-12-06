@@ -140,6 +140,12 @@ void JSContainerModal::CallWindowNative(const JSCallbackInfo& info)
         TAG_LOGI(AceLogTag::ACE_APPBAR, "CallWindowNative param error");
         return;
     }
+
+    if (!info[0]->IsString()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "CallWindowNative first param is not string");
+        return;
+    }
+
     if (!info[1]->IsString()) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "CallWindowNative value is error");
         return;
