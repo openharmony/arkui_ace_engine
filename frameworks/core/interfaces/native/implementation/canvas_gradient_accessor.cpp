@@ -38,50 +38,18 @@ void AddColorStopImpl(CanvasGradientPeer* peer,
                       const Ark_Number* offset,
                       const Ark_String* color)
 {
-
-    
-
-     if (!isColorStopValid_ && gradient_->GetColors().empty()) {
-        isColorStopValid_ = true;
+    CHECK_NULL_VOID(peer);
+    if (offset == nullptr || color == nullptr) {
+        peer->AddColorStop(-1.0f, Color::TRANSPARENT);
+        return;
     }
-    if (isColorStopValid_ && info[0]->IsNumber() && info[1]->IsString()) {
-        double offset = 0.0;
-        JSViewAbstract::ParseJsDouble(info[0], offset);
-        if (offset < 0 || offset > 1) {
-            isColorStopValid_ = false;
-            // if the offset is invalid, fill the shape with transparent
-            gradient_->ClearColors();
-            GradientColor color;
-            color.SetColor(Color::TRANSPARENT);
-            color.SetDimension(0.0);
-            gradient_->AddColor(color);
-            gradient_->AddColor(color);
-            return;
-        }
-        std::string jsColor;
-        GradientColor color;
-        JSViewAbstract::ParseJsString(info[1], jsColor);
-        Color colorFromString = Color::WHITE;
-        if (!Color::ParseColorString(jsColor, colorFromString)) {
-            gradient_->ClearColors();
-            color.SetColor(Color::TRANSPARENT);
-            color.SetDimension(0.0);
-            gradient_->AddColor(color);
-            gradient_->AddColor(color);
-            isColorStopValid_ = false;
-            return;
-        }
-        color.SetColor(colorFromString);
-        color.SetDimension(offset);
-        if (gradient_) {
-            gradient_->AddColor(color);
-        }
-        auto colorSize = gradient_->GetColors().size();
-        // prevent setting only one colorStop
-        if (colorSize == 1) {
-            gradient_->AddColor(color);
-        }
+    auto opt = Converter::OptConvert<Color>(*color);
+    if (!opt) {
+        peer->AddColorStop(-1.0f, Color::TRANSPARENT);
+        return;
     }
+    auto value = Converter::Convert<float>(*offset);
+    peer->AddColorStop(value, *opt);
 }
 } // CanvasGradientAccessor
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
