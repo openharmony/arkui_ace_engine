@@ -62,6 +62,7 @@ namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
+using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 
 class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
@@ -921,6 +922,9 @@ public:
     void FlushFrameCallback(uint64_t nanoTimestamp);
     void TriggerIdleCallback(int64_t deadline);
 
+    void AddCAPIFrameCallback(FrameCallbackFuncFromCAPI&& frameCallbackFuncFromCAPI);
+    void FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint32_t frameCount);
+
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
 
@@ -1268,6 +1272,7 @@ private:
     bool isForceSplit_ = false;
     std::string homePageConfig_;
 
+    std::list<FrameCallbackFuncFromCAPI> frameCallbackFuncsFromCAPI_;
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;

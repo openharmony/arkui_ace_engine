@@ -1633,6 +1633,25 @@ int32_t GetContextByNode(ArkUINodeHandle node)
     return instanceId;
 }
 
+ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID");
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto onframeCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimestamp, uint32_t frameCount) -> void {
+        callback(nanoTimestamp, frameCount, userData);
+    };
+
+    pipeline->AddCAPIFrameCallback(std::move(onframeCallbackFuncFromCAPI));
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -1666,6 +1685,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         ConvertLengthMetricsUnit,
 
         GetContextByNode,
+
+        PostFrameCallback,
     };
     /* clang-format on */
 
