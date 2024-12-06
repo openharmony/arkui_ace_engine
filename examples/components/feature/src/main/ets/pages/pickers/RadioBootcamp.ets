@@ -16,12 +16,12 @@ import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
 
 @Builder
-function buildRadio(config: RadioConfiguration) {
+function RadioBuilder(config: RadioConfiguration) {
   Row({ space: 30 }) {
     Circle({ width: 50, height: 50 })
       .stroke(Color.Black)
       .fill(config.checked ? (config.contentModifier as MyRadioStyle).selectedColor : Color.White)
-    Button(config.checked ? "off" : "on")
+    Button(config.checked ? 'off' : 'on' )
       .width(100)
       .type(config.checked ? (config.contentModifier as MyRadioStyle).type : ButtonType.Normal)
       .backgroundColor('#2787D9')
@@ -31,19 +31,20 @@ function buildRadio(config: RadioConfiguration) {
         } else {
           config.triggerChange(true)
         }
+        config.triggerChange(!config.checked);
       })
   }
 }
 
 class MyRadioStyle implements ContentModifier<RadioConfiguration> {
-  type: number = 0
-  selectedColor: ResourceColor = Color.Black
+  public type: number = 0
+  public selectedColor: ResourceColor = Color.Black
   constructor(numberType: number, colorType: ResourceColor) {
-    this.type = numberType
+    this.type = numberType;
     this.selectedColor = colorType
   }
   applyContent(): WrappedBuilder<[RadioConfiguration]> {
-    return wrapBuilder(buildRadio)
+    return wrapBuilder(RadioBuilder)
   }
 }
 
@@ -51,20 +52,20 @@ class MyRadioStyle implements ContentModifier<RadioConfiguration> {
 export struct RadioBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
-  @State enableCheked: boolean = false;
-  @State cheked: boolean = false;
+  @State enableChecked: boolean = false;
+  @State checked: boolean = false;
   @State enableRadioWidth: boolean = false;
   @State radioWidth: number = 10;
-  @State enableCheckedBackgroundColor: boolean = false
-  @State checkedBackgroundColor: ResourceColor = '#007DFF'
-  @State enableUncheckedBorderColor: boolean = false
-  @State uncheckedBorderColor: ResourceColor = '#182431'
-  @State enableIndicatorColor: boolean = false
-  @State indicatorColor: ResourceColor = '#FFFFFF'
-  @State enableIndicatorType: boolean = false
-  @State indicatorType: RadioIndicatorType = RadioIndicatorType.TICK
-  @State enableContentModifier: boolean = false
-  @State contentModifier: MyRadioStyle = new MyRadioStyle(1, '#004AAF')
+  @State enableCheckedBackgroundColor: boolean = false;
+  @State checkedBackgroundColor: ResourceColor = '#007DFF';
+  @State enableUncheckedBorderColor: boolean = false;
+  @State uncheckedBorderColor: ResourceColor = '#182431';
+  @State enableIndicatorColor: boolean = false;
+  @State indicatorColor: ResourceColor = '#FFFFFF';
+  @State enableIndicatorType: boolean = false;
+  @State indicatorType: RadioIndicatorType = RadioIndicatorType.TICK;
+  @State enableContentModifier: boolean = false;
+  @State contentModifier: MyRadioStyle = new MyRadioStyle(1, '#004AAF');
 
   build() {
     NavDestination() {
@@ -103,7 +104,7 @@ export struct RadioBootcamp {
               this.indicatorBuilder()
             }
           })
-            .checked(useEnabled(this.enableCheked, this.cheked))
+            .checked(useEnabled(this.enableChecked, this.checked))
             .width(useEnabled(this.enableRadioWidth, this.radioWidth))
             .radioStyle({
               checkedBackgroundColor: useEnabled(this.enableCheckedBackgroundColor, this.checkedBackgroundColor),
@@ -120,7 +121,7 @@ export struct RadioBootcamp {
               this.indicatorBuilder()
             }
           })
-            .checked(useEnabled(this.enableCheked, this.cheked))
+            .checked(useEnabled(this.enableChecked, this.checked))
             .width(useEnabled(this.enableRadioWidth, this.radioWidth))
             .radioStyle({
               checkedBackgroundColor: useEnabled(this.enableCheckedBackgroundColor, this.checkedBackgroundColor),
