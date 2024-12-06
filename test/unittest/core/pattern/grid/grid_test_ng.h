@@ -69,6 +69,7 @@ public:
     void CreateBigColItem(int32_t colStart, int32_t colEnd);
     void CreateBigRowItem(int32_t rowStart, int32_t rowEnd);
     void AddFixedHeightItems(int32_t cnt, float height);
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float position);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
@@ -79,6 +80,7 @@ public:
     bool AnimateTo(
         const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false);
     AssertionResult Position(float expectOffset);
+    AssertionResult VelocityPosition(float velocity, float expectOffset);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;

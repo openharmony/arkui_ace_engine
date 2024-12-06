@@ -887,7 +887,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
      */
     int32_t focusNodeIndex = 6;
     pattern_->ScrollToFocusNodeIndex(focusNodeIndex);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
     EXPECT_TRUE(focusNode->IsCurrentFocus());
     EXPECT_TRUE(Position(0));
@@ -898,7 +898,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
      */
     focusNodeIndex = 10;
     pattern_->ScrollToFocusNodeIndex(focusNodeIndex);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -921,7 +921,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToNode001, TestSize.Level1)
     int32_t focusNodeIndex = 6;
     RefPtr<FrameNode> focusNode = GetChildFrameNode(frameNode_, focusNodeIndex);
     pattern_->ScrollToNode(focusNode);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
 
@@ -1164,7 +1164,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
     pattern_->ScrollToIndex(targetIndex, false, align);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 6);
     EXPECT_EQ(info.endMainLineIndex_, 9);
@@ -1183,11 +1183,11 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
     EXPECT_LT(info.currentOffset_, -75.0f);
 
     pattern_->ScrollToIndex(targetIndex, false, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     for (int i = 0; i < 10; ++i) {
         info.currentOffset_ -= 75.0f;
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
     }
     if (SystemProperties::GetGridIrregularLayoutEnabled()) {
         EXPECT_EQ(info.startMainLineIndex_, 9);
@@ -1214,7 +1214,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
     pattern_->ScrollToIndex(targetIndex, false, align);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto& info = pattern_->info_;
     info.prevOffset_ = info.currentOffset_;
     info.currentOffset_ -= 1000.0f;
@@ -1249,7 +1249,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset002, TestSize.Level1)
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
     pattern_->ScrollToIndex(targetIndex, false, align);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto& info = pattern_->info_;
     info.prevOffset_ = info.currentOffset_;
     info.currentOffset_ -= 399;
@@ -1282,7 +1282,7 @@ HWTEST_F(GridScrollerTestNg, MultiLineItemScroll001, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollBy(-10);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto& info = pattern_->info_;
     EXPECT_TRUE(info.reachEnd_);
     EXPECT_FALSE(info.offsetEnd_);
@@ -1307,26 +1307,26 @@ HWTEST_F(GridScrollerTestNg, VerticalGridScrollToIndexWithLargeLineHeight001, Te
     // cache all line in Grid
     auto controller = pattern_->positionController_;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     controller->ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-550.0f));
 
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     controller->ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-790.0f));
 
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     controller->ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-1190.0f));
 }
 
@@ -1352,26 +1352,26 @@ HWTEST_F(GridScrollerTestNg, VerticalGridScrollToIndexWithLargeLineHeight002, Te
     // cache all line in Grid
     auto controller = pattern_->positionController_;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     controller->ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-310.0f));
 
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     controller->ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-730.0f));
 
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     controller->ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-870.0f));
 }
 } // namespace OHOS::Ace::NG
