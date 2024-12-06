@@ -1116,7 +1116,40 @@ GridSizeOpt Convert(const Ark_Literal_Number_offset_span& src)
     options.offset = OptConvert<int32_t>(src.offset);
     return options;
 }
-
+template<>
+GradientDirection Convert(const Ark_GradientDirection& value)
+{
+    auto optVal = OptConvert<GradientDirection>(value);
+    return optVal.has_value() ? optVal.value() : GradientDirection::NONE;
+}
+template<>
+std::pair<float, float> Convert(const Ark_FractionStop& value)
+{
+    return std::make_pair(Convert<float>(value.value0), Convert<float>(value.value1));
+}
+template<>
+NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
+{
+    auto blurRadius = Dimension(0);
+    std::pair<float, float> pair;
+    std::vector<std::pair<float, float>> fractionStops;
+    auto fractionStopsVec = Convert<std::vector<Ark_FractionStop>>(value.fractionStops);
+    for (auto arkPair : fractionStopsVec) {
+        pair = Convert<std::pair<float, float>>(arkPair);
+        fractionStops.push_back(pair);
+    }
+    auto direction = Convert<GradientDirection>(value.direction);
+    return NG::LinearGradientBlurPara(blurRadius, fractionStops, direction);
+}
+template<>
+    void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
+{
+    switch (src) {
+        case ARK_BLEND_APPLY_TYPE_FAST: dst = BlendApplyType::FAST; break;
+        case ARK_BLEND_APPLY_TYPE_OFFSCREEN: dst = BlendApplyType::OFFSCREEN; break;
+        default: dst.reset(); // Handle unexpected values by resetting the optional
+    }
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -3308,9 +3341,13 @@ void LinearGradientBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetLinearGradientBlur(frameNode, convValue);
+    auto radius = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = options ? Converter::OptConvert<NG::LinearGradientBlurPara>(*options) : std::nullopt;
+    Validator::ValidateNonNegative(radius);
+    if (radius.has_value()) {
+        convValue->blurRadius_ = radius.value();
+    }
+    ViewAbstract::SetLinearGradientBlur(frameNode, convValue);
 }
 void SystemBarEffectImpl(Ark_NativePointer node)
 {
@@ -3319,6 +3356,7 @@ void SystemBarEffectImpl(Ark_NativePointer node)
     //auto convValue = Converter::Convert<type>(undefined);
     //auto convValue = Converter::OptConvert<type>(undefined); // for enums
     //CommonMethodModelNG::SetSystemBarEffect(frameNode, convValue);
+    LOGE("The `ViewAbstract::SetSystemBarEffect(frameNode, enable)` function must take two parameters");
 }
 void BackdropBlurImpl(Ark_NativePointer node,
                       const Ark_Number* value,
@@ -3394,9 +3432,10 @@ void BlendModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBlendMode(frameNode, convValue);
+    auto blendMode = Converter::OptConvert<BlendMode>(value);
+    auto blendApplyType = type ? Converter::OptConvert<BlendApplyType>(*type) : std::nullopt;
+    ViewAbstract::SetBlendMode(frameNode, blendMode);
+    ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
 }
 void AdvancedBlendModeImpl(Ark_NativePointer node,
                            const Ark_Union_BlendMode_Blender* effect,

@@ -551,6 +551,8 @@ namespace Converter {
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
     template<>
     void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src);
+    template<>
+    void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

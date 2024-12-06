@@ -1239,4 +1239,42 @@ void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& sr
             LOGE("Unknown transition edge type: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
+{
+    switch (src) {
+        case ARK_BLEND_MODE_NONE: dst = BlendMode::NONE; break;
+        case ARK_BLEND_MODE_CLEAR: dst = BlendMode::CLEAR; break;
+        case ARK_BLEND_MODE_SRC: dst = BlendMode::SRC; break;
+        case ARK_BLEND_MODE_DST: dst = BlendMode::DST; break;
+        case ARK_BLEND_MODE_SRC_OVER: dst = BlendMode::SRC_OVER; break;
+        case ARK_BLEND_MODE_DST_OVER: dst = BlendMode::DST_OVER; break;
+        case ARK_BLEND_MODE_SRC_IN: dst = BlendMode::SRC_IN; break;
+        case ARK_BLEND_MODE_DST_IN: dst = BlendMode::DST_IN; break;
+        case ARK_BLEND_MODE_SRC_OUT: dst = BlendMode::SRC_OUT; break;
+        case ARK_BLEND_MODE_DST_OUT: dst = BlendMode::DST_OUT; break;
+        case ARK_BLEND_MODE_SRC_ATOP: dst = BlendMode::SRC_ATOP; break;
+        case ARK_BLEND_MODE_DST_ATOP: dst = BlendMode::DST_ATOP; break;
+        case ARK_BLEND_MODE_XOR: dst = BlendMode::XOR; break;
+        case ARK_BLEND_MODE_PLUS: dst = BlendMode::PLUS; break;
+        case ARK_BLEND_MODE_MODULATE: dst = BlendMode::MODULATE; break;
+        case ARK_BLEND_MODE_SCREEN: dst = BlendMode::SCREEN; break;
+        case ARK_BLEND_MODE_OVERLAY: dst = BlendMode::OVERLAY; break;
+        case ARK_BLEND_MODE_DARKEN: dst = BlendMode::DARKEN; break;
+        case ARK_BLEND_MODE_LIGHTEN: dst = BlendMode::LIGHTEN; break;
+        case ARK_BLEND_MODE_COLOR_DODGE: dst = BlendMode::COLOR_DODGE; break;
+        case ARK_BLEND_MODE_COLOR_BURN: dst = BlendMode::COLOR_BURN; break;
+        case ARK_BLEND_MODE_HARD_LIGHT: dst = BlendMode::HARD_LIGHT; break;
+        case ARK_BLEND_MODE_SOFT_LIGHT: dst = BlendMode::SOFT_LIGHT; break;
+        case ARK_BLEND_MODE_DIFFERENCE: dst = BlendMode::DIFF; break;
+        case ARK_BLEND_MODE_EXCLUSION: dst = BlendMode::EXCLUSION; break;
+        case ARK_BLEND_MODE_MULTIPLY: dst = BlendMode::MULTIPLY; break;
+        case ARK_BLEND_MODE_HUE: dst = BlendMode::HUE; break;
+        case ARK_BLEND_MODE_SATURATION: dst = BlendMode::SATURATION; break;
+        case ARK_BLEND_MODE_COLOR: dst = BlendMode::COLOR; break;
+        case ARK_BLEND_MODE_LUMINOSITY: dst = BlendMode::LUMINOSITY; break;
+        default: LOGE("Unknown transition Ark_BlendMode type: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
