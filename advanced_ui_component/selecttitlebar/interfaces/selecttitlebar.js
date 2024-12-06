@@ -428,7 +428,7 @@ export class SelectTitleBar extends ViewPU {
     }
     aboutToAppear() {
         let m8 = getContext().resourceManager;
-        this.messageDesc = m8?.getStringByNameSync('selecttitlebar_accessibility_massage_desc');
+        this.messageDesc = m8?.getStringByNameSync('selecttitlebar_accessibility_message_desc');
     }
     rerender() {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);

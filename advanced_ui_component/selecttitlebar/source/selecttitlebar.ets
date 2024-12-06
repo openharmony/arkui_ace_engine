@@ -137,7 +137,7 @@ export struct SelectTitleBar {
                   .constraintSize({ maxWidth: this.selectMaxWidth })
                   .offset({ x: -4 })
                   .accessibilityLevel('yes')
-                  .accessibilityDescription(this.messageDesc.replace("%s", this.badgeValue.toString()))
+                  .accessibilityDescription(this.messageDesc.replace('%s', this.badgeValue.toString()))
               }
               .justifyContent(FlexAlign.Start)
               .margin({ right: $r('sys.float.ohos_id_elements_margin_horizontal_l') });
@@ -214,7 +214,7 @@ export struct SelectTitleBar {
   }
   aboutToAppear(): void {
     let resourceManager = getContext().resourceManager;
-    this.messageDesc = resourceManager?.getStringByNameSync('selecttitlebar_accessibility_massage_desc');
+    this.messageDesc = resourceManager?.getStringByNameSync('selecttitlebar_accessibility_message_desc');
   }
 }
 
