@@ -144,4 +144,55 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig, TestS
     imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
     EXPECT_EQ(imagePaintMethod_->selected_, true);
 }
+
+/**
+ * @tc.name: ImagePaintMethodTestNg_NormalizeRadius
+ * @tc.desc: Create NormalizeRadius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NormalizeRadius, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    auto frameNode = ImagePaintMethodTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageGeometryNode = frameNode->GetGeometryNode();
+    EXPECT_NE(imageGeometryNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod.
+     */
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
+    pattern->image_ = pattern->loadingCtx_->MoveCanvasImage();
+    EXPECT_NE(pattern->image_, nullptr);
+    ImagePaintMethodConfig imagePaintMethodConfig_;
+    imagePaintMethodConfig_.selected = true;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ =
+        AceType::MakeRefPtr<ImagePaintMethod>(pattern->image_, imagePaintMethodConfig_);
+    EXPECT_NE(imagePaintMethod_, nullptr);
+    RefPtr<ImageRenderProperty> imagePaintProperty_ = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imagePaintProperty_, nullptr);
+    imagePaintProperty_->UpdateImageRepeat(ImageRepeat::REPEAT_X);
+    imagePaintProperty_->UpdateNeedBorderRadius(true);
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
+    geometryNode->SetContentSize(SizeF(1.0f, 1.0f));
+    auto imagePaintWrapper_ = frameNode->CreatePaintWrapper();
+    EXPECT_NE(imagePaintWrapper_, nullptr);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    ImageDfxConfig imageDfxConfig;
+    PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
+    EXPECT_NE(imagePaintWrapperRaw_, nullptr);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
+}
 } // namespace OHOS::Ace::NG
