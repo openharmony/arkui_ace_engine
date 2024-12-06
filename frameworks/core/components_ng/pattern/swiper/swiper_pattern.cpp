@@ -3272,6 +3272,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     if (IsHorizontalAndRightToLeft()) {
         info.currentOffset =
             GetCustomPropertyOffset() + Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
+        info.targetOffset = GetCustomPropertyTargetOffset() - Dimension(-translate, DimensionUnit::PX).ConvertToVp();
     }
 
     auto pipeline = GetContext();
