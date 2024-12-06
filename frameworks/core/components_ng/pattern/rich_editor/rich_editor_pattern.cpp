@@ -3038,24 +3038,21 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
 
 void RichEditorPattern::HandleDraggableFlag(bool isTouchSelectArea)
 {
-    auto gestureHub = GetGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     if (copyOption_ != CopyOptions::None && isTouchSelectArea) {
         bool isContentDraggalbe = JudgeContentDraggable();
         if (isContentDraggalbe) {
             dragBoxes_ = GetTextBoxes();
         }
-        gestureHub->SetIsTextDraggable(isContentDraggalbe);
+        SetIsTextDraggable(isContentDraggalbe);
     } else {
-        gestureHub->SetIsTextDraggable(false);
+        SetIsTextDraggable(false);
     }
 }
 
 void RichEditorPattern::SetIsTextDraggable(bool isTextDraggable)
 {
     auto gestureHub = GetGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetIsTextDraggable(isTextDraggable);
+    IF_PRESENT(gestureHub, SetIsTextDraggable(isTextDraggable));
 }
 
 bool RichEditorPattern::JudgeContentDraggable()
@@ -3599,10 +3596,7 @@ void RichEditorPattern::onDragDropAndLeave()
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        if (!eventHub->IsEnabled()) {
-            return;
-        }
+        CHECK_NULL_VOID(eventHub && eventHub->IsEnabled());
         pattern->status_ = Status::ON_DROP;
         pattern->HandleOnDragDrop(event);
         pattern->status_ = Status::NONE;
@@ -3612,8 +3606,7 @@ void RichEditorPattern::onDragDropAndLeave()
                                const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->StopAutoScroll();
+        IF_PRESENT(pattern, StopAutoScroll());
     };
     eventHub->SetOnDragLeave(onDragDragLeave);
 }
@@ -3622,9 +3615,7 @@ void RichEditorPattern::ClearDragDropEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetIsTextDraggable(false);
+    SetIsTextDraggable(false);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(nullptr);
@@ -3663,15 +3654,11 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
 {
     ResetDragRecordSize(-1);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
     ResetDragSpanItems();
-    if (recoverDragResultObjects_.empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(!recoverDragResultObjects_.empty());
     UpdateSpanItemDragStatus(recoverDragResultObjects_, false);
     recoverDragResultObjects_.clear();
     auto focusHub = GetFocusHub();
@@ -3681,7 +3668,8 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
         CalculateHandleOffsetAndShowOverlay();
         ResetSelection();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto host = GetHost();
+    IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF));
 }
 
 RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end)
@@ -4156,17 +4144,11 @@ void RichEditorPattern::ResetDragSpanItems()
     const auto& childrens = host->GetChildren();
     for (const auto& child : childrens) {
         auto findResult = nodeIds.find(child->GetId());
-        if (findResult == nodeIds.end()) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(findResult != nodeIds.end());
         auto node = DynamicCast<FrameNode>(child);
-        if (!node) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(node);
         auto renderContext = node->GetRenderContext();
-        if (!renderContext) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(renderContext);
         renderContext->UpdateOpacity(1);
         node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -7293,53 +7275,56 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
         if (!pattern->BetweenSelectedPosition(point)) {
             return;
         }
-        auto gesture = pattern->GetGestureEventHub();
-        CHECK_NULL_VOID(gesture);
         auto isContentDraggable = pattern->JudgeContentDraggable();
         if (!isContentDraggable) {
-            gesture->SetIsTextDraggable(false);
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "GetThumbnailCallback call, draggable is false");
+            pattern->SetIsTextDraggable(false);
             return;
         }
         if (pattern->dragBoxes_.empty()) {
             pattern->dragBoxes_ = pattern->GetTextBoxes();
         }
-        auto host = pattern->GetHost();
-        auto children = host->GetChildren();
-        std::list<RefPtr<FrameNode>> imageChildren;
-        for (const auto& child : children) {
-            auto node = DynamicCast<FrameNode>(child);
-            if (!node) {
-                continue;
-            }
-            auto tag = node->GetTag();
-            if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-                imageChildren.emplace_back(node);
-            }
-        }
-        RichEditorDragInfo info;
-        info.selectedWidth = pattern->GetSelectedMaxWidth();
-        info.handleColor = pattern->GetCaretColor();
-        info.selectedBackgroundColor = pattern->GetSelectedBackgroundColor();
-        pattern->CalculateHandleOffsetAndShowOverlay();
-        auto firstHandleInfo = pattern->GetFirstHandleInfo();
-        if (firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
-            info.firstHandle = pattern->textSelector_.firstHandle;
-        }
-        auto secondHandleInfo = pattern->GetSecondHandleInfo();
-        if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
-            info.secondHandle = pattern->textSelector_.secondHandle;
-        }
-        pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
-        auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
-        if (textDragPattern) {
-            auto option = host->GetDragPreviewOption();
-            option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
-            option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
-                ShadowStyle::OuterFloatingSM);
-            host->SetDragPreviewOptions(option);
-        }
-        FrameNode::ProcessOffscreenNode(pattern->dragNode_);
+        pattern->CreateDragNode();
     };
+}
+
+void RichEditorPattern::CreateDragNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    std::list<RefPtr<FrameNode>> imageChildren;
+    for (const auto& child : children) {
+        auto node = DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(node);
+        auto tag = node->GetTag();
+        if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            imageChildren.emplace_back(node);
+        }
+    }
+    RichEditorDragInfo info;
+    info.handleColor = GetCaretColor();
+    info.selectedBackgroundColor = GetSelectedBackgroundColor();
+    CalculateHandleOffsetAndShowOverlay();
+    auto firstHandleInfo = GetFirstHandleInfo();
+    if (firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
+        info.firstHandle = textSelector_.firstHandle;
+    }
+    auto secondHandleInfo = GetSecondHandleInfo();
+    if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
+        info.secondHandle = textSelector_.secondHandle;
+    }
+    dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
+    CHECK_NULL_VOID(dragNode_);
+    auto textDragPattern = dragNode_->GetPattern<TextDragPattern>();
+    if (textDragPattern) {
+        auto option = host->GetDragPreviewOption();
+        option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
+        option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
+            ShadowStyle::OuterFloatingSM);
+        host->SetDragPreviewOptions(option);
+    }
+    FrameNode::ProcessOffscreenNode(dragNode_);
 }
 
 void RichEditorPattern::CreateHandles()
@@ -8743,12 +8728,12 @@ void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& n
         }
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
-                "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());
+                "In OnDragMoved, the cursor has always Displayed in the textField, id:%{private}d", host->GetId());
         }
         return;
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "In OnDragMoved, the dragging node is moving in the richEditor, id:%{public}d", host->GetId());
+        "In OnDragMoved, the dragging node is moving in the richEditor, id:%{private}d", host->GetId());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -8762,7 +8747,7 @@ void RichEditorPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "In OnDragLeaved, the dragging node has left from richEditor, id:%{public}d", host->GetId());
+        "In OnDragLeaved, the dragging node has left from richEditor, id:%{private}d", host->GetId());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->LostFocusToViewRoot();
@@ -8778,13 +8763,13 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     StopAutoScroll();
     if (!isCursorAlwaysDisplayed_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "In OnDragEnded,"
-            " the released location is not in the current richEditor, id:%{public}d", host->GetId());
+            " the released location is not in the current richEditor, id:%{private}d", host->GetId());
         focusHub->LostFocus();
         StopTwinkling();
         return;
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "In OnDragEnded, the released location is in the current richEditor, id:%{public}d", host->GetId());
+        "In OnDragEnded, the released location is in the current richEditor, id:%{private}d", host->GetId());
     focusHub->LostFocusToViewRoot();
     isCursorAlwaysDisplayed_ = false;
     StopTwinkling();
