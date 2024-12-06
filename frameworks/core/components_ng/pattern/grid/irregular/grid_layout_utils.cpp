@@ -53,7 +53,7 @@ void GridLayoutUtils::PreloadGridItems(
         return;
     }
     CHECK_NULL_VOID(pattern);
-    const bool taskAdded = !pattern->GetPreloadItemList().empty();
+    const bool taskAdded = pattern->HasPreloadItemList();
     pattern->SetPreloadItemList(std::move(items));
     if (taskAdded) {
         // task already in queue, only need to update item list
@@ -64,13 +64,13 @@ void GridLayoutUtils::PreloadGridItems(
 
 void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb)
 {
-    auto context = pattern->GetContext();
+    auto* context = pattern->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)), buildCb](int64_t deadline, bool _) {
         ACE_SCOPED_TRACE("Grid preload items");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        const auto& items = pattern->GetPreloadItemList();
+        const auto items = pattern->MovePreloadItemList();
         if (items.empty()) {
             return;
         }
