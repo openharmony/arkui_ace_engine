@@ -374,7 +374,6 @@ void UIExtensionModelNG::SetOnError(FrameNode* frameNode,
     std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
     NG::SessionType sessionType)
 {
-
     CHECK_NULL_VOID(frameNode);
     if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
         auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();

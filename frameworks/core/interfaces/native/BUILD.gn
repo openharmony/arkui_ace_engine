@@ -167,7 +167,6 @@ template("ace_core_interfaces_native_node") {
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
-      "ability_base:want"
     ]
     if (defined(config.model_component_support) &&
         config.model_component_support) {

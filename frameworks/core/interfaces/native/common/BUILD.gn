@@ -73,6 +73,7 @@ template("ace_core_interfaces_native") {
     }
 
     external_deps += [
+      "ability_base:want",
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
     ]
