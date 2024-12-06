@@ -24,6 +24,25 @@
 namespace OHOS::Ace::NG {
 class TabsAttrTestNg : public TabsTestNg {
 public:
+    std::function<void()> GetDefaultBuilder()
+    {
+        return []() {
+            RowModelNG rowModel;
+            rowModel.Create(std::nullopt, nullptr, "");
+            ViewAbstract::SetWidth(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)));
+            ViewAbstract::SetHeight(CalcLength(Dimension(50.f)));
+        };
+    }
+
+    RefPtr<FrameNode> CreateCustomNode(const std::string& tag)
+    {
+        auto frameNode = AceType::MakeRefPtr<FrameNode>(
+            tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(Dimension(50.f))));
+        return frameNode;
+    }
 };
 
 /**
@@ -1620,6 +1639,78 @@ HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem006, TestSize.Level1)
     EXPECT_EQ(imagePaintProperty->GetSvgFillColor().value(), defaultColorOn);
     auto imagePaintProperty1 = iconNode1->GetPaintProperty<ImageRenderProperty>();
     EXPECT_EQ(imagePaintProperty1->GetSvgFillColor().value(), defaultColorOff);
+}
+
+/**
+ * @tc.name: TabContentModelAddTabBarItem007
+ * @tc.desc: test method with ComponentContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem007, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto tabContentModel = CreateTabContent();
+    RefPtr<FrameNode> tabBarNode1 = CreateCustomNode("tabbar1");
+    tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    frameNodePattern->SetTabBarWithContent(tabBarNode1);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    tabContentModel2.SetTabBar("", "", std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode->GetTabBarItemId());
+    auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    EXPECT_EQ(columnNode->GetChildren().size(), 1);
+    EXPECT_EQ(columnNode1->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: TabContentModelAddTabBarItem008
+ * @tc.desc: test method with ComponentContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem008, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto tabContentModel = CreateTabContent();
+    RefPtr<FrameNode> tabBarNode1 = CreateCustomNode("tabbar1");
+    tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    frameNodePattern->SetTabBarWithContent(tabBarNode1);
+    ViewStackProcessor::GetInstance()->Pop();
+    frameNodePattern->SetTabBarWithContent(nullptr);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    RefPtr<FrameNode> tabBarNode2 = CreateCustomNode("tabbar2");
+    tabContentModel2.SetTabBar("", "", std::nullopt, nullptr, true);
+    frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    frameNodePattern->SetTabBarWithContent(tabBarNode2);
+    ViewStackProcessor::GetInstance()->Pop();
+    RefPtr<FrameNode> tabBarNode3 = CreateCustomNode("tabbar3");
+    frameNodePattern->SetTabBarWithContent(tabBarNode3);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode->GetTabBarItemId());
+    auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    EXPECT_EQ(columnNode->GetChildren().size(), 2);
+    EXPECT_EQ(columnNode1->GetChildren().size(), 1);
 }
 
 /**
