@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/constants.h"
 
@@ -297,4 +298,10 @@ void ImageSourceInfo::SetModuleName(const std::string& moduleName)
 }
 
 void ImageSourceInfo::GenerateCacheKey() {}
+
+ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)
+{
+    ImageSourceInfo imageSourceInfo;
+    return imageSourceInfo;
+}
 } // namespace OHOS::Ace
