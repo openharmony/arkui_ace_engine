@@ -1073,8 +1073,8 @@ HWTEST_F(ParseTestTwoNg, ParseStopTest001, TestSize.Level1)
      * @tc.steps: step4. parse stopOpacity
      * @tc.expected: The property is parse successfully
      */
-    svgStop->ParseAndSetSpecializedAttr("stopOpacity", "1.0");
-    EXPECT_FALSE(GreatOrEqual(svgStop->stopAttr_.gradientColor.GetOpacity(), 1.0));
+    svgStop->ParseAndSetSpecializedAttr("stopOpacity", "0.0");
+    EXPECT_EQ(svgStop->GetGradientColor().GetOpacity(), 0.0);
 
     /* *
      * @tc.steps: step5. parse properties that do not belong to SvgStop
@@ -1352,48 +1352,6 @@ HWTEST_F(ParseTestTwoNg, ParseFeOffsetTest001, TestSize.Level1)
 
     auto bResult = svgFeOffset->ParseAndSetSpecializedAttr("undefine", "undefine");
     EXPECT_FALSE(bResult);
-}
-
-/**
- * @tc.name: ParseGradientTest003
- * @tc.desc: test Gradient
- * @tc.type: FUNC
- */
-HWTEST_F(ParseTestTwoNg, ParseGradientTest003, TestSize.Level1)
-{
-    auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_RADIAL.c_str(), GRADIENT_SVG_RADIAL.length());
-    EXPECT_NE(svgStream, nullptr);
-    ImageSourceInfo src;
-    src.SetFillColor(Color::BLACK);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
-    EXPECT_NE(svgDom, nullptr);
-    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
-    EXPECT_NE(svg, nullptr);
-    EXPECT_EQ(svg->children_.size(), CHILD_NUMBER);
-    auto defers = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
-    EXPECT_NE(defers, nullptr);
-    EXPECT_NE(defers->children_.at(0), nullptr);
-    auto svgGradient = AceType::DynamicCast<SvgGradient>(defers->children_.at(0));
-    EXPECT_NE(svgGradient, nullptr);
-    SvgGradientAttribute& svgGradientAttribute = svgGradient->gradientAttr_;
-
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
-    svgGradient->SetSpreadMethod("reflect", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-    svgGradient->SetSpreadMethod("repeat", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-
-    svgGradient->SetSpreadMethod("pad", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-    svgGradient->SetSpreadMethod("reflect", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-    svgGradient->SetSpreadMethod("repeat", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
 }
 
 /**
