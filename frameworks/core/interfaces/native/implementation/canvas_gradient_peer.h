@@ -34,12 +34,12 @@ struct CanvasGradientPeer {
     virtual void AddColorStop(const float& offset, const OHOS::Ace::Color& color)
     {
         CHECK_NULL_VOID(gradient_);
-        if (!isColorStopValid_ && gradient_->GetColors().empty()) {
-            isColorStopValid_ = true;
+        if (!valid_ && gradient_->GetColors().empty()) {
+            valid_ = true;
         }
         OHOS::Ace::GradientColor gradientColor;
         if (offset < 0 || offset > 1) {
-            isColorStopValid_ = false;
+            valid_ = false;
             // if the offset is invalid, fill the shape with transparent
             gradient_->ClearColors();
             gradientColor.SetColor(OHOS::Ace::Color::TRANSPARENT);
@@ -62,6 +62,6 @@ struct CanvasGradientPeer {
 
 private:
     std::shared_ptr<OHOS::Ace::Gradient> gradient_ = nullptr;
-    bool isColorStopValid_ = false;
+    bool valid_ = false;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
