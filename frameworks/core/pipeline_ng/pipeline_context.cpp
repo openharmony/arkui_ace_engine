@@ -5295,4 +5295,18 @@ ScopedLayout::~ScopedLayout()
     // set layout flag back
     pipeline_->SetIsLayouting(isLayouting_);
 }
+
+std::string PipelineContext::GetBundleName()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
+}
 } // namespace OHOS::Ace::NG
