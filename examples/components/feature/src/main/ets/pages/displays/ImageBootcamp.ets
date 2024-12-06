@@ -60,7 +60,7 @@ export struct ImageboxGroupBootcamp {
   @State copyOption: CopyOptions = CopyOptions.None
   @State enableEnableColorFilter: boolean = false;
   @State enableColorFilter: boolean = false;
-  private ColorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
+  private colorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
   private color: common2D.Color = { alpha: 255, red: 255, green: 0, blue: 0 };
   @State colorFilter: ColorFilter | undefined = undefined
   @State enableDraggable: boolean = false;
@@ -145,7 +145,7 @@ export struct ImageboxGroupBootcamp {
 
               .colorFilter(this.colorFilter)
               .onClick(()=>{
-                this.colorFilter = new ColorFilter(this.ColorFilterMatrix);  ///
+                this.colorFilter = new ColorFilter(this.colorFilterMatrix);  ///
               })
           }
         }
