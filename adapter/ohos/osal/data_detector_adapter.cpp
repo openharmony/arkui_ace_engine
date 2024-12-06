@@ -34,14 +34,27 @@ const std::string ALL_TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime"
 const std::string TEXT_DETECT_TYPES_WITHOUT_URL = "phoneNum,email,location,datetime";
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
-    { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
-    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
-    { TextDataDetectType::DATE_TIME, "datetime" }
+    { TextDataDetectType::PHONE_NUMBER, "phoneNum" },
+    { TextDataDetectType::URL, "url" },
+    { TextDataDetectType::EMAIL, "email" },
+    { TextDataDetectType::ADDRESS, "location" },
+    { TextDataDetectType::DATE_TIME, "datetime" },
+    { TextDataDetectType::PRECISE_TIME, "preciseTime" },
+    { TextDataDetectType::BANK_CARD_NUMBER, "bankCardNo" },
+    { TextDataDetectType::FLIGHT_NUMBER, "flightNo" },
+    { TextDataDetectType::EXPRESS_NUMBER, "expressNo" }
 };
+
 const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
-    { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
-    { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
-    { "datetime", TextDataDetectType::DATE_TIME }
+    { "phoneNum", TextDataDetectType::PHONE_NUMBER },
+    { "url", TextDataDetectType::URL },
+    { "email", TextDataDetectType::EMAIL },
+    { "location", TextDataDetectType::ADDRESS },
+    { "datetime", TextDataDetectType::DATE_TIME },
+    { "preciseTime", TextDataDetectType::PRECISE_TIME },
+    { "bankCardNo", TextDataDetectType::BANK_CARD_NUMBER },
+    { "flightNo", TextDataDetectType::FLIGHT_NUMBER },
+    { "expressNo", TextDataDetectType::EXPRESS_NUMBER }
 };
 
 void DataDetectorAdapter::GetAIEntityMenu()
@@ -254,6 +267,8 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     TextDataDetectInfo info;
     info.text = detectText;
     info.module = textDetectTypes_;
+    info.referenceTime = referenceTime_;
+    info.detectContext = detectContext_;
 
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);

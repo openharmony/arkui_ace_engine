@@ -38,6 +38,8 @@ struct TextDataDetectInfo {
     std::string text;
     std::string module;
     bool isWordPosEnabled = false;
+    int64_t referenceTime;
+    std::string detectContext;
 };
 
 struct TextDataDetectResult {

@@ -60,7 +60,8 @@ const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, Ellipsis
 const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
     TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime", "preciseTime",
+    "bankCardNo", "flightNo", "expressNo" };
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -1091,6 +1092,8 @@ void SetTextDataDetectorConfigWithEvent(
     textDetectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
     textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
     textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    textDetectConfig.referenceTime = arkUITextDetectConfig->referenceTime;
+    textDetectConfig.detectContext = arkUITextDetectConfig->detectContext;
     TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 

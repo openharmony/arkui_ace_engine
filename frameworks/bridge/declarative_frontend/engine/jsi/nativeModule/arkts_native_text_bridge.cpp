@@ -46,9 +46,11 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
+constexpr int NUM_8 = 8;
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime", "preciseTime",
+    "bankCardNo", "flightNo", "expressNo" };
 } // namespace
 
 ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1191,26 +1193,13 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     if (!typesArg->IsArray(vm)) {
-        GetArkUINodeModifiers()->getTextModifier()->
-            resetTextDataDetectorConfigWithEvent(nativeNode);
+        GetArkUINodeModifiers()->getTextModifier()->resetTextDataDetectorConfigWithEvent(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
     struct ArkUITextDetectConfigStruct arkUITextDetectConfig;
-    std::string types;
-    auto array = panda::Local<panda::ArrayRef>(typesArg);
-    for (size_t i = 0; i < array->Length(vm); i++) {
-        auto value = panda::ArrayRef::GetValueAt(vm, array, i);
-        auto index = value->Int32Value(vm);
-        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
-            return panda::NativePointerRef::New(vm, nullptr);
-        }
-        if (i != 0) {
-            types.append(",");
-        }
-        types.append(TEXT_DETECT_TYPES[index]);
+    if (!ParseAIEntityTypes(runtimeCallInfo, arkUITextDetectConfig)) {
+        return panda::NativePointerRef::New(vm, nullptr);
     }
-    arkUITextDetectConfig.types = types.c_str();
     std::function<void(const std::string&)> callback;
     if (callbackArg->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
@@ -1225,9 +1214,41 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
         arkUITextDetectConfig.onResult = reinterpret_cast<void*>(&callback);
     }
     ParseAIEntityColor(runtimeCallInfo, arkUITextDetectConfig);
-    GetArkUINodeModifiers()->getTextModifier()->
-        setTextDataDetectorConfigWithEvent(nativeNode, &arkUITextDetectConfig);
+    Local<JSValueRef> referenceTimeArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    if (referenceTimeArg->IsInt()) {
+        arkUITextDetectConfig.referenceTime = referenceTimeArg->IntegerValue(vm);
+    }
+    Local<JSValueRef> detectContextArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+    if (detectContextArg->IsString(vm)) {
+        arkUITextDetectConfig.detectContext = detectContextArg->ToString(vm)->ToString(vm).c_str();
+    } else {
+        arkUITextDetectConfig.detectContext = "";
+    }
+    GetArkUINodeModifiers()->getTextModifier()->setTextDataDetectorConfigWithEvent(nativeNode, &arkUITextDetectConfig);
     return panda::JSValueRef::Undefined(vm);
+}
+
+bool TextBridge::ParseAIEntityTypes(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, false);
+    Local<JSValueRef> typesArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    std::string types;
+    auto array = panda::Local<panda::ArrayRef>(typesArg);
+    for (size_t i = 0; i < array->Length(vm); i++) {
+        auto value = panda::ArrayRef::GetValueAt(vm, array, i);
+        auto index = value->Int32Value(vm);
+        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
+            return false;
+        }
+        if (i != 0) {
+            types.append(",");
+        }
+        types.append(TEXT_DETECT_TYPES[index]);
+    }
+    arkUITextDetectConfig.types = types.c_str();
+    return true;
 }
 
 void TextBridge::ParseAIEntityColor(

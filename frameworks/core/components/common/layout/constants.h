@@ -366,6 +366,10 @@ enum class TextDataDetectType {
     EMAIL,
     ADDRESS,
     DATE_TIME,
+    PRECISE_TIME,
+    BANK_CARD_NUMBER,
+    FLIGHT_NUMBER,
+    EXPRESS_NUMBER,
 };
 
 enum class LineBreakStrategy {
