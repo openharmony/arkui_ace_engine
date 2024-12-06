@@ -1545,6 +1545,24 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowPatternTest003
+ * @tc.desc: Test water flow pattern OutBoundaryCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.expected: OutBoundaryCallback() return false
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
+    EXPECT_FALSE(pattern_->OutBoundaryCallback());
+}
+
+/**
  * @tc.name: WaterFlowAccessibilityTest001
  * @tc.desc: Test Accessibility func
  * @tc.type: FUNC

@@ -140,8 +140,12 @@ SessionWrapperImpl::~SessionWrapperImpl() {}
 void SessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     int32_t callSessionId = GetSessionId();
+    if (!taskExecutor_) {
+        LOGE("Get taskExecutor_ is nullptr, the sessionid = %{public}d", callSessionId);
+        return;
+    }
+    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]
         (OHOS::Rosen::WSError errcode) {
         if (errcode == OHOS::Rosen::WSError::WS_OK) {

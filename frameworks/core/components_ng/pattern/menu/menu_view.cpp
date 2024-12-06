@@ -19,6 +19,7 @@
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -75,6 +76,28 @@ void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& p
     textNode->MarkModifyDone();
 }
 
+LayoutConstraintF CreatePreviewLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, {});
+    LayoutConstraintF constraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
+
+    auto currentId = Container::CurrentId();
+    auto parentContainerId =
+        currentId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subWindow, constraint);
+    auto subwindowSize = subWindow->GetRect().GetSize();
+    if (!subwindowSize.IsPositive()) {
+        return constraint;
+    }
+
+    if (subwindowSize != constraint.maxSize || subwindowSize != constraint.percentReference) {
+        constraint.maxSize.SetSizeT(subwindowSize);
+        constraint.percentReference.SetSizeT(subwindowSize);
+    }
+    return constraint;
+}
+
 void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam,
     const RefPtr<UINode>& previewCustomNode = nullptr)
 {
@@ -92,7 +115,8 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
     auto pipeline = previewNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     ScopedLayout scope(pipeline);
-    previewNode->Measure(layoutProperty->GetLayoutConstraint());
+    auto layoutConstraint = CreatePreviewLayoutConstraint(layoutProperty);
+    previewNode->Measure(layoutConstraint);
     auto previewSize = previewNode->GetGeometryNode()->GetFrameSize();
     previewPattern->SetIsShowHoverImage(true);
     previewPattern->SetCustomPreviewWidth(previewSize.Width());
@@ -706,16 +730,19 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
         if (menuParam.previewBorderRadius) {
             imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
         }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
         DragAnimationHelper::UpdateGatherNodeToTop();
+        DragDropFuncWrapper::UpdatePositionFromFrameNode(imageNode, target, width, height);
+        imageOffset = DragDropFuncWrapper::GetPaintRectCenterToScreen(target) -
+            OffsetF(width / HALF_DIVIDE, height / HALF_DIVIDE);
+        imageOffset -= DragDropFuncWrapper::GetCurrentWindowOffset(imageNode->GetContextRefPtr());
         MountTextNode(wrapperNode, previewNode);
     }
-    
+
     auto geometryNode = imageNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameOffset(imageOffset);

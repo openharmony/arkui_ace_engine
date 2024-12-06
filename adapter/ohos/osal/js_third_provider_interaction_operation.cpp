@@ -716,7 +716,7 @@ void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEve
 
 bool JsThirdProviderInteractionOperation::SendAccessibilitySyncEventToService(
     const OHOS::Accessibility::AccessibilityEventInfo& eventInfo,
-    void (*callback)(int32_t errorCode))
+    [[maybe_unused]] void (*callback)(int32_t errorCode))
 {
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_RETURN(jsAccessibilityManager, false);
@@ -724,7 +724,7 @@ bool JsThirdProviderInteractionOperation::SendAccessibilitySyncEventToService(
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(context->GetTaskExecutor(), false);
     context->GetTaskExecutor()->PostTask(
-        [jsMgr = jsAccessibilityManager_, eventInfo, callback] () mutable {
+        [jsMgr = jsAccessibilityManager_, eventInfo] () mutable {
             auto jsAccessibilityManager = jsMgr.Upgrade();
             if (jsAccessibilityManager == nullptr) {
                 return;

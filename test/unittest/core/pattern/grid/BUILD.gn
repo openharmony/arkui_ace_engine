@@ -17,6 +17,7 @@ COMMON_SRC = [
   "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
   "$ace_root/frameworks/bridge/common/utils/utils.cpp",
   "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+  "grid_accessibility_test_ng.cpp",
   "grid_common_test_ng.cpp",
   "grid_option_layout_test_ng.cpp",
   "grid_scroller_test_ng.cpp",
@@ -29,6 +30,7 @@ ace_unittest("grid_test_regular") {
   sources = COMMON_SRC
   sources += [
     "grid_attr_test_ng.cpp",
+    "grid_event_test_ng.cpp",
     "grid_layout_test_ng.cpp",
     "grid_scroll_layout_test_ng.cpp",
     "grid_scroller_event_test_ng.cpp",

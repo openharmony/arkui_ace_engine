@@ -208,14 +208,16 @@ void SystemWindowScene::RegisterEventCallback()
             if (!self) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                     "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
+                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
                 return;
             }
                 auto host = self->GetHost();
             if (!host) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                     "GetHost null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
+                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
                 return;
             }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);

@@ -71,6 +71,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -1326,7 +1327,7 @@ bool OverlayManager::IsContextMenuBindedOnOrigNode()
     CHECK_NULL_RETURN(mainPipeline, false);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
-    auto draggingNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    auto draggingNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(draggingNode, false);
     auto eventHub = draggingNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
@@ -3179,6 +3180,8 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             return true;
         }
+    } else {
+        SheetManager::GetInstance().RemoveSheetByESC();
     }
     return false;
 }
@@ -7038,7 +7041,7 @@ BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const
     CHECK_NULL_RETURN(mainPipeline, borderRadius);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, borderRadius);
-    auto dragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    auto dragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(dragFrameNode, borderRadius);
     return DragEventActuator::GetDragFrameNodeBorderRadius(dragFrameNode);
 }

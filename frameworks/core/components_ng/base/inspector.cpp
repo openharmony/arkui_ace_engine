@@ -74,19 +74,6 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
     return nullptr;
 }
 
-void DumpElementTree(
-    int32_t depth, const RefPtr<UINode>& element, std::map<int32_t, std::list<RefPtr<UINode>>>& depthElementMap)
-{
-    if (element->GetChildren().empty()) {
-        return;
-    }
-    const auto& children = element->GetChildren();
-    depthElementMap[depth].insert(depthElementMap[depth].end(), children.begin(), children.end());
-    for (const auto& depthElement : children) {
-        DumpElementTree(depth + 1, depthElement, depthElementMap);
-    }
-}
-
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
     return TouchEvent {}

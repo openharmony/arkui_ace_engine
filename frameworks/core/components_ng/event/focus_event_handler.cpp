@@ -66,6 +66,12 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
 
 bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
 {
+    if (!IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "node: %{public}s/%{public}d cannot handle key event because is not current focus",
+            GetFrameName().c_str(), GetFrameId());
+        return false;
+    }
     if (focusType_ == FocusType::SCOPE) {
         return OnFocusEventScope(event);
     }

@@ -18,6 +18,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -606,6 +607,47 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex016, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1700.f); // 1600.f - ITEM_MAIN_SIZE + 200.f
     ScrollToIndex(LAST_ITEM, true, ScrollAlign::END, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1700.f);
+}
+
+/**
+ * @tc.name: ScrollToIndex017
+ * @tc.desc: Test ScrollToIndex with update estimate offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndex017, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Test ScrollToIndex with update estimate offset
+     * @tc.expected: List will update Animation.
+     */
+    auto model = CreateList();
+    model.SetInitialIndex(4);
+    for (int32_t i = 0; i < 3; i++) {
+        ListItemModelNG itemModel;
+        itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+        SetSize(Axis::VERTICAL, CalcLength(FILL_LENGTH), CalcLength(200));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    for (int32_t i = 0; i < 3; i++) {
+        ListItemModelNG itemModel;
+        itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+        SetSize(Axis::VERTICAL, CalcLength(FILL_LENGTH), CalcLength(300));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200);
+
+    EXPECT_TRUE(ScrollToIndex(2, true, ScrollAlign::CENTER, 0, 600));
+    MockAnimationManager::GetInstance().SetTicks(4);
+    positionController_->ScrollToIndex(1, true, ScrollAlign::CENTER, 0);
+    FlushUITasks();
+    EXPECT_TRUE(TickPosition(-550));
+    EXPECT_TRUE(TickPosition(-500));
+    EXPECT_TRUE(TickPosition(-150));
+    EXPECT_TRUE(TickPosition(-137.5)); // Update Animation
+    EXPECT_TRUE(TickPosition(-125));
+    EXPECT_TRUE(TickPosition(-112.5));
+    EXPECT_TRUE(TickPosition(-100));
 }
 
 /**

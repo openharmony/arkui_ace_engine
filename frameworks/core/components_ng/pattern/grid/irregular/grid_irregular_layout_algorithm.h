@@ -154,6 +154,8 @@ private:
      */
     void SyncPreloadItems(int32_t cacheCnt);
 
+    void AdaptToChildMainSize(RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize);
+
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
@@ -164,6 +166,8 @@ private:
 
     bool enableSkip_ = true;
     bool overScroll_ = false;
+
+    SizeF frameSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };

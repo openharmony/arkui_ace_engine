@@ -743,7 +743,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
     itemLayoutProperty->UpdateColumnStart(0);
     itemLayoutProperty->UpdateColumnEnd(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // update items
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0, 0, itemWidth * 2, ITEM_MAIN_SIZE)));         // big item
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(itemWidth * 2, 0, itemWidth, ITEM_MAIN_SIZE))); // normal item
 }

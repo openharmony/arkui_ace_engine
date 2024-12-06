@@ -2156,7 +2156,6 @@ export class CounterComponent extends ViewPU {
                                     TextInput.borderRadius(0);
                                     TextInput.textAlign(TextAlign.Center);
                                     TextInput.type(InputType.PhoneNumber);
-                                    TextInput.caretColor(Color.Transparent);
                                     TextInput.copyOption(CopyOptions.None);
                                     TextInput.fontSize(this.getTextInputFontSize());
                                     TextInput.fontWeight(FontWeight.Medium);
@@ -2312,7 +2311,6 @@ export class CounterComponent extends ViewPU {
                                     TextInput.borderRadius(0);
                                     TextInput.textAlign(TextAlign.Center);
                                     TextInput.type(InputType.PhoneNumber);
-                                    TextInput.caretColor(Color.Transparent);
                                     TextInput.copyOption(CopyOptions.None);
                                     TextInput.fontSize(this.getTextInputFontSize());
                                     TextInput.fontWeight(FontWeight.Medium);
@@ -2629,7 +2627,6 @@ export class CounterComponent extends ViewPU {
                         });
                         TextInput.direction(this.counterDirection);
                         TextInput.type(InputType.Number);
-                        TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
                         TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
@@ -2761,7 +2758,6 @@ export class CounterComponent extends ViewPU {
                         });
                         TextInput.direction(this.counterDirection);
                         TextInput.type(InputType.Number);
-                        TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
                         TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
@@ -2904,7 +2900,6 @@ export class CounterComponent extends ViewPU {
                         });
                         TextInput.direction(this.counterDirection);
                         TextInput.type(InputType.Number);
-                        TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
                         TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);

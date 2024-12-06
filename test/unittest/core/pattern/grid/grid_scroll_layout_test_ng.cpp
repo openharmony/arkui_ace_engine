@@ -387,7 +387,7 @@ HWTEST_F(GridScrollLayoutTestNg, ChangeItemNumber001, TestSize.Level1)
         currentFrameNode->MountToParent(frameNode_);
     }
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 6), OffsetF(120.0f, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 8), OffsetF(0, ITEM_MAIN_SIZE * 2)));
 }
@@ -725,7 +725,7 @@ HWTEST_F(GridScrollLayoutTestNg, SupplyAllData2ZeroIndex001, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToIndex(20, true, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
@@ -746,9 +746,9 @@ HWTEST_F(GridScrollLayoutTestNg, SupplyAllData2ZeroIndex002, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToIndex(20, true, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->ScrollToIndex(10, true, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
@@ -962,36 +962,6 @@ HWTEST_F(GridScrollLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdaptToChildMainSize003
- * @tc.desc: Test Horizontal Grid with Infinity mainSize
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollLayoutTestNg, AdaptToChildMainSize003, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
-    CreateFixedItems(8);
-    CreateDone();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_MAIN_SIZE * 2);
-}
-
-/**
- * @tc.name: AdaptToChildMainSize004
- * @tc.desc: Test Vertical Grid with Infinity mainSize
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollLayoutTestNg, AdaptToChildMainSize004, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    ViewAbstract::SetHeight(CalcLength(Infinity<int32_t>()));
-    CreateFixedItems(8);
-    CreateDone();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_MAIN_SIZE * 2);
-}
-
-/**
  * @tc.name: AdaptToChildMainSize005
  * @tc.desc: Test Vertical Grid with maxcount and 0 itemHeight
  * @tc.type: FUNC
@@ -1029,7 +999,7 @@ HWTEST_F(GridScrollLayoutTestNg, GetResetMode001, TestSize.Level1)
     pattern_->ScrollToIndex(30, false, ScrollAlign::START);
     layoutAlgorithm->info_.startIndex_ = 30;
     frameNode_->childrenUpdatedFrom_ = 20;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 0), std::make_pair(true, false));
     EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 10), std::make_pair(true, false));
@@ -1120,7 +1090,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch001, TestSize.Level1)
     CreateAdaptChildSizeGridItems(1);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect0 = pattern_->GetItemRect(0);
     auto childRect1 = pattern_->GetItemRect(1);
@@ -1148,7 +1118,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch002, TestSize.Level1)
     CreateAdaptChildSizeGridItems(1);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect1 = pattern_->GetItemRect(1);
     EXPECT_EQ(childRect1.Height(), 0);
@@ -1178,7 +1148,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch003, TestSize.Level1)
     CreateFixedHeightItems(1, 150);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect1 = pattern_->GetItemRect(1);
     EXPECT_EQ(childRect1.Height(), 0);
@@ -1208,7 +1178,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch004, TestSize.Level1)
     CreateAdaptChildSizeGridItems(1);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect1 = pattern_->GetItemRect(1);
     EXPECT_EQ(childRect1.Height(), 0);
@@ -1238,7 +1208,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch005, TestSize.Level1)
     CreateAdaptChildSizeGridItems(1);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect0 = pattern_->GetItemRect(0);
     auto childRect1 = pattern_->GetItemRect(1);
@@ -1268,7 +1238,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch006, TestSize.Level1)
     CreateAdaptChildSizeGridItems(1);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect1 = pattern_->GetItemRect(1);
     EXPECT_EQ(childRect1.Width(), 0);
@@ -1298,7 +1268,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch007, TestSize.Level1)
     CreateFixedHeightItems(1, 150);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect1 = pattern_->GetItemRect(1);
     EXPECT_EQ(childRect1.Width(), 0);
@@ -1331,7 +1301,7 @@ HWTEST_F(GridScrollLayoutTestNg, Stretch008, TestSize.Level1)
     CreateAdaptChildSizeGridItems(2);
 
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto childRect1 = pattern_->GetItemRect(1);
     EXPECT_EQ(childRect1.Width(), 0);
@@ -1361,7 +1331,7 @@ HWTEST_F(GridScrollLayoutTestNg, MarginPadding001, TestSize.Level1)
     auto itemLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 2);
     itemLayoutProperty->UpdateMargin(margin);
     itemLayoutProperty->UpdatePadding(padding);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 240, 400)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 111, 113, 100)));
 }
@@ -1392,12 +1362,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -34.397873);
 
     /**
@@ -1407,15 +1377,15 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
 
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT + 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -67.198936);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
@@ -1445,12 +1415,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -34.397873);
 
     /**
@@ -1459,15 +1429,15 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT - 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -67.198936);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
@@ -1497,12 +1467,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 193.94336);
 
     /**
@@ -1511,15 +1481,15 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT + 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 96.97168);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
@@ -1549,12 +1519,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 193.94336);
 
     /**
@@ -1563,15 +1533,15 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT - 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 96.97168);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
@@ -1591,7 +1561,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1604,12 +1574,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -79.385628);
 
     /**
@@ -1618,15 +1588,15 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT + 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -89.692818);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -50);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -50);
 }
 
@@ -1645,7 +1615,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
     CreateFixedItems(20);
     CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
 
     /**
@@ -1659,12 +1629,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -79.385628);
     EXPECT_TRUE(pattern_->IsAtBottom());
 
@@ -1674,16 +1644,16 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT - 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     // the value of (currentOffset + gridMainSizeDelta) is greater than lineHeight(200), so move to next line
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -89.692818);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -50);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -50);
 }
 
@@ -1713,12 +1683,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest007, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
 
     /**
@@ -1727,15 +1697,15 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest007, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT + 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
@@ -1765,12 +1735,12 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
 
     /**
@@ -1779,15 +1749,15 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(GRID_HEIGHT - 50))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
@@ -1835,10 +1805,10 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridWithScrollToIndex001, TestSize
     CreateDone();
 
     pattern_->ScrollToIndex(10, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE / 2, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(pattern_->info_.gridMatrix_[5].size(), 4);
 }
@@ -1860,12 +1830,12 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridMeasureForward001, TestSize.Le
     CreateDone();
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
     for (int i = 0; i < 15; i++) {
         pattern_->ScrollBy(-100);
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
     }
     EXPECT_NE(pattern_->info_.gridMatrix_[0][0], pattern_->info_.gridMatrix_[1][0]);
 }

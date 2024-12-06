@@ -2332,6 +2332,7 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
     windowManager->SetGetWindowStartMoveFlagCallBack(
         [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
     windowManager->SetWindowSplitPrimaryCallBack(
@@ -2361,10 +2362,6 @@ void AceContainer::InitWindowCallback()
     windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
         [window = uiWindow_]() -> bool {
             return window->GetFreeMultiWindowModeEnabledState();
-        });
-    windowManager->SetPerformBackCallback(
-        [window = uiWindow_]() -> void {
-            return window->PerformBack();
         });
     windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
         window->OnContainerModalEvent(name, value);

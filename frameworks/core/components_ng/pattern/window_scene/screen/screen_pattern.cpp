@@ -19,6 +19,7 @@
 
 #include "ipc_skeleton.h"
 #include "root_scene.h"
+#include "screen_scene.h"
 #include "screen_manager.h"
 #include "transaction/rs_transaction_proxy.h"
 

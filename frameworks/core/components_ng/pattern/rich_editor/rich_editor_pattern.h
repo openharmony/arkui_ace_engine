@@ -624,10 +624,12 @@ public:
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
+    void CreateDragNode();
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
     bool BetweenSelection(const Offset& globalOffset);
+    bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
@@ -967,6 +969,7 @@ public:
     {
         ForceTriggerAvoidOnCaretChange(true);
         isTriggerAvoidOnCaretAvoidMode_ = false;
+        UpdateModifierCaretOffsetAndHeight();
         TriggerAvoidOnCaretChange();
     }
 
@@ -1262,6 +1265,7 @@ private:
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
     RectF GetSelectArea();
+    void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
     void DeleteForward(int32_t currentPosition, int32_t length);

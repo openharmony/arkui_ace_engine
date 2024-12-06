@@ -137,11 +137,6 @@ public:
         return turnPageRate_;
     }
 
-    float GetGroupTurnPageRate() const
-    {
-        return groupTurnPageRate_;
-    }
-
     GestureState GetGestureState();
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -157,11 +152,6 @@ public:
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
-    }
-
-    void SetGroupTurnPageRate(float groupTurnPageRate)
-    {
-        groupTurnPageRate_ = groupTurnPageRate;
     }
 
     float GetTouchBottomRate() const
@@ -518,8 +508,6 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
-    int32_t DisplayIndicatorTotalCount() const;
-    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
     bool ContentWillChange(int32_t comingIndex);
@@ -742,7 +730,6 @@ private:
     {
         return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
     }
-    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -1043,7 +1030,6 @@ private:
     float fadeOffset_ = 0.0f;
     float springOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
-    float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;

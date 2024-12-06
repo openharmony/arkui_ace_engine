@@ -991,37 +991,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleTouchBottomLoop004
- * @tc.desc: test Swiper indicator touch left bottom in loop when SwipeByGroup is true
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    CreateSwiperItems(6);
-    model.SetDisplayCount(3);
-    model.SetSwipeByGroup(true);
-    CreateSwiperDone();
-    EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
-    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 2;
-    pattern_->currentIndex_ = 0;
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
-    pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
-
-    pattern_->currentIndex_ = pattern_->TotalCount() - 3;
-    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-}
-
-/**
  * @tc.name: SwiperFunc002
  * @tc.desc: OnVisibleChange
  * @tc.type: FUNC
@@ -1295,7 +1264,7 @@ HWTEST_F(SwiperEventTestNg, UpdateSwiperPanEvent001, TestSize.Level1)
  * @tc.desc: PageFlipMode property test with CONTINUOUS mode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AttrPageFlipModeTest001, TestSize.Level1)
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
 {
     SwiperModelNG model = CreateSwiper();
     CreateSwiperItems();
@@ -1322,7 +1291,7 @@ HWTEST_F(SwiperTestNg, AttrPageFlipModeTest001, TestSize.Level1)
  * @tc.desc: PageFlipMode property test with SINGLE mode
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AttrPageFlipModeTest002, TestSize.Level1)
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
 {
     SwiperModelNG model = CreateSwiper();
     model.SetPageFlipMode(1);
