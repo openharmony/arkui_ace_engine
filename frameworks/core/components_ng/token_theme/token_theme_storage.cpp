@@ -68,12 +68,12 @@ void TokenThemeStorage::UpdateDefaultThemeBySystemTheme(ColorMode colorMode)
     if (!sysTheme) {
         return;
     }
-    std::vector<bool>& colorSet = colorMode == ColorMode::DARK ? darkThemeColorSet_ : lightThemeColorSet_;
+    auto& colorsAvailable = colorMode == ColorMode::DARK ? darkThemeColorsAvailable_ : lightThemeColorsAvailable_;
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
-        if (!colorSet[i]) {
+        if (!colorsAvailable[i]) {
             auto color = sysTheme->Colors()->GetByIndex(i);
-            theme->Colors()->GetColors()[i] = color;
-            colorSet[i] = true;
+            theme->Colors()->SetColor(i, color);
+            colorsAvailable[i] = true;
         }
     }
 }
@@ -168,8 +168,11 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     return tokenTheme;
 }
 
-std::vector<bool>& TokenThemeStorage::GetThemeColorSet(bool isDark)
+void TokenThemeStorage::SetIsThemeColorAvailable(bool isDark, int32_t idx, bool isColorAvailable)
 {
-    return isDark ? darkThemeColorSet_ : lightThemeColorSet_;
+    if (idx >= 0 && idx < TokenColors::TOTAL_NUMBER) {
+        auto& colorsAvailable = isDark ? darkThemeColorsAvailable_ : lightThemeColorsAvailable_;
+        colorsAvailable[idx] = isColorAvailable;
+    }
 }
 } // namespace OHOS::Ace::NG

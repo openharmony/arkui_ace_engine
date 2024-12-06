@@ -47,7 +47,8 @@ public:
     void CacheRemove(int32_t themeId);
 
     RefPtr<TokenTheme> ObtainSystemTheme();
-    std::vector<bool>& GetThemeColorSet(bool isDark);
+    
+    void SetIsThemeColorAvailable(bool isDark, int32_t idx, bool isColorAvailable);
 
 private:
     static constexpr int32_t SYSTEM_THEME_LIGHT_ID = -1;
@@ -64,8 +65,8 @@ private:
     // key: theme id, value: theme instance
     std::map<int32_t, RefPtr<TokenTheme>> themeCache_;
 
-    std::vector<bool> darkThemeColorSet_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
-    std::vector<bool> lightThemeColorSet_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
+    std::vector<bool> darkThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
+    std::vector<bool> lightThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
 
     inline static RefPtr<TokenTheme> defaultLightTheme_ = nullptr;
     inline static RefPtr<TokenTheme> defaultDarkTheme_ = nullptr;

@@ -93,7 +93,8 @@ public:
     virtual ~TokenColors() = default;
 
     void SetColors(const std::vector<Color>& colors);
-    std::vector<Color>& GetColors();
+    void SetColor(int32_t idx, const Color& color);
+    const std::vector<Color>& GetColors();
 
     Color Brand() const;
     Color Warning() const;
@@ -157,15 +158,12 @@ public:
 
     static int32_t GetSystemColorResIdByIndex(int32_t idx);
 
-    inline Color GetByIndex(int32_t idx)
-    {
-        return colors_[idx];
-    }
+    Color GetByIndex(int32_t idx);
 
     static const TokenColorData& GetTokenColorDataByIndex(int32_t idx);
 
 private:
-    std::vector<Color> colors_;
+    std::vector<Color> colors_ = std::vector<Color> (TokenColors::TOTAL_NUMBER);;
 };
 
 } // namespace OHOS::Ace::NG
