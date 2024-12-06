@@ -28,6 +28,10 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
+namespace NG {
+class FrameNode;
+}
+
 class ACE_FORCE_EXPORT ImageSourceInfo {
 public:
     // add constructor method for decompressed hap
@@ -59,6 +63,7 @@ public:
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
     static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
+    static ImageSourceInfo CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host);
 
     // operators
     bool operator==(const ImageSourceInfo& info) const;
