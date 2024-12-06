@@ -1152,8 +1152,42 @@ template<>
         default: dst.reset(); // Handle unexpected values by resetting the optional
     }
 }
-<<<<<<< HEAD
-=======
+template<>
+void AssignCast(std::optional<Matrix4>& dst, const Ark_CustomObject& src)
+{
+    if (!src.pointers[0] || !src.pointers[1] || !src.pointers[2] || !src.pointers[3]) {
+        dst = std::nullopt;
+        return;
+    }
+    if (strcmp(src.kind, "Matrix4") != 0) {
+        dst = std::nullopt;
+        return;
+    }
+    double* row1 = (double*)src.pointers[0];
+    double* row2 = (double*)src.pointers[1];
+    double* row3 = (double*)src.pointers[2];
+    double* row4 = (double*)src.pointers[3];
+    dst = Matrix4(row1[0], row1[1], row1[2], row1[3], row2[0], row2[1], row2[2], row2[3],
+        row3[0], row3[1], row3[2], row3[3], row4[0], row4[1], row4[2], row4[3]);
+}
+template<>
+ClickEffectLevel Convert(const Ark_ClickEffectLevel& src)
+{
+    switch (src) {
+    case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT:
+        return ClickEffectLevel::LIGHT;
+        break;
+    case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_MIDDLE:
+        return ClickEffectLevel::MIDDLE;
+        break;
+    case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_HEAVY:
+        return ClickEffectLevel::HEAVY;
+        break;
+    default:
+        return ClickEffectLevel::UNDEFINED;
+        break;
+    }
+}
 template<>
 void AssignCast(std::optional<ClickEffectLevel>& dst, const Ark_ClickEffectLevel& src)
 {
@@ -1178,7 +1212,6 @@ void AssignCast(std::optional<DragDropInfo>& dst, const Ark_String& src)
     vDst.extraInfo = Convert<std::string>(src);
     dst = vDst;
 }
->>>>>>> cb43f4d0ca (Intermediate commit)
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
