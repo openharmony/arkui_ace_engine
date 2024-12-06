@@ -46,6 +46,21 @@ V2::ItemDivider Convert(const Ark_DividerStyleOptions& src)
     if (colorOpt.has_value()) {
         dst.color = colorOpt.value();
     }
+    auto strokeWidth = OptConvert<Dimension>(src.strokeWidth);
+    Validator::ValidateNonNegative(strokeWidth);
+    if (strokeWidth.has_value()) {
+        dst.strokeWidth = strokeWidth.value();
+    }
+    auto startMargin = OptConvert<Dimension>(src.startMargin);
+    Validator::ValidateNonNegative(startMargin);
+    if (startMargin.has_value()) {
+        dst.startMargin = startMargin.value();
+    }
+    auto endMargin = OptConvert<Dimension>(src.endMargin);
+    Validator::ValidateNonNegative(endMargin);
+    if (endMargin.has_value()) {
+        dst.endMargin = endMargin.value();
+    }
     return dst;
 }
 }
@@ -126,7 +141,6 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
     MenuModelNG::SetItemDivider(frameNode, divider);
-    LOGE("MenuModifier::MenuItemDividerImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
                               const Opt_DividerStyleOptions* value)
@@ -136,7 +150,6 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
     MenuModelNG::SetItemGroupDivider(frameNode, divider);
-    LOGE("MenuModifier::MenuItemGroupDividerImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
                               Ark_SubMenuExpandingMode value)
