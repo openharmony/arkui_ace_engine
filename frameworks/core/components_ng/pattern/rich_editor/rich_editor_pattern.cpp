@@ -4257,7 +4257,6 @@ void RichEditorPattern::InitMouseEvent()
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -6954,8 +6953,10 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 
     caretUpdateType_ = CaretUpdateType::NONE;
     if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        sourceType_ = info.GetSourceDevice();
         HandleMouseLeftButton(info);
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+        sourceType_ = info.GetSourceDevice();
         HandleMouseRightButton(info);
     }
 }
