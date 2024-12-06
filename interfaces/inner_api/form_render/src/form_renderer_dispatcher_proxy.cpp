@@ -91,7 +91,8 @@ void FormRendererDispatcherProxy::SetAllowUpdate(bool allowUpdate)
     }
 }
 
-void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height, float borderWidth)
+void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height, uint32_t reason,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -107,6 +108,26 @@ void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float 
     if (!data.WriteFloat(height)) {
         HILOG_ERROR("write height fail, action error");
         return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        HILOG_ERROR("Write SessionSizeChangeReason failed");
+        return;
+    }
+
+    bool hasRSTransaction = rsTransaction != nullptr;
+    if (!data.WriteBool(hasRSTransaction)) {
+        HILOG_ERROR("Write has transaction failed");
+        return;
+    }
+    if (hasRSTransaction) {
+        auto pid = rsTransaction->GetParentPid();
+        rsTransaction->SetParentPid(getprocpid());
+        if (!data.WriteParcelable(rsTransaction.get())) {
+            HILOG_ERROR("Write transaction sync Id failed");
+            return;
+        }
+        rsTransaction->SetParentPid(pid);
     }
 
     if (!data.WriteFloat(borderWidth)) {
