@@ -808,7 +808,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
     FocusViewHide();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (type == PageTransitionType::EXIT_POP) {
+    if (type == PageTransitionType::EXIT_POP || isNeedRemove_) {
         auto stageNode = outPage->GetParent();
         CHECK_NULL_VOID(stageNode);
         stageNode->RemoveChild(outPage);
