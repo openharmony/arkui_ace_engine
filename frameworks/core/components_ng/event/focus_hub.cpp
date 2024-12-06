@@ -1773,9 +1773,9 @@ bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
         return true;
     }
 
-    auto operation = [this, step](const RefPtr<FocusHub>& focusHub) {
+    auto operation = [&lastfocus = lastWeakFocusNode_, step](const RefPtr<FocusHub>& focusHub) {
         if (focusHub && focusHub->AcceptFocusOfSpecifyChild(step)) {
-            lastWeakFocusNode_ = focusHub;
+            lastfocus = focusHub;
             return true;
         }
         return false;

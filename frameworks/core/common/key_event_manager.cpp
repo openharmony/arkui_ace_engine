@@ -116,24 +116,18 @@ uint8_t KeyEventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>&
 
 bool KeyEventManager::IsSystemKeyboardShortcut(const KeyEvent& event)
 {
-    static std::optional<std::vector<HotKey>> systemHotKeys;
-    static std::mutex lock_;
+    static std::vector<HotKey> systemHotKeys;
+    static std::once_flag initFlag;
 
-    if (!systemHotKeys) {
-        std::lock_guard<std::mutex> lockGuard(lock_);
+    std::call_once(initFlag, []() {
         std::vector<HotKey> initHotKeys;
-        if (!systemHotKeys && InputManager::GetSystemHotkeys(initHotKeys)) {
-            systemHotKeys.emplace(initHotKeys);
-        }
-    }
-    if (systemHotKeys.value().empty()) {
+        InputManager::GetSystemHotkeys(systemHotKeys);
+    });
+    if (systemHotKeys.empty()) {
         return false;
     }
 
-    const auto& hotKeys = systemHotKeys.value();
-    std::string info;
-    for (const auto& hotKey : hotKeys) {
-        const auto [prekey, finalkey] = hotKey;
+    for (const auto& [prekey, finalkey] : systemHotKeys) {
         if (static_cast<int32_t>(event.code) != finalkey || (event.pressedCodes.size() != prekey.size() + 1)) {
             continue;
         }
