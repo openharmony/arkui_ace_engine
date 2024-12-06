@@ -50,9 +50,7 @@ struct CanvasGradientPeer {
         }
         gradientColor.SetColor(color);
         gradientColor.SetDimension(offset);
-        if (gradient_) {
-            gradient_->AddColor(gradientColor);
-        }
+        gradient_->AddColor(gradientColor);
         auto colorSize = gradient_->GetColors().size();
         // prevent setting only one colorStop
         if (colorSize == 1) {
