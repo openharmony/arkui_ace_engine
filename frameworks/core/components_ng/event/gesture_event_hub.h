@@ -79,6 +79,11 @@ struct BindMenuStatus {
     }
 };
 
+struct DragframeNodeInfo {
+    RefPtr<FrameNode> frameNode;
+    std::vector<RefPtr<FrameNode>> gatherFrameNode;
+};
+
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
@@ -242,6 +247,9 @@ public:
     bool IsPixelMapNeedScale() const;
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
+    void HandleDragThroughMouse(const RefPtr<FrameNode> frameNode);
+    void HandleDragThroughTouch(const RefPtr<FrameNode> frameNode);
+    void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
@@ -396,6 +404,7 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
+    DragframeNodeInfo dragframeNodeInfo_;
     // disable drag for the node itself and its all children
     bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;

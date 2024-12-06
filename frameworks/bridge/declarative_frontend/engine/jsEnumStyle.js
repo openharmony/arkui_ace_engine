@@ -3278,6 +3278,7 @@ var DragPreviewMode;
   DragPreviewMode["DISABLE_SCALE"] = 2;
   DragPreviewMode["ENABLE_DEFAULT_SHADOW"] = 3;
   DragPreviewMode["ENABLE_DEFAULT_RADIUS"] = 4;
+  DragPreviewMode["ENABLE_DRAG_ITEM_GRAY_EFFECT"] = 5;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 var FoldStatus;
