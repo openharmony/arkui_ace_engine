@@ -39,8 +39,14 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    if (transitionType == PageTransitionType::EXIT_POP) {
-        page->GetEventHub<EventHub>()->SetEnabled(false);
+    auto eventHub = page->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (transitionType == PageTransitionType::EXIT_POP) {
+            eventHub->SetEnabled(false);
+        }
+    } else {
+        eventHub->SetEnabled(false);
     }
     pagePattern->SetPageInTransition(true);
     auto context = PipelineContext::GetCurrentContext();
