@@ -800,4 +800,20 @@ void TabContentModelNG::SetIconStyle(FrameNode* node, const  std::optional<IconS
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetIconStyle(iconStyle.value_or(IconStyle()));
 }
+
+void TabContentModelNG::SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow)
+{
+    CHECK_NULL_VOID(node);
+    auto tabContentEventHub = node->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillShow(onWillShow);
+}
+
+void TabContentModelNG::SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide)
+{
+    CHECK_NULL_VOID(node);
+    auto tabContentEventHub = node->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillHide(onWillHide);
+}
 } // namespace OHOS::Ace::NG

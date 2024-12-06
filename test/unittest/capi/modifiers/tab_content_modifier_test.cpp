@@ -19,6 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -165,22 +166,66 @@ HWTEST_F(TabContentModifierTest, setTabBar1BottomStyleTestText, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setOnWillShowTest
- * @tc.desc:
+ * @tc.name: setOnWillShowTest
+ * @tc.desc: check functionality setOnWillShow
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
+HWTEST_F(TabContentModifierTest, setOnWillShowTest, TestSize.Level1)
 {
-    // setOnWillShowTest doesn't implemented
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TabContentEventHub>();
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        checkEvent = {
+            .nodeId = resourceId
+        };
+    };
+
+    VoidCallback arkCallback = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
+
+    modifier_->setOnWillShow(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireWillShowEvent();
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
 }
 
 /*
- * @tc.name: DISABLED_setOnWillHideTest
- * @tc.desc:
+ * @tc.name: setOnWillHideTest
+ * @tc.desc: check functionality setOnWillHide
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1)
+HWTEST_F(TabContentModifierTest, setOnWillHideTest, TestSize.Level1)
 {
-    // setOnWillHideTest doesn't implemented
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TabContentEventHub>();
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        checkEvent = {
+            .nodeId = resourceId
+        };
+    };
+
+    VoidCallback arkCallback = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
+
+    modifier_->setOnWillHide(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireWillHideEvent();
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
 }
 } // namespace OHOS::Ace::NG
