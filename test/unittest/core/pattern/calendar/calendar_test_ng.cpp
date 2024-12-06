@@ -1329,6 +1329,45 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarMonthPatternTest006
+ * @tc.desc: Test CalendarMonthPattern GetCalendarDay
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(CalendarTestNg, CalendarMonthPatternTest006, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+    /**
+     * @tc.case: case1 InitVirtualNode.
+     */
+    CalendarDay today;
+    today.month.month = JUMP_MONTH;
+    today.month.year = JUMP_YEAR;
+    today.day = DAY_VALUE;
+    calendarMonthPattern->calendarDay_ = today;
+    ObtainedMonth obtainedMonth;
+    for (int i = DAY_VALUE; i < WEEKS_COUNT_SIX; i++) {
+        CalendarDay calendarDay;
+        calendarDay.month.month = JUMP_MONTH;
+        calendarDay.month.year = JUMP_YEAR;
+        calendarDay.day = i;
+        calendarDay.index = i;
+        obtainedMonth.days.emplace_back(calendarDay);
+    }
+    calendarMonthPattern->obtainedMonth_ = obtainedMonth;
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    calendarMonthPattern->CreateNodePaintMethod();
+    EXPECT_TRUE(calendarMonthPattern->accessibilityPropertyVec_.size() > 0);
+    auto property = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto level = property->GetAccessibilityLevel();
+    EXPECT_EQ(level, AccessibilityProperty::Level::NO_STR);
+}
+
+/**
  * @tc.name: CalendarLayoutAlgorithmTest001
  * @tc.desc: Test CalendarLayoutAlgorithm MeasureContent
  * @tc.type: FUNC
