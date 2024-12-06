@@ -21,7 +21,11 @@
 
 namespace OHOS::Ace::NG::Converter {
 
-inline void AssignArkValue(Ark_RichEditorOptions &dst, const Ark_NativePointer &src)
+inline void AssignArkValue(Ark_RichEditorOptions& dst, const Ark_NativePointer& src)
+{
+    dst.controller.ptr = src;
+}
+inline void AssignArkValue(Ark_RichEditorStyledStringOptions& dst, const Ark_NativePointer& src)
 {
     dst.controller.ptr = src;
 }

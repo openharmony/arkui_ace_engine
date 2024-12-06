@@ -45,6 +45,7 @@ ace_unittest("capi_all_accessors_test") {
     "patternlock_controller_accessor_test.cpp",
     "permission_request_accessor_test.cpp",
     "richeditor_controller_accessor_test.cpp",
+    "richeditor_string_styled_controller_accessor_test.cpp",
     "screen_capture_handler_accessor_test.cpp",
     "scroller_accessor_test.cpp",
     "search_controller_test.cpp",
