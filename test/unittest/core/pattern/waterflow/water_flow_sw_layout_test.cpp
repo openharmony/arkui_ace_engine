@@ -666,7 +666,7 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     const auto &info = pattern_->layoutInfo_;
     EXPECT_EQ(info->Offset(), -ITEM_MAIN_SIZE * 5);
     EXPECT_EQ(info->startIndex_, 7);
-    EXPECT_EQ(GetChildY(frameNode_, 7), 5);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 0);
 }
 
 /**

@@ -110,9 +110,6 @@ OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
 
 void WaterFlowPattern::UpdateScrollBarOffset()
 {
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return;
-    }
     CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
@@ -121,17 +118,15 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     auto viewSize = geometryNode->GetFrameSize();
-    auto overScroll = 0.0f;
-    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    if (Positive(info->Offset())) {
-        overScroll = info->Offset();
-    } else {
-        // distance to bottom
-        overScroll = GetMainContentSize() - (info->GetContentHeight() + info->currentOffset_);
+    float overScroll = 0.0f;
+    if (Positive(layoutInfo_->Offset())) {
+        overScroll = layoutInfo_->Offset();
+    } else if (layoutInfo_->offsetEnd_) {
+        overScroll = layoutInfo_->BottomFinalPos(GetMainContentSize()) - layoutInfo_->CurrentPos();
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(-info->Offset(), info->EstimateTotalHeight(),
+    UpdateScrollBarRegion(-layoutInfo_->Offset(), layoutInfo_->EstimateTotalHeight(),
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
@@ -211,9 +206,7 @@ void WaterFlowPattern::OnModifyDone()
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        SetScrollBar(DisplayMode::OFF);
-    } else if (paintProperty->GetScrollBarProperty()) {
+    if (paintProperty->GetScrollBarProperty()) {
         SetScrollBar(paintProperty->GetScrollBarProperty());
     }
     SetAccessibilityAction();
@@ -612,17 +605,11 @@ void WaterFlowPattern::OnAnimateStop()
 void WaterFlowPattern::AnimateTo(
     float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
-    if (layoutInfo_->Mode() == WaterFlowLayoutMode::SLIDING_WINDOW) {
-        return;
-    }
     ScrollablePattern::AnimateTo(position, duration, curve, smooth, canOverScroll);
 }
 
 void WaterFlowPattern::ScrollTo(float position)
 {
-    if (layoutInfo_->Mode() == WaterFlowLayoutMode::SLIDING_WINDOW) {
-        return;
-    }
     ScrollablePattern::ScrollTo(position);
 }
 
@@ -850,17 +837,14 @@ SizeF WaterFlowPattern::GetChildrenExpandedSize()
 {
     auto viewSize = GetViewSizeMinusPadding();
     auto axis = GetAxis();
-    float estimatedHeight = 0.0f;
-    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
-        auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-        estimatedHeight = info->EstimateTotalHeight();
-    }
+    const float estimatedHeight = layoutInfo_->EstimateTotalHeight();
 
     if (axis == Axis::VERTICAL) {
-        return SizeF(viewSize.Width(), estimatedHeight);
-    } else if (axis == Axis::HORIZONTAL) {
-        return SizeF(estimatedHeight, viewSize.Height());
+        return {viewSize.Width(), estimatedHeight};
     }
-    return SizeF();
+    if (axis == Axis::HORIZONTAL) {
+        return {estimatedHeight, viewSize.Height()};
+    }
+    return {};
 }
 } // namespace OHOS::Ace::NG
