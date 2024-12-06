@@ -28,7 +28,7 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-class StubSwiperController : public SwiperController {
+class StubSwiperController : public TabsControllerNG {
 public:
     StubSwiperController()
     {
@@ -38,10 +38,18 @@ public:
         SetPreloadItemsImpl(
             std::bind(&StubSwiperController::PreloadItems, this, std::placeholders::_1)
         );
+        SetTabBarTranslateImpl(
+            std::bind(&StubSwiperController::SetTabBarTranslate, this, std::placeholders::_1)
+        );
+        SetTabBarOpacityImpl(
+            std::bind(&StubSwiperController::SetTabBarOpacity, this, std::placeholders::_1)
+        );
     }
     ~StubSwiperController() override = default;
     virtual void SwipeTo(int, bool) {}
     virtual void PreloadItems(std::set<int32_t>) {}
+    virtual void SetTabBarTranslate(const NG::TranslateOptions&) {}
+    virtual void SetTabBarOpacity(double opacity) {}
 };
 
 class MockSwiperController : public StubSwiperController {
@@ -50,6 +58,8 @@ public:
     ~MockSwiperController() override = default;
     MOCK_METHOD(void, SwipeTo, (int, bool));
     MOCK_METHOD(void, PreloadItems, (std::set<int32_t>));
+    MOCK_METHOD(void, SetTabBarTranslate, (const NG::TranslateOptions&));
+    MOCK_METHOD(void, SetTabBarOpacity, (double opacity));
 };
 } // namespace
 
@@ -125,8 +135,65 @@ HWTEST_F(TabsControllerAccessorTest, preloadItemsTest, TestSize.Level1)
     accessor_->preloadItems(peer_, &validValue, &cont);
 
     // nothing calls expected when there are invalid params
+    EXPECT_CALL(*mockSwiperController_, PreloadItems(expectedIndexSet)).Times(0);
     auto invalidValue = Converter::ArkValue<Opt_Array_Number>();
     accessor_->preloadItems(peer_, &invalidValue, &cont);
     accessor_->preloadItems(peer_, nullptr, &cont);
+}
+
+/**
+ * @tc.name: setTabBarTranslateTest
+ * @tc.desc: Check the functionality of TabsControllerAccessor::SetTabBarTranslateImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsControllerAccessorTest, setTabBarTranslateTest, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(accessor_->setTabBarTranslate, nullptr);
+
+    Ark_TranslateOptions arkTranslate;
+    arkTranslate.x = ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(1.0f));
+    arkTranslate.y = ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("-2.2vp"));
+    arkTranslate.z = ArkValue<Opt_Union_Number_String>(Ark_Empty());
+
+    static bool wasInvoke = false;
+    mockSwiperController_->SetTabBarTranslateImpl([](const NG::TranslateOptions& translate) {
+        EXPECT_EQ(translate.x.ToString(), "1.00vp");
+        EXPECT_EQ(translate.y.ToString(), "-2.2vpcalc");
+        EXPECT_EQ(translate.z.ToString(), "0.00px");
+        wasInvoke = true;
+    });
+    accessor_->setTabBarTranslate(peer_, &arkTranslate);
+    EXPECT_TRUE(wasInvoke);
+}
+
+/**
+ * @tc.name: setTabBarOpacityTest
+ * @tc.desc: Check the functionality of TabsControllerAccessor.SetTabBarOpacityImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsControllerAccessorTest, setTabBarOpacityTest, TestSize.Level1)
+{
+    constexpr float validOpacity = 0.95;
+    constexpr float minOpacity = 0.0;
+    constexpr float maxOpacity = 1.0;
+
+    ASSERT_NE(accessor_->setTabBarOpacity, nullptr);
+
+    EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(validOpacity)).Times(1);
+    auto arkNumValid = ArkValue<Ark_Number>(validOpacity);
+    accessor_->setTabBarOpacity(peer_, &arkNumValid);
+
+    EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(minOpacity)).Times(1);
+    auto arkNumInValidMin = ArkValue<Ark_Number>(-FLT_MAX);
+    accessor_->setTabBarOpacity(peer_, &arkNumInValidMin);
+
+    EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(maxOpacity)).Times(1);
+    auto arkNumInValidMax = ArkValue<Ark_Number>(FLT_MAX);
+    accessor_->setTabBarOpacity(peer_, &arkNumInValidMax);
+
+    // nothing calls expected
+    EXPECT_CALL(*mockSwiperController_, SetTabBarOpacity(testing::_)).Times(0);
+    accessor_->setTabBarOpacity(peer_, nullptr);
 }
 } // namespace OHOS::Ace::NG

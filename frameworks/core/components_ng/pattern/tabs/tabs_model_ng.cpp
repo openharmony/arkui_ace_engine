@@ -1138,7 +1138,7 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_
     }
 }
 
-RefPtr<SwiperController> TabsModelNG::GetSwiperController(FrameNode* frameNode)
+RefPtr<TabsControllerNG> TabsModelNG::GetSwiperController(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -1147,7 +1147,8 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(FrameNode* frameNode)
     CHECK_NULL_RETURN(swiperNode, nullptr);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, nullptr);
-    return swiperPattern->GetSwiperController();
+    auto swiperController = swiperPattern->GetSwiperController();
+    return AceType::DynamicCast<TabsControllerNG>(swiperController);
 }
 
 // the combination of the TabsModelNG::Create (part that related to Index) and TabsModelNG::SetIndex

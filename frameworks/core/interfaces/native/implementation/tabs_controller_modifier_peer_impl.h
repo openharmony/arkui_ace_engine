@@ -18,14 +18,15 @@
 #include <optional>
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components/swiper/swiper_controller.h"
+#include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class TabsControllerPeerImpl : public Referenced {
 public:
     TabsControllerPeerImpl() = default;
 
-    void SetTargetController(const WeakPtr<SwiperController> &controller)
+    void SetTargetController(const WeakPtr<TabsControllerNG> &controller)
     {
         CHECK_NULL_VOID(!controller.Invalid());
         controllerWeakPtr_ = controller;
@@ -35,25 +36,39 @@ public:
     {
         index = index < 0 ? 0 : index;
 
-        auto swiperController = controllerWeakPtr_.Upgrade();
-        CHECK_NULL_VOID(swiperController);
+        auto controller = controllerWeakPtr_.Upgrade();
+        CHECK_NULL_VOID(controller);
 
-        const auto& updateCubicCurveCallback = swiperController->GetUpdateCubicCurveCallback();
+        const auto& updateCubicCurveCallback = controller->GetUpdateCubicCurveCallback();
         if (updateCubicCurveCallback != nullptr) {
             updateCubicCurveCallback();
         }
-        swiperController->SwipeTo(index);
+        controller->SwipeTo(index);
     }
 
     void TriggerPreloadItems(const std::set<int32_t>& indexSet) const
     {
-        auto swiperController = controllerWeakPtr_.Upgrade();
-        CHECK_NULL_VOID(swiperController);
-        swiperController->PreloadItems(indexSet);
+        auto controller = controllerWeakPtr_.Upgrade();
+        CHECK_NULL_VOID(controller);
+        controller->PreloadItems(indexSet);
+    }
+
+    void TriggerSetTabBarTranslate(const NG::TranslateOptions& translate) const
+    {
+        auto controller = controllerWeakPtr_.Upgrade();
+        CHECK_NULL_VOID(controller);
+        controller->SetTabBarTranslate(translate);
+    }
+
+    void TriggerSetTabBarOpacity(const double opacity) const
+    {
+        auto controller = controllerWeakPtr_.Upgrade();
+        CHECK_NULL_VOID(controller);
+        controller->SetTabBarOpacity(std::clamp(opacity, 0.0, 1.0));
     }
 
 private:
-    Ace::WeakPtr<SwiperController> controllerWeakPtr_;
+    Ace::WeakPtr<TabsControllerNG> controllerWeakPtr_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TABS_CONTROLLER_PEER_IMPL_H
