@@ -442,6 +442,21 @@ void SecurityUIExtensionPattern::HandleFocusEvent()
         WeakClaim(this), sessionWrapper_);
 }
 
+void SecurityUIExtensionPattern::SetEventProxyFlag(int32_t flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (flag != static_cast<int32_t>(EventProxyFlag::EVENT_NONE)
+        && platformEventProxy_ == nullptr) {
+        platformEventProxy_ = MakeRefPtr<PlatformEventProxy>();
+        platformEventProxy_->SetHostNode(host);
+    }
+
+    if (platformEventProxy_ != nullptr) {
+        platformEventProxy_->SetEventProxyFlag(flag);
+    }
+}
+
 void SecurityUIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
@@ -505,6 +520,7 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     }
 
     state_ = AbilityState::DESTRUCTION;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         PLATFORM_LOGI("DestroySession.");
         sessionWrapper_->DestroySession();
@@ -523,6 +539,7 @@ void SecurityUIExtensionPattern::FireOnErrorCallback(
 {
     state_ = AbilityState::NONE;
     PlatformPattern::FireOnErrorCallback(code, name, message);
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         sessionWrapper_->DestroySession();
     }

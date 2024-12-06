@@ -61,8 +61,6 @@ public:
         bool transferringCaller = false, bool densityDpi = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
-    // for DynamicComponent
-    virtual void Create();
     virtual void Create(const NG::UIExtensionConfig& config) {}
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime);

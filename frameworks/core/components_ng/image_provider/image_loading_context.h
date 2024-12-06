@@ -126,14 +126,14 @@ public:
         return imageQuality_;
     }
 
-    void SetImageDecodeFormat(PixelFormat imageDecodeFormat)
+    void SetPhotoDecodeFormat(PixelFormat photoDecodeFormat)
     {
-        imageDecodeFormat_ = imageDecodeFormat;
+        photoDecodeFormat_ = photoDecodeFormat;
     }
 
-    PixelFormat GetImageDecodeFormat()
+    PixelFormat GetPhotoDecodeFormat()
     {
-        return imageDecodeFormat_;
+        return photoDecodeFormat_;
     }
 
     void FinishMearuse()
@@ -206,7 +206,7 @@ private:
     const int32_t containerId_ {0};
 
     bool isHdrDecoderNeed_ = false;
-    PixelFormat imageDecodeFormat_ = PixelFormat::UNKNOWN;
+    PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
     bool syncLoad_ = false;
 

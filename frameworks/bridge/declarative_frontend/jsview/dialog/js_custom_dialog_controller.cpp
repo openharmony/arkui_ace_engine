@@ -62,6 +62,7 @@ constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 
 } // namespace
 
+static std::atomic<int32_t> controllerId = 0;
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
     int argc = info.Length();
@@ -229,6 +230,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.isModal = isModalValue->ToBoolean();
         }
 
+        instance->dialogProperties_.controllerId = controllerId.fetch_add(1, std::memory_order_relaxed);
         JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);
         JSViewAbstract::SetDialogHoverModeProperties(constructorArg, instance->dialogProperties_);
         instance->IncRefCount();

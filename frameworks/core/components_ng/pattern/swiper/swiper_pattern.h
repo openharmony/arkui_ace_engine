@@ -44,6 +44,11 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+enum class PageFlipMode {
+    CONTINUOUS = 0,
+    SINGLE,
+};
+
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
@@ -132,11 +137,6 @@ public:
         return turnPageRate_;
     }
 
-    float GetGroupTurnPageRate() const
-    {
-        return groupTurnPageRate_;
-    }
-
     GestureState GetGestureState();
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -152,11 +152,6 @@ public:
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
-    }
-
-    void SetGroupTurnPageRate(float groupTurnPageRate)
-    {
-        groupTurnPageRate_ = groupTurnPageRate;
     }
 
     float GetTouchBottomRate() const
@@ -513,8 +508,6 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
-    int32_t DisplayIndicatorTotalCount() const;
-    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
     bool ContentWillChange(int32_t comingIndex);
@@ -632,6 +625,13 @@ public:
 
     bool IsAutoPlay() const;
 
+    void SetPageFlipMode(int32_t pageFlipMode);
+
+    int32_t GetPageFlipMode() const
+    {
+        return static_cast<int32_t>(pageFlipMode_);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -730,7 +730,6 @@ private:
     {
         return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
     }
-    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -1031,7 +1030,6 @@ private:
     float fadeOffset_ = 0.0f;
     float springOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
-    float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
@@ -1164,6 +1162,9 @@ private:
     std::set<int32_t> cachedItems_;
     LayoutConstraintF layoutConstraint_;
     bool requestLongPredict_ = false;
+
+    PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
+    bool isFirstAxisAction_ = true;
 };
 } // namespace OHOS::Ace::NG
 

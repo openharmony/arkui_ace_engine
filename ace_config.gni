@@ -67,6 +67,9 @@ declare_args() {
 
   # Enable wearable product support
   ace_engine_feature_wearable = false
+
+  # Enable mouse axis support
+  ace_engine_feature_enable_form_mouse_axis_support = false
 }
 
 enable_dump_drawcmd = false
@@ -99,7 +102,7 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
-c_utils_path = "//commonlibrary/c_utils/base/include"
+c_utils_header_path = "//commonlibrary/c_utils/base/include"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
@@ -323,4 +326,8 @@ if (ace_engine_feature_enable_nav_split_mode) {
 
 if (ace_engine_feature_wearable) {
   ace_common_defines += [ "ARKUI_WEARABLE" ]
+}
+
+if (ace_engine_feature_enable_form_mouse_axis_support) {
+  ace_common_defines += [ "FORM_MOUSE_AXIS_SUPPORT" ]
 }

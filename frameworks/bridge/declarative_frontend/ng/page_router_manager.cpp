@@ -80,6 +80,11 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
     if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+        info.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {
+            TAG_LOGE(AceLogTag::ACE_ROUTER,
+                "Router load ohmUrl failed, probably caused by invalid ohmUrl. code:%{public}d, msg:%{public}s",
+                errorCode, errorMsg.c_str());
+        };
         auto loadTask = [weak = AceType::WeakClaim(this), info]() {
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);

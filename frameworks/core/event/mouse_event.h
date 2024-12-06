@@ -492,6 +492,11 @@ public:
 
     bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
 
+    bool IsHoverTarget() const
+    {
+        return onHoverCallback_ != nullptr || onHoverEventCallback_ != nullptr;
+    }
+
     bool IsAccessibilityHoverTarget()
     {
         return onAccessibilityHoverCallback_ != nullptr;

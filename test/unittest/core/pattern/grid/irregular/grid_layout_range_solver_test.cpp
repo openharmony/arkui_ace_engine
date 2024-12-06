@@ -326,11 +326,11 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
     const auto& info = pattern_->info_;
 
     pattern_->ScrollToIndex(88, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.startIndex_, 85);
     EXPECT_EQ(info.endIndex_, 90);
     pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.endIndex_, 2);
 }
@@ -358,7 +358,7 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem002, TestSize.Level1)
     const auto& info = pattern_->info_;
 
     pattern_->ScrollToIndex(22, false, ScrollAlign::CENTER, 0.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.startIndex_, 22);
     EXPECT_EQ(info.endIndex_, 26);
     for (int i = info.startIndex_; i <= info.endIndex_; ++i) {
@@ -440,7 +440,7 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 29);
@@ -450,7 +450,7 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.startIndex_, 28);
     EXPECT_EQ(info.endIndex_, 30);
     EXPECT_EQ(info.currentOffset_, 10.0f);
@@ -459,7 +459,7 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr");
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     // startIdx changed, but currentOffset_ is maintained. So Item 28 no longer in range
     EXPECT_EQ(info.startIndex_, 21);
     EXPECT_EQ(info.endIndex_, 23);
@@ -485,13 +485,13 @@ HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
     CreateFixedHeightItems(77, itemHeight);
     CreateDone();
     pattern_->ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     const auto& info = pattern_->info_;
     EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), GRID_HEIGHT - itemHeight);
     EXPECT_EQ(info.startIndex_, 22);
 
     pattern_->ScrollToIndex(88, false, ScrollAlign::AUTO, itemHeight);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.startIndex_, 85);
     EXPECT_EQ(info.endIndex_, 93);
     for (int i = 85; i <= 93; ++i) {
@@ -519,7 +519,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
     CreateDone();
     pattern_->ScrollToIndex(23, true);
     EXPECT_EQ(pattern_->targetIndex_, 23);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     const auto& info = pattern_->info_;
     for (int i = 0; i < 24; ++i) {
         auto it = info.FindInMatrix(i);
@@ -554,16 +554,16 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
     CreateFixedHeightItems(77, itemHeight);
     CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 91);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr");
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
     const float offset = info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f);
     UpdateCurrentOffset(pattern_->GetTotalOffset() - offset);
@@ -572,7 +572,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 22)->IsActive());
 
     pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), -1.0f);
     pattern_->extraOffset_ = 0.0f;
     EXPECT_FALSE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
@@ -613,7 +613,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
 
     // re-layout to trigger cache item layout
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 12), 0.0f);
     EXPECT_EQ(GetChildX(frameNode_, 13), itemWidth + 10.0f);
     EXPECT_EQ(GetChildX(frameNode_, 14), (itemWidth + 10.0f) * 2);
@@ -627,7 +627,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 16), 550.0f);
     EXPECT_EQ(GetChildY(frameNode_, 17), 550.0f);
     pattern_->ScrollToIndex(49);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.startIndex_, 39);
     const std::list<int32_t> preloadList2 = { 38, 37, 36, 35, 34, 33 };
     CheckPreloadListEqual(preloadList2);
@@ -660,7 +660,7 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     model.SetCachedCount(3); // 2 lines
     CreateDone();
     pattern_->ScrollToIndex(20, false, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.currentOffset_, -30.0f);
     EXPECT_EQ(info.startIndex_, 9);
@@ -675,7 +675,7 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
 
     // re-layout to trigger cache item layout
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 8), -140.0f);
     EXPECT_EQ(GetChildY(frameNode_, 7), -140.0f);
     EXPECT_EQ(GetChildY(frameNode_, 6), -140.0f);
@@ -696,7 +696,7 @@ HWTEST_F(GridLayoutRangeTest, Cache003, TestSize.Level1)
     model.SetRowsGap(Dimension(5));
     model.SetCachedCount(1);
     model.SetLayoutOptions({});
-    CreateLazyForEachItems(50, [](uint32_t idx) { return 50.0f; });
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
     CreateDone();
     frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
@@ -743,7 +743,7 @@ HWTEST_F(GridLayoutRangeTest, Drag001, TestSize.Level1)
     CreateDone();
 
     pattern_->ScrollToIndex(21, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 2)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 2), 340.0f);
     EXPECT_EQ(GetChildY(frameNode_, 24), 340.0f);
@@ -832,7 +832,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         algo.getNextFocusNode(FocusStep::TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
-        EXPECT_EQ(pattern_->focusIndex_, i);
+        EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
     }
     for (int i = 48; i >= 0; --i) {
@@ -840,7 +840,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         algo.getNextFocusNode(FocusStep::SHIFT_TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
-        EXPECT_EQ(pattern_->focusIndex_, i);
+        EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
     }
 }

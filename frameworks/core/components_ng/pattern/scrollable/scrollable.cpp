@@ -269,7 +269,7 @@ void Scrollable::HandleTouchUp()
         }
         return;
     }
-    if (isList_ && state_ != AnimationState::SNAP && startSnapAnimationCallback_) {
+    if (state_ != AnimationState::SNAP && startSnapAnimationCallback_) {
         startSnapAnimationCallback_(0.f, 0.f, 0.f, 0.f);
     }
 }

@@ -241,6 +241,39 @@ void WindowSceneHelper::InjectPointerEvent(
     OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node, nullptr, true);
 }
 
+void WindowSceneHelper::InjectPointerEventForActionCancel(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+{
+    if (!pointerEvent) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEventForActionCancel pointerEvent is null return.");
+        return;
+    }
+
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEventForActionCancel only handle cancel event.");
+        return;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+            "InjectPointerEventForActionCancel eventId:%{public}d container is null return.", pointerEvent->GetId());
+        return;
+    }
+    auto aceView = AceType::DynamicCast<OHOS::Ace::Platform::AceViewOhos>(container->GetAceView());
+    if (!aceView) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+            "InjectPointerEventForActionCancel eventId:%{public}d aceView is null return.", pointerEvent->GetId());
+        return;
+    }
+    OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, nullptr, true);
+}
+
 bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(keyEvent, false);

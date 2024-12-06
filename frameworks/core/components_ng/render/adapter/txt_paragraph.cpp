@@ -26,6 +26,7 @@ namespace {
 const std::u16string ELLIPSIS = u"\u2026";
 const std::u16string SYMBOL_TRANS = u"\uF0001";
 const int32_t LENGTH_INCREMENT = 2;
+constexpr int32_t THOUSAND = 1000;
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
@@ -184,8 +185,8 @@ uint32_t TxtParagraph::destructCount = 0;
 
 TxtParagraph::~TxtParagraph()
 {
-    if (destructCount % 100 == 0) {
-        TAG_LOGI(AceLogTag::ACE_TEXT,
+    if (destructCount % THOUSAND == 0) {
+        TAG_LOGW(AceLogTag::ACE_TEXT,
             "destroy TxtParagraph with placeholderCnt_ %{public}d, textAlign_ %{public}d, count %{public}u",
             placeholderCnt_, static_cast<int>(textAlign_), destructCount);
     }

@@ -115,47 +115,48 @@ HWTEST_F(GridLayoutTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSiz
     CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
 
+    auto& focus = pattern_->focusHandler_;
     /**
      * @tc.steps: step2. Find target child with specified index parameters.
      * @tc.expected: Can find the target focus child.
      */
     int32_t tarMainIndex = 1;
     int32_t tarCrossIndex = 1;
-    pattern_->isLeftStep_ = true;
-    auto IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isLeftStep_ = true;
+    auto IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     RefPtr<FocusHub> result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isLeftStep_ = false;
+    focus.isLeftStep_ = false;
 
     /**
      * @tc.steps: step3. Call the function when isRightStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isRightStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isRightStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isRightStep_ = false;
+    focus.isRightStep_ = false;
 
     /**
      * @tc.steps: step4. Call the function when isUpStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isUpStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isUpStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isUpStep_ = false;
+    focus.isUpStep_ = false;
 
     /**
      * @tc.steps: step5. Call the function when isDownStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isDownStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isDownStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isDownStep_ = false;
+    focus.isDownStep_ = false;
 }
 
 /**

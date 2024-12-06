@@ -593,15 +593,16 @@ bool FrameNode::IsSupportDrawModifier()
     return pattern_->IsSupportDrawModifier();
 }
 
-void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
+void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive)
 {
     CHECK_NULL_VOID(node);
-    auto task = [weak = AceType::WeakClaim(AceType::RawPtr(node))]() {
+    auto task = [weak = AceType::WeakClaim(AceType::RawPtr(node)), needRemainActive]() {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->ProcessOffscreenTask();
         node->MarkModifyDone();
         node->UpdateLayoutPropertyFlag();
+        bool isActive = node->IsActive();
         node->SetActive();
         node->isLayoutDirtyMarked_ = true;
         auto pipeline = node->GetContext();
@@ -628,7 +629,11 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushModifier();
         pipeline->FlushMessages();
-        node->SetActive(false);
+        if (needRemainActive) {
+            node->SetActive(isActive);
+        } else {
+            node->SetActive(false);
+        }
     };
     auto pipeline = node->GetContext();
     if (pipeline && pipeline->IsLayouting()) {
@@ -782,6 +787,9 @@ void FrameNode::DumpCommonInfo()
     if (NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
+    }
+    if (GetTag() == V2::ROOT_ETS_TAG) {
+        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(GetContext()->GetDensity())));
     }
     DumpAlignRulesInfo();
     DumpDragInfo();

@@ -67,6 +67,7 @@ public:
     void SetAnimateMode(TabAnimateMode mode) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetBarBackgroundEffect(const EffectOption& effectOption) override;
+    void SetPageFlipMode(int32_t pageFlipMode) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -91,6 +92,7 @@ public:
     static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
     static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
+    static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

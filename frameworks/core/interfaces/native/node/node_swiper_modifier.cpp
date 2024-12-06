@@ -1133,6 +1133,27 @@ void ResetOnContentDidScroll(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetOnContentDidScroll(frameNode, nullptr);
 }
+
+void SetSwiperPageFlipMode(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetPageFlipMode(frameNode, pageFlipMode);
+}
+
+void ResetSwiperPageFlipMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetPageFlipMode(frameNode, NUM_0);
+}
+
+ArkUI_Int32 GetSwiperSwiperPageFlipMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return SwiperModelNG::GetPageFlipMode(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1151,10 +1172,11 @@ const ArkUISwiperModifier* GetSwiperModifier()
         GetSwiperShowIndicator, GetSwiperShowDisplayArrow, GetSwiperEffectMode, SetIndicatorInteractive,
         ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
         SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
-        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
-        SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
-        SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
-        SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
+        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController, SetSwiperOnChange,
+        ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart, SetSwiperOnAnimationEnd,
+        ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe, SetOnContentDidScroll,
+        ResetOnContentDidScroll, GetIndicatorInteractive, SetSwiperPageFlipMode, ResetSwiperPageFlipMode,
+        GetSwiperSwiperPageFlipMode };
     return &modifier;
 }
 
@@ -1195,7 +1217,7 @@ void SetSwiperChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_SWIPER_CHANGE;
         event.componentAsyncEvent.data[NUM_0].i32 = index;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
@@ -1214,7 +1236,7 @@ void SetSwiperAnimationStart(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[NUM_2].f32 = info.currentOffset.value_or(ANIMATION_INFO_DEFAULT);
         event.componentAsyncEvent.data[NUM_3].f32 = info.targetOffset.value_or(ANIMATION_INFO_DEFAULT);
         event.componentAsyncEvent.data[NUM_4].f32 = info.velocity.value_or(ANIMATION_INFO_DEFAULT);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     SwiperModelNG::SetOnAnimationStart(frameNode, std::move(onEvent));
 }
@@ -1230,7 +1252,7 @@ void SetSwiperAnimationEnd(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_SWIPER_ANIMATION_END;
         event.componentAsyncEvent.data[NUM_0].i32 = index;
         event.componentAsyncEvent.data[NUM_1].f32 = info.currentOffset.value_or(ANIMATION_INFO_DEFAULT);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     SwiperModelNG::SetOnAnimationEnd(frameNode, std::move(onEvent));
 }
@@ -1246,7 +1268,7 @@ void SetSwiperGestureSwipe(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_SWIPER_GESTURE_SWIPE;
         event.componentAsyncEvent.data[NUM_0].i32 = index;
         event.componentAsyncEvent.data[NUM_1].f32 = info.currentOffset.value_or(ANIMATION_INFO_DEFAULT);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     SwiperModelNG::SetOnGestureSwipe(frameNode, std::move(onEvent));
 }
@@ -1266,7 +1288,7 @@ void SetSwiperOnContentDidScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[NUM_1].i32 = index;
         event.componentAsyncEvent.data[NUM_2].f32 = position;
         event.componentAsyncEvent.data[NUM_3].f32 = mainAxisLength / density;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(onEvent));
 }

@@ -674,6 +674,62 @@ public:
     {
         return aiWriteIsSupport_;
     }
+
+    const Dimension& GetCounterTextTopMargin() const
+    {
+        return counterTextTopMargin_;
+    }
+
+    const Dimension& GetCounterTextBottomMargin() const
+    {
+        return counterTextBottomMargin_;
+    }
+
+    const Dimension& GetStandardCounterTextMargin() const
+    {
+        return standardCounterTextMargin_;
+    }
+
+    const Dimension& GetErrorTextTopMargin() const
+    {
+        return errorTextTopMargin_;
+    }
+
+    const Dimension& GetErrorTextBottomMargin() const
+    {
+        return errorTextBottomMargin_;
+    }
+
+    const Dimension& GetCounterTextMarginOffset() const
+    {
+        return counterTextMarginOffset_;
+    }
+
+    const Dimension& GetErrorTextUnderlineMargin() const
+    {
+        return errorTextUnderlineMargin_;
+    }
+
+    const Dimension& GetErrorTextCapsuleMargin() const
+    {
+        return errorTextCapsuleMargin_;
+    }
+
+    float GetErrorTextMaxFontScale() const
+    {
+        return errorTextMaxFontScale_;
+    }
+
+    uint32_t GetCounterTextMaxline() const
+    {
+        return counterTextMaxline_;
+    }
+
+    uint32_t GetErrorTextMaxLine() const
+    {
+        return errorTextMaxLine_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -779,6 +835,19 @@ private:
     Dimension inlinePaddingLeft_ = 0.0_vp;
     Dimension inlinePaddingRight_ = 0.0_vp;
     Dimension placeholderLineSpacing_ = 0.0_vp;
+
+    Dimension counterTextTopMargin_ = 8.0_vp;
+    Dimension counterTextBottomMargin_ = 8.0_vp;
+    Dimension standardCounterTextMargin_ = 22.0_vp;
+    Dimension errorTextTopMargin_ = 8.0_vp;
+    Dimension errorTextBottomMargin_ = 8.0_vp;
+    Dimension counterTextMarginOffset_ = 8._vp;
+    Dimension errorTextUnderlineMargin_ = 8.0_vp;
+    Dimension errorTextCapsuleMargin_ = 8.0_vp;
+    
+    float errorTextMaxFontScale_ = 2.0f;
+    uint32_t counterTextMaxline_ = 1;
+    uint32_t errorTextMaxLine_ = 1;
 
     std::string hasShowedPassword_;
     std::string hasHiddenPassword_;

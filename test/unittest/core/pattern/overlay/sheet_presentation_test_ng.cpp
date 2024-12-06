@@ -2178,7 +2178,7 @@ HWTEST_F(SheetPresentationTestNg, IsSheetBottomStyle001, TestSize.Level1)
     EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
 
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
-    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    EXPECT_FALSE(sheetPattern->IsSheetBottomStyle());
 
     /**
      * @tc.steps: step6. set non-bottom style sheetType_, test "IsSheetBottomStyle".
@@ -2267,7 +2267,7 @@ HWTEST_F(SheetPresentationTestNg, IsSheetBottomStyle002, TestSize.Level1)
     EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
 
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
-    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    EXPECT_FALSE(sheetPattern->IsSheetBottomStyle());
 
     SheetPresentationTestNg::TearDownTestCase();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);

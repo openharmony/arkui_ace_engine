@@ -3199,8 +3199,11 @@ class ArkComponent {
     this._nativePtrChanged = false;
   }
   setNodePtr(nodePtr) {
+    if (nodePtr === this.nativePtr) {
+      return;
+    }
     this.nativePtr = nodePtr;
-    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+    this._weakPtr = (nodePtr !== undefined && nodePtr !== null) ? getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr) : undefined;
   }
   setInstanceId(instanceId) {
     this._instanceId = instanceId;
@@ -8021,6 +8024,23 @@ class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
   }
 }
 PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
+class PatternLockSkipUnselectedPointModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetSkipUnselectedPoint(node);
+    }
+    else {
+      getUINativeModule().patternLock.setSkipUnselectedPoint(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PatternLockSkipUnselectedPointModifier.identity = Symbol('patternlockSkipUnselectedPoint');
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8059,6 +8079,10 @@ class ArkPatternLockComponent extends ArkComponent {
   }
   activateCircleStyle(value) {
     modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
+    return this;
+  }
+  skipUnselectedPoint(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockSkipUnselectedPointModifier.identity, PatternLockSkipUnselectedPointModifier, value);
     return this;
   }
   onPatternComplete(callback) {
@@ -20844,6 +20868,7 @@ class ArkNavDestinationComponent extends ArkComponent {
     return this;
   }
 }
+
 class HideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -21636,6 +21661,11 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
+  enableModeChangeAnimation(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableModeChangeAnimationModifier.identity,
+      EnableModeChangeAnimationModifier, value);
+    return this;
+  }
   hideTitleBar(isHide, animated) {
     let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
     if (!isUndefined(isHide) && !isNull(isHide)) {
@@ -21908,6 +21938,21 @@ class HideToolBarModifier extends ModifierWithKey {
   }
 }
 HideToolBarModifier.identity = Symbol('hideToolBar');
+
+class EnableModeChangeAnimationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableModeChangeAnimation(node);
+    } else {
+      getUINativeModule().navigation.setEnableModeChangeAnimation(node, this.value);
+    }
+  }
+}
+EnableModeChangeAnimationModifier.identity = Symbol('enableModeChangeAnimation');
+
 class TitleModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -28429,6 +28474,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, value);
     return this;
   }
+  pageFlipMode(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -29006,6 +29055,22 @@ class SwiperOnContentDidScrollModifier extends ModifierWithKey {
   }
 }
 SwiperOnContentDidScrollModifier.identity = Symbol('swiperOnContentDidScroll');
+class SwiperPageFlipModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperPageFlipMode(node);
+    } else {
+      getUINativeModule().swiper.setSwiperPageFlipMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperPageFlipModeModifier.identity = Symbol('swiperPageFlipMode');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {
@@ -29136,6 +29201,10 @@ class ArkTabsComponent extends ArkComponent {
   }
   edgeEffect(value) {
     modifierWithKey(this._modifiersWithKeys, TabEdgeEffectModifier.identity, TabEdgeEffectModifier, value);
+    return this;
+  }
+  pageFlipMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TabPageFlipModeModifier.identity, TabPageFlipModeModifier, value);
     return this;
   }
   width(value) {
@@ -29477,6 +29546,19 @@ class TabEdgeEffectModifier extends ModifierWithKey {
   }
 }
 TabClipModifier.identity = Symbol('tabedgeEffect');
+class TabPageFlipModeModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabPageFlipMode(node);
+    } else {
+      getUINativeModule().tabs.setTabPageFlipMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabPageFlipModeModifier.identity = Symbol('tabPageFlipMode');
 class TabWidthModifier extends ModifierWithKey {
     constructor(value) {
         super(value);

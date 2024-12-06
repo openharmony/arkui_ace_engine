@@ -71,6 +71,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -865,7 +866,6 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog animation");
     CHECK_NULL_VOID(node);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -913,6 +913,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     ctx->ScaleAnimation(option, theme->GetScaleEnd(), theme->GetScaleStart());
     // start animation immediately
     pipeline->RequestFrame();
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "close dialog animation");
 }
 
 void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node)
@@ -1326,7 +1327,7 @@ bool OverlayManager::IsContextMenuBindedOnOrigNode()
     CHECK_NULL_RETURN(mainPipeline, false);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
-    auto draggingNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    auto draggingNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(draggingNode, false);
     auto eventHub = draggingNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
@@ -1978,6 +1979,17 @@ void OverlayManager::DismissPopup()
     HidePopup(dismissPopupId_, popupInfo);
 }
 
+void OverlayManager::ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper)
+{
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetHasFoldModeChangedTransition(false);
+    auto layoutProperty = menuWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+}
+
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu helper enter");
@@ -1992,7 +2004,7 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
         menuMap_[targetId] = menu;
     }
     CHECK_NULL_RETURN(menu, false);
-
+    ResetMenuWrapperVisibility(menu);
     RefPtr<FrameNode> menuFrameNode = menu;
     if (menu->GetTag() != V2::MENU_ETS_TAG) {
         auto menuChild = menu->GetChildAtIndex(0);
@@ -2923,7 +2935,6 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         TAG_LOGW(AceLogTag::ACE_DIALOG, "dialogNode/%{public}d is removing", dialogNode->GetId());
         return;
     }
-    dialogNode->MarkRemoving();
 
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -2944,6 +2955,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    dialogNode->MarkRemoving();
     if (transitionEffect != nullptr) {
         CloseDialogMatchTransition(dialogNode);
     } else {
@@ -3168,6 +3180,8 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             return true;
         }
+    } else {
+        SheetManager::GetInstance().RemoveSheetByESC();
     }
     return false;
 }
@@ -7027,7 +7041,7 @@ BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const
     CHECK_NULL_RETURN(mainPipeline, borderRadius);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, borderRadius);
-    auto dragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    auto dragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(dragFrameNode, borderRadius);
     return DragEventActuator::GetDragFrameNodeBorderRadius(dragFrameNode);
 }

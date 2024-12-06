@@ -31,9 +31,6 @@ using namespace testing::ext;
 constexpr float GRID_WIDTH = 240.f;
 constexpr float GRID_HEIGHT = 400.f;
 constexpr float ITEM_MAIN_SIZE = 100.f;
-constexpr float CONTENT_MAIN_SIZE = 1000.f;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - GRID_HEIGHT;
-constexpr float HORIZONTAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - GRID_WIDTH;
 constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 3.0_vp;
 constexpr Dimension BORDER_RADIUS = 8.0_vp;
 constexpr float COL_GAP = 10.f;
@@ -41,6 +38,7 @@ constexpr float ROW_GAP = 5.f;
 constexpr float BIG_ROW_GAP = 700.f;
 constexpr float MEDIUM_ROW_GAP = 35.f;
 constexpr int32_t FILL_VALUE = -2;
+constexpr int32_t TICK = 2;
 } // namespace
 
 class GridTestNg : public TestNG {
@@ -52,7 +50,7 @@ public:
     void GetGrid();
     GridModelNG CreateGrid();
     GridModelNG CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
-    void CreateLazyForEachItems(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
 
     /**
      * @param height -2 corresponds to 100% height
@@ -71,18 +69,25 @@ public:
     void CreateBigColItem(int32_t colStart, int32_t colEnd);
     void CreateBigRowItem(int32_t rowStart, int32_t rowEnd);
     void AddFixedHeightItems(int32_t cnt, float height);
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float position);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
 
     void CheckPreloadListEqual(const std::list<int32_t>& expectedList) const;
     RefPtr<FrameNode> GetItem(int32_t idx, bool asCache);
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset = std::nullopt);
+    bool AnimateTo(
+        const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false);
+    AssertionResult Position(float expectOffset);
+    AssertionResult VelocityPosition(float velocity, float expectOffset);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;
     RefPtr<GridEventHub> eventHub_;
     RefPtr<GridLayoutProperty> layoutProperty_;
     RefPtr<GridAccessibilityProperty> accessibilityProperty_;
+    RefPtr<ScrollableController> positionController_;
 };
 } // namespace OHOS::Ace::NG
 

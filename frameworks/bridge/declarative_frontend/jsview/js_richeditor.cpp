@@ -2711,7 +2711,6 @@ void JSRichEditorStyledStringController::GetStyledString(const JSCallbackInfo& a
     JSRef<JSObject> obj = JSClass<JSMutableSpanString>::NewInstance();
     auto jsMutableSpanString = Referenced::Claim(obj->Unwrap<JSMutableSpanString>());
     CHECK_NULL_VOID(jsMutableSpanString);
-    jsMutableSpanString->IncRefCount();
     jsMutableSpanString->SetController(mutableSpanString);
     jsMutableSpanString->SetMutableController(mutableSpanString);
     args.SetReturnValue(obj);

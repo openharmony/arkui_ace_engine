@@ -112,7 +112,7 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
-    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
+    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
     FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
@@ -258,6 +258,11 @@ public:
     }
 
     void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }

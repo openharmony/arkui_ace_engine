@@ -326,26 +326,6 @@ public:
         info_ = DragPreviewInfo();
     }
 
-    void SetPrepareDragFrameNode(const WeakPtr<FrameNode>& prepareDragFrameNode)
-    {
-        prepareDragFrameNode_ = prepareDragFrameNode;
-    }
-
-    const WeakPtr<FrameNode> GetPrepareDragFrameNode() const
-    {
-        return prepareDragFrameNode_;
-    }
-
-    void SetPreDragStatus(PreDragStatus preDragStatus)
-    {
-        preDragStatus_ = preDragStatus;
-    }
-
-    PreDragStatus GetPreDragStatus() const
-    {
-        return preDragStatus_;
-    }
-
     void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
     {
         isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
@@ -543,7 +523,6 @@ private:
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
     uint64_t preTimeStamp_ = 0L;
-    WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
@@ -571,7 +550,6 @@ private:
     bool isDragNodeNeedClean_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
-    PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     DragPointerEvent dragDropPointerEvent_;

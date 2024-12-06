@@ -826,20 +826,35 @@ export class v1 extends ViewPU {
     }
     onMaximizeButtonClick() {
         this.onCancelMenuTimer();
+        this.onHoverMaximizeButton(false);
+        this.maximizeScale = 1.0;
+        ContainerModal.callNative(EVENT_NAME_CUSTOM_MAX_CLICK);
     }
     onMinimizeButtonClick() {
+        this.onHoverMinimizeButton(false);
+        this.minimizeScale = 1.0;
+        ContainerModal.callNative(EVENT_NAME_MIN_CLICK);
+    }
+    onMinimizeButtonClick() {
+        ContainerModal.callNative(EVENT_NAME_MIN_CLICK);
     }
     onCloseButtonClick() {
+        ContainerModal.callNative(EVENT_NAME_CLOSE_CLICK);
     }
     onMenuLeftSplitClick() {
+        ContainerModal.callNative(EVENT_NAME_LEFT_SPLIT_CLICK);
     }
     onMenuRightSplitClick() {
+        ContainerModal.callNative(EVENT_NAME_RIGHT_SPLIT_CLICK);
     }
     addButtonPointLightAnim() {
+        ContainerModal.callNative(EVENT_NAME_BUTTON_POINT_LIGHT_ANIM);
     }
     onAreaChangeEvent(q3, r3) {
+        ContainerModal.callNative(EVENT_NAME_BUTTON_RECT_CHANGE);
     }
     onMenuWidthChange() {
+        ContainerModal.callNative(EVENT_NAME_CUSTOM_MENU_WIDTH_CHANGE);
     }
     setHideSplit(p3) {
         this.hideSplit = p3;
@@ -1080,6 +1095,7 @@ export class v1 extends ViewPU {
             Button.type(ButtonType.Normal);
             Button.borderRadius('4vp');
             Button.margin({ right: this.buttonSpacing + 'vp' });
+            Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
                 x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
                 y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -1147,6 +1163,7 @@ export class v1 extends ViewPU {
             Button.type(ButtonType.Normal);
             Button.borderRadius('4vp');
             Button.margin({ right: this.buttonSpacing + 'vp' });
+            Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
                 x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
                 y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,

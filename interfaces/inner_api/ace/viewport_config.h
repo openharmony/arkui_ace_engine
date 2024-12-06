@@ -90,6 +90,16 @@ public:
         return transform_;
     }
 
+    void SetDisplayId(uint64_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
+    uint64_t DisplayId() const
+    {
+        return displayId_;
+    }
+
     bool operator==(const ViewportConfig& other) const
     {
         return width_ == other.Width() &&
@@ -98,7 +108,8 @@ public:
             posY_ == other.Top() &&
             density_ == other.Density() &&
             orientation_ == other.Orientation() &&
-            transform_ == other.TransformHint();
+            transform_ == other.TransformHint() &&
+            displayId_ == other.DisplayId();
     }
 
     bool operator!=(const ViewportConfig& other) const
@@ -114,6 +125,7 @@ public:
         config.append(" density: " + std::to_string(density_));
         config.append(" position: (" + std::to_string(posX_) + ", " + std::to_string(posY_) + ")");
         config.append(" transformHint: " + std::to_string(transform_));
+        config.append(" displayId: " + std::to_string(displayId_));
         return config;
     }
 
@@ -125,6 +137,7 @@ private:
     int32_t orientation_ = 0;
     float density_ = 1.0f;
     uint32_t transform_ = 0;
+    uint64_t displayId_ = 0;
 };
 
 } // namespace OHOS::Ace

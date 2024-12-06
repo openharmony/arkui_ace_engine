@@ -73,12 +73,13 @@ struct ParsedConfig {
     std::string mcc;
     std::string mnc;
     std::string preferredLanguage;
+    std::string fontId;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
-                 preferredLanguage.empty());
+                 preferredLanguage.empty() && fontId.empty());
     }
 };
 
@@ -279,12 +280,6 @@ public:
         CHECK_NULL_VOID(uiWindow_);
         auto dmOrientation = static_cast<Rosen::Orientation>(static_cast<uint32_t>(orientation));
         uiWindow_->SetRequestedOrientation(dmOrientation);
-    }
-
-    uint64_t GetDisplayId() const override
-    {
-        CHECK_NULL_RETURN(uiWindow_, -1);
-        return uiWindow_->GetDisplayId();
     }
 
     Orientation GetOrientation() override
@@ -523,6 +518,8 @@ public:
     void BuildResConfig(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
+    void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(

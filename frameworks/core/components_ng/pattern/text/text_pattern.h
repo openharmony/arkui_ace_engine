@@ -627,6 +627,7 @@ public:
     // add for capi NODE_TEXT_CONTENT_WITH_STYLED_STRING
     void SetExternalParagraph(void* paragraph)
     {
+        ACE_TEXT_SCOPED_TRACE("SetExternalParagraph");
         externalParagraph_ = paragraph;
     }
 

@@ -142,7 +142,7 @@ void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_LIST_ITEM_SELECTED;
         event.componentAsyncEvent.data[0].i32 = static_cast<int32_t>(isSelected);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListItemModelNG::SetSelectCallback(frameNode, std::move(onEvent));
 }

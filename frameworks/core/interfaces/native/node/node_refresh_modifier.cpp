@@ -144,7 +144,7 @@ void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_REFRESH_STATE_CHANGE;
         event.componentAsyncEvent.data[0].i32 = value;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetOnStateChange(frameNode, std::move(onEvent));
 }
@@ -158,7 +158,7 @@ void SetOnRefreshing(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_REFRESH_REFRESHING;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));
 }
@@ -173,7 +173,7 @@ void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_REFRESH_ON_OFFSET_CHANGE;
         event.componentAsyncEvent.data[0].f32 = value;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetOnOffsetChange(frameNode, std::move(onEvent));
 }
@@ -189,7 +189,7 @@ void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_REFRESH_CHANGE_EVENT;
         bool newValue = value == "true";
         event.componentAsyncEvent.data[0].u32 = newValue;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }

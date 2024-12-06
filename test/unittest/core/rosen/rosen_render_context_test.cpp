@@ -27,7 +27,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
+namespace {
+    const char* SRC_JPG = "file://data/data/com.example.test/res/exampleAlt.jpg";
+
+} // namespace
 
 void RosenRenderContextTest::SetUp()
 {
@@ -193,7 +196,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest006, TestSize.Level1)
 
 /**
  * @tc.name: RosenRenderContextTest008
- * @tc.desc: SyncGeometryFrame().
+ * @tc.desc: OnForegroundEffectUpdate().
  * @tc.type: FUNC
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest008, TestSize.Level1)
@@ -285,7 +288,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest015, TestSize.Level1)
 
 /**
  * @tc.name: RosenRenderContextTest016
- * @tc.desc: SyncGeometryProperties().
+ * @tc.desc: OnForegroundColorStrategyUpdate().
  * @tc.type: FUNC
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest016, TestSize.Level1)
@@ -911,4 +914,257 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest036, TestSize.Level1)
     }
     rosenRenderContext->UpdateWindowBlur();
 }
+
+/**
+ * @tc.name: RosenRenderContextTest037
+ * @tc.desc: UpdateShadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest037, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    if (!rosenRenderContext) {
+        return;
+    }
+    Shadow shadow;
+    shadow.SetBlurRadius(1.0);
+    shadow.SetOffsetX(1.0);
+    shadow.SetOffsetY(1.0);
+    shadow.SetIsFilled(true);
+    rosenRenderContext->OnBackShadowUpdate(shadow);
+    auto color = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowColor();
+    ASSERT_TRUE(color.AsArgbInt() == Color::BLACK.GetValue());
+    auto offsetX =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
+    auto offsetY =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
+    ASSERT_TRUE(NearEqual(1.0, offsetX));
+    ASSERT_TRUE(NearEqual(1.0, offsetY));
+    auto isFilled =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowIsFilled();
+    ASSERT_TRUE(isFilled);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest38
+ * @tc.desc: UpdateClipEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest038, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    if (!rosenRenderContext) {
+        return;
+    }
+    rosenRenderContext->OnClipEdgeUpdate(true);
+    auto clip = rosenRenderContext->rsNode_->GetStagingProperties().GetClipToBounds();
+    ASSERT_TRUE(clip);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest039
+ * @tc.desc: GetStatusByEffectTypeAndWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest039, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+
+    auto windowEffect = EffectType::WINDOW_EFFECT;
+    rosenRenderContext->UpdateUseEffectType(windowEffect);
+    pipeline->WindowFocus(false);
+    EXPECT_TRUE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
+
+    pipeline->WindowFocus(true);
+    auto useEffectTypeVal = rosenRenderContext->GetUseEffectType();
+    EXPECT_EQ(useEffectTypeVal, windowEffect);
+    EXPECT_TRUE(pipeline->IsWindowFocused());
+    EXPECT_FALSE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
+
+    rosenRenderContext->UpdateUseEffectType(EffectType::DEFAULT);
+    EXPECT_FALSE(rosenRenderContext->GetStatusByEffectTypeAndWindow());
+}
+
+/**
+ * @tc.name: RosenRenderContextTest040
+ * @tc.desc: OnUseEffectUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest040, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto pipeline = rosenRenderContext->GetPipelineContext();
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    rosenRenderContext->UpdateUseEffectType(EffectType::WINDOW_EFFECT);
+    bool value = true;
+    // GetStatusByEffectTypeAndWindow() is true
+    pipeline->WindowFocus(false);
+    rosenRenderContext->OnUseEffectUpdate(value);
+    bool willSetVal = false;
+    rosenRenderContext->rsNode_->SetUseEffect(willSetVal);
+    EXPECT_NE(willSetVal, value);
+
+    // GetStatusByEffectTypeAndWindow() is false
+    pipeline->WindowFocus(true);
+    rosenRenderContext->OnUseEffectUpdate(value);
+    willSetVal = true;
+    rosenRenderContext->rsNode_->SetUseEffect(willSetVal);
+    EXPECT_EQ(willSetVal, value);
+
+    value = false;
+    // value is false, GetStatusByEffectTypeAndWindow() is true
+    pipeline->WindowFocus(false);
+    rosenRenderContext->OnUseEffectUpdate(value);
+    willSetVal = false;
+    rosenRenderContext->rsNode_->SetUseEffect(value);
+    EXPECT_EQ(willSetVal, value);
+
+    // value is false,  GetStatusByEffectTypeAndWindow() is false
+    pipeline->WindowFocus(true);
+    rosenRenderContext->OnUseEffectUpdate(value);
+    willSetVal = false;
+    rosenRenderContext->rsNode_->SetUseEffect(willSetVal);
+    EXPECT_EQ(willSetVal, value);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest041
+ * @tc.desc: OnUseEffectTypeUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest041, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    EffectType effectType = EffectType::WINDOW_EFFECT;
+    rosenRenderContext->OnUseEffectTypeUpdate(effectType);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    auto effectTypeParam = static_cast<Rosen::UseEffectType>(effectType);
+    rosenRenderContext->rsNode_->SetUseEffectType(effectTypeParam);
+    
+    bool useEffect = true;
+    rosenRenderContext->UpdateUseEffect(useEffect);
+    rosenRenderContext->OnUseEffectUpdate(useEffect);
+
+    useEffect = false;
+    rosenRenderContext->UpdateUseEffect(useEffect);
+    rosenRenderContext->OnUseEffectUpdate(useEffect);
+
+    effectType = EffectType::DEFAULT;
+    rosenRenderContext->OnUseEffectTypeUpdate(effectType);
+    auto useEffectTypeVal = rosenRenderContext->GetUseEffectType().value_or(EffectType::DEFAULT);
+    EXPECT_EQ(useEffectTypeVal, effectType);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest042
+ * @tc.desc: UpdateWindowFocusState().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest042, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+   
+    bool isFocused = true;
+    rosenRenderContext->UpdateWindowFocusState(isFocused);
+
+    auto useEffect = rosenRenderContext->GetUseEffect().value_or(false);
+    rosenRenderContext->UpdateUseEffectType(EffectType::WINDOW_EFFECT);
+    rosenRenderContext->OnUseEffectUpdate(useEffect);
+
+    BlurStyleOption blurStyleObj;
+    blurStyleObj.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    blurStyleObj.isWindowFocused = isFocused;
+    rosenRenderContext->UpdateBackBlurStyle(blurStyleObj);
+
+    EffectOption effectObj;
+    effectObj.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    rosenRenderContext->UpdateBackgroundEffect(effectObj);
+    EXPECT_EQ(effectObj.isWindowFocused, isFocused);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest043
+ * @tc.desc: OnBackgroundColorUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    const Color value = Color::RED;
+    rosenRenderContext->OnBackgroundColorUpdate(value);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->rsNode_->SetBackgroundColor(value.GetValue());
+    rosenRenderContext->PaintBackground();
+    auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    EXPECT_EQ(backgroundColorVal, OHOS::Rosen::RSColor::FromArgbInt(value.GetValue()));
+}
+
+/**
+ * @tc.name: RosenRenderContextTest044
+ * @tc.desc: HasValidBgImageResizable().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest044, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+
+    rosenRenderContext->bgLoadingCtx_ = nullptr;
+    EXPECT_EQ(rosenRenderContext->HasValidBgImageResizable(), false);
+    auto str = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(str, LoadNotifier(nullptr, nullptr, nullptr), true);
+   
+    rosenRenderContext->bgLoadingCtx_ = ctx;
+    auto srcSize = rosenRenderContext->bgLoadingCtx_->GetImageSize();
+    auto slice = rosenRenderContext->GetBackgroundImageResizableSliceValue(ImageResizableSlice());
+    auto left = slice.left.ConvertToPxWithSize(srcSize.Width());
+    auto right = slice.right.ConvertToPxWithSize(srcSize.Width());
+    auto top = slice.top.ConvertToPxWithSize(srcSize.Width());
+    auto bottom = slice.bottom.ConvertToPxWithSize(srcSize.Width());
+    bool firstRes = srcSize.Width() > left + right;
+    bool secondRes = srcSize.Height() > top + bottom;
+    bool thirdRes = right > 0;
+    bool fourthRes = bottom > 0;
+    bool res = firstRes && secondRes && thirdRes && fourthRes;
+
+    EXPECT_EQ(rosenRenderContext->HasValidBgImageResizable(), res);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest045
+ * @tc.desc: SetAlphaOffscreen().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest045, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    bool isOffScreen = true;
+    bool isOffScreenVal = true;
+    rosenRenderContext->SetAlphaOffscreen(isOffScreen);
+    rosenRenderContext->rsNode_->SetAlphaOffscreen(isOffScreenVal);
+    EXPECT_EQ(isOffScreen, isOffScreenVal);
+
+    isOffScreen = false;
+    isOffScreenVal = false;
+    rosenRenderContext->SetAlphaOffscreen(isOffScreen);
+    rosenRenderContext->rsNode_->SetAlphaOffscreen(isOffScreenVal);
+    EXPECT_EQ(isOffScreen, isOffScreenVal);
+}
+
 } // namespace OHOS::Ace::NG

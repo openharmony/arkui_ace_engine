@@ -2611,6 +2611,9 @@ struct ArkUISwiperModifier {
     void (*setSwiperOnContentDidScroll)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnContentDidScroll)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIndicatorInteractive)(ArkUINodeHandle node);
+    void (*setSwiperPageFlipMode)(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode);
+    void (*resetSwiperPageFlipMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperPageFlipMode)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -2937,6 +2940,8 @@ struct ArkUITabsModifier {
     void (*resetTabClip)(ArkUINodeHandle node);
     void (*setTabEdgeEffect)(ArkUINodeHandle node, ArkUI_Uint32 edgeEffect);
     void (*resetTabEdgeEffect)(ArkUINodeHandle node);
+    void (*setTabPageFlipMode)(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode);
+    void (*resetTabPageFlipMode)(ArkUINodeHandle node);
     void (*setTabWidthAuto)(ArkUINodeHandle node);
     void (*resetTabWidthAuto)(ArkUINodeHandle node);
     void (*setTabHeightAuto)(ArkUINodeHandle node);
@@ -3815,6 +3820,8 @@ struct ArkUIToggleModifier {
 struct ArkUINavigationModifier {
     void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetHideToolBar)(ArkUINodeHandle node);
+    void (*setEnableModeChangeAnimation)(ArkUINodeHandle node, ArkUI_Bool isEnable);
+    void (*resetEnableModeChangeAnimation)(ArkUINodeHandle node);
     void (*setHideNavBar)(ArkUINodeHandle node, ArkUI_Bool hideNavBar);
     void (*resetHideNavBar)(ArkUINodeHandle node);
     void (*setTitleMode)(ArkUINodeHandle node, ArkUI_Int32 value);
@@ -4597,6 +4604,10 @@ struct ArkUIPatternLockModifier {
     void (*resetPatternLockActiveCircleRadius)(ArkUINodeHandle node);
     void (*setPatternLockEnableWaveEffect)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetPatternLockEnableWaveEffect)(ArkUINodeHandle node);
+    void (*setPatternLockEnableForeground)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockEnableForeground)(ArkUINodeHandle node);
+    void (*setPatternLockSkipUnselectedPoint)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockSkipUnselectedPoint)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnSplitModifier {
@@ -5293,13 +5304,6 @@ struct ArkUIExtendedNodeAPI {
     void (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId);
     void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext);
     /// Events.
-    /**
-     * Returns != 0 if an event was received,
-     * fills in supplied buffer in such a case.
-     * Must not block, blocking is performed by
-     * ArkoalaHostApi.waitForVsync().
-     */
-    ArkUI_Int32 (*checkEvent)(ArkUINodeEvent* event);
     /**
      * Add an event to the event queue, so that
      * it will be picked up later by checkEvent().

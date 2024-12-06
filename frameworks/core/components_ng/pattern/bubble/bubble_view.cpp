@@ -386,6 +386,7 @@ void BubbleView::UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const R
         auto button = AceType::DynamicCast<FrameNode>(buttons.front());
         buttons.pop_front();
         auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
         auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateContent(primaryButton.value);
@@ -399,6 +400,7 @@ void BubbleView::UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const R
         auto button = AceType::DynamicCast<FrameNode>(buttons.front());
         buttons.pop_front();
         auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
         auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateContent(secondaryButton.value);
@@ -525,7 +527,6 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
 void BubbleView::GetPopupMaxWidthAndHeight(
     const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupNodeId)
 {
-    CHECK_NULL_VOID(popupNodeId);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupNodeId);
     CHECK_NULL_VOID(popupNode);
     auto pipelineContext = popupNode->GetContextRefPtr();
@@ -830,6 +831,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, nullptr);
     auto popupTheme = GetPopupTheme();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
     auto focusColor = popupTheme->GetFocusColor();
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();

@@ -364,7 +364,10 @@ void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
-void PipelineContext::WindowFocus(bool isFocus) {}
+void PipelineContext::WindowFocus(bool isFocus)
+{
+    onFocus_ = isFocus;
+}
 
 void PipelineContext::ContainerModalUnFocus() {}
 
@@ -490,9 +493,6 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
-
-void PipelineContext::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-    uint32_t closeButtonRightMargin, int32_t isDarkMode) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
@@ -1018,8 +1018,6 @@ bool PipelineBase::MaybeRelease()
 {
     return AceType::MaybeRelease();
 }
-
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
 double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {

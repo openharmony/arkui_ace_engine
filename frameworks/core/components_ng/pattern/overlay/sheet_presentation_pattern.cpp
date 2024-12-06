@@ -449,7 +449,9 @@ void SheetPresentationPattern::InitPanEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnkeyEvent(focusHub);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -489,6 +491,39 @@ void SheetPresentationPattern::InitPanEvent()
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+}
+
+void SheetPresentationPattern::InitOnkeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    });
+
+    focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleBlurEvent();
+        }
+    });
+}
+
+void SheetPresentationPattern::HandleFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sheetId = host->GetId();
+    TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet get focus, and id is : %{public}d", sheetId);
+    SheetManager::GetInstance().SetFocusSheetId(sheetId);
+}
+
+void SheetPresentationPattern::HandleBlurEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet lost focus");
+    SheetManager::GetInstance().SetFocusSheetId(std::nullopt);
 }
 
 void SheetPresentationPattern::HandleDragStart()

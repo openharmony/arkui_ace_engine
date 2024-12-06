@@ -27,9 +27,12 @@ enum class PlaybackMode {
 
 // movingphoto pixelmap format
 enum class MovingPhotoFormat {
-    NONE = -1,
-    RGBA_8888 = 0,
-    NV21 = 1
+    UNKNOWN = 0,
+    RGBA_8888 = 1,
+    NV21 = 2,
+    RGBA_1010102 = 3,
+    YCBCR_P010 = 4,
+    YCRCB_P010 = 5
 };
 
 } // namespace OHOS::Ace

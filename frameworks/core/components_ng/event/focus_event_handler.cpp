@@ -28,7 +28,7 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
         return FocusIntension::NONE;
     }
     if (keyEvent.pressedCodes.size() != 1) {
-        return keyEvent.IsShiftWith(KeyCode::KEY_TAB) ? FocusIntension::SHIFT_TAB : FocusIntension::NONE;
+        return keyEvent.IsExactlyShiftWith(KeyCode::KEY_TAB) ? FocusIntension::SHIFT_TAB : FocusIntension::NONE;
     }
     switch (keyEvent.code) {
         case KeyCode::KEY_TAB:
@@ -66,6 +66,12 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
 
 bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
 {
+    if (!IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "node: %{public}s/%{public}d cannot handle key event because is not current focus",
+            GetFrameName().c_str(), GetFrameId());
+        return false;
+    }
     if (focusType_ == FocusType::SCOPE) {
         return OnFocusEventScope(event);
     }
@@ -80,7 +86,6 @@ bool FocusEventHandler::OnFocusEventScope(const FocusEvent& event)
 {
     ACE_DCHECK(IsCurrentFocus());
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
-
     if (lastFocusNode && lastFocusNode->OnFocusEvent(event)) {
         TAG_LOGD(AceLogTag::ACE_FOCUS,
             "OnKeyEvent: Node %{public}s/%{public}d will not handle Event(type:%{private}d). "
@@ -89,26 +94,22 @@ bool FocusEventHandler::OnFocusEventScope(const FocusEvent& event)
             lastFocusNode->GetFrameId());
         return true;
     }
-    if (OnFocusEventNode(event)) {
-        return true;
-    }
-    if (HandleFocusTravel(event)) {
-        return true;
-    }
-    return false;
+    return OnFocusEventNode(event);
 }
 
 bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
 
+    bool ret = false;
     if (focusEvent.event.eventType == UIInputEventType::KEY) {
         const KeyEvent& keyEvent = static_cast<const KeyEvent&>(focusEvent.event);
-        return HandleKeyEvent(keyEvent, focusEvent.intension);
+        ret = HandleKeyEvent(keyEvent, focusEvent.intension);
     } else {
         LOGI("Handle NonPointerAxisEvent");
         return false;
     }
+    return ret ? true : HandleFocusTravel(focusEvent);
 }
 
 bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension intension)
@@ -135,19 +136,20 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
     if (retInternal || retCallback) {
         return true;
     }
+    // Handle on click
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        !pipeline->GetIsFocusActive()) {
+        return false;
+    }
+    if (intension == FocusIntension::SELECT && !IsTabStop()) {
+        intension = FocusIntension::SPACE;
+    }
     auto ret = false;
-    switch (intension) {
-        case FocusIntension::SELECT:
-        case FocusIntension::SPACE:
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
-                !pipeline->GetIsFocusActive()) {
-                break;
-            }
-            ret = OnClick(event);
-            TAG_LOGI(AceLogTag::ACE_FOCUS,
-                "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
-                GetFrameName().c_str(), GetFrameId(), event.code, event.action, ret);
-        default:;
+    if (intension == FocusIntension::SPACE) {
+        ret = OnClick(event);
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), event.code, event.action, ret);
     }
     return ret;
 }

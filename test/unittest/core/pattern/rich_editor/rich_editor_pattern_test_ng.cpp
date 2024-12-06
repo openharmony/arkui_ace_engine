@@ -12,7 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +41,7 @@ int32_t testNumber2 = 2;
 int32_t testNumber3 = 3;
 int32_t testNumber4 = 4;
 int32_t testNumber5 = 5;
+int32_t callBack1 = 0;
 } // namespace
 
 class RichEditorPatternTestNg : public RichEditorCommonTestNg {
@@ -307,6 +317,9 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, Tes
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
 
     std::string previewTextValue = INIT_VALUE_1;
     PreviewRange previewRange;
@@ -1478,6 +1491,10 @@ HWTEST_F(RichEditorPatternTestNg, GetPreviewTextDecorationColor001, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutproperty = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutproperty, nullptr);
+    layoutproperty->UpdatePreviewTextStyle("underline");
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));

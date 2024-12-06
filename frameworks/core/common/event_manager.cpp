@@ -1257,7 +1257,7 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
             currMouseTestResults_.emplace_back(mouseResult);
         }
         auto hoverResult = AceType::DynamicCast<HoverEventTarget>(result);
-        if (hoverResult) {
+        if (hoverResult && hoverResult->IsHoverTarget()) {
             hoverTestResult.emplace_back(hoverResult);
         }
         if (!hoverNode.Upgrade()) {
@@ -1356,7 +1356,8 @@ void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, con
 bool EventManager::DispatchMouseEventToCurResults(
     const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
 {
-    for (const auto& mouseTarget : currMouseTestResults_) {
+    auto currMouseTestResults = currMouseTestResults_;
+    for (const auto& mouseTarget : currMouseTestResults) {
         if (!mouseTarget) {
             continue;
         }
@@ -1384,7 +1385,8 @@ bool EventManager::DispatchMouseEventToCurResults(
 bool EventManager::DispatchMouseEventToCurResultsInLessAPI13(
     const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
 {
-    for (const auto& mouseTarget : currMouseTestResults_) {
+    auto currMouseTestResults = currMouseTestResults_;
+    for (const auto& mouseTarget : currMouseTestResults) {
         if (!mouseTarget) {
             continue;
         }
@@ -1850,7 +1852,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     TouchEvent falsifyEvent = touchPoint;
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
-    for (const auto& iter : downFingerIds_) {
+    auto downFingerIds = downFingerIds_;
+    for (const auto& iter : downFingerIds) {
         falsifyEvent.id = iter.first;
         falsifyEvent.pointers = lastTouchEvent_.pointers;
         if (touchPoint.id != iter.first) {

@@ -708,7 +708,7 @@ void SetOnWillScroll(ArkUINodeHandle node, void* extraParam)
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
         return scrollRes;
     };
@@ -724,7 +724,7 @@ void SetOnWaterFlowReachEnd(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_REACH_END;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
@@ -743,7 +743,7 @@ void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 =
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollableModelNG::SetOnDidScroll(frameNode, std::move(setOnDidScroll));
 }
@@ -758,7 +758,7 @@ void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
@@ -773,7 +773,7 @@ void SetOnWaterFlowScrollStop(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_STOP;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
@@ -794,7 +794,7 @@ void SetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 =
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         scrollRes.offset = usePx ? Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::PX)
                                  : Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
         return scrollRes;
@@ -814,7 +814,7 @@ void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_INDEX;
         event.componentAsyncEvent.data[0].i32 = first;
         event.componentAsyncEvent.data[1].i32 = last;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
@@ -828,7 +828,7 @@ void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_REACH_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }

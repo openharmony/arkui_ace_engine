@@ -1096,6 +1096,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
         options?: NavigationTitleOptions): NavigationAttribute;
     subTitle(value: string): NavigationAttribute;
     hideTitleBar(value: boolean): NavigationAttribute;
+    enableModeChangeAnimation(value: boolean): NavigationAttribute;
     hideBackButton(value: boolean): NavigationAttribute;
     titleMode(value: NavigationTitleMode): NavigationAttribute;
     menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute;
@@ -1846,6 +1847,10 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     onAnimationEnd(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this;
     onGestureSwipe(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this;
     nestedScroll(value: SwiperNestedScrollMode): this;
+    indicatorInteractive(value: boolean): this;
+    customContentTransition(transition: SwiperContentAnimatedTransition): this;
+    onContentDidScroll(handler: ContentDidScrollCallback): this;
+    pageFlipMode(value: PageFlipMode): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1872,6 +1877,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;
+    pageFlipMode(value: PageFlipMode): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

@@ -57,7 +57,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -677,6 +676,14 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
     ParseCommonTitle(true, false, subtitle, "", true);
 }
 
+void NavigationModelNG::SetEnableModeChangeAnimation(bool isEnable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableModeChangeAnimation, isEnable, navigationGroupNode);
+}
+
 void NavigationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1181,6 +1188,13 @@ void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
         Referenced::Claim<NavigationGroupNode>(AceType::DynamicCast<NavigationGroupNode>(frameNode));
     CHECK_NULL_VOID(navigationGroupNode);
     SetHideNavBarInner(navigationGroupNode, hideNavBar);
+}
+
+void NavigationModelNG::SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableModeChangeAnimation, isEnable, navigationGroupNode);
 }
 
 void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)

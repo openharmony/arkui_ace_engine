@@ -60,6 +60,7 @@
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
+#include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
@@ -301,9 +302,6 @@ public:
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::u16string insertValue, int32_t maxLength);
     void UpdateObscure(const std::u16string& insertValue, bool hasInsertValue);
-    float MeasureCounterNodeHeight();
-    double CalcCounterBoundHeight();
-    void UpdateCounterMargin();
     void CleanCounterNode();
     void CleanErrorNode();
     float CalcDecoratorWidth(const RefPtr<FrameNode>& decoratorNode);
@@ -325,14 +323,14 @@ public:
     void SetPreviewTextOperation(PreviewTextInfo info);
     void FinishTextPreviewOperation();
 
-    WeakPtr<LayoutWrapper> GetCounterNode()
+    RefPtr<TextComponentDecorator> GetCounterDecorator() const
     {
-        return counterTextNode_;
+        return counterDecorator_;
     }
 
-    RefPtr<FrameNode> GetErrorNode()
+    RefPtr<TextComponentDecorator> GetErrorDecorator() const
     {
-        return errorTextNode_;
+        return errorDecorator_;
     }
 
     bool GetShowCounterStyleValue() const
@@ -983,7 +981,6 @@ public:
         unitNode_ = unitNode;
     }
     void AddCounterNode();
-    void ClearCounterNode();
     void SetShowError();
 
     float GetUnderlineWidth() const
@@ -1706,7 +1703,6 @@ private:
     bool IsOnCleanNodeByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
-    void CreateErrorParagraph(const std::u16string& content);
     void UpdateErrorTextMargin();
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
@@ -1820,7 +1816,6 @@ private:
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
-    RefPtr<FrameNode> errorTextNode_;
     InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
 
@@ -1858,9 +1853,10 @@ private:
     bool isTransparent_ = false;
     bool contChange_ = false;
     bool counterChange_ = false;
-    WeakPtr<LayoutWrapper> counterTextNode_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
+    RefPtr<TextComponentDecorator> counterDecorator_;
+    RefPtr<TextComponentDecorator> errorDecorator_;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;

@@ -102,10 +102,7 @@ ohos_unittest("parse_test_ng") {
     include_dirs = [ "//third_party/skia" ]
   }
 
-  configs = [
-    ":config_svg_parse_test",
-    "$ace_root/test/unittest:ace_unittest_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   external_deps = [
     "bounds_checking_function:libsec_static",
@@ -212,10 +209,183 @@ ohos_unittest("svg_dom_test_ng") {
   ]
 }
 
+ohos_unittest("svg_utils_test_ng") {
+  module_out_path = svg_test_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_utils.cpp",
+    "svg_utils_test_ng.cpp",
+  ]
+
+  defines = [ "USE_ROSEN_DRAWING" ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+}
+
+ohos_unittest("svg_context_test_ng") {
+  module_out_path = svg_test_output_path
+
+  sources = [
+    "$ace_root/frameworks/base/base64/base64_util.cpp",
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/core/animation/svg_animate.cpp",
+    "$ace_root/frameworks/core/components/svg/svg_transform.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_animation.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_attributes_parser.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_circle.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_clip_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_constants.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_ellipse.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_blend.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_composite.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_flood.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_offset.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_filter.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_g.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_gradient.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_graphic.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_image.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_line.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_mask.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_node.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_polygon.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_rect.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_stop.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_style.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_svg.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_use.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_context.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_dom.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_fit_convertor.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_utils.cpp",
+    "$ace_root/test/mock/core/svg/mock_image_painter_utils.cpp",
+    "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
+    "svg_context_test_ng.cpp",
+  ]
+
+  defines = [ "USE_ROSEN_DRAWING" ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+}
+
+ohos_unittest("svg_node_test_ng") {
+  module_out_path = svg_test_output_path
+
+  sources = [
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+    "$ace_root/frameworks/core/animation/svg_animate.cpp",
+    "$ace_root/frameworks/core/components/svg/svg_transform.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_animation.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_attributes_parser.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_circle.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_clip_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_constants.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_blend.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_composite.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_offset.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_filter.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_g.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_gradient.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_graphic.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_mask.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_node.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_polygon.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_stop.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_svg.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_use.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_context.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_dom.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_fit_convertor.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_utils.cpp",
+    "$ace_root/test/mock/adapter/mock_drawing_color_filter_ohos.cpp",
+    "$ace_root/test/mock/core/svg/mock_image_painter_utils.cpp",
+    "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
+    "$ace_root/test/mock/core/svg/mock_shared_transition_effect.cpp",
+    "svg_node_test_ng.cpp",
+  ]
+
+  defines = [ "USE_ROSEN_DRAWING" ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+}
+
 group("core_svg_unittest") {
   testonly = true
   deps = [
     ":parse_test_ng",
+    ":svg_context_test_ng",
     ":svg_dom_test_ng",
+    ":svg_node_test_ng",
+    ":svg_utils_test_ng",
   ]
 }

@@ -1109,22 +1109,20 @@ void GestureEventHub::SetLongPressEvent(
 }
 
 // Set by user define, which will replace old one.
-void GestureEventHub::SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
-    Dimension distance, bool isOverrideDistance)
+void GestureEventHub::SetPanEvent(
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
 {
     if (!panEventActuator_) {
-        panEventActuator_ = MakeRefPtr<PanEventActuator>(
-            WeakClaim(this), direction, fingers, distance.ConvertToPx(), isOverrideDistance);
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
     }
     panEventActuator_->ReplacePanEvent(panEvent);
 }
 
-void GestureEventHub::AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
-    Dimension distance, bool isOverrideDistance)
+void GestureEventHub::AddPanEvent(
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
-        panEventActuator_ = MakeRefPtr<PanEventActuator>(
-            WeakClaim(this), direction, fingers, distance.ConvertToPx(), isOverrideDistance);
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
     }
     panEventActuator_->AddPanEvent(panEvent);
 }

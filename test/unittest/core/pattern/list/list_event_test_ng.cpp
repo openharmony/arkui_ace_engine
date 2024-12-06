@@ -301,7 +301,8 @@ HWTEST_F(ListEventTestNg, HandleDragOverScroll007, TestSize.Level1)
      * @tc.expected: contentMainSize_ not changed.
      */
     pattern_->ratio_ = 0;
-    DragAction(frameNode_, Offset(), 150, 0);
+    DragAction(frameNode_, Offset(), 50, 0);
+    DragAction(frameNode_, Offset(), 100, 0);
     EXPECT_EQ(pattern_->contentMainSize_, 300);
     EXPECT_EQ(pattern_->currentOffset_, -150);
 
@@ -312,6 +313,35 @@ HWTEST_F(ListEventTestNg, HandleDragOverScroll007, TestSize.Level1)
     DragAction(frameNode_, Offset(), -300, 0);
     EXPECT_EQ(pattern_->contentMainSize_, 300);
     EXPECT_EQ(pattern_->currentOffset_, 150);
+}
+
+/**
+ * @tc.name: HandleDragOverScroll008
+ * @tc.desc: List content not enough for one screen, Can not overs scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleDragOverScroll008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. EdgeEffect::NONE
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(4);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Drag over the top
+     * @tc.expected: Can not drag over
+     */
+    DragAction(frameNode_, Offset(), 10, DRAG_VELOCITY);
+    EXPECT_TRUE(Position(0));
+
+    /**
+     * @tc.steps: step3. Drag over the bottom
+     * @tc.expected: Can not drag over
+     */
+    DragAction(frameNode_, Offset(), -10, DRAG_VELOCITY);
+    EXPECT_TRUE(Position(0));
 }
 
 /**

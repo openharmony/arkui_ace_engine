@@ -74,19 +74,6 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
     return nullptr;
 }
 
-void DumpElementTree(
-    int32_t depth, const RefPtr<UINode>& element, std::map<int32_t, std::list<RefPtr<UINode>>>& depthElementMap)
-{
-    if (element->GetChildren().empty()) {
-        return;
-    }
-    const auto& children = element->GetChildren();
-    depthElementMap[depth].insert(depthElementMap[depth].end(), children.begin(), children.end());
-    for (const auto& depthElement : children) {
-        DumpElementTree(depth + 1, depthElement, depthElementMap);
-    }
-}
-
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
     return TouchEvent {}
@@ -345,6 +332,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     std::string jsonNodeStr = jsonNode->ToString();
     ConvertIllegalStr(jsonNodeStr);
     auto jsonNodeNew = JsonUtil::ParseJsonString(jsonNodeStr);
+    if (jsonNodeNew == nullptr || !jsonNodeNew->IsValid()) {
+        LOGW("inspector info of %{public}s-%{public}d is illegal", parent->GetTag().c_str(), parent->GetId());
+        return;
+    }
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, inspectorParameters.pageId, inspectorParameters.isLayoutInspector);

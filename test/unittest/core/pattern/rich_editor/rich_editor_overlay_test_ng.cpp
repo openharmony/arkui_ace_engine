@@ -12,7 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,14 +39,57 @@ int32_t testOnDeleteComplete = 0;
 int32_t testNumber0 = 0;
 int32_t testNumber5 = 5;
 const std::string TEST_IMAGE_SOURCE = "src/image.png";
+int32_t callBack1 = 0;
+int32_t callBack2 = 0;
+int32_t callBack3 = 0;
 } // namespace
 
 class RichEditorOverlayTestNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
+    void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
+    void RequestFocus();
     static void TearDownTestSuite();
 };
+
+void RichEditorOverlayTestNg::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
+{
+    EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> int8_t {
+                if (text.empty()) {
+                    return DEFAULT_RETURN_VALUE;
+                }
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return WORD_LIMIT_RETURN;
+                } else {
+                    return BEYOND_LIMIT_RETURN;
+                }
+            });
+
+    EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> std::vector<int8_t> {
+                if (text.empty()) {
+                    return std::vector<int8_t> { -1, -1 };
+                }
+
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return std::vector<int8_t> { 2, 3 };
+                } else {
+                    return std::vector<int8_t> { 0, 2 };
+                }
+            });
+}
+
+void RichEditorOverlayTestNg::RequestFocus()
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+}
 
 void RichEditorOverlayTestNg::SetUp()
 {
@@ -952,19 +1007,17 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle003, TestSize.Level1)
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
     textOverlayTheme->handleDiameter_ = 14.0_vp;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
-    TouchEventInfo touchEventInfo("");
     TouchLocationInfo touchLocationInfo(0);
     touchLocationInfo.touchType_ = TouchType::DOWN;
     touchLocationInfo.localLocation_ = touchOffset;
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    touchEventInfo.SetSourceTool(SourceTool::FINGER);
-    richEditorPattern->HandleTouchDown(touchEventInfo);
+    touchLocationInfo.SetSourceTool(SourceTool::FINGER);
+    richEditorPattern->HandleTouchDown(touchLocationInfo);
     EXPECT_TRUE(richEditorPattern->moveCaretState_.isTouchCaret);
     /**
      * @tc.steps: step4. move caret position by touch move
      */
-    touchOffset = Offset(50, 0);
-    richEditorPattern->HandleTouchMove(touchOffset);
+    touchLocationInfo.localLocation_ = Offset(50, 0);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
 }
 

@@ -647,7 +647,7 @@ void SetOnSelectSelect(ArkUINodeHandle node, void* extraParam)
         const char* arrayValue[] = {value.c_str(), indexStr.c_str()};
         event.textArrayEvent.subKind = ON_SELECT_SELECT;
         event.textArrayEvent.nativeStringArrayPtr = reinterpret_cast<intptr_t>(arrayValue);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     SelectModelNG::SetOnSelect(frameNode, std::move(onEvent));
 }

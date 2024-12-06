@@ -16,69 +16,16 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RICH_EDITOR_RICH_EDITOR_COMMON_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RICH_EDITOR_RICH_EDITOR_COMMON_TEST_NG_H
 
-#include <optional>
-#include <vector>
-
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_udmf.h"
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/image/pixel_map.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/window/drag_window.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/overlay/keyboard_view.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
-#include "core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_selector.h"
-#include "core/components_ng/render/paragraph.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/key_event.h"
-#include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline/base/constants.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-SelectionRangeInfo testSelectionRange(0, 0);
-int32_t callBack1 = 0;
-int32_t callBack2 = 0;
-int32_t callBack3 = 0;
 const std::string INIT_VALUE_1 = "hello1";
 const std::string INIT_VALUE_2 = "hello2";
 const std::string INIT_VALUE_3 = "hello world! hello world! hello world!";
@@ -123,10 +70,10 @@ const float BUILDER_WIDTH = 150.0f;
 const float BUILDER_HEIGHT = 75.0f;
 const SizeF BUILDER_SIZE(BUILDER_WIDTH, BUILDER_HEIGHT);
 const uint32_t SYMBOL_ID = 1;
-std::list<std::pair<std::string, int32_t>> TEXT_FONTFEATURE = {{ "subs", 1 }};
-std::list<std::pair<std::string, int32_t>> TEXT_FONTFEATURE_2 = {{ "subs", 0 }};
-std::vector<Color> SYMBOL_COLOR_LIST_1 = { Color::FromRGB(255, 100, 100) };
-std::vector<Color> SYMBOL_COLOR_LIST_2 = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
+const std::list<std::pair<std::string, int32_t>> TEXT_FONTFEATURE = {{ "subs", 1 }};
+const std::list<std::pair<std::string, int32_t>> TEXT_FONTFEATURE_2 = {{ "subs", 0 }};
+const std::vector<Color> SYMBOL_COLOR_LIST_1 = { Color::FromRGB(255, 100, 100) };
+const std::vector<Color> SYMBOL_COLOR_LIST_2 = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
 const uint32_t RENDER_STRATEGY_SINGLE = 0;
 const uint32_t RENDER_STRATEGY_MULTI_COLOR = 1;
 const uint32_t EFFECT_STRATEGY_NONE = 0;
@@ -138,22 +85,10 @@ constexpr Color SYSTEM_SELECT_BACKGROUND_COLOR = Color(0x33007dff);
 constexpr float CONTEXT_WIDTH_VALUE = 300.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
 const Color DEFAULT_TEXT_COLOR_VALUE = Color::FromARGB(229, 0, 0, 0);
-bool isOnWillChangeCalled = false;
-bool isOnDidChangeCalled = false;
-bool isOnEditChangeCalled = false;
-RichEditorChangeValue onWillChangeValue;
-RichEditorChangeValue onDidChangeValue;
-auto& onWillRangeBefore = onWillChangeValue.rangeBefore_;
-auto& onWillReplacedSpans = onWillChangeValue.replacedSpans_;
-auto& onWillReplacedImageSpans = onWillChangeValue.replacedImageSpans_;
-auto& onWillReplacedSymbolSpans = onWillChangeValue.replacedSymbolSpans_;
-auto& onDidRangeBefore = onDidChangeValue.rangeBefore_;
-auto& onDidRangeAfter = onDidChangeValue.rangeAfter_;
-RichEditorDeleteValue aboutToDeleteValue;
 const TextStyle TEXT_STYLE_1(10.0);
 const TextStyle TEXT_STYLE_2(20.0);
 const TextStyle TEXT_STYLE_3(30.0);
-TextSpanOptions TEXT_SPAN_OPTIONS_1 = { .value = INIT_VALUE_1, .style = TEXT_STYLE_1 };
+const TextSpanOptions TEXT_SPAN_OPTIONS_1 = { .value = INIT_VALUE_1, .style = TEXT_STYLE_1 };
 const ImageSpanAttribute IMAGE_SPAN_ATTRIBUTE_1 = {
     .size = ImageSpanSize{ .width = 200.0_px, .height = 100.0_px },
     .verticalAlign = VerticalAlign::CENTER,
@@ -176,8 +111,6 @@ const SymbolSpanOptions SYMBOL_SPAN_OPTIONS_1 = {
     .style = TEXT_STYLE_1,
     .resourceObject = nullptr
 };
-auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 } // namespace
 
 struct TestCursorItem {
@@ -209,13 +142,6 @@ public:
     void AddParagraph(TestParagraphItem testParagraphItem);
     void ClearParagraph();
     void ClearSpan();
-    void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
-    void RequestFocus();
-    void GetFocus(const RefPtr<RichEditorPattern>& pattern);
-    void OnDrawVerify(const SelectSpanType& type, const std::string& text, SymbolSpanOptions options, Offset offset,
-        bool selected = false);
-    void InitMagnifierParams(const SizeF& frameSize);
-    static void MockKeyboardBuilder() {}
     RefPtr<FrameNode> richEditorNode_;
 };
 } // namespace OHOS::Ace::NG

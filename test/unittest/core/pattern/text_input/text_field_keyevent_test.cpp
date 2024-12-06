@@ -437,7 +437,6 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent010, TestSize.Level1)
     pattern_->needToRequestKeyboardOnFocus_  = false;
     pattern_->needToRequestKeyboardInner_  = false;
     auto ret = pattern_->OnKeyEvent(keyEvent);
-    pattern_->CalcCounterBoundHeight();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(ret);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);

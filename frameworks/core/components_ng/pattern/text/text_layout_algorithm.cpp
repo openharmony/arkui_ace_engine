@@ -502,7 +502,7 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textSt
         if (suitCount % HUNDRED == 0) {
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_RETURN(host, {});
-            TAG_LOGI(AceLogTag::ACE_TEXT,
+            TAG_LOGW(AceLogTag::ACE_TEXT,
                 "suit layout:%{public}d, [id:%{public}d, suitSize:%{public}f, minFontSize:%{public}f, "
                 "stepSize:%{public}f]",
                 suitCount, host->GetId(), suitableSize, minFontSize, stepSize);
@@ -693,7 +693,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
         if (adaptCount % HUNDRED == 0) {
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_RETURN(host, {});
-            TAG_LOGI(AceLogTag::ACE_TEXT,
+            TAG_LOGW(AceLogTag::ACE_TEXT,
                 "AdaptLayout:%{public}d, [id:%{public}d, height:%{public}f, constraint:%{public}s, "
                 "maxlines:%{public}d]",
                 adaptCount, host->GetId(), height, contentConstraint.ToString().c_str(), maxLines);

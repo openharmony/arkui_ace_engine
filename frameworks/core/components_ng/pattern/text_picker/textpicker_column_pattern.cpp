@@ -168,6 +168,9 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto isToss = pattern->GetTossStatus();
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss) {
                 pattern->touchBreak_ = true;
@@ -221,6 +224,9 @@ void TextPickerColumnPattern::ParseTouchListener()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
             pattern->OnMiddleButtonTouchDown();
@@ -515,7 +521,7 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
             textLayoutProperty->UpdateContent(optionValue.text_);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
-        UpdateTextAccessibilityProperty(textNode, virtualIndex, iter, virtualIndexValidate);
+        UpdateTextAccessibilityProperty(virtualIndex, iter, virtualIndexValidate);
         textNode->GetRenderContext()->SetClipToFrame(true);
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -524,9 +530,11 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
     selectedIndex_ = currentIndex;
 }
 
-void TextPickerColumnPattern::UpdateTextAccessibilityProperty(RefPtr<FrameNode>& textNode, int32_t virtualIndex,
-    std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate)
+void TextPickerColumnPattern::UpdateTextAccessibilityProperty(
+    int32_t virtualIndex, std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate)
 {
+    auto textNode = DynamicCast<FrameNode>(*(iter));
+    CHECK_NULL_VOID(textNode);
     auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     if (!NotLoopOptions() || virtualIndexValidate) {
@@ -537,13 +545,15 @@ void TextPickerColumnPattern::UpdateTextAccessibilityProperty(RefPtr<FrameNode>&
     auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
     if (virtualIndex == -1 && isFocus) {
         auto nextTextNode = DynamicCast<FrameNode>(*(++iter));
-        CHECK_NULL_VOID(nextTextNode);
-        nextTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        if (nextTextNode) {
+            nextTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        }
         --iter;
     } else if (virtualIndex == static_cast<int32_t>(GetOptionCount()) && isFocus) {
         auto preTextNode = DynamicCast<FrameNode>(*(--iter));
-        CHECK_NULL_VOID(preTextNode);
-        preTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        if (preTextNode) {
+            preTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        }
         ++iter;
     }
 }
@@ -589,7 +599,7 @@ void TextPickerColumnPattern::FlushCurrentImageOptions()
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
-        UpdateTextAccessibilityProperty(rangeNode, virtualIndex, iter, virtualIndexValidate);
+        UpdateTextAccessibilityProperty(virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -666,7 +676,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
-        UpdateTextAccessibilityProperty(linearLayoutNode, virtualIndex, iter, virtualIndexValidate);
+        UpdateTextAccessibilityProperty(virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();

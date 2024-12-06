@@ -76,6 +76,7 @@ public:
     void SetSwipeByGroup(bool swipeByGroup) override;
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
+    void SetPageFlipMode(int32_t pageFlipMode) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
@@ -138,6 +139,8 @@ public:
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
     static bool GetIndicatorInteractive(FrameNode* frameNode);
+    static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
+    static int32_t GetPageFlipMode(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

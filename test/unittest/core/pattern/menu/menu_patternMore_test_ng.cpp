@@ -282,10 +282,6 @@ HWTEST_F(MenuPattern2TestNg, GetPreviewMenuAnimationOffset, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
-    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
-    ASSERT_NE(menuAlgorithmWrapper, nullptr);
-    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
-    ASSERT_NE(menuAlgorithm, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
 
@@ -306,44 +302,44 @@ HWTEST_F(MenuPattern2TestNg, GetPreviewMenuAnimationOffset, TestSize.Level1)
     auto left = cx - size.Width() * scale / HALF;
     auto right = cx + size.Width() * scale / HALF;
 
-    menuAlgorithm->placement_ = Placement::TOP;
+    menuPattern->UpdateLastPlacement(Placement::TOP);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(cx - w / HALF, top - SPACE - h));
 
-    menuAlgorithm->placement_ = Placement::TOP_LEFT;
+    menuPattern->UpdateLastPlacement(Placement::TOP_LEFT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left, top - SPACE - h));
 
-    menuAlgorithm->placement_ = Placement::TOP_RIGHT;
+    menuPattern->UpdateLastPlacement(Placement::TOP_RIGHT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right - w, top - SPACE - h));
 
-    menuAlgorithm->placement_ = Placement::BOTTOM;
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(cx - w / HALF, bottom + SPACE));
 
-    menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_LEFT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left, bottom + SPACE));
 
-    menuAlgorithm->placement_ = Placement::BOTTOM_RIGHT;
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_RIGHT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right - w, bottom + SPACE));
 
-    menuAlgorithm->placement_ = Placement::LEFT;
+    menuPattern->UpdateLastPlacement(Placement::LEFT);
     EXPECT_EQ(
         menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left - SPACE - w, cy - h / HALF));
 
-    menuAlgorithm->placement_ = Placement::LEFT_TOP;
+    menuPattern->UpdateLastPlacement(Placement::LEFT_TOP);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left - SPACE - w, top));
 
-    menuAlgorithm->placement_ = Placement::LEFT_BOTTOM;
+    menuPattern->UpdateLastPlacement(Placement::LEFT_BOTTOM);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left - SPACE - w, bottom - h));
 
-    menuAlgorithm->placement_ = Placement::RIGHT;
+    menuPattern->UpdateLastPlacement(Placement::RIGHT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right + SPACE, cy - h / HALF));
 
-    menuAlgorithm->placement_ = Placement::RIGHT_TOP;
+    menuPattern->UpdateLastPlacement(Placement::RIGHT_TOP);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right + SPACE, top));
 
-    menuAlgorithm->placement_ = Placement::RIGHT_BOTTOM;
+    menuPattern->UpdateLastPlacement(Placement::RIGHT_BOTTOM);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right + SPACE, bottom - h));
 
-    menuAlgorithm->placement_ = Placement::NONE;
+    menuPattern->UpdateLastPlacement(Placement::NONE);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left, bottom + SPACE));
 }
 

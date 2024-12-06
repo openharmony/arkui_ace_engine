@@ -45,6 +45,7 @@ public:
     void EnableAnalyzer(bool enabled);
     void SetImageAIOptions(void* options);
     void SetMovingPhotoFormat(MovingPhotoFormat format);
+    void SetDynamicRangeMode(DynamicRangeMode RangeMode);
 
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;

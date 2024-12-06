@@ -19,6 +19,7 @@
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/components_ng/pattern/ui_extension/platform_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
@@ -68,6 +69,7 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetInstanceId();
+    void SetEventProxyFlag(int32_t flag);
     void OnExtensionDetachToDisplay();
 
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
@@ -136,6 +138,7 @@ private:
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
     RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
+    RefPtr<PlatformEventProxy> platformEventProxy_;
     AbilityState state_ = AbilityState::NONE;
     bool isVisible_ = true;
     bool isShowPlaceholder_ = false;
