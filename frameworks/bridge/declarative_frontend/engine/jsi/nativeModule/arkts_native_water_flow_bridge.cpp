@@ -609,7 +609,15 @@ void SetWaterFlowSections(ArkUIRuntimeCallInfo* runtimeCallInfo)
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
         Framework::JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(frameNode, info, sectionsArgs);
     } else {
+        Framework::JSRef<Framework::JSVal> footerContentArgs = info[4];
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
+        if (!footerContentArgs->IsNull() && footerContentArgs->IsObject()) {
+            Framework::JSWaterFlow::UpdateWaterFlowFooterByFrameNode(
+                frameNode, Framework::JsiCallbackInfo(runtimeCallInfo));
+        } else {
+            GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterflowFooterWithFrameNode(nativeNode);
+        }
     }
 }
 
@@ -656,6 +664,7 @@ ArkUINativeModuleValue WaterFlowBridge::ResetWaterFlowInitialize(ArkUIRuntimeCal
         nativeNode, controller, proxyPtr);
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(nativeNode);
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterflowFooterWithFrameNode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

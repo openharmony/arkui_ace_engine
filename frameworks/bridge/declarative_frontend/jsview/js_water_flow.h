@@ -25,6 +25,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void UpdateWaterFlowSectionsByFrameNode(
         NG::FrameNode* frameNode, const JSCallbackInfo& args, const JSRef<JSVal>& sections);
+    static void UpdateWaterFlowFooterByFrameNode(NG::FrameNode* frameNode, const JSCallbackInfo& args);
 
 protected:
     static void SetColumnsGap(const JSCallbackInfo& info);

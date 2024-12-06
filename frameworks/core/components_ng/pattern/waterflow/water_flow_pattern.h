@@ -80,6 +80,8 @@ public:
 
     void AddFooter(const RefPtr<NG::UINode>& footer);
 
+    void AddFooterWithFrameNode(const RefPtr<NG::UINode>& footer);
+
     void ResetLayoutInfo();
 
     int32_t GetBeginIndex() const

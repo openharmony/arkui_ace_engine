@@ -33,6 +33,7 @@ public:
 
     virtual void Create() = 0;
     virtual void SetFooter(std::function<void()>&& footer) = 0;
+    virtual void SetFooterWithFrameNode(const RefPtr<NG::UINode>& footer) = 0;
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
     virtual RefPtr<ScrollProxy> CreateScrollBarProxy() = 0;
     virtual void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) = 0;

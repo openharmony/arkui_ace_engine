@@ -671,6 +671,29 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     footer->SetActive(false);
 }
 
+void WaterFlowPattern::AddFooterWithFrameNode(const RefPtr<NG::UINode>& footer)
+{
+    // assume this is always before other children are modified, because it's called during State update.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto prevFooter = footer_.Upgrade();
+    if (prevFooter != footer) {
+        if (!prevFooter) {
+            host->AddChild(footer, 0);
+            layoutInfo_->footerIndex_ = 0;
+        } else if (!footer) {
+            host->RemoveChild(prevFooter);
+        } else {
+            host->ReplaceChild(prevFooter, footer);
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    footer_ = footer;
+    if (footer) {
+        footer->SetActive(false);
+    }
+}
+
 void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {

@@ -574,6 +574,13 @@ void ResetWaterflowFooter(ArkUINodeHandle node)
     WaterFlowModelNG::SetWaterflowFooter(frameNode, nullptr);
 }
 
+void ResetWaterflowFooterWithFrameNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, nullptr);
+}
+
 void SetWaterFlowFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -667,9 +674,9 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetWaterFlowScrollBarColor, GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions,
         GetWaterFlowSectionOptions, GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight,
         GetWaterFlowEnableScrollInteraction, GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter,
-        ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit, ResetWaterFlowFlingSpeedLimit, GetScrollController,
-        SetWaterFlowScroller, SetWaterFlowLayoutMode, ResetWaterFlowLayoutMode, ResetWaterFlowSections,
-        SetWaterFlowFadingEdge, ResetWaterFlowFadingEdge };
+        ResetWaterflowFooter, ResetWaterflowFooterWithFrameNode, SetWaterFlowFlingSpeedLimit,
+        ResetWaterFlowFlingSpeedLimit, GetScrollController, SetWaterFlowScroller, SetWaterFlowLayoutMode,
+        ResetWaterFlowLayoutMode, ResetWaterFlowSections, SetWaterFlowFadingEdge, ResetWaterFlowFadingEdge };
     return &modifier;
 }
 
@@ -687,8 +694,8 @@ const CJUIWaterFlowModifier* GetCJUIWaterFlowModifier()
         GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
         GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
-        GetWaterFlowFriction, SetWaterflowFooter, ResetWaterflowFooter, SetScrollToIndex, SetWaterFlowFlingSpeedLimit,
-        ResetWaterFlowFlingSpeedLimit, };
+        GetWaterFlowFriction, SetWaterflowFooter, ResetWaterflowFooter, ResetWaterflowFooterWithFrameNode,
+        SetScrollToIndex, SetWaterFlowFlingSpeedLimit, ResetWaterFlowFlingSpeedLimit };
     return &modifier;
 }
 

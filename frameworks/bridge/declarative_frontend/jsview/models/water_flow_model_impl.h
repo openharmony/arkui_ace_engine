@@ -23,6 +23,7 @@ class WaterFlowModelImpl : public WaterFlowModel {
 public:
     void Create() override;
     void SetFooter(std::function<void()>&& footer) override;
+    void SetFooterWithFrameNode(const RefPtr<NG::UINode>& footer) override {};
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;

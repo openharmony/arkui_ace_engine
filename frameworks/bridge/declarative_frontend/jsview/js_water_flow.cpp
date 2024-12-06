@@ -166,6 +166,27 @@ void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
     UpdateSections(args, sections, waterFlowSections);
 }
 
+void JSWaterFlow::UpdateWaterFlowFooterByFrameNode(NG::FrameNode* frameNode, const JSCallbackInfo& args)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[4]);
+    if (obj->HasProperty("builderNode_")) {
+        JSRef<JSVal> builderNodeParam = obj->GetProperty("builderNode_");
+        if (builderNodeParam->IsObject()) {
+            auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+            JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+            if (!nodeptr.IsEmpty()) {
+                const auto* vm = nodeptr->GetEcmaVM();
+                auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+                auto* footerNode = reinterpret_cast<NG::FrameNode*>(node);
+                CHECK_NULL_VOID(footerNode);
+                RefPtr<NG::FrameNode> refPtrFooterNode = AceType::Claim(footerNode);
+                NG::WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, refPtrFooterNode);
+                return;
+            }
+        }
+    }
+}
+
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
     if (args.Length() > 1) {
@@ -206,7 +227,28 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
     } else {
         WaterFlowModel::GetInstance()->ResetSections();
 
-        if (footerObject->IsFunction()) {
+        if (obj->HasProperty("footerContent")) {
+            auto footerContentObject = obj->GetProperty("footerContent");
+            if (footerContentObject->IsObject()) {
+                auto footerJsObject = JSRef<JSObject>::Cast(footerContentObject);
+                JSRef<JSVal> builderNodeParam = footerJsObject->GetProperty("builderNode_");
+                if (builderNodeParam->IsObject()) {
+                    auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+                    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+                    if (!nodeptr.IsEmpty()) {
+                        const auto* vm = nodeptr->GetEcmaVM();
+                        auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+                        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+                        CHECK_NULL_VOID(frameNode);
+                        RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+                        WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrFrameNode);
+                        return;
+                    }
+                }
+            }
+            WaterFlowModel::GetInstance()->SetFooterWithFrameNode(nullptr);
+            return;
+        } else if (footerObject->IsFunction()) {
             // ignore footer if sections are present
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
             auto footerAction = [builderFunc]() { builderFunc->Execute(); };

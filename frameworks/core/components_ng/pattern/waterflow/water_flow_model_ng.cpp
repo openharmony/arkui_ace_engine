@@ -72,6 +72,15 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
     pattern->AddFooter(footerNode);
 }
 
+void WaterFlowModelNG::SetFooterWithFrameNode(const RefPtr<NG::UINode>& footer)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooterWithFrameNode(footer);
+}
+
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {
     return AceType::MakeRefPtr<ScrollableController>();
@@ -657,6 +666,14 @@ void WaterFlowModelNG::SetWaterflowFooter(FrameNode* frameNode, FrameNode* foote
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(AceType::Claim<UINode>(footerNode));
+}
+
+void WaterFlowModelNG::SetWaterflowFooterWithFrameNode(FrameNode* frameNode, const RefPtr<NG::UINode>& footer)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooterWithFrameNode(footer);
 }
 
 bool WaterFlowModelNG::hasFooter(FrameNode* frameNode)
