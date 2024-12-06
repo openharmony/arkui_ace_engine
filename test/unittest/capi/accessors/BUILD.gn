@@ -41,6 +41,7 @@ ace_unittest("capi_all_accessors_test") {
     "matrix2d_accessor_test.cpp",
     "nav_path_stack_accessor_test.cpp",
     "navigation_transition_proxy_accessor_test.cpp",
+    "pan_gesture_options_accessor_test.cpp",
     "patternlock_controller_accessor_test.cpp",
     "permission_request_accessor_test.cpp",
     "richeditor_controller_accessor_test.cpp",
