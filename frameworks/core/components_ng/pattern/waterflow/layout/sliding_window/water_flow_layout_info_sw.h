@@ -67,7 +67,10 @@ public:
 
     bool OutOfBounds() const override;
 
-    float GetContentHeight() const override;
+    float GetContentHeight() const override
+    {
+        return maxHeight_;
+    }
 
     float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
 
@@ -256,7 +259,7 @@ public:
 
     std::vector<float> mainGap_; // update this at the end of a layout
 
-    // maximum content height encountered so far, mainly for comparing content and viewport height
+    // maximum content height encountered so far
     float maxHeight_ = 0.0f;
     float footerHeight_ = 0.0f;
 
@@ -317,6 +320,7 @@ private:
 
     bool synced_ = false;
     bool prevItemStart_ = false;
+    bool knowTotalHeight = false; // set to true when content end is reached. no longer need to estimate totalHeight
 
     struct ItemInfo;
 };

@@ -620,7 +620,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
 
 /**
  * @tc.name: PositionController100
- * @tc.desc: Test PositionController AnimateTo and ScrollTo, should be disabled
+ * @tc.desc: Test PositionController AnimateTo and ScrollTo
  * @tc.type: FUNC
  */
 HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
@@ -635,14 +635,16 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     auto controller = pattern_->positionController_;
     /**
      * @tc.steps: step8. Test AnimateTo function
-     * @tc.expected: pattern_->isAnimationStop_ is false
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
-    EXPECT_TRUE(pattern_->isAnimationStop_);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -1.5);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -1.5);
 
     /**
      * @tc.steps: step8. test event
-     * @tc.expected: return the scroll event is ture.
      */
     bool isOnWillScrollCallBack = false;
     Dimension willScrollOffset;
@@ -659,7 +661,12 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
 
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    EXPECT_FALSE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    FlushLayoutTask(frameNode_);
+    const auto &info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->Offset(), -ITEM_MAIN_SIZE * 5);
+    EXPECT_EQ(info->startIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 5);
 }
 
 /**
