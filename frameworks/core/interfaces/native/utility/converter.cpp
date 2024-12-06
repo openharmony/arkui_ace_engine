@@ -1095,6 +1095,16 @@ PaddingProperty Convert(const Ark_LocalizedPadding& src)
 }
 
 template<>
+PaddingProperty Convert(const Ark_LengthMetrics& src)
+{
+    PaddingProperty dst;
+    if (auto padding = Converter::OptConvert<CalcLength>(src); padding.has_value()) {
+        dst.SetEdges(padding.value());
+    }
+    return dst;
+}
+
+template<>
 AnimateParam Convert(const Ark_AnimateParam& src)
 {
     AnimateParam option;
@@ -1139,6 +1149,17 @@ BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 
 template<>
 BorderRadiusProperty Convert(const Ark_Length& src)
+{
+    BorderRadiusProperty dst;
+    dst.multiValued = false;
+    if (auto radius = Converter::Convert<Dimension>(src); !radius.IsNegative()) {
+        dst.SetRadius(radius);
+    }
+    return dst;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderRadiusProperty dst;
     dst.multiValued = false;
@@ -1374,6 +1395,18 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
         dst = DATE_MIN;
     } else if (dst->GetDay() < DATE_MIN.GetDay() || dst->GetDay() > maxDay) {
         dst = DATE_MIN;
+    }
+}
+
+template<>
+void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
+{
+    switch (src) {
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP: dst = VerticalAlign::TOP; break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER: dst = VerticalAlign::CENTER; break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM: dst = VerticalAlign::BOTTOM; break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE: dst = VerticalAlign::BASELINE; break;
+        default: LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
     }
 }
 

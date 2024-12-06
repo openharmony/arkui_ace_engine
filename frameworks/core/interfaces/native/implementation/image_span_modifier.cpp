@@ -20,24 +20,6 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
-namespace OHOS::Ace::NG {
-namespace Converter {
-
-template<>
-void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
-{
-    switch (src) {
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP: dst = VerticalAlign::TOP; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER: dst = VerticalAlign::CENTER; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM: dst = VerticalAlign::BOTTOM; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE: dst = VerticalAlign::BASELINE; break;
-        default: LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
-    }
-}
-
-} // namespace Converter
-} // namespace OHOS::Ace::NG
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl()
