@@ -246,6 +246,18 @@ void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src)
 }
 
 template<>
+void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
+{
+    switch (src) {
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP: dst = VerticalAlign::TOP; break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER: dst = VerticalAlign::CENTER; break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM: dst = VerticalAlign::BOTTOM; break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE: dst = VerticalAlign::BASELINE; break;
+        default: LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src)
 {
     switch (src) {
