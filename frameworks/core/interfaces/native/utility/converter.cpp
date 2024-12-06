@@ -1398,17 +1398,6 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
     }
 }
 
-template<>
-void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
-{
-    switch (src) {
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP: dst = VerticalAlign::TOP; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER: dst = VerticalAlign::CENTER; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM: dst = VerticalAlign::BOTTOM; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE: dst = VerticalAlign::BASELINE; break;
-        default: LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
-    }
-}
 
 template<>
 LightSource Convert(const Ark_LightSource& src)
