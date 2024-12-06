@@ -1265,6 +1265,24 @@ float MenuLayoutAlgorithm::GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& m
     return height;
 }
 
+float MenuLayoutAlgorithm::CheckHorizontalLayoutPreviewOffsetX(
+    const RefPtr<GeometryNode>& previewGeometryNode, const RefPtr<GeometryNode>& menuGeometryNode, float offsetX)
+{
+    if (SystemProperties::GetDeviceOrientation() != DeviceOrientation::LANDSCAPE) {
+        return offsetX;
+    }
+    CHECK_NULL_RETURN(previewGeometryNode, offsetX);
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+    CHECK_NULL_RETURN(menuGeometryNode, offsetX);
+    auto menuSize = menuGeometryNode->GetMarginFrameSize();
+    // left menu right preview
+    auto x_min = wrapperRect_.Left() + paddingStart_ + menuSize.Width() + targetSecurity_;
+    // left preview right menu
+    auto x_max = wrapperRect_.Right() - paddingEnd_ - menuSize.Width() - previewSize.Width() - targetSecurity_;
+    auto needAvoid = GreatNotEqual(offsetX, x_max) && LessNotEqual(offsetX, x_min);
+    return needAvoid ? x_max : offsetX;
+}
+
 void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     const RefPtr<GeometryNode>& previewGeometryNode, const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize)
 {
@@ -1292,6 +1310,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     auto offsetX = targetCenterOffset.GetX() - previewSize.Width() / 2;
     auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
         param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - menuSize.Height());
+    offsetX = CheckHorizontalLayoutPreviewOffsetX(previewGeometryNode, menuGeometryNode, offsetX);
     auto x = std::clamp(offsetX, static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
