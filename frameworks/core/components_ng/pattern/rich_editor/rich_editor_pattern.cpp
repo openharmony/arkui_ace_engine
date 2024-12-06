@@ -8325,8 +8325,13 @@ void RichEditorPattern::OnScrollEndCallback()
     }
     CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     if (IsSelectAreaVisible()) {
-        selectOverlay_->UpdateMenuOffset();
-        selectOverlay_->ShowMenu();
+        auto info = selectOverlay_->GetSelectOverlayInfo();
+        if (info && info->menuInfo.menuBuilder) {
+            selectOverlay_->ProcessOverlay({ .animation = true });
+        } else {
+            selectOverlay_->UpdateMenuOffset();
+            selectOverlay_->ShowMenu();
+        }
     }
     if (AnimateStoped()) {
         UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
