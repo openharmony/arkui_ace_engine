@@ -8965,6 +8965,7 @@ RectF RichEditorPattern::GetSelectArea()
     CHECK_NULL_RETURN(host, rect);
     auto parent = host->GetAncestorNodeOfFrame();
     contentRect = GetVisibleContentRect(parent, contentRect);
+    AppendSelectRect(selectRects);
     if (selectRects.empty()) {
         CHECK_NULL_RETURN(overlayMod_, rect);
         auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
@@ -8987,6 +8988,25 @@ RectF RichEditorPattern::GetSelectArea()
             backRect.Bottom() - frontRect.Top());
     }
     return res.IntersectRectT(contentRect);
+}
+
+void RichEditorPattern::AppendSelectRect(std::vector<RectF>& selectRects)
+{
+    CHECK_NULL_VOID(!selectOverlay_->IsSingleHandle());
+    auto startPosition = textSelector_.GetTextStart();
+    auto endPosition = textSelector_.GetTextEnd();
+    auto height = 0.0f;
+    auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
+    if (paragraphs_.IsIndexAtParagraphEnd(startPosition + 1)) {
+        auto offset = paragraphs_.ComputeCursorOffset(startPosition, height, false, false);
+        RectF rect = RectF(offset.GetX(), offset.GetY(), caretWidth, height);
+        selectRects.insert(selectRects.begin(), rect);
+    }
+    if (paragraphs_.IsIndexAtParagraphEnd(endPosition)) {
+        auto offset = paragraphs_.ComputeCursorOffset(endPosition, height, true, false);
+        RectF rect = RectF(offset.GetX(), offset.GetY(), caretWidth, height);
+        selectRects.emplace_back(rect);
+    }
 }
 
 bool RichEditorPattern::IsTouchInFrameArea(const PointF& touchPoint)
