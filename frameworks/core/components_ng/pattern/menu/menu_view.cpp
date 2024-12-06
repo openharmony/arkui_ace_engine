@@ -76,6 +76,28 @@ void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& p
     textNode->MarkModifyDone();
 }
 
+LayoutConstraintF CreatePreviewLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, {});
+    LayoutConstraintF constraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
+
+    auto currentId = Container::CurrentId();
+    auto parentContainerId =
+        currentId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subWindow, constraint);
+    auto subwindowSize = subWindow->GetRect().GetSize();
+    if (!subwindowSize.IsPositive()) {
+        return constraint;
+    }
+
+    if (subwindowSize != constraint.maxSize || subwindowSize != constraint.percentReference) {
+        constraint.maxSize.SetSizeT(subwindowSize);
+        constraint.percentReference.SetSizeT(subwindowSize);
+    }
+    return constraint;
+}
+
 void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam,
     const RefPtr<UINode>& previewCustomNode = nullptr)
 {
@@ -93,7 +115,8 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
     auto pipeline = previewNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     ScopedLayout scope(pipeline);
-    previewNode->Measure(layoutProperty->GetLayoutConstraint());
+    auto layoutConstraint = CreatePreviewLayoutConstraint(layoutProperty);
+    previewNode->Measure(layoutConstraint);
     auto previewSize = previewNode->GetGeometryNode()->GetFrameSize();
     previewPattern->SetIsShowHoverImage(true);
     previewPattern->SetCustomPreviewWidth(previewSize.Width());
