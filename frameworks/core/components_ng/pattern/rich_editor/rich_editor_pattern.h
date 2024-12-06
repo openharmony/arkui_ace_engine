@@ -968,6 +968,7 @@ public:
     {
         ForceTriggerAvoidOnCaretChange(true);
         isTriggerAvoidOnCaretAvoidMode_ = false;
+        UpdateModifierCaretOffsetAndHeight();
         TriggerAvoidOnCaretChange();
     }
 
