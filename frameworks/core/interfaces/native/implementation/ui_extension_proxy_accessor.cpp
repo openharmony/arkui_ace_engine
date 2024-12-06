@@ -39,7 +39,7 @@ void SendImpl(UIExtensionProxyPeer* peer,
 Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
                                const Map_String_CustomObject* data)
 {
-    return nullptr;
+    return 0;
 }
 void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
                                  const Callback_UIExtensionProxy_Void* callback)

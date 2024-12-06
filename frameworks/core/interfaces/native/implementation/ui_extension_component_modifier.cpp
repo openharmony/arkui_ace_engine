@@ -43,7 +43,7 @@ AAFwk::Want CreateWant(const Ark_Want* want)
     }
     auto type = Converter::OptConvert<std::string>(want->type);
     if (type) {
-       aaFwkWant.SetType(type.value());
+        aaFwkWant.SetType(type.value());
     }
     auto flags = Converter::OptConvert<int32_t>(want->flags);
     if (flags) {
@@ -85,7 +85,7 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(want);   
+    CHECK_NULL_VOID(want);
     bool isTransferringCaller = false;
     bool densityDpi = false;
     auto extensionOptionOpt = Converter::OptConvert<Ark_UIExtensionOptions>(*options);
@@ -106,7 +106,7 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
     }
 #ifdef WINDOW_SCENE_SUPPORTED
     UIExtensionModelNG::UpdateWant(frameNode, CreateWant(want), isTransferringCaller, densityDpi);
-#endif //WINDOW_SCENE_SUPPORTED    
+#endif //WINDOW_SCENE_SUPPORTED
 }
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
@@ -128,7 +128,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             finalyzer(peer);
         };
     UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
-#endif //WINDOW_SCENE_SUPPORTED    
+#endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReceiveImpl(Ark_NativePointer node,
                    const Ark_CustomObject* value)
@@ -177,7 +177,7 @@ void OnResultImpl(Ark_NativePointer node,
             arkCallback.Invoke(parameter);
         };
     UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
-#endif //WINDOW_SCENE_SUPPORTED 
+#endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReleaseImpl(Ark_NativePointer node,
                    const Callback_Number_Void* value)

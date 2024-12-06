@@ -82,7 +82,7 @@ void UIExtensionModelNG::UpdateWant(FrameNode* frameNode, const AAFwk::Want& wan
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);    
+    CHECK_NULL_VOID(pattern);
     if (pattern->GetIsTransferringCaller() != isTransferringCaller) {
         pattern->UpdateSessionWraper(isTransferringCaller);
     }
@@ -257,7 +257,7 @@ void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
 void UIExtensionModelNG::SetOnRelease(FrameNode* frameNode, std::function<void(int32_t)>&& onRelease)
 {
     CHECK_NULL_VOID(frameNode);
-     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnReleaseCallback(std::move(onRelease));
 }
@@ -371,8 +371,8 @@ void UIExtensionModelNG::SetOnError(
 }
 
 void UIExtensionModelNG::SetOnError(FrameNode* frameNode,
-        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
-        NG::SessionType sessionType)
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
+    NG::SessionType sessionType)
 {
 
     CHECK_NULL_VOID(frameNode);
