@@ -6673,7 +6673,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
 {
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
-    auto position = paragraphs_.GetIndex(textOffset);
+    auto position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
     UpdateSelector(textSelector_.baseOffset, position);
     if (!isFirstMouseSelect_) {
         AdjustCursorPosition(position);
@@ -6714,7 +6714,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     if (textSelector_.baseOffset != textSelector_.destinationOffset) {
         ResetSelection();
     }
-    int32_t extend = paragraphs_.GetIndex(textOffset);
+    int32_t extend = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
     textSelector_.Update(extend);
     leftMousePress_ = true;
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
@@ -8530,7 +8530,7 @@ void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
         auto newOffset = MoveTextRect(param.offset);
         auto textOffset =
             Offset(param.eventOffset.GetX() - GetTextRect().GetX(), param.eventOffset.GetY() - GetTextRect().GetY());
-        int32_t extend = paragraphs_.GetIndex(textOffset);
+        int32_t extend = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
         UpdateSelector(textSelector_.baseOffset, extend);
         SetCaretPosition(std::max(textSelector_.baseOffset, extend));
         if (NearEqual(newOffset, 0.0f)) {
