@@ -47,6 +47,7 @@ constexpr int32_t ARG_NUM_STYLE_SHADOW = 15;
 constexpr int32_t ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAGE = 14;
 constexpr int32_t ARG_NUM_STYLE_FONT_FAMILY = 10;
 constexpr int32_t ARG_NUM_STYLE_STROKE_RADIUS = 17;
+constexpr int32_t ARG_NUM_STYLE_BORDER_RADIUS = 18;
 constexpr int32_t ARG_SECOND = 2;
 const char* PROGRESS_NODEPTR_OF_UINODE = "nodePtr_";
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
@@ -62,6 +63,7 @@ constexpr NG::ProgressStatus DEFAULT_PROGRESS_STATUS = NG::ProgressStatus::PROGR
 constexpr DimensionUnit DEFAULT_CAPSULE_FONT_UNIT = DimensionUnit::FP;
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<NG::ProgressStatus> STATUS_STYLES = { NG::ProgressStatus::PROGRESSING, NG::ProgressStatus::LOADING };
+constexpr double DEFAULT_BORDER_RADIUS = 0;
 
 namespace {
 bool ConvertProgressRResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient)
@@ -457,6 +459,19 @@ void ParseCapsuleFontFamily(
     progressStyle.fontInfo.familyLength = fontFamilies.size();
 }
 
+void ParseBorderRadius(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
+{
+    Local<JSValueRef> borderRadiusArg = runtimeCallInfo->GetCallArgRef(index);
+    CalcDimension borderRadius = CalcDimension(DEFAULT_BORDER_RADIUS, DimensionUnit::PERCENT);
+    if (borderRadiusArg->IsNull() || !ArkTSUtils::ParseJsLengthMetrics(vm, borderRadiusArg, borderRadius)) {
+        // Set illegal units, and the background will be handled according to the default value.
+        borderRadius.SetUnit(DimensionUnit::PERCENT);
+    }
+    progressStyle.borderRadiusValue = borderRadius.Value();
+    progressStyle.borderRadiusUnit = static_cast<uint8_t>(borderRadius.Unit());
+}
+
 void ParseLinearStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
 {
     ParseStrokeWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_STROKE_WIDTH);
@@ -487,6 +502,7 @@ void ParseCapsuleStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, 
     ParseEnableScanEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SCAN_EFFECT);
     ParseShowDefaultPercentage(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAGE);
     ParseEnableSmoothEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SMOOTH_EFFECT);
+    ParseBorderRadius(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_RADIUS);
 }
 
 void ParseProgressStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)

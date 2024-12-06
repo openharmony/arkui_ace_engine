@@ -402,6 +402,8 @@ struct ArkUIProgressStyle {
     ArkUI_Bool shadow;
     ArkUI_Bool showDefaultPercentage;
     ArkUIFontStruct fontInfo;
+    ArkUI_Float32 borderRadiusValue;
+    ArkUI_Int32 borderRadiusUnit;
 };
 
 struct ArkUIGradientType {

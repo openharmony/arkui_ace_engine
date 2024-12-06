@@ -370,6 +370,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     }
 
     JsSetFontStyle(info);
+    JsSetBorderRadius(paramObject);
 }
 
 void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
@@ -549,4 +550,19 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
     ProgressModel::GetInstance()->SetStrokeRadius(strokeRadiusDimension);
 }
 
+void JSProgress::JsSetBorderRadius(const JSRef<JSObject>& paramObject)
+{
+    CalcDimension radiusDimension;
+    auto borderRadius = paramObject->GetProperty("borderRadius");
+    if (borderRadius->IsUndefined() || borderRadius->IsNull() ||
+        !ParseJsLengthMetricsVp(borderRadius, radiusDimension)) {
+        ProgressModel::GetInstance()->ResetBorderRadius();
+        return;
+    }
+    if (LessNotEqual(radiusDimension.Value(), 0.0f) || radiusDimension.Unit() == DimensionUnit::PERCENT) {
+        ProgressModel::GetInstance()->ResetBorderRadius();
+        return;
+    }
+    ProgressModel::GetInstance()->SetBorderRadius(radiusDimension);
+}
 } // namespace OHOS::Ace::Framework
