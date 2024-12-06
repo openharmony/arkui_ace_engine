@@ -191,9 +191,9 @@ HWTEST_F(TabContentModifierTest, setOnWillShowTest, TestSize.Level1)
 
     modifier_->setOnWillShow(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    EXPECT_FALSE(checkEvent);
     eventHub->FireWillShowEvent();
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, contextId);
 }
 
@@ -223,9 +223,9 @@ HWTEST_F(TabContentModifierTest, setOnWillHideTest, TestSize.Level1)
 
     modifier_->setOnWillHide(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
+    EXPECT_FALSE(checkEvent);
     eventHub->FireWillHideEvent();
-    EXPECT_EQ(checkEvent.has_value(), true);
+    ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, contextId);
 }
 } // namespace OHOS::Ace::NG
