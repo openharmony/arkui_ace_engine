@@ -745,6 +745,7 @@ enum ArkUIEventCategory {
     TEXT_ARRAY = 10,
     MIXED_EVENT = 11,
     DRAG_EVENT = 12,
+    KEY_INPUT_EVENT = 13, // KEY_EVENT is already defined as a macro in wincon.h
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -774,6 +775,7 @@ enum ArkUIEventSubKind {
     ON_DRAG_LEAVE,
     ON_DRAG_END,
     ON_PRE_DRAG,
+    ON_KEY_PREIME,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -1058,6 +1060,24 @@ struct ArkUIMixedEvent {
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
 
+struct ArkUIKeyEvent {
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 type;
+    ArkUI_Int32 keyCode;
+    ArkUI_CharPtr keyText;
+    ArkUI_Int32 keySource;
+    ArkUI_Int64 deviceId;
+    ArkUI_Uint32 unicode;
+    ArkUI_Float64 timestamp;
+    ArkUI_Int32* pressedKeyCodes;
+    ArkUI_Int32 keyCodesLength;
+    ArkUI_Int32 intentionCode;
+    
+    // user input.
+    bool isConsumed;
+    bool stopPropagation;
+};
+
 struct ArkUINodeEvent {
     ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
@@ -1074,6 +1094,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextArray textArrayEvent;
         ArkUIMixedEvent mixedEvent;
         ArkUIDragEvent dragEvent;
+        ArkUIKeyEvent keyEvent;
     };
 };
 
