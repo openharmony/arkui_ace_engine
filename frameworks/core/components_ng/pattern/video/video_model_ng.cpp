@@ -128,6 +128,14 @@ void VideoModelNG::SetLoop(bool loop)
     videoPattern->UpdateLoop(loop);
 }
 
+void VideoModelNG::SetSurfaceBackgroundColor(Color color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->SetSurfaceBackgroundColor(color);
+}
+
 void VideoModelNG::SetOnStart(VideoEventFunc&& onStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

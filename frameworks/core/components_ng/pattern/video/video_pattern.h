@@ -106,6 +106,8 @@ public:
         return loop_;
     }
 
+    void SetSurfaceBackgroundColor(Color color);
+
     virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
