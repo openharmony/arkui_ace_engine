@@ -85,6 +85,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             pattern->RecordChangeEvent(currentIndex);
             auto context = tabsNode->GetContext();
             CHECK_NULL_VOID(context);
+            TAG_LOGI(
+                AceLogTag::ACE_TABS, "onChange preIndex:%{public}d, currentIndex:%{public}d", preIndex, currentIndex);
             context->AddAfterLayoutTask(
                 [currentIndex, jsEvent]() {
                     TabContentChangeEvent eventInfo(currentIndex);
