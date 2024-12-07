@@ -78,7 +78,7 @@ SelectionInfo RichEditorController::GetSpansInfo(int32_t start, int32_t end)
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, {});
     ACE_SCOPED_TRACE("RichEditorControllerGetSpansInfo");
-    return richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
+    return richEditorPattern->GetSpansInfoByRange(start, end);
 }
 
 SelectionInfo RichEditorController::GetSelectionSpansInfo()

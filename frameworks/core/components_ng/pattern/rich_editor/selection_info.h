@@ -184,6 +184,11 @@ public:
         return selection_;
     }
 
+    Selection& GetSelectionRef()
+    {
+        return selection_;
+    }
+
     void SetSelectionStart(int32_t start)
     {
         selection_.selection[RichEditorSpanRange::RANGESTART] = start;

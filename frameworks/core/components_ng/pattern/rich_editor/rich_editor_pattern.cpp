@@ -2169,6 +2169,22 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
     return resultObjects;
 }
 
+SelectionInfo RichEditorPattern::GetSpansInfoByRange(int32_t start, int32_t end)
+{
+    auto selectionInfo = GetSpansInfo(start, end , GetSpansMethod::GETSPANS);
+    CHECK_NULL_RETURN(isAPI14Plus, selectionInfo);
+    auto& resultObjects = selectionInfo.GetSelectionRef().resultObjects;
+    for (auto& resObj : resultObjects) {
+        CHECK_NULL_CONTINUE(resObj.type == SelectSpanType::TYPESPAN);
+        auto uiNode = GetChildByIndex(resObj.spanPosition.spanIndex);
+        auto spanNode = DynamicCast<SpanNode>(uiNode);
+        CHECK_NULL_CONTINUE(spanNode);
+        auto fontFamily = spanNode->GetFontFamily();
+        IF_TRUE(!fontFamily, resObj.textStyle.fontFamily.clear());
+    }
+    return selectionInfo;
+}
+
 void RichEditorPattern::UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code)
 {
     std::list<SpanPosition> resultObjects;
