@@ -512,7 +512,7 @@ struct MultiFilterRow {
       (this.isArrowIconDown?.value ? this.accessibilityCollapsed : this.accessibilityExpanded):
       (this.isArrowIconDown?.value ? this.accessibilityExpand : this.accessibilityCollapse))
     .accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined)
-    .id(`filterDownAndUpArrow_${this.filterId}_${this.rowIndex}`)
+    .id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`)
     .visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden)
     .onHover((isHover: boolean) => {
       animateTo({
@@ -579,7 +579,7 @@ struct MultiFilterRow {
           this.arrowShowStateRow.value = true
         })
       }
-      this.sendArrowAccessibility(`filterDownAndUpArrow_${this.filterId}_${this.rowIndex}`);
+      this.sendArrowAccessibility(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
     })
   }
 
@@ -606,7 +606,7 @@ struct MultiFilterRow {
             this.multiFiltersSelectedIndex = 0;
             this.sendAccessibility(this.filterRow?.options[0], true);
           })
-          .id(`filterMultiFilterRow_${this.getUniqueId()}_${this.rowIndex}`)
+          .id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`)
           .focusable(true)
           .onHover((isHover: boolean) => {
             animateTo({
@@ -1012,7 +1012,7 @@ export struct Filter {
       type: 'requestFocusForAccessibility',
       bundleName: this.bundleName,
       triggerAction: 'common',
-      customId: `filterMultiFilterRow_${this.getUniqueId()}_0`,
+      customId: `filterMultiFilterRow_${this.filterId}_0`,
     });
     accessibility.sendAccessibilityEvent(requestFocusEventInfo);
   }

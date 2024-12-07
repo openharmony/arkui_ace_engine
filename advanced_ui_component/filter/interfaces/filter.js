@@ -954,17 +954,17 @@ class MultiFilterRow extends ViewPU {
     sendArrowAccessibility(g15) {
         this.isSendArrowAccessibility = true;
         setTimeout(() => {
-            let i15 = ({
+            let j15 = ({
                 type: 'requestFocusForAccessibility',
                 bundleName: this.bundleName,
                 triggerAction: 'common',
                 customId: g15,
             });
-            accessibility.sendAccessibilityEvent(i15);
-        }, 100)
+            accessibility.sendAccessibilityEvent(j15);
+        }, 100);
         setTimeout(() => {
             this.isSendArrowAccessibility = false;
-        }, 200)
+        }, 200);
     }
 
     DownAndUpArrow(n14 = null) {
@@ -987,8 +987,8 @@ class MultiFilterRow extends ViewPU {
             Button.accessibilityText(this.isSendArrowAccessibility ?
                 (this.isArrowIconDown?.value ? this.accessibilityCollapsed : this.accessibilityExpanded) :
                 (this.isArrowIconDown?.value ? this.accessibilityExpand : this.accessibilityCollapse));
-            Button.accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined);
-            Button.id(`filterDownAndUpArrow_${this.filterId}_${this.rowIndex}`);
+            Button.accessibilityDescription(this.isSendArrowAccessibility ? ' ' : '');
+            Button.id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
             Button.visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden);
             Button.onHover((e15) => {
                 Context.animateTo({
@@ -1068,7 +1068,7 @@ class MultiFilterRow extends ViewPU {
                         this.arrowShowStateRow.value = true;
                     });
                 }
-                this.sendArrowAccessibility(`filterDownAndUpArrow_${this.filterId}_${this.rowIndex}`);
+                this.sendArrowAccessibility(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1161,7 +1161,7 @@ class MultiFilterRow extends ViewPU {
             If.create();
             if (this.filterRow?.options && this.filterRow?.options.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    if (!If.canRetake(`filterMultiFilterRow_${this.filterId}_${this.getUniqueId()}`)) {
+                    if (!If.canRetake(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`)) {
                         this.observeComponentCreation2((b14, c14) => {
                             Text.create(this.filterRow?.options[0]);
                             Text.height(LIST_ROW_HEIGHT);
@@ -1188,7 +1188,7 @@ class MultiFilterRow extends ViewPU {
                                 this.multiFiltersSelectedIndex = 0;
                                 this.sendAccessibility(this.filterRow?.options[0], true);
                             });
-                            Text.id(`filterMultiFilterRow_${this.getUniqueId()}_${this.rowIndex}`);
+                            Text.id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`);
                             Text.focusable(true);
                             Text.onHover((j14) => {
                                 Context.animateTo({
@@ -1528,7 +1528,7 @@ export class Filter extends ViewPU {
         this.bundleName = '';
         this.filterId = this.getUniqueId();
         this.setInitiallyProvidedValue(params);
-        this.declareWatch("isFloatBarShow", this.updateFocusForAccessibility);
+        this.declareWatch('isFloatBarShow', this.updateFocusForAccessibility);
         this.finalizeConstruction();
     }
 
@@ -2147,7 +2147,7 @@ export class Filter extends ViewPU {
             type: 'requestFocusForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            customId: `filterMultiFilterRow_${this.getUniqueId()}_0`,
+            customId: `filterMultiFilterRow_${this.filterId}_0`,
         });
         accessibility.sendAccessibilityEvent(k9);
     }
