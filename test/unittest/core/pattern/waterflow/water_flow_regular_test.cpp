@@ -676,6 +676,112 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LazyForEachJump001
+ * @tc.desc: Test jump function after changing dataSource in lazyforeach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyForEachJump001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(10);
+    CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    AddItemInLazyForEach(1);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    AddItemInLazyForEach(6);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 600.0f);
+    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+
+    AddItemInLazyForEach(17);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
+    pattern_->ScrollToIndex(17, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 17);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 24);
+    EXPECT_EQ(GetChildY(frameNode_, 17), 0.0f);
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+
+    AddItemInLazyForEach(99);
+    FlushUITasks();
+    pattern_->ScrollToIndex(99, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 92);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 99);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 100);
+}
+
+/**
+ * @tc.name: LazyForEachJump002
+ * @tc.desc: Test jump function after changing dataSource in lazyforeach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(10);
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 2);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+
+    DeleteItemInLazyForEach(58);
+    mockLazy->SetTotalCount(99);
+    FlushUITasks();
+    pattern_->ScrollToIndex(58, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 58);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 99);
+
+    DeleteItemInLazyForEach(63);
+    mockLazy->SetTotalCount(98);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 58);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
+    EXPECT_EQ(GetChildY(frameNode_, 58), 0.0f);
+    pattern_->ScrollToIndex(60, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 60);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 67);
+    EXPECT_TRUE(GetItem(58, true)->IsOnMainTree());
+
+    DeleteItemInLazyForEach(52);
+    mockLazy->SetTotalCount(97);
+    FlushUITasks();
+    pattern_->ScrollToIndex(49, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 49);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 56);
+
+    DeleteItemInLazyForEach(0);
+    mockLazy->SetTotalCount(96);
+    FlushUITasks();
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 96);
+}
+
+/**
  * @tc.name: ScrollToEdge009
  * @tc.desc: scrollEdge to bottom from top and trigger reach end
  * @tc.type: FUNC
