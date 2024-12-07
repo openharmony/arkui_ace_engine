@@ -44,12 +44,16 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     if (footerIndex_ == 0) {
         itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize, 0.1f);
     }
-    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin(), mainSize, 0.1f);
-    maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
 
-    if (!itemEnd_) {
+    if (itemEnd_) {
+        knowTotalHeight_ = true;
+    } else {
         footerHeight_ = 0.0f;
     }
+
+    const float contentEnd = endPos_ + footerHeight_ + BotMargin();
+    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(contentEnd, mainSize, 0.1f);
+    maxHeight_ = std::max(-totalOffset_ + contentEnd, maxHeight_);
 
     newStartIndex_ = EMPTY_NEW_START_INDEX;
 
@@ -62,6 +66,11 @@ float WaterFlowLayoutInfoSW::CalibrateOffset()
         // can calibrate totalOffset when at top
         const float prev = totalOffset_;
         totalOffset_ = startPos_ - TopMargin();
+
+        if (!NearEqual(totalOffset_, prev)) {
+            maxHeight_ = endPos_;
+            knowTotalHeight_ = false;
+        }
         return totalOffset_ - prev;
     }
     return 0.0f;
@@ -245,12 +254,6 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
     return firstLayout || GreatNotEqualCustomPrecision(prevEndPos, lastMainSize_, 0.1f) || backFromOverScroll;
 }
 
-float WaterFlowLayoutInfoSW::GetContentHeight() const
-{
-    // only height in view are remembered
-    return maxHeight_;
-}
-
 int32_t WaterFlowLayoutInfoSW::GetMainCount() const
 {
     if (lanes_.empty()) {
@@ -340,6 +343,7 @@ void WaterFlowLayoutInfoSW::Reset()
     idxToHeight_.clear();
     heightSum_ = 0.0f;
     maxHeight_ = 0.0f;
+    knowTotalHeight_ = false;
     synced_ = false;
 }
 
@@ -419,6 +423,7 @@ void WaterFlowLayoutInfoSW::ResetWithLaneOffset(std::optional<float> laneBasePos
         });
     }
     maxHeight_ = 0.0f;
+    knowTotalHeight_ = false;
     idxToLane_.clear();
     idxToHeight_.clear();
     heightSum_ = 0.0f;
@@ -780,6 +785,7 @@ void WaterFlowLayoutInfoSW::ClearData()
     heightSum_ = 0.0f;
     margins_.clear();
     maxHeight_ = 0.0f;
+    knowTotalHeight_ = false;
     synced_ = false;
     startIndex_ = 0;
     endIndex_ = -1;
@@ -801,6 +807,9 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
 {
     if (!synced_) {
         return 0.0f;
+    }
+    if (knowTotalHeight_) {
+        return maxHeight_;
     }
     float height = std::max(-totalOffset_, 0.0f) // to eliminate top overScroll
                    + (endPos_ - startPos_);
@@ -900,6 +909,7 @@ void WaterFlowLayoutInfoSW::SyncOnEmptyLanes()
     itemEnd_ = true;
     offsetEnd_ = true;
     maxHeight_ = footerHeight_;
+    knowTotalHeight_ = true;
     newStartIndex_ = EMPTY_NEW_START_INDEX;
     synced_ = true;
 }
