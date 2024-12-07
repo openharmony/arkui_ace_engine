@@ -3076,7 +3076,7 @@ test/unittest/core/pattern/shape/ @arkuilayout
 test/unittest/core/pattern/side_bar/ @arkui_superman
 test/unittest/core/pattern/slider/ @arkuipopupwindow
 test/unittest/core/pattern/stack/ @arkuilayout
-test/unittest/core/pattern/stage/ @arkuievent
+test/unittest/core/pattern/stage/ @arkui_superman
 test/unittest/core/pattern/stepper/ @arkui_superman
 test/unittest/core/pattern/swiper/ @arkuiscroll
 test/unittest/core/pattern/symbol/ @huawei_g_five
