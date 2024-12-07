@@ -510,11 +510,6 @@ HWTEST_F(RichEditorEditTestOneNg, RefreshSelectOverlay001, TestSize.Level1)
     richEditorPattern->HandleSurfacePositionChanged(posx, posy);
     EXPECT_EQ(richEditorPattern->HasFocus(), false);
 
-    richEditorPattern->RefreshSelectOverlay(true, false);
-    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(0, 0, 0, 0));
-
-    EXPECT_EQ(richEditorPattern->IsHandlesShow(), false);
-
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));

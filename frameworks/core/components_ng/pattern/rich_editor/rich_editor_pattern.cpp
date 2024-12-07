@@ -7800,17 +7800,6 @@ bool RichEditorPattern::ResetOnInvalidSelection(int32_t start, int32_t end)
     return true;
 }
 
-void RichEditorPattern::RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange)
-{
-    if (isMousePressed && !selectedTypeChange) {
-        return;
-    }
-    CloseSelectOverlay();
-    auto responseType = static_cast<TextResponseType>(
-        selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0));
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), responseType);
-}
-
 bool RichEditorPattern::IsShowHandle()
 {
     auto richEditorTheme = GetTheme<RichEditorTheme>();
