@@ -56,7 +56,10 @@ private:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void ReportComponentChangeEvent(const std::string& event);
     int32_t textNodeId_ = -2;
+    int32_t count_ = 0;
+    std::string value_;
 };
 } // namespace OHOS::Ace::NG
 
