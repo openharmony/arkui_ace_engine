@@ -160,10 +160,11 @@ RingStyleOptions | LinearStyleOptions | ScaleRingStyleOptions | EclipseStyleOpti
       let shadow = (<RingStyleOptions> this.value).shadow;
       let status = (<RingStyleOptions> this.value).status;
       let strokeRadius = (<LinearStyleOptions> this.value).strokeRadius;
+      let borderRadius = (<CapsuleStyleOptions> this.value).borderRadius;
       getUINativeModule().progress.SetProgressStyle(
         node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, borderColor,
         borderWidth, content, fontSize, fontWeight, fontFamily, fontStyle, fontColor,
-        enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius
+        enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius, borderRadius
       );
     }
   }

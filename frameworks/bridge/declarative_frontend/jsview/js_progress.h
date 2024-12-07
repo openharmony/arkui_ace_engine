@@ -52,6 +52,7 @@ private:
     static void JsSetFontDefault();
     static void JsSetFont(const JSRef<JSObject>& info);
     static void JsSetCommonOptions(const JSCallbackInfo& info);
+    static void JsSetBorderRadius(const JSRef<JSObject>& paramObject);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -5380,6 +5380,12 @@ bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimen
     return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
 }
 
+bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseJsLengthMetrics(jsValue, result);
+}
+
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     // 'vp' -> the value varies with pixel density of device.
