@@ -1117,6 +1117,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, ReachStart001, TestSize.Level1)
 
     reached = false;
     ScrollToIndex(36, false, ScrollAlign::START);
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(Infinity<float>());
     EXPECT_TRUE(reached);
 }

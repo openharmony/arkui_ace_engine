@@ -320,7 +320,7 @@ private:
 
     bool synced_ = false;
     bool prevItemStart_ = false;
-    bool knowTotalHeight = false; // set to true when content end is reached. no longer need to estimate totalHeight
+    bool knowTotalHeight_ = false; // set to true when content end is reached. no longer need to estimate totalHeight
 
     struct ItemInfo;
 };

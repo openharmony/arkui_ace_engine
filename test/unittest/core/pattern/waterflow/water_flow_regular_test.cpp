@@ -717,6 +717,7 @@ HWTEST_F(WaterFlowTestNg, Delete002, TestSize.Level1)
     CreateWaterFlowItems(43);
     CreateDone();
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-4000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 42);
