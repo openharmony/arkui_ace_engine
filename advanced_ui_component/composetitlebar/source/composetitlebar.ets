@@ -535,7 +535,7 @@ struct ImageMenuItem{
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
   @State publicBackCounter: number = -1
-  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
 
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: ComposeTitleBarDialog({
