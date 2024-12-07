@@ -420,6 +420,9 @@ int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOf
     auto wideText = pattern->GetTextUtf16Value();
     if (LessNotEqual(localOffset.GetX(), contentRect.GetX())) {
         auto index = selectController->GetStartIndex();
+        if (!SelectOverlayIsOn()) {
+            return index;
+        }
         if ((!isFirst && !IsHandleReverse()) || (isFirst && IsHandleReverse())) {
             index = selectController->GetEndIndex();
         }
@@ -427,6 +430,9 @@ int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOf
     }
     if (GreatOrEqual(localOffset.GetX(), contentRect.GetX() + contentRect.Width())) {
         auto index = selectController->GetEndIndex();
+        if (!SelectOverlayIsOn()) {
+            return index;
+        }
         if ((isFirst && !IsHandleReverse()) || (!isFirst && IsHandleReverse())) {
             index = selectController->GetStartIndex();
         }
