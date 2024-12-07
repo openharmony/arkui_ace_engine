@@ -23,6 +23,7 @@ ace_unittest("swiper_test_ng") {
     "swiper_common_test_ng.cpp",
     "swiper_controller_test_ng.cpp",
     "swiper_event_test_ng.cpp",
+    "swiper_flex_layout_test_ng.cpp",
     "swiper_indicator_common_test_ng.cpp",
     "swiper_indicator_extent_test_ng.cpp",
     "swiper_indicator_layout_test_ng.cpp",

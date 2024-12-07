@@ -742,6 +742,22 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeIndex003
+ * @tc.desc: Test ChangeIndex with animation and without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(8);
+    CreateSwiperDone();
+
+    VerifyChangeIndex(3, true, 3);
+    VerifyChangeIndex(1, false, 1);
+}
+
+/**
  * @tc.name: ChangeIndexWithLoopChange001
  * @tc.desc: Test changeIndex with loop change
  * @tc.type: FUNC
