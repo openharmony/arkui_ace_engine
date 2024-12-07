@@ -2724,46 +2724,6 @@ bool RichEditorPattern::HandleUserGestureEvent(
     return false;
 }
 
-void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool)
-{
-    CHECK_NULL_VOID(sourceTool != SourceTool::FINGER);
-    CHECK_NULL_VOID(sourceTool != SourceTool::PEN);
-    if (IsSelected()) {
-        return;
-    }
-    auto textRect = GetTextRect();
-    textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
-    textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
-    Offset offset = Offset(textRect.GetX(), textRect.GetY());
-    auto textOffset = globalOffset - offset;
-    int32_t currentPosition = paragraphs_.GetIndex(textOffset);
-    currentPosition = std::min(currentPosition, GetTextContentLength());
-    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(UtfUtils::Str8ToStr16(GetTextForDisplay()),
-        currentPosition);
-    nextPosition = std::min(nextPosition, GetTextContentLength());
-    AdjustPlaceholderSelection(currentPosition, nextPosition, textOffset);
-    auto textSelectInfo = GetSpansInfo(currentPosition, nextPosition, GetSpansMethod::ONSELECT);
-    auto results = textSelectInfo.GetSelection().resultObjects;
-    if (results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE && results.front().valueString != " "
-        && !isOnlyImageDrag_) {
-        textSelector_.Update(currentPosition, nextPosition);
-        isOnlyImageDrag_ = true;
-        showSelect_ = false;
-        CalculateHandleOffsetAndShowOverlay();
-        if (selectOverlay_->IsBothHandlesShow()) {
-            TextPattern::CloseSelectOverlay(false);
-        }
-        auto focusHub = GetFocusHub();
-        if (focusHub && sourceTool != SourceTool::FINGER) {
-            auto isSuccess = focusHub->RequestFocusImmediately();
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only image selected, textSelector=[%{public}d, %{public}d], "
-                "requestFocus=%{public}d, isFocus=%{public}d",
-                textSelector_.GetTextStart(), textSelector_.GetTextEnd(), isSuccess, HasFocus());
-            FireOnSelectionChange(textSelector_);
-        }
-    }
-}
-
 bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
 {
     auto calculateHandleFunc = [weak = WeakClaim(this)]() {
@@ -3568,7 +3528,6 @@ void RichEditorPattern::OnDragStartAndEnd()
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isOnlyImageDrag_ = false;
         pattern->isDragSponsor_ = false;
         pattern->dragRange_ = { 0, 0 };
         pattern->showSelect_ = true;
@@ -3592,10 +3551,6 @@ NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>
     eventHub->SetTimestamp(timestamp_);
     showSelect_ = false;
     auto dropInfo = OnDragStart(event, extraParams);
-    if (isOnlyImageDrag_) {
-        recoverStart_ = -1;
-        recoverEnd_ = -1;
-    }
     return dropInfo;
 }
 
@@ -6465,12 +6420,10 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(touchInfo);
-        HandleOnlyImageSelected(touchInfo.GetLocalLocation(), info.GetSourceTool());
         if (hasUrlSpan_) {
             HandleUrlSpanShowShadow(touchInfo.GetLocalLocation(), touchInfo.GetGlobalLocation(), GetUrlPressColor());
         }
     } else if (touchType == TouchType::UP) {
-        isOnlyImageDrag_ = false;
         HandleTouchUp();
         if (hasUrlSpan_) {
             HandleUrlSpanForegroundClear();
@@ -6694,7 +6647,6 @@ void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
-    HandleOnlyImageSelected(info.GetLocalLocation(), SourceTool::MOUSE);
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -6735,7 +6687,6 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     mouseStatus_ = MouseStatus::RELEASED;
     isMouseSelect_ = false;
     isFirstMouseSelect_ = true;
-    isOnlyImageDrag_ = false;
     if (!showSelect_) {
         showSelect_ = true;
         ResetSelection();
@@ -7358,17 +7309,6 @@ void RichEditorPattern::CreateHandles()
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
 {
-    if (!isNeedShowHandles) {
-        auto info = GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
-        auto selResult = info.GetSelection().resultObjects;
-        if (isMousePressed_ && selResult.size() == 1 && selResult.front().type == SelectSpanType::TYPEIMAGE) {
-            textSelector_.Update(-1, -1);
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            return;
-        }
-    }
     ShowHandles();
 }
 
