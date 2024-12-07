@@ -2005,5 +2005,89 @@ HWTEST_F(PipelineContextTestNg, DragEvent01, TestSize.Level1)
     EXPECT_EQ(305, resampledPointerEvent.x);
     EXPECT_EQ(405, resampledPointerEvent.y);
 }
+
+/**
+ * @tc.name: GetUnexecutedFinishCount
+ * @tc.desc: Test the function GetUnexecutedFinishCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, GetUnexecutedFinishCount, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Set a value for the finishCount_.
+     * @tc.expected: The result is [ 30 20 10 ].
+     */
+    EXPECT_EQ(context_->GetUnexecutedFinishCount(), "[ ]");
+
+    context_->finishCount_.insert(10);
+    context_->finishCount_.insert(20);
+    context_->finishCount_.insert(30);
+    EXPECT_EQ(context_->GetUnexecutedFinishCount(), "[ 30 20 10 ]");
+
+    /**
+     * @tc.steps3: Clear finishCount_.
+     * @tc.expected: The result is [ ].
+     */    
+    context_->finishCount_.clear();
+    EXPECT_EQ(context_->GetUnexecutedFinishCount(), "[ ]");
+}
+
+/**
+ * @tc.name: IsDirtyLayoutNodesEmpty
+ * @tc.desc: Test IsDirtyLayoutNodesEmpty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, IsDirtyLayoutNodesEmpty, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create some frameNode and configure the required parameters.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    frameNode->layoutProperty_ = nullptr;
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps3: Call AddDirtyLayoutNode with different parameters.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    EXPECT_FALSE(taskScheduler.IsDirtyLayoutNodesEmpty());
+}
+
+/**
+ * @tc.name: IsDirtyNodesEmpty
+ * @tc.desc: Test IsDirtyNodesEmpty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, IsDirtyNodesEmpty, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function IsDirtyNodesEmpty.
+     * @tc.expected: The dirtyNodes is not empty.
+     */
+    auto customNode_1 = CustomNode::CreateCustomNode(customNodeId_ + 20, TEST_TAG);
+    context_->AddDirtyCustomNode(customNode_1);
+    EXPECT_FALSE(context_->IsDirtyNodesEmpty());
+    context_->dirtyNodes_.clear();
+}
+
 } // namespace NG
 } // namespace OHOS::Ace
