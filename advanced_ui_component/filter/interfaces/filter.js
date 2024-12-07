@@ -39,7 +39,7 @@ const curves = requireNativeModule('ohos.curves');
 const measure = requireNapi('measure');
 const hilog = requireNapi('ohos.hilog');
 const JSON = requireNapi('util.json');
-const hilog = requireNapi('accessibility');
+const accessibility = requireNapi('accessibility');
 
 const TEXT_HOT_AREA_WIDTH = 8;
 const LIST_ROW_HEIGHT = 40;
