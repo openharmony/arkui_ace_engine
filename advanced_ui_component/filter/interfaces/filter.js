@@ -960,13 +960,11 @@ class MultiFilterRow extends ViewPU {
                 triggerAction: 'common',
                 customId: g15,
             });
-            accessibility.sendAccessibilityEvent(i15).then(() => {
-                setTimeout(() => {
-                    this.isSendArrowAccessibility = false;
-                }, 400);
-            });
-        }, 100);
-        clearTimeout();
+            accessibility.sendAccessibilityEvent(i15);
+        }, 100)
+        setTimeout(() => {
+            this.isSendArrowAccessibility = false;
+        }, 200)
     }
 
     DownAndUpArrow(n14 = null) {
@@ -1163,7 +1161,7 @@ class MultiFilterRow extends ViewPU {
             If.create();
             if (this.filterRow?.options && this.filterRow?.options.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    if (!If.canRetake(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`)) {
+                    if (!If.canRetake(`filterMultiFilterRow_${this.filterId}_${this.getUniqueId()}`)) {
                         this.observeComponentCreation2((b14, c14) => {
                             Text.create(this.filterRow?.options[0]);
                             Text.height(LIST_ROW_HEIGHT);
@@ -1190,7 +1188,7 @@ class MultiFilterRow extends ViewPU {
                                 this.multiFiltersSelectedIndex = 0;
                                 this.sendAccessibility(this.filterRow?.options[0], true);
                             });
-                            Text.id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`);
+                            Text.id(`filterMultiFilterRow_${this.getUniqueId()}_${this.rowIndex}`);
                             Text.focusable(true);
                             Text.onHover((j14) => {
                                 Context.animateTo({
@@ -2141,14 +2139,15 @@ export class Filter extends ViewPU {
             type: 'announceForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility: this.getFloatAccessibilityText(i9, FilterAccessibilityType.SEND_ACCESSIBILITY),
+            textAnnouncedForAccessibility:
+            this.getFloatAccessibilityText(i9, FilterAccessibilityType.SEND_ACCESSIBILITY),
         });
         accessibility.sendAccessibilityEvent(j9);
         let k9 = ({
             type: 'requestFocusForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            customId: `filterMultiFilterRow_${this.filterId}_0`,
+            customId: `filterMultiFilterRow_${this.getUniqueId()}_0`,
         });
         accessibility.sendAccessibilityEvent(k9);
     }

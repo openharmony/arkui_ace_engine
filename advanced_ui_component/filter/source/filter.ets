@@ -51,7 +51,7 @@ export enum FilterType {
   LIST_FILTER
 }
 
-export enum FilterAccessibilityType {
+enum FilterAccessibilityType {
   ACCESSIBILITY_TEXT,
   ACCESSIBILITY_DESC,
   SEND_ACCESSIBILITY,
@@ -462,13 +462,11 @@ struct MultiFilterRow {
         triggerAction: 'common',
         customId: id,
       });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        setTimeout(() => {
-          this.isSendArrowAccessibility = false;
-        }, 400)
-      })
-    }, 100)
-    clearTimeout();
+      accessibility.sendAccessibilityEvent(eventInfo);
+    }, 100);
+    setTimeout(() => {
+      this.isSendArrowAccessibility = false;
+    }, 200);
   }
 
   @Builder
@@ -608,7 +606,7 @@ struct MultiFilterRow {
             this.multiFiltersSelectedIndex = 0;
             this.sendAccessibility(this.filterRow?.options[0], true);
           })
-          .id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`)
+          .id(`filterMultiFilterRow_${this.getUniqueId()}_${this.rowIndex}`)
           .focusable(true)
           .onHover((isHover: boolean) => {
             animateTo({
@@ -891,7 +889,7 @@ export struct Filter {
     return Math.min(systemFontScale, this.maxAppFontScale);
   }
 
-  private getAccessibilityText(resource: ResourceStr | undefined, selected: boolean, type: FilterAccessibilityType): string {
+  getAccessibilityText(resource: ResourceStr | undefined, selected: boolean, type: FilterAccessibilityType): string {
     let accessibilityText: string = '';
     try {
       let resourceString: string = '';
@@ -1014,7 +1012,7 @@ export struct Filter {
       type: 'requestFocusForAccessibility',
       bundleName: this.bundleName,
       triggerAction: 'common',
-      customId: `filterMultiFilterRow_${this.filterId}_0`,
+      customId: `filterMultiFilterRow_${this.getUniqueId()}_0`,
     });
     accessibility.sendAccessibilityEvent(requestFocusEventInfo);
   }
