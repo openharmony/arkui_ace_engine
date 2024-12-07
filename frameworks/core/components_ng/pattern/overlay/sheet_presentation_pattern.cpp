@@ -1409,6 +1409,15 @@ void SheetPresentationPattern::UpdateMaskBackgroundColorRender()
     maskRenderContext->UpdateBackgroundColor(sheetMaskColor_);
 }
 
+void SheetPresentationPattern::FireCommonCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FireOnTypeDidChange();
+    FireOnWidthDidChange(host);
+    FireOnHeightDidChange();
+}
+
 void SheetPresentationPattern::CheckSheetHeightChange()
 {
     auto host = GetHost();
@@ -1442,8 +1451,10 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 CHECK_NULL_VOID(renderContext);
                 renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
+                FireCommonCallback();
+            } else {
+                overlayManager->PlaySheetTransition(host, true, false);
             }
-            overlayManager->PlaySheetTransition(host, true, false);
             auto maskNode = overlayManager->GetSheetMask(host);
             if (maskNode) {
                 UpdateMaskBackgroundColorRender();
@@ -2375,18 +2386,18 @@ void SheetPresentationPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("IsShouldDismiss: ").append(shouldDismiss_ ? "true" : "false"));
 }
 
-void SheetPresentationPattern::FireOnHeightDidChange(float height)
+void SheetPresentationPattern::FireOnHeightDidChange()
 {
+    auto height = 0.0f;
+    if (!IsSheetBottomStyle()) {
+        height = centerHeight_;
+    } else {
+        height = height_;
+    }
     if (NearEqual(preDidHeight_, height)) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
-        OnHeightDidChange(centerHeight_);
-    } else {
-        OnHeightDidChange(height_);
-    }
+    OnHeightDidChange(height);
     preDidHeight_ = height;
 }
 
