@@ -3729,6 +3729,9 @@ void TextPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(!textLayoutProperty->GetTextColorFlagByUserValue(false));
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(!renderContext->HasForegroundColor());
@@ -3736,8 +3739,6 @@ void TextPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
