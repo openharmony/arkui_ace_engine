@@ -80,6 +80,16 @@ const std::string CIRCLE_SVG_LABEL =
 
 class SvgNodeTestNg : public testing::Test {};
 
+class MockSvgGraphic : public SvgGraphic {
+public:
+    MockSvgGraphic() = default;
+    ~MockSvgGraphic() = default;
+
+    MOCK_METHOD2(SetLinearGradient, void(const Size& viewPort, OHOS::Ace::Gradient& gradient));
+    MOCK_METHOD2(SetRadialGradient, void(const Size& viewPort, OHOS::Ace::Gradient& gradient));
+    MOCK_METHOD3(RectifyTargetSize, void(const Rect& bounds, double& width, double& height));
+};
+
 /**
  * @tc.name: feOffsetTest
  * @tc.desc: test feOffsetTest
@@ -543,5 +553,106 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest003, TestSize.Level1)
     Size viewPort(100, 100);
     auto rsPath = svgPolygon->AsPath(viewPort);
     EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest001, TestSize.Level1)
+{
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(SvgCircle::Create());
+    EXPECT_NE(svgCircle, nullptr);
+    std::optional<Color> fillColorOpt = std::nullopt;
+    svgCircle->fillState_.SetColor(Color::TRANSPARENT);
+    auto updateFill = svgCircle->UpdateFillStyle(fillColorOpt);
+    EXPECT_EQ(updateFill, false);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest002, TestSize.Level1)
+{
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(SvgCircle::Create());
+    EXPECT_NE(svgCircle, nullptr);
+    std::optional<Color> fillColorOpt = std::nullopt;
+    svgCircle->fillState_.SetColor(Color::TRANSPARENT);
+    OHOS::Ace::Gradient gradient;
+    svgCircle->fillState_.SetGradient(gradient);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto updateFill = svgCircle->UpdateFillStyle(fillColorOpt);
+    MockContainer::TearDown();
+    EXPECT_EQ(updateFill, true);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest003, TestSize.Level1)
+{
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(SvgCircle::Create());
+    EXPECT_NE(svgCircle, nullptr);
+    std::optional<Color> fillColorOpt = std::nullopt;
+    svgCircle->fillState_.SetColor(Color::TRANSPARENT);
+    OHOS::Ace::Gradient gradient;
+    svgCircle->fillState_.SetGradient(gradient);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    auto updateFill = svgCircle->UpdateFillStyle(fillColorOpt);
+    MockContainer::TearDown();
+    EXPECT_EQ(updateFill, false);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest004, TestSize.Level1)
+{
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(SvgCircle::Create());
+    EXPECT_NE(svgCircle, nullptr);
+    std::optional<Color> fillColorOpt = std::nullopt;
+    svgCircle->fillState_.SetColor(Color::TRANSPARENT);
+    OHOS::Ace::Gradient gradient;
+    OHOS::Ace::GradientColor gradientColor1;
+    gradientColor1.SetColor(Color::RED);
+    gradientColor1.SetDimension(Dimension(0.5, DimensionUnit::PERCENT));
+    OHOS::Ace::GradientColor gradientColor2;
+    gradientColor2.SetColor(Color::BLUE);
+    gradientColor2.SetDimension(Dimension(1.0, DimensionUnit::PERCENT));
+    gradient.AddColor(gradientColor1);
+    gradient.AddColor(gradientColor2);
+    svgCircle->fillState_.SetGradient(gradient);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    auto updateFill = svgCircle->UpdateFillStyle(fillColorOpt);
+    MockContainer::TearDown();
+    EXPECT_EQ(updateFill, true);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest005, TestSize.Level1)
+{
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(SvgCircle::Create());
+    EXPECT_NE(svgCircle, nullptr);
+    std::optional<Color> fillColorOpt = std::nullopt;
+    svgCircle->fillState_.SetColor(Color::RED);
+    auto updateFill = svgCircle->UpdateFillStyle(fillColorOpt);
+    EXPECT_EQ(updateFill, true);
 }
 } // namespace OHOS::Ace::NG
