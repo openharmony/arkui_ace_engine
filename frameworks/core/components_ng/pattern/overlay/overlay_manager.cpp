@@ -1987,6 +1987,17 @@ void OverlayManager::DismissPopup()
     HidePopup(dismissPopupId_, popupInfo);
 }
 
+void OverlayManager::ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper)
+{
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetHasFoldModeChangedTransition(false);
+    auto layoutProperty = menuWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+}
+
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu helper enter");
@@ -2001,7 +2012,7 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
         menuMap_[targetId] = menu;
     }
     CHECK_NULL_RETURN(menu, false);
-
+    ResetMenuWrapperVisibility(menu);
     RefPtr<FrameNode> menuFrameNode = menu;
     if (menu->GetTag() != V2::MENU_ETS_TAG) {
         auto menuChild = menu->GetChildAtIndex(0);
