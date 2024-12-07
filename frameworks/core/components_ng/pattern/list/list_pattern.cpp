@@ -1193,8 +1193,8 @@ ScrollOffsetAbility ListPattern::GetScrollOffsetAbility()
             return true;
         },
         GetAxis(),
-        contentStartOffset_,
-        contentEndOffset_,
+        IsScrollSnapAlignCenter() ? 0 : contentStartOffset_,
+        IsScrollSnapAlignCenter() ? 0 : contentEndOffset_,
     };
 }
 
