@@ -207,11 +207,6 @@ void TimePickerHapticController::HandleDelta(double dy)
     }
 }
 
-void TimePickerHapticController::ClearVelocityInfo()
-{
-    velocityTracker_.Reset();
-}
-
 double TimePickerHapticController::ConvertPxToMillimeters(double px) const
 {
     auto& manager = ScreenSystemManager::GetInstance();

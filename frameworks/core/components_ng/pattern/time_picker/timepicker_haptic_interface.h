@@ -26,7 +26,6 @@ public:
     virtual void PlayOnce() = 0;
     virtual void Stop() = 0;
     virtual void HandleDelta(double dy) = 0;
-    virtual void ClearVelocityInfo() = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_AUDIO_HAPTIC_INTERFACE_H
