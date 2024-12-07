@@ -793,7 +793,7 @@ float ListPattern::GetEndOverScrollOffset(float offset, float endMainPos, float 
     return endOffset;
 }
 
-OverScrollOffset ListPattern::GetOutBoundaryOffset(bool useCurrentDelta) const
+OverScrollOffset ListPattern::GetOutBoundaryOffset(float delta, bool useChainDelta) const
 {
     OverScrollOffset offset = { 0, 0 };
     bool groupAtStart = true;
@@ -805,24 +805,18 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(bool useCurrentDelta) const
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
     if (startIndex == 0 && groupAtStart) {
-        if (useCurrentDelta) {
-            offset.start = startMainPos - currentDelta_ + GetChainDelta(0) - contentStartOffset_;
-        } else {
-            offset.start = startMainPos + GetChainDelta(0) - contentStartOffset_;
-        }
+        auto startChainDelta = useChainDelta ? GetChainDelta(0) : 0.0f;
+        offset.start = startMainPos - delta + startChainDelta - contentStartOffset_;
         offset.start = std::max(offset.start, 0.0);
     }
     if (endIndex >= maxListItemIndex_ && groupAtEnd) {
-        endMainPos = endMainPos + GetChainDelta(endIndex);
+        auto endChainDelta = useChainDelta ? GetChainDelta(endIndex) : 0.0f;
+        endMainPos = endMainPos + endChainDelta;
         auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
         if (startIndex_ == 0 && GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
             endMainPos = startMainPos + contentMainSize;
         }
-        if (useCurrentDelta) {
-            offset.end = contentMainSize_ - contentEndOffset_ - (endMainPos - currentDelta_);
-        } else {
-            offset.end = contentMainSize_ - contentEndOffset_ - endMainPos;
-        }
+        offset.end = contentMainSize_ - contentEndOffset_ - (endMainPos - delta);
         offset.end = std::max(offset.end, 0.0);
     }
     return offset;
@@ -854,7 +848,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
-        auto res = GetOutBoundaryOffset(true);
+        auto res = GetOutBoundaryOffset(currentDelta_);
         // over scroll in drag update from normal to over scroll.
         float overScroll = std::max(res.start, res.end);
         // adjust offset.
@@ -908,7 +902,8 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     if (itemPosition_.empty()) {
         return false;
     }
-    auto res = GetOutBoundaryOffset(useCurrentDelta);
+    auto currentDelta = useCurrentDelta ? currentDelta_ : 0.0f;
+    auto res = GetOutBoundaryOffset(currentDelta);
     // over scroll in drag update from normal to over scroll.
     return Positive(res.start) || Positive(res.end);
 }
@@ -1636,7 +1631,7 @@ void ListPattern::HandleScrollBarOutBoundary()
         ScrollablePattern::HandleScrollBarOutBoundary(0);
         return;
     }
-    auto res = GetOutBoundaryOffset(false);
+    auto res = GetOutBoundaryOffset(0.0f);
     float overScroll = std::max(res.start, res.end);
     ScrollablePattern::HandleScrollBarOutBoundary(overScroll);
 }
@@ -2174,7 +2169,7 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     }
     float overOffset = 0.0f;
     if (!itemPosition_.empty()) {
-        auto res = GetOutBoundaryOffset(false);
+        auto res = GetOutBoundaryOffset(-dragOffset, false);
         overOffset = std::max(res.start, res.end);
         if (!NearZero(res.end)) {
             overOffset = -overOffset;
