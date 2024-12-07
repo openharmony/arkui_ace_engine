@@ -1638,13 +1638,13 @@ public:
     virtual ~SaveRequestCallback() = default;
     void OnSaveRequestSuccess() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestSuccess called");
         ProcessOnFinish();
     }
 
     void OnSaveRequestFailed() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestFailed called");
         ProcessOnFinish();
     }
 

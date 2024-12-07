@@ -3954,9 +3954,10 @@ int32_t TextFieldPattern::GetRequestKeyboardId()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield to request keyboard"
-        "showsoftkeyboard: %{public}d", needShowSoftKeyboard);
-    if (!showKeyBoardOnFocus_ || !HasFocus()) {
+    bool isFocus = HasFocus();
+    if (!showKeyBoardOnFocus_ || !isFocus) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "showKeyBoardOnFocus:%{public}d, isFocus:%{public}d", showKeyBoardOnFocus_,
+            isFocus);
         return false;
     }
     auto tmpHost = GetHost();
@@ -3980,10 +3981,11 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
     MiscServices::TextConfig textConfig = optionalTextConfig.value();
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
-    TAG_LOGI(
-        AceLogTag::ACE_TEXT_FIELD, "node %{public}d RequestKeyboard set calling window id:%{public}u"
-        " inputType: %{public}d enterKeyType: %{public}d", tmpHost->GetId(), textConfig.windowId,
-        textConfig.inputAttribute.inputPattern, textConfig.inputAttribute.enterKeyType);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
+        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d",
+        tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
+        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
@@ -3993,7 +3995,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
 #endif
     if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request SoftKeyboard, Close CustomKeyboard.");
         CloseCustomKeyboard();
     }
     auto context = tmpHost->GetContextRefPtr();
@@ -4077,11 +4079,6 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         auto keyboardOffset = manager->GetKeyboardOffset();
         positionY -= keyboardOffset;
     }
-
-    TAG_LOGI(
-        AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d positionY: %{public}f, height: %{public}f,"
-        "paintOffset: %{public}s, windowRect: %{public}f",
-        tmpHost->GetId(), positionY, height, textPaintOffset.ToString().c_str(), windowRect.Top());
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   textPaintOffset.GetX(),
@@ -4269,8 +4266,6 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::u16string& insertValue, i
     InsertValueInfo insertValueInfo;
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%{public}d,offset:%{public}d",
-        static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
 
@@ -4284,8 +4279,6 @@ void TextFieldPattern::AfterIMEInsertValue(const std::u16string& insertValue)
     auto offset = selectController_->GetCaretIndex();
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%{public}d,offset:%{public}d",
-        static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
 }
 
