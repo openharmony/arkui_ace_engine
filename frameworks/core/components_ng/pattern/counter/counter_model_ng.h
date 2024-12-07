@@ -44,6 +44,7 @@ private:
     RefPtr<FrameNode> CreateButtonChild(
         int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme);
     static RefPtr<FrameNode> CreateContentNodeChild(int32_t contentId, const RefPtr<CounterTheme>& counterTheme);
+    static void ReportComponentChangeEvent(int32_t id, const std::string& value);
 };
 
 } // namespace OHOS::Ace::NG
