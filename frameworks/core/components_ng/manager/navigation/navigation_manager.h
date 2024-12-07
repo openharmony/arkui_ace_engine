@@ -54,6 +54,11 @@ public:
     NavigationManager();
     ~NavigationManager() = default;
 
+    void SetPipelineContext(const WeakPtr<PipelineContext>& pipeline)
+    {
+        pipeline_ = pipeline;
+    }
+
     void AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback);
     void RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth);
 
@@ -132,6 +137,10 @@ public:
     void StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> allNavigationInfo);
     const std::vector<NavdestinationRecoveryInfo> GetNavigationRecoveryInfo(std::string navigationId);
 
+    void OnContainerModalButtonsRectChange();
+    void AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener);
+    void RemoveButtonsRectChangeListener(int32_t id);
+
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -160,6 +169,10 @@ private:
     bool isInAnimation_ = false;
     bool hasCacheNavigationNodeEnable_ = false;
     int32_t interactiveAnimationId_ = -1;
+
+    WeakPtr<PipelineContext> pipeline_;
+    bool hasRegisterListener_ = false;
+    std::unordered_map<int32_t, std::function<void()>> buttonsRectChangeListeners_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -695,10 +695,11 @@ void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect
 
 void ContainerModalPattern::CallButtonsRectChange()
 {
-    CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
     RectF containerModal;
     RectF buttons;
     GetContainerModalButtonsRect(containerModal, buttons);
+    NotifyButtonsRectChange(containerModal, buttons);
+    CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
     if (isInitButtonsRect_ && buttonsRect_ == buttons) {
         return;
     }
@@ -966,5 +967,4 @@ void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimens
     row->MarkModifyDone();
     row->MarkDirtyNode();
 }
-
 } // namespace OHOS::Ace::NG
