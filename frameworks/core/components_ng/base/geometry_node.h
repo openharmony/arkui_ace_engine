@@ -378,6 +378,11 @@ public:
         return baselineDistance_.value_or(frame_.rect_.GetY());
     }
 
+    void ResetContent()
+    {
+        content_.reset();
+    }
+
     void SetAccumulatedSafeAreaEdges(const ExpandEdges& safeAreaPadding);
     const std::unique_ptr<ExpandEdges>& GetAccumulatedSafeAreaExpand() const;
     std::optional<RectF> ConvertExpandCacheToAdjustRect() const;
