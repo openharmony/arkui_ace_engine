@@ -30,6 +30,8 @@ const std::regex COLOR_WITH_MAGIC("#[0-9A-Fa-f]{8}");
 const std::regex BRACKETS("\\(.*?\\)");
 const std::regex FLOAT_MAGIC("^[0-9]+(\\.[0-9]+)?$");
 const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
+const char *COLORING_STRATEGY = "invert";
+const char *COLOR_MARKERS = "color";
 constexpr char PARAMS_SEPARATOR_LEVEL1 = ';';
 constexpr int UNIT_PX = 0;
 constexpr int UNIT_VP = 1;
@@ -3124,11 +3126,25 @@ const ArkUI_AttributeItem* GetContrast(ArkUI_NodeHandle node)
 
 int32_t SetForegroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    auto* fullImpl = GetFullImpl();
+    bool isColor = true;
+    if (item->string) {
+        if (std::strcmp(item->string, COLORING_STRATEGY) == 0) {
+            isColor = false;
+            fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
+                node->uiNodeHandle, isColor, static_cast<uint32_t>(ForegroundColorStrategy::INVERT));
+            return ERROR_CODE_NO_ERROR;
+        }
+        if (std::strcmp(item->string, COLOR_MARKERS) == 0 && item->size > 0) {
+            isColor = true;
+            fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
+                node->uiNodeHandle, isColor, item->value[0].u32);
+            return ERROR_CODE_NO_ERROR;
+        }
+    }
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* fullImpl = GetFullImpl();
-    bool isColor = true;
     if (item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_INVERT ||
         item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_AVERAGE ||
         item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_PRIMARY) {
