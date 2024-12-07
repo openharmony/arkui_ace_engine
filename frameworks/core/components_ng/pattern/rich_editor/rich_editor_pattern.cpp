@@ -7770,24 +7770,6 @@ bool RichEditorPattern::AdjustIndexSkipLineSeparator(int32_t& currentPosition)
     return false;
 }
 
-void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& options)
-{
-    if (options.menuPolicy == MenuPolicy::SHOW) {
-        if (isMousePressed_ || sourceType_ == SourceType::MOUSE) {
-            selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
-        }
-        if (SelectOverlayIsOn()) {
-            selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
-        } else {
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll());
-        }
-    } else if (options.menuPolicy == MenuPolicy::HIDE) {
-        if (SelectOverlayIsOn()) {
-            CloseSelectOverlay();
-        }
-    }
-}
-
 bool RichEditorPattern::ResetOnInvalidSelection(int32_t start, int32_t end)
 {
     if (start < end) {
