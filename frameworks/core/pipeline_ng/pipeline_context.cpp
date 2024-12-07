@@ -1144,6 +1144,16 @@ void PipelineContext::SetupRootElement()
     AddOnAreaChangeNode(rootNode_->GetId());
 }
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask([weak = WeakClaim(this), callback]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->focusOnNodeCallback_ = callback;
+        }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
+}
+
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
