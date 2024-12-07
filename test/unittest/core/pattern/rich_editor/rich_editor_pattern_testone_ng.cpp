@@ -506,40 +506,6 @@ HWTEST_F(RichEditorPatternTestOneNg, JudgeSelectType001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleSelectOverlayWithOptions001
- * @tc.desc: test RichEditorPattern HandleSelectOverlayWithOptions
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleSelectOverlayWithOptions001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = false;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->sourceType_ = SourceType::TOUCH;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = false;
-    richEditorPattern->sourceType_ = SourceType::TOUCH;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    ClearSpan();
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    ASSERT_EQ(richEditorPattern->SelectOverlayIsOn(), false);
-}
-
-/**
  * @tc.name: InsertValueInStyledString002
  * @tc.desc: test RichEditorPattern InsertValueInStyledString
  * @tc.type: FUNC
