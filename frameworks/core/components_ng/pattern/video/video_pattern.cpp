@@ -746,6 +746,12 @@ void VideoPattern::UpdateLooping()
     }
 }
 
+void VideoPattern::SetSurfaceBackgroundColor(Color color)
+{
+    CHECK_NULL_VOID(renderContextForMediaPlayer_);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(color);
+}
+
 void VideoPattern::UpdateSpeed()
 {
     if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
@@ -872,7 +878,6 @@ void VideoPattern::OnAttachToFrameNode()
     }
 
     renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
 }
 

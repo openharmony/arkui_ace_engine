@@ -30,6 +30,7 @@ public:
     static void JsControls(const JSCallbackInfo& info);
     static void JsLoop(const JSCallbackInfo& info);
     static void JsObjectFit(const JSCallbackInfo& info);
+    static void JsSurfaceBackgroundColor(const JSCallbackInfo& info);
 
     static void JsOnStart(const JSCallbackInfo& info);
     static void JsOnPause(const JSCallbackInfo& info);
