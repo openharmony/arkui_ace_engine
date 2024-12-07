@@ -16,6 +16,9 @@
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -352,29 +355,54 @@ void ImageAnimatorPattern::UpdateEventCallback()
 
     animator_->ClearAllListeners();
     auto startEvent = eventHub->GetStartEvent();
-    if (startEvent != nullptr) {
-        animator_->AddStartListener([startEvent] { startEvent(); });
-    }
+    animator_->AddStartListener([weak = WeakClaim(this), startEvent] {
+        auto imageAnimator = weak.Upgrade();
+        CHECK_NULL_VOID(imageAnimator);
+        imageAnimator->ReportComponentChangeEvent("onStart");
+        if (startEvent != nullptr) {
+            startEvent();
+        }
+    });
 
     auto stopEvent = eventHub->GetStopEvent();
-    if (stopEvent != nullptr) {
-        animator_->AddStopListener([stopEvent] { stopEvent(); });
-    }
+    animator_->AddStopListener([weak = WeakClaim(this), stopEvent] {
+        auto imageAnimator = weak.Upgrade();
+        CHECK_NULL_VOID(imageAnimator);
+        imageAnimator->ReportComponentChangeEvent("onFinish");
+        if (stopEvent != nullptr) {
+            stopEvent();
+        }
+    });
 
     auto pauseEvent = eventHub->GetPauseEvent();
-    if (pauseEvent != nullptr) {
-        animator_->AddPauseListener([pauseEvent] { pauseEvent(); });
-    }
+    animator_->AddPauseListener([weak = WeakClaim(this), pauseEvent] {
+        auto imageAnimator = weak.Upgrade();
+        CHECK_NULL_VOID(imageAnimator);
+        imageAnimator->ReportComponentChangeEvent("onPause");
+        if (pauseEvent != nullptr) {
+            pauseEvent();
+        }
+    });
 
     auto repeatEvent = eventHub->GetRepeatEvent();
-    if (repeatEvent != nullptr) {
-        animator_->AddRepeatListener([repeatEvent] { repeatEvent(); });
-    }
+    animator_->AddRepeatListener([weak = WeakClaim(this), repeatEvent] {
+        auto imageAnimator = weak.Upgrade();
+        CHECK_NULL_VOID(imageAnimator);
+        imageAnimator->ReportComponentChangeEvent("onRepeat");
+        if (repeatEvent != nullptr) {
+            repeatEvent();
+        }
+    });
 
     auto cancelEvent = eventHub->GetCancelEvent();
-    if (cancelEvent != nullptr) {
-        animator_->AddIdleListener([cancelEvent] { cancelEvent(); });
-    }
+    animator_->AddIdleListener([weak = WeakClaim(this), cancelEvent] {
+        auto imageAnimator = weak.Upgrade();
+        CHECK_NULL_VOID(imageAnimator);
+        imageAnimator->ReportComponentChangeEvent("onCancel");
+        if (cancelEvent != nullptr) {
+            cancelEvent();
+        }
+    });
 }
 
 void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -615,5 +643,16 @@ void ImageAnimatorPattern::ControlAnimatedImageAnimation(const RefPtr<FrameNode>
     if (!image->IsStatic()) {
         image->ControlAnimation(play);
     }
+}
+
+void ImageAnimatorPattern::ReportComponentChangeEvent(const char* event)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto value = InspectorJsonUtil::Create();
+    value->Put("ImageAnimator", event);
+    UiSessionManager::GetInstance().ReportComponentChangeEvent(host->GetId(), "event", value);
+#endif
 }
 } // namespace OHOS::Ace::NG
