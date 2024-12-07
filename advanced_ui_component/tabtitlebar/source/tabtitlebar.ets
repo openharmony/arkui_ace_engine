@@ -699,7 +699,7 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
-  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: TabTitleBarDialog({
       cancel: () => {
