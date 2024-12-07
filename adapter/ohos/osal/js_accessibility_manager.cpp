@@ -31,6 +31,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1234,18 +1235,6 @@ bool IsUserCheckedOrSelected(const RefPtr<NG::FrameNode> frameNode)
     return false;
 }
 
-void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& info, int32_t treeId)
-{
-    int32_t pageId = info.GetPageId();
-    if ((pageId >= MAX_PAGE_ID_WITH_SUB_TREE) || (pageId < 0)) {
-        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "pageId %{public}d cannot set tree id", pageId);
-    } else {
-        uint32_t unsignedPageId = static_cast<uint32_t>(pageId);
-        uint32_t unsignedTreeId = static_cast<uint32_t>(treeId);
-        info.SetPageId((unsignedTreeId << SUB_TREE_OFFSET_IN_PAGE_ID) | unsignedPageId);
-    }
-}
-}
 void UpdateAccessibilityTextValueInfo(
     RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
 {
@@ -1262,6 +1251,79 @@ void UpdateAccessibilityTextValueInfo(
         nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
     }
 }
+
+void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& info, int32_t treeId)
+{
+    int32_t pageId = info.GetPageId();
+    if ((pageId >= MAX_PAGE_ID_WITH_SUB_TREE) || (pageId < 0)) {
+        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "pageId %{public}d cannot set tree id", pageId);
+    } else {
+        uint32_t unsignedPageId = static_cast<uint32_t>(pageId);
+        uint32_t unsignedTreeId = static_cast<uint32_t>(treeId);
+        info.SetPageId((unsignedTreeId << SUB_TREE_OFFSET_IN_PAGE_ID) | unsignedPageId);
+    }
+}
+
+bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const RefPtr<NG::FrameNode>& parentFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    auto parentPattern = parentFrameNode->GetPattern<NG::ScrollablePattern>();
+    CHECK_NULL_RETURN(parentPattern, false);
+
+    auto scrollAbility = parentPattern->GetScrollOffsetAbility();
+    auto scrollFunc = scrollAbility.scrollFunc;
+    auto scrollAxis = scrollAbility.axis;
+    if (!scrollFunc || scrollAxis == Axis::NONE) {
+        return false;
+    }
+    auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
+        scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
+    if (!NearZero(moveOffset)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
+            moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
+        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+        return ret;
+    }
+    return false;
+}
+
+bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    bool ret = false;
+    auto parentFrameNode = curFrameNode->GetParentFrameNode();
+
+    while (parentFrameNode) {
+        if (ScrollByOffsetToParent(curFrameNode, parentFrameNode)) {
+            ret = true;
+        }
+        parentFrameNode = parentFrameNode->GetParentFrameNode();
+    }
+    return ret;
+}
+
+void ProcessFocusScroll(const RefPtr<NG::FrameNode>& curFrameNode, RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [node = AceType::WeakClaim(AceType::RawPtr(curFrameNode))] {
+            auto focusNode = node.Upgrade();
+            CHECK_NULL_VOID(focusNode);
+            auto accessibilityProperty = focusNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (accessibilityProperty->GetAccessibilityFocusState()) {
+                ScrollByOffset(focusNode);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityProcessFocusScroll");
+}
+}
+
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
@@ -2019,6 +2081,7 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
     CHECK_NULL_RETURN(accessibilityProperty, false);
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     accessibilityProperty->SetAccessibilityFocusState(true);
+    ProcessFocusScroll(frameNode, context);
     return true;
 }
 
