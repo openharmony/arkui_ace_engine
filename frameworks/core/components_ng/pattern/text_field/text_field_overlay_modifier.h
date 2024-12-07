@@ -41,6 +41,8 @@ public:
     TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect);
     ~TextFieldOverlayModifier() override = default;
 
+    void ModifierAttachProperty();
+
     void onDraw(DrawingContext& context) override;
 
     void SetCursorColor(Color& value);
@@ -50,6 +52,9 @@ public:
     void SetContentSize(SizeF& value);
     void SetContentOffset(OffsetF& value);
     void SetCursorOffset(const OffsetF& value);
+    void SetFloatingCursorOffset(const OffsetF& value);
+    void SetFloatingCursorVisible(bool value);
+    void SetShowOriginCursor(bool value);
     void SetInputStyle(InputStyle& value);
     void SetFrameSize(const SizeF& value);
     void SetCurrentOffset(float value);
@@ -74,9 +79,22 @@ public:
     void SetPreviewTextStyle(PreviewTextStyle style);
     void ContentChange();
 
+    void StartFloatingCaretLand(const OffsetF& originCaretOffset);
+
+    bool GetFloatCaretLanding() const
+    {
+        return caretLanding_;
+    }
+
+    void SetFloatCaretLanding(bool caretLanding)
+    {
+        caretLanding_ = caretLanding;
+    }
+
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
+    void PaintFloatingCursor(DrawingContext& context) const;
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void PaintScrollBar(DrawingContext& context);
     void PaintMagnifier(DrawingContext& context);
@@ -88,6 +106,7 @@ private:
     void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
     void PaintPreviewTextDecoration(DrawingContext& context) const;
 
+    bool caretLanding_ = false;
     bool needPaintSelect_ = false;
     bool needPaintPreviewText = false;
     PreviewTextStyle previewTextStyle_ = PreviewTextStyle::NORMAL;
@@ -115,6 +134,11 @@ private:
     RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RectF textRect_;
+
+    RefPtr<AnimatablePropertyOffsetF> floatingCursorOffset_;
+    RefPtr<PropertyBool> floatingCursorVisible_;
+    RefPtr<PropertyBool> showOriginCursor_;
+
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

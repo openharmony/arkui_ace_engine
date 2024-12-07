@@ -58,6 +58,7 @@ public:
 
     void UpdateScrollBar();
     void SetShowUnderlineWidth();
+    void SetFloatingCursor();
 
 private:
     void UpdateTextStyleToModifier(

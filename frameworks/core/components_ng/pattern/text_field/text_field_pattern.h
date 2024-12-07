@@ -192,6 +192,12 @@ struct TouchAndMoveCaretState {
     int32_t touchFingerId = -1;
 };
 
+struct FloatingCaretState {
+    bool FloatingCursorVisible = false;
+    bool ShowOriginCursor = false;
+    Color OriginCursorColor = Color(0x4D000000);
+};
+
 struct ContentScroller {
     CancelableCallback<void()> autoScrollTask;
     std::function<void(const Offset&)> scrollingCallback;
@@ -460,6 +466,41 @@ public:
         return cursorVisible_;
     }
 
+    bool GetFloatingCursorVisible() const
+    {
+        return floatCaretState_.FloatingCursorVisible;
+    }
+
+    void SetFloatingCursorVisible(bool floatingCursorVisible)
+    {
+        floatCaretState_.FloatingCursorVisible = floatingCursorVisible;
+    }
+
+    bool GetShowOriginCursor() const
+    {
+        return floatCaretState_.ShowOriginCursor;
+    }
+
+    void SetShowOriginCursor(bool showOriginCursor)
+    {
+        floatCaretState_.ShowOriginCursor = showOriginCursor;
+    }
+
+    Color GetOriginCursorColor() const
+    {
+        return floatCaretState_.OriginCursorColor;
+    }
+
+    void SetOriginCursorColor(Color originCursorColor)
+    {
+        floatCaretState_.OriginCursorColor = originCursorColor;
+    }
+
+    virtual void AdjustFloatingCaretInfo(const Offset& localOffset,
+        const HandleInfoNG& caretInfo, HandleInfoNG& floatingCaretInfo);
+
+    void FloatingCaretLand();
+
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool GetImeAttached() const
     {
@@ -696,6 +737,11 @@ public:
     RectF GetCaretRect() const override
     {
         return selectController_->GetCaretRect();
+    }
+
+    RectF GetFloatingCaretRect() const
+    {
+        return selectController_->GetFloatingCaretRect();
     }
 
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
@@ -1957,10 +2003,10 @@ private:
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     TouchAndMoveCaretState moveCaretState_;
+    FloatingCaretState floatCaretState_;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
-    bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
     bool isFillRequestFinish_ = true;
     bool keyboardAvoidance_ = false;

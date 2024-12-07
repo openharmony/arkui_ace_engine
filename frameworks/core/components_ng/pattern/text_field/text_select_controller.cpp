@@ -156,7 +156,7 @@ void TextSelectController::UpdateCaretRectByPositionNearTouchOffset(int32_t posi
     UpdateCaretHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent)
+void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent, bool floatCaret)
 {
     auto index = ConvertTouchOffsetToPosition(localOffset);
     AdjustCursorPosition(index, localOffset);
@@ -173,6 +173,13 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset, bo
     } else {
         SetCaretRectAtEmptyValue();
     }
+
+    CHECK_NULL_VOID(floatCaret);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    textField->AdjustFloatingCaretInfo(localOffset, caretInfo_, floatingCaretInfo_);
 }
 
 OffsetF TextSelectController::CalcCaretOffsetByOffset(const Offset& localOffset)
@@ -861,6 +868,27 @@ bool TextSelectController::IsTouchAtLineEnd(const Offset& localOffset)
         } else {
             return LessNotEqual(offset.GetX(), lineMetrics.x);
         }
+    }
+    return false;
+}
+
+bool TextSelectController::IsTouchAtLineEndOrBegin(const Offset& localOffset)
+{
+    CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), false);
+    auto index = ConvertTouchOffsetToPosition(localOffset);
+    if (index == 0 || index == static_cast<int32_t>(contentController_->GetWideText().length())) {
+        return true;
+    }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, false);
+    auto textRect = textField->GetTextRect();
+    auto offset = localOffset - Offset(textRect.GetX(), textRect.GetY());
+    LineMetrics lineMetrics;
+    if (paragraph_->GetLineMetricsByCoordinate(offset, lineMetrics)) {
+        return GreatNotEqual(offset.GetX(), lineMetrics.x + lineMetrics.width) ||
+            LessNotEqual(offset.GetX(), lineMetrics.x);
     }
     return false;
 }

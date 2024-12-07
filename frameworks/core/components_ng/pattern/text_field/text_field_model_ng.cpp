@@ -72,13 +72,13 @@ void TextFieldModelNG::CreateNode(
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->InitTheme();
+    auto colorMode = SystemProperties::GetColorMode();
+    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
