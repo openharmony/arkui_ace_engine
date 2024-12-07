@@ -445,6 +445,10 @@ protected:
     void HandleDidAccept();
     
     void ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer);
+    bool ProcessTouchEvent(const TouchEvent& point);
+    void HandleTouchDown(const TouchEvent& point);
+    void HandleTouchUp(const TouchEvent& point);
+    void HandleTouchCancel(const TouchEvent& point);
 
     RefereeState refereeState_ = RefereeState::READY;
 

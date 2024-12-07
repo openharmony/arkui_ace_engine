@@ -91,45 +91,66 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
     if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
+    auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(Claim(this));
+    if (multiFingerRecognizer) {
+        multiFingerRecognizer->ResetTouchPointsForSucceedBlock();
+    }
+    return ProcessTouchEvent(point);
+}
+
+bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
+{
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
             HandleEventToBridgeObjList(point, bridgeObjList_);
             break;
-        case TouchType::DOWN: {
-            deviceId_ = point.deviceId;
-            deviceType_ = point.sourceType;
-            inputEventType_ = deviceType_ == SourceType::MOUSE ? InputEventType::MOUSE_BUTTON :
-                InputEventType::TOUCH_SCREEN;
-            auto result = AboutToAddCurrentFingers(point);
-            if (result) {
-                HandleTouchDownEvent(point);
-                HandleEventToBridgeObjList(point, bridgeObjList_);
-            }
+        case TouchType::DOWN:
+            HandleTouchDown(point);
             break;
-        }
-        case TouchType::UP: {
-            auto result = AboutToMinusCurrentFingers(point.id);
-            if (result) {
-                HandleTouchUpEvent(point);
-                HandleEventToBridgeObjList(point, bridgeObjList_);
-                currentFingers_--;
-            }
+        case TouchType::UP:
+            HandleTouchUp(point);
             break;
-        }
-        case TouchType::CANCEL: {
-            auto result = AboutToMinusCurrentFingers(point.id);
-            if (result) {
-                HandleTouchCancelEvent(point);
-                HandleEventToBridgeObjList(point, bridgeObjList_);
-                currentFingers_--;
-            }
+        case TouchType::CANCEL:
+            HandleTouchCancel(point);
             break;
-        }
         default:
             break;
     }
     return true;
+}
+
+void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
+{
+    deviceId_ = point.deviceId;
+    deviceType_ = point.sourceType;
+    inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
+
+    auto result = AboutToAddCurrentFingers(point);
+    if (result) {
+        HandleTouchDownEvent(point);
+        HandleEventToBridgeObjList(point, bridgeObjList_);
+    }
+}
+
+void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
+{
+    auto result = AboutToMinusCurrentFingers(point.id);
+    if (result) {
+        HandleTouchUpEvent(point);
+        HandleEventToBridgeObjList(point, bridgeObjList_);
+        currentFingers_--;
+    }
+}
+
+void NGGestureRecognizer::HandleTouchCancel(const TouchEvent& point)
+{
+    auto result = AboutToMinusCurrentFingers(point.id);
+    if (result) {
+        HandleTouchCancelEvent(point);
+        HandleEventToBridgeObjList(point, bridgeObjList_);
+        currentFingers_--;
+    }
 }
 
 bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)

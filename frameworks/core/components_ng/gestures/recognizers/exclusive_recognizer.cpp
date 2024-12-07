@@ -207,6 +207,10 @@ void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>
 
     if (recognizer->GetRefereeState() != RefereeState::PENDING && CheckNeedBlocked(recognizer)) {
         recognizer->OnBlocked();
+        auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
+        if (multiFingerRecognizer) {
+            multiFingerRecognizer->SetTouchPointsForSucceedBlock();
+        }
         return;
     }
     activeRecognizer_ = recognizer;
