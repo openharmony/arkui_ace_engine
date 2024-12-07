@@ -2518,6 +2518,9 @@ void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::Ap
     if (dialogContainer) {
         return;
     }
+    if (isDynamicRender_ || isFormRender_) {
+        return;
+    }
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
