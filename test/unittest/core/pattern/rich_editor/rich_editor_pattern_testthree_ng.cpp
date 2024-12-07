@@ -741,7 +741,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleDragStart001, TestSize.Level1)
     auto dragEvent = AceType::MakeRefPtr<Ace::DragEvent>();
     std::string extraParams = "text";
     richEditorPattern->isDragSponsor_ = true;
-    richEditorPattern->isOnlyImageDrag_ = true;
     richEditorPattern->HandleDragStart(dragEvent, extraParams);
     EXPECT_EQ(richEditorPattern->recoverStart_, -1);
     EXPECT_EQ(richEditorPattern->recoverEnd_, -1);
