@@ -4926,7 +4926,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
     if (!caretVisible_) {
-        StartTwinkling();
+        IF_TRUE(HasFocus(), StartTwinkling());
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5220,7 +5220,7 @@ bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length,
         ResetSelection();
         DeleteByDeleteValueInfo(info);
         if (!caretVisible_) {
-            StartTwinkling();
+            IF_TRUE(HasFocus(), StartTwinkling());
         }
         eventHub->FireOnDeleteComplete();
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
