@@ -65,7 +65,10 @@ ace_unittest("post_event_manager_test_ng") {
 ace_unittest("select_overlay_manager_test_ng") {
   type = "new"
   module_output = "manager"
-  sources = [ "select_overlay_manager_test_ng.cpp" ]
+  sources = [
+    "select_overlay_manager_test_ng.cpp",
+    "select_overlay_manager_testtwo_ng.cpp",
+  ]
 }
 
 ace_unittest("select_overlay_proxy_test_ng") {
