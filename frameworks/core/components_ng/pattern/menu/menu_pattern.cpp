@@ -951,7 +951,8 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
         }
     } else {
         Shadow shadow;
-        if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+        auto shadowStyle = GetMenuDefaultShadowStyle();
+        if (GetShadowFromTheme(shadowStyle, shadow)) {
             renderContext->UpdateBackShadow(shadow);
         }
     }
@@ -989,7 +990,8 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         renderContext->UpdateBackgroundColor(bgColor);
     }
     Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+    auto defaultShadowStyle = GetMenuDefaultShadowStyle();
+    if (GetShadowFromTheme(defaultShadowStyle, shadow)) {
         renderContext->UpdateBackShadow(shadow);
     }
     // make menu round rect
