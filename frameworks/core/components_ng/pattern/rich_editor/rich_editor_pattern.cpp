@@ -582,16 +582,13 @@ void RichEditorPattern::UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty)
     gestureHub->SetResponseRegion({ { hotZoneWidth, hotZoneHeight, hotZoneOffset } });
 }
 
-void RichEditorPattern::ClearOnFocusTextField()
+void RichEditorPattern::ClearOnFocusTextField(FrameNode* node)
 {
-    CHECK_NULL_VOID(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(isAPI14Plus && node);
+    auto context = node->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_VOID(textFieldManager);
-    textFieldManager->ClearOnFocusTextField(host->GetId());
+    IF_PRESENT(textFieldManager, ClearOnFocusTextField(node->GetId()));
 }
 
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -887,10 +884,9 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     TextPattern::OnDetachFromFrameNode(node);
     ScrollablePattern::OnDetachFromFrameNode(node);
-    ClearOnFocusTextField();
+    ClearOnFocusTextField(node);
     auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    context->RemoveWindowSizeChangeCallback(frameId_);
+    IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
 }
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
@@ -2900,7 +2896,7 @@ void RichEditorPattern::HandleBlurEvent()
 {
     auto reason = GetBlurReason();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d, blur reason=%{public}d", frameId_, reason);
-    ClearOnFocusTextField();
+    ClearOnFocusTextField(GetUnsafeHostPtr());
     CHECK_NULL_VOID(showSelect_ || !IsSelected());
     isLongPress_ = false;
     previewLongPress_ = false;
