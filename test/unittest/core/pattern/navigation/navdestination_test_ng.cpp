@@ -53,6 +53,7 @@ constexpr float TITLE_FRAME_HEIGHT = 30.0f;
 constexpr float SUBTITLE_FRAME_WIDTH = 60.0f;
 constexpr float SUBTITLE_FRAME_HEIGHT = 20.0f;
 const CalcDimension DEFAULT_PADDING = 24.0_vp;
+const Dimension DEFAULT_MENU_BUTTON_PADDING = 8.0_vp;
 
 struct UIComponents {
     RefPtr<LayoutWrapperNode> layoutWrapper = nullptr;
@@ -1571,5 +1572,39 @@ HWTEST_F(NavdestinationTestNg, EnableToolBarSwipe001, TestSize.Level1)
     property->UpdateHideToolBar(false);
     enable = pattern->EnableToolBarSwipe(nodeBase);
     ASSERT_TRUE(enable);
+}
+
+
+/**
+ * @tc.name: NavDestinationTest015
+ * @tc.desc: Test LayoutBackButton Default padding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavdestinationTest015, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockPipelineContextGetTheme();
+
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    ui.titleBarLayoutAlgorithm->LayoutBackButton(
+        AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode, ui.titleBarLayoutProperty);
+
+    ASSERT_NE(ui.titleBarNode, nullptr);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(ui.titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    auto backButtonNodeLayoutProperty = backButtonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(backButtonNodeLayoutProperty);
+    auto& padding = backButtonNodeLayoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(padding);
+    EXPECT_TRUE(padding->left.has_value());
+    EXPECT_TRUE(padding->right.has_value());
+    EXPECT_TRUE(padding->top.has_value());
+    EXPECT_TRUE(padding->bottom.has_value());
+
+    EXPECT_EQ(padding->left.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
+    EXPECT_EQ(padding->right.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
+    EXPECT_EQ(padding->top.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
+    EXPECT_EQ(padding->bottom.value().GetDimension(), DEFAULT_MENU_BUTTON_PADDING);
 }
 } // namespace OHOS::Ace::NG
