@@ -812,8 +812,9 @@ private:
      * @brief Stops animations when the scroll starts.
      *
      * @param flushImmediately Whether to flush layout immediately.
+     * @param stopLongPointAnimation Whether to stop indicator long point animation immediately.
      */
-    void StopAnimationOnScrollStart(bool flushImmediately);
+    void StopAnimationOnScrollStart(bool flushImmediately, bool stopLongPointAnimation = false);
     /**
      * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
