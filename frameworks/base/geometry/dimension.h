@@ -16,9 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_H
 
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
-
 #include "ui/base/geometry/dimension.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_DIMENSION_H
