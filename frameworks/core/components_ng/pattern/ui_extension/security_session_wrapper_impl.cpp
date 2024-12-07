@@ -601,15 +601,21 @@ void SecuritySessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX,
 void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeRegister(
     uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
 void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeDeregister()
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeUnregister();
 }
 
 void SecuritySessionWrapperImpl::TransferAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityDumpChildInfo(params, info);
 }
 /************************ End: The interface about the accessibility **************************/
 
