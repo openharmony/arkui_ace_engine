@@ -245,7 +245,11 @@ void NavigationModelNG::Create()
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
 }
 
 bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
@@ -1577,8 +1581,11 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
     SetNavigationStack(AceType::RawPtr(navigationGroupNode));
 
     return navigationGroupNode;
