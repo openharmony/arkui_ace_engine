@@ -43,12 +43,8 @@ export struct ExceptionPrompt {
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
-  onTipClick: () => void = () => {
-    // Click the text on the left to change into the connecting state
-  }
-  onActionTextClick: () => void = () => {
-    // Click Set Network to open the Set network pop-up interface
-  }
+  onTipClick?: () => void = undefined;
+  onActionTextClick?: () => void = undefined;
 
   @Builder
   TextBuilder() {
@@ -73,8 +69,9 @@ export struct ExceptionPrompt {
       }
       .padding({ right: $r('sys.float.ohos_id_default_padding_end') })
       .width('100%')
+      .accessibilityDescription(this.onTipClick ? '' : ' ')
       .onClick(() => {
-        this.onTipClick() //Click the callback of the prompt text
+        this.onTipClick && this.onTipClick();
       })
 
       if (this.options.actionText) {
@@ -102,8 +99,9 @@ export struct ExceptionPrompt {
           right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
           left: $r('sys.float.ohos_id_elements_margin_vertical_l')
         })
+        .accessibilityDescription(this.onActionTextClick ? '' : ' ')
         .onClick(() => {
-          this.onActionTextClick();
+          this.onActionTextClick && this.onActionTextClick();
         })
       }
     }
@@ -160,7 +158,7 @@ export struct ExceptionPrompt {
 
   updateFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.isFollowingSystemFontScale) {
       return 1;
     }

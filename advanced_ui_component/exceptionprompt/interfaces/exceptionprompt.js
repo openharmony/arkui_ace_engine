@@ -49,10 +49,8 @@ export class ExceptionPrompt extends ViewPU {
         };
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
-        this.onTipClick = () => {
-        };
-        this.onActionTextClick = () => {
-        };
+        this.onTipClick = undefined;
+        this.onActionTextClick = undefined;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -144,8 +142,9 @@ export class ExceptionPrompt extends ViewPU {
                 }
             });
             Row.width('100%');
+            Row.accessibilityDescription(this.onTipClick ? '' : ' ');
             Row.onClick(() => {
-                this.onTipClick();
+                this.onTipClick && this.onTipClick();
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -236,8 +235,9 @@ export class ExceptionPrompt extends ViewPU {
                                 'moduleName': '__harDefaultModuleName__'
                             }
                         });
+                        Button.accessibilityDescription(this.onActionTextClick ? '' : ' ');
                         Button.onClick(() => {
-                            this.onActionTextClick();
+                            this.onActionTextClick && this.onActionTextClick();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
