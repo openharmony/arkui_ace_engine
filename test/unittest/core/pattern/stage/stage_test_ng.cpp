@@ -374,6 +374,7 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      * @tc.expected: Children length is less than the current index and return false
      */
     stageManager.PushPage(firstNode);
+    stageManager.SetSrcPage(firstNode);
     EXPECT_FALSE(stageManager.PopPageToIndex(1));
 
     /**
@@ -381,6 +382,7 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      * @tc.expected: Children length is equal to the current index and return true
      */
     stageManager.PushPage(secondNode);
+    stageManager.SetSrcPage(secondNode);
     EXPECT_TRUE(stageManager.PopPageToIndex(1));
 
     /**
@@ -389,8 +391,10 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      */
     stageManager.PushPage(thirdNode);
     stageManager.PushPage(fourthNode);
+    stageManager.SetSrcPage(fourthNode);
     stageManager.PopPageToIndex(1);
     EXPECT_EQ(stageNode->GetChildren().size(), 2);
+    stageManager.SetSrcPage(secondNode);
     stageManager.PopPageToIndex(0);
     EXPECT_EQ(stageNode->GetChildren().size(), 1);
 
@@ -400,6 +404,7 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      */
     stageManager.PushPage(thirdNode);
     stageManager.PushPage(fourthNode);
+    stageManager.SetSrcPage(fourthNode);
     EXPECT_TRUE(stageManager.PopPageToIndex(1, false, false));
 }
 
