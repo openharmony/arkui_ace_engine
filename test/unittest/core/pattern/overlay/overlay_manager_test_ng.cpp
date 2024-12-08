@@ -3002,6 +3002,43 @@ HWTEST_F(OverlayManagerTestNg, GetSheetType001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSheetType002
+ * @tc.desc: Test SheetPresentationPattern::GetSheetType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetSheetType002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "auto";
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo({0, 0, 800, 800});
+
+    /**
+     * @tc.steps: step2. Change the sheetType.
+     * @tc.expected: the sheetType is updated successfully
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->GetSheetType();
+    auto style = layoutProperty->GetSheetStyle();
+    EXPECT_TRUE(style->sheetType.has_value());
+    EXPECT_EQ(style->sheetType.value(), SheetType::SHEET_POPUP);
+}
+
+/**
  * @tc.name: TestSuitAgingScale
  * @tc.desc: Test SheetPresentationPattern::UpdateFontScaleStatus.
  * @tc.type: FUNC
