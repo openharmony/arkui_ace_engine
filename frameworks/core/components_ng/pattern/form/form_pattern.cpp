@@ -162,6 +162,7 @@ void FormPattern::InitClickEvent()
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto formPattern = weak.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FORM, "gestureEvent - clickCallback");
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleStaticFormEvent(
             { static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()) });
@@ -291,6 +292,7 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
     if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
     for (const auto& info : formLinkInfos_) {
         auto linkInfo = JsonUtil::ParseJsonString(info);
         CHECK_NULL_VOID(linkInfo);
@@ -1571,7 +1573,11 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    CHECK_NULL_VOID(formManagerBridge_);
+    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");  
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnActionEvent failed, form manager deleget is null!");
+        return;
+    }
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         return;
