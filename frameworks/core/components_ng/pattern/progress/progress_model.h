@@ -57,8 +57,6 @@ public:
     virtual void SetSmoothEffect(bool value) = 0;
     virtual void SetStrokeRadius(const Dimension& value) {}
     virtual void ResetStrokeRadius() {}
-    virtual void SetBorderRadius(const Dimension& value) {}
-    virtual void ResetBorderRadius() {}
 
 private:
     static std::unique_ptr<ProgressModel> instance_;

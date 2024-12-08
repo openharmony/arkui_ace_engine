@@ -99,7 +99,6 @@ public:
             paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
         strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
         progressModifier_->SetStrokeRadius(strokeRadius);
-        SetBorderRadius(paintWrapper);
     }
 
     void GetThemeData();
@@ -107,7 +106,6 @@ public:
 
 private:
     Gradient GenerateRingProgressColor(PaintWrapper* paintWrapper);
-    void SetBorderRadius(PaintWrapper* paintWrapper);
 
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
