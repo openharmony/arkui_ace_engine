@@ -90,6 +90,17 @@ enum class EventTreeType {
     POST_EVENT,
 };
 
+enum class AxisModel {
+    ABS_X = 0,
+    ABS_Y,
+    ABS_Z,
+    ABS_RZ,
+    ABS_GAS,
+    ABS_BRAKE,
+    ABS_HAT0X,
+    ABS_HAT0Y,
+};
+
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -120,7 +131,7 @@ enum class UIInputEventType {
     TOUCH,
     AXIS,
     KEY,
-    NON_POINTER_AXIS,
+    FOCUS_AXIS,
 };
 
 enum class KeyIntention : int32_t {

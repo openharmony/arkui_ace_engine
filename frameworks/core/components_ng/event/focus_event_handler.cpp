@@ -15,6 +15,7 @@
 #include "focus_event_handler.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/focus_axis_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -105,9 +106,10 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
     if (focusEvent.event.eventType == UIInputEventType::KEY) {
         const KeyEvent& keyEvent = static_cast<const KeyEvent&>(focusEvent.event);
         ret = HandleKeyEvent(keyEvent, focusEvent.intension);
-    } else {
-        LOGI("Handle NonPointerAxisEvent");
-        return false;
+    }
+    if (focusEvent.event.eventType == UIInputEventType::FOCUS_AXIS) {
+        const FocusAxisEvent& focusAxisEvent = static_cast<const FocusAxisEvent&>(focusEvent.event);
+        return HandleFocusAxisEvent(focusAxisEvent);
     }
     return ret ? true : HandleFocusTravel(focusEvent);
 }
@@ -152,6 +154,24 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
             GetFrameName().c_str(), GetFrameId(), event.code, event.action, ret);
     }
     return ret;
+}
+
+bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
+{
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto* pipeline = node->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto onFocusAxisCallback = GetOnFocusAxisCallback();
+    CHECK_NULL_RETURN(onFocusAxisCallback, false);
+    auto info = FocusAxisEventInfo(event);
+    auto eventHub = eventHub_.Upgrade();
+    if (eventHub) {
+        auto targetImpl = eventHub->CreateGetEventTargetImpl();
+        info.SetTarget(targetImpl().value_or(EventTarget()));
+    }
+    onFocusAxisCallback(info);
+    return info.IsStopPropagation();
 }
 
 bool FocusEventHandler::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)

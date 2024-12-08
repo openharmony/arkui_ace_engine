@@ -6674,6 +6674,43 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
     NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
 }
 
+void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onFocusAxisEvent = [frameNode, nodeId, extraParam](FocusAxisEventInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.focusAxisEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+        event.focusAxisEvent.absXValue = info.GetAbsXValue();
+        event.focusAxisEvent.absYValue = info.GetAbsYValue();
+        event.focusAxisEvent.absZValue = info.GetAbsZValue();
+        event.focusAxisEvent.absRzValue = info.GetAbsRzValue();
+        event.focusAxisEvent.absGasValue = info.GetAbsGasValue();
+        event.focusAxisEvent.absBrakeValue = info.GetAbsBrakeValue();
+        event.focusAxisEvent.absHat0XValue = info.GetAbsHat0XValue();
+        event.focusAxisEvent.absHat0YValue = info.GetAbsHat0YValue();
+        event.focusAxisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.focusAxisEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+        event.focusAxisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.focusAxisEvent.deviceId = info.GetDeviceId();
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.focusAxisEvent.keyCodesLength = pressedKeyCodes.size();
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnFocusAxisEvent(frameNode, onFocusAxisEvent);
+}
+
 void ResetOnKeyEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6686,6 +6723,13 @@ void ResetOnKeyPreIme(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+}
+
+void ResetOnFocusAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstractModelNG::DisableOnFocusAxisEvent(frameNode);
 }
 
 void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint, bool usePx)
