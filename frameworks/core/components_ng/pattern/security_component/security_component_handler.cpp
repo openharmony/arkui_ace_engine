@@ -29,6 +29,7 @@ using namespace OHOS::Security::SecurityComponent;
 namespace {
 constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 constexpr float HALF = 2.0f;
+constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 }
 
 static std::vector<uintptr_t> g_callList = {
@@ -617,7 +618,11 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
-    uint64_t displayId = container->GetCurrentDisplayId();
+    uint64_t displayId = container->GetDisplayId();
+    if (displayId == DISPLAY_ID_INVALID) {
+        SC_LOG_WARN("InitBaseInfoWarning: Get displayId failed, using default displayId");
+        displayId = 0;
+    }
     buttonInfo.displayId_ = displayId;
     return true;
 }
