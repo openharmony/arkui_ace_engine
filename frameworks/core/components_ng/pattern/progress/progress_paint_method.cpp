@@ -85,17 +85,4 @@ Gradient ProgressPaintMethod::GenerateRingProgressColor(PaintWrapper* paintWrapp
     return gradient;
 }
 
-void ProgressPaintMethod::SetBorderRadius(PaintWrapper* paintWrapper)
-{
-    CHECK_NULL_VOID(progressModifier_);
-    auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    const SizeF& contentSize = paintWrapper->GetContentSize();
-    constexpr float HALF = 2.0f;
-    float contentMinHalf = std::min(contentSize.Height(), contentSize.Width()) / HALF;
-    auto borderRadius = static_cast<float>(
-        paintProperty->GetBorderRadiusValue(Dimension(contentMinHalf, DimensionUnit::PX)).ConvertToPx());
-    progressModifier_->SetBorderRadius(std::min(contentMinHalf, borderRadius));
-}
-
 } // namespace OHOS::Ace::NG

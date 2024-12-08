@@ -623,25 +623,4 @@ void ProgressModelNG::ProgressInitialize(
         eventHub->SetHoverEffect(HoverEffectType::NONE);
     }
 }
-
-void ProgressModelNG::SetBorderRadius(const Dimension& value)
-{
-    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value);
-}
-
-void ProgressModelNG::ResetBorderRadius()
-{
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER);
-}
-
-void ProgressModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value, frameNode);
-}
-
-void ProgressModelNG::ResetBorderRadius(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
-}
-
 } // namespace OHOS::Ace::NG

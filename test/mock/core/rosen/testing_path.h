@@ -64,8 +64,7 @@ public:
         TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
     {}
 
-    virtual void AddRoundRect(const TestingRoundRect& roundRect,
-        TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) {}
+    virtual void AddRoundRect(const TestingRoundRect& roundRect, PathDirection dir = PathDirection::CW_DIRECTION) {}
 
     virtual void AddPath(const TestingPath& src) {}
 
