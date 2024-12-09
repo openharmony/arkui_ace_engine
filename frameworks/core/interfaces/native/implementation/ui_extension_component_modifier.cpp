@@ -150,8 +150,8 @@ void OnResultImpl(Ark_NativePointer node,
             Ark_Want arkWant;
             auto bundleName = want.GetBundle();
             arkWant.bundleName = Converter::ArkValue<Opt_String>(bundleName);
-            LOGE("UIExtensionComponentInterfaceModifier::OnResultImpl - "
-                "Ark_Want::abilityName is not supported");
+            auto abilityName = want.GetElement().GetAbilityName();
+            arkWant.abilityName = Converter::ArkValue<Opt_String>(abilityName);
             auto deviceId = want.GetDeviceId();
             arkWant.deviceId = Converter::ArkValue<Opt_String>(deviceId);
             auto uri = want.GetUriString();
@@ -215,8 +215,8 @@ void OnTerminatedImpl(Ark_NativePointer node,
             Ark_Want arkWant;
             auto bundleName = want.GetBundle();
             arkWant.bundleName = Converter::ArkValue<Opt_String>(bundleName);
-            LOGE("UIExtensionComponentInterfaceModifier::OnTerminatedImpl - "
-                "Ark_Want::abilityName is not supported");
+            auto abilityName = want.GetElement().GetAbilityName();
+            arkWant.abilityName = Converter::ArkValue<Opt_String>(abilityName);
             auto deviceId = want.GetDeviceId();
             arkWant.deviceId = Converter::ArkValue<Opt_String>(deviceId);
             auto uri = want.GetUriString();
