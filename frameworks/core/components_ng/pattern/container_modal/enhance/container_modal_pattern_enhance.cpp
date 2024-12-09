@@ -111,14 +111,22 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     SetControlButtonVisibleBeforeAnim(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
-    AddOrRemovePanEvent(customTitleRow);
-    AddOrRemovePanEvent(gestureRow);
+    AddPanEvent(customTitleRow);
+    AddPanEvent(gestureRow);
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     auto stack = GetStackNode();
     CHECK_NULL_VOID(stack);
     stack->UpdateInspectorId(CONTAINER_MODAL_STACK_ID);
+}
+
+void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
+{
+    auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearGesture();
+    eventHub->OnModifyDone();
 }
 
 RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
@@ -301,5 +309,77 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 controlButtonsLayoutProperty->UpdateVisibility(containerModal->GetControlButtonVisibleBeforeAnim());
             });
     }
+}
+
+void ContainerModalPatternEnhance::EnablePanEventOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set pan event", rowName.c_str());
+        return;
+    }
+    
+    if (isEnable) {
+        AddPanEvent(node);
+    } else {
+        RemovePanEvent(node);
+    }
+}
+
+
+void ContainerModalPatternEnhance::EnableTapGestureOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set tap gesture", rowName.c_str());
+        return;
+    }
+    
+    if (isEnable) {
+        SetTapGestureEvent(node);
+    } else {
+        ClearTapGestureEvent(node);
+    }
+}
+
+void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
+
+    auto floatingTitleRow = GetFloatingTitleRow();
+    auto customTitleRow = GetCustomTitleRow();
+    auto gestureRow = GetGestureRow();
+    EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
+    EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
+    EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
+    EnablePanEventOnNode(gestureRow, isEnable, "gesture row");
+    EnableTapGestureOnNode(gestureRow, isEnable, "gesture row");
+}
+
+bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
+{
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_RETURN(floatingTitleRow, false);
+    auto floatingTitleRowProp = floatingTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(floatingTitleRowProp, false);
+    return (floatingTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetCustomTitleVisible()
+{
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_RETURN(customTitleRow, false);
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(customTitleRowProp, false);
+    return (customTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetControlButtonVisible()
+{
+    auto controlButtonRow = GetControlButtonRow();
+    CHECK_NULL_RETURN(controlButtonRow, false);
+    auto controlButtonRowProp = controlButtonRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonRowProp, false);
+    return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

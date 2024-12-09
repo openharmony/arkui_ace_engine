@@ -174,6 +174,22 @@ public:
 
     void ForceRenderForImplicitAnimation();
 
+    virtual void EnableContainerModalGesture(bool isEnable) {}
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
     // add schedule task and return the unique mark id.
     virtual uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) = 0;
 

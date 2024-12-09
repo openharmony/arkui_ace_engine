@@ -40,6 +40,15 @@ public:
         controlButtonVisibleBeforeAnim_ = visibleType;
     }
 
+    void EnableContainerModalGesture(bool isEnable) override;
+    void ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow);
+    void EnablePanEventOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    void EnableTapGestureOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    bool GetFloatingTitleVisible() override;
+    bool GetCustomTitleVisible() override;
+    bool GetControlButtonVisible() override;
 protected:
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
     void ChangeFloatingTitle(bool isFocus) override;

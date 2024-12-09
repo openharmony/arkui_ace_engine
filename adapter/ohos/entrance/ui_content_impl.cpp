@@ -3879,4 +3879,57 @@ void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppE
         },
         TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
 }
+
+void UIContentImpl::EnableContainerModalGesture(bool isEnable)
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: EnableContainerModalGesture: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, isEnable);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerWeak = AceType::WeakClaim(AceType::RawPtr(container)), isEnable]() {
+            auto container = containerWeak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->EnableContainerModalGesture(isEnable);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIEnableContainerModalGesture");
+}
+
+bool UIContentImpl::GetContainerFloatingTitleVisible()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: GetContainerFloatingTitleVisible",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->GetContainerFloatingTitleVisible();
+}
+
+bool UIContentImpl::GetContainerCustomTitleVisible()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: GetContainerCustomTitleVisible",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->GetContainerCustomTitleVisible();
+}
+
+bool UIContentImpl::GetContainerControlButtonVisible()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: GetContainerControlButtonVisible",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->GetContainerControlButtonVisible();
+}
 } // namespace OHOS::Ace
