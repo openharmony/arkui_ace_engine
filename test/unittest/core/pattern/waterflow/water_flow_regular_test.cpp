@@ -818,4 +818,70 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge009, TestSize.Level1)
     EXPECT_TRUE(isReachEndCalled);
     EXPECT_LE(pattern_->layoutInfo_->Offset(), -14200.0f);
 }
+
+/**
+ * @tc.name: Delete002
+ * @tc.desc: Test layout when deleting a flowItem and changing the height of a flowItem meanwhile.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(43);
+    CreateDone();
+
+    UpdateCurrentOffset(-4000.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 42);
+    EXPECT_EQ(GetChildRect(frameNode_, 35).Bottom(), 400.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 35).Height(), 200.0f);
+
+    // delete the last item and change height of the 35th item.
+    frameNode_->RemoveChildAtIndex(42);
+    frameNode_->ChildrenUpdatedFrom(42);
+    auto child = GetChildFrameNode(frameNode_, 35);
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
+    child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    FlushLayoutTask(frameNode_);
+
+    // both operations can take effect.
+    EXPECT_EQ(GetChildHeight(frameNode_, 35), 300.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 35).Bottom(), 500.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 41);
+}
+
+/**
+ * @tc.name: Delete004
+ * @tc.desc: In less-than one line scene, test layout when delete the last item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete004, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(4);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 3);
+    EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (0.00, 0.00) - [96.00 x 100.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (96.00, 0.00) - [96.00 x 200.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 2).ToString(), "RectT (192.00, 0.00) - [96.00 x 100.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (288.00, 0.00) - [96.00 x 200.00]");
+
+    // delete the last item.
+    frameNode_->RemoveChildAtIndex(2);
+    frameNode_->ChildrenUpdatedFrom(2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 2);
+    EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (0.00, 0.00) - [96.00 x 100.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (96.00, 0.00) - [96.00 x 200.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 2).ToString(), "RectT (192.00, 0.00) - [96.00 x 200.00]");
+}
 } // namespace OHOS::Ace::NG
