@@ -176,4 +176,45 @@ void NodeContainerPattern::OnMountToParentDone()
 {
     SetExportTextureInfoIfNeeded();
 }
+
+RefPtr<NodeContainerEventHub> NodeContainerPattern::GetNodeContainerEventHub()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (frameNode) {
+        return frameNode->GetEventHub<NodeContainerEventHub>();
+    }
+    return nullptr;
+}
+
+void NodeContainerPattern::FireOnWillBind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnWillBind(containerId);
+    }
+}
+
+void NodeContainerPattern::FireOnWillUnbind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnWillUnbind(containerId);
+    }
+}
+
+void NodeContainerPattern::FireOnBind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnBind(containerId);
+    }
+}
+
+void NodeContainerPattern::FireOnUnbind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnUnbind(containerId);
+    }
+}
 } // namespace OHOS::Ace::NG
