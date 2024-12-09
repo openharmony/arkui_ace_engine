@@ -670,6 +670,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     PreloadExports(arkRuntime, global);
     PreloadRequireNative(arkRuntime, global);
 
+#ifdef CROSS_PLATFORM
+    JsiSyscapModule::GetInstance()->InitSyscapModule(arkRuntime, global);
+#endif
+
     // preload js enums
     bool jsEnumStyleResult = PreloadJsEnums(arkRuntime);
     if (!jsEnumStyleResult) {
