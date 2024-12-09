@@ -85,6 +85,7 @@ const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
 const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
+const SCROLL_BAR_OFFSET = 20;
 
 @CustomDialog
 export struct TipsDialog {
@@ -827,7 +828,7 @@ export struct AlertDialog {
           .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
-          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+          .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
@@ -842,7 +843,7 @@ export struct AlertDialog {
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
     }
-    .margin({ end: LengthMetrics.vp(this.getMargin()) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear(): void {
@@ -866,10 +867,6 @@ export struct AlertDialog {
     if (this.secondaryButton) {
       this.buttons.push(this.secondaryButton);
     }
-  }
-
-  private getMargin(): number {
-    return 0 - PADDING_LEVEL_8;
   }
 
   private getFontWeight(): number {
