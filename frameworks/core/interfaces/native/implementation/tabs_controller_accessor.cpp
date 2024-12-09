@@ -62,10 +62,23 @@ void PreloadItemsImpl(TabsControllerPeer* peer,
 void SetTabBarTranslateImpl(TabsControllerPeer* peer,
                             const Ark_TranslateOptions* translate)
 {
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(translate);
+    NG::TranslateOptions convValue;
+    convValue.x = Converter::OptConvert<CalcDimension>(translate->x).value_or(convValue.x);
+    convValue.y = Converter::OptConvert<CalcDimension>(translate->y).value_or(convValue.y);
+    convValue.z = Converter::OptConvert<CalcDimension>(translate->z).value_or(convValue.z);
+    peerImpl->TriggerSetTabBarTranslate(convValue);
 }
 void SetTabBarOpacityImpl(TabsControllerPeer* peer,
                           const Ark_Number* opacity)
 {
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(opacity);
+    auto convValue = Converter::Convert<float>(*opacity);
+    peerImpl->TriggerSetTabBarOpacity(convValue);
 }
 } // TabsControllerAccessor
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
