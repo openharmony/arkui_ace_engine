@@ -389,14 +389,13 @@ struct AutoProgressMaskPeer {
         ptr(accessor->ctor(value, total, color))
     {}
 
-    ~AutoProgressMaskPeer()
-    {
-        accessor->destroyPeer(ptr);
-    }
+    ~AutoProgressMaskPeer() { accessor->destroyPeer(ptr); }
 
     Ark_ProgressMask GetArkValue() const
     {
-        return {.ptr = reinterpret_cast<Ark_NativePointer>(ptr)};
+        return {
+            .ptr = reinterpret_cast<Ark_NativePointer>(ptr)
+        };
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(AutoProgressMaskPeer);
