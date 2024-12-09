@@ -851,6 +851,9 @@ class FocusController {
     }
 
     setAutoFocusTransfer(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.setAutoFocusTransfer(value);
         __JSScopeUtil__.restoreInstanceId();

@@ -393,7 +393,7 @@ void ResetWaterFlowBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetScrollBarWidth(frameNode, "0vp");
+    ScrollableModelNG::ResetScrollBarWidth(frameNode);
 }
 
 ArkUI_Float32 GetWaterFlowBarWidth(ArkUINodeHandle node)
@@ -415,7 +415,7 @@ void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetScrollBarColor(frameNode, "#FF000000");
+    ScrollableModelNG::ResetScrollBarColor(frameNode);
 }
 
 ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)

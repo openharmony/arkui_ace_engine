@@ -738,4 +738,34 @@ HWTEST_F(EventManagerTestNg, MouseEventTest013, TestSize.Level1) {
     EXPECT_FALSE(retFlag);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: DispatchAxisEventIssueTest1
+ * @tc.desc: Test DispatchAxisEventNG, axisTestResults_ is deleted each time it is dispatched.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
+     * @tc.expected: eventManager->axisTestResults_ is empty
+     */
+    auto axisEventTarget = AceType::MakeRefPtr<AxisEventTarget>();
+    auto onAxisCallback = [](AxisInfo&) -> void {};
+    axisEventTarget->SetOnAxisCallback(onAxisCallback);
+    AxisEvent event;
+    event.horizontalAxis = 0;
+    event.verticalAxis = 0;
+    event.pinchAxisScale = 0;
+    eventManager->axisTestResults_.push_back(axisEventTarget);
+    eventManager->DispatchAxisEventNG(event);
+    EXPECT_TRUE(eventManager->axisTestResults_.empty());
+}
 }
