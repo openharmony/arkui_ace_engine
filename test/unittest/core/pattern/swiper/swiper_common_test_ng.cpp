@@ -926,4 +926,35 @@ TEST_F(SwiperCommonTestNg, IsFocusNodeInItemPositionAfterJumpTest)
     targetFocusHub = childNode->GetFirstFocusHubChild();
     EXPECT_FALSE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
 }
+
+/**
+ * @tc.name: NeedStartNewAnimation001
+ * @tc.desc: Test NeedStartNewAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, NeedStartNewAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    pattern_->itemPositionInAnimation_.clear();
+    OffsetF offset;
+    EXPECT_TRUE(pattern_->NeedStartNewAnimation(offset));
+
+    struct SwiperItemInfo swiperItemInfo1;
+    struct SwiperItemInfo swiperItemInfo2;
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = 0.0f;
+    swiperItemInfo1.endPos = 180.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    pattern_->itemPositionInAnimation_.emplace(std::make_pair(0, swiperItemInfo1));
+
+    swiperItemInfo2.startPos = 180.0f;
+    swiperItemInfo2.endPos = 360.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo2));
+    pattern_->itemPositionInAnimation_.emplace(std::make_pair(0, swiperItemInfo2));
+
+    EXPECT_FALSE(pattern_->NeedStartNewAnimation(offset));
+}
 } // namespace OHOS::Ace::NG
