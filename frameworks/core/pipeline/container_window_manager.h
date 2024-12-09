@@ -113,7 +113,7 @@ public:
 
     void SetWindowIsStartMovingCallback(WindowIsStartMovingCallback&& callback)
     {
-        WindowIsStartMovingCallback = callback;
+        WindowIsStartMovingCallback_ = callback;
     }
 
     void SetWindowSetMaximizeModeCallBack(WindowSetMaximizeModeCallback&& callback)
