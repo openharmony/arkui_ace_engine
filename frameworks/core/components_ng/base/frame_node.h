@@ -1118,8 +1118,6 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void OnForegroundColorUpdate(const Color& value);
-
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);

@@ -2024,23 +2024,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg067, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg068
- * @tc.desc: Test OnForegroundColorUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg068, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
-    auto pattern = frameNode->GetPattern();
-    const Color& value = Color::RED;
-    frameNode->OnForegroundColorUpdate(value);
-    pattern->OnForegroundColorUpdate(value);
-    EXPECT_NE(pattern, nullptr);
-}
-
-/**
  * @tc.name: FrameNodeTestNg069
  * @tc.desc: Test CheckAutoSave.
  * @tc.type: FUNC
