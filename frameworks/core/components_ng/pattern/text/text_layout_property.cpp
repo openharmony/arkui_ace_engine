@@ -148,6 +148,16 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
     json->PutExtAttr("halfLeading", GetHalfLeading().value_or(false), filter);
+
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+
+    json->PutExtAttr("caretColor",
+        GetCursorColorValue(theme->GetCaretColor()).ColorToString().c_str(), filter);
+    json->PutExtAttr("selectedBackgroundColor",
+        GetSelectedBackgroundColorValue(theme->GetSelectedColor()).ColorToString().c_str(), filter);
 }
 
 void TextLayoutProperty::ToJsonValueForSymbol(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

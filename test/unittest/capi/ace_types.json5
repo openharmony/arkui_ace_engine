@@ -157,6 +157,28 @@
             ]
         },
         {
+            // Set 20% opacity (0x33) if alpha==0xFF
+            "name": "ColorsAlpha20Str",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"#123\"", "#33112233"],
+                ["\"#11223344\"", "#11223344"],
+                ["\"#123456\"", "#33123456"],
+                ["\"65535\"", "#3300FFFF"],
+                ["\"#abcdef\"", "#33ABCDEF"],
+                ["\"#aBcdeF\"", "#33ABCDEF"],
+                ["\"rgb(255, 100, 55)\"", "#33FF6437"],
+                ["\"rgba(255, 100, 255, 0.5)\"", "#80FF64FF"]
+            ],
+            "invalidValues": [
+                "\"invalid\"",
+                "\"\"",
+                "\"rgb(270, 0xf1, 755.5f)\"",
+                "\"RgbA(255, 100, 255, 0.5)\""
+
+            ]
+        },
+        {
             "name": "ColorsNum",
             "type": "Ark_Number",
             "validValues": [
@@ -164,6 +186,20 @@
                 ["1", "#FF000001"],
                 ["65535", "#FF00FFFF"],
                 ["-1", "#FFFFFFFF"],
+                ["0xBE7AC0DE", "#BE7AC0DE"],
+                ["std::numeric_limits<float>::quiet_NaN()", "#80000000"],
+                ["std::numeric_limits<float>::infinity()", "#80000000"]
+            ]
+        },
+        {
+            // Set 20% opacity (0x33) if alpha==0xFF
+            "name": "ColorsAlpha20Num",
+            "type": "Ark_Number",
+            "validValues": [
+                ["0", "#00000000"],
+                ["1", "#33000001"],
+                ["65535", "#3300FFFF"],
+                ["-1", "#33FFFFFF"],
                 ["0xBE7AC0DE", "#BE7AC0DE"],
                 ["std::numeric_limits<float>::quiet_NaN()", "#80000000"],
                 ["std::numeric_limits<float>::infinity()", "#80000000"]
@@ -191,6 +227,16 @@
             "resType": "COLOR",
             "validValues": [
                 ["Color(0xA1FAC0DE)", "#A1FAC0DE"]
+            ]
+        },
+        {
+            // Set 20% opacity (0x33) if alpha==0xFF
+            "name": "ColorsAlpha20Res",
+            "type": "Ark_Resource",
+            "resType": "COLOR",
+            "validValues": [
+                ["Color(0xA1FAC0DE)", "#A1FAC0DE"],
+                ["Color(0xFFFAC0DE)", "#33FAC0DE"]
             ]
         },
         {
@@ -320,6 +366,29 @@
                 ["ARK_COLOR_PINK", "#FFFFC0CB"],
                 ["ARK_COLOR_RED", "#FFFF0000"],
                 ["ARK_COLOR_YELLOW", "#FFFFFF00"],
+                ["ARK_COLOR_TRANSPARENT", "#00000000"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_Color>(-1)",
+                "static_cast<Ark_Color>(INT_MAX)"
+            ]
+        },
+        {
+            // Set 20% opacity (0x33) if alpha==0xFF
+            "name": "ColorsAlpha20Enum",
+            "type": "Ark_Color",
+            "validValues": [
+                ["ARK_COLOR_WHITE", "#33FFFFFF"],
+                ["ARK_COLOR_BLACK", "#33000000"],
+                ["ARK_COLOR_BLUE", "#330000FF"],
+                ["ARK_COLOR_BROWN", "#33A52A2A"],
+                ["ARK_COLOR_GRAY", "#33808080"],
+                ["ARK_COLOR_GREEN", "#33008000"],
+                ["ARK_COLOR_GREY", "#33808080"],
+                ["ARK_COLOR_ORANGE", "#33FFA500"],
+                ["ARK_COLOR_PINK", "#33FFC0CB"],
+                ["ARK_COLOR_RED", "#33FF0000"],
+                ["ARK_COLOR_YELLOW", "#33FFFF00"],
                 ["ARK_COLOR_TRANSPARENT", "#00000000"]
             ],
             "invalidValues": [
@@ -3964,6 +4033,10 @@
                     "fixtures": ["BaselineOffsetNum", "BaselineOffsetStr"]
                 },
                 {
+                    "name": "caretColor",
+                    "default": "#FF000000"
+                },
+                {
                     "name": "copyOption",
                     "default": "CopyOptions.None",
                     "fixtures": ["CopyOptions"]
@@ -4110,6 +4183,11 @@
                     "default": "false",
                 },
                 {
+                    "name": "selectedBackgroundColor",
+                    "default": "#FF000000",
+                    "fixtures": ["ColorsAlpha20Enum", "ColorsAlpha20Num", "ColorsAlpha20Str", "ColorsAlpha20Res"]
+                },
+                {
                     "name": "textAlign",
                     "default": "TextAlign.Start",
                     "fixtures": ["TextAlignType"],
@@ -4214,14 +4292,6 @@
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsFillValidValues",
                 "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
-
-                // New attr in API 105?
-                "setCaretColorTestDefaultValues",
-                "setCaretColorTestCaretColorValidValues",
-                "setCaretColorTestCaretColorInvalidValues",
-                "setSelectedBackgroundColorTestDefaultValues",
-                "setSelectedBackgroundColorTestSelectedBackgroundColorValidValues",
-                "setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues",
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",
