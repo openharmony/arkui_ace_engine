@@ -24,10 +24,16 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t WORKER_HAS_USED_ERROR = 10011;
+constexpr char PARAM_NAME_WORKER_HAS_USED[] = "workerHasUsed";
+constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two workers are not allowed to run at the same time";
+}
+
 int32_t DynamicPattern::dynamicGenerator_ = 0;
 
 DynamicPattern::DynamicPattern()
-    : PlatformPattern(AceLogTag::ACE_ISOLATED_COMPONENT, ++dynamicGenerator_)
+    : PlatformPattern(AceLogTag::ACE_DYNAMIC_COMPONENT, ++dynamicGenerator_)
 {
     uiExtensionId_ = UIExtensionIdUtility::GetInstance().ApplyExtensionId();
     instanceId_ = -1;
@@ -76,6 +82,12 @@ void DynamicPattern::InitializeRender(void* runtime)
         dynamicComponentRenderer_ =
             DynamicComponentRenderer::Create(GetHost(), runtime, curDynamicInfo_);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
+        if (dynamicComponentRenderer_->HasWorkerUsing(runtime)) {
+            FireOnErrorCallbackOnUI(
+                WORKER_HAS_USED_ERROR, PARAM_NAME_WORKER_HAS_USED, PARAM_MSG_WORKER_HAS_USED);
+            return;
+        }
+        dynamicComponentRenderer_->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =

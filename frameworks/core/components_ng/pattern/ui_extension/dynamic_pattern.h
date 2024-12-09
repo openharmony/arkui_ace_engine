@@ -66,8 +66,8 @@ private:
     void UnRegisterPipelineEvent(int32_t instanceId);
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
-    bool adaptiveWidth_ = true;
-    bool adaptiveHeight_ = true;
+    bool adaptiveWidth_ = false;
+    bool adaptiveHeight_ = false;
     IsolatedInfo curDynamicInfo_;
     DynamicDumpInfo dynamicDumpInfo_;
     int32_t uiExtensionId_ = 0;

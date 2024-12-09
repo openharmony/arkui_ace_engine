@@ -1271,6 +1271,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetIsFormRender(isFormRender_);
     container->SetIsDynamicRender(isDynamicRender_);
+    container->SetUIContentType(uIContentType_);
     container->SetRegisterComponents(registerComponents_);
     container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
