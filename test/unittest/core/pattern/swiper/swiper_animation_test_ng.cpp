@@ -218,6 +218,61 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
 }
 
 /**
+ * @tc.name: SwiperPatternSpringAnimation007
+ * @tc.desc: Test spring animation multiple interupting and restart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation007, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+    controller_->ChangeIndex(4, false);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 4), 0.0f);
+    // swiper to left, trigger spring animation
+    SimulateSwipe(-100.0f, -100.0f);
+    FlushUITasks();
+    auto visibleSize = pattern_->CalculateVisibleSize();
+    ASSERT_TRUE(visibleSize > 0.0f);
+    auto realOffset = -100.0f * SwiperHelper::CalculateFriction(100.0f / visibleSize);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset));
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset / 2));
+
+    // swipe again during spring animation
+    auto tempSpringOffset = pattern_->EstimateSpringOffset(realOffset / 2) - 100;
+    SimulateSwipe(-100.0f, -100.0f);
+    FlushUITasks();
+    realOffset = tempSpringOffset * SwiperHelper::CalculateFriction(std::abs(tempSpringOffset) / visibleSize);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset));
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset / 2));
+
+    // swipe again during spring animation
+    tempSpringOffset = pattern_->EstimateSpringOffset(realOffset / 2) - 100;
+    SimulateSwipe(-100.0f, -100.0f);
+    FlushUITasks();
+    realOffset = tempSpringOffset * SwiperHelper::CalculateFriction(std::abs(tempSpringOffset) / visibleSize);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset));
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset / 2));
+
+    // check offset after spring animation finished
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), 0.0f));
+}
+
+/**
  * @tc.name: SwiperPatternPlayFadeAnimation001
  * @tc.desc: PlayFadeAnimation
  * @tc.type: FUNC
