@@ -18,8 +18,13 @@
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
+#include "core/interfaces/native/implementation/file_selector_param_peer_impl.h"
+#include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
+#include "core/interfaces/native/implementation/full_screen_exit_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
+#include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/permission_request_peer_impl.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
@@ -27,6 +32,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+
+using namespace OHOS::Ace::NG::Converter;
 
 namespace {
 #ifdef WEB_SUPPORTED
@@ -192,6 +199,19 @@ MenuOptionsParam Convert(const Ark_ExpandedMenuItemOptions& src)
     menuOption.icon = Converter::OptConvert<std::string>(src.startIcon);
     LOGE("Converter ExpandedMenuItemOptions `action` property supporting is not implemented yet");
     return menuOption;
+}
+
+void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src)
+{
+    switch (src) {
+        case RenderExitReason::ABNORMAL_TERMINATION: dst = ARK_RENDER_EXIT_REASON_PROCESS_ABNORMAL_TERMINATION; break;
+        case RenderExitReason::WAS_KILLED: dst = ARK_RENDER_EXIT_REASON_PROCESS_WAS_KILLED; break;
+        case RenderExitReason::CRASHED: dst = ARK_RENDER_EXIT_REASON_PROCESS_CRASHED; break;
+        case RenderExitReason::OOM: dst = ARK_RENDER_EXIT_REASON_PROCESS_OOM; break;
+        case RenderExitReason::EXIT_UNKNOWN: dst = ARK_RENDER_EXIT_REASON_PROCESS_EXIT_UNKNOWN; break;
+        default: dst = static_cast<Ark_RenderExitReason>(-1);
+            LOGE("Unexpected enum value in RenderExitReason: %{public}d", src);
+    }
 }
 #endif // WEB_SUPPORTED
 } // namespace OHOS::Ace::NG::Converter
@@ -903,110 +923,253 @@ void OnUrlLoadInterceptImpl(Ark_NativePointer node,
 void OnSslErrorReceiveImpl(Ark_NativePointer node,
                            const Callback_Literal_Function_handler_Object_error_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnSslErrorReceive(frameNode, convValue);
+    // deprecated
 }
 void OnRenderExited0Impl(Ark_NativePointer node,
                          const Callback_OnRenderExitedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnRenderExited0(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onRenderExited = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<RenderExitedEvent>(info);
+        Ark_OnRenderExitedEvent parameter;
+        parameter.renderExitReason = Converter::ArkValue<Ark_RenderExitReason>(
+            static_cast<Converter::RenderExitReason>(eventInfo->GetExitedReason()));
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetRenderExitedId(frameNode, onRenderExited);
+#endif // WEB_SUPPORTED
 }
 void OnRenderExited1Impl(Ark_NativePointer node,
                          const Callback_Literal_Object_detail_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnRenderExited1(frameNode, convValue);
+    // deprecated
 }
 void OnShowFileSelectorImpl(Ark_NativePointer node,
                             const Callback_OnShowFileSelectorEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnShowFileSelector(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onShowFileSelector = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
+        Ark_OnShowFileSelectorEvent parameter;
+        auto paramPeer = new FileSelectorParamPeer();
+        paramPeer->handler = eventInfo->GetParam();
+        parameter.fileSelector.ptr = paramPeer;
+        auto resultPeer = new FileSelectorResultPeer();
+        resultPeer->handler = eventInfo->GetFileSelectorResult();
+        parameter.result.ptr = resultPeer;
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnShowFileSelectorImpl return value can be incorrect");
+        return false;
+    };
+    WebModelNG::SetOnFileSelectorShow(frameNode, onShowFileSelector);
+#endif // WEB_SUPPORTED
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
                             const Callback_Literal_Function_callback_Object_fileSelector_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnFileSelectorShow(frameNode, convValue);
+    // deprecated
 }
 void OnResourceLoadImpl(Ark_NativePointer node,
                         const Callback_OnResourceLoadEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnResourceLoad(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onResourceLoad = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info);
+        Ark_OnResourceLoadEvent parameter;
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetOnResourceLoadUrl());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetResourceLoadId(frameNode, onResourceLoad);
+#endif // WEB_SUPPORTED
 }
 void OnFullScreenExitImpl(Ark_NativePointer node,
                           const Callback_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnFullScreenExit(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onFullScreenExit = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        arkCallback.Invoke();
+    };
+    WebModelNG::SetOnFullScreenExit(frameNode, onFullScreenExit);
+#endif // WEB_SUPPORTED
 }
 void OnFullScreenEnterImpl(Ark_NativePointer node,
                            const OnFullScreenEnterCallback* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnFullScreenEnter(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onFullScreenEnter = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
+        Ark_FullScreenEnterEvent parameter;
+        parameter.videoWidth = Converter::ArkValue<Opt_Number>(std::optional<Ark_Number>(
+            Converter::ArkValue<Ark_Number>(eventInfo->GetVideoNaturalWidth())));
+        parameter.videoHeight = Converter::ArkValue<Opt_Number>(std::optional<Ark_Number>(
+            Converter::ArkValue<Ark_Number>(eventInfo->GetVideoNaturalHeight())));
+        parameter.handler.ptr = Referenced::RawPtr(eventInfo->GetHandler());
+        auto peer = new FullScreenExitHandlerPeer();
+        peer->handler = eventInfo->GetHandler();
+        parameter.handler.ptr = peer;
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnFullScreenEnter(frameNode, onFullScreenEnter);
+#endif // WEB_SUPPORTED
 }
 void OnScaleChangeImpl(Ark_NativePointer node,
                        const Callback_OnScaleChangeEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnScaleChange(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onScaleChange = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
+        Ark_OnScaleChangeEvent parameter;
+        parameter.newScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeNewScale());
+        parameter.oldScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeOldScale());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetScaleChangeId(frameNode, onScaleChange);
+#endif // WEB_SUPPORTED
 }
 void OnHttpAuthRequestImpl(Ark_NativePointer node,
                            const Callback_OnHttpAuthRequestEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnHttpAuthRequest(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onHttpAuthRequest = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info);
+        Ark_OnHttpAuthRequestEvent parameter;
+        parameter.host = Converter::ArkValue<Ark_String>(eventInfo->GetHost());
+        parameter.realm = Converter::ArkValue<Ark_String>(eventInfo->GetRealm());
+        auto peer = new HttpAuthHandlerPeer();
+        peer->handler = eventInfo->GetResult();
+        parameter.handler.ptr = peer;
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnHttpAuthRequestImpl return value can be incorrect");
+        // should return value
+        return false;
+    };
+    WebModelNG::SetOnHttpAuthRequest(frameNode, onHttpAuthRequest);
+#endif // WEB_SUPPORTED
 }
 void OnInterceptRequestImpl(Ark_NativePointer node,
                             const Callback_OnInterceptRequestEvent_WebResourceResponse* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnInterceptRequest(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onInterceptRequest = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> RefPtr<WebResponse> {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info);
+        Ark_OnInterceptRequestEvent parameter;
+        auto peer = new WebResourceRequestPeer();
+        peer->webRequest = eventInfo->GetRequest();
+        parameter.request.ptr = peer;
+        Callback_WebResourceResponse_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnInterceptRequestImpl return value can be incorrect");
+        return nullptr;
+    };
+    WebModelNG::SetOnInterceptRequest(frameNode, onInterceptRequest);
+#endif // WEB_SUPPORTED
 }
 void OnPermissionRequestImpl(Ark_NativePointer node,
                              const Callback_OnPermissionRequestEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnPermissionRequest(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPermissionRequest = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
+        Ark_OnPermissionRequestEvent parameter;
+        auto peer = new PermissionRequestPeer();
+        peer->handler = eventInfo->GetWebPermissionRequest();
+        parameter.request.ptr = peer;
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetPermissionRequestEventId(frameNode, onPermissionRequest);
+#endif // WEB_SUPPORTED
 }
 void OnScreenCaptureRequestImpl(Ark_NativePointer node,
                                 const Callback_OnScreenCaptureRequestEvent_Void* value)

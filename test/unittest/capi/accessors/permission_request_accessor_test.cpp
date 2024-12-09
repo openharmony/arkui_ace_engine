@@ -20,21 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/permission_request_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockWebPermissionRequest : public WebPermissionRequest {
-public:
-    MOCK_METHOD(void, Deny, (), (const));
-    MOCK_METHOD(std::string, GetOrigin, (), (const));
-    MOCK_METHOD(std::vector<std::string>, GetResources, (), (const));
-    MOCK_METHOD(void, Grant, (std::vector<std::string>&), (const));
-};
-} // namespace
 
 class PermissionRequestAccessorTest : public AccessorTestBase<GENERATED_ArkUIPermissionRequestAccessor,
     &GENERATED_ArkUIAccessors::getPermissionRequestAccessor, PermissionRequestPeer> {

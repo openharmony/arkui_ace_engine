@@ -43,6 +43,7 @@
 
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
+#include "ace_engine_types.h"
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
@@ -235,6 +236,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
+    void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
