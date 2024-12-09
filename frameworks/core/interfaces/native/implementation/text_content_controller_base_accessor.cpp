@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace TextContentControllerBaseAccessor {
 void DestroyPeerImpl(TextContentControllerBasePeer* peer)
 {
 }
-TextContentControllerBasePeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextContentControllerBasePeer();
 }
@@ -32,11 +32,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
 {

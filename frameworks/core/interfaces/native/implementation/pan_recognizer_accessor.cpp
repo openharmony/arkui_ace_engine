@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace PanRecognizerAccessor {
 void DestroyPeerImpl(PanRecognizerPeer* peer)
 {
 }
-PanRecognizerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new PanRecognizerPeer();
 }
@@ -32,7 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer GetPanGestureOptionsImpl(PanRecognizerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // PanRecognizerAccessor
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()

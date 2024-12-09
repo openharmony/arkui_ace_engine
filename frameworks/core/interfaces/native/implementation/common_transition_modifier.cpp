@@ -18,62 +18,59 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace RectModifier {
+namespace CommonTransitionModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
     return nullptr;
 }
-} // RectModifier
-namespace RectInterfaceModifier {
-void SetRectOptionsImpl(Ark_NativePointer node,
-                        const Opt_Union_RectOptions_RoundedRectOptions* options)
+void SlideImpl(Ark_NativePointer node,
+               Ark_SlideEffect value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //RectModelNG::SetSetRectOptions(frameNode, convValue);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CommonTransitionModelNG::SetSlide(frameNode, convValue);
 }
-} // RectInterfaceModifier
-namespace RectAttributeModifier {
-void RadiusWidthImpl(Ark_NativePointer node,
-                     const Ark_Union_Number_String* value)
+void TranslateImpl(Ark_NativePointer node,
+                   const Ark_TranslateOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RectModelNG::SetRadiusWidth(frameNode, convValue);
+    //CommonTransitionModelNG::SetTranslate(frameNode, convValue);
 }
-void RadiusHeightImpl(Ark_NativePointer node,
-                      const Ark_Union_Number_String* value)
+void ScaleImpl(Ark_NativePointer node,
+               const Ark_ScaleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RectModelNG::SetRadiusHeight(frameNode, convValue);
+    //CommonTransitionModelNG::SetScale(frameNode, convValue);
 }
-void RadiusImpl(Ark_NativePointer node,
-                const Ark_Union_Number_String_Array_Any* value)
+void OpacityImpl(Ark_NativePointer node,
+                 const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RectModelNG::SetRadius(frameNode, convValue);
+    //CommonTransitionModelNG::SetOpacity(frameNode, convValue);
 }
-} // RectAttributeModifier
-const GENERATED_ArkUIRectModifier* GetRectModifier()
+} // CommonTransitionModifier
+const GENERATED_ArkUICommonTransitionModifier* GetCommonTransitionModifier()
 {
-    static const GENERATED_ArkUIRectModifier ArkUIRectModifierImpl {
-        RectModifier::ConstructImpl,
-        RectInterfaceModifier::SetRectOptionsImpl,
-        RectAttributeModifier::RadiusWidthImpl,
-        RectAttributeModifier::RadiusHeightImpl,
-        RectAttributeModifier::RadiusImpl,
+    static const GENERATED_ArkUICommonTransitionModifier ArkUICommonTransitionModifierImpl {
+        CommonTransitionModifier::ConstructImpl,
+        CommonTransitionModifier::SlideImpl,
+        CommonTransitionModifier::TranslateImpl,
+        CommonTransitionModifier::ScaleImpl,
+        CommonTransitionModifier::OpacityImpl,
     };
-    return &ArkUIRectModifierImpl;
+    return &ArkUICommonTransitionModifierImpl;
 }
 
 }

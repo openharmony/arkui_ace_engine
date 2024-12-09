@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace FileSelectorParamAccessor {
 void DestroyPeerImpl(FileSelectorParamPeer* peer)
 {
 }
-FileSelectorParamPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new FileSelectorParamPeer();
 }
@@ -35,7 +35,7 @@ void GetTitleImpl(FileSelectorParamPeer* peer)
 }
 Ark_NativePointer GetModeImpl(FileSelectorParamPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void GetAcceptTypeImpl(FileSelectorParamPeer* peer)
 {

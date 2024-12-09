@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace WebControllerAccessor {
 void DestroyPeerImpl(WebControllerPeer* peer)
 {
 }
-WebControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new WebControllerPeer();
 }
@@ -71,7 +71,7 @@ void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer,
 }
 Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void RequestFocusImpl(WebControllerPeer* peer)
 {
@@ -97,7 +97,7 @@ void ForwardImpl(WebControllerPeer* peer)
 }
 Ark_NativePointer GetCookieManagerImpl(WebControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // WebControllerAccessor
 const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor()

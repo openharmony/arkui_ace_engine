@@ -14,14 +14,15 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SideBarContainerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // SideBarContainerModifier
 namespace SideBarContainerInterfaceModifier {
@@ -141,12 +142,11 @@ void SideBarPositionImpl(Ark_NativePointer node,
     //SideBarContainerModelNG::SetSideBarPosition(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerStyle_Null* value)
+                 const Opt_DividerStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SideBarContainerModelNG::SetDivider(frameNode, convValue);
 }
 void MinContentWidthImpl(Ark_NativePointer node,

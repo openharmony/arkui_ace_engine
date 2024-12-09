@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace ControllerHandlerAccessor {
 void DestroyPeerImpl(ControllerHandlerPeer* peer)
 {
 }
-ControllerHandlerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ControllerHandlerPeer();
 }
@@ -31,7 +31,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetWebControllerImpl(ControllerHandlerPeer* peer,
-                          const Ark_CustomObject* controller)
+                          const Ark_WebviewController* controller)
 {
 }
 } // ControllerHandlerAccessor

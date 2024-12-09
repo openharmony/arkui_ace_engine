@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace WebContextMenuParamAccessor {
 void DestroyPeerImpl(WebContextMenuParamPeer* peer)
 {
 }
-WebContextMenuParamPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new WebContextMenuParamPeer();
 }
@@ -53,18 +53,18 @@ Ark_Boolean ExistsImageContentsImpl(WebContextMenuParamPeer* peer)
 }
 Ark_NativePointer GetMediaTypeImpl(WebContextMenuParamPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void GetSelectionTextImpl(WebContextMenuParamPeer* peer)
 {
 }
 Ark_NativePointer GetSourceTypeImpl(WebContextMenuParamPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetInputFieldTypeImpl(WebContextMenuParamPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_Boolean IsEditableImpl(WebContextMenuParamPeer* peer)
 {

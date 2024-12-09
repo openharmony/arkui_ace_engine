@@ -14,14 +14,15 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TimePickerModifier
 namespace TimePickerInterfaceModifier {
@@ -79,7 +80,7 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     //TimePickerModelNG::SetSelectedTextStyle(frameNode, convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_DateTimeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

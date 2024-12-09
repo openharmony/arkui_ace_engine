@@ -14,14 +14,15 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // NavDestinationModifier
 namespace NavDestinationInterfaceModifier {
@@ -153,7 +154,7 @@ void OnWillHideImpl(Ark_NativePointer node,
     //NavDestinationModelNG::SetOnWillHide(frameNode, convValue);
 }
 void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Opt_CustomObject* value)
+                        const Opt_SystemBarStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

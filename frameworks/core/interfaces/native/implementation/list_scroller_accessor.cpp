@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace ListScrollerAccessor {
 void DestroyPeerImpl(ListScrollerPeer* peer)
 {
 }
-ListScrollerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ListScrollerPeer();
 }
@@ -34,7 +34,7 @@ Ark_NativePointer GetItemRectInGroupImpl(ListScrollerPeer* peer,
                                          const Ark_Number* index,
                                          const Ark_Number* indexInGroup)
 {
-    return 0;
+    return nullptr;
 }
 void ScrollToItemInGroupImpl(ListScrollerPeer* peer,
                              const Ark_Number* index,
@@ -51,7 +51,7 @@ Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
                                                 const Ark_Number* x,
                                                 const Ark_Number* y)
 {
-    return 0;
+    return nullptr;
 }
 } // ListScrollerAccessor
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()

@@ -671,36 +671,6 @@ void onStateChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
-namespace Navigation {
-void onTitleModeChangeImpl(Ark_Int32 nodeId,
-                           const Ark_NavigationTitleMode titleMode)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void onNavBarStateChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Boolean parameter)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void onNavigationModeChangeImpl(Ark_Int32 nodeId,
-                                const Ark_NavigationMode mode)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void navDestinationImpl(Ark_Int32 nodeId,
-                        const Ark_String name,
-                        const Ark_CustomObject param)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void customNavContentTransitionImpl(Ark_Int32 nodeId,
-                                    const Ark_NavContentInfo from,
-                                    const Ark_NavContentInfo to,
-                                    const Ark_NavigationOperation operation)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-}
 namespace Panel {
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Number width,
@@ -2062,18 +2032,6 @@ const GENERATED_ArkUINavRouterEventsReceiver* GetNavRouterEventsReceiver()
 
     return &GENERATED_ArkUINavRouterEventsReceiverImpl;
 }
-const GENERATED_ArkUINavigationEventsReceiver* GetNavigationEventsReceiver()
-{
-    static const GENERATED_ArkUINavigationEventsReceiver GENERATED_ArkUINavigationEventsReceiverImpl {
-        Navigation::onTitleModeChangeImpl,
-        Navigation::onNavBarStateChangeImpl,
-        Navigation::onNavigationModeChangeImpl,
-        Navigation::navDestinationImpl,
-        Navigation::customNavContentTransitionImpl,
-    };
-
-    return &GENERATED_ArkUINavigationEventsReceiverImpl;
-}
 const GENERATED_ArkUIPanelEventsReceiver* GetPanelEventsReceiver()
 {
     static const GENERATED_ArkUIPanelEventsReceiver GENERATED_ArkUIPanelEventsReceiverImpl {
@@ -2533,7 +2491,6 @@ const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
         GetMenuItemEventsReceiver,
         GetNavDestinationEventsReceiver,
         GetNavRouterEventsReceiver,
-        GetNavigationEventsReceiver,
         GetPanelEventsReceiver,
         GetPasteButtonEventsReceiver,
         GetPatternLockEventsReceiver,

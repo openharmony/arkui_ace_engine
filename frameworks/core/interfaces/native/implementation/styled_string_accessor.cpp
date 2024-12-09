@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,10 +22,10 @@ namespace StyledStringAccessor {
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
 }
-StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                            const Opt_Array_StyleOptions* styles)
 {
-    return new StyledStringPeer();
+    return new StyledStringPeer(value, styles);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -49,7 +49,7 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
                                       const Ark_Number* start,
                                       const Opt_Number* length)
 {
-    return 0;
+    return nullptr;
 }
 void FromHtmlImpl(const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)

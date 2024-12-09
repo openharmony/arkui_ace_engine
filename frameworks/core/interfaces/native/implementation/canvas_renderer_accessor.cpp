@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace CanvasRendererAccessor {
 void DestroyPeerImpl(CanvasRendererPeer* peer)
 {
 }
-CanvasRendererPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new CanvasRendererPeer();
 }
@@ -90,11 +90,11 @@ Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x1,
                                            const Ark_Number* y1)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
                                     const Ark_ImageBitmap* image,
-                                    const Ark_Union_String_Null* repetition)
+                                    const Opt_String* repetition)
 {
     return 0;
 }
@@ -106,25 +106,25 @@ Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* y1,
                                            const Ark_Number* r1)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
                                           const Ark_Number* startAngle,
                                           const Ark_Number* x,
                                           const Ark_Number* y)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
                                        const Ark_Number* sw,
                                        const Ark_Number* sh)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
                                        const Ark_ImageData* imagedata)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
                                    const Ark_Number* sx,
@@ -132,7 +132,7 @@ Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
                                    const Ark_Number* sw,
                                    const Ark_Number* sh)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
                                   const Ark_Number* sx,
@@ -140,7 +140,7 @@ Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
                                   const Ark_Number* sw,
                                   const Ark_Number* sh)
 {
-    return 0;
+    return nullptr;
 }
 void PutImageData0Impl(CanvasRendererPeer* peer,
                        const Ark_ImageData* imagedata,
@@ -202,7 +202,7 @@ void FillTextImpl(CanvasRendererPeer* peer,
 Ark_NativePointer MeasureTextImpl(CanvasRendererPeer* peer,
                                   const Ark_String* text)
 {
-    return 0;
+    return nullptr;
 }
 void StrokeTextImpl(CanvasRendererPeer* peer,
                     const Ark_String* text,
@@ -213,7 +213,7 @@ void StrokeTextImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void ResetTransformImpl(CanvasRendererPeer* peer)
 {
@@ -311,7 +311,7 @@ void SetImageSmoothingEnabledImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
                                   const Ark_String* imageSmoothingQuality)
@@ -319,7 +319,7 @@ void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetLineCapImpl(CanvasRendererPeer* peer,
                     const Ark_String* lineCap)
@@ -335,7 +335,7 @@ void SetLineDashOffsetImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetLineJoinImpl(CanvasRendererPeer* peer,
                      const Ark_String* lineJoin)
@@ -390,7 +390,7 @@ void SetShadowOffsetYImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
@@ -405,7 +405,7 @@ void SetFontImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetTextAlignImpl(CanvasRendererPeer* peer,
                       const Ark_String* textAlign)
@@ -413,7 +413,7 @@ void SetTextAlignImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)

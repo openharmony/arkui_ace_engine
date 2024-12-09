@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,10 +22,10 @@ namespace TransitionEffectAccessor {
 void DestroyPeerImpl(TransitionEffectPeer* peer)
 {
 }
-TransitionEffectPeer* CtorImpl(const Ark_String* type,
-                               const Ark_TransitionEffects* effect)
+Ark_NativePointer CtorImpl(const Ark_String* type,
+                           const Ark_TransitionEffects* effect)
 {
-    return new TransitionEffectPeer();
+    return new TransitionEffectPeer(type, effect);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,38 +33,38 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer RotateImpl(const Ark_RotateOptions* options)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
                                  const Ark_TransitionEffect* disappear)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
                               const Ark_TransitionEffect* transitionEffect)
 {
-    return 0;
+    return nullptr;
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()

@@ -14,14 +14,15 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnSplitModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // ColumnSplitModifier
 namespace ColumnSplitInterfaceModifier {
@@ -44,12 +45,11 @@ void ResizeableImpl(Ark_NativePointer node,
     //ColumnSplitModelNG::SetResizeable(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_ColumnSplitDividerStyle_Null* value)
+                 const Opt_ColumnSplitDividerStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //ColumnSplitModelNG::SetDivider(frameNode, convValue);
 }
 } // ColumnSplitAttributeModifier

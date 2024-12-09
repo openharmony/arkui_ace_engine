@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace Matrix2DAccessor {
 void DestroyPeerImpl(Matrix2DPeer* peer)
 {
 }
-Matrix2DPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new Matrix2DPeer();
 }
@@ -32,41 +32,41 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
                                const Opt_Matrix2D* other)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer,
                               const Opt_Number* rx,
                               const Opt_Number* ry)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
                               const Ark_Number* degree,
                               const Opt_Number* rx,
                               const Opt_Number* ry)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
                                 const Opt_Number* tx,
                                 const Opt_Number* ty)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,
                             const Opt_Number* sx,
                             const Opt_Number* sy)
 {
-    return 0;
+    return nullptr;
 }
 Ark_Int32 GetScaleXImpl(Matrix2DPeer* peer)
 {

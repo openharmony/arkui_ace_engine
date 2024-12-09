@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace RichEditorStyledStringControllerAccessor {
 void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
 {
 }
-RichEditorStyledStringControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new RichEditorStyledStringControllerPeer();
 }
@@ -36,11 +36,11 @@ void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
 }
 Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
                           const Ark_StyledStringChangedListener* listener)

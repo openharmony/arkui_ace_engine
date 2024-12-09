@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,12 +22,12 @@ namespace ConsoleMessageAccessor {
 void DestroyPeerImpl(ConsoleMessagePeer* peer)
 {
 }
-ConsoleMessagePeer* CtorImpl(const Ark_String* message,
-                             const Ark_String* sourceId,
-                             const Ark_Number* lineNumber,
-                             Ark_MessageLevel messageLevel)
+Ark_NativePointer CtorImpl(const Ark_String* message,
+                           const Ark_String* sourceId,
+                           const Ark_Number* lineNumber,
+                           Ark_MessageLevel messageLevel)
 {
-    return new ConsoleMessagePeer();
+    return new ConsoleMessagePeer(message, sourceId, lineNumber, messageLevel);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -45,7 +45,7 @@ Ark_Int32 GetLineNumberImpl(ConsoleMessagePeer* peer)
 }
 Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // ConsoleMessageAccessor
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()

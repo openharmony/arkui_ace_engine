@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,9 +22,9 @@ namespace ImageBitmapAccessor {
 void DestroyPeerImpl(ImageBitmapPeer* peer)
 {
 }
-ImageBitmapPeer* CtorImpl(const Ark_String* src)
+Ark_NativePointer CtorImpl(const Ark_String* src)
 {
-    return new ImageBitmapPeer();
+    return new ImageBitmapPeer(src);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

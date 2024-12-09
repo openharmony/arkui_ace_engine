@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace ScrollerAccessor {
 void DestroyPeerImpl(ScrollerPeer* peer)
 {
 }
-ScrollerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ScrollerPeer();
 }
@@ -53,7 +53,7 @@ void ScrollPage1Impl(ScrollerPeer* peer,
 }
 Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void ScrollToIndexImpl(ScrollerPeer* peer,
                        const Ark_Number* value,
@@ -74,7 +74,7 @@ Ark_Boolean IsAtEndImpl(ScrollerPeer* peer)
 Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer,
                                   const Ark_Number* index)
 {
-    return 0;
+    return nullptr;
 }
 Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
                            const Ark_Number* x,

@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace CalendarControllerAccessor {
 void DestroyPeerImpl(CalendarControllerPeer* peer)
 {
 }
-CalendarControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new CalendarControllerPeer();
 }

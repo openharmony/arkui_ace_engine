@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace XComponentControllerAccessor {
 void DestroyPeerImpl(XComponentControllerPeer* peer)
 {
 }
-XComponentControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new XComponentControllerPeer();
 }
@@ -35,7 +35,7 @@ void GetXComponentSurfaceIdImpl(XComponentControllerPeer* peer)
 }
 Ark_NativePointer GetXComponentContextImpl(XComponentControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer,
                                   const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
@@ -47,7 +47,7 @@ void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer,
 }
 Ark_NativePointer GetXComponentSurfaceRectImpl(XComponentControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer,
                                       const Ark_SurfaceRotationOptions* rotationOptions)
@@ -55,7 +55,7 @@ void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer,
 }
 Ark_NativePointer GetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 void OnSurfaceCreatedImpl(XComponentControllerPeer* peer,
                           const Ark_String* surfaceId)

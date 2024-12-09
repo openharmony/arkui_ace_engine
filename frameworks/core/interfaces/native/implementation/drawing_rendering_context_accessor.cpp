@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,9 +22,9 @@ namespace DrawingRenderingContextAccessor {
 void DestroyPeerImpl(DrawingRenderingContextPeer* peer)
 {
 }
-DrawingRenderingContextPeer* CtorImpl(const Opt_CustomObject* unit)
+Ark_NativePointer CtorImpl(const Opt_LengthMetricsUnit* unit)
 {
-    return new DrawingRenderingContextPeer();
+    return new DrawingRenderingContextPeer(unit);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

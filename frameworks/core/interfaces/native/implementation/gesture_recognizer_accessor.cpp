@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace GestureRecognizerAccessor {
 void DestroyPeerImpl(GestureRecognizerPeer* peer)
 {
 }
-GestureRecognizerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new GestureRecognizerPeer();
 }
@@ -35,7 +35,7 @@ void GetTagImpl(GestureRecognizerPeer* peer)
 }
 Ark_NativePointer GetTypeImpl(GestureRecognizerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
 {
@@ -51,11 +51,11 @@ Ark_Boolean IsEnabledImpl(GestureRecognizerPeer* peer)
 }
 Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
 {

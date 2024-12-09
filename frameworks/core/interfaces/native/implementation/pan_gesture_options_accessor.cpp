@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,9 +22,9 @@ namespace PanGestureOptionsAccessor {
 void DestroyPeerImpl(PanGestureOptionsPeer* peer)
 {
 }
-PanGestureOptionsPeer* CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
+Ark_NativePointer CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
 {
-    return new PanGestureOptionsPeer();
+    return new PanGestureOptionsPeer(value);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -44,7 +44,7 @@ void SetFingersImpl(PanGestureOptionsPeer* peer,
 }
 Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()

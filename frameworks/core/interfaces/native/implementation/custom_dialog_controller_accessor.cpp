@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,9 +22,9 @@ namespace CustomDialogControllerAccessor {
 void DestroyPeerImpl(CustomDialogControllerPeer* peer)
 {
 }
-CustomDialogControllerPeer* CtorImpl(const Ark_CustomDialogControllerOptions* value)
+Ark_NativePointer CtorImpl(const Ark_CustomDialogControllerOptions* value)
 {
-    return new CustomDialogControllerPeer();
+    return new CustomDialogControllerPeer(value);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

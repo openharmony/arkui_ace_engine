@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +22,7 @@ namespace LayoutManagerAccessor {
 void DestroyPeerImpl(LayoutManagerPeer* peer)
 {
 }
-LayoutManagerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new LayoutManagerPeer();
 }
@@ -38,12 +38,12 @@ Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer,
                                                    const Ark_Number* x,
                                                    const Ark_Number* y)
 {
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
                                      const Ark_Number* lineNumber)
 {
-    return 0;
+    return nullptr;
 }
 void GetRectsForRangeImpl(LayoutManagerPeer* peer,
                           const Ark_TextRange* range,
