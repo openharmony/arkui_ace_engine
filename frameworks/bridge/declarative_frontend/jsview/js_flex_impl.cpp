@@ -94,7 +94,7 @@ void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
         CalcDimension value;
         JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
         JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
-        if (!ParseLengthMetricsToPositiveDimension(mainSpaceVal, value) || value.IsNegative()) {
+        if (!ParseFlexSpaceToPositiveDimension(mainSpaceVal, value) || value.IsNegative()) {
             value.Reset();
         }
         FlexModel::GetInstance()->SetMainSpace(value);
@@ -118,10 +118,10 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
         JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
         JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
         JSRef<JSVal> crossSpaceVal = spaceObj->GetProperty("cross");
-        if (!ParseLengthMetricsToPositiveDimension(mainSpaceVal, mainValue) || mainValue.IsNegative()) {
+        if (!ParseFlexSpaceToPositiveDimension(mainSpaceVal, mainValue) || mainValue.IsNegative()) {
             mainValue.Reset();
         }
-        if (!ParseLengthMetricsToPositiveDimension(crossSpaceVal, crossValue) || crossValue.IsNegative()) {
+        if (!ParseFlexSpaceToPositiveDimension(crossSpaceVal, crossValue) || crossValue.IsNegative()) {
             crossValue.Reset();
         }
         FlexModel::GetInstance()->SetMainSpace(mainValue);
