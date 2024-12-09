@@ -49,6 +49,7 @@ protected:
     void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
     void OnRemoveBlank() override;
+    void OnAppRemoveStartingWindow() override;
 
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
@@ -66,6 +67,7 @@ private:
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
     CancelableCallback<void()> deleteWindowTask_;
+    CancelableCallback<void()> removeStartingWindowTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
