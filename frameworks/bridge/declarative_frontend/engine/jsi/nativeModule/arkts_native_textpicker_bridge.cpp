@@ -55,6 +55,30 @@ void PopulateUnits(const CalcDimension& dividerStrokeWidth, const CalcDimension&
     units[STROKE_WIDTH_INDEX] = static_cast<int32_t>(dividerStartMargin.Unit());
     units[COLOR_INDEX] = static_cast<int32_t>(dividerEndMargin.Unit());
 }
+
+void ParseFontSize(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen)
+{
+    if (value->IsNull() || value->IsUndefined()) {
+        dimen = Dimension(DEFAULT_NEGATIVE_NUM);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, value, dimen, DimensionUnit::FP, false)) {
+            dimen = Dimension(DEFAULT_NEGATIVE_NUM);
+        }
+    }
+}
+
+void ParseFontWeight(const EcmaVM* vm, const Local<JSValueRef>& value, std::string& weight)
+{
+    if (!value->IsNull() && !value->IsUndefined()) {
+        if (value->IsNumber()) {
+            weight = std::to_string(value->Int32Value(vm));
+        } else {
+            if (!ArkTSUtils::ParseJsString(vm, value, weight) || weight.empty()) {
+                weight = DEFAULT_ERR_CODE;
+            }
+        }
+    }
+}
 } // namespace
 
 ArkUINativeModuleValue TextPickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -463,6 +487,88 @@ ArkUINativeModuleValue TextPickerBridge::ResetGradientHeight(ArkUIRuntimeCallInf
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerGradientHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetDisableTextStyleAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> disableTextStyleAnimationArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    bool disableTextStyleAnimation = false;
+    if (disableTextStyleAnimationArg->IsBoolean()) {
+        disableTextStyleAnimation = disableTextStyleAnimationArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDisableTextStyleAnimation(
+        nativeNode, disableTextStyleAnimation);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetDisableTextStyleAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDisableTextStyleAnimation(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetDefaultTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);      // text color
+    Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(2);   // text font size
+    Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(3); // text font weight
+    Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(4); // text font family
+    Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(5);  // text font style
+    Local<JSValueRef> minFontSizeArg = runtimeCallInfo->GetCallArgRef(6); // text minFontSize
+    Local<JSValueRef> maxFontSizeArg = runtimeCallInfo->GetCallArgRef(7);  // text maxFontSize
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(8);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Color textColor;
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor)) {
+        textColor.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+    }
+    CalcDimension size;
+    ParseFontSize(vm, fontSizeArg, size);
+    std::string weight = DEFAULT_ERR_CODE;
+    ParseFontWeight(vm, fontWeightArg, weight);
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_ERR_CODE;
+    }
+    int32_t styleVal = 0;
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined() && fontStyleArg->IsNumber()) {
+        styleVal = fontStyleArg->Int32Value(vm);
+    }
+    CalcDimension minSize;
+    ParseFontSize(vm, minFontSizeArg, minSize);
+    CalcDimension maxSize;
+    ParseFontSize(vm, maxFontSizeArg, maxSize);
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), size.ToString().c_str(), weight.c_str(), fontFamily.c_str());
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDefaultTextStyle(
+        nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal, minSize.ToString().c_str(),
+        maxSize.ToString().c_str(), overflowVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetDefaultTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDefaultTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
