@@ -246,6 +246,7 @@ build_component_ng("pattern_ng") {
     "navigation/navdestination_node_base.cpp",
     "navigation/navdestination_pattern_base.cpp",
     "navigation/navigation_content_layout_algorithm.cpp",
+    "navigation/navigation_drag_bar_pattern.cpp",
     "navigation/navigation_event_hub.cpp",
     "navigation/navigation_group_node.cpp",
     "navigation/navigation_layout_algorithm.cpp",

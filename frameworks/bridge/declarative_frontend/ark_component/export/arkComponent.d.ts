@@ -1096,6 +1096,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     onNavigationModeChange(callback: (mode: NavigationMode) => void): NavigationAttribute;
     navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
+    enableDragBar(value: boolean | undefined): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

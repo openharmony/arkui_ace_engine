@@ -68,6 +68,7 @@ public:
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
+    void SetEnableDragBar(bool enableDragBar) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
@@ -91,6 +92,7 @@ public:
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
         bool ignoreMainTitle = false);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
+    static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

@@ -220,6 +220,21 @@ void ResetNavHideTitleBar(ArkUINodeHandle node)
     NavigationModelNG::SetHideTitleBar(frameNode, false, false);
 }
 
+void SetEnableDragBar(ArkUINodeHandle node, ArkUI_Bool enableDragBar)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableDragBar(frameNode, enableDragBar);
+}
+
+void ResetEnableDragBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // default value of navigation's enableDragBar is false
+    NavigationModelNG::SetEnableDragBar(frameNode, false);
+}
+
 void SetNavIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const char* edgesStr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -315,6 +330,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         ResetMinNavBarWidth,
         SetNavBarWidth,
         ResetNavBarWidth,
+        SetEnableDragBar,
+        ResetEnableDragBar,
         SetNavIgnoreLayoutSafeArea,
         ResetNavIgnoreLayoutSafeArea,
         SetNavTitle,

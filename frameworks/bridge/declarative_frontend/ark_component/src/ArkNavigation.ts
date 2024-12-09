@@ -133,6 +133,10 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute {
     throw new Error('Method not implemented.');
   }
+  enableDargBar(value: boolean | undefined): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
+    return this;
+
   ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): NavigationAttribute {
     let opts = new ArkSafeAreaExpandOpts();
     if (types && types.length >= 0) {
@@ -374,6 +378,21 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandO
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
       !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
+  }
+}
+
+class NavigationEnableDragBarModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableDragBar');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableDragBar(node);
+    } else {
+      getUINativeModule().navigation.setEnableDragBar(node, this.value);
+    }
   }
 }
 

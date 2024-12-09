@@ -70,6 +70,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1367,6 +1368,32 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     backButtonNode->MarkModifyDone();
     titleBarNode->SetBackButton(backButtonNode);
     titleBarNode->AddChild(backButtonNode, 0);
+}
+
+void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
+}
+
+void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
 }
 
 void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
