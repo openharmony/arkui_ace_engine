@@ -22,7 +22,6 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
-const char IFELSE_ELEMENT_TAG[] = "IfElseElement";
 const char INSPECTOR_TYPE[] = "$type";
 const char INSPECTOR_ROOT[] = "root";
 const char INSPECTOR_WIDTH[] = "width";
