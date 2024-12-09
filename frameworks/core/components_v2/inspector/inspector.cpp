@@ -119,23 +119,6 @@ void ToJsonValue(const RefPtr<Element>& element,
     }
     json->Put(INSPECTOR_CHILDREN, jsonNodeArray);
 }
-
-void DumpElementTree(
-    int32_t depth, const RefPtr<Element>& element, std::map<int32_t, std::list<RefPtr<Element>>>& depthElementMap)
-{
-    if (element->GetChildren().empty()) {
-        return;
-    }
-    const auto& children = element->GetChildren();
-    for (auto& depthElement : children) {
-        if (strcmp(AceType::TypeName(depthElement), IFELSE_ELEMENT_TAG) == 0) {
-            DumpElementTree(depth, depthElement, depthElementMap);
-            continue;
-        }
-        depthElementMap[depth].insert(depthElementMap[depth].end(), depthElement);
-        DumpElementTree(depth + 1, depthElement, depthElementMap);
-    }
-}
 } // namespace
 
 std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& context, const std::string& key)
