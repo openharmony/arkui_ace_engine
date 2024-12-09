@@ -2731,7 +2731,8 @@ void AceContainer::HotReload()
 
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->FlushReload(ConfigurationChange());
+            ConfigurationChange configurationChange { .hotReloadUpdate = true };
+            pipeline->FlushReload(configurationChange);
         },
         TaskExecutor::TaskType::UI, "ArkUIHotReload");
 }
