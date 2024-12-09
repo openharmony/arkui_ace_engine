@@ -15,7 +15,7 @@
 import hilog from '@ohos.hilog';
 import abilityManager from '@ohos.app.ability.abilityManager';
 import common from '@ohos.app.ability.common';
-import { Callback } from '@ohos.base';
+import { ErrorCallback, Callback } from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
 import Base from '@ohos.base';
@@ -28,6 +28,9 @@ export struct FullScreenLaunchComponent {
   options?: AtomicServiceOptions
   @State private isShow: boolean = false;
   private subscriber: commonEventManager.CommonEventSubscriber | null = null;
+  onError?: ErrorCallback;
+  onTerminated?: Callback<TerminationInfo>;
+
   aboutToAppear() {
     let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
       events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
@@ -55,9 +58,9 @@ export struct FullScreenLaunchComponent {
               return;
             }
 
-          hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.')
-          this.isShow = false;
-        })
+            hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.')
+            this.isShow = false;
+          })
       })
   }
 
@@ -142,18 +145,23 @@ export struct FullScreenLaunchComponent {
     })
       .height('100%')
       .width('100%')
-      .onRelease(
-        () => {
+      .onError(
+        err => {
+          if (this.onError != undefined) {
+            this.onError(err);
+          }
           this.isShow = false;
+          hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error!%{public}s', err.message)
+          this.getUIContext().showAlertDialog({
+            message: err.message
+          })
         }
-      ).onError(
-      err => {
+      )
+      .onTerminated(info => {
         this.isShow = false;
-        hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error!%{public}s', err.message)
-        this.getUIContext().showAlertDialog({
-          message: err.message
-        })
-      }
-    )
+        if (this.onTerminated != undefined) {
+          this.onTerminated(info)
+        }
+      })
   }
 }
