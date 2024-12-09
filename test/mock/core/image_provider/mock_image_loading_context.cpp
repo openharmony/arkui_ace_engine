@@ -179,4 +179,9 @@ void ImageLoadingContext::PerformDownload() {}
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData) {}
 
 void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage) {}
+
+RefPtr<ImageData> ImageLoadingContext::QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

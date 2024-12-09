@@ -285,6 +285,7 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     }
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     auto inPageNode = needShowNext ? inPage : nullptr;
+    pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     FireAutoSave(outPageNode, inPageNode);
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
     FirePageShow(inPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
@@ -343,6 +344,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         const auto& newPageNode = *iter;
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
+        pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     }
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
@@ -387,6 +389,7 @@ bool StageManager::CleanPageStack()
         pageNode->SetChildrenInDestroying();
         stageNode_->RemoveChild(pageNode);
     }
+    pipeline->GetMemoryManager()->RebuildImageByPage(AceType::DynamicCast<FrameNode>(children.back()));
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;

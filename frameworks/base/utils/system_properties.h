@@ -300,6 +300,11 @@ public:
         return downloadByNetworkEnabled_;
     }
 
+    static bool GetRecycleImageEnabled()
+    {
+        return recycleImageEnabled_;
+    }
+
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -658,6 +663,7 @@ private:
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
+    static bool recycleImageEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;

@@ -81,9 +81,16 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     // Determine whether to decode the width and height of each other based on the orientation
     SwapDecodeSize(width, height);
-    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ], hdr: [%d], quality: [%d]",
+    std::string isTrimMemRebuild = "False";
+    if (imageDfxConfig.isTrimMemRecycle_) {
+        isTrimMemRebuild = "True";
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "CreateImagePixelMapRebuild, %{private}s-%{public}s.",
+            src.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+    }
+    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ],"
+        "hdr: [%d], quality: [%d], isTrimMemRebuild: [%s]",
         src.c_str(), sourceSize.first, sourceSize.second, width, height, static_cast<int32_t>(isHdrDecoderNeed),
-        static_cast<int32_t>(imageQuality));
+        static_cast<int32_t>(imageQuality), isTrimMemRebuild.c_str());
 
     auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
     if (!pixmap) {

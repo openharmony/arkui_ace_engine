@@ -3788,6 +3788,7 @@ void PipelineContext::OnHide()
     AccessibilityEvent event;
     event.type = AccessibilityEventType::PAGE_CLOSE;
     SendEventToAccessibility(event);
+    memoryMgr_->PostMemRecycleTask();
 }
 
 void PipelineContext::WindowFocus(bool isFocus)
@@ -3993,6 +3994,7 @@ void PipelineContext::Destroy()
     focusManager_.Reset();
     selectOverlayManager_.Reset();
     fullScreenManager_.Reset();
+    memoryMgr_.Reset();
     nodeToMousePoints_.clear();
     nodeToPointEvent_.clear();
     touchEvents_.clear();
