@@ -294,6 +294,44 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndex007
+ * @tc.desc: Test ScrollTo top with update estimate offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndex007, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Test ScrollTo top with update estimate offset
+     * @tc.expected: List will scroll to top.
+     */
+    auto model = CreateList();
+    model.SetInitialIndex(4);
+    for (int32_t i = 0; i < 3; i++) {
+        ListItemModelNG itemModel;
+        itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+        SetSize(Axis::VERTICAL, CalcLength(FILL_LENGTH), CalcLength(180));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    for (int32_t i = 0; i < 4; i++) {
+        ListItemModelNG itemModel;
+        itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+        SetSize(Axis::VERTICAL, CalcLength(FILL_LENGTH), CalcLength(150));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 600); // estimate:600, real:690
+
+    MockAnimationManager::GetInstance().SetTicks(12);
+    positionController_->AnimateTo(Dimension(0), 100, nullptr, true);
+    FlushUITasks();
+    for (int32_t i = 0; i < 10; i++) {
+        EXPECT_TRUE(Position(-550 + i * 50));
+    }
+    EXPECT_TRUE(Position(-140)); // estimate:50, real:140
+    EXPECT_TRUE(Position(0));
+}
+
+/**
  * @tc.name: JumpToItemInGroup001
  * @tc.desc: Test JumpToItemInGroup
  * @tc.type: FUNC
@@ -1646,6 +1684,21 @@ HWTEST_F(ListScrollerTestNg, SetScrollBy001, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), y);
     model.SetScrollBy(AceType::RawPtr(frameNode_), x, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), y);
+}
+
+/**
+ * @tc.name: SetScrollBy002
+ * @tc.desc: Test List model ng SetScrollBy before List layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, SetScrollBy002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    const double y = 200.f;
+    model.SetScrollBy(AceType::RawPtr(frameNode_), 0, y);
+    CreateDone();
     EXPECT_EQ(pattern_->GetTotalOffset(), y);
 }
 } // namespace OHOS::Ace::NG

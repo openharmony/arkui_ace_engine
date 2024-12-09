@@ -1821,6 +1821,62 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListRepeatCacheCount003
+ * @tc.desc: List update size, cacheCount item update size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 4 and 5 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+    auto cachedItem4 = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem4->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), LIST_HEIGHT);
+    EXPECT_EQ(GetChildWidth(frameNode_, 4), LIST_WIDTH);
+    auto cachedItem5 = frameNode_->GetChildByIndex(5)->GetHostNode();
+    EXPECT_EQ(cachedItem5->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 5), LIST_HEIGHT + 100);
+    EXPECT_EQ(GetChildWidth(frameNode_, 5), LIST_WIDTH);
+
+    /**
+     * @tc.steps: step3. Update List width
+     * @tc.expected: cached item width update
+     */
+    const float newListWidth = 300;
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(newListWidth));
+    FlushUITasks();
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(GetChildY(frameNode_, 4), LIST_HEIGHT);
+    EXPECT_EQ(GetChildWidth(frameNode_, 4), newListWidth);
+    EXPECT_EQ(GetChildY(frameNode_, 5), LIST_HEIGHT + 100);
+    EXPECT_EQ(GetChildWidth(frameNode_, 5), newListWidth);
+}
+
+/**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
  * @tc.type: FUNC
