@@ -595,6 +595,9 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
         auto dragEventActuator = actuator.Upgrade();
         CHECK_NULL_VOID(dragEventActuator);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto touchPoint = Point(
             info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
