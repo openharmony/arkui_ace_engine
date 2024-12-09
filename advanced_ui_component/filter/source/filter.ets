@@ -195,7 +195,7 @@ struct ListFilterRow {
     return accessibilityText;
   }
 
-  sendAccessibility(resource: ResourceStr | undefined, selected: boolean) {
+  sendAccessibility(resource: ResourceStr | undefined, selected: boolean): void {
     let eventInfo: accessibility.EventInfo = ({
       type: 'announceForAccessibility',
       bundleName: this.bundleName,
@@ -442,7 +442,7 @@ struct MultiFilterRow {
     return accessibilityText;
   }
 
-  private sendAccessibility(resource: ResourceStr | undefined, selected: boolean) {
+  private sendAccessibility(resource: ResourceStr | undefined, selected: boolean): void {
     let eventInfo: accessibility.EventInfo = ({
       type: 'announceForAccessibility',
       bundleName: this.bundleName,
@@ -453,7 +453,7 @@ struct MultiFilterRow {
     accessibility.sendAccessibilityEvent(eventInfo);
   }
 
-  private sendArrowAccessibility(id: string) {
+  private sendArrowAccessibility(id: string): void {
     this.isSendArrowAccessibility = true;
     setTimeout(() => {
       let eventInfo: accessibility.EventInfo = ({
@@ -920,7 +920,7 @@ export struct Filter {
     return accessibilityText;
   }
 
-  private sendAccessibility(resource: ResourceStr | undefined, selected: boolean) {
+  private sendAccessibility(resource: ResourceStr | undefined, selected: boolean): void {
     let eventInfo: accessibility.EventInfo = ({
       type: 'announceForAccessibility',
       bundleName: this.bundleName,
@@ -933,7 +933,7 @@ export struct Filter {
     })
   }
 
-  private filterItemClick(rowIndex: number, colIndex: number) {
+  private filterItemClick(rowIndex: number, colIndex: number): void {
     let selectedFilterValue = this.multiFilters[rowIndex].options[colIndex]
     if (this.selectedFilters && colIndex !== this.selectedFilters[rowIndex].index) {
       if (this.colorArr) {
@@ -953,7 +953,7 @@ export struct Filter {
     this.refreshFloatFilterBarText()
   }
 
-  private refreshFloatFilterBarText() {
+  private refreshFloatFilterBarText(): void {
     this.floatFilterBarText = '';
     this.floatFilterBarAccessibilityText = '';
     if (this.selectedFilters) {
@@ -999,7 +999,7 @@ export struct Filter {
     return accessibilityText;
   }
 
-  private sendFloatAccessibility(resource: ResourceStr | undefined) {
+  private sendFloatAccessibility(resource: ResourceStr | undefined): void {
     let eventInfo: accessibility.EventInfo = ({
       type: 'announceForAccessibility',
       bundleName: this.bundleName,
@@ -1017,7 +1017,7 @@ export struct Filter {
     accessibility.sendAccessibilityEvent(requestFocusEventInfo);
   }
 
-  private initParams() {
+  private initParams(): void {
     if (!this.selectedFilters) {
       this.selectedFilters = []
       for (let filter of this.multiFilters) {
@@ -1152,7 +1152,7 @@ export struct Filter {
     })
   }
 
-  private additionItemClick(index: number) {
+  private additionItemClick(index: number): void {
     let additionRowIndex = this.multiFilters.length
     if (this.selectedFilters && this.selectedFilters[additionRowIndex].index !== index) {
       if (this.selectedFilters[additionRowIndex].index === -1) {
