@@ -1250,19 +1250,47 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
         isScrollIndex = true;
         ScrollToIndex(nextIndex, false, ScrollAlign::END);
         pipeline->FlushUITasks();
-    } else if (nextIndexInGroup == -1) {
-        auto iter = itemPosition_.find(nextIndex);
-        if (iter != itemPosition_.end()) {
-            float targetPos = 0.0f;
-            GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, ScrollAlign::AUTO, targetPos);
-            if (Positive(targetPos)) {
-                ScrollToIndex(nextIndex, false, ScrollAlign::END);
-            } else if (Negative(targetPos)) {
-                ScrollToIndex(nextIndex, false, ScrollAlign::START);
-            }
-        }
+    } else if (nextIndexInGroup == -1 && HandleDisplayedChildFocus(nextIndex, curIndex)) {
+        isScrollIndex = true;
+        pipeline->FlushUITasks();
     }
     return isScrollIndex;
+}
+
+bool ListPattern::HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex)
+{
+    auto iter = itemPosition_.find(nextIndex);
+    if (iter == itemPosition_.end()) {
+        return false;
+    }
+    float targetPos = 0.0f;
+    float startPos = iter->second.startPos;
+    float endPos = iter->second.endPos;
+    ScrollAlign align = ScrollAlign::AUTO;
+    if (iter->second.isGroup) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto itemGroupWrapper = host->GetChildByIndex(nextIndex);
+        CHECK_NULL_RETURN(itemGroupWrapper, false);
+        auto itemGroup = itemGroupWrapper->GetHostNode();
+        CHECK_NULL_RETURN(itemGroup, false);
+        auto groupPattern = itemGroup->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_RETURN(groupPattern, false);
+        int32_t indexInGroup = nextIndex < curIndex ? groupPattern->GetEndIndexInGroup() : 0;
+        if (!GetListItemGroupAnimatePosWithIndexInGroup(nextIndex, indexInGroup, startPos, align, targetPos)) {
+            targetPos = startPos;
+        }
+    } else {
+        GetListItemAnimatePos(startPos, endPos, align, targetPos);
+    }
+    if (Positive(targetPos)) {
+        ScrollToIndex(nextIndex, false, ScrollAlign::END);
+        return iter->second.isGroup;
+    } else if (Negative(targetPos)) {
+        ScrollToIndex(nextIndex, false, ScrollAlign::START);
+        return iter->second.isGroup;
+    }
+    return false;
 }
 
 bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
