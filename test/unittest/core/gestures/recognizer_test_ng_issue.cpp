@@ -112,4 +112,101 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue002, TestSize.Level1)
     EXPECT_NE(touchTime, mouseTime);
 }
 
+/**
+ * @tc.name: PanRecognizerIssue001
+ * @tc.desc: Test PanRecognizer: Test the finger information of the current recognizer in the case of setting a single
+ *           finger by pressing multiple fingers and lifting them.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, PanRecognizerIssue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    panGestureOption->SetFingers(1);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    panGestureOption->SetDirection(panDirection);
+    panGestureOption->SetDistance(10.0f);
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    /**
+     * @tc.steps: step2. DispatchTouchEvent with two different fingers and dispatch two up events.
+     * @tc.expected: step2. fingersId_ empty.
+     */
+    TouchEvent zeroDownEvent;
+    zeroDownEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
+    TouchEvent oneDownEvent;
+    oneDownEvent.SetId(1).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
+    panRecognizer->HandleEvent(zeroDownEvent);
+    panRecognizer->HandleEvent(oneDownEvent);
+    TouchEvent zeroUpEvent;
+    zeroUpEvent.SetId(0).SetType(TouchType::UP).SetX(100.0f).SetY(100.0f);
+    TouchEvent oneUpEvent;
+    oneUpEvent.SetId(1).SetType(TouchType::UP).SetX(100.0f).SetY(100.0f);
+    panRecognizer->HandleEvent(zeroUpEvent);
+    panRecognizer->HandleEvent(oneUpEvent);
+    EXPECT_TRUE(panRecognizer->fingersId_.empty());
+}
+
+/**
+ * @tc.name: RotationRecognizerIssue001
+ * @tc.desc: Test the rotating gesture by pressing two fingers, and when the gesture fails, lift finger number one and
+ *           finger number one is cleared from activeFingers_ correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, RotationRecognizerIssue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(2, ROTATION_GESTURE_ANGLE);
+    /**
+     * @tc.steps: step2. DispatchTouchEvent with two different fingers and dispatch two up events.
+     * @tc.expected: step2. fingersId_ empty.
+     */
+    TouchEvent zeroDownEvent;
+    zeroDownEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
+    TouchEvent oneDownEvent;
+    oneDownEvent.SetId(1).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
+    rotationRecognizer->HandleEvent(zeroDownEvent);
+    rotationRecognizer->HandleEvent(oneDownEvent);
+    TouchEvent oneUpEvent;
+    oneUpEvent.SetId(1).SetType(TouchType::UP).SetX(100.0f).SetY(100.0f);
+    rotationRecognizer->HandleEvent(oneUpEvent);
+    EXPECT_EQ(std::find(rotationRecognizer->activeFingers_.begin(), rotationRecognizer->activeFingers_.end(), 1),
+        rotationRecognizer->activeFingers_.end());
+    EXPECT_EQ(rotationRecognizer->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: PinchRecognizerIssue001
+ * @tc.desc: Test the pinch gesture by pressing two fingers, and when the gesture fails, lift finger number one and
+ *           finger number one is cleared from activeFingers_ correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, PinchRecognizerIssue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    auto pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(2, PINCH_GESTURE_DISTANCE);
+    /**
+     * @tc.steps: step2. DispatchTouchEvent with two different fingers and dispatch two up events.
+     * @tc.expected: step2. fingersId_ empty.
+     */
+    TouchEvent zeroDownEvent;
+    zeroDownEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
+    TouchEvent oneDownEvent;
+    oneDownEvent.SetId(1).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
+    pinchRecognizer->HandleEvent(zeroDownEvent);
+    pinchRecognizer->HandleEvent(oneDownEvent);
+    TouchEvent oneUpEvent;
+    oneUpEvent.SetId(1).SetType(TouchType::UP).SetX(100.0f).SetY(100.0f);
+    pinchRecognizer->HandleEvent(oneUpEvent);
+    EXPECT_EQ(std::find(pinchRecognizer->activeFingers_.begin(), pinchRecognizer->activeFingers_.end(), 1),
+        pinchRecognizer->activeFingers_.end());
+    EXPECT_EQ(pinchRecognizer->refereeState_, RefereeState::FAIL);
+}
+
 } // namespace OHOS::Ace::NG
