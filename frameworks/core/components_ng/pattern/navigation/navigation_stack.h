@@ -153,7 +153,7 @@ public:
     virtual void Clear();
     virtual void UpdateReplaceValue(int32_t replaceValue) const;
     virtual int32_t GetReplaceValue() const;
-    virtual RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode);
+    virtual bool CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node);
     virtual bool GetDisableAnimation() const
     {
@@ -180,7 +180,6 @@ public:
 
     virtual void OnAttachToParent(RefPtr<NavigationStack> parent) {}
     virtual void OnDetachFromParent() {}
-    virtual void ClearPreBuildNodeList() {}
 
     virtual std::vector<std::string> DumpStackInfo() const;
 
