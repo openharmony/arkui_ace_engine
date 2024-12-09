@@ -4380,7 +4380,8 @@ void OverlayManager::PlaySheetTransition(
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = 0.0f;
-        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+        auto sheetType = sheetPattern->GetSheetType();
+        if (sheetType == SheetType::SHEET_POPUP || sheetPattern->IsCurSheetNeedHalfFoldHover()) {
             offset = sheetPattern->GetSheetOffset();
         } else {
             offset = sheetMaxHeight - sheetHeight_;

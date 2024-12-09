@@ -117,6 +117,8 @@ const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
 } // namespace
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
@@ -8000,6 +8002,19 @@ void JSViewAbstract::ParseSheetStyle(
     auto shadowValue = paramObj->GetProperty("shadow");
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
         sheetStyle.shadow = shadow;
+    }
+
+    // Parse hoverMode
+    auto enableHoverModeValue = paramObj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        sheetStyle.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+    auto hoverModeAreaValue = paramObj->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            sheetStyle.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
     }
 
     auto widthValue = paramObj->GetProperty("width");
