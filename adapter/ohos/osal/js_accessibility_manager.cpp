@@ -874,8 +874,8 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>
 void GetFrameNodeChildren(
     const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG::FrameNode>>& children, int32_t pageId = -1)
 {
-    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (frameNode) {
         CHECK_NULL_VOID(frameNode->IsActive());
         if (uiNode->GetTag() == "page") {
             if (pageId != -1 && uiNode->GetPageId() != pageId) {
@@ -887,18 +887,12 @@ void GetFrameNodeChildren(
                 return;
             }
         }
-    }
-
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-    if (frameNode) {
+        
         auto overlayNode = frameNode->GetOverlayNode();
         if (overlayNode) {
             GetFrameNodeChildren(overlayNode, children, pageId);
         }
-    }
-
-    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+        
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
         if (uiVirtualNode != nullptr) {
@@ -1794,7 +1788,7 @@ void SearchExtensionElementInfoNG(const SearchParameter& searchParam,
 {
     auto extensionElementInfos = SearchExtensionElementInfoByAccessibilityIdNG(
         searchParam.nodeId, searchParam.mode, node, searchParam.uiExtensionOffset);
-    if (extensionElementInfos.size() > 0) {
+    if (!extensionElementInfos.empty()) {
         auto rootParentId = extensionElementInfos.front().GetParentNodeId();
         ConvertExtensionAccessibilityNodeId(extensionElementInfos, node, searchParam.uiExtensionOffset, parentInfo);
         if (rootParentId == NG::UI_EXTENSION_ROOT_ID) {
@@ -1943,7 +1937,9 @@ bool LostFocus(const RefPtr<NG::FrameNode>& frameNode)
 
 bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
-    auto gesture = frameNode->GetEventHub<NG::EventHub>()->GetGestureEventHub();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto gesture = eventHub->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
     bool result = gesture->ActClick();
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();

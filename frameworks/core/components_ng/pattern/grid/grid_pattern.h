@@ -213,9 +213,14 @@ public:
         return true;
     }
 
-    const std::list<GridPreloadItem>& GetPreloadItemList() const
+    bool HasPreloadItemList() const
     {
-        return preloadItemList_;
+        return !preloadItemList_.empty();
+    }
+
+    std::list<GridPreloadItem> MovePreloadItemList()
+    {
+        return std::move(preloadItemList_);
     }
 
     void SetPreloadItemList(std::list<GridPreloadItem>&& list)

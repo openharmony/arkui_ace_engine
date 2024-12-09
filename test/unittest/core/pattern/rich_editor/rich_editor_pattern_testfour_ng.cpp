@@ -1061,10 +1061,10 @@ HWTEST_F(RichEditorPatternTestFourNg, GetDeletedSpan001, TestSize.Level1)
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
     richEditorPattern->HandleFocusEvent();
 
-    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD, true);
+    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD);
 
     richEditorPattern->previewTextRecord_.previewContent = "abc";
-    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD, true);
+    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD);
 
     EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
 }
@@ -1130,47 +1130,6 @@ HWTEST_F(RichEditorPatternTestFourNg, CheckEditorTypeChange001, TestSize.Level1)
     richEditorPattern->CheckEditorTypeChange();
 
     EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
-}
-
-/**
- * @tc.name: HandleOnlyImageSelected001
- * @tc.desc: test HandleOnlyImageSelected
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleOnlyImageSelected001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddImageSpan();
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-    Offset globalOffset;
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->isOnlyImageDrag_ = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-    richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
-    selectOverlayInfo->firstHandle.isShow = true;
-    selectOverlayInfo->secondHandle.isShow = true;
-    richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
-    auto textPattern = AceType::DynamicCast<TextPattern>(richEditorPattern);
-    auto children = textPattern->GetAllChildren();
-    for (const auto& uinode : children) {
-        auto imageNode = AceType::DynamicCast<FrameNode>(uinode);
-        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-        ImageSourceInfo value(" ");
-        imageLayoutProperty->UpdateImageSourceInfo(value);
-    }
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
-    EXPECT_TRUE(richEditorPattern->isOnlyImageDrag_);
 }
 
 /**

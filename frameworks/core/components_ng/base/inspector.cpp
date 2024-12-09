@@ -89,10 +89,12 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
 {
     // Set ViewId for the fast preview.
     auto parent = uiNode->GetParent();
-    if (parent && parent->GetTag() == "JsView") {
-        uiNode->SetViewId(std::to_string(parent->GetId()));
-    } else {
-        uiNode->SetViewId(parent->GetViewId());
+    if (parent) {
+        if (parent->GetTag() == "JsView") {
+            uiNode->SetViewId(std::to_string(parent->GetId()));
+        } else {
+            uiNode->SetViewId(parent->GetViewId());
+        }
     }
     if (uiNode->GetTag() == "stage") {
     } else if (uiNode->GetTag() == "page") {

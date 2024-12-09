@@ -167,6 +167,9 @@ public:
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpTextStyleInfo();
+    void DumpTextStyleInfo2();
+    void DumpTextStyleInfo3();
+    void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
     void DumpParagraphsInfo();
@@ -971,8 +974,6 @@ private:
     void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
-
-    void DumpTextLayoutProperty();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

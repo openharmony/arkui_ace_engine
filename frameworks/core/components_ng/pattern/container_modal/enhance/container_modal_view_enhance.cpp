@@ -25,6 +25,10 @@
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t INVALID_LISTENER_ID = -1;
+}
+
 /**
  * The structure of container_modal enhanced is designed as follows :
  * |--container_modal(stack)
@@ -241,5 +245,38 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE,
         std::to_string(closeButtonRightMargin));
     containerPattern->CallButtonsRectChange();
+}
+
+int32_t ContainerModalViewEnhance::AddButtonsRectChangeListener(
+    PipelineContext* context, ButtonsRectChangeListener&& listener)
+{
+    CHECK_NULL_RETURN(context, INVALID_LISTENER_ID);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, INVALID_LISTENER_ID);
+    auto children = rootNode->GetChildren();
+    if (children.empty()) {
+        return INVALID_LISTENER_ID;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_RETURN(containerNode, INVALID_LISTENER_ID);
+    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_RETURN(pattern, INVALID_LISTENER_ID);
+    return pattern->AddButtonsRectChangeListener(std::move(listener));
+}
+
+void ContainerModalViewEnhance::RemoveButtonsRectChangeListener(PipelineContext* context, int32_t id)
+{
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto children = rootNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(containerNode);
+    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveButtonsRectChangeListener(id);
 }
 } // namespace OHOS::Ace::NG

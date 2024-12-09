@@ -19,6 +19,15 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<FocusManager> GetCurrentFocusManager()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto focusManager = context->GetFocusManager();
+    return focusManager;
+}
+}
 
 FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
 {
@@ -418,7 +427,6 @@ void FocusManager::WindowFocusMoveEnd()
 void FocusManager::FocusGuard::CreateFocusGuard(const RefPtr<FocusHub>& focusHub,
     const RefPtr<FocusManager>& focusManager, SwitchingStartReason reason)
 {
-    CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusManager);
     if (focusManager->isSwitchingFocus_.value_or(false)) {
         return;
@@ -431,14 +439,12 @@ FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub,
     SwitchingStartReason reason)
 {
     RefPtr<FocusHub> hub = focusHub;
-    if (!focusHub ||!focusHub->GetFocusManager()) {
+    if (!hub || !hub->GetFocusManager()) {
         auto curFocusView = FocusView::GetCurrentFocusView();
-        CHECK_NULL_VOID(curFocusView);
-        auto curFocusViewHub = curFocusView->GetFocusHub();
-        CHECK_NULL_VOID(curFocusViewHub);
-        hub = curFocusViewHub;
+        auto hub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     }
-    auto mng = hub->GetFocusManager();
+
+    auto mng = hub ? hub->GetFocusManager() : GetCurrentFocusManager();
     CreateFocusGuard(hub, mng, reason);
 }
 

@@ -1443,6 +1443,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    if (textSize == 0) {
+        return; // no content
+    }
     if (inlineStyle) {
         auto dotPos = contentController_->GetTextUtf16Value().rfind(u'.');
         if (dotPos != std::string::npos && static_cast<int32_t>(dotPos) < textSize - FIND_TEXT_ZERO_INDEX) {
@@ -3812,8 +3815,10 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
 void TextFieldPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
 {
     bool flag = false;
-    if (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT)) {
-        flag = true;
+    if (keyEvent.action == KeyAction::DOWN) {
+        if (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT)) {
+            flag = true;
+        }
     }
     if (flag != shiftFlag_) {
         shiftFlag_ = flag;
@@ -4591,17 +4596,19 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
             continue;
         }
         // cal word length
-        if (paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
+        if (paragraph_ && paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
             if (directionMove == 1) {
                 offset += (wordEnd - strIndex);
-                return offset;
             } else {
                 offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
             }
-            break;
+            return std::clamp(offset, 0, textLength);
+        } else {
+            // GetWordBoundary fail
+            return 0;
         }
     }
-    return offset;
+    return std::clamp(offset, 0, textLength);
 }
 
 int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged)
@@ -9163,11 +9170,12 @@ std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(
     if (touchInfos.empty()) {
         return std::nullopt;
     }
-    if (!moveCaretState_.isMoveCaret) {
+    if (!moveCaretState_.isMoveCaret && !IsGestureSelectingText()) {
         return touchInfos.front();
     }
+    auto fingerId = moveCaretState_.isMoveCaret ? moveCaretState_.touchFingerId : GetSelectingFingerId();
     for (auto touchInfo : touchInfos) {
-        if (touchInfo.GetFingerId() == moveCaretState_.touchFingerId) {
+        if (touchInfo.GetFingerId() == fingerId) {
             return touchInfo;
         }
     }

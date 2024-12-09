@@ -82,7 +82,8 @@ void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
     }
     currentOffset_ = currentDelta_;
     startMainPos_ = currentOffset_;
-    ACE_SCOPED_TRACE("measure swiper startMainPos_:%f", startMainPos_);
+    ACE_SCOPED_TRACE("measure swiper startMainPos_:%f, jumpIndex_:%d, targetIndex_:%d", startMainPos_,
+        jumpIndex_.value_or(-1), targetIndex_.value_or(-1));
     if (SwiperUtils::IsStretch(property)) {
         prevMargin_ = property->GetCalculatedPrevMargin();
         nextMargin_ = property->GetCalculatedNextMargin();

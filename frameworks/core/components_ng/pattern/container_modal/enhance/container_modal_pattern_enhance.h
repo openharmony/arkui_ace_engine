@@ -16,10 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
 
+#include <functional>
+#include <unordered_map>
+
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::NG {
+using ButtonsRectChangeListener = std::function<void(const RectF& containerModal, const RectF& buttonsRect)>;
+
 class ACE_EXPORT ContainerModalPatternEnhance : public ContainerModalPattern {
     DECLARE_ACE_TYPE(ContainerModalPatternEnhance, ContainerModalPattern);
 
@@ -68,6 +73,9 @@ public:
     void OnMinButtonClick();
     void OnCloseButtonClick();
     void CallMenuWidthChange(int32_t resId);
+    int32_t AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener);
+    void RemoveButtonsRectChangeListener(int32_t id);
+
 private:
     RefPtr<FrameNode> GetButtonRowByInspectorId()
     {
@@ -101,6 +109,7 @@ private:
 
     void SetColorConfigurationUpdate();
     void SetMaximizeIconIsRecover();
+    void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) override;
 
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<FrameNode> menuList_;
@@ -111,6 +120,7 @@ private:
     bool enableSplit_ = true;
     CancelableCallback<void()> contextTimer_;
     bool enableContainerModalGesture_ = true;
+    std::unordered_map<int32_t, ButtonsRectChangeListener> rectChangeListeners_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

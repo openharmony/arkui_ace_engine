@@ -798,6 +798,11 @@ void Scrollable::ProcessListSnapMotion(double position)
             touchUp_ = true;
         }
     }
+    if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(
+            nodeId_, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+    }
     currentPos_ = position;
     if (canOverScroll_ && state_ == AnimationState::SNAP) {
         scrollPause_ = true;

@@ -101,13 +101,13 @@ public:
             CHECK_NULL_VOID(frameNode);
             auto pipeline = frameNode->GetContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->AddAfterLayoutTask([weak = WeakClaim(this), currentIndex]() {
+            pipeline->AddAfterLayoutTask([weak = WeakClaim(this), preIndex, currentIndex]() {
                 auto eventHub = weak.Upgrade();
                 CHECK_NULL_VOID(eventHub);
-                eventHub->FireJSChangeEvent(currentIndex);
+                eventHub->FireJSChangeEvent(preIndex, currentIndex);
             });
         } else {
-            FireJSChangeEvent(currentIndex);
+            FireJSChangeEvent(preIndex, currentIndex);
         }
 
         if (!changeEventsWithPreIndex_.empty()) {
@@ -231,9 +231,11 @@ public:
     }
 
 private:
-    void FireJSChangeEvent(int32_t index)
+    void FireJSChangeEvent(int32_t preIndex, int32_t index)
     {
-        ACE_SCOPED_TRACE("Swiper FireChangeEvent, index: %d", index);
+        auto frameNode = GetFrameNode();
+        ACE_SCOPED_TRACE("Swiper FireChangeEvent, id: %d, preIndex: %d, index: %d", frameNode ? frameNode->GetId() : -1,
+            preIndex, index);
         if (changeEvents_.empty()) {
             return;
         }

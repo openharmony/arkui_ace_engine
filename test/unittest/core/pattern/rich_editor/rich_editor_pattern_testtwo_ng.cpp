@@ -786,50 +786,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, NeedShowAIDetect003, TestSize.Level1)
 }
 
 /**
- * @tc.name: RefreshSelectOverlay001
- * @tc.desc: test RefreshSelectOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, RefreshSelectOverlay001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = 100;
-    richEditorPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
-    EXPECT_EQ(selectOverlayInfo.hitTestMode, HitTestMode::HTMDEFAULT);
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
-    richEditorPattern->selectOverlayProxy_ = proxy;
-    richEditorPattern->RefreshSelectOverlay(false, false);
-    EXPECT_NE(proxy, nullptr);
-}
-
-/**
- * @tc.name: RefreshSelectOverlay002
- * @tc.desc: test RefreshSelectOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, RefreshSelectOverlay002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = 100;
-    richEditorPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
-    EXPECT_EQ(selectOverlayInfo.hitTestMode, HitTestMode::HTMDEFAULT);
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
-    richEditorPattern->selectOverlayProxy_ = proxy;
-    richEditorPattern->RefreshSelectOverlay(true, true);
-    EXPECT_NE(proxy, nullptr);
-}
-
-/**
  * @tc.name: HideMenu001
  * @tc.desc: test HideMenu
  * @tc.type: FUNC

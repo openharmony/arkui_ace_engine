@@ -475,7 +475,7 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
     EXPECT_FALSE(pattern_->IsAtTop());
-    EXPECT_EQ(GetChildY(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
     EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 }
 
@@ -553,8 +553,8 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex006, TestSize.Level1)
     model.SetLanes(lanes);
     CreateListItems(TOTAL_ITEM_NUMBER * lanes);
     CreateDone();
-    EXPECT_EQ(GetChildY(frameNode_, 2), 0.f);
-    EXPECT_EQ(GetChildY(frameNode_, 3), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0);
 }
 
 /**
@@ -572,7 +572,7 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex007, TestSize.Level1)
     model.SetInitialIndex(1);
     CreateListItemGroups(GROUP_NUMBER);
     CreateDone();
-    EXPECT_EQ(GetChildY(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
 }
 
 /**
@@ -727,8 +727,8 @@ HWTEST_F(ListAttrTestNg, AttrLanes006, TestSize.Level1)
      * @tc.expected: default value
      */
     ListModelNG model = CreateList();
-    model.SetLaneMinLength(Dimension(0.f));
-    model.SetLaneMaxLength(Dimension(0.f));
+    model.SetLaneMinLength(Dimension(0));
+    model.SetLaneMaxLength(Dimension(0));
     CreateListItems(1);
     CreateDone();
     EXPECT_FALSE(layoutProperty_->HasLaneMinLength());

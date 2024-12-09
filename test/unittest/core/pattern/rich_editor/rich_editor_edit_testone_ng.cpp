@@ -440,20 +440,12 @@ HWTEST_F(RichEditorEditTestOneNg, SetSelection001, TestSize.Level1)
 
     SelectionOptions options;
     options.menuPolicy = MenuPolicy::SHOW;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
-        richEditorPattern->selectionMenuOffsetByMouse_.GetX());
-
     int32_t start = 1;
     int32_t end = 3;
     richEditorPattern->SetSelection(start, end, options);
     EXPECT_NE(richEditorPattern->textSelector_.GetStart(), start);
 
     options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
-        richEditorPattern->selectionMenuOffsetByMouse_.GetX());
-
     richEditorPattern->SetSelection(start, end, options);
     EXPECT_NE(richEditorPattern->textSelector_.GetEnd(), end);
 
@@ -509,11 +501,6 @@ HWTEST_F(RichEditorEditTestOneNg, RefreshSelectOverlay001, TestSize.Level1)
     int32_t posy = 3;
     richEditorPattern->HandleSurfacePositionChanged(posx, posy);
     EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->RefreshSelectOverlay(true, false);
-    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(0, 0, 0, 0));
-
-    EXPECT_EQ(richEditorPattern->IsHandlesShow(), false);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();

@@ -154,6 +154,7 @@ void TextModelNG::SetTextColor(const Color& value)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
 void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
@@ -166,6 +167,7 @@ void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)

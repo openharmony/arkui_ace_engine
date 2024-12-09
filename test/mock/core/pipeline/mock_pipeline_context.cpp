@@ -878,6 +878,15 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    return 0;
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
