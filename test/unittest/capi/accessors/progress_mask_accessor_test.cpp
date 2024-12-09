@@ -38,11 +38,11 @@ public:
 };
 
 namespace {
-    constexpr auto defaultValue = 0.0f;
-    constexpr auto defaultMaxValue = 100.0f;
-    constexpr auto defaultEnableBreathe = false;
-    constexpr auto defaultColor = Color(0x99182431);
-}
+constexpr auto DEFAULT_VALUE = 0.0f;
+constexpr auto DEFAULT_MAX_VALUE = 100.0f;
+constexpr auto DEFAULT_ENABLE_BREATHE = false;
+constexpr auto DEFAULT_COLOR = Color(0x99182431);
+} // namespace
 
 /**
  * @tc.name: createDestroyPeerTest
@@ -84,10 +84,10 @@ HWTEST_F(ProgressMaskAccessorTest, ctorDefaultTest, TestSize.Level1)
     ASSERT_NE(peer_, nullptr);
     const auto property = peer_->GetProperty();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetValue(), defaultValue);
-    EXPECT_EQ(property->GetMaxValue(), defaultMaxValue);
-    EXPECT_EQ(property->GetColor(), defaultColor);
-    EXPECT_EQ(property->GetEnableBreathe(), defaultEnableBreathe);
+    EXPECT_EQ(property->GetValue(), DEFAULT_VALUE);
+    EXPECT_EQ(property->GetMaxValue(), DEFAULT_MAX_VALUE);
+    EXPECT_EQ(property->GetColor(), DEFAULT_COLOR);
+    EXPECT_EQ(property->GetEnableBreathe(), DEFAULT_ENABLE_BREATHE);
 }
 
 /**
@@ -135,24 +135,24 @@ HWTEST_F(ProgressMaskAccessorTest, ctorInvalidTest, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_Number, float, Ark_Number, float, Ark_ResourceColor, Color>> validValues {
         {
-            Converter::ArkValue<Ark_Number>(-1), defaultValue,
-            Converter::ArkValue<Ark_Number>(-1), defaultMaxValue,
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color(-1)), defaultColor
+            Converter::ArkValue<Ark_Number>(-1), DEFAULT_VALUE,
+            Converter::ArkValue<Ark_Number>(-1), DEFAULT_MAX_VALUE,
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color(-1)), DEFAULT_COLOR
         },
         {
-            Converter::ArkValue<Ark_Number>(-100), defaultValue,
+            Converter::ArkValue<Ark_Number>(-100), DEFAULT_VALUE,
             Converter::ArkValue<Ark_Number>(10), 10,
             Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED
         },
         {
             Converter::ArkValue<Ark_Number>(10), 10,
-            Converter::ArkValue<Ark_Number>(-200.5f), defaultMaxValue,
+            Converter::ArkValue<Ark_Number>(-200.5f), DEFAULT_MAX_VALUE,
             Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), Color(0xff0000ff)
         },
         {
             Converter::ArkValue<Ark_Number>(200.5f), 200.5f,
             Converter::ArkValue<Ark_Number>(32267.0f), 32267.0f,
-            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), defaultColor
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), DEFAULT_COLOR
         },
     };
     for (const auto& [inValue, outValue, inMax, outMax, inColor, outColor] : validValues) {
@@ -209,7 +209,7 @@ HWTEST_F(ProgressMaskAccessorTest, updateProgressInvalidTest, TestSize.Level1)
         accessor_->updateProgress(peer_, &inValue);
         const auto property = peer_->GetProperty();
         ASSERT_NE(property, nullptr);
-        EXPECT_EQ(property->GetValue(), defaultValue);
+        EXPECT_EQ(property->GetValue(), DEFAULT_VALUE);
     }
 }
 
@@ -252,7 +252,7 @@ HWTEST_F(ProgressMaskAccessorTest, updateColorInvalidTest, TestSize.Level1)
         accessor_->updateColor(peer_, &inValue);
         const auto property = peer_->GetProperty();
         ASSERT_NE(property, nullptr);
-        EXPECT_EQ(property->GetColor(), defaultColor);
+        EXPECT_EQ(property->GetColor(), DEFAULT_COLOR);
     }
 }
 

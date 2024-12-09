@@ -386,11 +386,18 @@ struct AutoProgressMaskPeer {
         const GENERATED_ArkUIFullNodeAPI* fullAPI,
         const Ark_Number* value, const Ark_Number* total, const Ark_ResourceColor* color
     ) : accessor(fullAPI->getAccessors()->getProgressMaskAccessor()),
-        ptr(accessor->ctor(value, total, color)) {}
+        ptr(accessor->ctor(value, total, color))
+    {}
 
-    ~AutoProgressMaskPeer() { accessor->destroyPeer(ptr); }
+    ~AutoProgressMaskPeer()
+    {
+        accessor->destroyPeer(ptr);
+    }
 
-    Ark_ProgressMask GetArkValue() { return {.ptr = reinterpret_cast<Ark_NativePointer>(ptr)}; }
+    Ark_ProgressMask GetArkValue() const
+    {
+        return {.ptr = reinterpret_cast<Ark_NativePointer>(ptr)};
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(AutoProgressMaskPeer);
 };

@@ -2871,10 +2871,6 @@ void Mask1Impl(Ark_NativePointer node,
         },
         [node](const auto& value) {
             LOGE("CommonMethodModifier::Mask1Impl is not implemented yet");
-            // Uncomment the following lines when the shape types will be defined (not Ark_CustomObject).
-            // MaskShapeImpl(node,
-            //     &Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape,
-            //         std::remove_cvref_t<decltype(value)>>(value));
         },
         []() {}
     );
