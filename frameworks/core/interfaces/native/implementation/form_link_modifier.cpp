@@ -47,9 +47,10 @@ FormLinkOptions Convert(const Ark_FormLinkOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FormLinkModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // FormLinkModifier
 namespace FormLinkInterfaceModifier {

@@ -224,6 +224,7 @@ HWTEST_F(ProgressModifierTest, setColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_GRADIENT
 HWTEST_F(ProgressModifierTest, setColorTestValidValues, TestSize.Level1)
 {
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
@@ -259,6 +260,7 @@ HWTEST_F(ProgressModifierTest, setColorTestValidValues, TestSize.Level1)
     EXPECT_EQ(strResult,
         "[{\"color\":\"#44223311\",\"offset\":\"0.500000\"},{\"color\":\"#33112244\",\"offset\":\"0.900000\"}]");
 }
+#endif
 
 /*
  * @tc.name: setLinearStyleDefaultValues

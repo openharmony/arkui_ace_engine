@@ -2915,10 +2915,10 @@
                 "setAspectRatioTestDefaultValues",
                 "setAspectRatioTestAspectRatioValidValues",
                 "setClickEffectTestDefaultValues",
-                "setClickEffectTestClickEffectClickEffectLevelValidValues",
-                "setClickEffectTestClickEffectClickEffectLevelInvalidValues",
-                "setClickEffectTestClickEffectClickEffectScaleValidValues",
-                "setClickEffectTestClickEffectClickEffectScaleInvalidValues",
+                "setClickEffectTestClickEffectLevelValidValues",
+                "setClickEffectTestClickEffectLevelInvalidValues",
+                "setClickEffectTestClickEffectScaleValidValues",
+                "setClickEffectTestClickEffectScaleInvalidValues",
                 "setAllowDropTestDefaultValues",
                 "setAllowDropTestValidValues",
                 "setDraggableTestDefaultValues",
@@ -3565,6 +3565,8 @@
                 "setStyleTestStyleProgressStyleOptionsStrokeWidthValidValues", // Incorrect json value
                 "setStyleTestStyleProgressStyleOptionsScaleWidthValidValues", // Incorrect json value
                 "setStyleTestStyleRingStyleOptionsStrokeWidthValidValues", // Incorrect json value
+
+                "setColorTestColorInvalidValues", // broken LinearGradient
             ],
             "attributes": [
                 {
@@ -3721,6 +3723,10 @@
                 "setMinResponsiveDistanceTestMinResponsiveDistanceValidValues", // Need float comp in UT generator
                 "setSlideRangeTestSlideRangeFromValidValues", // Need float comp in UT generator
                 "setSlideRangeTestSlideRangeToValidValues", // Need float comp in UT generator (looks like dep on from)
+
+                "setTrackColorTestDefaultValues", // broken LinearGradient
+                "setTrackColorTestTrackColorValidValues", // broken LinearGradient
+                "setTrackColorTestTrackColorInvalidValues", // broken LinearGradient
             ],
             "attributes": [
                 {

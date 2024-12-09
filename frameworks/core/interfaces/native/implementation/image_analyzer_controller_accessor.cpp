@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "image_analyzer_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -55,7 +57,7 @@ void DestroyPeerImpl(ImageAnalyzerControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-ImageAnalyzerControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ImageAnalyzerControllerPeer>();
     peerImpl->IncRefCount();

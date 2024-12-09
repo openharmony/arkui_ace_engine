@@ -60,9 +60,10 @@ DataPanelOptions Convert(const Ark_DataPanelOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataPanelModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // DataPanelModifier
 namespace DataPanelInterfaceModifier {

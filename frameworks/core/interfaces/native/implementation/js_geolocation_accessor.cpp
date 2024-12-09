@@ -26,7 +26,7 @@ void DestroyPeerImpl(JsGeolocationPeer* peer)
     peer->webGeolocation = nullptr;
     delete peer;
 }
-JsGeolocationPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new JsGeolocationPeer();
 }

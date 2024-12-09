@@ -72,6 +72,7 @@ namespace GeneratedApiImpl {
     void SetChildTotalCount(Ark_NodeHandle node, Ark_Int32 totalCount);
     void ShowCrash(Ark_CharPtr message);
     void SetCallbackMethod(GENERATED_Ark_APICallbackMethod* method);
+    void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event);
 } // namespace OHOS::Ace::NG::GeneratedApiImpl
 
 namespace GeneratedBridge {
@@ -144,9 +145,9 @@ const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier();
 const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier();
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier();
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier();
-const GENERATED_ArkUINavigationModifier* GetNavigationModifier();
 const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier();
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier();
+const GENERATED_ArkUICommonTransitionModifier* GetCommonTransitionModifier();
 const GENERATED_ArkUIPanelModifier* GetPanelModifier();
 const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier();
 const GENERATED_ArkUIPathModifier* GetPathModifier();
@@ -221,7 +222,6 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor();
-const GENERATED_ArkUIContentModifierAccessor* GetContentModifierAccessor();
 const GENERATED_ArkUIViewAccessor* GetViewAccessor();
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor();
 const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor();
@@ -357,9 +357,9 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetMenuItemGroupModifier,
         GetNavDestinationModifier,
         GetNavRouterModifier,
-        GetNavigationModifier,
         GetNavigatorModifier,
         GetNodeContainerModifier,
+        GetCommonTransitionModifier,
         GetPanelModifier,
         GetPasteButtonModifier,
         GetPathModifier,
@@ -440,7 +440,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPixelMapMockAccessor,
         GetProgressMaskAccessor,
         GetAttributeModifierAccessor,
-        GetContentModifierAccessor,
         GetViewAccessor,
         GetTextContentControllerBaseAccessor,
         GetDynamicNodeAccessor,
@@ -537,7 +536,8 @@ const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
         OHOS::Ace::NG::GeneratedApiImpl::ApplyModifierFinish,
         OHOS::Ace::NG::GeneratedApiImpl::MarkDirty,
         OHOS::Ace::NG::GeneratedApiImpl::IsBuilderNode,
-        OHOS::Ace::NG::GeneratedApiImpl::ConvertLengthMetricsUnit
+        OHOS::Ace::NG::GeneratedApiImpl::ConvertLengthMetricsUnit,
+        OHOS::Ace::NG::GeneratedApiImpl::EmitOnClick,
     };
     return &basicNodeAPIImpl;
 }

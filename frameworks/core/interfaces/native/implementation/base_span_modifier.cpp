@@ -22,9 +22,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseSpanModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 void TextBackgroundStyleImpl(Ark_NativePointer node,
                              const Ark_TextBackgroundStyle* value)

@@ -48,7 +48,7 @@ SelectIconType Convert(const Ark_String& src)
 }
 
 template<>
-SelectIconType Convert(const Ark_CustomObject& src)
+SelectIconType Convert(const Ark_SymbolGlyphModifier& src)
 {
     return nullptr;
 }
@@ -56,9 +56,10 @@ SelectIconType Convert(const Ark_CustomObject& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // MenuItemModifier
 namespace MenuItemInterfaceModifier {

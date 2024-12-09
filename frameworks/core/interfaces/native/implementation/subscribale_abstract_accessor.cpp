@@ -24,7 +24,7 @@ namespace SubscribaleAbstractAccessor {
 void DestroyPeerImpl(SubscribaleAbstractPeer* peer)
 {
 }
-SubscribaleAbstractPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new SubscribaleAbstractPeer();
 }

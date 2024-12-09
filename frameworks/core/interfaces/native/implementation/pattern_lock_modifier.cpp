@@ -21,7 +21,6 @@
 #include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 
-
 namespace OHOS::Ace::NG {
 namespace {
 struct CircleStyleOptions {
@@ -46,9 +45,10 @@ CircleStyleOptions Convert(const Ark_CircleStyleOptions& src)
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PatternLockModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // PatternLockModifier
 namespace PatternLockInterfaceModifier {

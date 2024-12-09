@@ -28,7 +28,7 @@ void DestroyPeerImpl(XComponentControllerPeer* peer)
     CHECK_NULL_VOID(peer);
     delete peer;
 }
-XComponentControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peer = new XComponentControllerPeer();
 #ifdef XCOMPONENT_SUPPORTED

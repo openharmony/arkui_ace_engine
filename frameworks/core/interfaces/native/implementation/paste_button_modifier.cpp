@@ -51,9 +51,10 @@ PasteButtonStyle Convert(const Ark_PasteButtonOptions& src)
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PasteButtonModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // PasteButtonModifier
 namespace PasteButtonInterfaceModifier {

@@ -178,7 +178,7 @@ void DestroyPeerImpl(CanvasRendererPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-CanvasRendererPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<CanvasRendererPeerImpl>();
     peerImpl->IncRefCount();
@@ -281,11 +281,11 @@ Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::CreateLinearGradientImpl return type Ark_NativePointer "
         "should be replaced with a valid ark type for CanvasGradient.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
                                     const Ark_ImageBitmap* image,
-                                    const Ark_Union_String_Null* repetition)
+                                    const Opt_String* repetition)
 {
     LOGE("ARKOALA CanvasRendererAccessor::CreatePatternImpl return type Ark_NativePointer "
         "should be replaced with a valid ark type for CanvasPattern.");
@@ -301,7 +301,7 @@ Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::CreateRadialGradientImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for CanvasGradient type.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
                                           const Ark_Number* startAngle,
@@ -310,7 +310,7 @@ Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::CreateConicGradientImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for CanvasGradient type.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
                                        const Ark_Number* sw,
@@ -327,7 +327,7 @@ Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
         "should be replaced with a valid ark type for ImageData.");
     LOGE("ARKOALA CanvasRendererAccessor::CreateImageData1Impl Ark_ImageData includes Ark_ArrayBuffer "
         "which is partially implemented.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
                                    const Ark_Number* sx,
@@ -337,7 +337,7 @@ Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetImageDataImpl return type Ark_NativePointer "
         "should be replaced with a valid ark type for ImageData.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
                                   const Ark_Number* sx,
@@ -347,7 +347,7 @@ Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetPixelMapImpl return type Ark_NativePointer "
         "should be replaced with a valid ark type for PixelMap.");
-    return 0;
+    return nullptr;
 }
 void PutImageData0Impl(CanvasRendererPeer* peer,
                        const Ark_ImageData* imagedata,
@@ -520,7 +520,7 @@ Ark_NativePointer MeasureTextImpl(CanvasRendererPeer* peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::MeasureTextImpl return type Ark_NativePointer "
         "should be replaced with a valid ark type for TextMetrics.");
-    return 0;
+    return nullptr;
 }
 void StrokeTextImpl(CanvasRendererPeer* peer,
                     const Ark_String* text,
@@ -551,7 +551,7 @@ Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetTransformImpl return type Ark_NativePointer "
         "should be replaced with a valid ark type for Matrix2D.");
-    return 0;
+    return nullptr;
 }
 void ResetTransformImpl(CanvasRendererPeer* peer)
 {
@@ -819,7 +819,7 @@ Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetImageSmoothingQualityImpl return type Ark_NativePointer "
         "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
-    return 0;
+    return nullptr;
 }
 void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
                                   const Ark_String* imageSmoothingQuality)
@@ -833,7 +833,7 @@ Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasLineCap type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetLineCapImpl there is no implementation in controller "
         "for getter method of LineCap.");
-    return 0;
+    return nullptr;
 }
 void SetLineCapImpl(CanvasRendererPeer* peer,
                     const Ark_String* lineCap)
@@ -864,7 +864,7 @@ Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasLineJoin type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetLineJoinImpl there is no implementation in controller "
         "for getter method of LineJoin.");
-    return 0;
+    return nullptr;
 }
 void SetLineJoinImpl(CanvasRendererPeer* peer,
                      const Ark_String* lineJoin)
@@ -979,7 +979,7 @@ Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasDirection type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetDirectionImpl there is no implementation in controller "
         "for getter method of Direction.");
-    return 0;
+    return nullptr;
 }
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
@@ -1008,7 +1008,7 @@ Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasTextAlign type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetTextAlignImpl there is no implementation in controller "
         "for getter method of TextAlign.");
-    return 0;
+    return nullptr;
 }
 void SetTextAlignImpl(CanvasRendererPeer* peer,
                       const Ark_String* textAlign)
@@ -1022,7 +1022,7 @@ Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
         "should be replaced with a valid ark enum for CanvasTextBaseline type.");
     LOGE("ARKOALA CanvasRendererAccessor::GetTextBaselineImpl there is no implementation in controller "
         "for getter method of TextBaseline.");
-    return 0;
+    return nullptr;
 }
 void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)

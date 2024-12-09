@@ -55,7 +55,7 @@ struct SearchOptions {
 
 using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
 using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
-using UnionIconOptionsObject = std::variant<Ark_IconOptions, Ark_CustomObject>;
+using UnionIconOptionsObject = std::variant<Ark_IconOptions, Ark_SymbolGlyphModifier>;
 } // namespace
 
 namespace Converter {
@@ -122,9 +122,10 @@ SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // SearchModifier
 namespace SearchInterfaceModifier {

@@ -26,7 +26,7 @@ void DestroyPeerImpl(ClientAuthenticationHandlerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-ClientAuthenticationHandlerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ClientAuthenticationHandlerPeer();
 }

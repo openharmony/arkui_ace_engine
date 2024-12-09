@@ -24,7 +24,7 @@ namespace TimePickerDialogAccessor {
 void DestroyPeerImpl(TimePickerDialogPeer* peer)
 {
 }
-TimePickerDialogPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TimePickerDialogPeer();
 }

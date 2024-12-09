@@ -64,9 +64,10 @@ SaveButtonStyle Convert(const Ark_SaveButtonOptions& src)
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // SaveButtonModifier
 namespace SaveButtonInterfaceModifier {

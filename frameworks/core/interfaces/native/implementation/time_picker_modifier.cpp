@@ -36,9 +36,10 @@ void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TimePickerModifier
 namespace TimePickerInterfaceModifier {
@@ -115,7 +116,7 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, pickerStyle);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_DateTimeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

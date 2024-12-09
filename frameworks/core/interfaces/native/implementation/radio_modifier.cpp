@@ -35,9 +35,10 @@ void AssignCast(std::optional<RadioIndicatorType>& dst, const Ark_RadioIndicator
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RadioModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // RadioModifier
 namespace RadioInterfaceModifier {

@@ -86,9 +86,10 @@ void OffsetImpl(Ark_NativePointer node,
                 const Ark_Union_Position_Edges_LocalizedEdges* value);
 } // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 void IconSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)

@@ -50,9 +50,10 @@ void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // ImageModifier
 namespace ImageInterfaceModifier {
@@ -326,7 +327,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
     ViewAbstract::SetPrivacySensitive(frameNode, Converter::Convert<bool>(value));
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
-                              const Ark_CustomObject* value)
+                              const Ark_ResolutionQuality* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

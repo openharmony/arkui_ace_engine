@@ -170,9 +170,10 @@ void AssignCast(std::optional<ProgressStatus>& dst, const Ark_ProgressStatus& sr
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ProgressModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // ProgressModifier
 namespace ProgressInterfaceModifier {

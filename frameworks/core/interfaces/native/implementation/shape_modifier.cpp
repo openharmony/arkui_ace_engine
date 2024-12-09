@@ -47,9 +47,10 @@ ShapeOptions Convert(const Ark_ViewportRect& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ShapeModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // ShapeModifier
 namespace ShapeInterfaceModifier {

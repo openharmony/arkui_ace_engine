@@ -191,9 +191,10 @@ MenuOptionsParam Convert(const Ark_ExpandedMenuItemOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // WebModifier
 namespace WebInterfaceModifier {

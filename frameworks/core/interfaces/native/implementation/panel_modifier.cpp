@@ -65,9 +65,10 @@ void AssignCast(std::optional<CalcDimension>& dst, const Ark_PanelHeight& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanelModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // PanelModifier
 namespace PanelInterfaceModifier {

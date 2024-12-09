@@ -31,7 +31,7 @@ void DestroyPeerImpl(WebResourceResponsePeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-WebResourceResponsePeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new WebResourceResponsePeer();
 }

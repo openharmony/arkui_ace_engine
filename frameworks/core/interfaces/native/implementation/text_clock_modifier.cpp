@@ -52,9 +52,10 @@ namespace OHOS::Ace::NG::Converter {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TextClockModifier
 namespace TextClockInterfaceModifier {
@@ -176,7 +177,7 @@ void ContentModifierImpl(Ark_NativePointer node,
     //TextClockModelNG::SetContentModifier(frameNode, convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
-                         const Opt_CustomObject* value)
+                         const Opt_DateTimeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

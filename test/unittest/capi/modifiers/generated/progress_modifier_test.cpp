@@ -29,7 +29,6 @@ using namespace testing::ext;
 using namespace Converter;
 using namespace TypeHelper;
 namespace {
-const auto ATTRIBUTE_COLOR_NAME = "color";
 const auto ATTRIBUTE_STYLE_I_FONT_NAME = "font";
 const auto ATTRIBUTE_VALUE_NAME = "value";
 const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "0.000000";
@@ -39,14 +38,8 @@ const auto ATTRIBUTE_STYLE_NAME = "style";
 const auto ATTRIBUTE_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_TYPE_NAME = "type";
 const auto ATTRIBUTE_TYPE_DEFAULT_VALUE = "ProgressStyle.Linear";
-const auto ATTRIBUTE_COLOR_I_ANGLE_NAME = "angle";
-const auto ATTRIBUTE_COLOR_I_ANGLE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_COLOR_I_DIRECTION_NAME = "direction";
-const auto ATTRIBUTE_COLOR_I_DIRECTION_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_COLOR_I_COLORS_NAME = "colors";
-const auto ATTRIBUTE_COLOR_I_COLORS_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_COLOR_I_REPEATING_NAME = "repeating";
-const auto ATTRIBUTE_COLOR_I_REPEATING_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_COLOR_NAME = "color";
+const auto ATTRIBUTE_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME = "strokeWidth";
 const auto ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_STYLE_I_STROKE_RADIUS_NAME = "strokeRadius";
@@ -420,34 +413,96 @@ HWTEST_F(ProgressModifierTest, setValueTestValueValidValues, TestSize.Level1)
 HWTEST_F(ProgressModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_COLOR_NAME);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_ANGLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_ANGLE_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.angle'";
-
-    resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_DIRECTION_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.direction'";
-
-    resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_COLORS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_COLORS_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.colors'";
-
-    resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_REPEATING_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_REPEATING_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.repeating'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) << "Default value for attribute 'color'";
 }
 
 /*
- * @tc.name: setColorTestValidValues
+ * @tc.name: setColorTestColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setColorTestValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setColorTestColorValidValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Ark_Union_ResourceColor_LinearGradient initValueColor;
+
+    // Initial setup
+    initValueColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+
+    auto checkValue = [this, &initValueColor](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_ResourceColor_LinearGradient& value) {
+        Ark_Union_ResourceColor_LinearGradient inputValueColor = initValueColor;
+
+        inputValueColor = value;
+        modifier_->setColor(node_, &inputValueColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setColor, attribute: color";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+                ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+    }
+}
+
+/*
+ * @tc.name: setColorTestColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Level1)
+{
+    Ark_Union_ResourceColor_LinearGradient initValueColor;
+
+    // Initial setup
+    initValueColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+
+    auto checkValue = [this, &initValueColor](
+                          const std::string& input, const Ark_Union_ResourceColor_LinearGradient& value) {
+        Ark_Union_ResourceColor_LinearGradient inputValueColor = initValueColor;
+
+        modifier_->setColor(node_, &inputValueColor);
+        inputValueColor = value;
+        modifier_->setColor(node_, &inputValueColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setColor, attribute: color";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+                              ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
 }
 
 /*

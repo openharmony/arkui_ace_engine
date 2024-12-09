@@ -94,9 +94,10 @@ std::optional<int32_t> FontWeightToInt(const FontWeight& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TextModifier
 namespace TextInterfaceModifier {

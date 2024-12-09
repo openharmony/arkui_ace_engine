@@ -62,9 +62,10 @@ inline void AssignCast(std::optional<GridItemAlignment>& dst, const Ark_GridItem
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // GridModifier
 namespace GridInterfaceModifier {

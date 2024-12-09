@@ -374,9 +374,10 @@ ItemDivider Convert(const Ark_DividerOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TextPickerModifier
 namespace TextPickerInterfaceModifier {
@@ -575,7 +576,7 @@ void SelectedIndexImpl(Ark_NativePointer node,
     }
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerOptions_Null* value)
+                 const Opt_DividerOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

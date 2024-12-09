@@ -75,9 +75,10 @@ PasswordIcon Convert(const Ark_PasswordIcon& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TextInputModifier
 namespace TextInputInterfaceModifier {

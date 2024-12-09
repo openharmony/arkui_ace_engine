@@ -24,7 +24,7 @@ namespace DynamicNodeAccessor {
 void DestroyPeerImpl(DynamicNodePeer* peer)
 {
 }
-DynamicNodePeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new DynamicNodePeer();
 }

@@ -26,7 +26,7 @@ void DestroyPeerImpl(TextControllerPeer* peer)
     peer->controller = nullptr;
     delete peer;
 }
-TextControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextControllerPeer();
 }
@@ -47,7 +47,7 @@ void SetStyledStringImpl(TextControllerPeer* peer,
 Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
 {
     LOGW("TextControllerAccessor::GetLayoutManagerImpl is not implemented");
-    return 0;
+    return nullptr;
 }
 } // TextControllerAccessor
 const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()

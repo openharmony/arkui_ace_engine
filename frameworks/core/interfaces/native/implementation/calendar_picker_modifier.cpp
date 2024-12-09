@@ -51,9 +51,10 @@ void AssignCast(std::optional<CalendarSettingData>& dst, const Ark_CalendarOptio
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarPickerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // CalendarPickerModifier
 namespace CalendarPickerInterfaceModifier {

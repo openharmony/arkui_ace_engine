@@ -107,9 +107,10 @@ TabsOptions Convert(const Ark_TabsOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TabsModifier
 namespace TabsInterfaceModifier {
@@ -333,7 +334,7 @@ void FadingEdgeImpl(Ark_NativePointer node,
     TabsModelNG::SetFadingEdge(frameNode, Converter::Convert<bool>(value));
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerStyle_Null* value)
+                 const Opt_DividerStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -425,8 +426,8 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     };
     TabsModelNG::SetOnContentWillChange(frameNode, std::move(callback));
 }
-void BarModeBarMode_SCROLLABLEImpl(Ark_NativePointer node,
-                                   const Ark_ScrollableBarModeOptions* options)
+void BarModeScrollableImpl(Ark_NativePointer node,
+                           const Ark_ScrollableBarModeOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -469,7 +470,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::BarBackgroundBlurStyle1Impl,
         TabsAttributeModifier::BarBackgroundEffectImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
-        TabsAttributeModifier::BarModeBarMode_SCROLLABLEImpl,
+        TabsAttributeModifier::BarModeScrollableImpl,
     };
     return &ArkUITabsModifierImpl;
 }

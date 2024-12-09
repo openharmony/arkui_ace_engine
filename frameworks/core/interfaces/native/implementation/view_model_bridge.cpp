@@ -44,6 +44,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createCommonNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCommonMethodNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCommonShapeMethodNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createCommonTransitionNode(Ark_Int32 nodeId);
     Ark_NodeHandle createComponent3DNode(Ark_Int32 nodeId);
     Ark_NodeHandle createContainerSpanNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCounterNode(Ark_Int32 nodeId);
@@ -83,7 +84,6 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createMenuItemGroupNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNavDestinationNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNavRouterNode(Ark_Int32 nodeId);
-    Ark_NodeHandle createNavigationNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNavigatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNodeContainerNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPanelNode(Ark_Int32 nodeId);
@@ -175,6 +175,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_COMMON: return GeneratedViewModel::createCommonNode(id);
             case GENERATED_ARKUI_COMMON_METHOD: return GeneratedViewModel::createCommonMethodNode(id);
             case GENERATED_ARKUI_COMMON_SHAPE_METHOD: return GeneratedViewModel::createCommonShapeMethodNode(id);
+            case GENERATED_ARKUI_COMMON_TRANSITION: return GeneratedViewModel::createCommonTransitionNode(id);
             case GENERATED_ARKUI_COMPONENT_3D: return GeneratedViewModel::createComponent3DNode(id);
             case GENERATED_ARKUI_CONTAINER_SPAN: return GeneratedViewModel::createContainerSpanNode(id);
             case GENERATED_ARKUI_COUNTER: return GeneratedViewModel::createCounterNode(id);
@@ -214,7 +215,6 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_MENU_ITEM_GROUP: return GeneratedViewModel::createMenuItemGroupNode(id);
             case GENERATED_ARKUI_NAV_DESTINATION: return GeneratedViewModel::createNavDestinationNode(id);
             case GENERATED_ARKUI_NAV_ROUTER: return GeneratedViewModel::createNavRouterNode(id);
-            case GENERATED_ARKUI_NAVIGATION: return GeneratedViewModel::createNavigationNode(id);
             case GENERATED_ARKUI_NAVIGATOR: return GeneratedViewModel::createNavigatorNode(id);
             case GENERATED_ARKUI_NODE_CONTAINER: return GeneratedViewModel::createNodeContainerNode(id);
             case GENERATED_ARKUI_PANEL: return GeneratedViewModel::createPanelNode(id);
@@ -241,11 +241,9 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_SCREEN: return GeneratedViewModel::createScreenNode(id);
             case GENERATED_ARKUI_SCROLL: return GeneratedViewModel::createScrollNode(id);
             case GENERATED_ARKUI_SCROLL_BAR: return GeneratedViewModel::createScrollBarNode(id);
-            case GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD:
-                return GeneratedViewModel::createScrollableCommonMethodNode(id);
+            case GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD: return GeneratedViewModel::createScrollableCommonMethodNode(id);
             case GENERATED_ARKUI_SEARCH: return GeneratedViewModel::createSearchNode(id);
-            case GENERATED_ARKUI_SECURITY_COMPONENT_METHOD:
-                return GeneratedViewModel::createSecurityComponentMethodNode(id);
+            case GENERATED_ARKUI_SECURITY_COMPONENT_METHOD: return GeneratedViewModel::createSecurityComponentMethodNode(id);
             case GENERATED_ARKUI_SELECT: return GeneratedViewModel::createSelectNode(id);
             case GENERATED_ARKUI_SHAPE: return GeneratedViewModel::createShapeNode(id);
             case GENERATED_ARKUI_SIDE_BAR_CONTAINER: return GeneratedViewModel::createSideBarContainerNode(id);
@@ -277,4 +275,5 @@ namespace GeneratedBridge {
         }
     }
 }
+
 }

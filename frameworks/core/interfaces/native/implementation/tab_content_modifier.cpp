@@ -206,9 +206,10 @@ void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // TabContentModifier
 namespace TabContentInterfaceModifier {

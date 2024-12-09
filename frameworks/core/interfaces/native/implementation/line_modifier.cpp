@@ -41,9 +41,10 @@ LineOptions Convert(const Ark_LineOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // LineModifier
 namespace LineInterfaceModifier {

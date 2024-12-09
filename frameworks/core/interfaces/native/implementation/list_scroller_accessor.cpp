@@ -26,7 +26,7 @@ void DestroyPeerImpl(ListScrollerPeer* peer)
         peer->DecRefCount();
     }
 }
-ListScrollerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peer = Referenced::MakeRefPtr<ListScrollerPeer>();
     peer->IncRefCount();

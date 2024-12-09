@@ -63,7 +63,7 @@ static void DestroyPeerImpl(PanGestureOptionsPeer *peer)
     peer->handler = nullptr;
     delete peer;
 }
-PanGestureOptionsPeer* CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
+Ark_NativePointer CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
 {
     auto peer = new PanGestureOptionsPeer();
     peer->handler = Referenced::MakeRefPtr<PanGestureOption>();

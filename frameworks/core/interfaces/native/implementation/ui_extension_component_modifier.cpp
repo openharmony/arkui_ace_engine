@@ -19,9 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionComponentModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
@@ -47,7 +48,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnRemoteReady(frameNode, convValue);
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   const Ark_CustomObject* value)
+                   const Ark_ReceiveCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

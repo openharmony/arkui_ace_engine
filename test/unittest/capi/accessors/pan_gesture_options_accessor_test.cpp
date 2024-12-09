@@ -30,7 +30,7 @@ using namespace testing::ext;
 class PanGestureOptionsAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIPanGestureOptionsAccessor,
     &GENERATED_ArkUIAccessors::getPanGestureOptionsAccessor, PanGestureOptionsPeer> {
 public:
-    PanGestureOptionsPeer* CreatePeerInstance() override
+    void *CreatePeerInstance() override
     {
         const Ark_Literal_Number_distance_fingers_PanDirection_direction ARK_DEFAULT_SETTINGS = {
             .fingers = Converter::ArkValue<Opt_Number>(1),

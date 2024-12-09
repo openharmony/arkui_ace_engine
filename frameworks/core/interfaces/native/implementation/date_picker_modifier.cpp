@@ -93,9 +93,10 @@ void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptio
 } // namespace  OHOS::Ace:NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // DatePickerModifier
 namespace DatePickerInterfaceModifier {

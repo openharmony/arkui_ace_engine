@@ -258,9 +258,9 @@ namespace Converter {
     }
 
     template<>
-    inline ImageSourceInfo Convert(const Ark_CustomObject& value)
+    inline ImageSourceInfo Convert(const Ark_DrawableDescriptor& value)
     {
-        LOGE("Convert [Ark_CustomObject] to [ImageSourceInfo] is not supported");
+        LOGE("Convert [Ark_DrawableDescriptor] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
     }
 
@@ -380,9 +380,9 @@ namespace Converter {
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
+    template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
-    template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
     template<> PickerSelectedType Convert(const Ark_Number& src);
     template<> PickerSelectedType Convert(const Array_Number& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
@@ -544,7 +544,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
-    template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
     template<> void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);

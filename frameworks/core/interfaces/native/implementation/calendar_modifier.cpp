@@ -179,9 +179,10 @@ WorkStateStyleData Convert(const Ark_WorkStateStyle& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // CalendarModifier
 namespace CalendarInterfaceModifier {

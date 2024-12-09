@@ -1159,9 +1159,10 @@ constexpr int32_t CASE_1 = 1;
 constexpr int32_t CASE_2 = 2;
 
 namespace CommonMethodModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
 {
@@ -1457,7 +1458,7 @@ void ForegroundEffectImpl(Ark_NativePointer node,
     ViewAbstract::SetForegroundEffect(frameNode, convValue);
 }
 void VisualEffectImpl(Ark_NativePointer node,
-                      const Ark_CustomObject* value)
+                      const Ark_VisualEffect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1466,7 +1467,7 @@ void VisualEffectImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetVisualEffect(frameNode, convValue);
 }
 void BackgroundFilterImpl(Ark_NativePointer node,
-                          const Ark_CustomObject* value)
+                          const Ark_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1475,7 +1476,7 @@ void BackgroundFilterImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBackgroundFilter(frameNode, convValue);
 }
 void ForegroundFilterImpl(Ark_NativePointer node,
-                          const Ark_CustomObject* value)
+                          const Ark_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1484,7 +1485,7 @@ void ForegroundFilterImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetForegroundFilter(frameNode, convValue);
 }
 void CompositingFilterImpl(Ark_NativePointer node,
-                           const Ark_CustomObject* value)
+                           const Ark_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1586,19 +1587,7 @@ void BorderImageImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
     if (value->source.tag != Ark_Tag::ARK_TAG_UNDEFINED && value->source.value.selector == NUM_3) {
-        Gradient gradient;
-        gradient.CreateGradientWithType(GradientType::LINEAR);
-        auto repeat = Converter::OptConvert<bool>(value->source.value.value2.repeating);
-        if (repeat) {
-            gradient.SetRepeat(repeat.value());
-        }
-        auto linear = gradient.GetLinearGradient();
-        linear->angle = Converter::OptConvert<Dimension>(value->source.value.value2.angle);
-        auto direction = Converter::OptConvert<GradientDirection>(value->source.value.value2.direction);
-        if (direction) {
-            Converter::AssignLinearGradientDirection(linear, direction.value());
-        }
-        Converter::AssignGradientColors(&gradient, &value->source.value.value2.colors);
+        Gradient gradient = Converter::Convert<Gradient>(value->source.value.value2);
         ViewAbstract::SetBorderImageGradient(frameNode, gradient);
     } else {
         auto info = Converter::OptConvert<ImageSourceInfo>(value->source);
@@ -2632,12 +2621,11 @@ void AspectRatioImpl(Ark_NativePointer node,
     }
 }
 void ClickEffectImpl(Ark_NativePointer node,
-                     const Ark_Union_ClickEffect_Null* value)
+                     const Opt_ClickEffect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetClickEffect(frameNode, convValue);
 }
 void OnDragStartImpl(Ark_NativePointer node,
@@ -2695,12 +2683,11 @@ void OnDragEndImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDragEnd(frameNode, convValue);
 }
 void AllowDropImpl(Ark_NativePointer node,
-                   const Ark_Union_Array_UniformDataType_Null* value)
+                   const Opt_Array_UniformDataType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetAllowDrop(frameNode, convValue);
 }
 void DraggableImpl(Ark_NativePointer node,

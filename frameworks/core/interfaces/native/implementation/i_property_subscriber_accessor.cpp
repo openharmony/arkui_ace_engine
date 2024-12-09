@@ -24,7 +24,7 @@ namespace IPropertySubscriberAccessor {
 void DestroyPeerImpl(IPropertySubscriberPeer* peer)
 {
 }
-IPropertySubscriberPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new IPropertySubscriberPeer();
 }

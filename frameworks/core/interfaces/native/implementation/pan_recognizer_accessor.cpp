@@ -24,7 +24,7 @@ namespace PanRecognizerAccessor {
 void DestroyPeerImpl(PanRecognizerPeer* peer)
 {
 }
-PanRecognizerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new PanRecognizerPeer();
 }
@@ -34,7 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer GetPanGestureOptionsImpl(PanRecognizerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // PanRecognizerAccessor
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()
