@@ -61,6 +61,7 @@ void NavigationTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
     auto context = MockPipelineContext::GetCurrent();
     if (context) {
         context->stageManager_ = nullptr;
@@ -942,17 +943,17 @@ HWTEST_F(NavigationTestNg, NavigationStackTest002, TestSize.Level1)
      */
     NavigationModelNG navigationModel;
     navigationModel.Create();
-    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<NavigationGroupNode> navigationNode =
         AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigationNode, nullptr);
-
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationStack(AceType::MakeRefPtr<MockNavigationStack>());
     /**
      * @tc.steps: step2.add page A
      */
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
-    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<NavDestinationPattern>());
     auto stack = pattern->GetNavigationStack();
     stack->Add("A", frameNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
@@ -964,7 +965,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest002, TestSize.Level1)
     /**
      * @tc.steps: step3. replace pageA
      */
-    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+    RefPtr<FrameNode> replaceNode = FrameNode::CreateFrameNode("temp", 245,
+        AceType::MakeRefPtr<NavDestinationPattern>());
     stack->Remove();
     stack->Add("B", replaceNode);
     navigationPattern->OnModifyDone();
