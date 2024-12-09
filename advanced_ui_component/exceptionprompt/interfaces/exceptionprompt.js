@@ -49,10 +49,8 @@ export class ExceptionPrompt extends ViewPU {
         };
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
-        this.onTipClick = () => {
-        };
-        this.onActionTextClick = () => {
-        };
+        this.onTipClick = undefined;
+        this.onActionTextClick = undefined;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -144,8 +142,9 @@ export class ExceptionPrompt extends ViewPU {
                 }
             });
             Row.width('100%');
+            Row.accessibilityDescription(this.onTipClick ? '' : ' ');
             Row.onClick(() => {
-                this.onTipClick();
+                this.onTipClick && this.onTipClick();
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -236,25 +235,9 @@ export class ExceptionPrompt extends ViewPU {
                                 'moduleName': '__harDefaultModuleName__'
                             }
                         });
-                        Button.onTouch((event) => {
-                            if (event.type === TouchType.Down) {
-                                this.touchBackgroundColor = {
-                                    'id': -1,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_click_effect'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                };
-                                this.onActionTextClick();
-                            } else if (event.type === TouchType.Up) {
-                                this.touchBackgroundColor = {
-                                    'id': -1,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                };
-                            }
+                        Button.accessibilityDescription(this.onActionTextClick ? '' : ' ');
+                        Button.onClick(() => {
+                            this.onActionTextClick && this.onActionTextClick();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -327,7 +310,7 @@ export class ExceptionPrompt extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.width('100%');
-            Row.position({ y: this.options.marginTop });
+            Row.margin({ top: this.options.marginTop });
             Row.zIndex(ZINDEX_NUM);
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
