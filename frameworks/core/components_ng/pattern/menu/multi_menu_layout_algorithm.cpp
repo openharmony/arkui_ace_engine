@@ -177,9 +177,15 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     float contentHeight = 0.0f;
     float contentWidth = childConstraint.selfIdealSize.Width().value();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!child) {
+            TAG_LOGW(AceLogTag::ACE_MENU, "child is null in MultiMenu");
+            continue;
+        }
         child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
-        auto childHeight = std::max(child->GetGeometryNode()->GetMarginFrameSize().Height(),
-            child->GetGeometryNode()->GetContentSize().Height());
+        auto childGeometryNode = child->GetGeometryNode();
+        CHECK_NULL_VOID(childGeometryNode);
+        auto childHeight = std::max(childGeometryNode->GetMarginFrameSize().Height(),
+            childGeometryNode->GetContentSize().Height());
         contentHeight += childHeight;
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
