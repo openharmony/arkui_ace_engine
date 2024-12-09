@@ -29,7 +29,7 @@ export struct TextBootcamp {
   @State textOverflow: TextOverflow = TextOverflow.Clip;
   @State enableMaxLines: boolean = false;
   @State maxLines: number | undefined = undefined;
-  @State enableLineHeight: boolean = false; //文本行高
+  @State enableLineHeight: boolean = false;
   @State lineHeight: number | undefined = undefined;
   @State enableTextDecorationType: boolean = false;
   @State textDecorationType: TextDecorationType = TextDecorationType.None;
@@ -87,18 +87,8 @@ export struct TextBootcamp {
   @State enableDataDetector: boolean = false;
   @State enableTextDataDetectorConfigTypes: boolean = false;
   @State textDataDetectorConfigTypes: TextDataDetectorType[] = [];
-  // @State enableTextDataDetectorConfigColor: boolean = false;
-  // @State textDataDetectorConfigColor: ResourceColor = '#ff0a59f7';
-  // @State enableTextDataDetectorConfigDecorationType: boolean = false;
-  // @State textDataDetectorConfigDecorationType: TextDecorationType = TextDecorationType.Underline
-  // @State enableTextDataDetectorConfigDecorationColor: boolean = false;
-  // @State textDataDetectorConfigDecorationColor: ResourceColor = '#ff0a59f7';
-  // @State enableTextDataDetectorConfigDecorationStyle: boolean = false;
-  // @State textDataDetectorConfigDecorationStyle: TextDecorationStyle = TextDecorationStyle.SOLID
   @State enableBindSelectionMenuSpanType: boolean = false;
   @State bindSelectionMenuSpanType: TextSpanType = TextSpanType.TEXT;
-  // @State enableBindSelectionMenuContent: boolean = false;
-  // @State bindSelectionMenuContent: CustomBuilder = () => any | void
   @State enableBindSelectionMenuResponseType: boolean = false;
   @State bindSelectionMenuResponseType: TextResponseType = TextResponseType.LONG_PRESS;
   @State enableFontFeature: boolean = false;
@@ -113,12 +103,6 @@ export struct TextBootcamp {
   @State lineBreakStrategy: LineBreakStrategy = LineBreakStrategy.GREEDY
   @State enableTextSelectable: boolean = false;
   @State textSelectable: TextSelectableMode = TextSelectableMode.SELECTABLE_UNFOCUSABLE
-  // @State enableEditMenuOptionsContent: boolean = false; //EditMenuOption
-  // @State editMenuOptionsContent: ResourceStr = 'MenuName'
-  // @State enableEditMenuOptionsIcon: boolean = false;
-  // @State editMenuOptionsIcon: ResourceStr = 'MenuIcon'
-  // @State enableEditMenuOptionsId: boolean = false;
-  // @State editMenuOptionsId: TextMenuItemId =
   @State enableMinFontScale: boolean = false;
   @State minFontScale: number | undefined = undefined;
   @State enableMaxFontScale: boolean = false;
@@ -139,11 +123,6 @@ export struct TextBootcamp {
   @State caretColor: ResourceColor = '#007DFF';
   @State enableSelectedBackgroundColor: boolean = false;
   @State selectedBackgroundColor: ResourceColor = '#007DFF'
-
-  // @State enableTextSpanType: boolean = false;
-  // @State textSpanType: TextSpanType = TextSpanType.TEXT;
-  // @State enableTextResponseType: boolean = false;
-  // @State textResponseType: TextResponseType = TextResponseType.RIGHT_CLICK
 
   build() {
     NavDestination() {
@@ -206,10 +185,6 @@ export struct TextBootcamp {
           onDetectResultUpdate: (result: string) => {
           },
         })
-          // .bindSelectionMenu({TextSpanType:useEnabled(this.enableBindSelectionMenuSpanType,
-          // this.bindSelectionMenuSpanType),
-          // this.Content: (result: string)=>{},
-          // ResponseType:useEnabled(this.enableBindSelectionMenuResponseType,this.bindSelectionMenuResponseType)})
         .fontFeature(useEnabled(this.enableFontFeature, this.fontFeature))
         .lineSpacing({
           value: useEnabled(this.enableLineSpacingValue, this.lineSpacingValue),
@@ -220,11 +195,7 @@ export struct TextBootcamp {
         .textSelectable(useEnabled(this.enableTextSelectable, this.textSelectable))
         .minFontScale(useEnabled(this.enableMinFontScale, this.minFontScale))
         .maxFontScale(useEnabled(this.enableMaxFontScale,
-          this.maxFontScale))// .halfLeading(useEnabled(this.enableHalfLeading,this.halfLeading))
-          //   .font(fontValue:{size:useEnabled(this.enableFontValueSize,this.fontValueSize),
-          // weight:useEnable(this.enableFontValueWeight,this.fontValueWeight),
-          // style:useEnable(this.enableFontValueStyle,this.fontValueStyle)},
-          // options:useEnabled(this.enableFontOptions,this.fontOptions))
+          this.maxFontScale))
         .fontWeight(useEnabled(this.enableFontWeightWeight, this.fontWeightWeight))
     }.justifyContent(FlexAlign.Start)
   }
@@ -547,43 +518,6 @@ export struct TextBootcamp {
             { label: 'DATE_TIME', value: TextDataDetectorType.DATE_TIME },
           ]
         })
-
-        // ColorBlock({
-        //   title: 'textDataDetectorConfig.color',
-        //   isEnabled: this.enableTextDataDetectorConfigColor,
-        //   color: this.textDataDetectorConfigColor
-        // })
-        //
-        // RadioBlock({
-        //   title:'textDataDetectorConfig.decorationTypes',
-        //   isEnabled: this.enableTextDataDetectorConfigDecorationType,
-        //   value: this.textDataDetectorConfigDecorationType,
-        //   dataSource: [
-        //     {label: 'None', value: TextDecorationType.None },
-        //     {label: 'Underline', value: TextDecorationType.Underline },
-        //     {label: 'Overline', value: TextDecorationType.Overline },
-        //     {label: 'LineThrough', value: TextDecorationType.LineThrough },
-        //   ]
-        // })
-        //
-        // ColorBlock({
-        //   title: 'textDataDetectorConfig.decorationColor',
-        //   isEnabled: this.enableTextDataDetectorConfigDecorationColor,
-        //   color: this.textDataDetectorConfigDecorationColor
-        // })
-        // //
-        // RadioBlock({
-        //   title:'TextDataDetectorConfig.decorationStyle',
-        //   isEnabled: this.enableTextDataDetectorConfigDecorationStyle,
-        //   value: this.textDataDetectorConfigDecorationStyle,
-        //   dataSource: [
-        //     {label: 'SOLID', value: TextDecorationStyle.SOLID },
-        //     {label: 'DOUBLE', value: TextDecorationStyle.DOUBLE },
-        //     {label: 'DOTTED', value: TextDecorationStyle.DOTTED },
-        //     {label: 'DASHED', value: TextDecorationStyle.DASHED },
-        //     {label: 'WAVY', value: TextDecorationStyle.WAVY },
-        //   ]
-        // })
 
         RadioBlock({
           title: 'bindSelectionMenu.spanType',
