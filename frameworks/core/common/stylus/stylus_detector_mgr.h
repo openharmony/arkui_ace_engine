@@ -27,7 +27,6 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/touch_event.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -66,39 +65,27 @@ public:
         return nodeId_;
     }
 
+    WeakPtr<NG::LayoutInfoInterface> GetLayoutInfo() const
+    {
+        return layoutInfo_;
+    }
+
+    void SetSelectState(int32_t start, int32_t end, bool showMenu)
+    {
+        sInd_ = start;
+        eInd_ = end;
+        showMenu_ = showMenu;
+    }
+
+    bool HasSelectChanged(int32_t start, int32_t end, bool showMenu)
+    {
+        return (sInd_ != start || eInd_ != end || showMenu_ != showMenu);
+    }
+    
+
 private:
     StylusDetectorMgr();
     ~StylusDetectorMgr() = default;
-
-    class StylusDetectorCallBack : public OHOS::Ace::IStylusDetectorCallback {
-    public:
-        explicit StylusDetectorCallBack() = default;
-        virtual ~StylusDetectorCallBack() = default;
-        static int32_t RequestFocus(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
-        static int32_t SetText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler,
-            std::shared_ptr<IAceStylusCallback> callback);
-        static int32_t GetText(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler,
-            std::shared_ptr<IAceStylusCallback> callback);
-        static int32_t DeleteText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
-        static int32_t ChoiceText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
-        static int32_t InsertSpace(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
-        static int32_t MoveCursor(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
-
-        static int32_t Redo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
-        static int32_t Undo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
-        int32_t OnDetector(
-            const CommandType& command, void* data, std::shared_ptr<IAceStylusCallback> callback) override;
-        bool OnDetectorSync(const CommandType& command) override;
-
-    private:
-        static int32_t HandleMoveCursor(const RefPtr<NG::FrameNode>& frameNode, NG::PositionWithAffinity sInd,
-            bool showHandle);
-        static NG::PositionWithAffinity GetGlyphPositionByGlobalOffset(const RefPtr<NG::FrameNode>& frameNode,
-            const Offset& offset);
-        static std::tuple<int32_t, int32_t, int32_t> CalculateIntersectedRegion(NG::PositionWithAffinity sInd,
-            NG::PositionWithAffinity eInd, int32_t wtextLength);
-        static NG::OffsetF GetPaintRectGlobalOffset(const RefPtr<NG::FrameNode>& frameNode);
-    };
 
     bool IsStylusTouchEvent(const TouchEvent& touchEvent) const;
     bool IsHitCleanNodeResponseArea(

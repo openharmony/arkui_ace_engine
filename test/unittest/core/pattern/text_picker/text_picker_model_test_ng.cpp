@@ -63,6 +63,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t ONCHANGE_CALLBACK_INFO = 1;
+    constexpr int32_t ONSCROLLSTOP_CALLBACK_INFO = 1;
     const std::string DEFAULT_CONTENT_VALUE = "hello world";
     const std::vector<NG::RangeContent> MENU_OPTIONS = {
         { "/data/resource/1.svg", "share" },
@@ -212,6 +213,35 @@ HWTEST_F(TextPickerModelTestNg, SetOnCascadeChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnScrollStop001
+ * @tc.desc: Test SetOnScrollStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetOnScrollStop001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
+    int32_t callbackInfo = 0;
+    auto onScrollStopFunc = [&callbackInfo](const std::vector<std::string>& value, const std::vector<double>& index) {
+        callbackInfo = ONSCROLLSTOP_CALLBACK_INFO;
+    };
+    TextPickerModelNG::GetInstance()->SetOnScrollStop(std::move(onScrollStopFunc));
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(textPickerEventHub, nullptr);
+
+    EXPECT_NE(textPickerEventHub->onScrollStopEvent_, nullptr);
+    std::vector<std::string> value = { "hello world" };
+    std::vector<double> index = { 0 };
+    textPickerEventHub->FireScrollStopEvent(value, index);
+    EXPECT_EQ(callbackInfo, ONSCROLLSTOP_CALLBACK_INFO);
+}
+
+/**
  * @tc.name: SetValue001
  * @tc.desc: Test SetValue
  * @tc.type: FUNC
@@ -314,6 +344,7 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     auto onCancelFunc = []() {};
     auto onAcceptFunc = [](const std::string&) {};
     auto onChangeFunc = [](const std::string&) {};
+    auto onScrollStopFunc = [](const std::string&) {};
 
     TextPickerDialog textPickerDialog = {
         .height = 16.0_vp,
@@ -334,7 +365,8 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     };
     std::vector<ButtonInfo> buttonInfos;
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
-        onCancelFunc, onAcceptFunc, onChangeFunc, textPickerDialog, textPickerDialogEvent, buttonInfos);
+        onCancelFunc, onAcceptFunc, onChangeFunc, onScrollStopFunc, textPickerDialog, textPickerDialogEvent,
+        buttonInfos);
     EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
 }
 
@@ -615,6 +647,30 @@ HWTEST_F(TextPickerModelTestNg, StaticSetOnCascadeChange001, TestSize.Level1)
     std::vector<double> index = { 0 };
     textPickerEventHub->FireChangeEvent(value, index);
     EXPECT_EQ(callbackInfo, ONCHANGE_CALLBACK_INFO);
+}
+
+/**
+ * @tc.name: StaticSetOnScrollStop001
+ * @tc.desc: Test Static SetOnScrollStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, StaticSetOnScrollStop001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(textPickerEventHub, nullptr);
+    int32_t callbackInfo = 0;
+    auto onScrollStopFunc = [&callbackInfo](const std::vector<std::string>& value, const std::vector<double>& index) {
+        callbackInfo = ONSCROLLSTOP_CALLBACK_INFO;
+    };
+    TextPickerModelNG::SetOnScrollStop(AceType::RawPtr(frameNode), std::move(onScrollStopFunc));
+
+    EXPECT_NE(textPickerEventHub->onScrollStopEvent_, nullptr);
+    std::vector<std::string> value = { "hello world" };
+    std::vector<double> index = { 0 };
+    textPickerEventHub->FireScrollStopEvent(value, index);
+    EXPECT_EQ(callbackInfo, ONSCROLLSTOP_CALLBACK_INFO);
 }
 
 /**

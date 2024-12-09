@@ -20,10 +20,23 @@
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
+void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto menu = pattern->GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<InnerMenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->RecordItemsAndGroups();
+}
+
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    RecordItemsAndGroups(host);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

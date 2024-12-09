@@ -34,10 +34,10 @@ const std::vector<TextInputType> TEXT_INPUT_TYPES = { TextInputType::TEXT, TextI
     TextInputType::EMAIL_ADDRESS, TextInputType::VISIBLE_PASSWORD };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 
-const std::function<void(std::string)> FormatCharFunction(void (*callback)(const char* value))
+const std::function<void(std::u16string)> FormatCharFunction(void (*callback)(const char* value))
 {
-    const std::function<void(std::string)> result = [lambda = CJLambda::Create(callback)](
-                                                        const std::string& value) -> void { lambda(value.c_str()); };
+    const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)]
+        (const std::u16string& value) -> void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
     return result;
 }
 
@@ -268,7 +268,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
     auto onChange = [func = FormatCharFunction(callback)](
-        const std::string& val, PreviewText& previewText) {
+        const std::u16string& val, PreviewText& previewText) {
         func(val);
     };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
@@ -287,7 +287,7 @@ void FfiOHOSAceFrameworkTextFieldOnCut(void (*callback)(const char* value))
 void FfiOHOSAceFrameworkTextFieldOnPaste(void (*callback)(const char* value))
 {
     auto onPaste = [func = FormatCharFunction(callback)](
-        const std::string& val, NG::TextCommonEvent& info) {
+        const std::u16string& val, NG::TextCommonEvent& info) {
         func(val);
     };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));

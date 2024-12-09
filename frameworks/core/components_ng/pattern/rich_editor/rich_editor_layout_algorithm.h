@@ -51,12 +51,12 @@ protected:
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
-    bool CreateParagraph(
-        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) override;
+    bool CreateParagraph(const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper,
+        double maxWidth = 0.0) override;
     bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const override;
+        const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const override;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
     RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);

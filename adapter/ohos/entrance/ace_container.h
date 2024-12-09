@@ -73,12 +73,13 @@ struct ParsedConfig {
     std::string mcc;
     std::string mnc;
     std::string preferredLanguage;
+    std::string fontId;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
-                 preferredLanguage.empty());
+                 preferredLanguage.empty() && fontId.empty());
     }
 };
 
@@ -518,6 +519,8 @@ public:
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration);
+    void UpdateConfigurationSyncForAll(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
@@ -561,6 +564,8 @@ public:
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
+
+    uint32_t GetStatusBarHeight();
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -710,6 +715,12 @@ public:
     }
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
+
+    bool IsFloatingWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+    }
 
 private:
     virtual bool MaybeRelease() override;

@@ -21,8 +21,10 @@ ace_unittest("ui_extension_pattern_test_ng") {
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_pattern.cpp",
@@ -84,8 +86,10 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_pattern.cpp",
@@ -146,8 +150,10 @@ ace_unittest("ui_extension_manager_test") {
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_pattern.cpp",
@@ -207,8 +213,10 @@ ace_unittest("platform_pattern_test_ng") {
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/session_wrapper_impl.cpp",
@@ -305,8 +313,10 @@ ace_unittest("isolated_pattern_test_ng") {
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_session_wrapper_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_pattern.cpp",
@@ -355,13 +365,139 @@ ace_unittest("isolated_pattern_test_ng") {
   }
 }
 
+ace_unittest("platform_event_proxy_test") {
+  type = "new"
+  sources = [
+    "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+    "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_session_wrapper_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/session_wrapper_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
+    "platform_event_proxy_test.cpp",
+  ]
+  if (is_ohos_standard_system) {
+    defines = [
+      "OHOS_STANDARD_SYSTEM",
+      "WINDOW_SCENE_SUPPORTED",
+    ]
+    external_deps = [
+      "ability_base:want",
+      "ability_runtime:abilitykit_native",
+      "accessibility:accessibility_common",
+      "c_utils:utils",
+      "ffrt:libffrt",
+      "graphic_2d:librender_service_client",
+      "hilog:libhilog",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "napi:ace_napi",
+      "window_manager:libdm",
+      "window_manager:libwm",
+      "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+    ]
+
+    if (defined(global_parts_info) && defined(
+            global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
+      external_deps += [ "atomicservice_basic_engine:hagserviceability_client" ]
+      defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+    }
+  }
+}
+
+ace_unittest("security_ui_extension_pattern_test") {
+  type = "new"
+  sources = [
+    "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/window_scene_helper.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_security_session_wrapper_impl.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
+    "security_ui_extension_component_test.cpp",
+  ]
+  if (is_ohos_standard_system) {
+    defines = [
+      "OHOS_STANDARD_SYSTEM",
+      "WINDOW_SCENE_SUPPORTED",
+    ]
+    external_deps = [
+      "ability_base:want",
+      "ability_runtime:abilitykit_native",
+      "accessibility:accessibility_common",
+      "c_utils:utils",
+      "ffrt:libffrt",
+      "graphic_2d:librender_service_client",
+      "hilog:libhilog",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "napi:ace_napi",
+      "window_manager:libdm",
+      "window_manager:libwm",
+      "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+    ]
+    cflags = []
+
+    if (ace_engine_feature_asbng_path_enable) {
+      defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+      cflags +=
+          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
+    }
+  }
+}
+
 group("ui_extension_component_test_ng") {
   testonly = true
   deps = [
     ":accessibility_session_adapter_ui_extension_test_ng",
     ":isolated_pattern_test_ng",
     ":modal_ui_extension_proxy_impl_test_ng",
+    ":platform_event_proxy_test",
     ":platform_pattern_test_ng",
+    ":security_ui_extension_pattern_test",
     ":ui_extension_manager_test",
     ":ui_extension_pattern_test_ng",
   ]

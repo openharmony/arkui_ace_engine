@@ -144,7 +144,8 @@ public:
     virtual void SetSwipeByGroup(bool swipeByGroup) {}
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
-    virtual void SetBindIndicator(bool bind) {}
+    virtual void SetPageFlipMode(int32_t pageFlipMode) {}
+
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;

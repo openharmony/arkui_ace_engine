@@ -1349,9 +1349,11 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest041, TestSize.Level1)
     cacheItem.item = node;
     std::unordered_map<std::string, RefPtr<UINode>> nodeKey = { { "Key041", node } };
     caches.node4key_ = { { "Key041", cacheItem } };
-    caches.node4key4ttype_ = { { "template041", nodeKey } };
-    caches.ttype4index_ = { { 0, "template041" } };
-    caches.index4ttype_ = { { "template041", 0 } };
+
+    auto ttype = g_onGetTypes4Range(0, 0).front();
+    caches.node4key4ttype_ = { { ttype, nodeKey } };
+    caches.ttype4index_ = { { 0, ttype } };
+    caches.index4ttype_ = { { ttype, 0 } };
     repeatNode->caches_ = caches;
     repeatNode->onMainTree_ = true;
 

@@ -22,15 +22,11 @@
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 #include "water_flow_test_ng.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
@@ -45,6 +41,7 @@ namespace OHOS::Ace::NG {
 void WaterFlowTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -52,7 +49,6 @@ void WaterFlowTestNg::SetUpTestSuite()
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
-    EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
     auto container = Container::Current();
     ASSERT_TRUE(container);
@@ -84,6 +80,7 @@ void WaterFlowTestNg::TearDown()
     accessibilityProperty_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 void WaterFlowTestNg::GetWaterFlow()
@@ -148,6 +145,29 @@ void WaterFlowTestNg::CreateItemsInRepeat(int32_t itemNumber, std::function<floa
     repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, [](uint32_t start, uint32_t end) {});
 }
 
+RefPtr<WaterFlowMockLazy> WaterFlowTestNg::CreateItemsInLazyForEach(
+    int32_t itemNumber, std::function<float(int32_t)>&& getHeight)
+{
+    RefPtr<WaterFlowMockLazy> mockLazy = AceType::MakeRefPtr<WaterFlowMockLazy>(itemNumber, std::move(getHeight));
+    RefPtr<LazyForEachActuator> mockLazyActuator = mockLazy;
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockLazyActuator);
+    return mockLazy;
+}
+
+void WaterFlowTestNg::AddItemInLazyForEach(int32_t index)
+{
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    lazyForEachNode->OnDataAdded(index);
+}
+
+void WaterFlowTestNg::DeleteItemInLazyForEach(int32_t index)
+{
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    lazyForEachNode->OnDataDeleted(index);
+}
+
 WaterFlowItemModelNG WaterFlowTestNg::CreateWaterFlowItem(float mainSize)
 {
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
@@ -183,26 +203,6 @@ void WaterFlowTestNg::CreateRandomWaterFlowItems(int32_t itemNumber)
     std::srand(0);
     for (int32_t i = 0; i < itemNumber; i++) {
         CreateWaterFlowItem(std::rand() % 200 + 50.0f);
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-}
-
-void WaterFlowTestNg::CreateLazyForEachItems(int32_t itemNumber)
-{
-    auto waterFlowNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    auto weakWaterFlow = AceType::WeakClaim(AceType::RawPtr(waterFlowNode));
-    const RefPtr<LazyForEachActuator> lazyForEachActuator = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    LazyForEachModelNG lazyForEachModelNG;
-    lazyForEachModelNG.Create(lazyForEachActuator);
-    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
-    for (int32_t index = 0; index < itemNumber; index++) {
-        CreateWaterFlowItem((index & 1) == 0 ? ITEM_MAIN_SIZE : BIG_ITEM_MAIN_SIZE);
-        auto waterFlowItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        lazyForEachNode->builder_->cachedItems_.try_emplace(
-            index, LazyForEachChild(std::to_string(index), waterFlowItemNode));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -298,6 +298,11 @@ RectF WaterFlowTestNg::GetLazyChildRect(int32_t itemIndex)
     return waterFlowItem->GetGeometryNode()->GetFrameRect();
 }
 
+RefPtr<FrameNode> WaterFlowTestNg::GetItem(int32_t index, bool isCache)
+{
+    return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(index, isCache));
+}
+
 /**
  * @tc.name: LazyForeachLayout001
  * @tc.desc: Test LazyForeach Layout
@@ -307,7 +312,7 @@ HWTEST_F(WaterFlowTestNg, LazyForeachLayout001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
-    CreateLazyForEachItems();
+    CreateItemsInLazyForEach(100, [](int32_t index) { return (index & 1) == 0 ? ITEM_MAIN_SIZE : BIG_ITEM_MAIN_SIZE; });
     CreateDone();
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
     EXPECT_TRUE(IsEqual(GetLazyChildRect(0), RectF(0, 0, 240, 100)));
@@ -1524,6 +1529,24 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowPatternTest003
+ * @tc.desc: Test water flow pattern OutBoundaryCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.expected: OutBoundaryCallback() return false
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
+    EXPECT_FALSE(pattern_->OutBoundaryCallback());
+}
+
+/**
  * @tc.name: WaterFlowAccessibilityTest001
  * @tc.desc: Test Accessibility func
  * @tc.type: FUNC
@@ -1782,11 +1805,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowSetFriction001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
 {
-    WaterFlowModelNG waterFlowModelNG;
-    waterFlowModelNG.Create();
-    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
-    GetWaterFlow();
+    CreateWaterFlow();
+    CreateDone();
 
     // need dpi to be 1
     /**
@@ -1805,47 +1825,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
     pattern_->OnRestoreInfo(ret);
     EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 1);
     EXPECT_DOUBLE_EQ(pattern_->layoutInfo_->restoreOffset_, 1.0f);
-}
-
-/**
- * @tc.name: WaterFlowPaintMethod001
- * @tc.desc: Test UpdateOverlayModifier.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowPaintMethod001, TestSize.Level1)
-{
-    WaterFlowModelNG model = CreateWaterFlow();
-    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
-    model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    CreateWaterFlowItems();
-    CreateDone();
-
-    /**
-     * @tc.steps: step2. not set positionMode.
-     * @tc.expected: the positionMode_ of scrollBarOverlayModifier_ is default value.
-     */
-    pattern_->SetScrollBar(DisplayMode::AUTO);
-    auto scrollBar = pattern_->GetScrollBar();
-    scrollBar->SetScrollable(true);
-
-    auto paintMethod = pattern_->CreateNodePaintMethod();
-    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
-        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
-    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
-    EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::RIGHT);
-
-    /**
-     * @tc.steps: step3. scrollBar setting positionMode set to bottom.
-     * @tc.expected: the positionMode_ of scrollBarOverlayModifier_ is bottom.
-     */
-    pattern_->SetEdgeEffect(EdgeEffect::FADE);
-    scrollBar->SetPositionMode(PositionMode::BOTTOM);
-
-    paintMethod = pattern_->CreateNodePaintMethod();
-    paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
-        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
-    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
-    EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::BOTTOM);
 }
 
 /**
@@ -2137,7 +2116,7 @@ HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
     CreateWaterFlowItems(4);
-    CreateDone(colNode);
+    CreateDone();
 
     MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
     PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };

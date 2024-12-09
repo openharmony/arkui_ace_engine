@@ -550,7 +550,6 @@ struct SegmentButtonItem {
         Image(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon)
           .direction(this.options.direction)
           .size(this.options.imageSize ?? { width: 24, height: 24 })
-          .focusable(!this.options.showText)
           .draggable(false)
           .fillColor(this.property.isSelected ? (this.options.selectedFontColor ??
           segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) : (this.options.fontColor ??
@@ -569,7 +568,6 @@ struct SegmentButtonItem {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(1)
           .textAlign(TextAlign.Center)
-          .focusable(true)
           .padding(this.getTextPadding())
       }
     }
@@ -730,10 +728,12 @@ struct SegmentButtonItemArrayComponent {
   private getBorderRadius(index: number): LocalizedBorderRadiuses {
     let borderRadius: LocalizedBorderRadiuses = this.buttonBorderRadius[index]
     if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex]) {
-      borderRadius.topStart = LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4)
-      borderRadius.topEnd = LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4)
-      borderRadius.bottomStart = LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4)
-      borderRadius.bottomEnd = LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4)
+      return {
+        topStart: LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4),
+        topEnd: LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4),
+        bottomStart: LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4),
+        bottomEnd: LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4)
+      }
     }
     return borderRadius
   }

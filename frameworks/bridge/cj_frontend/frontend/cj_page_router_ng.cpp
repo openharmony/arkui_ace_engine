@@ -246,6 +246,7 @@ void CJPageRouterNG::StartClean()
         LOGW("current page stack can not clean, %{public}d", static_cast<int32_t>(pageRouterStack_.size()));
         return;
     }
+    UpdateSrcPage();
     std::list<WeakPtr<FrameNode>> temp;
     std::swap(temp, pageRouterStack_);
     pageRouterStack_.emplace_back(temp.back());
@@ -352,7 +353,7 @@ void CJPageRouterNG::StartPush(const RouterPageInfo& target, const std::string& 
         LOGE("router.Push uri is empty");
         return;
     }
-
+    UpdateSrcPage();
     if (mode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(target.url);
         if (pageInfo.second) {
@@ -372,6 +373,7 @@ void CJPageRouterNG::StartReplace(const RouterPageInfo& target, const std::strin
         LOGE("router.Push uri is empty");
         return;
     }
+    UpdateSrcPage();
     std::string url = target.url;
 
     PopPage("", false, false);
@@ -399,9 +401,11 @@ void CJPageRouterNG::StartBack(const RouterPageInfo& target, const std::string& 
             ExitToDesktop();
             return;
         }
+        UpdateSrcPage();
         PopPage(params, true, true);
         return;
     }
+    UpdateSrcPage();
     std::string url = target.url;
     auto pageInfo = FindPageInStack(url);
     if (pageInfo.second) {
@@ -705,5 +709,15 @@ void CJPageRouterNG::FlushReload()
         }
         view->MarkNeedUpdate();
     }
+}
+
+void CJPageRouterNG::UpdateSrcPage()
+{
+    auto currentObj = Container::Current();
+    CHECK_NULL_VOID(currentObj);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(currentObj->GetPipelineContext());
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    stageManager->SetSrcPage(GetCurrentPageNode());
 }
 } // namespace OHOS::Ace::Framework

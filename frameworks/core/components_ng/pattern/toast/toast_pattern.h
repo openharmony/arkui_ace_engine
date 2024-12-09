@@ -147,6 +147,7 @@ public:
 
     void InitUIExtensionHostWindowRect();
     
+    RefPtr<PipelineContext> GetToastContext();
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);
@@ -162,6 +163,7 @@ private:
     int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
 
     void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight);
+    NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;

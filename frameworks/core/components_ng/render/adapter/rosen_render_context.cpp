@@ -436,11 +436,16 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
     const std::optional<ContextParam>& param, bool isTextureExportNode)
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-        .isTextureExportNode = isTextureExportNode };
+        .isTextureExportNode = isTextureExportNode, .isSync = true };
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
     if (surfaceNode) {
-        surfaceNode->SetHardwareEnabled(true, param->patternType == PatternType::VIDEO ?
-            SelfDrawingNodeType::VIDEO : SelfDrawingNodeType::DEFAULT);
+        if (param->patternType == PatternType::VIDEO) {
+            surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::VIDEO);
+        } else if (param->patternType == PatternType::XCOM) {
+            surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::XCOM);
+        } else {
+            surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::DEFAULT);
+        }
     }
     return surfaceNode;
 }
@@ -2288,7 +2293,7 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+void RosenRenderContext::RegisterDensityChangedCallback()
 {
     if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
         auto context = GetPipelineContext();
@@ -2301,8 +2306,17 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
             if (borderRadius.has_value()) {
                 renderContext->SetBorderRadius(borderRadius.value());
             }
+            auto outerBorderRadius = renderContext->GetOuterBorderRadius();
+            if (outerBorderRadius.has_value()) {
+                renderContext->SetOuterBorderRadius(outerBorderRadius.value());
+            }
         });
     }
+}
+
+void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+{
+    RegisterDensityChangedCallback();
     CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
@@ -2396,6 +2410,7 @@ void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
 
 void RosenRenderContext::OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
+    RegisterDensityChangedCallback();
     SetOuterBorderRadius(value);
 }
 
@@ -2559,6 +2574,9 @@ void RosenRenderContext::PaintAccessibilityFocus()
     frameRect.SetRect(RectF(lineWidth, lineWidth, noGreenBorderHeight, noGreenBorderWidth));
     RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
     if (localRect != RectT<int32_t>()) {
+        RectT<int32_t> containerRect;
+        containerRect.SetRect(0, 0, bounds.z_, bounds.w_);
+        localRect = localRect.Constrain(containerRect);
         RectF globalRect = frameRect.GetRect();
         auto localRectWidth = localRect.Width() - 2 * lineWidth;
         auto localRectHeight = localRect.Height() - 2 * lineWidth;
@@ -2570,7 +2588,6 @@ void RosenRenderContext::PaintAccessibilityFocus()
         }
         globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
             localRectWidth, localRectHeight);
-        globalRect = globalRect.Constrain(frameRect.GetRect());
         if (globalRect.IsEmpty()) {
             ClearAccessibilityFocus();
             return;
@@ -3541,11 +3558,13 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
 void RosenRenderContext::PaintFocusState(
     const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
 {
+#ifndef IS_RELEASE_VERSION
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). Color is %{public}s, PainWidth is "
         "%{public}s",
         paintRect.GetRect().Left(), paintRect.GetRect().Top(), paintRect.GetRect().Width(),
         paintRect.GetRect().Height(), paintColor.ColorToString().c_str(), paintWidth.ToString().c_str());
+#endif
     CHECK_NULL_VOID(paintRect.GetRect().IsValid());
     CHECK_NULL_VOID(rsNode_);
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
@@ -3708,10 +3727,9 @@ void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(foregroundDraw);
     rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE,
-            [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas)
-            {
-                CHECK_NULL_VOID(canvas);
-                foregroundDraw(*canvas);
+        [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas) {
+            CHECK_NULL_VOID(canvas);
+            foregroundDraw(*canvas);
         });
 }
 
@@ -4887,6 +4905,14 @@ void RosenRenderContext::SetSecurityLayer(bool isSecure)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetSecurityLayer(isSecure);
+}
+
+void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetHDRBrightness(hdrBrightness);
 }
 
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
@@ -6178,10 +6204,10 @@ void RosenRenderContext::UpdateWindowBlur()
         return;
     }
     auto maskColor = LinearColor(blurParam->maskColor.GetValue());
-    auto rgbaColor = (static_cast<uint32_t>(std::clamp<int16_t>(maskColor.GetAlpha(), 0, UINT8_MAX))) |
-                     (static_cast<uint32_t>((std::clamp<int16_t>(maskColor.GetBlue(), 0, UINT8_MAX)) << 8)) |
-                     (static_cast<uint32_t>((std::clamp<int16_t>(maskColor.GetGreen(), 0, UINT8_MAX)) << 16)) |
-                     (static_cast<uint32_t>((std::clamp<int16_t>(maskColor.GetRed(), 0, UINT8_MAX)) << 24));
+    auto rgbaColor = (static_cast<uint32_t>(std::clamp<uint16_t>(maskColor.GetAlpha(), 0, UINT8_MAX))) |
+                     (static_cast<uint32_t>((std::clamp<uint16_t>(maskColor.GetBlue(), 0, UINT8_MAX)) << 8)) |
+                     (static_cast<uint32_t>((std::clamp<uint16_t>(maskColor.GetGreen(), 0, UINT8_MAX)) << 16)) |
+                     (static_cast<uint32_t>((std::clamp<uint16_t>(maskColor.GetRed(), 0, UINT8_MAX)) << 24));
     if (!windowBlurModifier_.has_value()) {
         windowBlurModifier_ = WindowBlurModifier();
     }

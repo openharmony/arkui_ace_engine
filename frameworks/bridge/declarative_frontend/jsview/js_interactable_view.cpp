@@ -20,6 +20,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utf_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
@@ -85,11 +86,12 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
-                          KeyEventInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                          KeyEventInfo& info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKey");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        auto ret = func->ExecuteWithValue(info);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
@@ -408,19 +410,19 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
 }
 
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::string text)
+void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::u16string text)
 {
     if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onClick");
-        std::string content = text;
+        std::u16string content = text;
         if (!node.Invalid()) {
             data->Put("id", node.GetRawPtr()->GetId());
             auto children = node.GetRawPtr()->GetChildren();
             if (!children.empty()) {
                 node.GetRawPtr()->GetContainerComponentText(content);
             }
-            data->Put("text", content.data());
+            data->Put("text", UtfUtils::Str16ToStr8(content).data());
             data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
         }
         UiSessionManager::GetInstance().ReportClickEvent(data->ToString());

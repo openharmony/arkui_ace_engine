@@ -36,7 +36,11 @@
 #ifndef ARKUI_NATIVE_TYPE_H
 #define ARKUI_NATIVE_TYPE_H
 
+#ifdef __cplusplus
 #include <cstdint>
+#else
+#include <stdint.h>
+#endif
 
 #include "drawable_descriptor.h"
 
@@ -194,14 +198,14 @@ typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
  *
  * @since 14
  */
-struct ArkUI_CustomProperty;
+typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
 
 /**
  * @brief Define ActiveChildenInfo class information.
  *
  * @since 14
  */
-struct ArkUI_ActiveChildrenInfo;
+typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
@@ -807,6 +811,19 @@ typedef enum {
      * effect; otherwise, the Swiper triggers the edge effect. */
     ARKUI_SWIPER_NESTED_SRCOLL_SELF_FIRST,
 } ArkUI_SwiperNestedScrollMode;
+
+/**
+ * @brief Enumerates the page flipping modes using the mouse wheel for the <b>Swiper</b> component.
+ *
+ * @since 14
+ */
+typedef enum {
+    /** When the mouse wheel is scrolled continuously, multiple pages are flipped, which is determined by the number of
+     *  times that mouse events are reported. */
+    ARKUI_PAGE_FLIP_MODE_CONTINUOUS = 0,
+    /** The system does not respond to other mouse wheel events until the page flipping animation ends. */
+    ARKUI_PAGE_FLIP_MODE_SINGLE,
+} ArkUI_PageFlipMode;
 
 /**
  * @brief Enumerates the accessibility modes.

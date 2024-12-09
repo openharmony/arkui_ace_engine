@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,9 +32,10 @@ namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_ALPHA = 255;
 constexpr float DEFAULT_OPACITY = 0.2;
 
-void TextModelNG::Create(const std::string& content)
+void TextModelNG::Create(const std::u16string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_ETS_TAG, nodeId);
     auto frameNode =
@@ -53,14 +55,20 @@ void TextModelNG::Create(const std::string& content)
     }
 
     auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
 }
 
+void TextModelNG::Create(const std::string& content)
+{
+    Create(UtfUtils::Str8ToStr16(content));
+}
+
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
 {
-    TextModelNG::Create("");
+    TextModelNG::Create(u"");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -73,7 +81,7 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
     }
 }
 
-RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
+RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::u16string& content)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -140,29 +148,26 @@ void TextModelNG::SetTextColor(const Color& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
 void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -464,7 +469,7 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
-void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
+void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
@@ -643,12 +648,12 @@ void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
 
-std::string TextModelNG::GetContent(FrameNode* frameNode)
+std::u16string TextModelNG::GetContent(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, "");
+    CHECK_NULL_RETURN(frameNode, u"");
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetContent().value_or("");
+    CHECK_NULL_RETURN(layoutProperty, u"");
+    return layoutProperty->GetContent().value_or(u"");
 }
 
 float TextModelNG::GetLineHeight(FrameNode* frameNode)

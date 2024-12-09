@@ -34,6 +34,9 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -72,6 +75,16 @@ constexpr Dimension DEFAULT_IMAGE_HEIGHT_V10 = 24.0_vp;
 constexpr static int32_t TEST_VALUE = 12;
 constexpr float MAX_SIDE_BAR = 20.0f;
 constexpr float MIN_SIDE_BAR = -10.0f;
+constexpr Dimension DIVIDER_STROKE_WIDTH = 5.0_vp;
+constexpr Dimension DIVIDER_START_MARGIN = 2.0_vp;
+constexpr Dimension DIVIDER_END_MARGIN = 3.0_vp;
+constexpr static int32_t DEFAULT_CONTROL_BUTTON_ZINDEX = 3;
+constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_EMBED = 0;
+constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_EMBED = 1;
+constexpr static int32_t DEFAULT_CONTENT_ZINDEX_EMBED = 2;
+constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_OVERLAY = 2;
+constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_OVERLAY = 1;
+constexpr static int32_t DEFAULT_CONTENT_ZINDEX_OVERLAY = 0;
 } // namespace
 
 class SideBarPatternTestNg : public testing::Test {
@@ -893,69 +906,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg029, TestSize.Level1)
     EXPECT_FALSE(pattern->showSideBar_);
     pattern->OnUpdateShowSideBar(layoutProperty);
     EXPECT_FALSE(pattern->showSideBar_);
-}
-
-/**
- * @tc.name: SideBarPatternTestNg030
- * @tc.desc: Test SideBar UpdateControlButtonIcon In version13
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg030, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sideBarContainer,controlButton node,then mount controlButton node to its parent
-     * frameNode.
-     * @tc.expected: check whether the sideBarContainer node's children is not empty.
-     */
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-
-    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
-    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
-
-    pattern->CreateAndMountControlButton(frameNode);
-
-    auto children = frameNode->GetChildren();
-    ASSERT_FALSE(children.empty());
-
-    /**
-     * @tc.steps: step2. execute UpdateControlButtonIcon method, then get the default imageId of controlButton
-     * @tc.expected: check whether the controlButton's imageId is same as the default image.
-     */
-    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
-    ASSERT_NE(sideBarTheme, nullptr);
-    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
-    ASSERT_NE(buttonFrameNode, nullptr);
-    auto buttonChildren = buttonFrameNode->GetChildren();
-    ASSERT_FALSE(buttonChildren.empty());
-    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
-    ASSERT_NE(imgFrameNode, nullptr);
-    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
-
-    pattern->sideBarStatus_ = SideBarStatus::SHOW;
-    pattern->UpdateControlButtonIcon();
-    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
-    EXPECT_EQ(imgSourceInfo.resourceId_, InternalResource::ResourceId::SIDE_BAR);
-
-    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
-    pattern->UpdateControlButtonIcon();
-    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
-    EXPECT_EQ(imgSourceInfo.resourceId_, InternalResource::ResourceId::SIDE_BAR);
-
-    pattern->sideBarStatus_ = SideBarStatus::CHANGING;
-    pattern->UpdateControlButtonIcon();
-    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
-    EXPECT_EQ(imgSourceInfo.resourceId_, InternalResource::ResourceId::SIDE_BAR);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1908,6 +1858,997 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg061, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SideBarPatternTestNg062
+ * @tc.desc: Test SideBar property set function with frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg062, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar and set the properties ,and then get frameNode.
+     */
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarNode, nullptr);
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    sideBarContainerModelInstance.SetSideBarWidth(AceType::RawPtr(sideBarNode), SIDE_BAR_WIDTH);
+    sideBarContainerModelInstance.SetMinSideBarWidth(AceType::RawPtr(sideBarNode), MIN_SIDE_BAR_WIDTH);
+    sideBarContainerModelInstance.SetMaxSideBarWidth(AceType::RawPtr(sideBarNode), MAX_SIDE_BAR_WIDTH);
+    sideBarContainerModelInstance.SetControlButtonWidth(AceType::RawPtr(sideBarNode), WIDTH);
+    sideBarContainerModelInstance.SetControlButtonHeight(AceType::RawPtr(sideBarNode), HEIGHT);
+    sideBarContainerModelInstance.SetControlButtonLeft(AceType::RawPtr(sideBarNode), LEFT);
+    sideBarContainerModelInstance.SetControlButtonTop(AceType::RawPtr(sideBarNode), TOP);
+    sideBarContainerModelInstance.SetControlButtonShowIconInfo(AceType::RawPtr(sideBarNode), SHOW_ICON_STR, false, nullptr);
+    sideBarContainerModelInstance.SetControlButtonHiddenIconInfo(AceType::RawPtr(sideBarNode), HIDDEN_ICON_STR, false, nullptr);
+    sideBarContainerModelInstance.SetControlButtonSwitchingIconInfo(AceType::RawPtr(sideBarNode), SWITCHING_ICON_STR, false, nullptr);
+    sideBarContainerModelInstance.SetShowControlButton(AceType::RawPtr(sideBarNode), SHOW_CONTROL_BUTTON);
+    sideBarContainerModelInstance.SetAutoHide(AceType::RawPtr(sideBarNode), AUTO_HIDE);
+    sideBarContainerModelInstance.SetMinContentWidth(AceType::RawPtr(sideBarNode), MIN_CONTENT_WIDTH);
+    sideBarContainerModelInstance.SetSideBarPosition(AceType::RawPtr(sideBarNode), SIDE_BAR_POSITION);
+    sideBarContainerModelInstance.SetShowSideBar(AceType::RawPtr(sideBarNode), IS_SHOW);
+    sideBarContainerModelInstance.SetDividerStrokeWidth(AceType::RawPtr(sideBarNode), DIVIDER_STROKE_WIDTH);
+    sideBarContainerModelInstance.SetDividerColor(AceType::RawPtr(sideBarNode), Color::BLUE);
+    sideBarContainerModelInstance.SetDividerStartMargin(AceType::RawPtr(sideBarNode), DIVIDER_START_MARGIN);
+    sideBarContainerModelInstance.SetDividerEndMargin(AceType::RawPtr(sideBarNode), DIVIDER_END_MARGIN);
+    sideBarContainerModelInstance.MarkNeedInitRealSideBarWidth(AceType::RawPtr(sideBarNode));
+    
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sideBarLayoutProperty = sideBarNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    EXPECT_EQ(sideBarLayoutProperty->GetShowSideBar(), IS_SHOW);
+    EXPECT_EQ(sideBarLayoutProperty->GetShowControlButton(), SHOW_CONTROL_BUTTON);
+    EXPECT_EQ(sideBarLayoutProperty->GetSideBarWidth(), SIDE_BAR_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetMinSideBarWidth(), MIN_SIDE_BAR_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetMaxSideBarWidth(), MAX_SIDE_BAR_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetMinContentWidth(), MIN_CONTENT_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetAutoHide(), AUTO_HIDE);
+    EXPECT_EQ(sideBarLayoutProperty->GetSideBarPosition(), SIDE_BAR_POSITION);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonWidth(), WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHeight(), HEIGHT);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonLeft(), LEFT);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonTop(), TOP);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonShowIconInfo()->GetSrc(), SHOW_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHiddenIconInfo()->GetSrc(), HIDDEN_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonSwitchingIconInfo()->GetSrc(), SWITCHING_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetDividerStrokeWidth(), DIVIDER_STROKE_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetDividerColor(), Color::BLUE);
+    EXPECT_EQ(sideBarLayoutProperty->GetDividerStartMargin(), DIVIDER_START_MARGIN);
+    EXPECT_EQ(sideBarLayoutProperty->GetDividerEndMargin(), DIVIDER_END_MARGIN);
+    sideBarContainerModelInstance.ResetControlButtonLeft(AceType::RawPtr(sideBarNode));
+    sideBarContainerModelInstance.ResetControlButtonIconInfo();
+    sideBarContainerModelInstance.ResetControlButtonIconInfo(AceType::RawPtr(sideBarNode));
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg063
+ * @tc.desc: Test SideBar pattern OnUpdateShowSideBar function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg063, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern and layoutProperty.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto sideBarLayoutProperty = sideBarFrameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    sideBarPattern->hasInit_ = true;
+    sideBarLayoutProperty->UpdateShowSideBar(true);
+    sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    sideBarPattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    sideBarPattern->hasInit_ = false;
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+
+    /**
+     * @tc.steps: step2. call OnUpdateShowSideBar function.
+     * @tc.expected: step2. sideBarNode active status is set.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+    sideBarNode = sideBarPattern->GetSideBarNode(sideBarFrameNode);
+    ASSERT_NE(sideBarNode, nullptr);
+    sideBarLayoutProperty->UpdateShowSideBar(false);
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    EXPECT_FALSE(sideBarNode->IsActive());
+    sideBarPattern->hasInit_ = true;
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    EXPECT_FALSE(sideBarNode->IsActive());
+    sideBarPattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    EXPECT_FALSE(sideBarNode->IsActive());
+    sideBarPattern->hasInit_ = false;
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    EXPECT_FALSE(sideBarNode->IsActive());
+    sideBarNode->MarkBuildDone();
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    EXPECT_FALSE(sideBarNode->IsActive());
+    sideBarLayoutProperty->UpdateShowSideBar(true);
+    sideBarPattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+    EXPECT_FALSE(sideBarNode->IsActive());
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg064
+ * @tc.desc: Test SideBar pattern OnUpdateShowDivider function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg064, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern and layoutProperty.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto sideBarLayoutProperty = sideBarFrameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step2. call OnUpdateShowDivider function.
+     * @tc.expected: step2. divider's color and width is set.
+     */
+    sideBarLayoutProperty->UpdateDividerColor(Color::BLUE);
+    sideBarLayoutProperty->UpdateDividerStrokeWidth(DIVIDER_STROKE_WIDTH);
+    sideBarPattern->OnUpdateShowDivider(sideBarLayoutProperty, sideBarFrameNode);
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    ASSERT_NE(dividerRenderProperty, nullptr);
+    EXPECT_EQ(dividerRenderProperty->GetDividerColor(), Color::BLUE);
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    ASSERT_NE(dividerLayoutProperty, nullptr);
+    EXPECT_EQ(dividerLayoutProperty->GetStrokeWidth(), DIVIDER_STROKE_WIDTH);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg065
+ * @tc.desc: Test SideBar pattern UpdateDividerShadow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg065, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern and layoutProperty.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto sideBarLayoutProperty = sideBarFrameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    auto context = PipelineBase::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    sideBarTheme->dividerShadowEnable_ = true;
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step2. call UpdateDividerShadow function.
+     * @tc.expected: step2. SideBar component's ZIndex is changed.
+     */
+    sideBarLayoutProperty->UpdateSideBarContainerType(SideBarContainerType::EMBED);
+    auto sideBarRenderContext = sideBarNode->GetRenderContext();
+    ASSERT_NE(sideBarRenderContext, nullptr);
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    ASSERT_NE(dividerRenderContext, nullptr);
+    auto contentRenderContext = contentNode->GetRenderContext();
+    ASSERT_NE(contentRenderContext, nullptr);
+    auto controlBtnRenderContext = controlBtnNode->GetRenderContext();
+    ASSERT_NE(controlBtnRenderContext, nullptr);
+    sideBarPattern->UpdateDividerShadow();
+    EXPECT_EQ(sideBarRenderContext->GetZIndexValue(-1), DEFAULT_SIDE_BAR_ZINDEX_EMBED);
+    EXPECT_EQ(dividerRenderContext->GetZIndexValue(-1), DEFAULT_DIVIDER_ZINDEX_EMBED);
+    EXPECT_EQ(contentRenderContext->GetZIndexValue(-1), DEFAULT_CONTENT_ZINDEX_EMBED);
+    EXPECT_EQ(controlBtnRenderContext->GetZIndexValue(-1), DEFAULT_CONTROL_BUTTON_ZINDEX);
+
+    sideBarLayoutProperty->UpdateSideBarContainerType(SideBarContainerType::OVERLAY);
+    sideBarPattern->UpdateDividerShadow();
+    EXPECT_EQ(sideBarRenderContext->GetZIndexValue(-1), DEFAULT_SIDE_BAR_ZINDEX_OVERLAY);
+    EXPECT_EQ(dividerRenderContext->GetZIndexValue(-1), DEFAULT_DIVIDER_ZINDEX_OVERLAY);
+    EXPECT_EQ(contentRenderContext->GetZIndexValue(-1), DEFAULT_CONTENT_ZINDEX_OVERLAY);
+    EXPECT_EQ(controlBtnRenderContext->GetZIndexValue(-1), DEFAULT_CONTROL_BUTTON_ZINDEX);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg066
+ * @tc.desc: Test SideBar pattern UpdateDividerShadow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg066, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern and layoutProperty.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod function.
+     * @tc.expected: step2. Get paintMethod.
+     */
+    auto paintMethod = AceType::DynamicCast<SideBarContainerPaintMethod>(sideBarPattern->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+    EXPECT_FALSE(paintMethod->needClipPadding_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg067
+ * @tc.desc: Test SideBar pattern ShowDialogWithNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg067, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern and layoutProperty.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step2. call ShowDialogWithNode function.
+     * @tc.expected: step2. isDialogShow_ is set.
+     */
+    sideBarPattern->isDialogShow_ = true;
+    sideBarPattern->ShowDialogWithNode();
+    sideBarPattern->isDialogShow_ = false;
+    sideBarPattern->ShowDialogWithNode();
+    EXPECT_TRUE(sideBarPattern->isDialogShow_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg068
+ * @tc.desc: Test SideBar GetContentNode with contentNode is customNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg068, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar with contentNode is a customNode, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customContentNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customContentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(customContentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+    auto childID = ElementRegister::GetInstance()->MakeUniqueId();
+    auto contentChildNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        childID, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    customContentNode->children_.push_back(contentChildNode);
+
+    /**
+     * @tc.steps: step2. call GetContentNode function.
+     * @tc.expected: step2. get child node of contentNode.
+     */
+    auto resultNode = sideBarPattern->GetContentNode(sideBarFrameNode);
+    ASSERT_NE(resultNode, nullptr);
+    EXPECT_EQ(resultNode->GetId(), childID);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg069
+ * @tc.desc: Test SideBar GetSideBarNode with sideBarNode is customNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg069, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar with few child node, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customSideBarNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customSideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(customSideBarNode);
+
+    /**
+     * @tc.steps: step2. call GetSideBarNode function.
+     * @tc.expected: step2. get nullptr.
+     */
+    auto resultNode = sideBarPattern->GetSideBarNode(sideBarFrameNode);
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set a child node to sideBarNode.
+     */
+    auto childID = ElementRegister::GetInstance()->MakeUniqueId();
+    auto sideBarChildNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        childID, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    customSideBarNode->children_.push_back(sideBarChildNode);
+    sideBarFrameNode->Clean();
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(customSideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step4. call GetSideBarNode function.
+     * @tc.expected: step4. get child node of sideBarNode.
+     */
+    resultNode = sideBarPattern->GetSideBarNode(sideBarFrameNode);
+    ASSERT_NE(resultNode, nullptr);
+    EXPECT_EQ(resultNode->GetId(), childID);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg070
+ * @tc.desc: Test SideBar GetFirstFrameNode with first node is customNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg070, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar with no child node, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetFirstFrameNode function.
+     * @tc.expected: step2. get nullptr.
+     */
+    auto resultNode = sideBarPattern->GetFirstFrameNode(sideBarFrameNode);
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set a customNode child to sideBar.
+     */
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customContentNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customContentNode, nullptr);
+    sideBarFrameNode->children_.push_back(customContentNode);
+
+    /**
+     * @tc.steps: step4. call GetFirstFrameNode function.
+     * @tc.expected: step4. get nullptr.
+     */
+    resultNode = sideBarPattern->GetFirstFrameNode(sideBarFrameNode);
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step5. set a FrameNode child to childNode.
+     */
+    sideBarFrameNode->Clean();
+    auto childID = ElementRegister::GetInstance()->MakeUniqueId();
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        childID, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    customContentNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(customContentNode);
+
+    /**
+     * @tc.steps: step6. call GetFirstFrameNode function.
+     * @tc.expected: step6. get child node of child node.
+     */
+    resultNode = sideBarPattern->GetFirstFrameNode(sideBarFrameNode);
+    ASSERT_NE(resultNode, nullptr);
+    EXPECT_EQ(resultNode->GetId(), childID);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg071
+ * @tc.desc: Test SideBar GetSideBarNodeOrFirstChild with sideBarNode is customNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg071, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar with few child node, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customSideBarNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customSideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(customSideBarNode);
+
+    /**
+     * @tc.steps: step2. call GetSideBarNodeOrFirstChild function.
+     * @tc.expected: step2. get nullptr.
+     */
+    auto resultNode = sideBarPattern->GetSideBarNodeOrFirstChild();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set a empty customNode child to sideBar.
+     */
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step4. call GetSideBarNodeOrFirstChild function.
+     * @tc.expected: step4. get nullptr.
+     */
+    resultNode = sideBarPattern->GetSideBarNodeOrFirstChild();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step5. set a child node to customNode.
+     */
+    auto childID = ElementRegister::GetInstance()->MakeUniqueId();
+    auto sideBarChildNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        childID, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    sideBarFrameNode->Clean();
+    customSideBarNode->children_.push_back(sideBarChildNode);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(customSideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step6. call GetSideBarNodeOrFirstChild function.
+     * @tc.expected: step6. get child node of sideBar node.
+     */
+    resultNode = sideBarPattern->GetSideBarNodeOrFirstChild();
+    ASSERT_NE(resultNode, nullptr);
+    EXPECT_EQ(resultNode->GetId(), childID);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg072
+ * @tc.desc: Test SideBar GetControlButtonNode with controlButtonNode is customNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg072, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar with no child node, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetControlButtonNode function.
+     * @tc.expected: step2. get nullptr.
+     */
+    auto resultNode = sideBarPattern->GetControlButtonNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set controlButtonNode without BUTTON_ETS_TAG.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto errorControlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(errorControlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(errorControlBtnNode);
+
+    /**
+     * @tc.steps: step4. call GetControlButtonNode function.
+     * @tc.expected: step4. get nullptr.
+     */
+    resultNode = sideBarPattern->GetControlButtonNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step5. set controlButtonNode which is customNode.
+     */
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customControlBtnNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customControlBtnNode, nullptr);
+    sideBarFrameNode->Clean();
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(customControlBtnNode);
+
+    /**
+     * @tc.steps: step6. call GetControlButtonNode function.
+     * @tc.expected: step6. get nullptr.
+     */
+    resultNode = sideBarPattern->GetControlButtonNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step7. set controlButtonNode.
+     */
+    auto childID = ElementRegister::GetInstance()->MakeUniqueId();
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        childID, AceType::MakeRefPtr<ButtonPattern>());
+    sideBarFrameNode->Clean();
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step8. call GetControlButtonNode function.
+     * @tc.expected: step8. get controlButtonNode.
+     */
+    resultNode = sideBarPattern->GetControlButtonNode();
+    ASSERT_NE(resultNode, nullptr);
+    EXPECT_EQ(resultNode->GetId(), childID);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg073
+ * @tc.desc: Test SideBar GetControlImageNode with controlButtonNode is customNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg073, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar with no child node, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetControlImageNode function.
+     * @tc.expected: step2. get nullptr.
+     */
+    auto resultNode = sideBarPattern->GetControlImageNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set controlButtonNode without BUTTON_ETS_TAG.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto errorControlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(errorControlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(errorControlBtnNode);
+
+    /**
+     * @tc.steps: step4. call GetControlImageNode function.
+     * @tc.expected: step4. get nullptr.
+     */
+    resultNode = sideBarPattern->GetControlImageNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step5. set controlButtonNode which is customNode.
+     */
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customControlBtnNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customControlBtnNode, nullptr);
+    sideBarFrameNode->Clean();
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(customControlBtnNode);
+
+    /**
+     * @tc.steps: step6. call GetControlImageNode function.
+     * @tc.expected: step6. get nullptr.
+     */
+    resultNode = sideBarPattern->GetControlImageNode();
+    EXPECT_EQ(resultNode, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg074
+ * @tc.desc: Test SideBar GetControlImageNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg074, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step2. call GetControlImageNode function.
+     * @tc.expected: step2. get nullptr.
+     */
+    auto resultNode = sideBarPattern->GetControlImageNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set controlImageNode without IMAGE_ETS_TAG and call GetControlImageNode function.
+     * @tc.expected: step3. get nullptr.
+     */
+    auto errorControlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(errorControlBtnNode, nullptr);
+    controlBtnNode->children_.push_back(errorControlBtnNode);
+    resultNode = sideBarPattern->GetControlImageNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step4. set controlImageNode which is customNode and call GetControlImageNode function.
+     * @tc.expected: step4. get nullptr.
+     */
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customControlBtnNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customControlBtnNode, nullptr);
+    controlBtnNode->Clean();
+    controlBtnNode->children_.push_back(customControlBtnNode);
+    resultNode = sideBarPattern->GetControlImageNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step5. set controlImageNode and call GetControlImageNode function.
+     * @tc.expected: step5. get controlImageNode.
+     */
+    auto childID = ElementRegister::GetInstance()->MakeUniqueId();
+    auto controlImageNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::IMAGE_ETS_TAG,
+        childID, AceType::MakeRefPtr<ImagePattern>());
+    controlBtnNode->Clean();
+    controlBtnNode->children_.push_back(controlImageNode);
+    resultNode = sideBarPattern->GetControlImageNode();
+    ASSERT_NE(resultNode, nullptr);
+    EXPECT_EQ(resultNode->GetId(), childID);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg075
+ * @tc.desc: Test SideBar GetDividerNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg075, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar with no child node, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetDividerNode function.
+     * @tc.expected: step2. get nullptr.
+     */
+    auto resultNode = sideBarPattern->GetDividerNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step3. set dividerNode without DIVIDER_ETS_TAG.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto errorDividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(errorDividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(errorDividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step4. call GetDividerNode function.
+     * @tc.expected: step4. get nullptr.
+     */
+    resultNode = sideBarPattern->GetDividerNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step5. set dividerNode which is customNode.
+     */
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto viewIdStr = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewIdStr);
+    auto customDividerNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    ASSERT_NE(customDividerNode, nullptr);
+    sideBarFrameNode->Clean();
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(customDividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step6. call GetDividerNode function.
+     * @tc.expected: step6. get nullptr.
+     */
+    resultNode = sideBarPattern->GetDividerNode();
+    EXPECT_EQ(resultNode, nullptr);
+
+    /**
+     * @tc.steps: step7. set dividerNode.
+     */
+    auto childID = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        childID, AceType::MakeRefPtr<DividerPattern>());
+    sideBarFrameNode->Clean();
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step8. call GetDividerNode function.
+     * @tc.expected: step8. get dividerNode.
+     */
+    resultNode = sideBarPattern->GetDividerNode();
+    ASSERT_NE(resultNode, nullptr);
+    EXPECT_EQ(resultNode->GetId(), childID);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg076
+ * @tc.desc: Test SideBar OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg076, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern and layoutProperty.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto sideBarLayoutProperty = sideBarFrameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step2. call OnHover function with illegal and legal property.
+     * @tc.expected: step2. isDividerDraggable_ is set.
+     */
+    sideBarPattern->isInDividerDrag_ = true;
+    sideBarPattern->OnHover(true);
+    sideBarPattern->isInDividerDrag_ = false;
+    sideBarLayoutProperty->UpdateDividerStrokeWidth(-DIVIDER_STROKE_WIDTH);
+    sideBarLayoutProperty->UpdateMinSideBarWidth(MIN_SIDE_BAR_WIDTH);
+    sideBarLayoutProperty->UpdateMaxSideBarWidth(MAX_SIDE_BAR_WIDTH);
+    sideBarPattern->OnHover(true);
+    EXPECT_FALSE(sideBarPattern->isDividerDraggable_);
+    sideBarLayoutProperty->UpdateDividerStrokeWidth(DIVIDER_STROKE_WIDTH);
+    sideBarPattern->OnHover(true);
+    EXPECT_FALSE(sideBarPattern->isDividerDraggable_);
+    sideBarLayoutProperty->UpdateDividerStrokeWidth(-DIVIDER_STROKE_WIDTH);
+    sideBarLayoutProperty->UpdateMinSideBarWidth(IMAGE_WIDTH);
+    sideBarPattern->OnHover(true);
+    EXPECT_FALSE(sideBarPattern->isDividerDraggable_);
+    sideBarLayoutProperty->UpdateDividerStrokeWidth(DIVIDER_STROKE_WIDTH);
+    sideBarPattern->OnHover(true);
+    EXPECT_TRUE(sideBarPattern->isDividerDraggable_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg077
+ * @tc.desc: Test SideBar ShowDialogWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg077, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get pattern.
+     */
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentNode, nullptr);
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(sideBarNode, nullptr);
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    ASSERT_NE(dividerNode, nullptr);
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(controlBtnNode, nullptr);
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
+
+    /**
+     * @tc.steps: step2. call ShowDialogWithNode function.
+     * @tc.expected: step2. isDialogShow_ is set.
+     */
+    sideBarPattern->isDialogShow_ = true;
+    sideBarPattern->ShowDialogWithNode();
+    sideBarPattern->isDialogShow_ = false;
+    sideBarPattern->ShowDialogWithNode();
+    EXPECT_TRUE(sideBarPattern->isDialogShow_);
+}
+
+/**
  * @tc.name: SideBarContainerPaintMethodNg001
  * @tc.desc: Test SideBarContainerPaintMethod ClipPadding
  * @tc.type: FUNC
@@ -2050,67 +2991,5 @@ HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern003, TestSize.Level1)
     pattern->showSideBar_ = false;
     pattern->sideBarStatus_ = SideBarStatus::SHOW;
     pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
-}
-
-/**
- * @tc.name: SideBarContainerPattern004
- * @tc.desc: Test SideBar CreateControlButton and Image In version13
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sideBarContainer,controlButton node,then mount controlButton node to its parent
-     * frameNode.
-     * @tc.expected: check whether the sideBarContainer node's children is not empty.
-     */
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-
-    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
-    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
-
-    pattern->CreateAndMountControlButton(frameNode);
-
-    auto children = frameNode->GetChildren();
-    ASSERT_FALSE(children.empty());
-
-    /**
-     * @tc.steps: step2. get the controlButton and controlImage properties,
-     * @tc.expected: check whether the controlButton's properties is same as the default theme.
-     */
-    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
-    ASSERT_NE(sideBarTheme, nullptr);
-    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
-    ASSERT_NE(buttonFrameNode, nullptr);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    ASSERT_NE(buttonLayoutProperty, nullptr);
-    auto buttonPattern = buttonFrameNode->GetPattern<ButtonPattern>();
-    ASSERT_NE(buttonPattern, nullptr);
-    auto buttonRenderContext = buttonFrameNode->GetRenderContext();
-    ASSERT_NE(buttonRenderContext, nullptr);
-    auto buttonChildren = buttonFrameNode->GetChildren();
-    ASSERT_FALSE(buttonChildren.empty());
-    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
-    ASSERT_NE(imgFrameNode, nullptr);
-    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
-
-    auto expectedButtonRadius = sideBarTheme->GetControlButtonRadius();
-    auto currentButtonRadius = buttonLayoutProperty->GetBorderRadiusValue();
-    EXPECT_EQ(BorderRadiusProperty(expectedButtonRadius), currentButtonRadius);
-
-    auto expectedBackgroundColor = Color::TRANSPARENT;
-    auto currentBackgroundColor = buttonRenderContext->GetBackgroundColorValue();
-    EXPECT_EQ(expectedBackgroundColor.GetValue(), currentBackgroundColor.GetValue());
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

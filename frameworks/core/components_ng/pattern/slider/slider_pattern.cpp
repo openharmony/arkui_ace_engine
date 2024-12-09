@@ -20,6 +20,7 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/container.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
@@ -44,6 +45,7 @@ constexpr float HALF = 0.5;
 constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
+constexpr Dimension FORM_PAN_DISTANCE = 1.0_vp;
 constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
@@ -98,6 +100,7 @@ void SliderPattern::OnModifyDone()
     SetAccessibilityAction();
     InitAccessibilityHoverEvent();
     AccessibilityVirtualNodeRenderTask();
+    InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
 }
 
@@ -155,21 +158,54 @@ void SliderPattern::HandleSliderOnAccessibilityFocusCallback()
     }
 }
 
-void SliderPattern::InitAccessibilityVirtualNodeTask()
-{
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier()) {
-        return;
+class SliderAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    SliderAccessibilitySAObserverCallback(
+        const WeakPtr<SliderPattern> &weakSliderPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakSliderPattern_(weakSliderPattern)
+    {}
+
+    ~SliderAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto sliderPattern = weakSliderPattern_.Upgrade();
+        CHECK_NULL_RETURN(sliderPattern, false);
+        if (state) {
+            sliderPattern->InitAccessibilityVirtualNodeTask();
+        }
+        return true;
     }
+private:
+    WeakPtr<SliderPattern> weakSliderPattern_;
+};
+
+void SliderPattern::InitSliderAccessibilityEnabledRegister()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    if (!isInitAccessibilityVirtualNode_) {
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilitySAObserverCallback_ = std::make_shared<SliderAccessibilitySAObserverCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
+}
+
+void SliderPattern::InitAccessibilityVirtualNodeTask()
+{
+    if (!isInitAccessibilityVirtualNode_ && CheckCreateAccessibilityVirtualNode()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask(
-            [weak = WeakClaim(this), &isInitAccessibilityVirtualNode = isInitAccessibilityVirtualNode_]() {
+            [weak = WeakClaim(this)]() {
                 auto sliderPattern = weak.Upgrade();
                 CHECK_NULL_VOID(sliderPattern);
-                isInitAccessibilityVirtualNode = sliderPattern->InitAccessibilityVirtualNode();
+                sliderPattern->isInitAccessibilityVirtualNode_ = sliderPattern->InitAccessibilityVirtualNode();
             });
     }
 }
@@ -192,20 +228,30 @@ void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const Accessibil
 
 void SliderPattern::AccessibilityVirtualNodeRenderTask()
 {
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    if (isInitAccessibilityVirtualNode_) {
+    if (isInitAccessibilityVirtualNode_ && CheckCreateAccessibilityVirtualNode()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto sliderPattern = weak.Upgrade();
             CHECK_NULL_VOID(sliderPattern);
             sliderPattern->ModifyAccessibilityVirtualNode();
         });
     }
+}
+
+bool SliderPattern::CheckCreateAccessibilityVirtualNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, false);
+    bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier() || !isShowSteps) {
+        return false;
+    }
+    return true;
 }
 
 bool SliderPattern::InitAccessibilityVirtualNode()
@@ -392,7 +438,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
 
         auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(pointNodeProperty);
-        auto valueTxt = pointNodeProperty->GetContent().value_or("");
+        auto valueTxt = UtfUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
         if (currentStepIndex == i) {
             pointAccessibilityProperty->SetAccessibilityText(selectedTxt + valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(" ");
@@ -1039,6 +1085,24 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     if (direction_ == GetDirection() && panEvent_) return;
     direction_ = GetDirection();
+   
+    if (panEvent_) {
+        gestureHub->RemovePanEvent(panEvent_);
+    }
+    panEvent_ = CreatePanEvent();
+
+    PanDirection panDirection;
+    panDirection.type = direction_ == Axis::HORIZONTAL ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    gestureHub->AddPanEvent(
+        panEvent_, panDirection, 1, pipeline->IsFormRender() ? FORM_PAN_DISTANCE : DEFAULT_PAN_DISTANCE);
+}
+
+RefPtr<PanEvent> SliderPattern::CreatePanEvent()
+{
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle action start");
         auto pattern = weak.Upgrade();
@@ -1077,15 +1141,8 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->axisFlag_ = false;
         pattern->CloseTranslateAnimation();
     };
-    if (panEvent_) {
-        gestureHub->RemovePanEvent(panEvent_);
-    }
-    panEvent_ = MakeRefPtr<PanEvent>(
+    return MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-
-    PanDirection panDirection;
-    panDirection.type = direction_ == Axis::HORIZONTAL ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -1921,6 +1978,11 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     hasVisibleChangeRegistered_ = false;
+
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromFrameNode OK");
 }
 
 void SliderPattern::InitOrRefreshSlipFactor()

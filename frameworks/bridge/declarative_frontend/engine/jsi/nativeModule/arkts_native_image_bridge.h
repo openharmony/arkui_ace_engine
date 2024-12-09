@@ -78,6 +78,8 @@ public:
     static ArkUINativeModuleValue ResetOnError(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnFinish(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnFinish(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOrientation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOrientation(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

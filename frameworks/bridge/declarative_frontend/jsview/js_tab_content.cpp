@@ -513,9 +513,6 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
     if (!labelStyle.fontStyle.has_value()) {
         labelStyle.fontStyle = FontStyle::NORMAL;
     }
-    if (!labelStyle.fontFamily.has_value()) {
-        labelStyle.fontFamily = { "HarmonyOS Sans" };
-    }
     if (!labelStyle.heightAdaptivePolicy.has_value()) {
         labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }

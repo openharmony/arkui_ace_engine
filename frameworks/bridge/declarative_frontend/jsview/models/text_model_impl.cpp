@@ -39,6 +39,11 @@ void TextModelImpl::Create(const std::string& content)
     textComponent->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::Create(const std::u16string& content)
+{
+    Create(UtfUtils::Str16ToStr8(content));
+}
+
 void TextModelImpl::SetFont(const Font& value) {}
 
 void TextModelImpl::SetFontSize(const Dimension& value)

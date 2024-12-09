@@ -1263,7 +1263,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg076, TestSize.Level1)
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     menuPattern->OnItemPressed(parent, 5, false);
     EXPECT_EQ(parent->GetTag(), V2::JS_FOR_EACH_ETS_TAG);
-    menuPattern->OnItemPressed(parent, 0, false);
+    menuPattern->OnItemPressed(parent, 1, false);
     EXPECT_EQ(parent->GetChildAtIndex(1)->GetTag(), V2::JS_FOR_EACH_ETS_TAG);
     menuPattern->OnItemPressed(parent, 3, false);
     EXPECT_EQ(parent->GetChildAtIndex(4)->GetTag(), V2::MENU_ITEM_GROUP_ETS_TAG);

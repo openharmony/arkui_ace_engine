@@ -52,6 +52,7 @@ public:
     static void RemoveOffscreenNode(RefPtr<FrameNode> node);
     static void GetInspectorTree(InspectorTreeMap& treesInfo);
     static void GetOffScreenTreeNodes(InspectorTreeMap& nodes);
+    static void GetRecordAllPagesNodes(InspectorTreeMap& treesInfo);
 
 private:
     static RefPtr<RecNode> AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes);
@@ -59,6 +60,7 @@ private:
         std::vector<RefPtr<NG::UINode>> children, int32_t pageId, InspectorTreeMap& recNodes);
     static void GetInspectorChildrenInfo(
         const RefPtr<NG::UINode>& parent, InspectorTreeMap& recNodes, int32_t pageId, uint32_t depth = UINT32_MAX);
+    static void RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, InspectorTreeMap& treesInfo);
 
 private:
     static std::set<RefPtr<FrameNode>> offscreenNodes;

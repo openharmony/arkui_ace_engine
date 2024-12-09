@@ -35,7 +35,7 @@ HWTEST_F(TextTestThreeNg, TextModelSetFont001, TestSize.Level1)
      * @tc.steps: step1. Initialize textModelNG and FrameNode
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     Font font;
     font.fontSize = FONT_SIZE_VALUE;
     font.fontWeight = FontWeight::BOLD;
@@ -70,7 +70,7 @@ HWTEST_F(TextTestThreeNg, TextModelGetFontInJson001, TestSize.Level1)
      * @tc.steps: step1. Initialize textModelNG and FrameNode
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
@@ -212,7 +212,7 @@ HWTEST_F(TextTestThreeNg, ApplyIndents002, TestSize.Level1)
      */
     TextStyle textStyle;
     textStyle.SetTextIndent(Dimension(5));
-    rowLayoutAlgorithm->CreateParagraph(textStyle, "This is a test.", AceType::RawPtr(host));
+    rowLayoutAlgorithm->CreateParagraph(textStyle, u"This is a test.", AceType::RawPtr(host));
 
     /**
      * @tc.steps: step3. run the ApplyIndents Func.
@@ -239,7 +239,7 @@ HWTEST_F(TextTestThreeNg, ApplyIndents003, TestSize.Level1)
      */
     TextStyle textStyle;
     textStyle.SetTextIndent(Dimension(5, DimensionUnit::PERCENT));
-    rowLayoutAlgorithm->CreateParagraph(textStyle, "This is a test.", AceType::RawPtr(host));
+    rowLayoutAlgorithm->CreateParagraph(textStyle, u"This is a test.", AceType::RawPtr(host));
 
     /**
      * @tc.steps: step3. run the ApplyIndents Func.
@@ -260,7 +260,7 @@ HWTEST_F(TextTestThreeNg, ClearOnClick001, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
 
     /**
      * @tc.steps: step2. Running ClearOnClick function.
@@ -282,7 +282,7 @@ HWTEST_F(TextTestThreeNg, SetFontSize001, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
     /**
@@ -311,7 +311,7 @@ HWTEST_F(TextTestThreeNg, SetTextCaretColor001, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
     /**
@@ -340,7 +340,7 @@ HWTEST_F(TextTestThreeNg, SetSelectedBackgroundColor001, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
 
     /**
@@ -379,7 +379,7 @@ HWTEST_F(TextTestThreeNg, GetLineCount001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    rowLayoutAlgorithm->CreateParagraph(textStyle, "This is a test.", AceType::RawPtr(frameNode));
+    rowLayoutAlgorithm->CreateParagraph(textStyle, u"This is a test.", AceType::RawPtr(frameNode));
 
     /**
      * @tc.steps: step3. GetLineCount.
@@ -452,7 +452,7 @@ HWTEST_F(TextTestThreeNg, GetCopyOptionString001, TestSize.Level1)
      * @tc.steps: step1. Initialize textModelNG and FrameNode
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto [frameNode, pattern] = Init();
     auto pipeline = frameNode->GetContextRefPtr();
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -609,7 +609,7 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern without any spanNodes.
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     textModelNG.SetCopyOption(CopyOptions::Local);
     std::function<void()> buildFunc = []() {};
     SelectMenuParam memuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
@@ -664,7 +664,7 @@ HWTEST_F(TextTestThreeNg, HandleClickEventTest001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern with two  child spanNodes.
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     textModelNG.SetCopyOption(CopyOptions::Local);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = host->GetPattern<TextPattern>();
@@ -716,7 +716,7 @@ HWTEST_F(TextTestThreeNg, SetTextSelection001, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
 
     /**
      * @tc.steps: step2. call SetTextSelection with CopyOptions::None
@@ -775,7 +775,7 @@ HWTEST_F(TextTestThreeNg, SetTextSelection001, TestSize.Level1)
 HWTEST_F(TextTestThreeNg, TextFrameNodeCreator004, TestSize.Level1)
 {
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
@@ -921,7 +921,7 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     /**
      * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
      * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
@@ -979,7 +979,7 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange003, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     /**
      * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
      * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
@@ -1037,7 +1037,7 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange004, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     /**
      * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
      * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
@@ -1095,7 +1095,7 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange005, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     /**
      * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
      * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
@@ -1305,7 +1305,7 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
      */
     SuppressMockParagraph();
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     textModelNG.SetCopyOption(CopyOptions::InApp);
     textModelNG.SetTextDetectEnable(true);
     /**
@@ -1370,7 +1370,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent001, TestSize.Level1)
      */
     SuppressMockParagraph();
     TextModelNG textModelNG;
-    textModelNG.Create("1234567890");
+    textModelNG.Create(u"1234567890");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     host->draggable_ = true;
@@ -1425,7 +1425,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent002, TestSize.Level1)
      */
     SuppressMockParagraph();
     TextModelNG textModelNG;
-    textModelNG.Create("1234567890abcdefghijklmnopqrstuvwxyz");
+    textModelNG.Create(u"1234567890abcdefghijklmnopqrstuvwxyz");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     host->draggable_ = true;
@@ -1500,7 +1500,7 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
      */
     SuppressMockParagraph();
     TextModelNG textModelNG;
-    textModelNG.Create("");
+    textModelNG.Create(u"");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     host->draggable_ = true;
@@ -1566,7 +1566,7 @@ HWTEST_F(TextTestThreeNg, GetSymbolSpanResultObject001, TestSize.Level1)
      */
     SuppressMockParagraph();
     TextModelNG textModelNG;
-    textModelNG.Create("");
+    textModelNG.Create(u"");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto stack = ViewStackProcessor::GetInstance();
     auto host = AceType::Claim<FrameNode>(stack->GetMainFrameNode());
@@ -1626,7 +1626,7 @@ HWTEST_F(TextTestThreeNg, GetImageResultObject001, TestSize.Level1)
      */
     SuppressMockParagraph();
     TextModelNG textModelNG;
-    textModelNG.Create("");
+    textModelNG.Create(u"");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     host->draggable_ = true;
@@ -1689,7 +1689,7 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern with child span node.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("");
+    textModelNG.Create(u"");
     TextDetectConfig textDetectConfig;
     textModelNG.SetTextDetectConfig(textDetectConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -1709,7 +1709,7 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern.
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     Shadow textShadow;
     textShadow.SetBlurRadius(3.f); // 3.f means BlurRadius.
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
@@ -1755,7 +1755,7 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod002, TestSize.Level1)
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
@@ -1833,11 +1833,12 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     /**
      * @tc.steps: step1. create frameNode.
      */
-    auto frameNode = TextModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId(), V2::TEXT_ETS_TAG);
+    auto frameNode = TextModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        StringUtils::Str8ToStr16(V2::TEXT_ETS_TAG));
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
     auto node = frameNode.rawPtr_;
-    std::string str = "Hello, World!";
+    std::u16string str = u"Hello, World!";
     Font font;
     TextModelNG::SetFont(node, font);
     TextModelNG::InitText(node, str);
@@ -1884,7 +1885,8 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty002, TestSize.Level1)
     /**
      * @tc.steps: step1. create frameNode.
      */
-    auto frameNode = TextModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId(), V2::TEXT_ETS_TAG);
+    auto frameNode = TextModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        StringUtils::Str8ToStr16(V2::TEXT_ETS_TAG));
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
     auto node = frameNode.rawPtr_;
@@ -1960,7 +1962,7 @@ HWTEST_F(TextTestThreeNg, TextLayoutAlgorithmLayout001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern with imageSpanNode&PlaceholderSpanNode.
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pattern = host->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
@@ -2037,7 +2039,7 @@ HWTEST_F(TextTestThreeNg, CreateParagphDragTest001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("1234567890");
+    textModelNG.Create(u"1234567890");
     textModelNG.SetCopyOption(CopyOptions::Local);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     host->draggable_ = true;
@@ -2074,7 +2076,7 @@ HWTEST_F(TextTestThreeNg, AdaptMaxTextSizeTest001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("1234567890");
+    textModelNG.Create(u"1234567890");
     textModelNG.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
     textModelNG.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE_S);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2114,7 +2116,7 @@ HWTEST_F(TextTestThreeNg, SetImageSpanTextStyleTest001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern with ImageSpanNodes.
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = host->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
@@ -2164,7 +2166,7 @@ HWTEST_F(TextTestThreeNg, SetImageSpanTextStyleTest001, TestSize.Level1)
 HWTEST_F(TextTestThreeNg, UpdateFontFeature001, TestSize.Level1)
 {
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();

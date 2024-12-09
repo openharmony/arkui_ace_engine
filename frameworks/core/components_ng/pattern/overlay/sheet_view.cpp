@@ -211,7 +211,8 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
     RefPtr<FrameNode> iconNode;
 
     // when api >= 12, use symbol format image, else use image format.
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         iconNode = FrameNode::CreateFrameNode(
             V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(iconNode);
@@ -309,6 +310,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
 
 RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
+    CHECK_NULL_RETURN(sheetNode, nullptr);
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto subtitleId = pattern->GetSubtitleId();

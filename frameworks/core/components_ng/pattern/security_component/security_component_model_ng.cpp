@@ -118,6 +118,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
+    property->UpdateTextStyle(style.text);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -151,8 +152,6 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     textLayoutProperty->UpdateFontSize(secCompTheme->GetFontSize());
     textLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
-    textLayoutProperty->UpdateFontFamily(defaultFontFamily);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 
     if (isButtonVisible) {

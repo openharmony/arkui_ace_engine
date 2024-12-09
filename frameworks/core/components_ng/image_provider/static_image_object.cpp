@@ -41,13 +41,15 @@ void StaticImageObject::MakeCanvasImage(
     ImageProvider::MakeCanvasImage(Claim(this), ctx, targetSize,
         { .forceResize = forceResize,
             .sync = syncLoad,
-            .dynamicMode = ctx->GetDynamicRangeMode(),
             .imageQuality = ctx->GetImageQuality(),
-            .isHdrDecoderNeed = ctx->GetIsHdrDecoderNeed() });
+            .isHdrDecoderNeed = ctx->GetIsHdrDecoderNeed(),
+            .photoDecodeFormat = ctx->GetPhotoDecodeFormat() });
 }
 
 RefPtr<ImageObject> StaticImageObject::Clone()
 {
-    return MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
+    auto object = MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
+    object->SetOrientation(orientation_);
+    return object;
 }
 } // namespace OHOS::Ace::NG

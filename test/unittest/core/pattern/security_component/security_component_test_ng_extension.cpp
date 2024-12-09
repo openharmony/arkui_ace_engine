@@ -1421,13 +1421,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDi
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
     
-    textLayoutProperty->UpdateContent("test");
+    textLayoutProperty->UpdateContent(u"test");
     EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::LTR);
 
-    textLayoutProperty->UpdateContent("تۇرۇشلۇق ئورۇن"); // this text is read from RTL
+    textLayoutProperty->UpdateContent(u"تۇرۇشلۇق ئورۇن"); // this text is read from RTL
     EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::RTL);
 
-    textLayoutProperty->UpdateContent(""); // this text empty, should ret default LTR
+    textLayoutProperty->UpdateContent(u""); // this text empty, should ret default LTR
     EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::LTR);
 }
 
@@ -1520,7 +1520,7 @@ void SecurityComponentModelTestNg::InitLayoutAlgorithm(RefPtr<SecurityComponentL
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textGeometryNode = textNode->geometryNode_;
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent("Security component");
+    textLayoutProperty->UpdateContent(u"Security component");
     textLayoutProperty->UpdateFontSize(Dimension(TEST_FONT_SIZE));
     auto textWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(textNode)), textGeometryNode, textLayoutProperty);

@@ -35,6 +35,10 @@ public:
     // Hide the keyboard across processes
     void HideKeyboardAcrossProcesses();
     void ProcessModalPageScene();
+    WeakPtr<NG::FrameNode> GetCurFocusNode() const
+    {
+        return curFocusNode_;
+    }
 
 private:
     InputMethodManager() = default;

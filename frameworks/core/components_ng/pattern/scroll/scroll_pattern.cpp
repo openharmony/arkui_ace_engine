@@ -59,6 +59,14 @@ void ScrollPattern::OnModifyDone()
     }
 }
 
+RefPtr<PaintProperty> ScrollPattern::CreatePaintProperty()
+{
+    auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
+    auto property = MakeRefPtr<ScrollPaintProperty>();
+    property->UpdateScrollBarMode(defaultDisplayMode);
+    return property;
+}
+
 RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
 {
     auto host = GetHost();

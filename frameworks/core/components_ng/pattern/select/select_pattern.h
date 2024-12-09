@@ -26,8 +26,6 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/option/option_paint_method.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"

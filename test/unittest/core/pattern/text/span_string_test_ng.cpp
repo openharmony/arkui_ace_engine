@@ -1388,7 +1388,8 @@ HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
     imageSpan->ApplyToSpanItem(imageSpanItem, SpanOperation::REMOVE);
     imageSpan->GetSubSpan(0, 3);
     buffer = imageSpan->ToString();
-    EXPECT_TRUE(buffer.empty());
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("ImageSpan"), 0);
 
     auto customSpan = AceType::MakeRefPtr<CustomSpan>();
     auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
@@ -1404,7 +1405,8 @@ HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
     paragraphStyleSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     EXPECT_FALSE(paragraphStyleSpan->IsAttributesEqual(fontSpan));
     buffer = paragraphStyleSpan->ToString();
-    EXPECT_TRUE(buffer.empty());
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("ParagraphStyleSpan"), 0);
 
     auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>();
     EXPECT_FALSE(lineHeightSpan->IsAttributesEqual(fontSpan));

@@ -929,4 +929,20 @@ double SystemProperties::GetSrollableFriction()
     auto ret = system::GetParameter("persist.scrollable.friction", "");
     return StringUtils::StringToDouble(ret);
 }
+
+double SystemProperties::GetScrollableDistance()
+{
+    auto ret = system::GetParameter("persist.scrollable.distance", "");
+    return StringUtils::StringToDouble(ret);
+}
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
+
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
+}
 } // namespace OHOS::Ace

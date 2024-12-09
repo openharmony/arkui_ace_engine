@@ -141,7 +141,9 @@ void TextClockPattern::UpdateTextLayoutProperty(
 
 void TextClockPattern::OnModifyDone()
 {
-    Pattern::OnModifyDone();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        Pattern::OnModifyDone();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textNode = GetTextNode();

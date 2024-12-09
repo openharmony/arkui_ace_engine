@@ -204,6 +204,8 @@ public:
     std::optional<TextBackgroundStyle> backgroundStyle;
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
+    GestureEventFunc onDoubleClick;
+    OnHoverFunc onHover;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeholderIndex = -1;
@@ -275,6 +277,17 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
+
+    void SetDoubleClickEvent(GestureEventFunc&& onDoubleClick_)
+    {
+        onDoubleClick = std::move(onDoubleClick_);
+    }
+
+    void SetHoverEvent(OnHoverFunc&& onHover_)
+    {
+        onHover = std::move(onHover_);
+    }
+
     void SetIsParentText(bool isText)
     {
         isParentText = isText;
@@ -317,6 +330,9 @@ public:
     {
         return symbolId_;
     }
+    
+    virtual void SpanDumpInfo();
+    void SpanDumpInfoAdvance();
 
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
@@ -533,23 +549,7 @@ public:
         const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
         bool isMarquee = false) override;
 
-    void DumpInfo() const
-    {
-        auto& dumpLog = DumpLog::GetInstance();
-        dumpLog.AddDesc("--------------- print run info ---------------");
-        dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run_.width)));
-        dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run_.height)));
-        dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run_.alignment)));
-        dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run_.baseline)));
-        dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run_.baseline_offset)));
-        dumpLog.AddDesc("--------------- print text style ---------------");
-        dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
-        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
-        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
-        dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
-        dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
-        dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
-    }
+    void DumpInfo() const;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 
     void SetCustomNode(const RefPtr<UINode>& customNode)
@@ -682,6 +682,10 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
+    void SpanDumpInfo() override
+    {
+        PlaceholderSpanItem::DumpInfo();
+    }
 };
 
 class ACE_EXPORT CustomSpanNode : public FrameNode {

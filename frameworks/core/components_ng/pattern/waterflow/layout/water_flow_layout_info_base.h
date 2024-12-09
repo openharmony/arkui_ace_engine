@@ -53,6 +53,11 @@ public:
     virtual float CalibrateOffset() = 0;
 
     /**
+     * @return estimated total content height.
+     */
+    virtual float EstimateTotalHeight() const = 0;
+
+    /**
      * @brief Get which cross-axis lane the item is in.
      *
      * @param itemIndex
@@ -194,6 +199,7 @@ public:
      */
     bool itemEnd_ = false;
     bool offsetEnd_ = false; // last item's bottom is in viewport
+    bool isDataValid_ = true;
 
     Axis axis_ = Axis::VERTICAL;
 

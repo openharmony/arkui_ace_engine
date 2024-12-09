@@ -448,36 +448,6 @@ const char *OH_ArkUI_KeyEvent_GetKeyText(const ArkUI_UIInputEvent* event);
 ArkUI_KeySourceType OH_ArkUI_KeyEvent_GetKeySource(const ArkUI_UIInputEvent* event);
 
 /**
- * @brief Obtains the ID of device that triggers a key event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @return Returns the device ID.
- * @since 14
- */
-int32_t OH_ArkUI_KeyEvent_GetDeviceId(const ArkUI_UIInputEvent* event);
-
-/**
- * @brief Obtains the state of the meta key (that is, the <b>WIN</b> key on the Windows keyboard or the <b>Command</b>
- *        key on the Mac keyboard) when a key event occurs.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @return Returns the state of the meta key. The value <b>1</b> means that the key is pressed, and <b>0</b> means the
- *         opposite.
- * @since 14
- */
-int32_t OH_ArkUI_KeyEvent_GetMetaKey(const ArkUI_UIInputEvent* event);
-
-/**
- * @brief Obtains the timestamp of a key event. It is the interval between the time when the event is triggered and the
- *        time when the system starts, in nanoseconds.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @return Returns the event timestamp, in nanoseconds.
- * @since 14
- */
-uint64_t OH_ArkUI_KeyEvent_GetTimestamp(const ArkUI_UIInputEvent* event);
-
-/**
  * @brief Prevents a key event from bubbling up.
  *
  * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
@@ -485,18 +455,6 @@ uint64_t OH_ArkUI_KeyEvent_GetTimestamp(const ArkUI_UIInputEvent* event);
  * @since 14
  */
 void OH_ArkUI_KeyEvent_StopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation);
-
-/**
- * @brief Obtains the pressed status of modifier keys from a key event.
- * The following modifier keys are supported: Ctrl, Alt, Shift, Fn. However, the <b>Fn</b> key on external keyboards
- * is not supported.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @param modifierKeys Modifier keys to check, which must be created using {@link ArkUI_ModifierKeyName}.
- * @return Returns whether the pressed status of the modifier keys.
- * @since 14
- */
-bool OH_ArkUI_KeyEvent_GetModifierKeyState(const ArkUI_UIInputEvent* event, uint32_t modifierKeys);
 
 /**
  * @brief Obtains the intention code associated with a key event.

@@ -97,7 +97,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
     bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
@@ -108,14 +108,10 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
         [gatherNodeCenter, gatherNodeChildrenInfo, calcResult]() mutable {
             for (const auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
-                CHECK_NULL_VOID(imageNode);
-                auto imageContext = imageNode->GetRenderContext();
-                CHECK_NULL_VOID(imageContext);
                 auto curPos = child.offset + OffsetF(child.halfWidth, child.halfHeight);
                 auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, calcResult);
-                imageContext->UpdatePosition(OffsetT<Dimension>(
-                    Dimension(child.offset.GetX() + offset.GetX()),
-                    Dimension(child.offset.GetY() + offset.GetY())));
+                offset += child.offset;
+                DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, offset);
             }
         });
 }
@@ -145,7 +141,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     if (!actuator->IsNeedGather()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
@@ -159,6 +155,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();
+    actuator->InitGatherNodesPosition(gatherNodeChildrenInfo);
     pipeline->FlushSyncGeometryNodeTasks();
     manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);
@@ -262,7 +259,7 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
 
 void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -316,7 +313,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(menuPattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -331,9 +328,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipeline, badgeLength);
+    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipelineContext, badgeLength);
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     textNode->MarkModifyDone();
@@ -343,7 +338,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(textNode);
     }
-    pipeline->FlushSyncGeometryNodeTasks();
+    pipelineContext->FlushSyncGeometryNodeTasks();
 }
 
 void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(

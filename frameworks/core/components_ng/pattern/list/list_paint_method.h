@@ -133,11 +133,6 @@ public:
     }
 
 private:
-    ContentClipMode GetDefaultContentClip() const override
-    {
-        return ContentClipMode::CONTENT_ONLY;
-    }
-
     V2::ItemDivider divider_;
     int32_t lanes_ = 1;
     int32_t totalItemCount_ = 0;

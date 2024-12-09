@@ -97,6 +97,7 @@ constexpr int32_t WORD_LIMIT_RETURN = 2;
 constexpr int32_t BEYOND_LIMIT_RETURN = 4;
 constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const InputStyle DEFAULT_INPUT_STYLE = InputStyle::INLINE;
 struct ExpectParagraphParams {
     float height = 50.f;
@@ -187,7 +188,7 @@ void TextInputWordBreak::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(placeHolder, text);
+    textFieldModelNG.CreateTextInput(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }
@@ -409,7 +410,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout001, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::NORMAL);
@@ -445,7 +446,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout002, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_ALL);
@@ -481,7 +482,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout003, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_WORD);
@@ -519,7 +520,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout004, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((uint32_t)(textStyle.GetWordBreak()), invalidValue);
@@ -557,7 +558,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout005, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((int32_t)(textStyle.GetWordBreak()), invalidValue);

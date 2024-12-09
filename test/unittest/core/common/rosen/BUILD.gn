@@ -34,10 +34,10 @@ ohos_unittest("rosen_test") {
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
-    "//third_party/googletest:gmock_main",
   ]
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "window_manager:libwm",
   ]

@@ -43,16 +43,7 @@ public:
         return MakeRefPtr<TitleBarAccessibilityProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto titleBarLayoutAlgorithm = MakeRefPtr<TitleBarLayoutAlgorithm>();
-        titleBarLayoutAlgorithm->SetInitialTitleOffsetY(initialTitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialTitle(isInitialTitle_);
-        titleBarLayoutAlgorithm->SetInitialSubtitleOffsetY(initialSubtitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialSubtitle(isInitialSubtitle_);
-        titleBarLayoutAlgorithm->SetMinTitleHeight(minTitleHeight_);
-        return titleBarLayoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     bool IsAtomicNode() const override
     {
@@ -81,19 +72,9 @@ public:
         return tempTitleOffsetY_;
     }
 
-    float GetTempTitleOffsetX() const
-    {
-        return tempTitleOffsetX_;
-    }
-
     float GetTempSubTitleOffsetY() const
     {
         return tempSubTitleOffsetY_;
-    }
-
-    float GetTempSubTitleOffsetX() const
-    {
-        return tempSubTitleOffsetX_;
     }
 
     float GetMaxTitleBarHeight() const
@@ -214,12 +195,10 @@ public:
         currentTitleOffsetY_ = currentTitleOffsetY;
     }
 
-    void SetCurrentTitleOffsetX(float currentTitleOffsetX)
+    void SetCurrentTitleBarHeight(float currentTitleBarHeight)
     {
-        currentTitleOffsetX_ = currentTitleOffsetX;
+        currentTitleBarHeight_ = currentTitleBarHeight;
     }
-
-    void SetCurrentTitleBarHeight(float currentTitleBarHeight);
 
     void SetIsTitleChanged(bool isTitleChanged)
     {
@@ -301,22 +280,6 @@ public:
     {
         return dialogNode_;
     }
-
-    void UpdateOffsetXToAvoidSideBar();
-    void ResetSideBarControlButtonInfo();
-    void UpdateSideBarControlButtonInfo(bool needToAvoidSideBar, OffsetF offset, SizeF size);
-
-    RectF GetControlButtonInfo() const
-    {
-        return controlButtonRect_;
-    }
-
-    bool IsNecessaryToAvoidSideBar() const
-    {
-        return needToAvoidSideBar_;
-    }
-
-    void InitSideBarButtonUpdateCallbackIfNeeded();
     
     void SetBackButtonDialogNode(const RefPtr<FrameNode>& dialogNode)
     {
@@ -346,9 +309,7 @@ private:
     void SetMaxTitleBarHeight();
     void SetTempTitleBarHeight(float offsetY);
     void SetTempTitleOffsetY();
-    void SetTempTitleOffsetX();
     void SetTempSubTitleOffsetY();
-    void SetTempSubTitleOffsetX();
     void SetDefaultTitleFontSize();
     void SetDefaultSubtitleOpacity();
 
@@ -388,10 +349,6 @@ private:
     void HandleLongPress(const RefPtr<FrameNode>& backButtonNode);
     void HandleLongPressActionEnd();
     void OnFontScaleConfigurationUpdate() override;
-
-    RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
-    void UpdateTitlePositionInfo();
-    float GetNavLeftPadding(float parentWidth);
 
     void InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
         const std::vector<NG::BarItem>& menuItems);
@@ -463,18 +420,6 @@ private:
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<FrameNode> dialogNode_;
-
-    float moveRatioX_ = 0.0f;
-    float minTitleOffsetX_ = 0.0f;
-    float maxTitleOffsetX_ = 0.0f;
-    float defaultTitleOffsetX_ = 0.0f;
-    float currentTitleOffsetX_ = 0.0f;
-    float tempTitleOffsetX_ = 0.0f;
-    float tempSubTitleOffsetX_ = 0.0f;
-    float titleMoveDistanceX_ = 0.0f;
-    bool needToAvoidSideBar_ = false;
-    RectF controlButtonRect_;
-    bool isScrolling_ = false;
 };
 
 } // namespace OHOS::Ace::NG

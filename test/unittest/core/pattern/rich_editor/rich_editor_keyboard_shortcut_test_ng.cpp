@@ -12,7 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1280,37 +1289,36 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchLocationInfo.localLocation_ = Offset(10.0f, 20.0f);
     /**
      * @tc.steps: step2. change parameter and call function.
      */
     richEditorPattern->textSelector_.baseOffset = richEditorPattern->caretPosition_ - 1;
-    Offset offset1(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleTouchMove(offset1);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
      * @tc.steps: step3. change parameter and call function.
      */
-    Offset offset2(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
     richEditorPattern->isMoveCaretAnywhere_ = true;
-    richEditorPattern->HandleTouchMove(offset2);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
      * @tc.steps: step4. change parameter and call function.
      */
-    Offset offset3(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
     richEditorPattern->isMoveCaretAnywhere_ = false;
-    richEditorPattern->HandleTouchMove(offset3);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
      * @tc.steps: step5. change parameter and call function.
      */
-    Offset offset4(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = false;
     richEditorPattern->selectOverlay_->ProcessOverlay({ .animation = false });
     auto manager = richEditorPattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
@@ -1319,7 +1327,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
     manager->CreateSelectOverlay(info);
     ASSERT_NE(manager->shareOverlayInfo_, nullptr);
     manager->shareOverlayInfo_->isSingleHandle = true;
-    richEditorPattern->HandleTouchMove(offset4);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
 }
 

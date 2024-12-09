@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
@@ -336,7 +337,8 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
         CHECK_NULL_VOID(buttonNextPrevLayoutProperty);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
         func();
-        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("common.next")) {
+        if (textLayoutProperty->GetContent() ==
+            UtfUtils::Str8ToStr16(Localization::GetInstance()->GetEntryLetters("common.next"))) {
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.prev"));
         } else {
@@ -437,7 +439,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("");
+    textLayoutProperty->UpdateContent(u"");
     textLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     auto titleNodeRenderContext = textTitleNode->GetRenderContext();
     titleNodeRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);

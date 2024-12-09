@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_text_modifier.h"
 
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -82,12 +83,11 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 namespace {
 
 std::string g_strValue;
-
 void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string content(value);
+    std::u16string content = UtfUtils::Str8ToStr16(std::string(value));
     TextModelNG::InitText(frameNode, content);
 }
 
@@ -95,7 +95,7 @@ const char* GetTextContent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    g_strValue = TextModelNG::GetContent(frameNode);
+    g_strValue = UtfUtils::Str16ToStr8(TextModelNG::GetContent(frameNode));
     return g_strValue.c_str();
 }
 
@@ -1144,17 +1144,16 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
-    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
-        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
-        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+        NG::OnCreateMenuCallback onCreateMenu = *(reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback));
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenu));
     } else {
         TextModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
-        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+        NG::OnMenuItemClickCallback onMenuItemClick =
+            *(reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback));
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
     } else {
         TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
@@ -1267,7 +1266,7 @@ void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_DETECT_RESULT_UPDATE;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextModelNG::SetOnDetectResultUpdate(frameNode, std::move(onDetectResultUpdate));
 }

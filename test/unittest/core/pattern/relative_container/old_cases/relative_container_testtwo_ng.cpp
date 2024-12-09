@@ -121,7 +121,7 @@ void RelativeContainerTestTwoNg::CreateInstance(const std::function<void(Relativ
 
 void RelativeContainerTestTwoNg::SetComponentParam(TextModelNG& textModelNG, std::string id, float width, float height)
 {
-    textModelNG.Create(id);
+    textModelNG.Create(StringUtils::Str8ToStr16(id));
     ViewAbstract::SetWidth(CalcLength(width));
     ViewAbstract::SetHeight(CalcLength(height));
     ViewAbstract::SetInspectorId(id);
@@ -152,7 +152,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest001, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -162,7 +162,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest001, TestSize.Level1)
         * add first child
         */
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -172,7 +172,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest001, TestSize.Level1)
         * add second child
         */
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -212,21 +212,21 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest002, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -263,7 +263,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest003, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -274,7 +274,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -285,7 +285,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -321,7 +321,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest004, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -332,7 +332,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest004, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -343,7 +343,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest004, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -379,7 +379,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest005, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -390,7 +390,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest005, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -401,7 +401,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest005, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -438,7 +438,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest006, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -449,7 +449,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest006, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -460,7 +460,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest006, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -499,7 +499,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest007, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -510,7 +510,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest007, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -521,7 +521,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest007, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -560,7 +560,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest008, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -571,7 +571,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest008, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -582,7 +582,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest008, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -618,7 +618,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest009, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -629,7 +629,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest009, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -640,7 +640,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest009, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -676,7 +676,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest010, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -687,7 +687,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest010, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -698,7 +698,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest010, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -734,7 +734,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest011, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -745,7 +745,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest011, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -756,7 +756,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest011, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -792,7 +792,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest012, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -803,7 +803,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest012, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -814,7 +814,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest012, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -850,7 +850,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest013, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -861,7 +861,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest013, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -872,7 +872,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest013, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -908,7 +908,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest014, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -919,7 +919,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest014, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -930,7 +930,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest014, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");
@@ -966,7 +966,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest015, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
         ViewAbstract::SetInspectorId(CONTAINER_ID);
         TextModelNG textModelFirst;
-        textModelFirst.Create("text1");
+        textModelFirst.Create(u"text1");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text1");
@@ -977,7 +977,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest015, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelSecond;
-        textModelSecond.Create("text2");
+        textModelSecond.Create(u"text2");
         ViewAbstract::SetWidth(CalcLength(100.0f));
         ViewAbstract::SetHeight(CalcLength(50.0f));
         ViewAbstract::SetInspectorId("text2");
@@ -988,7 +988,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest015, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
 
         TextModelNG textModelThird;
-        textModelThird.Create("text3");
+        textModelThird.Create(u"text3");
         ViewAbstract::SetWidth(CalcLength(40.0f));
         ViewAbstract::SetHeight(CalcLength(20.0f));
         ViewAbstract::SetInspectorId("text3");

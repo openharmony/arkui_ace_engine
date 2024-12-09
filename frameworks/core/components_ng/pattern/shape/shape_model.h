@@ -37,6 +37,7 @@ public:
     virtual void InitBox(const RefPtr<PixelMap>& pixMap);
     virtual void SetStroke(const Color& color);
     virtual void SetFill(const Color& color);
+    virtual void SetForegroundColor(const Color& color);
     virtual void SetStrokeDashOffset(const Ace::Dimension& dashOffset);
     virtual void SetStrokeLineCap(int lineCapStyle);
     virtual void SetStrokeLineJoin(int lineJoinStyle);

@@ -61,6 +61,8 @@ class ObjectProxyHandler {
 
         // makeObserved logic adds wrapper proxy later
         let ret = this.isMakeObserved_ ? target[key] : ObserveV2.autoProxyObject(target, key);
+        // do not addref for function type, it will make such huge unnecessary dependency collection
+        // for some common function attributes, e.g. toString etc.
         if (typeof (ret) !== 'function') {
             ObserveV2.getObserve().addRef(conditionalTarget, key);
             return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret).proxy : ret;

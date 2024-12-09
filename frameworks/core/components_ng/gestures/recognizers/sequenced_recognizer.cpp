@@ -298,7 +298,7 @@ void SequencedRecognizer::OnResetStatus()
 
 void SequencedRecognizer::DeadlineTimer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto callback = [weakPtr = AceType::WeakClaim(this)]() {

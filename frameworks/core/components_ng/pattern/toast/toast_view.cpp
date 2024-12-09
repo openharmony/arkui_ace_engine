@@ -97,7 +97,6 @@ void ToastView::UpdateTextLayoutProperty(
     textLayoutProperty->UpdateContent(message);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateFontSize(fontSize);
-    textLayoutProperty->UpdateLayoutDirection((isRightToLeft ? TextDirection::RTL : TextDirection::LTR));
     textLayoutProperty->UpdatePadding(paddings);
     textLayoutProperty->UpdateTextColor(textColor.value_or(defaultColor));
     textLayoutProperty->UpdateFontWeight(fontWeight);

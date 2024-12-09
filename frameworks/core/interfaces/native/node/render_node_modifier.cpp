@@ -104,11 +104,15 @@ void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 ro
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
-    Dimension first = Dimension(rotationX, unit);
-    Dimension second = Dimension(rotationY, unit);
-    Dimension third = Dimension(rotationZ, unit);
-    renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        renderContext->SetRotation(rotationX, rotationY, rotationZ);
+    } else {
+        DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
+        Dimension first = Dimension(rotationX, unit);
+        Dimension second = Dimension(rotationY, unit);
+        Dimension third = Dimension(rotationZ, unit);
+        renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
+    }
     renderContext->RequestNextFrame();
 }
 

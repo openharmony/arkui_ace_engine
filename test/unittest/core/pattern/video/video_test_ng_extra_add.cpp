@@ -1478,7 +1478,6 @@ HWTEST_F(VideoTestExtraAddNg, RecoverState001, TestSize.Level1)
     /* Indirectly call the RecoverState function by calling the ExitFullScreen function */
     EXPECT_TRUE(fullScreenPattern->ExitFullScreen());
 
-    videoPattern->isPrepared_ = true;
     videoPattern->mediaPlayer_ = nullptr;
 
     videoPattern->FullScreen();

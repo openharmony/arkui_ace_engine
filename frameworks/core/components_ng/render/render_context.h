@@ -171,6 +171,7 @@ public:
     enum class PatternType : int8_t {
         DEFAULT,
         VIDEO,
+        XCOM,
 #ifdef PLATFORM_VIEW_SUPPORTED
         PLATFORM_VIEW,
 #endif
@@ -277,6 +278,7 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
     virtual void SetSecurityLayer(bool isSecure) {}
+    virtual void SetHDRBrightness(float hdrBrightness) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}

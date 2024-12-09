@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 
+#include <atomic>
+
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
@@ -29,7 +31,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+#include "core/common/resource/resource_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -44,15 +46,6 @@ const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
 const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 
-constexpr float LIGHT_ON_INTENSITY_DARK = 2.5f;
-constexpr float LIGHT_ON_INTENSITY_LIGHT = 2.5f;
-constexpr float LIGHT_OFF_INTENSITY = 0.0f;
-constexpr float LIGHT_POSITION_Z = 70.0f;
-constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
-constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
-constexpr int32_t LIGHT_OFF_DELAY_TIME = 2000;
-constexpr int32_t LIGHT_OFF_UPDATE_INTERVAL = 500000000;
-
 const Dimension MENU_ITEM_RADIUS = 4.0_vp;
 const Dimension MENU_ITEM_PADDING_H = 12.0_vp;
 const Dimension MENU_ITEM_PADDING_V = 8.0_vp;
@@ -62,6 +55,8 @@ const Dimension MENU_SAFETY_X = 8.0_vp;
 const Dimension MENU_SAFETY_Y = 96.0_vp;
 const Dimension MENU_ITEM_TEXT_PADDING = 8.0_vp;
 const Color MENU_ITEM_COLOR = Color(0xffffff);
+
+std::atomic<int32_t> g_nextListenerId = 1;
 
 RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
 {
@@ -160,6 +155,14 @@ RefPtr<FrameNode> BuildMenuItem(WeakPtr<ContainerModalPatternEnhance>&& weakPatt
     BondingMenuItemEvent(weakPattern, containerTitleRow, isLeftSplit);
     return containerTitleRow;
 }
+
+void EventHubOnModifyDone(RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto eventHub = node->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->OnModifyDone();
+}
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -197,6 +200,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     layoutProperty->UpdateBorderWidth(borderWidth);
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToBounds(true);
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     // only floating window show border
     BorderRadiusProperty borderRadius;
@@ -227,7 +231,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
     ChangeFloatingTitle(isFocus_);
     ChangeControlButtons(isFocus_);
-    AddPointLight();
     auto controlButtonsContext = controlButtonsNode->GetRenderContext();
     CHECK_NULL_VOID(controlButtonsContext);
     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
@@ -235,8 +238,20 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     controlButtonVisibleBeforeAnim_ = (isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
-    AddPanEvent(customTitleRow);
-    AddPanEvent(gestureRow);
+
+    // add tap event and pan event
+    if (enableContainerModalGesture_) {
+        auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+        pattern->SetTapGestureEvent(customTitleRow);
+        pattern->SetTapGestureEvent(gestureRow);
+        pattern->SetTapGestureEvent(floatingTitleRow);
+        AddPanEvent(customTitleRow);
+        AddPanEvent(gestureRow);
+        EventHubOnModifyDone(customTitleRow);
+        EventHubOnModifyDone(gestureRow);
+        EventHubOnModifyDone(floatingTitleRow);
+    }
+    
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -255,7 +270,6 @@ void ContainerModalPatternEnhance::OnWindowFocused()
 {
     ContainerModalPattern::OnWindowFocused();
     isHoveredMenu_ = false;
-    UpdateLightIntensity();
 }
 
 void ContainerModalPatternEnhance::OnWindowUnfocused()
@@ -264,12 +278,10 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
         SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
         isFocus_ = false;
         isHoveredMenu_ = true;
-        UpdateLightIntensity();
         return;
     }
     ContainerModalPattern::OnWindowUnfocused();
     isHoveredMenu_ = false;
-    UpdateLightIntensity();
 }
 
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
@@ -393,127 +405,6 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     }
 }
 
-void ContainerModalPatternEnhance::AddPointLight()
-{
-    auto controlButtonsNode = GetButtonRowByInspectorId();
-    CHECK_NULL_VOID(controlButtonsNode);
-
-    auto maximizeButton = GetMaximizeButton();
-    auto minimizeButton = GetMinimizeButton();
-    auto closeButton = GetCloseButton();
-
-    CHECK_NULL_VOID(maximizeButton);
-    CHECK_NULL_VOID(minimizeButton);
-    CHECK_NULL_VOID(closeButton);
-
-    SetPointLight(controlButtonsNode, maximizeButton, minimizeButton, closeButton);
-}
-
-void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTitleRow, RefPtr<FrameNode>& maximizeBtn,
-    RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn)
-{
-    auto inputHub = containerTitleRow->GetOrCreateInputEventHub();
-    RefPtr<RenderContext> maximizeBtnRenderContext = maximizeBtn->GetRenderContext();
-    RefPtr<RenderContext> minimizeBtnRenderContext = minimizeBtn->GetRenderContext();
-    closeBtnRenderContext_ = closeBtn->GetRenderContext();
-
-    CHECK_NULL_VOID(maximizeBtnRenderContext);
-    CHECK_NULL_VOID(minimizeBtnRenderContext);
-    CHECK_NULL_VOID(closeBtnRenderContext_);
-    maximizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    minimizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    closeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-
-    auto mouseTask = [weakPattern = WeakClaim(this), weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](
-                         MouseInfo& info) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto closeBtn = weakCloseBtn.Upgrade();
-        CHECK_NULL_VOID(closeBtn);
-        auto closeBntFrameRect = closeBtn->GetGeometryNode()->GetFrameRect();
-        TranslateOptions closeTranslate = TranslateOptions(info.GetLocalLocation().GetX() - closeBntFrameRect.Left(),
-            info.GetLocalLocation().GetY() - closeBntFrameRect.Top(), LIGHT_POSITION_Z);
-        auto closeBtnContext = closeBtn->GetRenderContext();
-        CHECK_NULL_VOID(closeBtnContext);
-        closeBtnContext->UpdateLightPosition(closeTranslate);
-        if (!pattern->isLightOn_) {
-            pattern->UpdateLightIntensity();
-        }
-        if (pattern->isLightOn_) {
-            auto timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
-            pattern->UpdateLightOffDelay(timeStamp);
-        }
-    };
-    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnMouseEvent(mouseEvent);
-
-    auto hoverEventFucRow = [weakPattern = WeakClaim(this)](bool hover) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isTitleRowHovered_ = hover;
-        pattern->UpdateLightColor();
-        pattern->UpdateLightIntensity();
-    };
-    inputHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFucRow)));
-}
-
-void ContainerModalPatternEnhance::UpdateLightOffDelay(double timeStamp)
-{
-    if (timeStamp - lightOffDelayUpdateTime_ < LIGHT_OFF_UPDATE_INTERVAL) {
-        return;
-    }
-    lightOffDelayUpdateTime_ = timeStamp;
-    auto&& callback = [weakPattern = WeakClaim(this)]() {
-        AnimationOption option;
-        option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
-        option.SetCurve(Curves::SMOOTH);
-        AnimationUtils::Animate(option, [weakPattern]() {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
-            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
-            pattern->isLightOn_ = false;
-        });
-    };
-    auto pipeline = GetHost()->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    lightOffCallback_.Reset(callback);
-    pipeline->GetTaskExecutor()->PostDelayedTask(
-        lightOffCallback_, TaskExecutor::TaskType::UI, LIGHT_OFF_DELAY_TIME, "ArkUIContainerModalLightOff");
-}
-
-void ContainerModalPatternEnhance::UpdateLightColor()
-{
-    CHECK_NULL_VOID(closeBtnRenderContext_);
-    auto colorMode = SystemProperties::GetColorMode();
-    if (colorMode == ColorMode::LIGHT) {
-        closeBtnRenderContext_->UpdateLightColor(Color::BLACK);
-    } else {
-        closeBtnRenderContext_->UpdateLightColor(Color::WHITE);
-    }
-}
-
-void ContainerModalPatternEnhance::UpdateLightIntensity()
-{
-    AnimationOption option;
-    option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
-    option.SetCurve(Curves::SMOOTH);
-    AnimationUtils::Animate(option, [weakPattern = WeakClaim(this)]() {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
-        if (pattern->GetIsFocus() && pattern->isTitleRowHovered_) {
-            auto colorMode = SystemProperties::GetColorMode();
-            pattern->closeBtnRenderContext_->UpdateLightIntensity(
-                colorMode == ColorMode::LIGHT ? LIGHT_ON_INTENSITY_LIGHT : LIGHT_ON_INTENSITY_DARK);
-            pattern->isLightOn_ = true;
-        } else {
-            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
-            pattern->isLightOn_ = false;
-        }
-    });
-}
-
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
 {
     MeasureContext textCtx;
@@ -574,7 +465,7 @@ void ContainerModalPatternEnhance::CalculateMenuOffset(const RefPtr<FrameNode>& 
     }
     if (offsetX > screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx()) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen right");
-        offsetX = screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx();
+        offsetX = nodeOffset.GetX() + windowOffset.GetX() + buttonSize;
     }
     if (offsetY > screenHeight - menuHeight - MENU_SAFETY_Y.ConvertToPx()) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
@@ -612,7 +503,6 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
         containerNode->OnWindowFocused();
     });
     eventHub->AddGesture(tapGesture);
-    eventHub->OnModifyDone();
 }
 
 void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
@@ -688,24 +578,6 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
     }
     ResetHoverTimer();
     return menuList;
-}
-
-void ContainerModalPatternEnhance::OnMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn)
-{
-    // add long press event
-    auto longPressCallback = [weakPattern = AceType::WeakClaim(this),
-                                 weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn))](
-                                 GestureEvent& info) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto maximizeBtn = weakMaximizeBtn.Upgrade();
-        CHECK_NULL_VOID(maximizeBtn);
-        pattern->ShowMaxMenu(maximizeBtn);
-    };
-    // diable mouse left!
-    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
-    auto hub = maximizeBtn->GetOrCreateGestureEventHub();
-    hub->SetLongPressEvent(longPressEvent, false, true);
 }
 
 void ContainerModalPatternEnhance::OnMaxBtnInputEvent(MouseInfo& info)
@@ -821,6 +693,8 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
 
+    enableContainerModalGesture_ = isEnable;
+
     auto floatingTitleRow = GetFloatingTitleRow();
     auto customTitleRow = GetCustomTitleRow();
     auto gestureRow = GetGestureRow();
@@ -829,6 +703,9 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
     EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
     EnablePanEventOnNode(gestureRow, isEnable, "gesture row");
     EnableTapGestureOnNode(gestureRow, isEnable, "gesture row");
+    EventHubOnModifyDone(floatingTitleRow);
+    EventHubOnModifyDone(customTitleRow);
+    EventHubOnModifyDone(gestureRow);
 }
 
 bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
@@ -947,6 +824,22 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     }
 }
 
+void ContainerModalPatternEnhance::CallContainerModalNative(const std::string& name, const std::string& value)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallContainerModalNative name = %{public}s , value = %{public}s", name.c_str(),
+        value.c_str());
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    windowManager->FireWindowCallNativeCallback(name, value);
+}
+
+void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name, const std::string& value)
+{
+    auto controlButtonsNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    controlButtonsNode->FireCustomCallback(name, value);
+}
+
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
 {
     auto buttonRow = GetButtonRowByInspectorId();
@@ -966,6 +859,15 @@ bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& container
         return false;
     }
 
+    auto controlButtonsNode = GetControlButtonRow();
+    CHECK_NULL_RETURN(controlButtonsNode, false);
+    auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonsLayoutProperty, false);
+    if (controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttonRow are hidden");
+        return false;
+    }
+
     auto controlButtonsRow = GetButtonRowByInspectorId();
     CHECK_NULL_RETURN(controlButtonsRow, false);
     auto buttonRect = controlButtonsRow->GetGeometryNode()->GetFrameRect();
@@ -975,5 +877,79 @@ bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& container
         return false;
     }
     return true;
+}
+
+bool ContainerModalPatternEnhance::GetContainerModalComponentRect(RectF& containerModal, RectF& buttons)
+{
+    auto column = GetColumnNode();
+    CHECK_NULL_RETURN(column, false);
+    auto columnRect = column->GetGeometryNode()->GetFrameRect();
+    containerModal = columnRect;
+    if (columnRect.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
+
+    if (customTitleSettedShow_) {
+        return false;
+    }
+    auto controlButtonsRow = GetButtonRowByInspectorId();
+    CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto buttonRect = controlButtonsRow->GetGeometryNode()->GetFrameRect();
+    buttons = buttonRect;
+    if (buttons.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttons are hidden");
+        return false;
+    }
+    return true;
+}
+
+void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
+{
+    std::string text = "";
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        text = resAdapter->GetString(resId);
+    }
+    if (text.empty()) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "text is empty");
+        return;
+    }
+
+    MeasureContext textCtx;
+    textCtx.textContent = text;
+    textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
+    auto textSize = MeasureUtil::MeasureTextSize(textCtx);
+
+    auto controlButtonsNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    CalcDimension widthDimension(textSize.Width(), DimensionUnit::PX);
+    auto width = widthDimension.ConvertToVp();
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "GetMenuWidth width = %{public}f", width);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_MENU_WIDTH_CHANGE, std::to_string(width));
+}
+
+int32_t ContainerModalPatternEnhance::AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener)
+{
+    auto id = g_nextListenerId.fetch_add(1);
+    rectChangeListeners_.emplace(id, listener);
+    return id;
+}
+
+void ContainerModalPatternEnhance::RemoveButtonsRectChangeListener(int32_t id)
+{
+    auto it = rectChangeListeners_.find(id);
+    if (it != rectChangeListeners_.end()) {
+        rectChangeListeners_.erase(it);
+    }
+}
+
+void ContainerModalPatternEnhance::NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect)
+{
+    for (auto& pair : rectChangeListeners_) {
+        if (pair.second) {
+            pair.second(containerModal, buttonsRect);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

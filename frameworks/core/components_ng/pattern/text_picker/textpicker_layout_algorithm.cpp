@@ -143,17 +143,17 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
     auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
     float pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
 
-    if (textPickerPattern->GetIsShowInDialog() && isDefaultPickerItemHeight_) {
+    if (textPickerPattern->GetIsShowInDialog()) {
         float dialogButtonHeight =
             static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight() +
                                 dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2)
                                 .ConvertToPx());
         pickerHeight = std::min(pickerHeight, layoutConstraint->maxSize.Height() - dialogButtonHeight);
-        if (!NearZero(showCount_)) {
-            defaultPickerItemHeight_ = pickerHeight / showCount_;
+        if (isDefaultPickerItemHeight_) {
+            defaultPickerItemHeight_ = NearZero(showCount_) ? defaultPickerItemHeight_ : pickerHeight / showCount_;
+            textPickerPattern->SetResizePickerItemHeight(defaultPickerItemHeight_);
+            textPickerPattern->SetResizeFlag(true);
         }
-        textPickerPattern->SetResizePickerItemHeight(defaultPickerItemHeight_);
-        textPickerPattern->SetResizeFlag(true);
     }
 
     frameSize.SetWidth(pickerWidth);

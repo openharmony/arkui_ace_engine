@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -25,6 +26,7 @@ constexpr int32_t DEFAULT_ANIMATION_DURATION = 500;
 void NavDestinationPatternBase::SetTitleBarStyle(const std::optional<BarStyle>& barStyle)
 {
     if (titleBarStyle_ != barStyle) {
+        // Mark need update safeAreaPadding when it is enabled or disabled.
         if (barStyle.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING ||
             titleBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING) {
             safeAreaPaddingChanged_ = true;
@@ -39,6 +41,7 @@ void NavDestinationPatternBase::SetTitleBarStyle(const std::optional<BarStyle>& 
 void NavDestinationPatternBase::SetToolBarStyle(const std::optional<BarStyle>& barStyle)
 {
     if (toolBarStyle_ != barStyle) {
+        // Mark need update safeAreaPadding when it is enabled or disabled.
         if (barStyle.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING ||
             toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING) {
             safeAreaPaddingChanged_ = true;
@@ -48,41 +51,6 @@ void NavDestinationPatternBase::SetToolBarStyle(const std::optional<BarStyle>& b
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
-}
-
-bool NavDestinationPatternBase::UpdateBarSafeAreaPadding()
-{
-    if (!safeAreaPaddingChanged_) {
-        return false;
-    }
-    safeAreaPaddingChanged_ = false;
-    auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
-    CHECK_NULL_RETURN(nodeBase, false);
-    auto contentNode = AceType::DynamicCast<FrameNode>(nodeBase->GetContentNode());
-    CHECK_NULL_RETURN(contentNode, false);
-    auto contentLayoutProperty = contentNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(contentLayoutProperty, false);
-
-    Dimension paddingTop = 0.0_vp;
-    if (titleBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING) {
-        paddingTop = GetTitleBarHeightBeforeMeasure();
-    }
-    Dimension paddingBottom = 0.0_vp;
-    auto toolBarNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
-    if (toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
-        toolBarNode && toolBarNode->IsVisible()) {
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_RETURN(theme, false);
-        paddingBottom = theme->GetHeight();
-    }
-    PaddingProperty paddingProperty;
-    paddingProperty.left = CalcLength(0.0_vp);
-    paddingProperty.right = CalcLength(0.0_vp);
-    paddingProperty.top = CalcLength(paddingTop);
-    paddingProperty.bottom = CalcLength(paddingBottom);
-
-    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
-    return true;
 }
 
 void NavDestinationPatternBase::UpdateLayoutPropertyBeforeAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
@@ -392,6 +360,66 @@ void NavDestinationPatternBase::RemoveAnimation(int32_t id)
     auto it = barAnimations_.find(id);
     if (it != barAnimations_.end()) {
         barAnimations_.erase(it);
+    }
+}
+
+void NavDestinationPatternBase::UpdateHideBarProperty()
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(layoutProperty);
+    /**
+     *  Mark need update safeAreaPadding when usr-set visibility of safe-area-padding-mode titleBar changed.
+     *  The same goes for toolBar.
+     */
+    if ((titleBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
+        isHideTitlebar_ != layoutProperty->GetHideTitleBarValue(false)) ||
+        (toolBarStyle_.value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
+        isHideToolbar_ != layoutProperty->GetHideToolBarValue(false))) {
+        safeAreaPaddingChanged_ = true;
+    }
+    isHideToolbar_ = layoutProperty->GetHideToolBarValue(false);
+    isHideTitlebar_ = layoutProperty->GetHideTitleBarValue(false);
+}
+
+void NavDestinationPatternBase::ExpandContentSafeAreaIfNeeded()
+{
+    auto hostNode = DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
+    auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (opts && contentNode) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s SafeArea expand as %{public}s",
+            hostNode->GetTag().c_str(), opts->ToString().c_str());
+        contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        contentNode->MarkModifyDone();
+    }
+}
+
+void NavDestinationPatternBase::MarkSafeAreaPaddingChangedWithCheckTitleBar(float titleBarHeight)
+{
+    auto hostNode = DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    if (titleBarStyle_.value_or(BarStyle::STANDARD) != BarStyle::SAFE_AREA_PADDING) {
+        return;
+    }
+    /**
+     *  Mark need update safeAreaPadding when the height of safe-area-padding-title changed.
+     *  For example, when titleMode of navigation changed or when free-mode-title is dragged.
+     */
+    if (!NearEqual(titleBarHeight, titleBarHeight_)) {
+        safeAreaPaddingChanged_ = true;
+        return;
+    }
+    /**
+     *  Mark need update safeAreaPadding when titleBar onHover mode updated.
+     */
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    if (titleBarNode && NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode) != titleBarOffsetY_) {
+        safeAreaPaddingChanged_ = true;
     }
 }
 } // namespace OHOS::Ace::NG

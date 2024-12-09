@@ -695,6 +695,32 @@ ArkUINativeModuleValue XComponentBridge::ResetEnableSecure(ArkUIRuntimeCallInfo 
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue XComponentBridge::SetHdrBrightness(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        float hdrBrightness = secondArg->ToNumber(vm)->Value();
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentHdrBrightness(nativeNode, hdrBrightness);
+    } else {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentHdrBrightness(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetHdrBrightness(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentHdrBrightness(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue XComponentBridge::SetRenderFit(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();

@@ -106,6 +106,13 @@ public:
         sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
+    void OnExtensionDetachToDisplay() override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionDetachToDisplay();
+    }
+
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
         auto sessionWrapper = sessionWrapper_.Upgrade();
@@ -133,8 +140,12 @@ SessionWrapperImpl::~SessionWrapperImpl() {}
 void SessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     int32_t callSessionId = GetSessionId();
+    if (!taskExecutor_) {
+        LOGE("Get taskExecutor_ is nullptr, the sessionid = %{public}d", callSessionId);
+        return;
+    }
+    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]
         (OHOS::Rosen::WSError errcode) {
         if (errcode == OHOS::Rosen::WSError::WS_OK) {
@@ -330,6 +341,11 @@ void SessionWrapperImpl::InitAllCallback()
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
     };
+    sessionCallbacks->getStatusBarHeightFunc_ = [instanceId = instanceId_]() -> uint32_t {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_RETURN(container, 0);
+        return container->GetStatusBarHeight();
+    };
 }
 /************************************************ End: Initialization *************************************************/
 
@@ -349,7 +365,8 @@ Rosen::SessionViewportConfig ConvertToRosenSessionViewportConfig(const SessionVi
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
     ContainerScope scope(instanceId_);
-    UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
+    UIEXT_LOGI("The session is created with bundle = %{public}s, ability = %{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
@@ -400,7 +417,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     SessionViewportConfig sessionViewportConfig;
     sessionViewportConfig.isDensityFollowHost_ = pattern->GetDensityDpi();
     sessionViewportConfig.density_ = context->GetCurrentDensity();
-    sessionViewportConfig.displayId_ = 0;
+    sessionViewportConfig.displayId_ = container->GetCurrentDisplayId();
     sessionViewportConfig.orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation());
     sessionViewportConfig.transform_ = context->GetTransformHint();
     pattern->SetSessionViewportConfig(sessionViewportConfig);
@@ -620,12 +637,18 @@ void SessionWrapperImpl::NotifyForeground()
         session_, hostWindowId, std::move(foregroundCallback_));
 }
 
-void SessionWrapperImpl::NotifyBackground()
+void SessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d.", session_->GetPersistentId());
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
-        session_, std::move(backgroundCallback_));
+    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d, isHandleError = %{public}d.",
+        session_->GetPersistentId(), isHandleError);
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, std::move(backgroundCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, nullptr);
+    }
 }
 
 void SessionWrapperImpl::OnReleaseDone()
@@ -729,6 +752,27 @@ void SessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
                 isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
+}
+
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+    UIEXT_LOGI("OnExtensionDetachToDisplay");
+    int32_t callSessionId = GetSessionId();
+    taskExecutor_->PostTask(
+        [weak = hostPattern_, callSessionId]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "OnExtensionDetachToDisplay: The callSessionId(%{public}d)"
+                    " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+
+            pattern->OnExtensionDetachToDisplay();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnExtensionDetachToDisplay");
 }
 
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)

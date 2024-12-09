@@ -96,6 +96,9 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogLayoutProperty = dialogNode->GetLayoutProperty();
     CHECK_NULL_RETURN(dialogLayoutProperty, nullptr);
+    auto calendarTextDirection = calendarLayoutProperty->GetNonAutoLayoutDirection();
+    auto dialogTextDirection = dialogLayoutProperty->GetNonAutoLayoutDirection();
+    SetWeekTextDirection(dialogTextDirection, calendarTextDirection, weekFrameNode);
     dialogLayoutProperty->UpdateLayoutDirection(textDirection);
     CreateChildNode(contentColumn, dialogNode, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
@@ -109,6 +112,33 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     calendarNode->MarkModifyDone();
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void CalendarDialogView::SetWeekTextDirection(const TextDirection& dialogDirection,
+    const TextDirection& calendarDirection, const RefPtr<FrameNode>& weekNode)
+{
+    std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
+    for (int32_t column = 0; column < DAYS_OF_WEEK; column++) {
+        auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(textWeekNode);
+        int32_t weekId = 0;
+        if (calendarDirection == TextDirection::RTL
+            && dialogDirection != TextDirection::RTL) {
+            weekId = (DAYS_OF_WEEK - 1) - (column % DAYS_OF_WEEK);
+        } else {
+            weekId = column % DAYS_OF_WEEK;
+        }
+        if (weekId < 0) {
+            continue;
+        }
+        std::string weekContent { weekNumbers[weekId] };
+        auto textLayoutProperty = textWeekNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(weekContent);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        textWeekNode->MountToParent(weekNode);
+    }
 }
 
 void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
@@ -134,10 +164,6 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         BorderRadiusProperty radius;
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
-    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
         if (shadowTheme) {
             auto colorMode = SystemProperties::GetColorMode();
@@ -206,25 +232,26 @@ void CalendarDialogView::SetTitleIdealSize(
     }
 }
 
-void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode,
-    RefPtr<FrameNode>& leftDayArrowNode, RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode)
+void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode, RefPtr<FrameNode>& leftDayArrowNode,
+    RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode, RefPtr<CalendarTheme> theme)
 {
+    CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(leftYearArrowNode);
     auto leftYearProperty = leftYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(leftYearProperty);
-    leftYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_year"));
+    leftYearProperty->SetAccessibilityText(theme->GetCalendarTheme().preYear);
     CHECK_NULL_VOID(leftDayArrowNode);
     auto leftDayProperty = leftDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(leftDayProperty);
-    leftDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_month"));
+    leftDayProperty->SetAccessibilityText(theme->GetCalendarTheme().preMonth);
     CHECK_NULL_VOID(rightDayArrowNode);
     auto rightDayProperty = rightDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(rightDayProperty);
-    rightDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_month"));
+    rightDayProperty->SetAccessibilityText(theme->GetCalendarTheme().nextMonth);
     CHECK_NULL_VOID(rightYearArrowNode);
     auto rightYearProperty = rightYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(rightYearProperty);
-    rightYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_year"));
+    rightYearProperty->SetAccessibilityText(theme->GetCalendarTheme().nextYear);
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
@@ -264,7 +291,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("");
+    textLayoutProperty->UpdateContent(u"");
     MarginProperty textMargin;
     textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
     textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
@@ -287,7 +314,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     auto rightYearArrowNode =
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
-    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode);
+    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode, theme);
     return titleRow;
 }
 
@@ -311,31 +338,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateWeekNode(const RefPtr<FrameNode>& ca
     MarginProperty margin;
     margin.top = CalcLength(theme->GetDistanceBetweenTitleAndDate().ConvertToPx() + WEEK_SPACE);
     weekLayoutProperty->UpdateMargin(margin);
-    std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
-    for (uint32_t column = 0; column < DAYS_OF_WEEK; column++) {
-        auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_RETURN(textWeekNode, nullptr);
-        auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
-        int32_t weekId = 0;
-        if (textDirection == TextDirection::LTR) {
-            weekId = column % DAYS_OF_WEEK;
-        } else {
-            weekId = (DAYS_OF_WEEK - 1) - (column % DAYS_OF_WEEK);
-        }
-        if (weekId < 0) {
-            continue;
-        }
-        std::string weekContent { weekNumbers[weekId] };
-        auto textLayoutProperty = textWeekNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-        textLayoutProperty->UpdateContent(weekContent);
-        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(
-            calendarPaintProperty->GetWeekWidthValue({})), std::nullopt));
-        textLayoutProperty->UpdateTextColor(theme->GetCalendarTheme().weekColor);
-        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        textWeekNode->MountToParent(weekFrameNode);
-    }
     return weekFrameNode;
 }
 
@@ -617,7 +619,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
-    
+
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
@@ -682,7 +684,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
     } else {
         width = CalcLength(pickerTheme->GetButtonWidth());
     }
-    
+
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale() &&
         (!(GetPreviousOrientation() == SystemProperties::GetDeviceOrientation())

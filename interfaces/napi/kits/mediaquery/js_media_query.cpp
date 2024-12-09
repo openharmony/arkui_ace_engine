@@ -25,6 +25,7 @@ namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
 constexpr int32_t TWO_ARGS = 2;
+constexpr int32_t DEFAULT_INSTANCE_ID = -1;
 }
 
 using namespace OHOS::Ace::Framework;
@@ -168,7 +169,7 @@ public:
             napi_close_handle_scope(env, scope);
             return nullptr;
         }
-        auto jsEngine = EngineHelper::GetEngine(listener->GetInstanceId());
+        auto jsEngine = listener->GetJsEngine();
         if (!jsEngine) {
             return nullptr;
         }
@@ -308,7 +309,7 @@ private:
             env_ = env;
         }
         napi_close_handle_scope(env, scope);
-        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
+        auto jsEngine = GetJsEngine();
         if (!jsEngine) {
             return;
         }
@@ -325,6 +326,16 @@ private:
         CHECK_NULL_RETURN(listener, nullptr);
         listener->Initialize(env, thisVar);
         return listener;
+    }
+
+    RefPtr<Framework::JsEngine> GetJsEngine()
+    {
+        if (GetInstanceId() == DEFAULT_INSTANCE_ID) {
+            TAG_LOGW(AceLogTag::ACE_MEDIA_QUERY, "matchMediaSync executes in non-UI context");
+            return EngineHelper::GetCurrentEngineSafely();
+        } else {
+            return EngineHelper::GetEngine(GetInstanceId());
+        }
     }
 
     static size_t ParseArgs(napi_env& env, napi_callback_info& info, napi_value& thisVar, napi_value& cb)
@@ -357,7 +368,7 @@ private:
 
     napi_env env_ = nullptr;
     std::list<napi_ref> cbList_;
-    int32_t instanceId_;
+    int32_t instanceId_ = DEFAULT_INSTANCE_ID;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static napi_env delayDeleteEnv_;
     static std::set<napi_ref>* delayDeleteCallbacks_;

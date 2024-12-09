@@ -1295,7 +1295,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy017, TestSize.Lev
     marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     frameNode->SetLayoutProperty(marqueeLayoutProperty);
     pattern->OnModifyDone();
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), "test");
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), u"test");
     EXPECT_EQ(textLayoutProperty->GetFontSize().value(), Dimension(2.0));
     EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), Ace::FontWeight::W200);
     EXPECT_EQ(textLayoutProperty->GetFontFamily().value(), fontFamily);
@@ -1437,9 +1437,8 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy019, TestSize.Lev
      */
     pattern->StartMarqueeAnimation();
     auto renderContext = frameChild1->GetRenderContext();
-    TranslateOptions temp = renderContext->GetTransformTranslate().value();
-    TranslateOptions result { 3.5f, 0.0f, 0.0f };
-    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+    auto temp = renderContext->GetShowingTranslateProperty().GetX();
+    EXPECT_EQ(temp, 0.0f);
 
     /**
      * @tc.steps: step4. Call StartMarqueeAnimation again with isFormRender_ is true.
@@ -1447,8 +1446,8 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy019, TestSize.Lev
      */
     MockPipelineContext::GetCurrent()->SetIsFormRender(true);
     pattern->StartMarqueeAnimation();
-    temp = renderContext->GetTransformTranslate().value();
-    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+    temp = renderContext->GetShowingTranslateProperty().GetX();
+    EXPECT_EQ(temp, 0.0f);
 }
 
 /**

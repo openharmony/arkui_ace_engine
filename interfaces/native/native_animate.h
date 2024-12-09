@@ -16,7 +16,11 @@
 #ifndef ARKUI_NATIVE_ANIMATE_H
 #define ARKUI_NATIVE_ANIMATE_H
 
+#ifdef __cplusplus
 #include <cstdint>
+#else
+#include <stdint.h>
+#endif
 
 #include "native_type.h"
 

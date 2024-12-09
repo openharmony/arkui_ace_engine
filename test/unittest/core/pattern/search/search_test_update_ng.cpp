@@ -66,7 +66,9 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::string EMPTY_VALUE;
+const std::u16string EMPTY_VALUE_U16;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
+const std::u16string PLACEHOLDER_U16 = u"DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
@@ -79,10 +81,15 @@ const Color DEFAULT_SELECTED_BACKFROUND_COLOR_BLACK = Color::BLACK;
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR_GREEN = Color::GREEN;
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR_GRAY = Color::GRAY;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const std::string DEFAULT_FILTER_TEXT = "CabcdefgABhCDEFG0123a456A789";
+const std::u16string DEFAULT_FILTER_TEXT_U16 = u"CabcdefgABhCDEFG0123a456A789";
 const std::string NUMBER_FILTER = "^[0-9]*$";
+const std::u16string NUMBER_FILTER_U16 = u"^[0-9]*$";
 const std::string NUM_FILTER = "[0-9]";
+const std::u16string NUM_FILTER_U16 = u"[0-9]";
 const std::string FILTER_NUM_TEXT = "0123456789";
+const std::u16string FILTER_NUM_TEXT_U16 = u"0123456789";
 } // namespace
 
 class SearchUpdateTestNg : public testing::Test {
@@ -116,7 +123,7 @@ void SearchUpdateTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
 }
 
 void SearchUpdateTestNg::TearDownTestSuite()
@@ -136,7 +143,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor001, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -167,7 +174,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor002, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -198,7 +205,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor003, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -229,7 +236,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor004, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -260,7 +267,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor005, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -291,7 +298,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor006, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -322,7 +329,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor007, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -353,7 +360,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor008, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -384,7 +391,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor009, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_FILTER_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_FILTER_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -415,7 +422,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor010, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_FILTER_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_FILTER_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -446,7 +453,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor011, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_FILTER_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_FILTER_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -477,7 +484,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor012, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(DEFAULT_FILTER_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(DEFAULT_FILTER_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -508,7 +515,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor013, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUMBER_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUMBER_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -539,7 +546,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor014, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUMBER_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUMBER_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -570,7 +577,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor015, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUMBER_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUMBER_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -601,7 +608,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor016, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUMBER_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUMBER_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -632,7 +639,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor017, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUM_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUM_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -663,7 +670,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor018, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUM_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUM_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -694,7 +701,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor019, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUM_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUM_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -725,7 +732,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor020, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(NUM_FILTER, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(NUM_FILTER_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -756,7 +763,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor021, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(FILTER_NUM_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(FILTER_NUM_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -787,7 +794,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor022, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(FILTER_NUM_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(FILTER_NUM_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -818,7 +825,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor023, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(FILTER_NUM_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(FILTER_NUM_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
@@ -849,7 +856,7 @@ HWTEST_F(SearchUpdateTestNg, testSelectedBackgroundColor024, TestSize.Level1)
      * @tc.steps: Create Text filed node
      */
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(FILTER_NUM_TEXT, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(FILTER_NUM_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();

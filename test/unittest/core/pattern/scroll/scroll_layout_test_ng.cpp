@@ -410,7 +410,7 @@ HWTEST_F(ScrollLayoutTestNg, Alignment001, TestSize.Level1)
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
     FlushLayoutTask(frameNode_);
     float centerPosition = (SCROLL_HEIGHT - ITEM_MAIN_SIZE) / 2;
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, centerPosition)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(60, centerPosition)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
     FlushLayoutTask(frameNode_);
@@ -460,7 +460,7 @@ HWTEST_F(ScrollLayoutTestNg, Alignment002, TestSize.Level1)
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF()));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-240, 0)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
     FlushLayoutTask(frameNode_);
@@ -561,7 +561,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge001, TestSize.Level1)
      * @tc.steps: step1. scrollEdge to bottom
      */
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
@@ -599,7 +599,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge002, TestSize.Level1)
      * @tc.steps: step1. scrollEdge to bottom
      */
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
@@ -642,7 +642,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
      * @tc.steps: step1. scrollEdge to bottom
      */
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
@@ -669,5 +669,50 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: ScrollGetChildrenExpandedSize001
+ * @tc.desc: Test Scroll GetChildrenExpandedSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ScrollGetChildrenExpandedSize001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent(100.f);
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH, 100.f));
+
+    auto padding = 2 * 5.f;
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH - padding, 100.f));
+
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH - padding, 2000.f));
+
+    pattern_->SetAxis(Axis::HORIZONTAL);
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(100.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(100.f, SCROLL_HEIGHT -padding));
+
+    ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(2000.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2000.f, SCROLL_HEIGHT - padding));
+
+    ViewAbstract::SetMargin(AceType::RawPtr(contentNode), CalcLength(5.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2010.f, SCROLL_HEIGHT - padding));
+
+    pattern_->SetAxis(Axis::NONE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+
+    pattern_->SetAxis(Axis::FREE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
 }
 } // namespace OHOS::Ace::NG

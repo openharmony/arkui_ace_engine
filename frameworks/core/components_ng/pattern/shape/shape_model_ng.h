@@ -32,6 +32,7 @@ public:
     void InitBox(const RefPtr<PixelMap>& pixMap) override;
     void SetStroke(const Color& color) override;
     void SetFill(const Color& color) override;
+    void SetForegroundColor(const Color& color) override;
     void SetStrokeDashOffset(const Ace::Dimension& dashOffset) override;
     void SetStrokeLineCap(int lineCapStyle) override;
     void SetStrokeLineJoin(int lineJoinStyle) override;

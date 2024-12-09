@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -72,7 +73,8 @@ std::string TextLayoutProperty::GetCopyOptionString() const
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
-    json->PutFixedAttr("content", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
+    json->PutFixedAttr("content", UtfUtils::Str16ToStr8(GetContent().value_or(u"")).c_str(), filter,
+        FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;

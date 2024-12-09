@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -61,6 +62,9 @@ void PagePattern::OnAttachToFrameNode()
     }
     host->GetLayoutProperty()->UpdateMeasureType(measureType);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& /* config */)
@@ -88,7 +92,7 @@ void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
     dynamicPageSizeCallback_(node->GetFrameSize());
 }
 
-void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish)
+void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, PageTransitionType type)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -96,9 +100,13 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish)
         pageTransitionFunc_();
     }
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
-    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
+    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_, type]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
+            ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+        }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         if (sharedFinish == pattern->pageTransitionFinish_) {
@@ -108,9 +116,11 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish)
             host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
         }
     };
-    auto effect = FindPageTransitionEffect(type_);
+    auto effect = FindPageTransitionEffect(type);
     if (effect && effect->GetUserCallback()) {
-        RouteType routeType = (type_ == PageTransitionType::ENTER_POP || type_ == PageTransitionType::EXIT_POP)
+        AnimationUtils::StopAnimation(currCustomAnimation_);
+        host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
+        RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
                                   ? RouteType::POP
                                   : RouteType::PUSH;
         host->CreateAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY, 0.0f,
@@ -120,15 +130,15 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish)
         AnimationOption option(effect->GetCurve(), effect->GetDuration());
         option.SetDelay(effect->GetDelay());
         option.SetOnFinishEvent(wrappedOnFinish);
-        auto animation = AnimationUtils::StartAnimation(option, [weakPage = WeakPtr<FrameNode>(host)]() {
+        currCustomAnimation_ = AnimationUtils::StartAnimation(option, [weakPage = WeakPtr<FrameNode>(host)]() {
             auto pageNode = weakPage.Upgrade();
             CHECK_NULL_VOID(pageNode);
             pageNode->UpdateAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY, 1.0f);
         }, option.GetOnFinishEvent());
-        TriggerDefaultTransition(nullptr);
+        TriggerDefaultTransition(nullptr, type);
         return;
     }
-    TriggerDefaultTransition(wrappedOnFinish);
+    TriggerDefaultTransition(wrappedOnFinish, type);
 }
 
 bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish,
@@ -211,6 +221,26 @@ void PagePattern::OnDetachFromMainTree()
 #endif
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+}
+
+void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+}
+
+void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
+{
+    if (!isPageInTransition_) {
+        return;
+    }
+    auto page = GetHost();
+    CHECK_NULL_VOID(page);
+    auto renderContext = page->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->RemoveClipWithRRect();
 }
 
 void PagePattern::OnShow()
@@ -320,6 +350,10 @@ bool PagePattern::OnBackPressed()
 {
     if (RemoveOverlay()) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
+        return true;
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN) && isPageInTransition_) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
     // if in page transition, do not set to ON_BACK_PRESS
@@ -445,7 +479,9 @@ bool PagePattern::AvoidKeyboard() const
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    return safeAreaManager->KeyboardSafeAreaEnabled();
 }
 
 bool PagePattern::RemoveOverlay()
@@ -475,8 +511,9 @@ void PagePattern::MarkDirtyOverlay()
     overlayManager_->MarkDirtyOverlay();
 }
 
-void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect)
+void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type)
 {
+    CHECK_NULL_VOID(effect);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto renderContext = hostNode->GetRenderContext();
@@ -487,11 +524,19 @@ void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect)
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
+    if (type == PageTransitionType::ENTER_POP) {
+        renderContext->RemoveClipWithRRect();
+    } else {
+        auto context = hostNode->GetContext();
+        CHECK_NULL_VOID(context);
+        renderContext->UpdateBackgroundColor(context->GetAppBgColor());
+        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
+    }
 }
 
-void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect)
+void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect, PageTransitionType type)
 {
+    CHECK_NULL_VOID(effect);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto renderContext = hostNode->GetRenderContext();
@@ -501,11 +546,22 @@ void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect)
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
+    if (type == PageTransitionType::EXIT_PUSH) {
+        renderContext->RemoveClipWithRRect();
+        return;
+    }
     renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
 }
 
 RefPtr<PageTransitionEffect> PagePattern::GetDefaultPageTransition(PageTransitionType type)
 {
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, nullptr);
+    auto renderContext = hostNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
     auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
     resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
     TranslateOptions translate;
@@ -513,7 +569,8 @@ RefPtr<PageTransitionEffect> PagePattern::GetDefaultPageTransition(PageTransitio
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     auto statusHeight = static_cast<float>(safeAreaInsets.top_.Length());
-    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, rect.Width(), REMOVE_CLIP_SIZE);
     resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
@@ -570,7 +627,7 @@ void PagePattern::UpdateEnterPushEffect(RefPtr<PageTransitionEffect>& effect, fl
     effect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     TranslateOptions translate;
     RectF pageTransitionRectF;
-    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
+    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, rect.Width(), REMOVE_CLIP_SIZE);
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         pageTransitionRectF =
             RectF(0.0f, -statusHeight, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
@@ -578,7 +635,7 @@ void PagePattern::UpdateEnterPushEffect(RefPtr<PageTransitionEffect>& effect, fl
     } else {
         pageTransitionRectF =
             RectF(rect.Width() * HALF, -statusHeight, rect.Width() * HALF, REMOVE_CLIP_SIZE);
-        defaultPageTransitionRectF = RectF(0.0f, -statusHeight, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
+        defaultPageTransitionRectF = RectF(0.0f, -statusHeight, rect.Width(), REMOVE_CLIP_SIZE);
         translate.x = Dimension(rect.Width() * HALF);
     }
     effect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
@@ -611,8 +668,9 @@ void PagePattern::UpdateExitPushEffect(RefPtr<PageTransitionEffect>& effect, flo
     effect->SetTranslateEffect(translate);
 }
 
-void PagePattern::TransitionInFinish(const RefPtr<PageTransitionEffect>& effect)
+void PagePattern::TransitionInFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type)
 {
+    CHECK_NULL_VOID(effect);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto renderContext = hostNode->GetRenderContext();
@@ -620,11 +678,14 @@ void PagePattern::TransitionInFinish(const RefPtr<PageTransitionEffect>& effect)
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
-    renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
+    if (type == PageTransitionType::ENTER_PUSH) {
+        renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
+    }
 }
 
-void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect)
+void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type)
 {
+    CHECK_NULL_VOID(effect);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto renderContext = hostNode->GetRenderContext();
@@ -634,7 +695,9 @@ void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
+    if (type == PageTransitionType::EXIT_POP) {
+        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
+    }
 }
 
 void PagePattern::MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor)
@@ -732,7 +795,7 @@ void PagePattern::ResetPageTransitionEffect()
     MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }
 
-void PagePattern::FinishOutPage(const int32_t animationId)
+void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType type)
 {
     if (animationId_ != animationId) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id is different");
@@ -741,15 +804,17 @@ void PagePattern::FinishOutPage(const int32_t animationId)
     auto outPage = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(outPage);
     outPage->GetEventHub<EventHub>()->SetEnabled(true);
-    if (type_ != PageTransitionType::EXIT_PUSH && type_ != PageTransitionType::EXIT_POP) {
+    if (type != PageTransitionType::EXIT_PUSH && type != PageTransitionType::EXIT_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "current transition type is invalid");
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    FocusViewHide();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        FocusViewHide();
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (type_ == PageTransitionType::EXIT_POP) {
+    if (type == PageTransitionType::EXIT_POP || isNeedRemove_) {
         auto stageNode = outPage->GetParent();
         CHECK_NULL_VOID(stageNode);
         stageNode->RemoveChild(outPage);
@@ -766,7 +831,7 @@ void PagePattern::FinishOutPage(const int32_t animationId)
     ResetPageTransitionEffect();
 }
 
-void PagePattern::FinishInPage(const int32_t animationId)
+void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType type)
 {
     if (animationId_ != animationId) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id in inPage is invalid");
@@ -775,36 +840,42 @@ void PagePattern::FinishInPage(const int32_t animationId)
     auto inPage = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(inPage);
     inPage->GetEventHub<EventHub>()->SetEnabled(true);
-    if (type_ != PageTransitionType::ENTER_PUSH && type_ != PageTransitionType::ENTER_POP) {
+    if (type != PageTransitionType::ENTER_PUSH && type != PageTransitionType::ENTER_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "inPage transition type is invalid");
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    FocusViewShow();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        FocusViewShow();
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
+    if (type == PageTransitionType::ENTER_PUSH) {
+        auto renderContext = inPage->GetRenderContext();
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(false);
 }
 
-void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish)
+void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type)
 {
     bool transitionIn = true;
-    if (type_ == PageTransitionType::ENTER_PUSH || type_ == PageTransitionType::ENTER_POP) {
+    if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
         transitionIn = true;
-    } else if (type_ == PageTransitionType::EXIT_PUSH || type_ == PageTransitionType::EXIT_POP) {
+    } else if (type == PageTransitionType::EXIT_PUSH || type == PageTransitionType::EXIT_POP) {
         transitionIn = false;
     } else {
         return;
     }
-    auto transition = FindPageTransitionEffect(type_);
+    auto transition = FindPageTransitionEffect(type);
     RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
-    UpdateAnimationOption(transition, effect, option);
+    UpdateAnimationOption(transition, effect, option, type);
     option.SetOnFinishEvent(onFinish);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -813,28 +884,28 @@ void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     if (transitionIn) {
-        InitTransitionIn(effect);
-        auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect]() {
+        InitTransitionIn(effect, type);
+        auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect, type]() {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->TransitionInFinish(effect);
+            pattern->TransitionInFinish(effect, type);
         }, option.GetOnFinishEvent());
-        stageManager->AddAnimation(animation, type_ == PageTransitionType::ENTER_PUSH);
+        stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_PUSH);
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
         return;
     }
-    InitTransitionOut(effect);
-    auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect]() {
+    InitTransitionOut(effect, type);
+    auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect, type]() {
         auto pagePattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pagePattern);
-        pagePattern->TransitionOutFinish(effect);
+        pagePattern->TransitionOutFinish(effect, type);
     }, option.GetOnFinishEvent());
-    stageManager->AddAnimation(animation, type_ == PageTransitionType::ENTER_POP);
+    stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_POP);
     MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
 }
 
 void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& transition,
-    RefPtr<PageTransitionEffect>& effect, AnimationOption& option)
+    RefPtr<PageTransitionEffect>& effect, AnimationOption& option, PageTransitionType type)
 {
     if (transition) {
         effect = GetPageTransitionEffect(transition);
@@ -843,11 +914,13 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
         option.SetDelay(transition->GetDelay());
         return;
     }
-    effect = GetDefaultPageTransition(type_);
+    effect = GetDefaultPageTransition(type);
     const RefPtr<InterpolatingSpring> springCurve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-    const float defaultAmplitudePx = 0.005f;
-    springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        const float defaultAmplitudePx = 0.005f;
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+    }
     option.SetCurve(springCurve);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION

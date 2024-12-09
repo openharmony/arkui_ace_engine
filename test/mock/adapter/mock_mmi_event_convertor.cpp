@@ -25,6 +25,6 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
 void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const PointerAction action)
 {}
 void CalculatePointerEvent(
-    const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode)
+    const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode, bool useRealtimeMatrix)
 {}
 } // namespace OHOS::Ace::Platform

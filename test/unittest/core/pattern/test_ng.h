@@ -42,14 +42,15 @@ class TestNG : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void FlushUITasks();
+    void CreateDone();
     RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty = false);
-    RefPtr<PaintWrapper> CreateDone(const RefPtr<FrameNode>& frameNode = nullptr);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
     void FlushExpandSafeAreaTask();
     void CreateLayoutTask(const RefPtr<FrameNode>& frameNode);
-    RefPtr<FrameNode> CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback);
+    RefPtr<FrameNode> CreateText(const std::u16string& content, const std::function<void(TextModelNG)>& callback);
     RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
     RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
     void SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize);
@@ -57,7 +58,6 @@ public:
     void DragUpdate(float delta);
     void DragEnd(float velocityDelta);
     void DragAction(const RefPtr<FrameNode>& frameNode, Offset startOffset, float dragDelta, float velocityDelta);
-    RefPtr<FrameNode> FindRootNode(const RefPtr<FrameNode>& frameNode);
     RefPtr<FrameNode> FindScrollableNode(const RefPtr<FrameNode>& frameNode);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)

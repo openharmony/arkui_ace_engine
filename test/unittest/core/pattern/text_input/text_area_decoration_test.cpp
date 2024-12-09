@@ -171,7 +171,7 @@ void TextAreaDecorationBase::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(placeHolder, text);
+    textFieldModelNG.CreateTextArea(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }

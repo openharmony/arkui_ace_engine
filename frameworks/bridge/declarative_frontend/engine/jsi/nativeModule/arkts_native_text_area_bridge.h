@@ -142,8 +142,6 @@ public:
     static ArkUINativeModuleValue ResetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetTextAreAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
-    static ArkUINativeModuleValue ResetTextAreAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

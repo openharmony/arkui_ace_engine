@@ -74,19 +74,6 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
     return nullptr;
 }
 
-void DumpElementTree(
-    int32_t depth, const RefPtr<UINode>& element, std::map<int32_t, std::list<RefPtr<UINode>>>& depthElementMap)
-{
-    if (element->GetChildren().empty()) {
-        return;
-    }
-    const auto& children = element->GetChildren();
-    depthElementMap[depth].insert(depthElementMap[depth].end(), children.begin(), children.end());
-    for (const auto& depthElement : children) {
-        DumpElementTree(depth + 1, depthElement, depthElementMap);
-    }
-}
-
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
     return TouchEvent {}
@@ -102,10 +89,12 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
 {
     // Set ViewId for the fast preview.
     auto parent = uiNode->GetParent();
-    if (parent && parent->GetTag() == "JsView") {
-        uiNode->SetViewId(std::to_string(parent->GetId()));
-    } else {
-        uiNode->SetViewId(parent->GetViewId());
+    if (parent) {
+        if (parent->GetTag() == "JsView") {
+            uiNode->SetViewId(std::to_string(parent->GetId()));
+        } else {
+            uiNode->SetViewId(parent->GetViewId());
+        }
     }
     if (uiNode->GetTag() == "stage") {
     } else if (uiNode->GetTag() == "page") {
@@ -192,7 +181,7 @@ void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
 }
 
 void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
-    InspectorChildrenParameters& inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
+    InspectorChildrenParameters inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
     uint32_t depth = UINT32_MAX)
 {
     // Span is a special case in Inspector since span inherits from UINode
@@ -318,7 +307,7 @@ void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
 }
 
 void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
-    InspectorChildrenParameters& inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
+    InspectorChildrenParameters inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
     uint32_t depth = UINT32_MAX)
 {
     // Span is a special case in Inspector since span inherits from UINode
@@ -345,6 +334,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     std::string jsonNodeStr = jsonNode->ToString();
     ConvertIllegalStr(jsonNodeStr);
     auto jsonNodeNew = JsonUtil::ParseJsonString(jsonNodeStr);
+    if (jsonNodeNew == nullptr || !jsonNodeNew->IsValid()) {
+        LOGW("inspector info of %{public}s-%{public}d is illegal", parent->GetTag().c_str(), parent->GetId());
+        return;
+    }
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, inspectorParameters.pageId, inspectorParameters.isLayoutInspector);
@@ -871,6 +864,45 @@ void Inspector::GetInspectorTree(InspectorTreeMap& treesInfo)
         GetFrameNodeChildren(overlayNode, children, pageId, false);
     }
     return GetInspectorTreeInfo(children, pageId, treesInfo);
+}
+
+void Inspector::RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, InspectorTreeMap& treesInfo)
+{
+    CHECK_NULL_VOID(pageNode);
+    std::vector<RefPtr<NG::UINode>> children;
+    auto pageId = pageNode->GetPageId();
+    auto rootNode = AddInspectorTreeNode(pageNode, treesInfo);
+    CHECK_NULL_VOID(rootNode);
+    for (const auto& item : pageNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId, false);
+    }
+    auto overlayNode = GetOverlayNode(pageNode);
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, pageId, false);
+    }
+    GetInspectorTreeInfo(children, pageId, treesInfo);
+}
+
+void Inspector::GetRecordAllPagesNodes(InspectorTreeMap& treesInfo)
+{
+    treesInfo.clear();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    for (const auto& item : stageNode->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(item);
+        if (frameNode == nullptr) {
+            continue;
+        }
+        auto pagePattern = frameNode->GetPattern<PagePattern>();
+        if (pagePattern == nullptr) {
+            continue;
+        }
+        RecordOnePageNodes(item, treesInfo);
+    }
 }
 
 RefPtr<RecNode> Inspector::AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes)

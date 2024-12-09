@@ -528,12 +528,13 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         };
         auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                             const std::shared_ptr<std::vector<uint8_t>>& content,
-                                            const std::function<void(const std::string&, int32_t)>& errorCallback) {
+                                            const std::function<void(const std::string&, int32_t)>& errorCallback,
+                                            const std::string& contentName) {
             auto jsEngine = weakEngine.Upgrade();
             if (!jsEngine) {
                 return false;
             }
-            return jsEngine->LoadPageSource(content, errorCallback);
+            return jsEngine->LoadPageSource(content, errorCallback, contentName);
         };
         auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                            const std::string& namedRouter, bool isTriggeredByJs) {

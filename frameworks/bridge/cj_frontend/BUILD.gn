@@ -176,6 +176,8 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_view_context_ffi.cpp",
       "interfaces/cj_ffi/cj_view_stack_processor_ffi.cpp",
       "interfaces/cj_ffi/concurrency/cj_concurrency_ffi.cpp",
+      "interfaces/cj_ffi/displaySync/display_sync_ffi.cpp",
+      "interfaces/cj_ffi/displaySync/display_sync_impl.cpp",
       "interfaces/cj_ffi/font/cj_font_ffi.cpp",
       "interfaces/cj_ffi/measure/cj_measure_ffi.cpp",
       "interfaces/cj_ffi/prompt/cj_prompt_ffi.cpp",
@@ -208,12 +210,15 @@ template("cj_frontend") {
     } else {
       sources -= [
         "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
+        "interfaces/cj_ffi/displaySync/display_sync_ffi.cpp",
+        "interfaces/cj_ffi/displaySync/display_sync_impl.cpp",
         "interfaces/cj_ffi/state_manage/cj_environment.cpp",
         "interfaces/cj_ffi/state_manage/cj_persistent_storage_ffi.cpp",
       ]
 
       # add mock sources for ohos-sdk
       sources += [
+        "interfaces/cj_ffi/displaySync/display_sync_mock.cpp",
         "interfaces/cj_ffi/mock/cj_richtext.cpp",
         "interfaces/cj_ffi/state_manage/mock/cj_state_manage_mock.cpp",
       ]

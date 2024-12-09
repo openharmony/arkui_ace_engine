@@ -15,6 +15,7 @@
 
 #include "text_base.h"
 #include "test/mock/core/render/mock_canvas_image.h"
+#include "base/utils/string_utils.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
@@ -465,7 +466,7 @@ HWTEST_F(TextTestFiveNg, GetSelectedText001, TestSize.Level1)
     textPattern->AddChildSpanItem(textSpanNode6);
 
     auto selectedText = textPattern->GetSelectedText(0, 10);
-    ASSERT_EQ(selectedText, " ");
+    ASSERT_EQ(StringUtils::Str16ToStr8(selectedText), " ");
 }
 
 /**
@@ -816,7 +817,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     ASSERT_NE(textAdaptFontSizer, nullptr);
 
     TextStyle textStyle;
-    std::string content;
+    std::u16string content;
     Dimension stepUnit;
     LayoutConstraintF contentConstraint;
 
@@ -1023,17 +1024,17 @@ HWTEST_F(TextTestFiveNg, CreateParagraph001, TestSize.Level1)
     ASSERT_NE(externalParagraph, nullptr);
     pattern->SetExternalParagraph(AceType::RawPtr(externalParagraph));
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 
     pattern->SetExternalParagraphStyle(externalParagraphStyle);
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 }
 
 /**
@@ -1085,7 +1086,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinTextSize001, TestSize.Level1)
     ASSERT_NE(textLayoutAlgorithm, nullptr);
 
     TextStyle textStyle;
-    std::string content;
+    std::u16string content;
     LayoutConstraintF contentConstraint;
 
     frameNode->pattern_ = nullptr;
@@ -1132,11 +1133,11 @@ HWTEST_F(TextTestFiveNg, GetGraphemeClusterLength001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
 
-    std::wstring text;
+    std::u16string text;
 
     EXPECT_EQ(pattern->GetGraphemeClusterLength(text, 0, false), 1);
 
-    text = L"Test";
+    text = u"Test";
 
     EXPECT_EQ(pattern->GetGraphemeClusterLength(text, 0, true), 1);
     EXPECT_EQ(pattern->GetGraphemeClusterLength(text, 10, true), 1);

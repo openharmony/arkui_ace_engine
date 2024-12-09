@@ -54,11 +54,6 @@ public:
         return toolBarStyle_;
     }
 
-    virtual Dimension GetTitleBarHeightBeforeMeasure()
-    {
-        return 0.0_vp;
-    }
-
     bool IsAtomicNode() const override
     {
         return false;
@@ -239,14 +234,31 @@ public:
         needHideToolBarForNavWidth_ = hide;
     }
 
-    bool UpdateBarSafeAreaPadding();
-    void MarkSafeAreaPaddingChanged()
+    void UpdateSafeAreaPaddingChanged(bool changed)
     {
-        safeAreaPaddingChanged_ = true;
+        safeAreaPaddingChanged_ = changed;
     }
 
+    bool IsSafeAreaPaddingChanged() const
+    {
+        return safeAreaPaddingChanged_;
+    }
+
+    float GetTitleBarOffsetY() const
+    {
+        return titleBarOffsetY_;
+    }
+
+    void SetTitleBarOffsetY(float titleBarOffsetY)
+    {
+        titleBarOffsetY_ = titleBarOffsetY;
+    }
+
+    void MarkSafeAreaPaddingChangedWithCheckTitleBar(float titleBarHeight);
 protected:
     void AbortBarAnimation();
+    void UpdateHideBarProperty();
+    void ExpandContentSafeAreaIfNeeded();
     void RemoveAnimation(int32_t id);
     void BarAnimationPropertyCallback(
         bool needRunTitleBarAnimation, bool hideTitle, bool needRunToolBarAnimation, bool hideTool);
@@ -266,6 +278,7 @@ protected:
     std::optional<int32_t> landscapeMenuNodeId_;
     int32_t maxMenuNums_ = -1;
     float titleBarHeight_ = 0.0f;
+    float titleBarOffsetY_ = 0.0f;
     float toolBarHeight_ = 0.0f;
     float toolBarDividerHeight_ = 0.0f;
     int32_t titleBarAnimationCount_ = 0;

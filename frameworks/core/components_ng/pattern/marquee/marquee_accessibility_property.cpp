@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_accessibility_property.h"
 
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
@@ -25,7 +26,7 @@ std::string MarqueeAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(textChild, "");
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    return textLayoutProperty->GetContent().value_or("");
+    return UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u""));
 }
 
 std::string MarqueeAccessibilityProperty::GetGroupText(bool) const

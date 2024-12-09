@@ -32,11 +32,6 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetCanOverScroll(bool canOverScroll) override
-    {
-        canOverScroll_ = canOverScroll;
-    }
-
     bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
 
 private:
@@ -66,7 +61,6 @@ private:
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float footerMainStartPos_ = 0.0f;
-    bool canOverScroll_ = false;
     bool skipMeasure_ = false;
 };
 } // namespace OHOS::Ace::NG

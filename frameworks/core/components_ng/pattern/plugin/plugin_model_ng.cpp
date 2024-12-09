@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 void PluginModelNG::Create(const RequestPluginInfo& pluginInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PLUGIN_ETS_TAG, nodeId);
     auto frameNode = PluginNode::GetOrCreatePluginNode(

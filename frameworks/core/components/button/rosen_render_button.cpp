@@ -65,6 +65,9 @@ void RosenRenderButton::UpdateLayer()
     float translateX = GetLayoutSize().Width() / 2 * (INIT_SCALE - scale_);
     // The bottom of the component must be close to the bottom of the circle when the type is arc.
     // The center point deviates 2 times downward.
+    if (!buttonComponent_) {
+        return;
+    }
     float translateY = (buttonComponent_->GetType() == ButtonType::ARC)
                         ? GetLayoutSize().Height() * (INIT_SCALE - scale_) * 2
                         : GetLayoutSize().Height() / 2 * (1.0 - scale_);
@@ -106,6 +109,9 @@ void RosenRenderButton::Paint(RenderContext& context, const Offset& offset)
     }
     DrawButton(canvas, offset);
     auto pipeline = context_.Upgrade();
+    if (pipeline == nullptr) {
+        return;
+    }
     if (isFocus_ && (isTablet_ || isPhone_) && pipeline && pipeline->GetIsTabKeyPressed()) {
         // Need to use PipelineContext::ShowFocusAnimation
         if (buttonComponent_->IsPopupButton()) {

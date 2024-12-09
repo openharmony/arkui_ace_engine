@@ -672,29 +672,29 @@ HWTEST_F(DragEventTestNg, DragEventActuatorHandleTouchMoveEventTest001, TestSize
      */
     dragEventActuator->longPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGERS_NUMBER, false, true);
-    dragEventActuator->isOnBeforeLiftingAnimation = false;
+    dragEventActuator->isOnBeforeLiftingAnimation_ = false;
     dragEventActuator->HandleTouchMoveEvent();
     EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
-    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
 
     /**
      * @tc.steps: step4. Invoke HandleTouchMoveEvent.
      */
-    dragEventActuator->isOnBeforeLiftingAnimation = true;
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
     dragEventActuator->longPressRecognizer_->disposal_ = GestureDisposal::ACCEPT;
     dragEventActuator->HandleTouchMoveEvent();
     EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
-    EXPECT_TRUE(dragEventActuator->isOnBeforeLiftingAnimation);
+    EXPECT_TRUE(dragEventActuator->isOnBeforeLiftingAnimation_);
     EXPECT_FALSE(dragEventActuator->longPressRecognizer_->GetGestureDisposal() == GestureDisposal::REJECT);
 
     /**
      * @tc.steps: step5. Invoke HandleTouchMoveEvent.
      */
     dragEventActuator->longPressRecognizer_->disposal_ = GestureDisposal::REJECT;
-    dragEventActuator->isOnBeforeLiftingAnimation = true;
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
     dragEventActuator->HandleTouchMoveEvent();
     EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
-    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
     EXPECT_TRUE(dragEventActuator->longPressRecognizer_->GetGestureDisposal() == GestureDisposal::REJECT);
 }
 
@@ -1152,10 +1152,10 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest012, TestSize.Leve
     SystemProperties::debugEnabled_ = true;
     GestureEvent info = GestureEvent();
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     dragEventActuator->userCallback_ = nullptr;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
@@ -1206,7 +1206,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest013, TestSize.Leve
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = true;
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 

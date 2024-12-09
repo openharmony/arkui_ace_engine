@@ -14,9 +14,12 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_search_ffi.h"
+#include <optional>
+#include <string>
 
 #include "cj_lambda.h"
 
+#include "base/utils/utf_helper.h"
 #include "bridge/cj_frontend/cppview/search_controller.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
@@ -45,6 +48,14 @@ void handleFont(
     font.fontFamilies = ConvertStrToFontFamilies(fontFamily);
     font.fontStyle = FONT_STYLE[fontStyle];
 }
+
+std::optional<std::u16string> OptionalStr8ToStr16(const std::optional<std::string> optStr)
+{
+    if (optStr.has_value()) {
+        return UtfUtils::Str8ToStr16(optStr.value());
+    }
+    return std::nullopt;
+}
 } // namespace
 
 extern "C" {
@@ -58,11 +69,12 @@ void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value)
         LOGI("icon url not found");
     }
     if (value.controllerID == -1) {
-        SearchModel::GetInstance()->Create(key, tip, src);
+        SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
     } else {
         auto self_ = FFIData::GetData<SearchController>(value.controllerID);
         if (self_ != nullptr) {
-            auto controller = SearchModel::GetInstance()->Create(key, tip, src);
+            auto controller = SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip),
+                src);
             self_->SetController(controller);
         } else {
             LOGE("invalid scrollerID");
@@ -80,11 +92,12 @@ void FfiOHOSAceFrameworkSearchCreateByIconRes(
     std::optional<std::string> tip = placeholder;
     std::optional<std::string> src = iconUrl;
     if (controllerId == -1) {
-        SearchModel::GetInstance()->Create(key, tip, src);
+        SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
     } else {
         auto nativeController = FFIData::GetData<SearchController>(controllerId);
         if (nativeController != nullptr) {
-            auto controller = SearchModel::GetInstance()->Create(key, tip, src);
+            auto controller = SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip),
+                src);
             nativeController->SetController(controller);
         } else {
             LOGE("Invalid controller id.");
@@ -192,28 +205,30 @@ void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
 {
-    auto onChange = [lambda = CJLambda::Create(callback)](
-                        const std::string& value, PreviewText& previewText) -> void { lambda(value.c_str()); };
+    auto onChange = [lambda = CJLambda::Create(callback)](const std::u16string& value, PreviewText& previewText) ->
+        void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkSearchOnCopy(void (*callback)(const char* value))
 {
-    auto onCopy = [lambda = CJLambda::Create(callback)](const std::string& value) -> void { lambda(value.c_str()); };
+    auto onCopy = [lambda = CJLambda::Create(callback)](const std::u16string& value) ->
+        void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
     SearchModel::GetInstance()->SetOnCopy(std::move(onCopy));
 }
 
 void FfiOHOSAceFrameworkSearchOnCut(void (*callback)(const char* value))
 {
-    auto onCut = [lambda = CJLambda::Create(callback)](const std::string& value) -> void { lambda(value.c_str()); };
+    auto onCut = [lambda = CJLambda::Create(callback)](const std::u16string& value) ->
+        void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
     SearchModel::GetInstance()->SetOnCut(std::move(onCut));
 }
 
 void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* value))
 {
-    auto onPaste = [lambda = CJLambda::Create(callback)](const std::string& val, NG::TextCommonEvent& info) -> void {
+    auto onPaste = [lambda = CJLambda::Create(callback)](const std::u16string& val, NG::TextCommonEvent& info) -> void {
         LOGI("OnPaste called.");
-        lambda(val.c_str());
+        lambda(UtfUtils::Str16ToStr8(val).c_str());
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }

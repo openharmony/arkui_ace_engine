@@ -32,6 +32,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
 
     float mainSize = MeasureSelf(props);
+    bool matchChildren = GreaterOrEqualToInfinity(mainSize);
     Init(props);
 
     if (info_.targetIndex_) {
@@ -50,6 +51,9 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     UpdateLayoutInfo();
+    if (matchChildren) {
+        AdaptToChildMainSize(props, mainSize, frameSize_);
+    }
     const int32_t cacheCnt = props->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     if (props->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(cacheCnt);
@@ -83,18 +87,18 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>& props)
 {
     // set self size
-    auto size = CreateIdealSize(props->GetLayoutConstraint().value(), info_.axis_, props->GetMeasureType(), true);
-    wrapper_->GetGeometryNode()->SetFrameSize(size);
+    frameSize_ = CreateIdealSize(props->GetLayoutConstraint().value(), info_.axis_, props->GetMeasureType(), true);
+    wrapper_->GetGeometryNode()->SetFrameSize(frameSize_);
 
     // set content size
     const auto& padding = props->CreatePaddingAndBorder();
     wrapper_->GetGeometryNode()->UpdatePaddingWithBorder(padding);
-    MinusPaddingToSize(padding, size);
+    MinusPaddingToSize(padding, frameSize_);
     info_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(props, info_.axis_);
-    size.AddHeight(info_.contentEndPadding_);
-    wrapper_->GetGeometryNode()->SetContentSize(size);
+    frameSize_.AddHeight(info_.contentEndPadding_);
+    wrapper_->GetGeometryNode()->SetContentSize(frameSize_);
 
-    return size.MainSize(info_.axis_);
+    return frameSize_.MainSize(info_.axis_);
 }
 
 void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
@@ -238,7 +242,7 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     // adjust offset
     if (!overScroll_ && info_.endIndex_ == info_.childrenCount_ - 1) {
         float overDis =
-            -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, false), mainGap_);
+            -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         if (Negative(overDis)) {
             return;
         }
@@ -350,7 +354,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
 
     info_.lastMainSize_ = mainSize;
-    info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_, false);
+    info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_, true);
     info_.avgLineHeight_ = info_.GetTotalLineHeight(0.0f) / static_cast<float>(info_.lineHeightMap_.size());
 
     if (info_.reachEnd_) {
@@ -622,11 +626,11 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     std::list<GridPreloadItem> itemsToPreload;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
-        if (l >= 0 && !wrapper_->GetChildByIndex(l)) {
+        if (l >= 0 && !wrapper_->GetChildByIndex(l, true)) {
             itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
-        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r)) {
+        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r, true)) {
             itemsToPreload.emplace_back(r);
         }
     }
@@ -657,5 +661,19 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             item->SetActive(false);
             return true;
         });
+}
+
+void GridIrregularLayoutAlgorithm::AdaptToChildMainSize(
+    RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize)
+{
+    auto lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
+    auto gridMainSize = std::min(lengthOfItemsInViewport, mainSize);
+    gridMainSize =
+        std::max(gridMainSize, GetMainAxisSize(gridLayoutProperty->GetLayoutConstraint()->minSize, info_.axis_));
+    idealSize.SetMainSize(gridMainSize, info_.axis_);
+    AddPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
+    wrapper_->GetGeometryNode()->SetFrameSize(idealSize);
+    info_.lastMainSize_ = gridMainSize;
+    TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
 }
 } // namespace OHOS::Ace::NG

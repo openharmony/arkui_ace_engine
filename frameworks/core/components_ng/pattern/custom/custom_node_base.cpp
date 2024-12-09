@@ -101,4 +101,28 @@ void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
 {
     onDumpInspectorFunc_ = func;
 }
+
+void CustomNodeBase::SetOnRecycleFunc(std::function<void()>&& func)
+{
+    onRecycleFunc_ = func;
+}
+
+void CustomNodeBase::SetOnReuseFunc(std::function<void(void*)>&& func)
+{
+    onReuseFunc_ = func;
+}
+
+void CustomNodeBase::FireOnRecycleFunc()
+{
+    if (onRecycleFunc_) {
+        onRecycleFunc_();
+    }
+}
+
+void CustomNodeBase::FireOnReuseFunc(void* params)
+{
+    if (onReuseFunc_) {
+        onReuseFunc_(params);
+    }
+}
 } // namespace OHOS::Ace::NG

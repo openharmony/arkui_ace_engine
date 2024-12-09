@@ -22,12 +22,13 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/animation/curve.h"
@@ -40,8 +41,6 @@
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
-#include "bridge/declarative_frontend/jsview/js_indicator.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -159,6 +158,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("nestedScroll", &JSSwiper::SetNestedScroll);
     JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
     JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
+    JSClass<JSSwiper>::StaticMethod("pageFlipMode", &JSSwiper::SetPageFlipMode);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -690,22 +690,6 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
     }
 }
 
-void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        return;
-    }
-
-    auto* jsIndicatorController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
-    if (!jsIndicatorController) {
-        return;
-    }
-
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    jsIndicatorController->SetSwiperNode(targetNode);
-    SwiperModel::GetInstance()->SetBindIndicator(true);
-}
-
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -716,7 +700,6 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
-    SwiperModel::GetInstance()->SetBindIndicator(false);
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
@@ -735,8 +718,6 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
-        } else if (typeParam->IsUndefined()) {
-            SetIndicatorController(info);
         } else {
             SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
             JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
@@ -1298,5 +1279,17 @@ void JSSwiper::SetOnContentDidScroll(const JSCallbackInfo& info)
         func->Execute(selectedIndex, index, position, mainAxisLength);
     };
     SwiperModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
+void JSSwiper::SetPageFlipMode(const JSCallbackInfo& info)
+{
+    // default value
+    int32_t value = 0;
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        SwiperModel::GetInstance()->SetPageFlipMode(value);
+        return;
+    }
+    JSViewAbstract::ParseJsInt32(info[0], value);
+    SwiperModel::GetInstance()->SetPageFlipMode(value);
 }
 } // namespace OHOS::Ace::Framework

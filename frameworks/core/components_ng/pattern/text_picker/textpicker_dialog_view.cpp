@@ -106,6 +106,8 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(textPickerNode, std::move(changeEvent));
+    auto scrollStopEvent = dialogEvent["scrollStopId"];
+    SetDialogScrollStop(textPickerNode, std::move(scrollStopEvent));
     ViewStackProcessor::GetInstance()->Finish();
     textPickerNode->MountToParent(contentColumn);
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
@@ -260,6 +262,8 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(textPickerNode, std::move(changeEvent));
+    auto scrollStopEvent = dialogEvent["scrollStopId"];
+    SetDialogScrollStop(textPickerNode, std::move(scrollStopEvent));
 
     ViewStackProcessor::GetInstance()->Finish();
     textPickerNode->MountToParent(contentColumn);
@@ -1016,6 +1020,14 @@ void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, D
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
+}
+
+void TextPickerDialogView::SetDialogScrollStop(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDialogScrollStop(std::move(onScrollStop));
 }
 
 void TextPickerDialogView::SetDefaultPickerItemHeight(const Dimension& value)

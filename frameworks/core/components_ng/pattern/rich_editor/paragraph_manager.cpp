@@ -284,6 +284,16 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     return TextLineMetrics();
 }
 
+bool ParagraphManager::IsIndexAtParagraphEnd(int32_t index)
+{
+    for (const auto& info : paragraphs_) {
+        if (info.end == index) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ParagraphManager::GetPaintRegion(RectF& boundsRect, float x, float y) const
 {
     if (paragraphs_.empty()) {

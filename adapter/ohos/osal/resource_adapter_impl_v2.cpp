@@ -864,6 +864,7 @@ void ResourceAdapterImplV2::SetAppHasDarkRes(bool hasDarkRes)
 RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
     const ResourceConfiguration& config, const ConfigurationChange& configurationChange)
 {
+    CHECK_NULL_RETURN(sysResourceManager_, nullptr);
     std::shared_ptr<Global::Resource::ResConfig> overrideResConfig(Global::Resource::CreateResConfig());
     sysResourceManager_->GetOverrideResConfig(*overrideResConfig);
     if (configurationChange.colorModeUpdate) {

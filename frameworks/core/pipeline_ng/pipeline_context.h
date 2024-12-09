@@ -44,6 +44,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -56,7 +57,6 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -174,7 +174,7 @@ public:
 #endif
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override;
+    bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
     // ReDispatch KeyEvent from Web process.
     void ReDispatch(KeyEvent& keyEvent);
@@ -200,11 +200,11 @@ public:
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
         std::string extraInfo,
         const RefPtr<FrameNode>& node,
-        const std::list<PointerEvent>& pointEvent);
+        const std::list<DragPointerEvent>& pointEvent);
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        std::unordered_map<int32_t, PointerEvent> newIdPoints,
+        std::unordered_map<int32_t, DragPointerEvent> newIdPoints,
         std::string& extraInfo,
-        std::unordered_map<int, PointerEvent> &idToPoints,
+        std::unordered_map<int, DragPointerEvent> &idToPoints,
         const RefPtr<FrameNode>& node);
 
     // Called by view when axis event received.
@@ -217,7 +217,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
 
     // Called by view when idle event.
@@ -488,7 +488,7 @@ public:
 
     bool IsTabJustTriggerOnKeyEvent() const
     {
-        return isTabJustTriggerOnKeyEvent_;
+        return eventManager_->IsTabJustTriggerOnKeyEvent();
     }
 
     bool GetOnShow() const override
@@ -539,6 +539,19 @@ public:
     }
 
     void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
+    void OnFlushReloadFinish()
+    {
+        auto tasks = std::move(afterReloadAnimationTasks_);
+        for (const auto& task : tasks) {
+            if (task) {
+                task();
+            }
+        }
+    }
+    void AddAfterReloadAnimationTask(std::function<void()>&& task)
+    {
+        afterReloadAnimationTasks_.emplace_back(std::move(task));
+    }
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -781,7 +794,6 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
-
     void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
 
     const SerializedGesture& GetSerializedGesture() const override;
@@ -820,6 +832,11 @@ public:
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
     {
         return formVisibleMgr_;
+    }
+
+    const RefPtr<FormEventManager>& GetFormEventManager() const
+    {
+        return formEventMgr_;
     }
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
@@ -994,6 +1011,10 @@ public:
     bool GetContainerCustomTitleVisible() override;
 
     bool GetContainerControlButtonVisible() override;
+
+    std::string GetBundleName();
+    std::string GetModuleName();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1015,6 +1036,7 @@ protected:
         const bool supportAvoidance = false, bool forceChange = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
+    void FlushDirtyPropertyNodesWhenExist();
 
     void SetIsLayouting(bool layouting)
     {
@@ -1049,12 +1071,6 @@ private:
 
     void InspectDrew();
 
-    bool TriggerKeyEventDispatch(const KeyEvent& event);
-
-    bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
-
-    bool IsSkipShortcutAndFocusMove();
-
     void FlushBuildFinishCallbacks();
 
     void DumpPipelineInfo() const;
@@ -1077,9 +1093,9 @@ private:
 
     bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
-    void CompensatePointerMoveEvent(const PointerEvent& event, const RefPtr<FrameNode>& node);
+    void CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node);
 
-    bool CompensatePointerMoveEventFromUnhandledEvents(const PointerEvent& event, const RefPtr<FrameNode>& node);
+    bool CompensatePointerMoveEventFromUnhandledEvents(const DragPointerEvent& event, const RefPtr<FrameNode>& node);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
@@ -1100,6 +1116,9 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
+            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+                return nodeLeft->IsOnMainTree();
+            }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
@@ -1110,39 +1129,6 @@ private:
         }
     };
 
-    std::tuple<float, float, float, float> LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
-        const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, float, float> GetResampleCoord(const std::vector<TouchEvent>& history,
-        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
-
-    std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
-
-    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
-        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
-
-    TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
-    
-    PointerEvent GetResamplePointerEvent(const std::vector<PointerEvent>& history,
-        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, float, float> GetResamplePointerCoord(const std::vector<PointerEvent>& history,
-        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
-
-    PointerEvent GetPointerLatestPoint(const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, uint64_t> GetPointerAvgPoint(const std::vector<PointerEvent>& events, const bool isScreen);
-
-    MouseEvent GetResampleMouseEvent(
-        const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
-
-    std::tuple<float, float, float, float> GetMouseResampleCoord(const std::vector<MouseEvent>& history,
-        const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
-
-    MouseEvent GetMouseLatestPoint(const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
- 
-    std::tuple<float, float, uint64_t> GetMouseAvgPoint(const std::vector<MouseEvent>& events, const bool isScreen);
-    
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
@@ -1169,7 +1155,7 @@ private:
 
     std::list<TouchEvent> touchEvents_;
     
-    std::map<RefPtr<FrameNode>, std::list<PointerEvent>> dragEvents_;
+    std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
     std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
@@ -1195,7 +1181,7 @@ private:
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
-    std::unordered_map<int32_t, std::vector<PointerEvent>> historyPointsEventById_;
+    std::unordered_map<int32_t, std::vector<DragPointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
@@ -1224,7 +1210,6 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
-    bool isTabJustTriggerOnKeyEvent_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;
@@ -1264,12 +1249,8 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
-    std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
-    std::unordered_map<int32_t, MouseEvent> idToMousePoints_;
     std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
-    std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent_;
-    std::unordered_map<int32_t, PointerEvent> idToDragPoints_;
-    std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
@@ -1280,9 +1261,11 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
+    int32_t lastMouseStyle_ = 0;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
@@ -1306,6 +1289,7 @@ private:
     static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
+    std::list<std::function<void()>> afterReloadAnimationTasks_;
     
     friend class ScopedLayout;
 };

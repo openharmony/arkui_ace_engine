@@ -78,6 +78,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto textPattern = hostNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, nullptr);
     auto placeholderIndex = textPattern->GetPlaceHolderIndex();
+    CHECK_NULL_RETURN(imageChildren.size() <= placeholderIndex.size(), nullptr);
     auto rectsForPlaceholders = textPattern->GetRectsForPlaceholders();
 
     size_t index = 0;

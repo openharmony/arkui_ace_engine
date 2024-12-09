@@ -144,6 +144,9 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event));
 void UnregisterOnEvent();
+void HandleTouchEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
+void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
+void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 int32_t CheckEvent(ArkUI_NodeEvent* event);
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent);

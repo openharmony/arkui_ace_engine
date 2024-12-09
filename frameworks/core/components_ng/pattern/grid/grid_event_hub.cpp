@@ -77,7 +77,7 @@ int32_t GridEventHub::GetInsertPosition(float x, float y)
     CHECK_NULL_RETURN(host, -1);
     auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
     CHECK_NULL_RETURN(pattern, -1);
-    auto itemFrameNode = host->FindChildByPosition(x, y);
+    auto itemFrameNode = host->FindChildByPositionWithoutChildTransform(x, y);
     if (itemFrameNode) {
         RefPtr<GridItemLayoutProperty> itemLayoutProperty = itemFrameNode->GetLayoutProperty<GridItemLayoutProperty>();
         CHECK_NULL_RETURN(itemLayoutProperty, 0);
@@ -155,7 +155,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
     auto globalY = static_cast<float>(info.GetGlobalPoint().GetY());
 
-    auto gridItem = host->FindChildByPosition(globalX, globalY);
+    auto gridItem = host->FindChildByPositionWithoutChildTransform(globalX, globalY);
     CHECK_NULL_VOID(gridItem);
     draggedIndex_ = GetGridItemIndex(gridItem);
 

@@ -280,6 +280,7 @@ void ProgressPattern::OnModifyDone()
     } else {
         RemoveTouchEvent();
     }
+    OnAccessibilityEvent();
 }
 
 void ProgressPattern::DumpInfo()
@@ -481,5 +482,22 @@ void ProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("color:", color.ToString().c_str());
     json->Put("style:", jsonValue->ToString().c_str());
     json->Put("EnableSmoothEffect", paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false");
+}
+
+void ProgressPattern::OnAccessibilityEvent()
+{
+    if (!initFlag_) {
+        initFlag_ = true;
+        return;
+    }
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+    if (!NearEqual(value_, value)) {
+        value_ = value;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+    }
 }
 } // namespace OHOS::Ace::NG

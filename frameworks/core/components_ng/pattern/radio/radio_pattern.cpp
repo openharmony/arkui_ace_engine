@@ -69,7 +69,10 @@ void RadioPattern::SetBuilderState()
 
 void RadioPattern::UpdateIndicatorType()
 {
-    auto radioPaintProperty = GetHost()->GetPaintProperty<RadioPaintProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto radioPaintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(radioPaintProperty);
     auto radioIndicatorType = radioPaintProperty->GetRadioIndicator().value_or(0);
     if (radioIndicatorType == static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
         LoadBuilder();

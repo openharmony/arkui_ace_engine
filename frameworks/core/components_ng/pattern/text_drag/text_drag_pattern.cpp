@@ -140,7 +140,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
         }
     } else {
         globalX = contentRect.Left() + globalOffset.GetX() - dragOffset;
-        width = contentRect.Width();
+        AdjustMaxWidth(width, contentRect, boxes);
     }
     float contentX = (leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0) - dragOffset - delta / CONSTANT_HALF;
     dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});
@@ -154,6 +154,20 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     TextDragData data(rect, width + bothOffset, height + bothOffset, leftHandler.Height(), rightHandler.Height());
     data.initSelecitonInfo(info, leftHandler.GetY() == rightHandler.GetY());
     return data;
+}
+
+void TextDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)
+{
+    width = contentRect.Width();
+    CHECK_NULL_VOID(!boxes.empty());
+    float startX = boxes.front().Left();
+    float endX = boxes.front().Right();
+    for (const auto& box : boxes) {
+        startX = std::min(startX, box.Left());
+        endX = std::max(endX, box.Right());
+    }
+    startX = std::min(0.0f, startX);
+    width = std::abs(startX - endX);
 }
 
 RectF TextDragPattern::GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,

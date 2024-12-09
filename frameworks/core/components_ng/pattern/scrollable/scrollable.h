@@ -335,9 +335,19 @@ public:
         nodeId_ = nodeId;
     }
 
+    int32_t GetNodeId()
+    {
+        return nodeId_;
+    }
+
     void SetNodeTag(const std::string& nodeTag)
     {
         nodeTag_ = nodeTag;
+    }
+
+    const std::string& GetNodeTag() const
+    {
+        return nodeTag_;
     }
 
     void ProcessScrollOverCallback(double velocity);

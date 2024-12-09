@@ -25,12 +25,13 @@ void CheckBoxModelNG::Create(
     const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tagName.c_str(), nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
-
+    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (name.has_value()) {
@@ -101,7 +102,9 @@ void CheckBoxModelNG::SetCheckMarkWidth(const Dimension& width)
 
 void CheckBoxModelNG::SetOnChange(ChangeEvent&& onChange)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -125,7 +128,9 @@ void CheckBoxModelNG::SetPadding(const NG::PaddingPropertyF& args, const NG::Pad
 
 void CheckBoxModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -135,7 +140,9 @@ void CheckBoxModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
 void CheckBoxModelNG::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     NG::ViewAbstract::SetResponseRegion(responseRegion);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
@@ -293,6 +300,7 @@ Dimension CheckBoxModelNG::GetCheckMarkWidth(FrameNode* frameNode)
 CheckBoxStyle CheckBoxModelNG::GetCheckboxStyle(FrameNode* frameNode)
 {
     CheckBoxStyle value = CheckBoxStyle::CIRCULAR_STYLE;
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxSelectedStyle, value, frameNode, value);
     return value;

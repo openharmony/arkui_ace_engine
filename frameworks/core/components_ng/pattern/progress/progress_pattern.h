@@ -135,6 +135,8 @@ public:
         return gradient;
     }
 
+    void OnAccessibilityEvent();
+
 private:
     void InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty);
     void CalculateStrokeWidth(const SizeF& contentSize);
@@ -168,6 +170,8 @@ private:
     Color selectColor_;
     Color borderColor_;
     Color fontColor_;
+    double value_ = 0.0;
+    bool initFlag_ = false;
     ProgressType progressType_ = ProgressType::LINEAR;
     bool isTextFromUser_ = false;
     bool visibilityProp_ = true;

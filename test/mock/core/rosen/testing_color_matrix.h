@@ -30,6 +30,7 @@ public:
     virtual void SetArray(const float src[MATRIX_SIZE]) {}
     virtual void SetScale(scalar sr, scalar sg, scalar sb, scalar sa) {}
     virtual void PreConcat(const TestingColorMatrix& m) {}
+    virtual void PostConcat(const TestingColorMatrix& m) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_MATRIX_H

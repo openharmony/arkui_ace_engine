@@ -23,6 +23,7 @@
 #include "base/json/json_util.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/animation/curves.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -39,7 +40,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -242,7 +242,7 @@ void SelectPattern::UpdateOptionsWidth(float selectWidth)
         auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         optionPattern->SetIsWidthModifiedBySelect(true);
-        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
     }
@@ -307,11 +307,13 @@ void SelectPattern::RegisterOnHover()
     CHECK_NULL_VOID(host);
     auto inputHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto mouseCallback = [weak = WeakClaim(this), host](bool isHover) {
+    auto mouseCallback = [weak = WeakClaim(this)](bool isHover) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select mouse hover %{public}d", isHover);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetIsHover(isHover);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto* pipeline = host->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
@@ -333,6 +335,9 @@ void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -400,7 +405,7 @@ void SelectPattern::CreateSelectedCallback()
         RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
-        auto hub = option->GetEventHub<OptionEventHub>();
+        auto hub = option->GetEventHub<MenuItemEventHub>();
         // no std::move, need to set multiple options
         hub->SetOnSelect(callback);
         option->MarkModifyDone();
@@ -451,7 +456,8 @@ void SelectPattern::SetDisabledStyle()
     textProps->UpdateTextColor(theme->GetDisabledFontColor());
     text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(spinnerLayoutProperty);
         spinnerLayoutProperty->UpdateSymbolColorList({theme->GetDisabledSpinnerSymbolColor()});
@@ -538,7 +544,8 @@ void SelectPattern::BuildChild()
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
     InitTextProps(textProps, theme);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         spinner_ = FrameNode::GetOrCreateFrameNode(
             V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_VOID(spinner_);
@@ -822,7 +829,7 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
             CHECK_NULL_VOID(lastSelectedNode);
-            auto lastSelectedPros = lastSelectedNode->GetPaintProperty<OptionPaintProperty>();
+            auto lastSelectedPros = lastSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
             CHECK_NULL_VOID(lastSelectedPros);
             lastSelectedPros->UpdateNeedDivider(true);
         }
@@ -872,7 +879,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
-    auto newSelectedPros = newSelectedNode->GetPaintProperty<OptionPaintProperty>();
+    auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(newSelectedPros);
     newSelectedPros->UpdateNeedDivider(false);
 }
@@ -968,7 +975,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     }
     ToJsonOptionAlign(json, filter);
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
@@ -1008,7 +1015,7 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
 
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    json->PutExtAttr("value", props->GetContent().value_or("").c_str(), filter);
+    json->PutExtAttr("value", UtfUtils::Str16ToStr8(props->GetContent().value_or(u"")).c_str(), filter);
     Color fontColor = props->GetTextColor().value_or(Color::BLACK);
     json->PutExtAttr("fontColor", fontColor.ColorToString().c_str(), filter);
     json->PutExtAttr("font", props->InspectorGetTextFont().c_str(), filter);
@@ -1048,7 +1055,7 @@ void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const Inspec
     if (options_.empty()) {
         json->PutExtAttr("divider", "", filter);
     } else {
-        auto props = options_[0]->GetPaintProperty<OptionPaintProperty>();
+        auto props = options_[0]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         auto divider = JsonUtil::Create(true);
         if (props->HasDivider()) {
@@ -1166,7 +1173,7 @@ std::string SelectPattern::GetValue()
     CHECK_NULL_RETURN(text_, "");
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, "");
-    return textProps->GetContentValue("");
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue(u""));
 }
 
 void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
@@ -1312,7 +1319,7 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
         auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         optionPattern->SetIsWidthModifiedBySelect(true);
-        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
     }
@@ -1449,7 +1456,7 @@ ControlSize SelectPattern::GetControlSize()
 void SelectPattern::SetDivider(const SelectDivider& divider)
 {
     for (auto&& option : options_) {
-        auto props = option->GetPaintProperty<OptionPaintProperty>();
+        auto props = option->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateDivider(divider);
     }

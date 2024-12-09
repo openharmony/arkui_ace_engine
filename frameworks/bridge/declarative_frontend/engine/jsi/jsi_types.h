@@ -97,6 +97,7 @@ public:
     bool IsUndefined() const;
     bool IsNull() const;
     std::string ToString() const;
+    std::u16string ToU16String() const;
     bool ToBoolean() const;
 
     template<typename T>

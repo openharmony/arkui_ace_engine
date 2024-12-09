@@ -85,6 +85,11 @@ inline bool IsLetterOrNumberForWchar(wchar_t chr)
     return (chr >= L'0' && chr <= L'9') || (chr >= L'a' && chr <= L'z') || (chr >= L'A' && chr <= L'Z');
 }
 
+inline bool IsLetterOrNumberForChar16(char16_t chr)
+{
+    return (chr >= u'0' && chr <= u'9') || (chr >= u'a' && chr <= u'z') || (chr >= u'A' && chr <= u'Z');
+}
+
 inline std::string ToString(const std::wstring& str)
 {
     if (str == DEFAULT_WSTRING) {
@@ -705,7 +710,8 @@ inline bool EndWith(const std::string& str, const char* suffix, size_t suffixLen
     return ((len >= suffixLen) && (str.compare(len - suffixLen, suffixLen, suffix) == 0));
 }
 
-inline void TransformStrCase(std::string& str, int32_t textCase)
+template<typename T>
+inline void TransformStrCase(T& str, int32_t textCase)
 {
     if (str.empty()) {
         return;

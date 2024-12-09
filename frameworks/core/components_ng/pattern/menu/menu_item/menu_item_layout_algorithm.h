@@ -16,6 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_ITEM_MENU_ITEM_LAYOUT_ALGORITHM_H
 
 #include "base/memory/referenced.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
@@ -28,7 +29,7 @@ class ACE_EXPORT MenuItemLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuItemLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    MenuItemLayoutAlgorithm() = default;
+    MenuItemLayoutAlgorithm(bool isOption = false) : isOption_(isOption) {}
     ~MenuItemLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -41,14 +42,20 @@ private:
     void MeasureItemViews(LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint,
         PaddingPropertyF padding, LayoutWrapper* layoutWrapper);
-    void MeasureLeftRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
-    void MeasureRightRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint,
-        LayoutWrapper* layoutWrapper);
+    void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
     float GetBordersHeight(LayoutWrapper* layoutWrapper);
     float GetMenuItemVerticalPadding();
+    std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
+    void UpdateIconMargin(LayoutWrapper* layoutWrapper);
+    void MeasureMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
+        const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint);
+    void MeasureOption(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
+        const RefPtr<LayoutProperty>& props, const std::optional<LayoutConstraintF>& layoutConstraint);
+    void LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
+    void LayoutOption(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
@@ -61,6 +68,7 @@ private:
     float minItemHeight_ = 0.0f;
     double iconSize_ = 0.0f;
     bool needExpandContent_ = false;
+    bool isOption_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);
 };

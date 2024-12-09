@@ -287,6 +287,12 @@ const std::vector<WaterFlowSections::Section> SECTION_12 = {
         .rowsGap = 2.0_px,
         .margin = MARGIN_3 },
 };
+
+const std::vector<WaterFlowSections::Section> SECTION_13 = {
+    { .itemsCount = 2, .crossCount = 2},
+    { .itemsCount = 2, .crossCount = 2 },
+    { .itemsCount = 1, .crossCount = 1 },
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_ITEM_MAPS_H

@@ -46,7 +46,7 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetFirstHandleInfo()
     CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.firstHandle;
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = dragHandleIndex_ == DragHandleIndex::FIRST || CheckHandleVisible(handleInfo.paintRect);
 
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
@@ -61,7 +61,8 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
     CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.secondHandle;
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = (dragHandleIndex_ == DragHandleIndex::SECOND && !IsSingleHandle()) ||
+        CheckHandleVisible(handleInfo.paintRect);
 
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
@@ -155,11 +156,6 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
         (!pattern->textSelector_.StartGreaterDest());
     IF_TRUE(isChangeSecondHandle, pattern->TriggerAvoidOnCaretChange());
-    if (isFirst) {
-        pattern->textSelector_.firstHandle.SetOffset(localOffset);
-    } else {
-        pattern->textSelector_.secondHandle.SetOffset(localOffset);
-    }
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
         .handleRect = handleRect,
         .isFirstHandle = isFirst,
@@ -181,7 +177,6 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     auto preHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
-    pattern->StartVibratorByIndexChange(currentHandleIndex, preHandleIndex);
     pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, initSelector_.second);
@@ -194,10 +189,13 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
             pattern->HandleSelectionChange(initSelector_.first, currentHandleIndex);
         }
     }
+    auto finalHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
+    pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex);
 }
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
+    BaseTextSelectOverlay::OnHandleMoveDone(handleRect, isFirstHandle);
     isHandleMoving_ = false;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -364,7 +362,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             }
             break;
         default:
-            TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Unsupported menu option id %{public}d", id);
             break;
     }
 }
@@ -382,7 +380,7 @@ void RichEditorSelectOverlay::ToggleMenu()
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
-    TAG_LOGD(AceLogTag::ACE_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
@@ -487,6 +485,7 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
 
 void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
     isHandleMoving_ = true;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);

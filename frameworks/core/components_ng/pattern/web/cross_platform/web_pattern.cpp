@@ -747,7 +747,7 @@ void WebPattern::RegistVirtualKeyBoardListener()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetVirtualKeyBoardCallback(
-        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
+        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) {
             auto webPattern = weak.Upgrade();
             CHECK_NULL_RETURN(webPattern, false);
             return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
@@ -1212,6 +1212,11 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 }
 
 void WebPattern::OnOverScrollModeUpdate(int mode)
+{
+   // cross platform is not support now;
+}
+
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
 {
    // cross platform is not support now;
 }

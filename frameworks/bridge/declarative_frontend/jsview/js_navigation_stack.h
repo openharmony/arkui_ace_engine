@@ -136,7 +136,7 @@ private:
     bool GetIsEntryByIndex(int32_t index);
     JSRef<JSObject> CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
-    int32_t GetSize() const;
+    int32_t GetSize() const override;
     void SetJSParentStack(JSRef<JSVal> parent);
     std::string ConvertParamToString(const JSRef<JSVal>& param, bool needLimit = false) const;
     void ParseJsObject(
@@ -152,6 +152,8 @@ private:
 
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
+    int32_t ExecuteBuilderByConfig(const std::string& name,
+        const WeakPtr<NG::UINode>& customNode, const JSRef<JSVal>& param);
 
     JSRef<JSArray> GetPathArray();
     JSRef<JSObject> GetPathInfo(int32_t index);

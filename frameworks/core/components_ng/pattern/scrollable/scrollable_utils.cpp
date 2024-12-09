@@ -20,6 +20,7 @@ namespace {
 std::vector<RefPtr<ForEachBaseNode>> GetForEachNodes(RefPtr<FrameNode>& host)
 {
     std::vector<RefPtr<ForEachBaseNode>> foreachNodes;
+    CHECK_NULL_RETURN(host, foreachNodes);
     for (const auto& child : host->GetChildren()) {
         if (!AceType::InstanceOf<ForEachBaseNode>(child)) {
             continue;

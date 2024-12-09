@@ -21,7 +21,7 @@ void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
 {
     PaintProperty::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
-    if (filter.IsFastFilter()) {
+    if (!json || filter.IsFastFilter()) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();

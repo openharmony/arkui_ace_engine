@@ -324,6 +324,7 @@ public:
     }
     void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
     void EnableSecure(bool isSecure);
+    void HdrBrightness(float hdrBrightness);
 
 private:
     void OnAttachToFrameNode() override;

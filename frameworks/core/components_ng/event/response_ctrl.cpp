@@ -37,7 +37,8 @@ void ResponseCtrl::TrySetFirstResponse(const WeakPtr<NG::FrameNode>& frameNode)
         firstResponseNode_ = frameNode;
         if (state_ == MonopolizeState::ON) {
             TAG_LOGI(
-                AceLogTag::ACE_GESTURE, "monopolize on by node id:%d, tag:%s", node->GetId(), node->GetTag().c_str());
+                AceLogTag::ACE_GESTURE, "monopolize on by node id:" SEC_PLD(%{public}d) ", tag:%s",
+                    SEC_PARAM(node->GetId()), node->GetTag().c_str());
         }
     }
 }

@@ -39,8 +39,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"

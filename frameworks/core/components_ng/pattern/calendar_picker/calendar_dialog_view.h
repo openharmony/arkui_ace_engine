@@ -115,6 +115,8 @@ private:
         const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty,
         const Dimension& weekHeight);
     static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
+    static void SetWeekTextDirection(const TextDirection& dialogDirection, const TextDirection& calendarDirection,
+        const RefPtr<FrameNode>& weekNode);
     static constexpr double deviceHeightLimit = 640.0;
     static DeviceOrientation previousOrientation_;
 };

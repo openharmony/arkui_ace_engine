@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_OBJECT_NG_H
 
 #include "base/utils/noncopyable.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
@@ -40,11 +41,15 @@ public:
     const ImageSourceInfo& GetSourceInfo() const;
     const RefPtr<ImageData>& GetData() const;
     int32_t GetFrameCount() const;
+    ImageRotateOrientation GetOrientation() const;
+    ImageRotateOrientation GetUserOrientation() const;
 
     void SetData(const RefPtr<ImageData>& data);
     void SetImageSize(const SizeF& imageSize);
     virtual void ClearData();
     void SetFrameCount(int32_t frameCount);
+    void SetOrientation(ImageRotateOrientation orientation);
+    void SetUserOrientation(ImageRotateOrientation orientation);
 
     virtual RefPtr<SvgDomBase> GetSVGDom() const
     {
@@ -73,6 +78,8 @@ public:
 
 protected:
     const ImageSourceInfo src_;
+    ImageRotateOrientation orientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
     SizeF imageSize_ { -1.0, -1.0 };
     // no longer needed after making canvas image
     RefPtr<ImageData> data_;

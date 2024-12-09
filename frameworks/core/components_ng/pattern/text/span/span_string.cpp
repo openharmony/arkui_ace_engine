@@ -17,6 +17,7 @@
 
 #include <cstdint>
 
+#include "base/utils/string_utils.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
@@ -362,8 +363,8 @@ RefPtr<NG::CustomSpanItem> SpanString::MakeCustomSpanItem(const RefPtr<CustomSpa
 
 void SpanString::ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end)
 {
-    auto text = GetWideString();
-    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+    auto text = GetU16string();
+    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
         start, end-start, text, true);
     int startIndex = range.startIndex;
     int endIndex = range.endIndex;
@@ -616,6 +617,11 @@ const std::string& SpanString::GetString() const
 std::wstring SpanString::GetWideString()
 {
     return StringUtils::ToWstring(text_);
+}
+
+std::u16string SpanString::GetU16string()
+{
+    return StringUtils::Str8ToStr16(text_);
 }
 
 int32_t SpanString::GetLength() const
@@ -1048,6 +1054,23 @@ void SpanString::UpdateSpansMap()
             }
         }
     }
+}
+
+std::string SpanString::ToString()
+{
+    std::stringstream ss;
+    for (auto span: spans_) {
+        ss << "Get spanItem [" << span->interval.first << ":"
+            << span->interval.second << "] " << span->content << std::endl;
+    }
+    for (auto& iter : spansMap_) {
+        auto spans = spansMap_[iter.first];
+        for (auto it = spans.begin(); it != spans.end(); ++it) {
+            ss << (*it)->ToString() << std::endl;
+        }
+    }
+    std::string output = ss.str();
+    return output;
 }
 
 RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)

@@ -121,13 +121,11 @@ const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShader
 
 CustomPaintPaintMethod::CustomPaintPaintMethod()
 {
-    auto container = Container::CurrentSafely();
-    if (container) {
-        apiVersion_ = container->GetApiTargetVersion();
-    } else {
-        // %1000 because the API version is the last three digits of the APP version
-        apiVersion_ = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-    }
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
+    // The default value of the font size in canvas is 14px.
+    SetMeasureFontSize(DEFAULT_FONT_SIZE);
+    // The default value of TextAlign is TextAlign::START.
+    SetMeasureTextAlign(TextAlign::START);
 }
 
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
@@ -217,7 +215,7 @@ void CustomPaintPaintMethod::UpdateFontFamilies()
     }
 }
 
-std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient)
+std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(const Ace::Gradient& gradient)
 {
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::CONIC) {
@@ -274,7 +272,7 @@ void CustomPaintPaintMethod::UpdatePaintShader(RSPen* pen, RSBrush* brush, const
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
         shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, pos, mode);
     } else if (gradient.GetType() == Ace::GradientType::CONIC) {
-        shaderEffect = MakeConicGradient(nullptr, gradient);
+        shaderEffect = MakeConicGradient(gradient);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
             shaderEffect = RSShaderEffect::CreateRadialGradient(endPoint, gradient.GetOuterRadius(), colors, pos, mode);
@@ -1566,7 +1564,11 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
@@ -1592,7 +1594,11 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
@@ -1619,7 +1625,11 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
@@ -1660,7 +1670,11 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1685,7 +1699,11 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1708,7 +1726,11 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     matrix[18] = percentNum;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1728,7 +1750,11 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1749,7 +1775,11 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
     matrix[18] = 1;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
@@ -1818,7 +1848,7 @@ double CustomPaintPaintMethod::PxStrToDouble(const std::string& str)
 double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
 {
     double ret = 0;
-    
+
     // check px case
     size_t index = str.find("px");
     if (index != std::string::npos) {
@@ -1835,7 +1865,7 @@ double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
         ret = ret * density_;
         return ret;
     }
-    
+
     // check rem case
     index = str.find("rem");
     if (index != std::string::npos) {
@@ -1934,6 +1964,7 @@ void CustomPaintPaintMethod::SaveProperties()
 {
     matrixStates_.push_back(matrix_);
     lineDashStates_.push_back(lineDash_);
+    measureTextStates_.push_back(measureTextState_);
 }
 
 void CustomPaintPaintMethod::RestoreProperties()
@@ -1946,6 +1977,10 @@ void CustomPaintPaintMethod::RestoreProperties()
         lineDash_ = lineDashStates_.back();
         lineDashStates_.pop_back();
     }
+    if (!measureTextStates_.empty()) {
+        measureTextState_ = measureTextStates_.back();
+        measureTextStates_.pop_back();
+    }
 }
 
 void CustomPaintPaintMethod::ResetTransformMatrix()
@@ -1957,6 +1992,16 @@ void CustomPaintPaintMethod::ResetLineDash()
 {
     std::vector<double>().swap(lineDash_.lineDash);
     lineDash_.dashOffset = 0.0;
+}
+
+void CustomPaintPaintMethod::ResetMeasureTextState()
+{
+    std::vector<PaintState>().swap(measureTextStates_);
+    measureTextState_ = PaintState();
+    // The default value of the font size in canvas is 14px.
+    SetMeasureFontSize(DEFAULT_FONT_SIZE);
+    // The default value of TextAlign is TextAlign::START.
+    SetMeasureTextAlign(TextAlign::START);
 }
 
 void CustomPaintPaintMethod::RotateMatrix(double angle)
@@ -2082,15 +2127,17 @@ void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
 TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
 #ifndef ACE_UNITTEST
+    PaintState paintState =
+        (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) ? measureTextState_ : state;
     TextMetrics textMetrics;
     RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
+    style.textAlign = Constants::ConvertTxtTextAlign(paintState.GetTextAlign());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
     RSTextStyle txtStyle;
-    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    ConvertTxtStyle(paintState.GetTextStyle(), txtStyle);
+    txtStyle.fontSize = paintState.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
 
@@ -2105,8 +2152,8 @@ TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, 
     auto glyphsBoundsBottom = paragraph->GetGlyphsBoundsBottom();
     auto glyphsBoundsLeft = paragraph->GetGlyphsBoundsLeft();
     auto glyphsBoundsRight = paragraph->GetGlyphsBoundsRight();
-    auto textAlign = state.GetTextAlign();
-    auto textBaseLine = state.GetTextStyle().GetTextBaseline();
+    auto textAlign = paintState.GetTextAlign();
+    auto textBaseLine = paintState.GetTextStyle().GetTextBaseline();
     const double baseLineY = GetFontBaseline(fontMetrics, textBaseLine);
     const double baseLineX = GetFontAlign(textAlign, paragraph);
 

@@ -147,12 +147,20 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->CanUndo(), false);
+    EXPECT_EQ(pattern->CanRedo(), false);
     pattern->HandleOnUndoAction();
     TextEditingValueNG record {
-        .text = pattern->contentController_->GetTextValue(),
+        .text = pattern->contentController_->GetTextUtf16Value(),
         .caretPosition = pattern->selectController_->GetCaretIndex(),
     };
     pattern->operationRecords_.emplace_back(record);
+    pattern->HandleOnUndoAction();
+    for (int32_t i = 0; i < 30; i++) {
+        TextEditingValueNG value;
+        value.text = u"123";
+        pattern->redoOperationRecords_.push_back(value);
+    }
     pattern->HandleOnUndoAction();
 }
 
@@ -175,7 +183,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern007, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->HandleOnRedoAction();
     TextEditingValueNG record {
-        .text = pattern->contentController_->GetTextValue(),
+        .text = pattern->contentController_->GetTextUtf16Value(),
         .caretPosition = pattern->selectController_->GetCaretIndex(),
     };
     pattern->operationRecords_.emplace_back(record);
@@ -659,7 +667,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern026, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->deleteBackwardOperations_.emplace(10);
-    pattern->InitEditingValueText("");
+    pattern->InitEditingValueText(u"");
 }
 
 /**
@@ -681,8 +689,8 @@ HWTEST_F(TextFieldPatternTest, TextPattern027, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->hasPreviewText_ = true;
     pattern->deleteBackwardOperations_.emplace(10);
-    pattern->InitValueText("");
-    pattern->InitValueText("123");
+    pattern->InitValueText(u"");
+    pattern->InitValueText(u"123");
 }
 
 /**
@@ -869,10 +877,10 @@ HWTEST_F(TextFieldPatternTest, TextPattern036, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->focusIndex_ = FocuseIndex::TEXT;
-    pattern->contentController_->SetTextValue("");
+    pattern->contentController_->SetTextValue(u"");
     pattern->selectController_->caretInfo_.index = 2;
     pattern->CursorMoveRightWord();
-    pattern->contentController_->SetTextValue("123");
+    pattern->contentController_->SetTextValue(u"123");
     pattern->selectController_->caretInfo_.index = 0;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 3;
@@ -895,7 +903,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern037, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->contentController_->SetTextValue("123");
+    pattern->contentController_->SetTextValue(u"123");
     pattern->selectController_->caretInfo_.index = 0;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 3;
@@ -1121,7 +1129,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern047, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->selectController_->caretInfo_.index = 1;
-    pattern->contentController_->SetTextValue("");
+    pattern->contentController_->SetTextValue(u"");
     pattern->HandleSelectionRight();
 }
 
@@ -1142,10 +1150,10 @@ HWTEST_F(TextFieldPatternTest, TextPattern048, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->selectController_->caretInfo_.index = 1;
-    pattern->contentController_->SetTextValue("1");
+    pattern->contentController_->SetTextValue(u"1");
     pattern->HandleSelectionRightWord();
     pattern->selectController_->caretInfo_.index = 4;
-    pattern->contentController_->SetTextValue("1");
+    pattern->contentController_->SetTextValue(u"1");
     pattern->HandleSelectionRightWord();
 }
 
@@ -1166,10 +1174,10 @@ HWTEST_F(TextFieldPatternTest, TextPattern049, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->selectController_->caretInfo_.index = 1;
-    pattern->contentController_->SetTextValue("1");
+    pattern->contentController_->SetTextValue(u"1");
     pattern->HandleSelectionLineEnd();
     pattern->selectController_->caretInfo_.index = 0;
-    pattern->contentController_->SetTextValue("1");
+    pattern->contentController_->SetTextValue(u"1");
     pattern->HandleSelectionLineEnd();
 }
 
@@ -1190,10 +1198,10 @@ HWTEST_F(TextFieldPatternTest, TextPattern050, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->selectController_->caretInfo_.index = 1;
-    pattern->contentController_->SetTextValue("1");
+    pattern->contentController_->SetTextValue(u"1");
     pattern->HandleSelectionEnd();
     pattern->selectController_->caretInfo_.index = 4;
-    pattern->contentController_->SetTextValue("1");
+    pattern->contentController_->SetTextValue(u"1");
     pattern->selectController_->firstHandleInfo_.index = 1;
     pattern->selectController_->secondHandleInfo_.index = 2;
     pattern->HandleSelectionEnd();
@@ -1519,7 +1527,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern067, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     pattern->selectController_->firstHandleInfo_.index = 1;
     pattern->selectController_->secondHandleInfo_.index = 2;
-    const PreviewTextInfo info = { "ni", { -1, -1 } };
+    const PreviewTextInfo info = { u"ni", { -1, -1 } };
     pattern->SetPreviewTextOperation(info);
 }
 
@@ -1566,10 +1574,10 @@ HWTEST_F(TextFieldPatternTest, TextPattern069, TestSize.Level0)
     PreviewRange previewRange;
     previewRange.start = -1;
     previewRange.end = -1;
-    pattern->CheckPreviewTextValidate("", previewRange);
+    pattern->CheckPreviewTextValidate(u"", previewRange);
     previewRange.start = -1;
     previewRange.end = 0;
-    pattern->CheckPreviewTextValidate("", previewRange);
+    pattern->CheckPreviewTextValidate(u"", previewRange);
 }
 
 /**
@@ -2218,7 +2226,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern097, TestSize.Level0)
     GestureEvent info;
     Offset localLocation(1, 1);
     info.SetLocalLocation(localLocation);
-    bool state = pattern->IsMouseOverScrollBar(info);
+    bool state = pattern->IsMouseOverScrollBar(&info);
     EXPECT_FALSE(state);
 }
 
@@ -2366,6 +2374,7 @@ HWTEST_F(TextFieldPatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
+    pattern->SetAccessibilityPasswordIconAction();
     DirtySwapConfig config;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         textFieldNode, AceType::MakeRefPtr<GeometryNode>(), textFieldNode->GetLayoutProperty());
@@ -2416,6 +2425,10 @@ HWTEST_F(TextFieldPatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
 
     pattern->mouseStatus_ = MouseStatus::RELEASED;
     EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), true);
+    config.skipMeasure = true;
+    layoutWrapper->skipMeasureContent_ = true;
+    layoutWrapper->layoutAlgorithm_->skipMeasure_ = true;
+    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
 }
 
 /**
@@ -2471,7 +2484,7 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     ASSERT_NE(layoutProperty, nullptr);
 
     ASSERT_NE(pattern->contentController_, nullptr);
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
@@ -2479,7 +2492,7 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     ASSERT_NE(eventHub, nullptr);
 
     bool calledOnCopy = false;
-    eventHub->SetOnCopy([&calledOnCopy](const std::string& value) {
+    eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
         calledOnCopy = true;
     });
 
@@ -2502,6 +2515,29 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HandleOnCut001
+ * @tc.desc: test testInput text HandleOnCut
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnCut001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    layoutProperty->UpdateCopyOptions(CopyOptions::None);
+    auto context = PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    pattern->HandleOnCut();
+    pattern->UpdateCaretInfoToController(false);
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
+}
+
+/**
  * @tc.name: FireEventHubOnChange001
  * @tc.desc: test testInput text FireEventHubOnChange
  * @tc.type: FUNC
@@ -2513,11 +2549,14 @@ HWTEST_F(TextFieldPatternTest, FireEventHubOnChange001, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    pattern->textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
+    pattern->textFieldForegroundModifier_ = AceType::MakeRefPtr<TextFieldForegroundModifier>(pattern);
     auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
-    std::string text = "Test";
+    std::u16string text = u"Test";
     layoutProperty->UpdateNeedFireOnChange(true);
 
     pattern->underlineWidth_ = 1.0_px;
@@ -2531,6 +2570,8 @@ HWTEST_F(TextFieldPatternTest, FireEventHubOnChange001, TestSize.Level0)
 
     pattern->underlineWidth_ = 1.0_px;
     layoutProperty->UpdateShowErrorText(true);
+ 
+    pattern->CalculateBoundsRect();
     pattern->FireEventHubOnChange(text);
     EXPECT_NE(pattern->underlineWidth_, 2.0_px);
 }

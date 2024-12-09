@@ -1288,7 +1288,12 @@ ArkUINativeModuleValue FrameNodeBridge::IsAttached(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isVisible(nativeNode);
+    bool isAttached;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isAttached(nativeNode);
+    } else {
+        isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isVisible(nativeNode);
+    }
     return panda::BooleanRef::New(vm, isAttached);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetInspectorInfo(ArkUIRuntimeCallInfo* runtimeCallInfo)

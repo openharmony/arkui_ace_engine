@@ -778,6 +778,7 @@ public:
     void UpdateOverlayScrollbarEnabled(bool isEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
+    void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
@@ -830,6 +831,7 @@ public:
     bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
+    void GestureBackBlur();
     void OnWebviewHide();
     void OnWebviewShow();
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
@@ -951,6 +953,7 @@ public:
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
+    bool IsCurrentFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -1011,13 +1014,14 @@ public:
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoByFocusMove(
         int64_t accessibilityId, int32_t direction);
-    void SetAccessibilityState(bool state);
+    void SetAccessibilityState(bool state, bool isDelayed);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void ScaleGestureChange(double scale, double centerX, double centerY);
+    void ScaleGestureChangeV2(int type, double scale, double originScale, double centerX, double centerY);
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();

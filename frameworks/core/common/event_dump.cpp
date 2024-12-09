@@ -36,10 +36,12 @@ void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLis
     oss << "monopolizeEvents: " << monopolizeEvents << ", "
         << "isHit: " << isHit << ", "
         << "hitTestMode: " << hitTestMode << ", ";
+#ifndef IS_RELEASE_VERSION
     oss << "responseRegion: ";
     for (const auto& rect : responseRegionList) {
         oss << rect.ToString().c_str();
     }
+#endif
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 
@@ -152,8 +154,8 @@ void EventTreeRecord::AddGestureSnapshot(int32_t finger, RefPtr<GestureSnapshot>
     gestureTree[finger].emplace_back(gesture);
 }
 
-void EventTreeRecord::AddGestureProcedure(uint64_t id,
-    const std::string& procedure, const std::string& state, const std::string& disposal, int64_t timestamp)
+void EventTreeRecord::AddGestureProcedure(uint64_t id, const std::string& procedure, const std::string& extraInfo,
+    const std::string& state, const std::string& disposal, int64_t timestamp)
 {
     if (eventTreeList.empty()) {
         return;
@@ -164,14 +166,14 @@ void EventTreeRecord::AddGestureProcedure(uint64_t id,
         return;
     }
     // TouchEventActuator don't record move
-    if (iter->second->type == "TouchEventActuator" && procedure == "HandleTouchMove") {
+    if (iter->second->type == "TouchEventActuator") {
         return;
     }
-    iter->second->AddProcedure(procedure, state, disposal, timestamp);
+    iter->second->AddProcedure(procedure, extraInfo, state, disposal, timestamp);
 }
 
-void EventTreeRecord::AddGestureProcedure(uint64_t id,
-    const TouchEvent& point, const std::string& state, const std::string& disposal, int64_t timestamp)
+void EventTreeRecord::AddGestureProcedure(uint64_t id, const TouchEvent& point, const std::string& extraInfo,
+    const std::string& state, const std::string& disposal, int64_t timestamp)
 {
     if (eventTreeList.empty()) {
         return;
@@ -187,7 +189,7 @@ void EventTreeRecord::AddGestureProcedure(uint64_t id,
         return;
     }
     std::string procedure = std::string("Handle").append(GestureSnapshot::TransTouchType(point.type));
-    iter->second->AddProcedure(procedure, state, disposal, timestamp);
+    iter->second->AddProcedure(procedure, extraInfo, state, disposal, timestamp);
 }
 
 void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,

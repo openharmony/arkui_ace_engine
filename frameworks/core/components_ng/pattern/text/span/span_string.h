@@ -42,6 +42,7 @@ public:
     ~SpanString() override;
     const std::string& GetString() const;
     std::wstring GetWideString();
+    std::u16string GetU16string();
     int32_t GetLength() const;
     void SetString(const std::string& text);
     void SetGroupId(const RefPtr<SpanBase>& span);
@@ -86,6 +87,7 @@ public:
     void ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end);
     void ChangeStartToCorrectNum(int32_t& start);
     void ChangeEndToCorrectNum(int32_t& end);
+    std::string ToString();
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(

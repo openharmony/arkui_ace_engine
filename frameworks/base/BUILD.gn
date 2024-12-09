@@ -34,6 +34,7 @@ template("ace_base_source_set") {
       "resource:ace_resource",
     ]
     external_deps = []
+    external_deps += [ "zlib:shared_libz" ]
     include_dirs = []
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -74,6 +75,7 @@ template("ace_base_source_set") {
       "utils/string_utils.cpp",
       "utils/time_util.cpp",
       "utils/utf.cpp",
+      "utils/utf_helper.cpp",
       "utils/utils.cpp",
     ]
 
@@ -174,6 +176,7 @@ foreach(item, ace_platforms) {
         "init:libbegetutil",
         "napi:ace_napi",
         "window_manager:libdm",
+        "zlib:shared_libz",
       ]
 
       if (defined(config.hichecker_exists) && config.hichecker_exists) {

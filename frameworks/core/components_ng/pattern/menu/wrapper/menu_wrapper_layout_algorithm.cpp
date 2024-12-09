@@ -16,23 +16,40 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
-void CheckLayoutConstraint(LayoutConstraintF& constraint)
+void CheckLayoutConstraint(LayoutConstraintF& constraint, const RefPtr<FrameNode>& menuWrapper)
 {
-    if (constraint.minSize.IsNonPositive() && constraint.maxSize.IsNonPositive()) {
-        auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
-        CHECK_NULL_VOID(currentSubwindow);
-        auto subwindowRect = currentSubwindow->GetRect();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetChildLayoutConstraint(constraint);
+
+    CHECK_NULL_VOID(menuWrapperPattern->GetIsFirstShow());
+    auto currentId = Container::CurrentId();
+    auto parentContainerId =
+        currentId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    CHECK_NULL_VOID(subWindow);
+    auto subwindowRect = subWindow->GetRect();
+    // after the size of subwindow is changed, flush layout before updating windowSize to root node will result in an
+    // incorrect constraint, and the constraint needs to be updated to the size of subwindow
+    // 1. first measure after new subWindow is created, the constraint is empty and maxSize is zero
+    // 2. first measure after windowSize is changed, the constraint has not been updated and is old value
+    if (subwindowRect.GetSize() != constraint.maxSize) {
         constraint.maxSize.SetSizeT(subwindowRect.GetSize());
-        constraint.percentReference.UpdateMax(constraint.maxSize);
-        constraint.parentIdealSize = OptionalSize(constraint.maxSize);
+        constraint.percentReference.SetSizeT(constraint.maxSize);
+        TAG_LOGW(AceLogTag::ACE_MENU, "update menuWrapper childConstraint because constraint doesn't match windowSize");
     }
+
+    menuWrapperPattern->SetChildLayoutConstraint(constraint);
 }
 
 // set wrapper to full screen size
 void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
@@ -42,7 +59,7 @@ void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     // first layout after created subwindow, constraint is zero
-    CheckLayoutConstraint(layoutConstraint);
+    CheckLayoutConstraint(layoutConstraint, layoutWrapper->GetHostNode());
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
     }

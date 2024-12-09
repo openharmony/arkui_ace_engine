@@ -68,10 +68,12 @@ SelectOverlayContentModifier::SelectOverlayContentModifier(const WeakPtr<Pattern
 void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID(!isUsingMouse_);
+    CHECK_NULL_VOID(isHiddenHandle_);
     if (isHiddenHandle_->Get()) {
         return;
     }
 
+    CHECK_NULL_VOID(inShowArea_);
     if (!inShowArea_->Get()) {
         return;
     }
@@ -80,6 +82,7 @@ void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
     canvas.Save();
     ClipViewPort(canvas);
 
+    CHECK_NULL_VOID(isSingleHandle_);
     if (isSingleHandle_->Get()) {
         PaintSingleHandle(canvas);
     } else {
@@ -119,7 +122,13 @@ OffsetF SelectOverlayContentModifier::CalculateCenterPoint(
 bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
 {
     CHECK_NULL_RETURN(isPaintHandleUsePoints_, false);
+
+    CHECK_NULL_RETURN(firstHandleIsShow_, false);
+    CHECK_NULL_RETURN(secondHandleIsShow_, false);
+    CHECK_NULL_RETURN(isHandleLineShow_, false);
+
     if (firstHandleIsShow_->Get()) {
+        CHECK_NULL_RETURN(firstCircleIsShow_, false);
         auto startPoint = firstHandlePaintInfo_.startPoint;
         startPoint.SetY(startPoint.GetY() + 1.0f);
         auto centerOffset = CalculateCenterPoint(
@@ -135,6 +144,7 @@ bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
         PaintHandle(canvas, drawInfo);
     }
     if (secondHandleIsShow_->Get()) {
+        CHECK_NULL_RETURN(secondCircleIsShow_, false);
         auto startPoint = secondHandlePaintInfo_.startPoint;
         startPoint.SetY(startPoint.GetY() + 1.0f);
         auto centerOffset = CalculateCenterPoint(
@@ -154,12 +164,19 @@ bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
 
 void SelectOverlayContentModifier::PaintSingleHandleWithRect(RSCanvas& canvas)
 {
+    CHECK_NULL_VOID(firstHandleIsShow_);
+    CHECK_NULL_VOID(secondHandleIsShow_);
+    CHECK_NULL_VOID(isHandleLineShow_);
     if (firstHandleIsShow_->Get()) {
+        CHECK_NULL_VOID(firstHandle_);
+        CHECK_NULL_VOID(firstCircleIsShow_);
         PaintHandle(canvas, firstHandle_->Get(), false,
             { isHandleLineShow_->Get(), firstCircleIsShow_->Get(), IsDraggingHandle(true) });
         return;
     }
     if (secondHandleIsShow_->Get() || isClipHandleDrawRect_) {
+        CHECK_NULL_VOID(secondHandle_);
+        CHECK_NULL_VOID(secondCircleIsShow_);
         PaintHandle(canvas, secondHandle_->Get(), false,
             { isHandleLineShow_->Get(), secondCircleIsShow_->Get(), IsDraggingHandle(false) });
     }
@@ -176,7 +193,12 @@ void SelectOverlayContentModifier::PaintDoubleHandle(RSCanvas& canvas)
 bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
 {
     CHECK_NULL_RETURN(isPaintHandleUsePoints_, false);
+
+    CHECK_NULL_RETURN(firstHandleIsShow_, false);
+    CHECK_NULL_RETURN(secondHandleIsShow_, false);
+    CHECK_NULL_RETURN(handleReverse_, false);
     if (firstHandleIsShow_->Get()) {
+        CHECK_NULL_RETURN(firstCircleIsShow_, false);
         auto handleOnTop = !handleReverse_->Get();
         auto centerOffset = CalculateCenterPoint(
             firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, GetDrawHandleRadius(), handleOnTop);
@@ -193,6 +215,7 @@ bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
         PaintHandle(canvas, drawInfo);
     }
     if (secondHandleIsShow_->Get()) {
+        CHECK_NULL_RETURN(secondCircleIsShow_, false);
         auto handleOnTop = handleReverse_->Get();
         auto centerOffset = CalculateCenterPoint(
             secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, GetDrawHandleRadius(), handleOnTop);
@@ -213,11 +236,18 @@ bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
 
 void SelectOverlayContentModifier::PaintDoubleHandleWithRect(RSCanvas& canvas)
 {
+    CHECK_NULL_VOID(firstHandleIsShow_);
+    CHECK_NULL_VOID(secondHandleIsShow_);
+    CHECK_NULL_VOID(handleReverse_);
     if (firstHandleIsShow_->Get() || isClipHandleDrawRect_) {
+        CHECK_NULL_VOID(firstHandle_);
+        CHECK_NULL_VOID(firstCircleIsShow_);
         PaintHandle(canvas, firstHandle_->Get(), !handleReverse_->Get(),
             { true, firstCircleIsShow_->Get(), IsDraggingHandle(true) });
     }
     if (secondHandleIsShow_->Get() || isClipHandleDrawRect_) {
+        CHECK_NULL_VOID(secondHandle_);
+        CHECK_NULL_VOID(secondCircleIsShow_);
         PaintHandle(canvas, secondHandle_->Get(), handleReverse_->Get(),
             { true, secondCircleIsShow_->Get(), IsDraggingHandle(false) });
     }
@@ -228,14 +258,19 @@ void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
     if (!isOverlayMode_ || isClipHandleDrawRect_) {
         return;
     }
+    CHECK_NULL_VOID(viewPort_);
     auto left = viewPort_->Get().Left();
     auto top = viewPort_->Get().Top();
     auto right = viewPort_->Get().Right();
     auto bottom = viewPort_->Get().Bottom();
     auto upHandle = GetFirstPaintRect();
+    CHECK_NULL_VOID(firstHandleIsShow_);
     auto upHandleIsShow = firstHandleIsShow_->Get();
     auto downHandle = GetSecondPaintRect();
+    CHECK_NULL_VOID(secondHandleIsShow_);
     auto downHandleIsShow = secondHandleIsShow_->Get();
+    CHECK_NULL_VOID(isSingleHandle_);
+    CHECK_NULL_VOID(handleReverse_);
     if (isSingleHandle_->Get()) {
         upHandleIsShow = false;
         downHandleIsShow = firstHandleIsShow_->Get() || secondHandleIsShow_->Get();
@@ -247,6 +282,7 @@ void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
         downHandle = GetFirstPaintRect();
         downHandleIsShow = firstHandleIsShow_->Get();
     }
+    CHECK_NULL_VOID(handleRadius_);
     auto handleDiameter = handleRadius_->Get() * 2;
     auto handleRadius = isPaintHandleUsePoints_ ? 0.0f : handleRadius_->Get();
     if (upHandleIsShow) {
@@ -263,6 +299,7 @@ void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
         top = std::min(downHandle.Top(), top);
         bottom = std::max(downHandle.Bottom() + handleDiameter, bottom);
     }
+    CHECK_NULL_VOID(handleStrokeWidth_);
     auto strokeWidth = handleStrokeWidth_->Get();
     RSRect clipInnerRect = RSRect(left - strokeWidth, top - strokeWidth, right + strokeWidth, bottom + strokeWidth);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
@@ -270,6 +307,7 @@ void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
 
 RectF SelectOverlayContentModifier::ConvertPointsToRect(const SelectHandlePaintInfo& paintInfo) const
 {
+    CHECK_NULL_RETURN(handleRadius_, RectF());
     auto handleDiameter = handleRadius_->Get() * 2;
     auto left = std::min(paintInfo.startPoint.GetX(), paintInfo.endPoint.GetX()) - handleDiameter;
     auto right = std::max(paintInfo.startPoint.GetX(), paintInfo.endPoint.GetX()) + handleDiameter;
@@ -285,6 +323,7 @@ RectF SelectOverlayContentModifier::GetFirstPaintRect() const
     if (isPaintHandleUsePoints_) {
         return ConvertPointsToRect(firstHandlePaintInfo_);
     }
+    CHECK_NULL_RETURN(firstHandle_, RectF());
     return firstHandle_->Get();
 }
 
@@ -293,6 +332,7 @@ RectF SelectOverlayContentModifier::GetSecondPaintRect() const
     if (isPaintHandleUsePoints_) {
         return ConvertPointsToRect(secondHandlePaintInfo_);
     }
+    CHECK_NULL_RETURN(secondHandle_, RectF());
     return secondHandle_->Get();
 }
 
@@ -304,7 +344,9 @@ void SelectOverlayContentModifier::PaintHandle(
     OffsetF startPoint(0.0, 0.0);
     OffsetF endPoint(0.0, 0.0);
     auto scaleY = isOverlayMode_ ? 1.0f : scale_.y;
+    CHECK_NULL_VOID(handleRadius_);
     auto handleRadius = handleRadius_->Get() * scaleY;
+    CHECK_NULL_VOID(handleStrokeWidth_);
     auto gap = NearEqual(scaleY, 1.0f) ? 0.0f : handleStrokeWidth_->Get() * scaleY;
     if (handleOnTop) {
         centerOffset.SetY(handleRect.Top() - handleRadius);
@@ -334,9 +376,15 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
     auto scaleY = isOverlayMode_ ? 1.0f : scale_.y;
     canvas.Save();
     canvas.Translate(handleInfo.centerOffset.GetX(), handleInfo.centerOffset.GetY());
+    CHECK_NULL_VOID(handleColor_);
     Color handleColor = handleColor_->Get();
+    CHECK_NULL_VOID(handleOpacity_);
     handleColor = handleColor.BlendOpacity(handleOpacity_->Get());
     if (handleInfo.isCircleShow) {
+        CHECK_NULL_VOID(innerHandleColor_);
+        CHECK_NULL_VOID(innerHandleRadius_);
+        CHECK_NULL_VOID(handleStrokeWidth_);
+        CHECK_NULL_VOID(handleRadius_);
         canvas.Save();
         canvas.Scale(scaleX, scaleY);
         // Paint inner circle.
@@ -359,6 +407,14 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
         canvas.DetachPen();
         canvas.Restore();
     }
+    PaintHandleLine(canvas, handleInfo, handleColor);
+    canvas.Restore();
+}
+
+void SelectOverlayContentModifier::PaintHandleLine(
+    RSCanvas& canvas, const HandleDrawInfo& handleInfo, Color handleColor)
+{
+    auto scaleX = isOverlayMode_ ? 1.0f : scale_.x;
     float handleLineWidth = handleInfo.handleWidth;
     if (handleInfo.isHandleLineShow && !NearZero(handleLineWidth)) {
         canvas.Save();
@@ -375,7 +431,6 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
         canvas.DetachPen();
         canvas.Restore();
     }
-    canvas.Restore();
 }
 
 bool SelectOverlayContentModifier::CheckHandleCircleIsShow(const RectF& handleRect)
@@ -391,7 +446,10 @@ void SelectOverlayContentModifier::ClipHandleDrawRect(
     if (!isClipHandleDrawRect_) {
         return;
     }
+    CHECK_NULL_VOID(handleRadius_);
+    CHECK_NULL_VOID(handleStrokeWidth_);
     auto extendDimension = handleRadius_->Get() + handleStrokeWidth_->Get() / 2.0f;
+    CHECK_NULL_VOID(viewPort_);
     auto viewPort = viewPort_->Get();
     auto left = GreatOrEqual(handleRect.Right(), viewPort.Left() - VIEW_PORT_MODIFICATION_VALUE)
                     ? handleRect.Left() - extendDimension

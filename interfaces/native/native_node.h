@@ -1675,6 +1675,16 @@ typedef enum {
     NODE_CLICK_DISTANCE = 97,
 
     /**
+     * @brief Defines the moving distance limit for the component-bound tap gesture.
+     * This attribute can be set as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: allowed moving distance of a finger, in vp. \n
+     *
+     */
+    NODE_TAB_STOP = 98,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4646,6 +4656,19 @@ typedef enum {
     NODE_SWIPER_INDICATOR_INTERACTIVE,
 
     /**
+     * @brief Sets the page flipping mode using the mouse wheel.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: page flipping mode using the mouse wheel. The parameter type is {@link ArkUI_PageFlipMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_PageFlipMode}:\n
+     * .value[0].i32: page flipping mode using the mouse wheel. \n
+     *
+     * @since 14
+     */
+    NODE_SWIPER_PAGE_FLIP_MODE,
+
+    /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
      * property acquisition interfaces.
      *
@@ -5465,6 +5488,8 @@ typedef enum {
      * device. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
      */
     NODE_ON_KEY_EVENT = 21,
     /**
@@ -5477,6 +5502,8 @@ typedef enum {
      * device. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
      */
     NODE_ON_KEY_PRE_IME = 22,
     /**
@@ -5868,6 +5895,19 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
      */
     NODE_TEXT_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
+
+    /**
+     * @brief Defines the event triggered when an item is selected and scrolling has stopped in the
+     * <b>ARKUI_NODE_TEXT_PICKER</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+     *
+     * @since 14
+     */
+    NODE_TEXT_PICKER_EVENT_ON_SCROLL_STOP = 15001,
 
     /**
      * @brief Defines the event triggered when a date is selected in the <b>NODE_CALENDAR_PICKER</b>.
@@ -7494,7 +7534,7 @@ int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* 
 ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node);
 
 /**
- * @brief Retrieve all active child nodes of a node.
+ * @brief Retrieve all active child nodes of a node. Span and ImageSpan will not be counted in the children.
  *
  * @param head Pass in the node that needs to be obtained.
  * @param handle The structure corresponding to the sub node information of the head node.

@@ -72,7 +72,7 @@ void InteractableView::OnHover(std::function<void(bool)> callback)
     });
 }
 
-void InteractableView::OnKey(std::function<void(KeyEventInfo& keyInfo)> callback)
+void InteractableView::OnKey(std::function<bool(KeyEventInfo& keyInfo)> callback)
 {
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(callback));
 }

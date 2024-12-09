@@ -16,9 +16,16 @@
 #include "base/log/dump_log.h"
 
 #include <fstream>
+
+#include "zlib.h"
+
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
+
+#define CHUNK 16384
+
+#define COMPRESS_VERSION 9
 
 DumpLog::DumpLog() = default;
 DumpLog::~DumpLog() = default;
@@ -195,5 +202,69 @@ std::string DumpLog::FormatDumpInfo(const std::string& str, int32_t depth)
         return str.substr(1, str.length() - DumpLog::END_POS_THREE);
     }
     return str;
+}
+
+int DumpLog::CompressString(const char* in_str, size_t in_len, std::string& out_str, int level)
+{
+    if (!in_str)
+        return Z_DATA_ERROR;
+
+    int ret, flush;
+    unsigned have;
+    z_stream strm;
+
+    unsigned char out[CHUNK];
+
+    /* allocate deflate state */
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    ret = deflateInit(&strm, level);
+    if (ret != Z_OK)
+        return ret;
+
+    std::shared_ptr<z_stream> sp_strm(&strm, [](z_stream* strm) { (void)deflateEnd(strm); });
+    const char* end = in_str + in_len;
+
+    size_t distance = 0;
+    /* compress until end of file */
+    do {
+        distance = end - in_str;
+        strm.avail_in = (distance >= CHUNK) ? CHUNK : distance;
+        strm.next_in = (Bytef*)in_str;
+        in_str += strm.avail_in;
+        flush = (in_str == end) ? Z_FINISH : Z_NO_FLUSH;
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+            ret = deflate(&strm, flush);
+            if (ret == Z_STREAM_ERROR)
+                break;
+            have = CHUNK - strm.avail_out;
+            out_str.append((const char*)out, have);
+        } while (strm.avail_out == 0);
+        if (strm.avail_in != 0) {
+            break;
+        }
+    } while (flush != Z_FINISH);
+    if (ret != Z_STREAM_END)
+        return Z_STREAM_ERROR;
+    return Z_OK;
+}
+
+void DumpLog::OutPutByCompress()
+{
+    if (!ostream_ || !ostream_->good()) {
+        result_.clear();
+        return;
+    }
+    std::string compressString;
+    if (CompressString(result_.c_str(), result_.size(), compressString, COMPRESS_VERSION) == Z_OK) {
+        ostream_->write(compressString.c_str(), compressString.length());
+    } else {
+        ostream_->write(result_.c_str(), result_.length());
+    }
+    result_.clear();
+    ostream_->flush();
 }
 } // namespace OHOS::Ace

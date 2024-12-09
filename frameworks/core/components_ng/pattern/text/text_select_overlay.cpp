@@ -230,7 +230,6 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     if (textPattern->GetMagnifierController()) {
         textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
-    textPattern->SetTextResponseType(TextResponseType::LONG_PRESS);
     auto textSelector = textPattern->GetTextSelector();
     textPattern->UpdateSelectionSpanType(textSelector.GetTextStart(), textSelector.GetTextEnd());
     textPattern->CalculateHandleOffsetAndShowOverlay();
@@ -259,7 +258,7 @@ std::string TextSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textPattern, "");
     auto start = textPattern->GetTextSelector().GetTextStart();
     auto end = textPattern->GetTextSelector().GetTextEnd();
-    return textPattern->GetSelectedText(start, end);
+    return UtfUtils::Str16ToStr8(textPattern->GetSelectedText(start, end));
 }
 
 RectF TextSelectOverlay::GetSelectArea()

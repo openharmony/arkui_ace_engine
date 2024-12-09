@@ -71,7 +71,8 @@ OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
 
 RosenMediaPlayer::~RosenMediaPlayer()
 {
-    Release();
+    CHECK_NULL_VOID(mediaPlayer_);
+    mediaPlayer_->Release();
 }
 
 void RosenMediaPlayer::CreateMediaPlayer()
@@ -186,7 +187,12 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
         return false;
     }
     MediaFileInfo fileInfo;
-    std::string videoFilePath = mediaPath.substr(mediaPath.find("resources/base"));
+    size_t pos = mediaPath.find("resources/base");
+    if (pos == std::string::npos) {
+        LOGE("substring is not found in mediaPath.");
+        return false;
+    }
+    std::string videoFilePath = mediaPath.substr(pos);
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
@@ -510,13 +516,13 @@ int32_t RosenMediaPlayer::SetPlayRange(int64_t startTime, int64_t endTime)
     return mediaPlayer_->SetPlayRange(startTime, endTime);
 }
 
-int32_t RosenMediaPlayer::Release()
+int32_t RosenMediaPlayer::SetParameter(const std::string& key, int64_t value)
 {
-    LOGI("Media player start to release.");
+    LOGI("Media player start to SetParameter.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
-    auto ret = mediaPlayer_->Release();
-    mediaPlayer_.reset();
-    return ret;
+    Media::Format format;
+    (void)format.PutIntValue(key, value);
+    return mediaPlayer_->SetParameter(format);
 }
 
 } // namespace OHOS::Ace::NG

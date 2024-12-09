@@ -62,16 +62,14 @@ public:
         CHECK_NULL_RETURN(swiperNode, nullptr);
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
-        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DotIndicatorLayoutAlgorithm>();
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
 
-            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
-                swiperPattern->DisplayIndicatorTotalCount() : swiperPattern->TotalCount();
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
-                                : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(indicatorDisplayCount);
+                                : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(swiperPattern->TotalCount());
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
@@ -92,15 +90,12 @@ public:
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
+        paintMethod->SetItemCount(swiperPattern->TotalCount());
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
-        paintMethod->SetItemCount(swiperPattern->DisplayIndicatorTotalCount());
-        paintMethod->SetTotalItemCount(swiperPattern->TotalCount());
-        paintMethod->SetSwipeByGroup(swiperLayoutProperty->GetSwipeByGroup().value_or(false));
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         gestureState_ = swiperPattern->GetGestureState();
         paintMethod->SetGestureState(gestureState_);
         paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
-        paintMethod->SetGroupTurnPageRate(swiperPattern->GetGroupTurnPageRate());
         paintMethod->SetIsLoop(swiperPattern->IsLoop());
         paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
         paintMethod->SetIsHover(isHover_);
@@ -121,7 +116,7 @@ public:
         CHECK_NULL_RETURN(swiperNode, nullptr);
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
-        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             if (swiperPattern->GetMaxDisplayCount() > 0) {
                 SetIndicatorInteractive(false);
                 return CreateOverlongDotIndicatorPaintMethod(swiperPattern);
@@ -133,7 +128,7 @@ public:
         return nullptr;
     }
 
-    virtual RefPtr<FrameNode> GetSwiperNode() const
+    RefPtr<FrameNode> GetSwiperNode() const
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
@@ -172,97 +167,9 @@ public:
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetIndicatorInteractive(bool isInteractive);
-    virtual Axis GetDirection() const;
-    virtual bool GetDotCurrentOffset(OffsetF& offset, float indicatorWidth, float indicatorHeight);
-    void OnModifyDone() override;
-    void SetIndicatorOnChange();
-    void IndicatorOnChange();
-    virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
-    virtual int32_t RealTotalCount() const;
-    virtual int32_t GetCurrentIndex() const;
 
-protected:
-    virtual void FireChangeEvent() const {}
-    virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
-    virtual void ShowPrevious();
-    virtual void ShowNext();
-    virtual void ChangeIndex(int32_t index, bool useAnimation);
-    virtual bool IsHorizontalAndRightToLeft() const;
-    virtual TextDirection GetNonAutoLayoutDirection() const;
-    virtual void GetTextContentSub(std::string& firstContent, std::string& lastContent) const;
-    virtual int32_t GetCurrentShownIndex() const;
-    virtual int32_t DisplayIndicatorTotalCount() const;
-    virtual bool IsLoop() const;
-
-    RefPtr<SwiperPattern> GetSwiperPattern() const
-    {
-        auto swiperNode = GetSwiperNode();
-        CHECK_NULL_RETURN(swiperNode, nullptr);
-        return swiperNode->GetPattern<SwiperPattern>();
-    }
-
-    virtual SwiperIndicatorType GetIndicatorType() const
-    {
-        auto swiperPattern = GetSwiperPattern();
-        CHECK_NULL_RETURN(swiperPattern, SwiperIndicatorType::DOT);
-        return swiperPattern->GetIndicatorType();
-    }
-
-    const bool& IsHover() const
-    {
-        return isHover_;
-    }
-
-    const bool& IsPressed() const
-    {
-        return isPressed_;
-    }
-
-    const PointF& GetHoverPoint() const
-    {
-        return hoverPoint_;
-    }
-
-    std::optional<int32_t> GetOptinalMouseClickIndex() const
-    {
-        return mouseClickIndex_;
-    }
-
-    void SetMouseClickIndex(int32_t mouseClickIndex)
-    {
-        if (mouseClickIndex_) {
-            mouseClickIndex_ = mouseClickIndex;
-        }
-    }
-
-    const TouchBottomType& GetTouchBottomType() const
-    {
-        return touchBottomType_;
-    }
-
-    const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const
-    {
-        return dotIndicatorModifier_;
-    }
-
-    void SetDotIndicatorModifier(RefPtr<DotIndicatorModifier> dotIndicatorModifier)
-    {
-        dotIndicatorModifier_ = dotIndicatorModifier;
-    }
-
-    const RefPtr<OverlengthDotIndicatorModifier>& GetOverlengthDotIndicatorModifier() const
-    {
-        return overlongDotIndicatorModifier_;
-    }
-
-    void SetOverlengthDotIndicatorModifier(RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier)
-    {
-        overlongDotIndicatorModifier_ = overlongDotIndicatorModifier;
-    }
-    RectF CalcBoundsRect() const;
-    int32_t GetLoopIndex(int32_t originalIndex) const;
-    void ResetOverlongModifier();
 private:
+    void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -292,19 +199,21 @@ private:
     void HandleLongDragUpdate(const TouchLocationInfo& info);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
-    int32_t GetInitialIndex() const;
+    int32_t GetCurrentIndex() const;
     RefPtr<OverlengthDotIndicatorPaintMethod> CreateOverlongDotIndicatorPaintMethod(
         RefPtr<SwiperPattern> swiperPattern);
     RefPtr<DotIndicatorPaintMethod> CreateDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern);
+    RectF CalcBoundsRect() const;
     void UpdateOverlongPaintMethod(
         const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
     int32_t GetDisplayCurrentIndex() const;
     void UpdateDigitalIndicator();
     void RegisterIndicatorChangeEvent();
-    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
-    std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
     void ResetDotModifier();
+    void ResetOverlongModifier();
     void UpdateFocusable() const;
+    void CheckDragAndUpdate(
+        const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -322,6 +231,7 @@ private:
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier_;
+    SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> startIndex_;

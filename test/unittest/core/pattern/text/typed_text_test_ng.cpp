@@ -14,13 +14,24 @@
  */
 
 #include "text_base.h"
+
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/typed_text.h"
+#define private public
+#define protected public
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#undef protected
+#undef private
 
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
 class TypedTextTestNg : public TextBases {
+public:
+};
+
+class TextFieldPatternNg : public TextBases {
 public:
 };
 
@@ -154,4 +165,106 @@ HWTEST_F(TypedTextTestNg, GetUTF8Next, TestSize.Level1)
     TypedText::GetUTF8Next(text, i, j);
     EXPECT_EQ(j, 4);
 }
+
+/**
+ * @tc.name: TextFieldDeleteRange001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternNg, TextFieldDeleteRange001, TestSize.Level1)
+{
+    TextFieldPattern textFieldPatternObject;
+    int32_t start = 5;
+    int32_t end = 2;
+    const std::u16string str1 = u"abc";
+    textFieldPatternObject.showCountBorderStyle_ = true;
+    textFieldPatternObject.contentController_->SetTextValue(str1);
+    textFieldPatternObject.DeleteRange(start, end);
+    EXPECT_FALSE(textFieldPatternObject.showCountBorderStyle_);
 }
+
+/**
+ * @tc.name: TextFieldDeleteRange002
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternNg, TextFieldDeleteRange002, TestSize.Level1)
+{
+    TextFieldPattern textFieldPatternObject;
+    int32_t start = 3;
+    int32_t end = 5;
+    const std::u16string str1 = u"ab";
+    textFieldPatternObject.showCountBorderStyle_ = true;
+    textFieldPatternObject.contentController_->SetTextValue(str1);
+    textFieldPatternObject.DeleteRange(start, end);
+    EXPECT_TRUE(textFieldPatternObject.showCountBorderStyle_);
+}
+
+/**
+ * @tc.name: TextFieldDeleteRange003
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternNg, TextFieldDeleteRange003, TestSize.Level1)
+{
+    TextFieldPattern textFieldPatternObject;
+    int32_t start = 2;
+    int32_t end = 5;
+    const std::u16string str1 = u"abc";
+    textFieldPatternObject.showCountBorderStyle_ = true;
+    textFieldPatternObject.contentController_->SetTextValue(str1);
+    textFieldPatternObject.DeleteRange(start, end);
+    EXPECT_FALSE(textFieldPatternObject.showCountBorderStyle_);
+}
+
+/**
+ * @tc.name: TextFieldDeleteRange004
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternNg, TextFieldDeleteRange004, TestSize.Level1)
+{
+    TextFieldPattern textFieldPatternObject;
+    int32_t start = 2;
+    int32_t end = 2;
+    const std::u16string str1 = u"abc";
+    textFieldPatternObject.showCountBorderStyle_ = true;
+    textFieldPatternObject.contentController_->SetTextValue(str1);
+    textFieldPatternObject.DeleteRange(start, end);
+    EXPECT_TRUE(textFieldPatternObject.showCountBorderStyle_);
+}
+
+/**
+ * @tc.name: TextFieldDeleteRange005
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternNg, TextFieldDeleteRange005, TestSize.Level1)
+{
+    TextFieldPattern textFieldPatternObject;
+    int32_t start = -2;
+    int32_t end = -1;
+    const std::u16string str1 = u"abcdefgh";
+    textFieldPatternObject.showCountBorderStyle_ = true;
+    textFieldPatternObject.contentController_->SetTextValue(str1);
+    textFieldPatternObject.DeleteRange(start, end);
+    EXPECT_TRUE(textFieldPatternObject.showCountBorderStyle_);
+}
+
+/**
+ * @tc.name: TextFieldDeleteRange006
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternNg, TextFieldDeleteRange006, TestSize.Level1)
+{
+    TextFieldPattern textFieldPatternObject;
+    int32_t start = 6;
+    int32_t end = 5;
+    const std::u16string str1 = u"abc";
+    textFieldPatternObject.showCountBorderStyle_ = true;
+    textFieldPatternObject.contentController_->SetTextValue(str1);
+    textFieldPatternObject.DeleteRange(start, end);
+    EXPECT_TRUE(textFieldPatternObject.showCountBorderStyle_);
+}
+} // namespace OHOS::Ace::NG

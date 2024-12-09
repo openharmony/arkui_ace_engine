@@ -334,13 +334,16 @@ void ListLanesLayoutAlgorithm::ModifyLaneLength(
     }
 }
 
-float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
+float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup)
 {
     if (lanes_ <= 0) {
         return 0.0f;
     }
+    if (isGroup) {
+        return ListLayoutAlgorithm::CalculateLaneCrossOffset(crossSize, childCrossSize, isGroup);
+    }
     return ListLayoutAlgorithm::CalculateLaneCrossOffset((crossSize + GetLaneGutter()) / lanes_,
-        childCrossSize / lanes_);
+        childCrossSize / lanes_, isGroup);
 }
 
 int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& host)
@@ -574,7 +577,7 @@ std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
         isGroup = false;
         return std::make_pair(true, false);
     }
-    bool isDirty = wrapper->CheckNeedForceMeasureAndLayout();
+    bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
     if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
         if (isDirty) {
             return std::make_pair(true, true);
@@ -585,7 +588,7 @@ std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
 }
 
 int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList)
+    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
@@ -597,7 +600,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
         bool isGroup = false;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes_ && curIndex + i <= GetMaxListItemIndex() && !isGroup; i++) {
-            wrapper = layoutWrapper->GetChildByIndex(curIndex + i, true);
+            wrapper = layoutWrapper->GetChildByIndex(curIndex + i, !show);
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup);
             if (needPredict) {
                 predictList.emplace_back(PredictLayoutItem { curIndex + i, cachedCount, -1 });
@@ -634,7 +637,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
 }
 
 int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList)
+    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
@@ -647,7 +650,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes_ && curIndex - i >= 0; i++) {
             auto idx = curIndex - i;
-            wrapper = layoutWrapper->GetChildByIndex(idx, true);
+            wrapper = layoutWrapper->GetChildByIndex(idx, !show);
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup);
             if (needPredict) {
                 predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount });

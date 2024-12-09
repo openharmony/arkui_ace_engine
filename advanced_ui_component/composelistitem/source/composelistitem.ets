@@ -15,7 +15,10 @@
 
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
-import common from '@ohos.app.ability.common';
+import { common, EnvironmentCallback } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 
 export enum IconType {
   BADGE = 1,
@@ -50,6 +53,7 @@ export declare class OperateItem {
   public checkbox?: OperateCheck;
   public radio?: OperateCheck;
   public image?: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public text?: ResourceStr;
   public arrow?: OperateIcon;
 }
@@ -57,6 +61,7 @@ export declare class OperateItem {
 export declare class ContentItem {
   public iconStyle?: IconType;
   public icon?: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public primaryText?: ResourceStr;
   public secondaryText?: ResourceStr;
   public description?: ResourceStr;
@@ -64,6 +69,7 @@ export declare class ContentItem {
 
 export declare class OperateIcon {
   public value: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public action?: () => void;
 }
 
@@ -104,24 +110,17 @@ const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
-const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - ${RIGHT_ONLY_ARROW_WIDTH})';
-const RIGHT_ONLY_IMAGE_WIDTH = '48vp';
-const LEFT_ONLY_IMAGE_WIDTH = 'calc(100% - ${RIGHT_ONLY_IMAGE_WIDTH})';
-const RIGHT_ONLY_ICON_WIDTH = '32vp';
-const LEFT_ONLY_ICON_WIDTH = 'calc(100% - ${RIGHT_ONLY_ICON_WIDTH})';
-const RIGHT_ICON_SUB_ICON_WIDTH = '72vp';
-const LEFT_ICON_SUB_ICON_WIDTH = 'calc(100% - ${RIGHT_ICON_SUB_ICON_WIDTH})';
-const RIGHT_ONLY_RADIO_WIDTH = '24vp';
-const LEFT_ONLY_RADIO_WIDTH = 'calc(100% - ${RIGHT_ONLY_RADIO_WIDTH})';
-const RIGHT_ONLY_CHECKBOX_WIDTH = '24vp';
-const LEFT_ONLY_CHECKBOX_WIDTH = 'calc(100% - ${RIGHT_ONLY_CHECKBOX_WIDTH})';
-const RIGHT_ONLY_SWITCH_WIDTH = '40vp';
-const LEFT_ONLY_SWITCH_WIDTH = 'calc(100% - ${RIGHT_ONLY_SWITCH_WIDTH})';
+const RIGHT_ONLY_IMAGE_WIDTH = '54vp';
+const RIGHT_ONLY_ICON_WIDTH = '40vp';
+const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
+const RIGHT_ONLY_RADIO_WIDTH = '30vp';
+const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
+const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
+const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
@@ -134,10 +133,31 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.VERTICAL, VERTICAL_SIZE]
 ])
 
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
+
 @Component
 struct ContentItemStruct {
   @Prop @Watch('onPropChange') iconStyle: IconType | null = null;
   @Prop @Watch('onPropChange') icon: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @Prop @Watch('onPropChange') primaryText: ResourceStr | null = null;
   @Prop @Watch('onPropChange') secondaryText: ResourceStr | null = null;
   @Prop @Watch('onPropChange') description: ResourceStr | null = null;
@@ -156,45 +176,66 @@ struct ContentItemStruct {
     this.descriptionColor = theme.colors.fontTertiary;
   }
 
-  onPropChange() {
-    if (this.icon == null && this.iconStyle == null) {
+  onPropChange(): void {
+    if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
       this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
     } else {
       this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
     }
   }
 
-  aboutToAppear() {
+  aboutToAppear(): void {
     this.onPropChange();
   }
 
   @Builder
   createIcon() {
-    if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
-      if (this.iconStyle <= IconType.PREVIEW) {
-        Image(this.icon)
-          .objectFit(ImageFit.Contain)
-          .width(ICON_SIZE_MAP.get(this.iconStyle))
-          .height(ICON_SIZE_MAP.get(this.iconStyle))
+    if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
+      if (this.symbolStyle != null) {
+        SymbolGlyph()
+          .attributeModifier(this.symbolStyle)
+          .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+          .effectStrategy(SymbolEffectStrategy.NONE)
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(false)
           .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_secondary'))
           .flexShrink(0)
-      } else {
-        Image(this.icon)
-          .objectFit(ImageFit.Contain)
-          .constraintSize({
-            minWidth: SPECIAL_ICON_SIZE,
-            maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
-            minHeight: SPECIAL_ICON_SIZE,
-            maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
-          })
-          .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .focusable(false)
-          .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_secondary'))
-          .flexShrink(0)
+      } else if (this.icon != null) {
+        if (Util.isSymbolResource(this.icon)) {
+          SymbolGlyph(this.icon as Resource)
+            .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+            .focusable(false)
+            .draggable(false)
+            .flexShrink(0)
+        } else {
+          if (this.iconStyle <= IconType.PREVIEW) {
+            Image(this.icon)
+              .objectFit(ImageFit.Contain)
+              .width(ICON_SIZE_MAP.get(this.iconStyle))
+              .height(ICON_SIZE_MAP.get(this.iconStyle))
+              .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor($r('sys.color.ohos_id_color_secondary'))
+              .flexShrink(0)
+          } else {
+            Image(this.icon)
+              .objectFit(ImageFit.Contain)
+              .constraintSize({
+                minWidth: SPECIAL_ICON_SIZE,
+                maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
+                minHeight: SPECIAL_ICON_SIZE,
+                maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
+              })
+              .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor($r('sys.color.ohos_id_color_secondary'))
+              .flexShrink(0)
+          }
+        }
       }
     }
   }
@@ -225,18 +266,18 @@ struct ContentItemStruct {
       }
     }
     .flexShrink(1)
-    .margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined :{
+    .margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
       top: TEXT_SAFE_MARGIN,
       bottom: TEXT_SAFE_MARGIN
     })
     .alignItems(HorizontalAlign.Start)
   }
 
-  isColumnDirection() {
+  isColumnDirection(): boolean {
     return this.itemDirection === FlexDirection.Column;
   }
 
-  isParentColumnDirection() {
+  isParentColumnDirection(): boolean {
     return this.parentDirection === FlexDirection.Column;
   }
 
@@ -254,16 +295,16 @@ struct ContentItemStruct {
       justifyContent: FlexAlign.Start,
       alignItems: this.isColumnDirection() ? ItemAlign.Start : ItemAlign.Center,
     }) {
-      this.createIcon()
-      this.createText()
+      this.createIcon();
+      this.createText();
     }
+    .height(this.itemDirection === FlexDirection.Column ? 'auto' : undefined)
     .margin({
       end: this.isParentColumnDirection() ?
       LengthMetrics.vp(0) :
       LengthMetrics.vp(16)
     })
     .padding({ start: LengthMetrics.vp(LISTITEM_PADDING) })
-    .width(this.isParentColumnDirection() ? undefined : this.leftWidth)
     .flexShrink(this.isParentColumnDirection() ? 0 : 1)
   }
 }
@@ -282,19 +323,20 @@ struct OperateItemStruct {
   @Prop @Watch('onPropChange') checkBox: OperateCheck | null = null;
   @Prop @Watch('onPropChange') radio: OperateCheck | null = null;
   @Prop @Watch('onPropChange') image: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @Prop @Watch('onPropChange') text: ResourceStr | null = null;
-  @State switchState: boolean = false
-  @State radioState: boolean = false
-  @State checkBoxState: boolean = false
+  @State switchState: boolean = false;
+  @State radioState: boolean = false;
+  @State checkBoxState: boolean = false;
   @Prop rightWidth: string = RIGHT_PART_WIDTH;
   @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @State hoveringColor: ResourceColor = '#0d000000';
   @State activedColor: ResourceColor = '#1a0a59f7';
-  @Link parentCanFocus: boolean
-  @Link parentCanTouch: boolean
-  @Link parentIsHover: boolean
-  @Link parentCanHover: boolean
-  @Link parentIsActive: boolean
+  @Link parentCanFocus: boolean;
+  @Link parentCanTouch: boolean;
+  @Link parentIsHover: boolean;
+  @Link parentCanHover: boolean;
+  @Link parentIsActive: boolean;
   @Link parentFrontColor: ResourceColor;
   @Link parentDirection: FlexDirection;
   @State rowSpace: number = DEFAULT_ROW_SPACE;
@@ -305,7 +347,7 @@ struct OperateItemStruct {
     this.activedColor = theme.colors.interactiveActive;
   }
 
-  onPropChange() {
+  onPropChange(): void {
     if (this.switch != null) {
       this.switchState = this.switch.isCheck as boolean;
     }
@@ -316,15 +358,15 @@ struct OperateItemStruct {
       this.checkBoxState = this.checkBox.isCheck as boolean;
     }
 
-    if ((this.button == null && this.image == null && this.icon != null && this.text != null) ||
-      (this.button == null && this.image == null && this.icon == null && this.arrow != null && this.text != null)) {
+    if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
+      ((this.icon != null) || (this.icon == null && this.arrow != null))) {
       this.rowSpace = SPECICAL_ROW_SPACE;
     } else {
       this.rowSpace = DEFAULT_ROW_SPACE;
     }
   }
 
-  aboutToAppear() {
+  aboutToAppear(): void {
     this.onPropChange();
   }
 
@@ -356,12 +398,12 @@ struct OperateItemStruct {
       this.parentCanFocus = false;
     })
     .onHover((isHover: boolean) => {
-      this.parentCanHover = false
+      this.parentCanHover = false;
       if (isHover && this.parentFrontColor === this.hoveringColor) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
-        this.parentCanHover = true
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -373,12 +415,29 @@ struct OperateItemStruct {
   @Builder
   createIcon(param: CreateIconParam) {
     Button({ type: ButtonType.Normal }) {
-      Image(param.icon?.value)
-        .height(OPERATEITEM_ICONLIKE_SIZE)
-        .width(OPERATEITEM_ICONLIKE_SIZE)
-        .focusable(true)
-        .fillColor($r('sys.color.ohos_id_color_primary'))
-        .draggable(false)
+      if (param.icon?.symbolStyle) {
+        SymbolGlyph()
+          .attributeModifier(param.icon?.symbolStyle)
+          .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .focusable(true)
+          .draggable(false)
+      } else {
+        if (Util.isSymbolResource(param.icon?.value)) {
+          SymbolGlyph(param.icon?.value as Resource)
+            .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(param.icon?.value)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ICONLIKE_SIZE)
+            .focusable(true)
+            .fillColor($r('sys.color.ohos_id_color_primary'))
+            .draggable(false)
+        }
+      }
     }
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
@@ -389,12 +448,12 @@ struct OperateItemStruct {
       this.parentCanFocus = false;
     })
     .onHover((isHover: boolean) => {
-      this.parentCanHover = false
+      this.parentCanHover = false;
       if (isHover && this.parentFrontColor === this.hoveringColor) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
-        this.parentCanHover = true
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -407,9 +466,27 @@ struct OperateItemStruct {
 
   @Builder
   createImage() {
-    Image(this.image)
-      .height(OPERATEITEM_IMAGE_SIZE)
-      .width(OPERATEITEM_IMAGE_SIZE)
+    if (Util.isSymbolResource(this.image)) {
+      SymbolGlyph(this.image as Resource)
+        .fontSize(OPERATEITEM_IMAGE_SIZE)
+        .effectStrategy(SymbolEffectStrategy.NONE)
+        .draggable(false)
+        .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
+    } else {
+      Image(this.image)
+        .height(OPERATEITEM_IMAGE_SIZE)
+        .width(OPERATEITEM_IMAGE_SIZE)
+        .draggable(false)
+        .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
+    }
+  }
+
+  @Builder
+  createSymbol() {
+    SymbolGlyph()
+      .attributeModifier(this.symbolStyle)
+      .fontSize(OPERATEITEM_IMAGE_SIZE)
+      .effectStrategy(SymbolEffectStrategy.NONE)
       .draggable(false)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
   }
@@ -427,13 +504,30 @@ struct OperateItemStruct {
   @Builder
   createArrow() {
     Button({ type: ButtonType.Normal }) {
-      Image(this.arrow?.value)
-        .height(OPERATEITEM_ICONLIKE_SIZE)
-        .width(OPERATEITEM_ARROW_WIDTH)
-        .focusable(true)
-        .fillColor($r('sys.color.ohos_id_color_fourth'))
-        .draggable(false)
-        .matchTextDirection(true)
+      if (this.arrow?.symbolStyle) {
+        SymbolGlyph()
+          .attributeModifier(this.arrow?.symbolStyle)
+          .fontSize(OPERATEITEM_ARROW_WIDTH)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .focusable(true)
+          .draggable(false)
+      } else {
+        if (Util.isSymbolResource(this.arrow?.value)) {
+          SymbolGlyph(this.arrow?.value as Resource)
+            .fontSize(OPERATEITEM_ARROW_WIDTH)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(this.arrow?.value)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ARROW_WIDTH)
+            .focusable(true)
+            .fillColor($r('sys.color.ohos_id_color_fourth'))
+            .draggable(false)
+            .matchTextDirection(true)
+        }
+      }
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     .hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent)
@@ -449,12 +543,11 @@ struct OperateItemStruct {
       if (this.arrow?.action === undefined) {
         return;
       }
-      this.parentCanHover = false
       if (isHover) {
+        this.parentCanHover = false;
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
-      }
-      if (!isHover) {
-        this.parentCanHover = true
+      } else {
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -477,13 +570,14 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
+      .flexShrink(0)
       .onHover((isHover: boolean) => {
-        this.parentCanHover = false
+        this.parentCanHover = false;
         if (isHover && this.parentFrontColor === this.hoveringColor) {
           this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
-          this.parentCanHover = true
+          this.parentCanHover = true;
           if (this.parentIsHover) {
             this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
               (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -505,13 +599,14 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
+      .flexShrink(0)
       .onHover((isHover: boolean) => {
-        this.parentCanHover = false
+        this.parentCanHover = false;
         if (isHover && this.parentFrontColor === this.hoveringColor) {
           this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
-          this.parentCanHover = true
+          this.parentCanHover = true;
           if (this.parentIsHover) {
             this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
               (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -526,7 +621,7 @@ struct OperateItemStruct {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
         .onChange(this.switch?.onChange)
         .onClick(() => {
-          this.switchState = !this.switchState
+          this.switchState = !this.switchState;
         })
         .hitTestBehavior(HitTestMode.Block)
     }
@@ -538,12 +633,12 @@ struct OperateItemStruct {
       this.parentCanFocus = false;
     })
     .onHover((isHover: boolean) => {
-      this.parentCanHover = false
+      this.parentCanHover = false;
       if (isHover && this.parentFrontColor === this.hoveringColor) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
-        this.parentCanHover = true
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -565,19 +660,36 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
-          Image(this.arrow?.value)
-            .height(OPERATEITEM_ICONLIKE_SIZE)
-            .width(OPERATEITEM_ARROW_WIDTH)
-            .fillColor($r('sys.color.ohos_id_color_fourth'))
-            .focusable(false)
-            .draggable(false)
-            .matchTextDirection(true)
+          if (this.arrow?.symbolStyle) {
+            SymbolGlyph()
+              .attributeModifier(this.arrow?.symbolStyle)
+              .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .focusable(false)
+              .draggable(false)
+          } else {
+            if (Util.isSymbolResource(this.arrow?.value)) {
+              SymbolGlyph(this.arrow?.value as Resource)
+                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .effectStrategy(SymbolEffectStrategy.NONE)
+                .focusable(false)
+                .draggable(false)
+            } else {
+              Image(this.arrow?.value)
+                .height(OPERATEITEM_ICONLIKE_SIZE)
+                .width(OPERATEITEM_ARROW_WIDTH)
+                .fillColor($r('sys.color.ohos_id_color_fourth'))
+                .focusable(false)
+                .draggable(false)
+                .matchTextDirection(true)
+            }
+          }
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
           end: LengthMetrics.vp(LISTITEM_PADDING)
         })
-      }else {
+      } else {
         Row({ space: SPECICAL_ROW_SPACE }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -587,13 +699,30 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
-          Image(this.arrow?.value)
-            .height(OPERATEITEM_ICONLIKE_SIZE)
-            .width(OPERATEITEM_ARROW_WIDTH)
-            .fillColor($r('sys.color.ohos_id_color_fourth'))
-            .focusable(false)
-            .draggable(false)
-            .matchTextDirection(true)
+          if (this.arrow?.symbolStyle) {
+            SymbolGlyph()
+              .attributeModifier(this.arrow?.symbolStyle)
+              .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .focusable(false)
+              .draggable(false)
+          } else {
+            if (Util.isSymbolResource(this.arrow?.value)) {
+              SymbolGlyph(this.arrow?.value as Resource)
+                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .effectStrategy(SymbolEffectStrategy.NONE)
+                .focusable(false)
+                .draggable(false)
+            } else {
+              Image(this.arrow?.value)
+                .height(OPERATEITEM_ICONLIKE_SIZE)
+                .width(OPERATEITEM_ARROW_WIDTH)
+                .fillColor($r('sys.color.ohos_id_color_fourth'))
+                .focusable(false)
+                .draggable(false)
+                .matchTextDirection(true)
+            }
+          }
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
@@ -623,12 +752,11 @@ struct OperateItemStruct {
       if (this.arrow?.action === undefined) {
         return;
       }
-      this.parentCanHover = false
       if (isHover) {
+        this.parentCanHover = false;
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
-      }
-      if (!isHover) {
-        this.parentCanHover = true
+      } else {
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -653,25 +781,27 @@ struct OperateItemStruct {
     Flex(this.getFlexOptions()) {
       if (this.button != null) {
         this.createButton();
+      } else if (this.symbolStyle != null) {
+        this.createSymbol();
       } else if (this.image != null) {
-        this.createImage()
+        this.createImage();
       } else if (this.icon != null && this.text != null) {
-        this.createText()
+        this.createText();
         this.createIcon({ icon: this.icon })
       } else if (this.arrow != null && this.text == null) {
-        this.createArrow()
+        this.createArrow();
       } else if (this.arrow != null && this.text != null) {
         this.createTextArrow();
       } else if (this.text != null) {
-        this.createText()
+        this.createText();
       } else if (this.radio != null) {
-        this.createRadio()
+        this.createRadio();
       } else if (this.checkBox != null) {
-        this.createCheckBox()
+        this.createCheckBox();
       } else if (this.switch != null) {
-        this.createSwitch()
+        this.createSwitch();
       } else if (this.icon != null) {
-        this.createIcon({ icon: this.icon })
+        this.createIcon({ icon: this.icon });
         if (this.subIcon != null) {
           this.createIcon({ icon: this.subIcon });
         }
@@ -687,12 +817,12 @@ export struct ComposeListItem {
   @Prop @Watch('onPropChange') operateItem: OperateItem | null = null;
   @State frontColor: ResourceColor = Color.Transparent.toString();
   @State borderSize: number = 0;
-  @State canFocus: boolean = false
-  @State canTouch: boolean = true
-  @State canHover: boolean = true
-  @State isHover: boolean = true
+  @State canFocus: boolean = false;
+  @State canTouch: boolean = true;
+  @State canHover: boolean = true;
+  @State isHover: boolean = true;
   @State itemHeight: number = ItemHeight.FIRST_HEIGHT;
-  @State isActive: boolean = false
+  @State isActive: boolean = false;
   @State hoveringColor: ResourceColor = '#0d000000';
   @State touchDownColor: ResourceColor = '#1a000000';
   @State activedColor: ResourceColor = '#1a0a59f7';
@@ -704,6 +834,7 @@ export struct ComposeListItem {
   @State textArrowLeftSafeOffset: number = 0;
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
+  private callbackId: number | undefined = undefined;
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -712,19 +843,22 @@ export struct ComposeListItem {
     this.focusOutlineColor = theme.colors.interactiveFocus;
   }
 
-  onPropChange() {
+  onPropChange(): void {
+    this.containerDirection = this.decideContainerDirection();
+    this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItem === undefined) {
       if (this.operateItem?.image !== undefined ||
+        this.operateItem?.symbolStyle !== undefined ||
         this.operateItem?.icon !== undefined ||
         this.operateItem?.subIcon !== undefined) {
-        this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING
+        this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
       }
-      return
+      return;
     }
 
     if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
       if (this.contentItem?.icon === undefined) {
-        this.itemHeight = ItemHeight.FIRST_HEIGHT
+        this.itemHeight = ItemHeight.FIRST_HEIGHT;
       } else {
         this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ?
         ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
@@ -732,68 +866,73 @@ export struct ComposeListItem {
     } else if (this.contentItem.description === undefined) {
       if (this.contentItem.icon === undefined ||
         (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
-        this.itemHeight = ItemHeight.THIRD_HEIGHT
+        this.itemHeight = ItemHeight.THIRD_HEIGHT;
       } else {
-        this.itemHeight = ItemHeight.FOURTH_HEIGHT
+        this.itemHeight = ItemHeight.FOURTH_HEIGHT;
       }
     } else {
-      this.itemHeight = ItemHeight.FIFTH_HEIGHT
+      this.itemHeight = ItemHeight.FIFTH_HEIGHT;
     }
 
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
-
   }
 
-  aboutToAppear() {
+  aboutToAppear(): void {
+    this.fontSizeScale = this.decideFontSizeScale();
     this.onPropChange();
+    try {
+      this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+    } catch (paramError) {
+      let code = (paramError as BusinessError).code;
+      let message = (paramError as BusinessError).message;
+      hilog.error(0x3900, 'Ace',
+        `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
+    }
   }
 
-  calculatedLeftWidth(): string {
-    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_LEFTWIDTH;
-    } else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_SWITCH_WIDTH;
-    } else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_CHECKBOX_WIDTH;
-    } else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_RADIO_WIDTH;
-    } else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
-      if (this.operateItem?.subIcon != null) {
-        return LEFT_ICON_SUB_ICON_WIDTH;
-      }
-      return LEFT_ONLY_ICON_WIDTH;
-    } else if (this.operateItem?.image != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_IMAGE_WIDTH;
-    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_ARROW_WIDTH;
-    } else {
-      return LEFT_PART_WIDTH;
+  private envCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (config) => {
+      this.fontSizeScale = this.decideFontSizeScale();
+    },
+    onMemoryLevel: (level) => {
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (this.callbackId) {
+      this.getUIContext()
+        .getHostContext()
+      ?.getApplicationContext()
+      ?.off('environment', this.callbackId);
+      this.callbackId = void (0);
     }
   }
 
   calculatedRightWidth(): string {
-    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_RIGHTWIDTH;
-    } else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
+    if (this.operateItem?.text || this.operateItem?.button) {
+      return RIGHT_PART_WIDTH;
+    }
+    if (this.operateItem?.switch) {
       return RIGHT_ONLY_SWITCH_WIDTH;
-    } else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.checkbox) {
       return RIGHT_ONLY_CHECKBOX_WIDTH;
-    } else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.radio) {
       return RIGHT_ONLY_RADIO_WIDTH;
-    } else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
-      if (this.operateItem?.subIcon != null) {
+    } else if (this.operateItem?.icon) {
+      if (this.operateItem?.subIcon) {
         return RIGHT_ICON_SUB_ICON_WIDTH;
       }
       return RIGHT_ONLY_ICON_WIDTH;
-    } else if (this.operateItem?.image != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.symbolStyle) {
       return RIGHT_ONLY_IMAGE_WIDTH;
-    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.image) {
+      return RIGHT_ONLY_IMAGE_WIDTH;
+    } else if (this.operateItem?.arrow) {
       return RIGHT_ONLY_ARROW_WIDTH;
-    } else {
-      return RIGHT_PART_WIDTH;
     }
+    return RIGHT_CONTENT_NULL_RIGHTWIDTH;
   }
 
   decideContentItemDirection(): FlexDirection {
@@ -810,6 +949,8 @@ export struct ComposeListItem {
     }
     if (this.operateItem?.button) {
       return FlexDirection.Column;
+    } else if (this.operateItem?.symbolStyle) {
+      return FlexDirection.Row;
     } else if (this.operateItem?.image) {
       return FlexDirection.Row;
     } else if (this.operateItem?.icon && this.operateItem?.text) {
@@ -827,7 +968,7 @@ export struct ComposeListItem {
     }
   }
 
-  onFontSizeScaleChange() {
+  onFontSizeScaleChange(): void {
     this.containerDirection = this.decideContainerDirection();
     this.contentItemDirection = this.decideContentItemDirection();
     if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
@@ -867,7 +1008,8 @@ export struct ComposeListItem {
 
   getMainSpace(): LengthMetrics {
     if (this.containerDirection === FlexDirection.Column) {
-      return LengthMetrics.resource(this.isSingleLine() ? $r('sys.float.padding_level1') : $r('sys.float.padding_level8'));
+      return LengthMetrics.resource(this.isSingleLine() ? $r('sys.float.padding_level1') :
+      $r('sys.float.padding_level8'));
     }
     return LengthMetrics.vp(0);
   }
@@ -898,17 +1040,6 @@ export struct ComposeListItem {
     )
   }
 
-  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
-    this.fontSizeScale = this.decideFontSizeScale();
-    let sizeResult: SizeResult = { height: 0, width: 0 };
-    children.forEach((child) => {
-      let childMeasureResult: MeasureResult = child.measure(constraint);
-      sizeResult.width = childMeasureResult.width;
-      sizeResult.height = childMeasureResult.height;
-    });
-    return sizeResult;
-  }
-
   build() {
     Stack() {
       Flex(this.getFlexOptions()) {
@@ -918,11 +1049,11 @@ export struct ComposeListItem {
         if (this.contentItem !== null) {
           ContentItemStruct({
             icon: this.contentItem?.icon,
+            symbolStyle: this.contentItem?.symbolStyle,
             iconStyle: this.contentItem?.iconStyle,
             primaryText: this.contentItem?.primaryText,
             secondaryText: this.contentItem?.secondaryText,
             description: this.contentItem?.description,
-            leftWidth: this.calculatedLeftWidth(),
             fontSizeScale: this.fontSizeScale,
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
@@ -937,6 +1068,7 @@ export struct ComposeListItem {
             checkBox: this.operateItem?.checkbox,
             radio: this.operateItem?.radio,
             image: this.operateItem?.image,
+            symbolStyle: this.operateItem?.symbolStyle,
             text: this.operateItem?.text,
             arrow: this.operateItem?.arrow,
             parentCanFocus: this.canFocus,
@@ -950,13 +1082,14 @@ export struct ComposeListItem {
           })
             .flexShrink(0)
             .onFocus(() => {
-              this.canFocus = false
+              this.canFocus = false;
             })
             .onBlur(() => {
-              this.canFocus = true
-            }).padding({start: this.getOperateOffset()});
+              this.canFocus = true;
+            }).padding({ start: this.getOperateOffset() });
         }
       }
+      .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
       .constraintSize({
         minHeight: this.itemHeight
       })
@@ -964,13 +1097,13 @@ export struct ComposeListItem {
       .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
       .backgroundColor(this.frontColor)
       .onFocus(() => {
-        this.canFocus = true
+        this.canFocus = true;
       })
       .onBlur(() => {
-        this.canFocus = false
+        this.canFocus = false;
       })
       .onHover((isHover: boolean) => {
-        this.isHover = isHover
+        this.isHover = isHover;
         if (this.canHover) {
           this.frontColor = isHover ? this.hoveringColor :
             (this.isActive ? this.activedColor : Color.Transparent.toString());
@@ -995,8 +1128,10 @@ export struct ComposeListItem {
         pressed: {
           .backgroundColor(this.touchDownColor)
         }
-      }).padding(this.containerPadding)
+      })
+      .padding(this.containerPadding)
     }
+    .width('100%')
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING

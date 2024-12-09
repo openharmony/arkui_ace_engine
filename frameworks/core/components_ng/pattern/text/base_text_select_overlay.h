@@ -268,6 +268,9 @@ public:
     {
         return enableContainerModal_;
     }
+    bool IsHiddenHandle();
+
+    bool IsHandleVisible(bool isFirst);
 
 protected:
     RectF MergeSelectedBoxes(

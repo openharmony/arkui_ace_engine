@@ -297,6 +297,9 @@ public:
 
     // initial drag gesture event
     void InitPanEvent();
+    void InitOnkeyEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
 
     void HandleDragStart();
 
@@ -332,8 +335,15 @@ public:
         ProcessColumnRect(height_);
     }
 
+    bool GetWindowButtonRect(NG::RectF& floatButtons);
+
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
+        DeviceType deviceType = SystemProperties::GetDeviceType();
+        if (deviceType != DeviceType::TWO_IN_ONE) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "Bottom offset invalid");
+            return;
+        }
         if (sheetStyle.bottomOffset.has_value() &&
             sheetStyle.sheetType.value_or(SheetType::SHEET_BOTTOM) == SheetType::SHEET_BOTTOM) {
             bottomOffsetX_ = sheetStyle.bottomOffset->GetX();
@@ -641,12 +651,12 @@ public:
 
     bool IsSheetBottomStyle()
     {
+        // sheetType_ is invalid before onModifyDone
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-                   sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
+                   sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
         }
-        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-               sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
+        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
 
     // Nestable Scroll

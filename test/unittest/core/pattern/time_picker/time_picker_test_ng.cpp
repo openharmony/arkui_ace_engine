@@ -4972,4 +4972,24 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest004
     EXPECT_NE(result, fontSizeValue * fontScale);
 }
 
+/**
+ * @tc.name: TimePickerModelNGBackgroundColor001
+ * @tc.desc: Test TimePickerPatternTestNg SetBackgroundColor and getTimepickerBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGBackgroundColor001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+
+    auto theme = context->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TimePickerModelNG::SetBackgroundColor(frameNode, Color::RED);
+    EXPECT_EQ(TimePickerModelNG::getTimepickerBackgroundColor(frameNode), Color::RED.GetValue());
+}
+
 } // namespace OHOS::Ace::NG

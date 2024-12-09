@@ -197,6 +197,11 @@ void XComponentPattern::InitSurface()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
+    // only xcomponent created by capi will set successfully, others will be set in FireExternalEvent
+    SetExpectedRateRangeInit();
+    OnFrameEventInit();
+    UnregisterOnFrameEventInit();
+
     renderContext->SetClipToFrame(true);
     renderContext->SetClipToBounds(true);
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -294,9 +299,10 @@ void XComponentPattern::InitializeRenderContext()
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
                                                         : RenderContext::ContextType::HARDWARE_SURFACE;
-    RenderContext::ContextParam param = { contextType, GetId() + "Surface" };
+    RenderContext::ContextParam param = { contextType, GetId() + "Surface", RenderContext::PatternType::XCOM };
 #else
-    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface" };
+    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+                                          GetId() + "Surface", RenderContext::PatternType::XCOM };
 #endif
 
     renderContextForSurface_->InitContext(false, param);
@@ -1791,9 +1797,12 @@ void XComponentPattern::NativeSurfaceHide()
 
 void XComponentPattern::OnWindowHide()
 {
-    if (!hasXComponentInit_ || hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
+    }
+    if (renderSurface_) {
+        renderSurface_->OnWindowStateChange(false);
     }
     NativeSurfaceHide();
     hasReleasedSurface_ = true;
@@ -1801,9 +1810,12 @@ void XComponentPattern::OnWindowHide()
 
 void XComponentPattern::OnWindowShow()
 {
-    if (!hasXComponentInit_ || !hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || !hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
+    }
+    if (renderSurface_) {
+        renderSurface_->OnWindowStateChange(true);
     }
     NativeSurfaceShow();
     hasReleasedSurface_ = false;
@@ -2035,5 +2047,14 @@ void XComponentPattern::EnableSecure(bool isSecure)
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContextForSurface_->SetSecurityLayer(isSecure);
     isEnableSecure_ = isSecure;
+}
+
+void XComponentPattern::HdrBrightness(float hdrBrightness)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetHDRBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
 }
 } // namespace OHOS::Ace::NG

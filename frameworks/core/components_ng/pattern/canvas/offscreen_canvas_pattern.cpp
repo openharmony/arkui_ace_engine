@@ -28,7 +28,7 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 void OffscreenCanvasPattern::UpdateSize(int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(offscreenPaintMethod_);
-    return offscreenPaintMethod_->UpdateSize(width, height);
+    return offscreenPaintMethod_->UpdateSize(std::max(width, 0), std::max(height, 0));
 }
 
 void OffscreenCanvasPattern::FillRect(const Rect& rect)

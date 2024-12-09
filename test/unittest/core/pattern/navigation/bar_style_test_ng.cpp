@@ -200,7 +200,8 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest002, TestSize.Level1)
     ASSERT_NE(contentLayoutProperty, nullptr);
     const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(safeAreaPadding, nullptr);
-    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT));
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 
 /**
@@ -245,7 +246,8 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest003, TestSize.Level1)
     ASSERT_NE(contentLayoutProperty, nullptr);
     const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(safeAreaPadding, nullptr);
-    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(FULL_SINGLE_LINE_TITLEBAR_HEIGHT));
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 
 /**
@@ -290,7 +292,8 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest004, TestSize.Level1)
     ASSERT_NE(contentLayoutProperty, nullptr);
     const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(safeAreaPadding, nullptr);
-    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT));
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 
 /**
@@ -335,7 +338,8 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest005, TestSize.Level1)
     ASSERT_NE(contentLayoutProperty, nullptr);
     const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(safeAreaPadding, nullptr);
-    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(DOUBLE_LINE_TITLEBAR_HEIGHT));
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 
 /**
@@ -380,7 +384,8 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest006, TestSize.Level1)
     ASSERT_NE(contentLayoutProperty, nullptr);
     const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(safeAreaPadding, nullptr);
-    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT));
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 
 /**
@@ -414,6 +419,7 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest007, TestSize.Level1)
     ASSERT_NE(contentLayoutProperty, nullptr);
     const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(safeAreaPadding, nullptr);
-    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0_vp)), CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT));
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 } // namespace OHOS::Ace::NG

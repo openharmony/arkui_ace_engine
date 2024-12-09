@@ -501,10 +501,11 @@ HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty002, TestSize.Level1)
      */
     TabsModelNG model = CreateTabs();
     const std::string textTest = "text_test";
+    const std::u16string textU16Test = u"text_test";
     TabContentModelNG tabContentModel = CreateTabContent();
-    auto tabBarItemFunc = [textTest]() {
+    auto tabBarItemFunc = [textU16Test]() {
         TextModelNG model;
-        model.Create(textTest);
+        model.Create(textU16Test);
     };
     tabContentModel.SetTabBar(textTest, "", std::nullopt, std::move(tabBarItemFunc), true);
     ViewStackProcessor::GetInstance()->Pop();

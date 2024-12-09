@@ -379,7 +379,12 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap
         return false;
     }
     currentBitmap.Free();
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
+    RSBitmapFormat format;
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        format = { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
+    } else {
+        format = { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    }
     currentBitmap.Build(lastLayoutSize_.Width(), lastLayoutSize_.Height(), format);
 
     RSCanvas currentCanvas;

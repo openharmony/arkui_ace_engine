@@ -39,8 +39,14 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    if (transitionType == PageTransitionType::EXIT_POP) {
-        page->GetEventHub<EventHub>()->SetEnabled(false);
+    auto eventHub = page->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (transitionType == PageTransitionType::EXIT_POP) {
+            eventHub->SetEnabled(false);
+        }
+    } else {
+        eventHub->SetEnabled(false);
     }
     pagePattern->SetPageInTransition(true);
     auto context = PipelineContext::GetCurrentContext();
@@ -48,30 +54,27 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(true);
-    pagePattern->SetPageTransitionType(transitionType);
     pagePattern->SetAnimationId(stageManager->GetAnimationId());
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition([weakPattern = WeakPtr<PagePattern>(pagePattern),
-            animationId = stageManager->GetAnimationId()]() {
-            auto pagePattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pagePattern);
-            pagePattern->FinishOutPage(animationId);
-        });
+            animationId = stageManager->GetAnimationId(), transitionType]() {
+                auto pagePattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(pagePattern);
+                pagePattern->FinishOutPage(animationId, transitionType);
+            }, transitionType);
         return;
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
-        [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId()]() {
-            ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+        [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId(), transitionType]() {
             auto pagePattern = weak.Upgrade();
             CHECK_NULL_VOID(pagePattern);
             auto page = pagePattern->GetHost();
             CHECK_NULL_VOID(page);
             TAG_LOGI(AceLogTag::ACE_ANIMATION, "pageTransition in finish, nodeId:%{public}d", page->GetId());
-            pagePattern->FinishInPage(animationId);
-        });
+            pagePattern->FinishInPage(animationId, transitionType);
+        }, transitionType);
 }
 } // namespace
 
@@ -300,8 +303,10 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
         }
         return true;
     }
-    stageNode_->RemoveChild(pageNode);
-    pageNode->SetChildrenInDestroying();
+    if (pageNode) {
+        stageNode_->RemoveChild(pageNode);
+        pageNode->SetChildrenInDestroying();
+    }
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;
@@ -328,13 +333,16 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
-    auto outPageNode = AceType::DynamicCast<FrameNode>(children.back());
+    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = *iter;
-        FirePageHide(
-            pageNode, firstPageTransition && needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
-        firstPageTransition = false;
+        if (!needTransition|| !CheckPageInTransition(pageNode)) {
+            FirePageHide(
+                pageNode,
+                firstPageTransition && needTransition ?PageTransitionType::EXIT_POP : PageTransitionType::NONE);
+            firstPageTransition = false;
+        }
         ++iter;
     }
 
@@ -353,7 +361,11 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         // the last node will be deleted after pageTransition
         for (int32_t current = 1; current < popSize; ++current) {
             auto pageNode = *(++children.rbegin());
-            stageNode_->RemoveChild(pageNode);
+            if (CheckPageInTransition(pageNode)) {
+                UpdatePageNeedRemove(pageNode);
+            } else {
+                stageNode_->RemoveChild(pageNode);
+            }
         }
         stageNode_->RebuildRenderContextTree();
         StartTransition(outPageNode, inPageNode, RouteType::POP);
@@ -653,5 +665,23 @@ std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)
     auto srcPageInfo = srcPattern->GetPageInfo();
     CHECK_NULL_RETURN(srcPageInfo, "");
     return srcPageInfo->GetFullPath();
+}
+
+bool StageManager::CheckPageInTransition(const RefPtr<UINode>& pageNode)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = frameNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    return pagePattern->GetPageInTransition();
+}
+
+void StageManager::UpdatePageNeedRemove(const RefPtr<UINode>& pageNode)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pagePattern = frameNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->SetIsNeedRemove(true);
 }
 } // namespace OHOS::Ace::NG

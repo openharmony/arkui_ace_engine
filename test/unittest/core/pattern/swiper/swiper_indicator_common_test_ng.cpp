@@ -215,7 +215,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
     indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(firstTextLayoutProperty, nullptr);
-    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(""), "1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
 
     /**
      * @tc.steps: step2. Test swiperLayoutProperty->HasIndex() and currentIndex > swiperPattern->RealTotalCount()
@@ -225,7 +225,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
     indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
     firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(firstTextLayoutProperty, nullptr);
-    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(""), "1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
 }
 
 /**
@@ -505,6 +505,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = false;
     indicatorPattern->isClicked_ = true;
     indicatorPattern->isRepeatClicked_ = false;
+    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DOT;
     /**
      * @tc.steps: step2. call the function DumpAdvanceInfo.
      * @tc.expected: verify the size dumped correctly.
@@ -521,6 +522,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = true;
     indicatorPattern->isClicked_ = false;
     indicatorPattern->isRepeatClicked_ = true;
+    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DIGIT;
     indicatorPattern->DumpAdvanceInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_.size(), 5);
 }
@@ -721,37 +723,5 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern019, TestSize.Level1)
     indicatorPattern->UpdateOverlongPaintMethod(pattern_, overlongPaintMethod);
     EXPECT_EQ(overlongPaintMethod->gestureState_, GestureState::GESTURE_STATE_NONE);
     EXPECT_TRUE(modifier->longPointLeftAnimEnd_);
-}
-
-/**
- * @tc.name: SwiperIndicatorPattern020
- * @tc.desc: Test HandleLongDragUpdate when SwipeByGroup is true
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    model.SetDisplayCount(2);
-    model.SetSwipeByGroup(true);
-    CreateSwiperItems();
-    CreateSwiperDone();
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
-    TouchEventInfo touchEventInfo("default");
-    TouchLocationInfo touchLocationInfo("down", 0);
-    touchLocationInfo.SetLocalLocation(Offset(18.0f, 1.0f));
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-
-    GestureEvent info;
-    info.SetLocalLocation(Offset(0.0f, 1.0f));
-    indicatorPattern->HandleTouchDown();
-    indicatorPattern->HandleDragStart(info);
-    indicatorPattern->HandleTouchEvent(touchEventInfo);
-    EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

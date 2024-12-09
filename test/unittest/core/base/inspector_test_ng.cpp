@@ -33,6 +33,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -645,5 +646,56 @@ HWTEST_F(InspectorTestNg, GetOffScreenTreeNodes_001, TestSize.Level1)
     Inspector::GetOffScreenTreeNodes(offNodes);
     EXPECT_EQ(offNodes.size(), num);
     context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetRecordAllPagesNodes_001
+ * @tc.desc: Test the operation of GetRecordAllPagesNodes
+ * (stageNode)--PageA--PageB--PageC
+ *                              |--frameNode
+ *                              |--frameNode1--frameNode3
+ *                              |--frameNode2
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_001, TestSize.Level1)
+{
+    // tc.steps: step1. call GetRecordAllPagesNodes
+    // tc.expected: expect the function is run ok
+    auto context1 = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context1, nullptr);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("sageNode", id, AceType::MakeRefPtr<Pattern>(), true);
+    context1->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageNode->children_.clear();
+
+    // tc.steps: step2 add lastPage and create a frame node tree to lastPage
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("PageA", id2,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+    auto id3 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> pageB = FrameNode::CreateFrameNode("PageB", id3,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageB);
+    auto id4 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> pageC = FrameNode::CreateFrameNode("PageC", id4,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageC);
+
+    auto frameNode = FrameNode::CreateFrameNode("frameNode0", 5, AceType::MakeRefPtr<Pattern>(), true);
+    pageC->AddChild(frameNode);
+    auto frameNode1 = FrameNode::CreateFrameNode("frameNode1", 6, AceType::MakeRefPtr<Pattern>(), true);
+    pageC->AddChild(frameNode1);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 62, AceType::MakeRefPtr<Pattern>(), true);
+    pageC->AddChild(frameNode2);
+    frameNode2->isActive_ = false;
+    auto frameNode3 = FrameNode::CreateFrameNode("frameNode3", 63, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode1->AddChild(frameNode3);
+    frameNode3->isActive_ = true;
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetRecordAllPagesNodes(treesInfos);
+    EXPECT_TRUE(!treesInfos.empty());
+    context1->stageManager_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

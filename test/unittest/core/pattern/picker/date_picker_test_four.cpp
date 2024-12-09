@@ -953,6 +953,8 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest111, TestSize.Level1)
     datePickerPattern->isFiredDateChange_ = false;
     datePickerPattern->showMonthDays_ = true;
     datePickerPattern->OnModifyDone();
+    auto children = buttonConfirmNode->GetChildren();
+    EXPECT_EQ(children.size(), 1);
 }
 
 /**

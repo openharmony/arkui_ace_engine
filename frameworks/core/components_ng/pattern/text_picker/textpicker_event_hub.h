@@ -53,6 +53,18 @@ public:
         }
     }
 
+    void SetOnScrollStop(TextChangeEvent&& onScrollStopEvent)
+    {
+        onScrollStopEvent_ = std::move(onScrollStopEvent);
+    }
+
+    void FireScrollStopEvent(const std::vector<std::string>& value, const std::vector<double>& index) const
+    {
+        if (onScrollStopEvent_) {
+            onScrollStopEvent_(value, index);
+        }
+    }
+
     void SetDialogChange(DialogTextEvent&& onChange)
     {
         DialogChangeEvent_ = std::move(onChange);
@@ -62,6 +74,18 @@ public:
     {
         if (DialogChangeEvent_) {
             DialogChangeEvent_(info);
+        }
+    }
+
+    void SetDialogScrollStop(DialogTextEvent&& onScrollStopEvent)
+    {
+        dialogScrollStopEvent_ = std::move(onScrollStopEvent);
+    }
+
+    void FireDialogScrollStopEvent(const std::string& info) const
+    {
+        if (dialogScrollStopEvent_) {
+            dialogScrollStopEvent_(info);
         }
     }
 
@@ -88,7 +112,9 @@ public:
     }
 private:
     TextChangeEvent TextChangeEvent_;
+    TextChangeEvent onScrollStopEvent_;
     DialogTextEvent DialogChangeEvent_;
+    DialogTextEvent dialogScrollStopEvent_;
     DialogTextEvent DialogAcceptEvent_;
     TextValueChangeEvent onValueChangeEvent_;
     TextSelectedChangeEvent onSelectedChangeEvent_;

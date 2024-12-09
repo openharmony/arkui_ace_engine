@@ -26,6 +26,7 @@ build_component_ng("manager_ng") {
     "drag_drop/utils/drag_animation_helper.cpp",
     "focus/focus_manager.cpp",
     "focus/focus_view.cpp",
+    "form_event/form_event_manager.cpp",
     "form_visible/form_visible_manager.cpp",
     "frame_rate/frame_rate_manager.cpp",
     "full_screen/full_screen_manager.cpp",

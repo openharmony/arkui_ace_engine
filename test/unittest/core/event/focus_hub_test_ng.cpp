@@ -277,7 +277,7 @@ HWTEST_F(FocusHubTestNg, FocusHubHandleKeyEventTest006, TestSize.Level1)
      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::TV_CONTROL_UP;
-    EXPECT_FALSE(focusHub->HandleKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     /**
      * @tc.steps: step4. Focus hub is currently focused, FocusType is DISABLE and key code is TV_CONTROL_UP.
@@ -285,7 +285,7 @@ HWTEST_F(FocusHubTestNg, FocusHubHandleKeyEventTest006, TestSize.Level1)
      */
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub->currentFocus_ = true;
-    EXPECT_FALSE(focusHub->HandleKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -657,21 +657,21 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0016, TestSize.Level1)
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     focusHub->SetFocusType(FocusType::NODE);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     /**
      * @tc.steps3: call the function OnKeyEvent with FocusType::SCOPE.
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     focusHub->SetFocusType(FocusType::SCOPE);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     /**
      * @tc.steps4: call the function OnKeyEvent with FocusType::DISABLE.
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     focusHub->SetFocusType(FocusType::DISABLE);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -1183,6 +1183,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent002, TestSize.Level1)
      * @tc.expected: The return value of OnKeyEvent is true.
      */
     focusHub->SetFocusType(FocusType::NODE);
+    focusHub->currentFocus_ = true;
     auto onKeyEventCallback = [](KeyEventInfo& eventInfo) -> bool {
         eventInfo.SetStopPropagation(true);
         return false;
@@ -1190,7 +1191,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent002, TestSize.Level1)
     auto onKeyEvent = [](const KeyEvent& event) -> bool { return true; };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
     focusHub->SetOnKeyCallback(std::move(onKeyEventCallback));
-    EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -1244,7 +1245,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
     auto lastFocusNode = focusHub->lastWeakFocusNode_.Upgrade();
     lastFocusNode->currentFocus_ = true;
     lastFocusNode->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     /**
      * @tc.steps7: call the function OnKeyEvent with FocusType::SCOPE.
@@ -1252,7 +1253,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
      */
     lastFocusNode->currentFocus_ = false;
     focusHub->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -1304,35 +1305,35 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent004, TestSize.Level1)
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     keyEvent.code = KeyCode::TV_CONTROL_UP;
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.code = KeyCode::TV_CONTROL_DOWN;
     focusHub->SetScopeFocusAlgorithm();
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.code = KeyCode::TV_CONTROL_LEFT;
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.code = KeyCode::TV_CONTROL_RIGHT;
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.code = KeyCode::KEY_TAB;
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.code = KeyCode::KEY_MOVE_HOME;
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.code = KeyCode::KEY_MOVE_END;
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     keyEvent.code = KeyCode::KEY_SPACE;
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -1477,7 +1478,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableFocus001, TestSize.Level1)
      * @tc.steps3: clear the function.
      * @tc.expected: The result is nullptr.
      */
-    focusHub->ClearUserOnFocus();
+    focusHub->ClearOnFocusCallback();
     EXPECT_EQ(focusHub->GetOnFocusCallback(), nullptr);
 
     /**
@@ -1525,7 +1526,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableBlur001, TestSize.Level1)
      * @tc.steps3: clear the function OnBlur.
      * @tc.expected: The result is nullptr.
      */
-    focusHub->ClearUserOnBlur();
+    focusHub->ClearOnBlurCallback();
     EXPECT_EQ(focusHub->GetOnBlurCallback(), nullptr);
 
     /**
@@ -1555,6 +1556,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableKey001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
 
     /**
      * @tc.steps2: call the function OnKey with FocusType::NODE.
@@ -1562,30 +1564,36 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableKey001, TestSize.Level1)
      */
     focusHub->SetFocusType(FocusType::NODE);
     std::string result;
-    auto onKey = [&result](KeyEventInfo& info) { result = RESULT_SUCCESS_ONE; };
+    auto onKey = [&result](KeyEventInfo& info) -> bool {
+        result = RESULT_SUCCESS_ONE;
+        return false;
+    };
     focusHub->SetOnKeyCallback(onKey);
     EXPECT_NE(focusHub->GetOnKeyCallback(), nullptr);
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::UP;
-    focusHub->OnKeyEvent(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     EXPECT_EQ(result, RESULT_SUCCESS_ONE);
 
     /**
      * @tc.steps3: clear the function OnKey.
      * @tc.expected: The result is nullptr.
      */
-    focusHub->ClearUserOnKey();
+    focusHub->ClearOnKeyCallback();
     EXPECT_EQ(focusHub->GetOnKeyCallback(), nullptr);
 
     /**
      * @tc.steps4: set the function OnKey again.
      * @tc.expected: The result is right.
      */
-    auto onKey2 = [&result](KeyEventInfo& info) { result = RESULT_SUCCESS_TWO; };
+    auto onKey2 = [&result](KeyEventInfo& info) -> bool {
+        result = RESULT_SUCCESS_TWO;
+        return false;
+    };
     focusHub->SetOnKeyCallback(onKey2);
     EXPECT_NE(focusHub->GetOnKeyCallback(), nullptr);
 
-    focusHub->OnKeyEvent(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     EXPECT_EQ(result, RESULT_SUCCESS_TWO);
 }
 
@@ -2006,5 +2014,88 @@ HWTEST_F(FocusHubTestNg, SetLastWeakFocusToPreviousInFocusView001, TestSize.Leve
     KeyEvent keyEvent;
     focusHub->SetLastWeakFocusToPreviousInFocusView();
     ASSERT_FALSE(focusHub->lastWeakFocusNode_.Upgrade());
+}
+
+/**
+ * @tc.name: FocusHubFlushChildrenFocusHubTest001
+ * @tc.desc: Test the function SetTabStop and IsTabStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubSetTabStopTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_EQ(focusHub->IsTabStop(), false);
+    focusHub->SetTabStop(true);
+    EXPECT_EQ(focusHub->IsTabStop(), true);
+    focusHub->SetTabStop(false);
+    EXPECT_EQ(focusHub->IsTabStop(), false);
+}
+
+/**
+ * @tc.name: FocusHubRequestNextFocusOfKeyEnterTest001
+ * @tc.desc: Test the function RequestNextFocusOfKeyEnter
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubRequestNextFocusOfKeyEnterTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEnter(), false);
+    focusHub->SetTabStop(true);
+    focusHub->focusType_ = FocusType::NODE;
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEnter(), false);
+    focusHub->SetTabStop(true);
+    focusHub->focusType_ = FocusType::SCOPE;
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEnter(), true);
+}
+
+/**
+ * @tc.name: FocusHubRequestNextFocusOfKeyEscTest001
+ * @tc.desc: Test the function RequestNextFocusOfKeyEsc
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubRequestNextFocusOfKeyEscTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEsc(), false);
+
+    focusHub->SetTabStop(true);
+    EXPECT_EQ(focusHub->RequestNextFocusOfKeyEsc(), false);
+
+    focusHub->SetTabStop(false);
+    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
+    eventHub1->AttachHost(child);
+    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
+    focusHub1->SetTabStop(true);
+    EXPECT_EQ(focusHub1->RequestNextFocusOfKeyEsc(), false);
 }
 } // namespace OHOS::Ace::NG

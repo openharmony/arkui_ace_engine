@@ -1329,8 +1329,10 @@ void DialogPattern::UpdateButtonsProperty()
             UpdateButtonsPropertyForEachButton(buttonFrameNode, btnIndex);
             ++btnIndex;
         }
-    } else if (menuNode_.Upgrade()) {
-        for (const auto& rowNode : menuNode_.Upgrade()->GetChildren()) {
+    } else {
+        auto upgradedMenuNode = menuNode_.Upgrade();
+        CHECK_NULL_VOID(upgradedMenuNode);
+        for (const auto& rowNode : upgradedMenuNode->GetChildren()) {
             if (rowNode->GetTag() != V2::ROW_ETS_TAG) {
                 continue;
             }
@@ -1813,6 +1815,25 @@ bool DialogPattern::IsShowInFreeMultiWindow()
         }
     }
     return container->IsFreeMultiWindow();
+}
+
+bool DialogPattern::IsShowInFloatingWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsFloatingWindow();
 }
 
 void DialogPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)

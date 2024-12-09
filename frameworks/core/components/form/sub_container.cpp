@@ -174,12 +174,12 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     }
 
     cardType_ = cardType;
-    if (cardType != FrontendType::ETS_CARD && cardType != FrontendType::JS_CARD) {
+    if (cardType_ != FrontendType::ETS_CARD && cardType_ != FrontendType::JS_CARD) {
         LOGE("Run Card failed, card type unknown");
         return;
     }
 
-    InitFrontend(path, module, imageDataMap, formSrc, cardType);
+    InitFrontend(path, module, imageDataMap, formSrc, cardType_);
 
     if (cardType_ == FrontendType::ETS_CARD) { // ETS Card : API9 only support NG-Host & NG-eTSCard
         if (Container::IsCurrentUseNewPipeline()) {
@@ -414,6 +414,9 @@ void SubContainer::InitFrontend(const std::string &path, const std::string &modu
     frontend_->Initialize(cardType_, taskExecutor_);
     frontend_->ResetPageLoadState();
     LOGI("run card path:%{private}s, module:%{private}s", path.c_str(), module.c_str());
+
+    auto assetManager = GetAssetManager(path, module);
+
     if (formSrc.compare(0, 2, "./") == 0) {        // 2:length of "./"
         frontend_->SetFormSrc(formSrc.substr(2));  // 2:length of "./"
     } else {
@@ -433,13 +436,47 @@ void SubContainer::InitFrontend(const std::string &path, const std::string &modu
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
     }
-    InitCardThemeManager(path, instanceId_, module, imageDataMap);
+
+    InitCardThemeManager(path, instanceId_, module, imageDataMap, assetManager);
+
+    InitPipelineContext();
 
     frontend_->AttachPipelineContext(pipelineContext_);
     frontend_->SetLoadCardCallBack(outSidePipelineContext_);
     frontend_->SetRunningCardId(nodeId_);
     frontend_->SetDensity(density_);
     UpdateSurfaceSize();
+}
+
+void SubContainer::InitPipelineContext()
+{
+    auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto form = container->GetFormPattern();
+            CHECK_NULL_VOID(form);
+            form->OnActionEvent(action);
+        } else {
+            auto form = AceType::DynamicCast<FormElement>(container->GetFormElement().Upgrade());
+            CHECK_NULL_VOID(form);
+            form->OnActionEvent(action);
+        }
+    };
+    pipelineContext_->SetActionEventHandler(actionEventHandler);
+
+    auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    taskExecutor_->PostTask(
+        [weakContext]() {
+            auto context = weakContext.Upgrade();
+            if (context == nullptr) {
+                LOGE("RunCard PostTask Task failed, context is nullptr");
+                return;
+            }
+            context->SetupRootElement();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIFormSetupRootElement");
 }
 
 RefPtr<AssetManager> SubContainer::GetAssetManager(const std::string &path, const std::string &module)
@@ -464,9 +501,8 @@ RefPtr<AssetManager> SubContainer::GetAssetManager(const std::string &path, cons
 }
 
 void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanceId, const std::string &module,
-    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap)
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap, RefPtr<AssetManager> assetManager)
 {
-    auto assetManager = GetAssetManager(path, module);
     ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();

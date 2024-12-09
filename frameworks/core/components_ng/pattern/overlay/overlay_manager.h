@@ -236,13 +236,14 @@ public:
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
-    bool RemoveAllModalInOverlay();
+    bool RemoveAllModalInOverlay(bool isRouterTransition = true);
     bool RemoveAllModalInOverlayByStack();
     bool RemoveAllModalInOverlayByList();
     bool OnRemoveAllModalInOverlayByList();
     void AfterRemoveAllModalInOverlayByList();
     bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -506,6 +507,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
+    static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
@@ -689,7 +692,7 @@ private:
      *   @return     true if process is successful
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
-
+    void ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper);
     // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
     // 2. end show animation: overlay node get focus;
@@ -806,6 +809,7 @@ private:
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
+    RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

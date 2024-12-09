@@ -136,6 +136,7 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
         ResponseLinkResult& responseLinkResult) override;
+    void InitDragDropStatusToIdle();
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(
@@ -186,13 +187,12 @@ public:
 
     bool IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode);
     void StartDragTaskForWeb(const GestureEvent& info);
-    void StartLongPressActionForWeb(bool isFloatImage = true);
+    void StartLongPressActionForWeb();
     void CancelDragForWeb();
     void ResetDragActionForWeb() {
         if (isReceivedLongPress_) {
             isReceivedLongPress_ = false;
         }
-        isFloatImage_ = true;
     }
 
     void SetIsNotInPreviewState(bool isNotInPreviewState)
@@ -244,6 +244,7 @@ public:
         const RefPtr<FrameNode>& frameNode, GatherNodeChildInfo& gatherNodeChildInfo);
     static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
+    static void InitGatherNodesPosition(const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
         const RefPtr<FrameNode>& gatherNode, const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
@@ -284,6 +285,17 @@ public:
     static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
     static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);
 
+    void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
+    {
+        isThumbnailCallbackTriggered_ = isThumbnailCallbackTriggered;
+    }
+
+    void TryTriggerThumbnailCallback();
+
+    void GetThumbnailPixelMap(bool isSync);
+    void GetThumbnailPixelMapForCustomNode();
+    void GetThumbnailPixelMapForCustomNodeSync();
+
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
     void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);
@@ -296,7 +308,7 @@ private:
     // check the current node's status to decide if it can initiate one drag operation
     bool IsCurrentNodeStatusSuitableForDragging(
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
-    bool IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode);
+    bool IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode) const;
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
@@ -323,13 +335,13 @@ private:
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
-    bool isFloatImage_ = true;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     std::vector<DimensionRect> responseRegion_;
     bool isSelectedItemNode_ = false;
-    bool isOnBeforeLiftingAnimation = false;
+    bool isOnBeforeLiftingAnimation_ = false;
     bool isDragPrepareFinish_ = false;
+    bool isThumbnailCallbackTriggered_ = false;
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;

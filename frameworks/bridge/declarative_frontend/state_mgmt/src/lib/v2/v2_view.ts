@@ -152,6 +152,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
 
         MonitorV2.clearWatchesFromTarget(this);
+        ComputedV2.clearComputedFromTarget(this);
 
         this.updateFuncByElmtId.clear();
         if (this.parent_) {

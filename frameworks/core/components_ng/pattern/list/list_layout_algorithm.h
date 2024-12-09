@@ -424,7 +424,7 @@ protected:
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos);
     virtual int32_t LayoutALineBackward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos);
-    virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup);
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) {};
     virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
@@ -468,11 +468,13 @@ protected:
     void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
     float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
+    bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
+    RefPtr<ListLayoutProperty> listLayoutProperty_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
@@ -501,10 +503,10 @@ private:
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
     void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
-    virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList);
-    virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList);
+    virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
+        int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show);
+    virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
+        int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     std::tuple<int32_t, int32_t, int32_t, int32_t> LayoutCachedItemInEdgeGroup(LayoutWrapper* layoutWrapper,
         int32_t cacheCount, std::list<PredictLayoutItem>& predictList);
@@ -582,6 +584,7 @@ private:
     float laneGutter_ = 0.0f;
     float groupItemAverageHeight_ = 0.0f;
     OffsetF paddingOffset_;
+    bool isLayouted_ = true;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 

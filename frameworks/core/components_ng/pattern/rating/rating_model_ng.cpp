@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 void RatingModelNG::Create(double rating, bool indicator)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RATING_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(

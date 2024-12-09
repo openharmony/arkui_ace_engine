@@ -37,6 +37,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -97,7 +98,8 @@ constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
-constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+constexpr int32_t POPUP_EDGE_INTERVAL = 8;
+constexpr int32_t POPUP_MIN_EDGE = 1;
 constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
@@ -905,18 +907,18 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& keyEventCallback = [context = pipelineContext_, id = instanceId_](const KeyEvent& event) {
+    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](const NonPointerEvent& event) {
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result, id]() {
+            [context, &event, &result, id]() {
                 ContainerScope scope(id);
-                result = context->OnKeyEvent(event);
+                result = context->OnNonPointerEvent(event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerNonPointerEvent", PriorityType::VIP);
         return result;
     };
-    aceView_->RegisterKeyEventCallback(keyEventCallback);
+    aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -1022,7 +1024,7 @@ void AceContainer::InitializeCallback()
 void AceContainer::InitDragEventCallback()
 {
     if (!isFormRender_) {
-        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const PointerEvent& pointerEvent,
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const DragPointerEvent& pointerEvent,
                                        const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);
@@ -1328,26 +1330,33 @@ private:
 
         auto trans = node->GetTransformRelativeOffset();
         auto bottomAvoidHeight = GetBottomAvoidHeight();
+        auto edge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_EDGE_INTERVAL);
+        auto minEdge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_MIN_EDGE);
 
         bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
-
-        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
-            (size.height + POPUP_EDGE_INTERVAL + bottomAvoidHeight)) {
+        if (rectf.GetY() > size.height + edge + minEdge) {
+            if (isBottom) {
+                deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
+            } else {
+                deltaY = rect_.top - trans.GetY();
+            }
+        } else if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+            (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
             // popup will display at the bottom of the container
             if (isBottom) {
-                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY() + edge;
             } else {
-                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - POPUP_EDGE_INTERVAL;
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge;
             }
         } else {
             // popup will display in the middle of the container
             if (isBottom) {
                 deltaY = rect_.top + rect_.height -
-                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() + edge;
             } else {
-                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() - edge;
             }
         }
         return deltaY;
@@ -1665,7 +1674,7 @@ private:
 bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
     const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative, int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "RequestAutoSave called");
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
@@ -2323,6 +2332,7 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
     windowManager->SetGetWindowStartMoveFlagCallBack(
         [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
     windowManager->SetWindowSplitPrimaryCallBack(
@@ -2353,7 +2363,9 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> bool {
             return window->GetFreeMultiWindowModeEnabledState();
         });
-
+    windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
+        window->OnContainerModalEvent(name, value);
+    });
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
@@ -2399,6 +2411,12 @@ Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
     return {};
 }
 
+uint32_t AceContainer::GetStatusBarHeight()
+{
+    CHECK_NULL_RETURN(uiWindow_, 0);
+    return static_cast<uint32_t>(uiWindow_->GetStatusBarHeight());
+}
+
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
     const std::string& bundle, const std::string& module)
 {
@@ -2423,6 +2441,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 
 void AceContainer::CheckAndSetFontFamily()
 {
+    CHECK_NULL_VOID(pipelineContext_);
     auto fontManager = pipelineContext_->GetFontManager();
     CHECK_NULL_VOID(fontManager);
     if (fontManager->IsUseAppCustomFont()) {
@@ -2455,7 +2474,7 @@ void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
     if (!parsedConfig.fontScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
         if (fontSizeScale != pipelineContext_->GetFontScale()) {
@@ -2464,8 +2483,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
-            parsedConfig.fontWeightScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontWeightScale: %{public}s", parsedConfig.fontWeightScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
         if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
@@ -2525,9 +2543,6 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
         configurationChange.skinUpdate = skinUpdate;
-        if (fontUpdate) {
-            CheckAndSetFontFamily();
-        }
     }
 }
 
@@ -2625,6 +2640,19 @@ void AceContainer::UpdateConfiguration(
     pipelineContext_->ClearImageCache();
 }
 
+void AceContainer::UpdateConfigurationSyncForAll(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+
+    if (!parsedConfig.fontId.empty()) {
+        CheckAndSetFontFamily();
+    }
+}
+
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
     for (auto& item : configurationChangedCallbacks_) {
@@ -2669,9 +2697,7 @@ void AceContainer::NotifyConfigurationChange(
                         pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
                     }
                     pipeline->NotifyConfigurationChange();
-                    if (configurationChange.IsNeedUpdate()) {
-                        pipeline->FlushReload(configurationChange);
-                    }
+                    pipeline->FlushReload(configurationChange);
                     if (needReloadTransition) {
                         // reload transition animation
                         pipeline->FlushReloadTransition();
@@ -3061,7 +3087,7 @@ bool AceContainer::GetCurPointerEventInfo(
     sourceType = currentPointerEvent->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
-    sourceTool = pointerItem.GetToolType();
+    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
     displayId = currentPointerEvent->GetTargetDisplayId();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;

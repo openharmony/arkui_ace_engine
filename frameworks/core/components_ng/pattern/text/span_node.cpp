@@ -251,6 +251,79 @@ void SpanNode::DumpInfo()
     }
 }
 
+void SpanItem::SpanDumpInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(
+        std::string("---Content length: ").append(std::to_string(StringUtils::ToWstring(content).length())));
+    auto textStyle = textStyle_;
+    if (!textStyle) {
+        return;
+    }
+    dumpLog.AddDesc(
+        std::string("FontSize: ")
+            .append(textStyle->GetFontSize().ToString())
+            .append(" self: ")
+            .append(fontStyle && fontStyle->HasFontSize() ? fontStyle->GetFontSizeValue().ToString() : "Na"));
+    dumpLog.AddDesc(
+        std::string("TextColor: ")
+            .append(textStyle->GetTextColor().ColorToString())
+            .append(" self: ")
+            .append(fontStyle && fontStyle->HasTextColor() ? fontStyle->GetTextColorValue().ColorToString() : "Na"));
+    dumpLog.AddDesc(
+        std::string("LineHeight: ")
+            .append(textStyle->GetLineHeight().ToString())
+            .append(" self: ")
+            .append(textLineStyle
+                        ? textLineStyle->GetLineHeight().value_or(Dimension(0.0, DimensionUnit::FP)).ToString()
+                        : "Na"));
+    dumpLog.AddDesc(std::string("BaselineOffset: ")
+                        .append(textStyle->GetBaselineOffset().ToString())
+                        .append(textLineStyle && textLineStyle->HasBaselineOffset()
+                                    ? textLineStyle->GetBaselineOffsetValue().ToString()
+                                    : "Na"));
+    dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle->GetHalfLeading())));
+    SpanDumpInfoAdvance();
+}
+
+void SpanItem::SpanDumpInfoAdvance()
+{
+    CHECK_NULL_VOID(SystemProperties::GetDebugEnabled());
+    auto& dumpLog = DumpLog::GetInstance();
+    auto textStyle = textStyle_;
+    if (!textStyle) {
+        return;
+    }
+    dumpLog.AddDesc(std::string("WordSpacing: ").append(textStyle->GetWordSpacing().ToString()));
+    dumpLog.AddDesc(
+        std::string("TextIndent: ")
+            .append(textStyle->GetTextIndent().ToString())
+            .append(" self: ")
+            .append(textLineStyle && textLineStyle->HasTextIndent() ? textLineStyle->GetTextIndentValue().ToString()
+                                                                    : "Na"));
+    dumpLog.AddDesc(
+        std::string("LetterSpacing: ")
+            .append(textStyle->GetLetterSpacing().ToString())
+            .append(" self: ")
+            .append(fontStyle ? fontStyle->GetLetterSpacing().value_or(Dimension(0.0, DimensionUnit::FP)).ToString()
+                              : "Na"));
+    dumpLog.AddDesc(
+        std::string("FontWeight: ")
+            .append(StringUtils::ToString(textStyle->GetFontWeight()))
+            .append(" self: ")
+            .append(fontStyle && fontStyle->HasFontWeight() ? StringUtils::ToString(fontStyle->GetFontWeightValue())
+                                                            : "Na"));
+    dumpLog.AddDesc(std::string("FontStyle: ")
+                        .append(StringUtils::ToString(textStyle->GetFontStyle()))
+                        .append(" self: ")
+                        .append(fontStyle && fontStyle->HasItalicFontStyle()
+                                    ? StringUtils::ToString(fontStyle->GetItalicFontStyleValue())
+                                    : "Na"));
+    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle->GetWordBreak())));
+    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle->GetTextCase())));
+    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle->GetEllipsisMode())));
+}
+
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
     const TextStyle& textStyle, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
@@ -275,7 +348,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     spanTextStyle.SetTextBackgroundStyle(backgroundStyle);
-    if (!fontStyle->HasTextColor() && urlOnRelease) {
+    if (fontStyle && !fontStyle->HasTextColor() && urlOnRelease) {
         auto urlSpanColor = pattern->GetUrlSpanColor();
         spanTextStyle.SetTextColor(urlSpanColor);
         UpdateTextStyle(spanContent, builder, spanTextStyle, selectedStart, selectedEnd);
@@ -688,8 +761,8 @@ void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension, LineHeight);
     WRITE_TLV_INHERIT(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension, LineSpacing);
     WRITE_TLV_INHERIT(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline, TextBaseline);
-    WRITE_TLV_INHERIT(
-        textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension, BaselineOffset);
+    // text's baselineOffset attribute is not span's baselineOffset attribute
+    WRITE_TEXT_STYLE_TLV(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
     WRITE_TLV_INHERIT(textLineStyle, TextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow, TextOverflow);
     WRITE_TLV_INHERIT(textLineStyle, TextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign, TextAlign);
     WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLength, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
@@ -804,6 +877,15 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
 
 bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
 {
+    if (spanItemType == SpanItemType::NORMAL) {
+        // ImageSpan(resource)场景，复制图片为属性字符串为空格。ImageSpanItem::GetSameStyleSpanItem获取到的spanItemType为NORMAL
+        TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
+        TLVUtil::WriteInt32(buff, interval.first);
+        TLVUtil::WriteInt32(buff, interval.second);
+        TLVUtil::WriteString(buff, content);
+        TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
+        return true;
+    }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
@@ -949,7 +1031,16 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
     if (options.HasValue()) {
         sameSpan->SetImageSpanOptions(options);
     } else {
+        // 用与Text控件复制ImageSpan子控件，生成并保存options数据
         sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
+        if (!(sameSpan->options.imagePixelMap.value())) {
+            /*
+                ImageSpan子控件，存在resource和pixelMap两种来源。
+                ImageSpan(resource)场景，复制图片为属性字符串为空格。
+                因此设置为NORMAL。在ImageSpanItem::EncodeTlv时，SpanItemType为NORMAL时，组装SpanItem。
+            */
+            sameSpan->spanItemType = SpanItemType::NORMAL;
+        }
     }
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
@@ -1102,6 +1193,46 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     run_ = run;
     builder->PopStyle();
     return index;
+}
+
+void PlaceholderSpanItem::DumpInfo() const
+{
+        auto& dumpLog = DumpLog::GetInstance();
+        dumpLog.AddDesc("--------------- print run info ---------------");
+        dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run_.width)));
+        dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run_.height)));
+        dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run_.alignment)));
+        dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run_.baseline)));
+        dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run_.baseline_offset)));
+        dumpLog.AddDesc("--------------- print text style ---------------");
+        dumpLog.AddDesc(
+            std::string("FontSize: ")
+                .append(textStyle.GetFontSize().ToString())
+                .append(" self: ")
+                .append(fontStyle && fontStyle->HasFontSize() ? fontStyle->GetFontSizeValue().ToString() : "Na"));
+        dumpLog.AddDesc(
+            std::string("TextColor: ")
+                .append(textStyle.GetTextColor().ColorToString())
+                .append(" self: ")
+                .append(
+                fontStyle && fontStyle->HasTextColor() ? fontStyle->GetTextColorValue().ColorToString() : "Na"));
+        dumpLog.AddDesc(std::string("BaselineOffset: ")
+                            .append(textStyle.GetBaselineOffset().ToString())
+                            .append(" self: ")
+                            .append(textLineStyle && textLineStyle->HasBaselineOffset()
+                                        ? textLineStyle->GetBaselineOffsetValue().ToString()
+                                        : "Na"));
+        dumpLog.AddDesc(
+            std::string("LineHeight: ")
+                .append(textStyle.GetLineHeight().ToString())
+                .append(" self: ")
+                .append(textLineStyle
+                            ? textLineStyle->GetLineHeight().value_or(Dimension(0.0, DimensionUnit::FP)).ToString()
+                            : "Na"));
+        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
+        dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
+        dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
+        dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
 }
 
 RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
