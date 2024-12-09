@@ -807,6 +807,63 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
     return nullptr;
 }
 
+using FindCondition = std::function<bool(const RefPtr<NG::FrameNode>&)>;
+
+bool FindFrameNodeByCondition(const std::list<RefPtr<NG::UINode>>& children,
+    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result, FindCondition condition)
+{
+    for (const auto& child : children) {
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
+        if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
+            if (condition(frameNode)) {
+                result = frameNode;
+                return true;
+            }
+        }
+        nodes.push(child);
+    }
+    return false;
+}
+
+RefPtr<NG::FrameNode> GetFramenodeByCondition(const RefPtr<NG::FrameNode>& root, FindCondition condition)
+{
+    CHECK_NULL_RETURN(root, nullptr);
+
+    std::queue<RefPtr<NG::UINode>> nodes;
+    nodes.push(root);
+    RefPtr<NG::FrameNode> frameNodeResult = nullptr;
+
+    while (!nodes.empty()) {
+        auto current = nodes.front();
+        nodes.pop();
+        if (current->HasVirtualNodeAccessibilityProperty()) {
+            auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
+            if (FindFrameNodeByCondition(children, nodes, frameNodeResult, condition)) {
+                return frameNodeResult;
+            }
+        } else {
+            const auto& children = current->GetChildren(true);
+            if (FindFrameNodeByCondition(children, nodes, frameNodeResult, condition)) {
+                return frameNodeResult;
+            }
+        }
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
+        if (!frameNode) {
+            continue;
+        }
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            const auto& children = std::list<RefPtr<NG::UINode>> { overlayNode };
+            if (FindFrameNodeByCondition(children, nodes, frameNodeResult, condition)) {
+                return frameNodeResult;
+            }
+        }
+    }
+    return nullptr;
+}
+
 void GetFrameNodeParent(const RefPtr<NG::UINode>& uiNode, RefPtr<NG::FrameNode>& parent)
 {
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
@@ -979,10 +1036,12 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
                            NearEqual(visibleInnerRect.Width(), 0.0) && NearEqual(visibleInnerRect.Height(), 0.0);
     clipVisible = (GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0)) ||
                   isClipCheckSkip;
-    auto renderContext = frame_node->GetRenderContext();
+    auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rect = renderContext->GetPaintRectWithoutTransform();
     if (NearEqual(rect.Width(), 0.0) && NearEqual(rect.Height(), 0.0)) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Component %{public}s is not visible: width and height are both zero.",
+                 std::to_string(frameNode->GetAccessibilityId()).c_str());
         clipVisible = false;
     }
     std::string parentPath;
@@ -1011,6 +1070,43 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
         frameNode->SetAccessibilityVisible(nodeAccessibilityVisible);
     }
     nodeInfo.SetAccessibilityVisible(frameNode->GetAccessibilityVisible());
+}
+
+void SetRootAccessibilityNextFocusId(const RefPtr<NG::UINode>& currentNode, const RefPtr<NG::FrameNode>& rootNode,
+                                     AccessibilityElementInfo& nodeInfo)
+{
+    auto currentFrameNode = AceType::DynamicCast<NG::FrameNode>(currentNode);
+    CHECK_NULL_VOID(currentFrameNode);
+    auto accessibilityProperty = currentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->GetAccessibilityNextFocusInspectorKey() == "") {
+        return;
+    }
+
+    FindCondition condition = [accessibilityProperty](const RefPtr<NG::FrameNode>& node) {
+        return node->GetInspectorId() == accessibilityProperty->GetAccessibilityNextFocusInspectorKey();
+    };
+    auto nextNode = GetFramenodeByCondition(rootNode, condition);
+    CHECK_NULL_VOID(nextNode);
+    nodeInfo.SetAccessibilityNextFocusId(nextNode->GetAccessibilityId());
+}
+
+void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const RefPtr<NG::FrameNode>& rootNode,
+                                    AccessibilityElementInfo& nodeInfo)
+{
+    auto currentFrameNode = AceType::DynamicCast<NG::FrameNode>(currentNode);
+    CHECK_NULL_VOID(currentFrameNode);
+
+    auto currentInspectorId = currentFrameNode->GetInspectorId();
+    if (currentInspectorId != "") {
+        FindCondition preCondition = [currentInspectorId](const RefPtr<NG::FrameNode>& node) {
+            auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            return currentInspectorId == accessibilityProperty->GetAccessibilityNextFocusInspectorKey();
+        };
+        auto preNode = GetFramenodeByCondition(rootNode, preCondition);
+        CHECK_NULL_VOID(preNode);
+        nodeInfo.SetAccessibilityPreviousFocusId(preNode->GetAccessibilityId());
+    }
 }
 
 int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
@@ -1293,6 +1389,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
                 subComponent.accessibilityLevel));
         }
     }
+    nodeInfo.SetAccessibilityNextFocusInspectorKey(accessibilityProperty->GetAccessibilityNextFocusInspectorKey());
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
     nodeInfo.SetAccessibilityGroup(accessibilityProperty->IsAccessibilityGroup());
     nodeInfo.SetAccessibilityLevel(accessibilityProperty->GetAccessibilityLevel());
@@ -2282,6 +2379,10 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("accessibility label: ", nodeInfo.GetLabeledAccessibilityId());
     DumpLog::GetInstance().AddDesc("isActive: ", nodeInfo.GetIsActive());
     DumpLog::GetInstance().AddDesc("accessibilityVisible: ", nodeInfo.GetAccessibilityVisible());
+    DumpLog::GetInstance().AddDesc("accessibilityNextFocusInspectorKey: ",
+                                   nodeInfo.GetAccessibilityNextFocusInspectorKey());
+    DumpLog::GetInstance().AddDesc("accessibilityNextFocusId: ", nodeInfo.GetAccessibilityNextFocusId());
+    DumpLog::GetInstance().AddDesc("accessibilityPreviousFocusId: ", nodeInfo.GetAccessibilityPreviousFocusId());
     DumpLog::GetInstance().AddDesc("clip: ", nodeInfo.GetClip());
     DumpExtraElementInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc(
@@ -3209,6 +3310,9 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
     GenerateCommonProperty(ngPipeline, commonProperty, pipeline, frameNode);
     AccessibilityElementInfo nodeInfo;
     UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    SetRootAccessibilityVisible(frameNode, nodeInfo);
+    SetRootAccessibilityNextFocusId(frameNode, ngPipeline->GetRootElement(), nodeInfo);
+    SetRootAccessibilityPreFocusId(frameNode, ngPipeline->GetRootElement(), nodeInfo);
     if (IsExtensionComponent(frameNode) && !IsUIExtensionShowPlaceholder(frameNode)) {
         SearchParameter param {-1, "", PREFETCH_RECURSIVE_CHILDREN, NG::UI_EXTENSION_OFFSET_MAX};
         std::list<AccessibilityElementInfo> extensionElementInfos;
@@ -3928,6 +4032,8 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
         commonProperty.windowId, commonProperty.windowLeft, commonProperty.windowTop);
     UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
     SetRootAccessibilityVisible(node, nodeInfo);
+    SetRootAccessibilityNextFocusId(node, rootNode, nodeInfo);
+    SetRootAccessibilityPreFocusId(node, rootNode, nodeInfo);
     if (IsExtensionComponent(node) && !IsUIExtensionShowPlaceholder(node)) {
         SearchParameter param {-1, "", mode, uiExtensionOffset};
         SearchExtensionElementInfoNG(param, node, infos, nodeInfo);

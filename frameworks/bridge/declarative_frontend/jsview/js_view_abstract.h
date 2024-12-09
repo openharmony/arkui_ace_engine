@@ -436,6 +436,7 @@ public:
     static void JsAccessibilityGroup(const JSCallbackInfo& info);
     static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
+    static void JsAccessibilityNextFocusId(const JSCallbackInfo& info);
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
