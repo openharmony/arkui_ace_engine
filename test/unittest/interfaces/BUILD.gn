@@ -507,6 +507,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/native_impl.cpp",
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/native_node_extented.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
@@ -560,6 +561,7 @@ ohos_unittest("native_node_napi_test") {
     "image_framework:image_native",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "graphic_2d:native_drawing_ndk",
   ]
 }
 

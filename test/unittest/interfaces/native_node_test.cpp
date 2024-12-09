@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include <cstdint>
 #include "gtest/gtest.h"
 #define private public
@@ -20,6 +21,7 @@
 #include "native_interface.h"
 #include "native_node.h"
 #include "native_type.h"
+#include "native_styled_string.h"
 #include "event_converter.h"
 #include "interfaces/native/node/node_model.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -5224,5 +5226,25 @@ HWTEST_F(NativeNodeTest, NativeNodeTest080, TestSize.Level1)
     nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE);
     nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
     nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest080
+ * @tc.desc: Test native style string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest081, TestSize.Level1)
+{
+    OH_Drawing_TypographyStyle* style = OH_Drawing_CreateTypographyStyle();
+    ArkUI_StyledString* styleString = OH_ArkUI_StyledString_Create(style, nullptr);
+    OH_Drawing_TextStyle* textStyle = OH_Drawing_CreateTextStyle();
+    OH_ArkUI_StyledString_PushTextStyle(styleString, textStyle);
+    OH_Drawing_PlaceholderSpan* placeholder = new OH_Drawing_PlaceholderSpan();
+    OH_ArkUI_StyledString_AddPlaceholder(styleString, placeholder);
+
+    OH_Drawing_DestroyTextStyle(textStyle);
+    delete placeholder;
+    OH_ArkUI_StyledString_PushTextStyle(styleString, textStyle);
+    OH_ArkUI_StyledString_AddPlaceholder(styleString, placeholder);
 }
 } // namespace OHOS::Ace
