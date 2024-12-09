@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_list_item_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -118,7 +119,9 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
             ListItemModel::GetInstance()->Create();
         }
     } else {
-        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(arg0));
+        auto deepRenderFunc = JSRef<JSFunc>::Cast(arg0);
+        JSListItemTheme::ObtainDeepRenderFuncForThemeSupport(args.GetVm(), deepRenderFunc);
+        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), deepRenderFunc);
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
                                           jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
             ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
@@ -171,13 +174,21 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
         return;
     }
     bool select = false;
-    if (info[0]->IsBoolean()) {
-        select = info[0]->ToBoolean();
+    JSRef<JSVal> changeEventVal;
+    auto selectedVal = info[0];
+    if (selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (selectedVal->IsBoolean()) {
+        select = selectedVal->ToBoolean();
     }
     ListItemModel::GetInstance()->SetSelected(select);
-
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                bool param) {
@@ -421,7 +432,6 @@ void JSListItem::ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, 
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
-    JSClass<JSListItem>::StaticMethod("createInternal", &JSListItem::Create);
     JSClass<JSListItem>::StaticMethod("create", &JSListItem::Create);
     JSClass<JSListItem>::StaticMethod("pop", &JSListItem::Pop);
 

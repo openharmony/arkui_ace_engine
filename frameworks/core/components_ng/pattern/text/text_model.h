@@ -44,6 +44,8 @@ struct TextDetectConfig {
     TextDecoration entityDecorationType = TextDecoration::UNDERLINE;
     Color entityDecorationColor;
     TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
+    int64_t referenceTime;
+    std::string detectContext;
 
     TextDetectConfig()
     {
@@ -66,6 +68,8 @@ struct TextDetectConfig {
         decorationJson->Put("color", entityDecorationColor.ToString().c_str());
         decorationJson->Put("style", static_cast<int64_t>(entityDecorationStyle));
         jsonValue->Put("decoration", decorationJson);
+        jsonValue->Put("referenceTime", referenceTime);
+        jsonValue->Put("detectContext", detectContext.c_str());
         return jsonValue->ToString();
     }
 };

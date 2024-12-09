@@ -344,6 +344,8 @@ struct ArkUITextDetectConfigStruct {
     ArkUI_Int32 entityDecorationType;
     ArkUI_Uint32 entityDecorationColor;
     ArkUI_Int32 entityDecorationStyle;
+    ArkUI_Int64 referenceTime;
+    ArkUI_CharPtr detectContext;
 };
 
 struct ArkUIImagePropertiesStruct {
@@ -2285,6 +2287,8 @@ struct ArkUIImageModifier {
     void (*resetRenderMode)(ArkUINodeHandle node);
     void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool syncLoadValue);
     void (*resetSyncLoad)(ArkUINodeHandle node);
+    void (*setImageMatrix)(ArkUINodeHandle node, const ArkUI_Float32* matrix);
+    void (*resetImageMatrix)(ArkUINodeHandle node);
     void (*setObjectFit)(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber);
     void (*resetObjectFit)(ArkUINodeHandle node);
     void (*setFitOriginalSize)(ArkUINodeHandle node, ArkUI_Bool fitOriginalSizeValue);
@@ -5245,6 +5249,9 @@ struct ArkUIBasicAPI {
     ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
 
     ArkUI_Int32 (*getContextByNode)(ArkUINodeHandle node);
+
+    ArkUI_Int32 (*postFrameCallback)(ArkUI_Int32 instanceId, void* userData,
+        void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData));
 };
 
 struct ArkUIDialogAPI {

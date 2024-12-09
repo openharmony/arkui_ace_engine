@@ -6490,7 +6490,7 @@ class ViewPU extends PUV2ViewBase {
     aboutToRecycle() { }
     onWillApplyThemeInternally() {
         var _a;
-        const theme = (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.getFinalTheme(this.id__());
+        const theme = (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.getFinalTheme(this);
         if (theme) {
             this.onWillApplyTheme(theme);
         }

@@ -833,4 +833,322 @@ HWTEST_F(ImagePatternTestNg, ImageDumpAdvanceInfo001, TestSize.Level1)
     pattern->DumpAdvanceInfo(json);
     ASSERT_NE(json, nullptr);
 }
+
+/**
+ * @tc.name: GetImageInterpolation001
+ * @tc.desc: Get Image Interpolation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, GetImageInterpolation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(false);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    imagePattern->DumpInfo(json);
+    EXPECT_NE(json, nullptr);
+    /**
+     * @tc.steps: step2. call GetImageInterpolation.
+     * @tc.expected: Returned value is LOW.
+     */
+    imagePattern->interpolationDefault_ = ImageInterpolation::LOW;
+    imagePattern->DumpRenderInfo(json);
+    auto res = imagePattern->GetDefaultInterpolation();
+    ImageInterpolation Msg = ImageInterpolation::LOW;
+    EXPECT_EQ(res, Msg);
+    /**
+     * @tc.steps: step3. call GetImageInterpolation.
+     * @tc.expected: Returned value is MEDIUM.
+     */
+    imagePattern->interpolationDefault_ = ImageInterpolation::MEDIUM;
+    imagePattern->DumpRenderInfo(json);
+    res = imagePattern->GetDefaultInterpolation();
+    Msg = ImageInterpolation::MEDIUM;
+    EXPECT_EQ(res, Msg);
+}
+
+/**
+ * @tc.name: GetImageInterpolation002
+ * @tc.desc: Get Image Interpolation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, GetImageInterpolation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(true);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    imagePattern->DumpInfo(json);
+    EXPECT_NE(json, nullptr);
+    /**
+     * @tc.steps: step2. call GetImageInterpolation.
+     * @tc.expected: Returned value is HIGH.
+     */
+    imagePattern->interpolationDefault_ = ImageInterpolation::HIGH;
+    imagePattern->DumpRenderInfo(json);
+    auto res = imagePattern->GetDefaultInterpolation();
+    ImageInterpolation Msg = ImageInterpolation::HIGH;
+    EXPECT_EQ(res, Msg);
+    /**
+     * @tc.steps: step3. call GetImageInterpolation.
+     * @tc.expected: Returned value is NONE.
+     */
+    imagePattern->interpolationDefault_ = ImageInterpolation::NONE;
+    imagePattern->DumpRenderInfo(json);
+    res = imagePattern->GetDefaultInterpolation();
+    Msg = ImageInterpolation::NONE;
+    EXPECT_EQ(res, Msg);
+}
+
+/**
+ * @tc.name: ConvertOrientationToString001
+ * @tc.desc: Convert Orientation To String
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ConvertOrientationToString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(true);
+    /**
+     * @tc.steps: step2. call ConvertOrientationToString.
+     * @tc.expected: Returned value is UP.
+     */
+    ImageRotateOrientation orientation = ImageRotateOrientation::UP;
+    imagePattern->SetOrientation(orientation);
+    imagePattern->DumpInfo();
+    auto res = imagePattern->GetOrientation();
+    ImageRotateOrientation Msg = ImageRotateOrientation::UP;
+    EXPECT_EQ(res, Msg);
+    /**
+     * @tc.steps: step3. call GetImageInterpolation.
+     * @tc.expected: Returned value is NONE.
+     */
+    orientation = ImageRotateOrientation::RIGHT;
+    imagePattern->SetOrientation(orientation);
+    imagePattern->DumpInfo();
+    res = imagePattern->GetOrientation();
+    Msg = ImageRotateOrientation::RIGHT;
+    EXPECT_EQ(res, Msg);
+}
+
+/**
+ * @tc.name: ConvertOrientationToString002
+ * @tc.desc: Convert Orientation To String
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ConvertOrientationToString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(true);
+    /**
+     * @tc.steps: step2. call ConvertOrientationToString.
+     * @tc.expected: Returned value is DOWN.
+     */
+    ImageRotateOrientation orientation = ImageRotateOrientation::DOWN;
+    imagePattern->SetOrientation(orientation);
+    imagePattern->DumpInfo();
+    auto res = imagePattern->GetOrientation();
+    ImageRotateOrientation Msg = ImageRotateOrientation::DOWN;
+    EXPECT_EQ(res, Msg);
+    /**
+     * @tc.steps: step3. call GetImageInterpolation.
+     * @tc.expected: Returned value is LEFT.
+     */
+    orientation = ImageRotateOrientation::LEFT;
+    imagePattern->SetOrientation(orientation);
+    imagePattern->DumpInfo();
+    res = imagePattern->GetOrientation();
+    Msg = ImageRotateOrientation::LEFT;
+    EXPECT_EQ(res, Msg);
+    /**
+     * @tc.steps: step3. call GetImageInterpolation.
+     * @tc.expected: Returned value is AUTO.
+     */
+    orientation = ImageRotateOrientation::AUTO;
+    imagePattern->SetOrientation(orientation);
+    imagePattern->DumpInfo();
+    res = imagePattern->GetOrientation();
+    Msg = ImageRotateOrientation::AUTO;
+    EXPECT_EQ(res, Msg);
+}
+
+/**
+ * @tc.name: PrepareAnimation
+ * @tc.desc: Prepare Animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, PrepareAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator(2);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(true);
+    /**
+     * @tc.steps: step2. call PrepareAnimation.
+     * @tc.expected: Returned value is true.
+     */
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, { .selected = true });
+    EXPECT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto canvasImage = imagePaintMethod.canvasImage_;
+    EXPECT_NE(canvasImage, nullptr);
+    imagePattern->PrepareAnimation(canvasImage);
+    bool res = canvasImage->IsStatic();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: GetDynamicModeString
+ * @tc.desc: Get Dynamic Mode String
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, GetDynamicModeString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator(2);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(false);
+    /**
+     * @tc.steps: step2. call GetDynamicModeString.
+     * @tc.expected: Returned value is HIGH.
+     */
+    auto loadingCtx = imagePattern->loadingCtx_;
+    EXPECT_NE(loadingCtx, nullptr);
+    auto dynamicMode = DynamicRangeMode::HIGH;
+    loadingCtx->SetDynamicRangeMode(dynamicMode);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imageRenderProperty, nullptr);
+    auto res = imageRenderProperty->HasDynamicMode();
+    imagePattern->DumpRenderInfo();
+    EXPECT_FALSE(res);
+    /**
+     * @tc.steps: step3. call GetDynamicModeString.
+     * @tc.expected: Returned value is false.
+     */
+    dynamicMode = DynamicRangeMode::CONSTRAINT;
+    loadingCtx->SetDynamicRangeMode(dynamicMode);
+    imagePattern->DumpRenderInfo();
+    EXPECT_FALSE(res);
+    /**
+     * @tc.steps: step3. call GetDynamicModeString.
+     * @tc.expected: Returned value is false.
+     */
+    dynamicMode = DynamicRangeMode::STANDARD;
+    loadingCtx->SetDynamicRangeMode(dynamicMode);
+    imagePattern->DumpRenderInfo();
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: DumpFillColor
+ * @tc.desc: Dump Fill Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, DumpFillColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. call DumpFillColor.
+     * @tc.expected: Returned color value is BLUE.
+     */
+    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
+    image.SetImageFill(Color::BLUE);
+    image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imageRenderProperty, nullptr);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
+}
+
+/**
+ * @tc.name: SetImageAnalyzerConfig
+ * @tc.desc: SetImageAnalyzerConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, SetImageAnalyzerConfig, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. call SetImageAnalyzerConfig.
+     * @tc.expected: Returned value is true.
+     */
+    imagePattern->isEnableAnalyzer_ = true;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    auto isEnableAnalyzer = imagePattern->isEnableAnalyzer_;
+    imagePattern->SetImageAnalyzerConfig(voidPtr);
+    EXPECT_TRUE(isEnableAnalyzer);
+}
 } // namespace OHOS::Ace::NG

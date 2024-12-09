@@ -1450,16 +1450,42 @@ class ArkSelection {
   }
 }
 
+class DecorationStyleInterface {
+  type: TextDecorationType;
+  color: ResourceColor;
+  style: TextDecorationStyle;
+  constructor() {
+    this.type = undefined;
+    this.color = undefined;
+    this.style = undefined;
+  }
+  isEqual(another: DecorationStyleInterface): boolean {
+    (this.type === another.type) && (this.color === another.color) && (this.style === another.style)
+  }
+}
+
 class TextDataDetectorConfig {
   types: TextDataDetectorType;
   onDetectResultUpdate: (result: string) => void;
+  color: ResourceColor;
+  decoration: DecorationStyleInterface;
+  referenceTime: number;
+  detectContext: string;
   constructor() {
     this.types = undefined;
     this.onDetectResultUpdate = undefined;
+    this.color = undefined;
+    this.decoration = undefined;
+    this.referenceTime = undefined;
+    this.detectContext = undefined;
   }
   isEqual(another: TextDataDetectorConfig): boolean {
     return (this.types === another.types) &&
-      (this.onDetectResultUpdate === another.onDetectResultUpdate);
+      (this.onDetectResultUpdate === another.onDetectResultUpdate) &&
+      (this.color === another.color) &&
+      (this.decoration.isEqual(another.decoration)) &&
+      (this.referenceTime === another.referenceTime) &&
+      (this.detectContext === another.detectContext);
   }
 }
 

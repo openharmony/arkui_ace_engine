@@ -497,11 +497,11 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
 }
 
 /**
- * @tc.name: EstimateContentHeight001
- * @tc.desc: Test EstimateContentHeight.
+ * @tc.name: EstimateTotalHeight001
+ * @tc.desc: Test EstimateTotalHeight.
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
+HWTEST_F(WaterFlowTestNg, EstimateTotalHeight001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
@@ -516,13 +516,13 @@ HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
     for (const auto& item : info->items_[0]) {
         childCount += item.second.size();
     }
-    EXPECT_EQ(info->EstimateContentHeight(), info->GetMaxMainHeight() / childCount * info->childrenCount_);
+    EXPECT_EQ(info->EstimateTotalHeight(), info->GetMaxMainHeight() / childCount * info->childrenCount_);
 
     pattern_->UpdateCurrentOffset(-5000.f, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info->startIndex_, 31);
     EXPECT_EQ(info->endIndex_, TOTAL_LINE_NUMBER * 4 - 1);
-    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_);
+    EXPECT_EQ(info->EstimateTotalHeight(), info->maxHeight_);
 }
 
 /**

@@ -389,6 +389,8 @@ public:
     virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
     virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
+    virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
+    virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

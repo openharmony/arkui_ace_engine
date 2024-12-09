@@ -1840,6 +1840,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20, GridItemStyle::NONE);
     CreateDone(frameNode_);
 
@@ -1850,7 +1851,6 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
     auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 6);
     EXPECT_EQ(info.endMainLineIndex_, 9);
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     for (int i = 0; i < 500; ++i) {
         UpdateCurrentOffset(-200.0f);

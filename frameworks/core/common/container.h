@@ -538,6 +538,13 @@ public:
                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
     }
 
+    static bool LessThanAPIVersionSafelyWithCheck(PlatformVersion version)
+    {
+        return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+               PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
+                   static_cast<int32_t>(version);
+    }
+
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
         return PipelineBase::GetCurrentContext() &&

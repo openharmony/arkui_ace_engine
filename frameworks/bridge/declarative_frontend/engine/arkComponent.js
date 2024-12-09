@@ -6839,6 +6839,22 @@ class ImageObjectFitModifier extends ModifierWithKey {
   }
 }
 ImageObjectFitModifier.identity = Symbol('imageObjectFit');
+class ImageMatrixModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetImageMatrix(node);
+    } else {
+      getUINativeModule().image.setImageMatrix(node, this.value.matrix4x4);
+    }
+  }
+  checkObjectDiff() {
+    return !deepCompareArrays(this.stageValue.matrix4x4, this.value.matrix4x4);
+  }
+}
+ImageMatrixModifier.identity = Symbol('imageMatrix');
 class ImageBorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7292,6 +7308,10 @@ class ArkImageComponent extends ArkComponent {
   }
   objectFit(value) {
     modifierWithKey(this._modifiersWithKeys, ImageObjectFitModifier.identity, ImageObjectFitModifier, value);
+    return this;
+  }
+  imageMatrix(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageMatrixModifier.identity, ImageMatrixModifier, value);
     return this;
   }
   objectRepeat(value) {
@@ -11775,7 +11795,8 @@ class TextDataDetectorConfigModifier extends ModifierWithKey {
       getUINativeModule().text.resetDataDetectorConfig(node);
     } else {
       getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
-        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle);
+        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle,
+        this.value.referenceTime, this.value.detectContext);
     }
   }
   checkObjectDiff() {
@@ -11784,7 +11805,9 @@ class TextDataDetectorConfigModifier extends ModifierWithKey {
     !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
     !isBaseOrResourceEqual(this.stageValue.decorationType, this.value.decorationType) ||
     !isBaseOrResourceEqual(this.stageValue.decorationColor, this.value.decorationColor) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle);
+    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle) ||
+    !isBaseOrResourceEqual(this.stageValue.referenceTime, this.value.referenceTime) ||
+    !isBaseOrResourceEqual(this.stageValue.detectContext, this.value.detectContext);
   }
 }
 TextDataDetectorConfigModifier.identity = Symbol('textDataDetectorConfig');
@@ -11928,6 +11951,8 @@ class ArkTextComponent extends ArkComponent {
       detectorConfig.decorationColor = config.decoration.color;
       detectorConfig.decorationStyle = config.decoration.style;
     }
+    detectorConfig.referenceTime = config.referenceTime;
+    detectorConfig.detectContext = config.detectContext;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
   }
@@ -15876,11 +15901,14 @@ class TextDataDetectorConfig {
     this.decorationType = undefined;
     this.decorationColor = undefined;
     this.decorationStyle = undefined;
+    this.referenceTime = undefined;
+    this.detectContext = undefined;
   }
   isEqual(another) {
     return (this.types === another.types) && (this.onDetectResultUpdate === another.onDetectResultUpdate) &&
     (this.color === another.color) && (this.decorationType === another.decorationType) &&
-    (this.decorationColor=== another.decorationColor) && (this.decorationStyle === another.decorationStyle);
+    (this.decorationColor === another.decorationColor) && (this.decorationStyle === another.decorationStyle) &&
+    (this.referenceTime === another.referenceTime) && (this.detectContext === another.detectContext);
   }
 }
 

@@ -595,7 +595,7 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
     return res;
 }
 
-float WaterFlowLayoutInfo::EstimateContentHeight() const
+float WaterFlowLayoutInfo::EstimateTotalHeight() const
 {
     auto childCount = 0;
     if (!itemInfos_.empty()) {

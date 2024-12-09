@@ -1552,8 +1552,8 @@ HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius001, TestSize.Level1)
     sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->ClipSheetNode();
     auto renderContext = sheetNode->GetRenderContext();
-    radius.radiusBottomLeft = 0.0_vp;
-    radius.radiusBottomRight = 0.0_vp;
+    radius.radiusBottomLeft = 1.0_px;
+    radius.radiusBottomRight = 1.0_px;
     EXPECT_EQ(renderContext->GetBorderRadius(), radius);
 
     SheetPresentationTestNg::TearDownTestCase();

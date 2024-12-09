@@ -81,6 +81,7 @@ const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
 const RIGHT_ONLY_RADIO_WIDTH = '30vp';
 const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
 const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
+const ACCESSIBILITY_LEVEL_AUTO = 'auto';
 const ICON_SIZE_MAP = new Map([
     [IconType.BADGE, BADGE_SIZE],
     [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -801,6 +802,9 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
+            Button.accessibilityLevel(this.button?.accessibilityLevel ? this.button?.accessibilityLevel : ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''));
         }, Button);
         this.observeComponentCreation2((q13, r13) => {
             Row.create();
@@ -842,6 +846,9 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(g13.icon?.action);
+            Button.accessibilityLevel(g13.icon?.accessibilityLevel ? g13.icon?.accessibilityLevel : ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(getAccessibilityText(g13.icon?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(g13.icon?.accessibilityDescription ?? ''));
             Button.flexShrink(0);
         }, Button);
         this.observeComponentCreation2((i13, j13) => {
@@ -904,6 +911,9 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(this.arrow?.action);
+            Button.accessibilityLevel(this.arrow?.accessibilityLevel ? this.arrow?.accessibilityLevel : ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
         this.observeComponentCreation2((v12, w12) => {
             Image.create(this.arrow?.value);
@@ -943,6 +953,9 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
+            Radio.accessibilityLevel(this.radio?.accessibilityLevel ? this.radio?.accessibilityLevel : ACCESSIBILITY_LEVEL_AUTO);
+            Radio.accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? '', this.radio?.isCheck));
+            Radio.accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? '', this.radio?.isCheck));
         }, Radio);
     }
     createCheckBox(m12 = null) {
@@ -972,6 +985,9 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
+            Checkbox.accessibilityLevel(this.checkBox?.accessibilityLevel ? this.checkBox?.accessibilityLevel : ACCESSIBILITY_LEVEL_AUTO);
+            Checkbox.accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? '', this.checkBox?.isCheck));
+            Checkbox.accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? '', this.checkBox?.isCheck));
         }, Checkbox);
         Checkbox.pop();
     }
@@ -1006,6 +1022,9 @@ class OperateItemStruct extends ViewPU {
                 this.switchState = !this.switchState;
             });
             Toggle.hitTestBehavior(HitTestMode.Block);
+            Toggle.accessibilityLevel(this.switch?.accessibilityLevel ? this.switch?.accessibilityLevel : ACCESSIBILITY_LEVEL_AUTO);
+            Toggle.accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? '', this.switch?.isCheck));
+            Toggle.accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? '', this.switch?.isCheck));
         }, Toggle);
         Toggle.pop();
         Row.pop();
@@ -1048,6 +1067,9 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(this.arrow?.action);
+            Button.accessibilityLevel(this.arrow?.accessibilityLevel ? this.arrow?.accessibilityLevel : ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`);
+            Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
         this.observeComponentCreation2((p11, q11) => {
             If.create();
@@ -1213,6 +1235,25 @@ class OperateItemStruct extends ViewPU {
         this.updateDirtyElements();
     }
 }
+function getAccessibilityText(j, k) {
+    try {
+        let o = getContext().resourceManager.getStringSync(125833934);
+        let p = '';
+        if (typeof j === 'string') {
+            p = j;
+        }
+        else {
+            p = getContext().resourceManager.getStringSync(j);
+        }
+        return k ? `${o},${p}` : p;
+    }
+    catch (l) {
+        let m = l.code;
+        let n = l.message;
+        hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${m}, message: ${n}`);
+        return '';
+    }
+}
 export class ComposeListItem extends ViewPU {
     constructor(b11, c11, d11, e11 = -1, f11 = undefined, g11) {
         super(b11, d11, e11, g11);
@@ -1241,6 +1282,7 @@ export class ComposeListItem extends ViewPU {
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
         this.callbackId = undefined;
+        this.__accessibilityTextBuilder = new ObservedPropertySimplePU('', this, "accessibilityTextBuilder");
         this.envCallback = {
             onConfigurationUpdated: (h) => {
                 this.fontSizeScale = this.decideFontSizeScale();
@@ -1320,6 +1362,9 @@ export class ComposeListItem extends ViewPU {
         if (a11.callbackId !== undefined) {
             this.callbackId = a11.callbackId;
         }
+        if (a11.accessibilityTextBuilder !== undefined) {
+            this.accessibilityTextBuilder = a11.accessibilityTextBuilder;
+        }
         if (a11.envCallback !== undefined) {
             this.envCallback = a11.envCallback;
         }
@@ -1348,6 +1393,7 @@ export class ComposeListItem extends ViewPU {
         this.__contentItemDirection.purgeDependencyOnElmtId(y10);
         this.__containerPadding.purgeDependencyOnElmtId(y10);
         this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(y10);
+        this.__accessibilityTextBuilder.purgeDependencyOnElmtId(y10);
     }
     aboutToBeDeleted() {
         this.__contentItem.aboutToBeDeleted();
@@ -1369,6 +1415,7 @@ export class ComposeListItem extends ViewPU {
         this.__contentItemDirection.aboutToBeDeleted();
         this.__containerPadding.aboutToBeDeleted();
         this.__textArrowLeftSafeOffset.aboutToBeDeleted();
+        this.__accessibilityTextBuilder.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1486,6 +1533,12 @@ export class ComposeListItem extends ViewPU {
     set textArrowLeftSafeOffset(f10) {
         this.__textArrowLeftSafeOffset.set(f10);
     }
+    get accessibilityTextBuilder() {
+        return this.__accessibilityTextBuilder.get();
+    }
+    set accessibilityTextBuilder(i) {
+        this.__accessibilityTextBuilder.set(i);
+    }
     onWillApplyTheme(e10) {
         this.hoveringColor = e10.colors.interactiveHover;
         this.touchDownColor = e10.colors.interactivePressed;
@@ -1524,6 +1577,21 @@ export class ComposeListItem extends ViewPU {
         }
         if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle) >= this.itemHeight) {
             this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle) + SAFE_LIST_PADDING;
+        }
+        if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
+            this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+      `;
+        }
+        else {
+            this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+        ${getAccessibilityText(this.operateItem?.text ?? '')}
+      `;
         }
     }
     aboutToAppear() {
@@ -1677,6 +1745,8 @@ export class ComposeListItem extends ViewPU {
         this.observeComponentCreation2((v9, w9) => {
             Stack.create();
             Stack.width('100%');
+            Stack.accessibilityGroup(true);
+            Stack.accessibilityText(this.accessibilityTextBuilder);
             Stack.padding({
                 left: STACK_PADDING,
                 right: STACK_PADDING
@@ -1728,7 +1798,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((o9, p9) => {
                             if (p9) {
-                                let q9 = new ContentItemStruct(this, {}, undefined, o9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 903, col: 11 });
+                                let q9 = new ContentItemStruct(this, {}, undefined, o9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 979, col: 11 });
                                 ViewPU.create(q9);
                                 let c = () => {
                                     return {};
@@ -1764,7 +1834,7 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, i9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 906, col: 11 });
+                                }, undefined, i9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 982, col: 11 });
                                 ViewPU.create(k9);
                                 let b = () => {
                                     return {
@@ -1838,7 +1908,7 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.__containerDirection,
-                                }, undefined, a9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 918, col: 11 });
+                                }, undefined, a9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 994, col: 11 });
                                 ViewPU.create(c9);
                                 let a = () => {
                                     return {

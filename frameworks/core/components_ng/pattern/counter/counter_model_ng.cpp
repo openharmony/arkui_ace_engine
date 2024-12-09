@@ -165,12 +165,11 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
     CHECK_NULL_VOID(addNode);
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
-    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
-                        clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onInc");
-#endif
-                    };
+    GestureEventFunc gestureEventFunc = [id = frameNode->GetId(), clickEvent = std::move(onInc)](
+                                            GestureEvent& /*unused*/) {
+        clickEvent();
+        CounterModelNG::ReportComponentChangeEvent(id, "onInc");
+    };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 
@@ -183,12 +182,11 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
     auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
     CHECK_NULL_VOID(subNode);
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
-    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
-                        clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDec");
-#endif
-                    };
+    GestureEventFunc gestureEventFunc = [id = frameNode->GetId(), clickEvent = std::move(onDec)](
+                                            GestureEvent& /*unused*/) {
+        clickEvent();
+        CounterModelNG::ReportComponentChangeEvent(id, "onDec");
+    };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 
@@ -331,5 +329,14 @@ void CounterModelNG::SetWidth(FrameNode* frameNode, const Dimension& value)
 void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, value, frameNode);
+}
+
+void CounterModelNG::ReportComponentChangeEvent(int32_t id, const std::string& value)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto json = InspectorJsonUtil::Create();
+    json->Put("Counter", value.data());
+    UiSessionManager::GetInstance().ReportComponentChangeEvent(id, "event", json);
+#endif
 }
 } // namespace OHOS::Ace::NG

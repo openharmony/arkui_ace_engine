@@ -41,7 +41,10 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         overlayMod->SetCaretVisible(false);
         const auto& selection = richEditorPattern->GetTextSelector();
         if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-            overlayMod->SetSelectedRects(pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd()));
+            auto contentRect = richEditorPattern->GetTextContentRect();
+            auto rects = pManager_->GetTextBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
+            std::vector<RectF> selectedRects = CalculateSelectedRect(rects, contentRect.Width());
+            overlayMod->SetSelectedRects(selectedRects);
         }
         return;
     }
@@ -55,16 +58,38 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     SetCaretOffsetAndHeight(paintWrapper);
     std::vector<RectF> selectedRects;
     const auto& selection = richEditorPattern->GetTextSelector();
-    if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-        selectedRects = pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd());
-    }
     auto contentRect = richEditorPattern->GetTextContentRect();
+    if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
+        auto rects = pManager_->GetTextBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
+        selectedRects = CalculateSelectedRect(rects, contentRect.Width());
+    }
     overlayMod->SetContentRect(contentRect);
     overlayMod->SetSelectedRects(selectedRects);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     overlayMod->SetFrameSize(frameSize);
     overlayMod->UpdateScrollBar(paintWrapper);
     overlayMod->SetIsClip(false);
+}
+
+std::vector<RectF> RichEditorPaintMethod::CalculateSelectedRect(
+    const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& selectedRects, float contentWidth)
+{
+    const float blankWidth = TextBase::GetSelectedBlankLineWidth();
+    std::vector<RectF> result;
+    float lastLineBottom = -1.0f;
+    for (const auto& info : selectedRects) {
+        auto rects = info.first;
+        TextBase::CalculateSelectedRectEx(rects, lastLineBottom);
+        auto textAlign = TextBase::CheckTextAlignByDirection(info.second.align, info.second.direction);
+        for (auto& rect : rects) {
+            TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);
+        }
+        result.insert(result.end(), rects.begin(), rects.end());
+        if (!result.empty()) {
+            lastLineBottom = result.back().Bottom();
+        }
+    }
+    return result;
 }
 
 void RichEditorPaintMethod::SetPreviewTextDecoration(PaintWrapper* paintWrapper)

@@ -676,8 +676,11 @@ globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(cont
 };
 globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId) {
     let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
-    nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-    NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+    if (nodeController) {
+        nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
+        nodeController._value = -1;
+        NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+    }
 };
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.

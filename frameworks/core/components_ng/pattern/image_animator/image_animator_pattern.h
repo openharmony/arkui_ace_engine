@@ -165,6 +165,7 @@ private:
     void ResetFormAnimationStartTime();
     void ResetFormAnimationFlag();
     void RunAnimatorByStatus(int32_t index);
+    void ReportComponentChangeEvent(const char* event);
 
     int32_t iteration_ = 1;
     RefPtr<Animator> animator_;
