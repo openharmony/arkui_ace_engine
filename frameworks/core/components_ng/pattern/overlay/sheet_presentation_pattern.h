@@ -447,6 +447,8 @@ public:
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
 
+    void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
+
     void BubbleStyleSheetTransition(bool isTransitionIn);
 
     void StartOffsetEnteringAnimation();

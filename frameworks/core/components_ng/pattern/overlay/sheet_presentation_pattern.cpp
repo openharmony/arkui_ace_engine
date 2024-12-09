@@ -45,6 +45,9 @@
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
 #include "core/components_ng/property/property.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1748,6 +1751,21 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
         sheetType = SheetType::SHEET_CENTER;
     }
+}
+
+void SheetPresentationPattern::SetUIFirstSwitch(bool isFirstTransition, bool isNone)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!isFirstTransition) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rosenContext = DynamicCast<RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(rosenContext);
+    rosenContext->SetUIFirstSwitch(
+        isNone ? OHOS::Rosen::RSUIFirstSwitch::NONE : OHOS::Rosen::RSUIFirstSwitch::MODAL_WINDOW_CLOSE);
+#endif
 }
 
 void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
