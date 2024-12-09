@@ -34,7 +34,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'image', label: '图片/Image' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
-    { name: 'counter', label: '计数器/counter'},
+    { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
     { name: 'dataPanel', label: '数据面板/DataPanel'}
   ]
