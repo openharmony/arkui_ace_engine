@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/common/layout_inspector.h"
 
+#include <mutex>
 #include <string>
 
 #include "include/core/SkImage.h"
@@ -122,10 +123,20 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 }
 } // namespace
 
+constexpr static char RECNODE_SELFID[] = "selfId";
+constexpr static char RECNODE_NODEID[] = "nodeID";
+constexpr static char RECNODE_NAME[] = "value";
+constexpr static char RECNODE_DEBUGLINE[] = "debugLine";
+constexpr static char RECNODE_CHILDREN[] = "RSNode";
+
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
-std::function<void(bool)> LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
+bool LayoutInspector::isUseStageModel_ = false;
+std::mutex LayoutInspector::recMutex_;
+ProfilerStatusCallback LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
+RsProfilerNodeMountCallback LayoutInspector::rsProfilerNodeMountCallback_ = nullptr;
 const char PNG_TAG[] = "png";
+NG::InspectorTreeMap LayoutInspector::recNodeInfos_;
 
 void LayoutInspector::SupportInspector()
 {
@@ -166,7 +177,7 @@ void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
     }
 }
 
-void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback callback)
+void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback&& callback)
 {
     jsStateProfilerStatusCallback_ = callback;
 }
@@ -174,6 +185,16 @@ void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback ca
 bool LayoutInspector::GetStateProfilerStatus()
 {
     return stateProfilerStatus_;
+}
+
+RsProfilerNodeMountCallback LayoutInspector::GetRsProfilerNodeMountCallback()
+{
+    return rsProfilerNodeMountCallback_;
+}
+
+void LayoutInspector::SetRsProfilerNodeMountCallback(RsProfilerNodeMountCallback&& callback)
+{
+    rsProfilerNodeMountCallback_ = callback;
 }
 
 void LayoutInspector::SendStateProfilerMessage(const std::string& message)
@@ -189,18 +210,35 @@ void LayoutInspector::SetStateProfilerStatus(bool status)
     taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetStateProfilerStatus");
 }
 
+void LayoutInspector::ConnectServerCallback()
+{
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "connect server callback isStage:%{public}d", isUseStageModel_);
+    if (isUseStageModel_) {
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "connect server, reset callback.");
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetRecordCallback(
+            LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
+    }
+}
+
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "InstanceId:%{public}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
         OHOS::AbilityRuntime::ConnectServerManager::Get().SetLayoutInspectorCallback(
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
             [](bool status) { return SetStatus(status); });
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetRecordCallback(
+            LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
+        OHOS::AbilityRuntime::ConnectServerManager::Get().RegistConnectServerCallback(
+            LayoutInspector::ConnectServerCallback);
+        isUseStageModel_ = true;
     } else {
         OHOS::Ace::ConnectServerManager::Get().SetLayoutInspectorCallback(
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
             [](bool status) { return SetStatus(status); });
+        isUseStageModel_ = false;
     }
 
     OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
@@ -298,4 +336,80 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     message->Put("pixelMapBase64", info.c_str());
 }
 
+void LayoutInspector::HandleStopRecord()
+{
+    std::unique_lock<std::mutex> lock(recMutex_);
+    SetRsProfilerNodeMountCallback(nullptr);
+    auto jsonRoot = JsonUtil::Create(true);
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    for (auto& uiNode : recNodeInfos_) {
+        if (uiNode.second != nullptr) {
+            auto jsonNode = JsonUtil::Create(true);
+            jsonNode->Put(RECNODE_NODEID, std::to_string(uiNode.second->GetSelfId()).c_str());
+            jsonNode->Put(RECNODE_SELFID, uiNode.second->GetNodeId());
+            jsonNode->Put(RECNODE_NAME, uiNode.second->GetName().c_str());
+            jsonNode->Put(RECNODE_DEBUGLINE, uiNode.second->GetDebugLine().c_str());
+            jsonNodeArray->PutRef(std::move(jsonNode));
+        }
+    }
+    recNodeInfos_.clear();
+    lock.unlock();
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot->PutRef(RECNODE_CHILDREN, std::move(jsonNodeArray));
+    }
+    std::string arrayJsonStr = jsonRoot->ToString();
+    auto sendResultTask = [arrayJsonStr]() {
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetRecordResults(arrayJsonStr);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendResultTask));
+}
+
+void LayoutInspector::HandleStartRecord()
+{
+    // regist inner callback function
+    std::unique_lock<std::mutex> lock(recMutex_);
+    SetRsProfilerNodeMountCallback(LayoutInspector::HandleInnerCallback);
+    lock.unlock();
+    auto container = Container::GetFoucsed();
+    CHECK_NULL_VOID(container);
+    if (container->IsDynamicRender()) {
+        container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+    }
+    auto containerId = container->GetInstanceId();
+    ContainerScope socpe(containerId);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto startRecordTask = []() {
+        std::lock_guard<std::mutex> lock(LayoutInspector::recMutex_);
+        NG::InspectorTreeMap recTreeNodes;
+        NG::InspectorTreeMap offScreenTreeNodes;
+        NG::Inspector::GetRecordAllPagesNodes(recTreeNodes);
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get nodes size:%{public}zu", recTreeNodes.size());
+        NG::Inspector::GetOffScreenTreeNodes(offScreenTreeNodes);
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get offscreen nodes size:%{public}zu", offScreenTreeNodes.size());
+        LayoutInspector::recNodeInfos_.swap(recTreeNodes);
+        for (auto& item : offScreenTreeNodes) {
+            recNodeInfos_.emplace(item);
+        }
+    };
+    context->GetTaskExecutor()->PostTask(
+        std::move(startRecordTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTree");
+}
+
+void LayoutInspector::HandleInnerCallback(FrameNodeInfo node)
+{
+    // convert FrameNodeInfo --> recNode
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR,
+        "FrameNodeInfo:selfid:%{public}" PRIu64 ",nodid:%{public}d,type:%{public}s,debugline:%{public}s",
+        node.rsNodeId, node.frameNodeId, node.nodeType.c_str(), node.debugline.c_str());
+    auto recNode = AceType::MakeRefPtr<NG::RecNode>();
+    CHECK_NULL_VOID(recNode);
+    recNode->SetSelfId(node.rsNodeId);
+    recNode->SetNodeId(node.frameNodeId);
+    recNode->SetName(node.nodeType);
+    recNode->SetDebugLine(node.debugline);
+    std::lock_guard<std::mutex> lock(recMutex_);
+    recNodeInfos_.emplace(node.rsNodeId, recNode);
+}
 } // namespace OHOS::Ace
