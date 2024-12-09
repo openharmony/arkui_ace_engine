@@ -552,6 +552,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
         case KEY_INPUT_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->keyEvent.subKind);
             break;
+        case TEXT_INPUT_CHANGE:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->textChangeEvent.subKind);
+            break;
         default:
             break; /* Empty */
     }

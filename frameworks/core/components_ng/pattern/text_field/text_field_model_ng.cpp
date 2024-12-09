@@ -891,6 +891,14 @@ void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
 }
 
+Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, LetterSpacing, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
@@ -1916,6 +1924,14 @@ void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+bool TextFieldModelNG::GetEnablePreviewText(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSupportPreviewText();
 }
 
 void TextFieldModelNG::SetEnableHapticFeedback(bool state)
