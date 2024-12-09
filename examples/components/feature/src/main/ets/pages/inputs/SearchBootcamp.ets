@@ -319,8 +319,6 @@ export struct SearchBootcamp {
           color: this.searchIconColorLight
         })
 
-        //输入？(searchIconSrc)
-
         RadioBlock({
           title: 'cancelButton.style',
           isEnabled: this.enableCancelButtonStyle,
@@ -345,8 +343,6 @@ export struct SearchBootcamp {
           isEnabled: this.enableCancelButtonIconColor,
           color: this.cancelButtonIconColor
         })
-
-        //输入？(cancelButtonIcon.Src)
 
         ColorBlock({
           title: 'fontColor',
@@ -481,8 +477,6 @@ export struct SearchBootcamp {
           min: 0,
           max: 20
         })
-
-        //输入(fontFeature
 
         ColorBlock({
           title: 'selectedBackgroundColor',
