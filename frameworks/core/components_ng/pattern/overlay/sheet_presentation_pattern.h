@@ -413,6 +413,7 @@ public:
 
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
+    bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
