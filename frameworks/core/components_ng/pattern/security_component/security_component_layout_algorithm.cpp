@@ -121,6 +121,12 @@ void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayou
         property->GetBackgroundBottomPadding().has_value(), size, borderWidth);
 
     size = property->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToPx();
+    if (!property->GetTextIconSpace().has_value() ||
+        LessNotEqual(property->GetTextIconSpace().value().ConvertToPx(), 0.0)) {
+        size = theme->GetTextIconSpace().ConvertToPx();
+    } else {
+        size = property->GetTextIconSpace().value().ConvertToPx();
+    }
     middle_.Init(isVertical_, property->GetTextIconSpace().has_value(), size, 0.0);
 }
 
