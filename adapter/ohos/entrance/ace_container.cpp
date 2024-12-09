@@ -196,6 +196,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
     }
 }
+
+void ParseLanguage(ConfigurationChange& configurationChange, const std::string& languageTag)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+    }
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -2567,14 +2579,8 @@ void AceContainer::BuildResConfig(
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
     if (!parsedConfig.languageTag.empty()) {
-        std::string language;
-        std::string script;
-        std::string region;
-        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
-        if (!language.empty() || !script.empty() || !region.empty()) {
-            configurationChange.languageUpdate = true;
-            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-        }
+        ParseLanguage(configurationChange, parsedConfig.languageTag);
+        resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
         auto fontManager = pipelineContext_->GetFontManager();
@@ -2614,8 +2620,8 @@ void AceContainer::UpdateConfiguration(
     auto resConfig = GetResourceConfiguration();
     BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
+        ParseLanguage(configurationChange, parsedConfig.preferredLanguage);
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
-        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
