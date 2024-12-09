@@ -382,6 +382,11 @@ public:
         return context ? context->GetWindow() : nullptr;
     }
 
+    virtual uint64_t GetDisplayId() const
+    {
+        return -1;
+    }
+
     virtual bool IsUseStageModel() const
     {
         return false;

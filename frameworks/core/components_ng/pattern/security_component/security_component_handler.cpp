@@ -617,7 +617,11 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
-    uint64_t displayId = container->GetCurrentDisplayId();
+    uint64_t displayId = container->GetDisplayId();
+    if (displayId == Rosen::DISPLAY_ID_INVALID) {
+        SC_LOG_WARN("InitBaseInfoWarning: Get displayId failed, using default displayId");
+        displayId = 0;
+    }
     buttonInfo.displayId_ = displayId;
     return true;
 }
