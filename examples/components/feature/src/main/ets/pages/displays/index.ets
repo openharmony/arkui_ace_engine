@@ -35,7 +35,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
     { name: 'counter', label: '计数器/counter'},
-    { name: 'AdvancedCounter', label: '计数器/advanced.Counter'},
+    { name: 'advancedCounter', label: '计数器/advanced.Counter'},
     { name: 'dataPanel', label: '数据面板/DataPanel'}
   ]
 };
@@ -54,11 +54,11 @@ export function DisplaysDestination(name: string, route: Route) {
     TextBootcamp({ title: route.label })
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
-  }else if (name === 'displays/counter') {
+  } else if (name === 'displays/counter') {
     CounterBootcamp({ title: route.label})
-  }else if (name === 'displays/AdvancedCounter'){
+  } else if (name === 'displays/advancedCounter'){
     AdvancedCounterBootcamp({ title: route.label})
-  }else if (name === 'displays/dataPanel'){
+  } else if (name === 'displays/dataPanel'){
     DataPanelBootcamp({ title: route.label})
   }
 }
