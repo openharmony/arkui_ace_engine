@@ -113,6 +113,7 @@ constexpr Dimension ERROR_TEXT_BOTTOM_MARGIN = 8.0_vp;
 constexpr Dimension COUNTER_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension COUNTER_TEXT_BOTTOM_MARGIN = 8.0_vp;
 constexpr Dimension STANDARD_COUNTER_TEXT_MARGIN = 22.0_vp;
+constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr uint32_t ERROR_TEXT_MAXLINE = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
@@ -1891,6 +1892,7 @@ void TextFieldPattern::ResetTouchAndMoveCaretState()
             StopTwinkling();
         }
     }
+    FloatingCaretLand();
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)
@@ -1952,7 +1954,8 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         UpdateContentScroller(touchOffset);
         selectController_->UpdateCaretInfoByOffset(touchOffset, false);
         if (magnifierController_ && IsOperation()) {
-            magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
+            auto floatCaretRectCenter = GetFloatingCaretRect().Center();
+            magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
         }
         StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
     }
@@ -2506,7 +2509,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
     if (mouseStatus_ != MouseStatus::MOVE) {
-        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation(), true, false);
         UpdateCaretInfoToController();
     }
     StartTwinkling();
@@ -3874,7 +3877,7 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
         StopTwinkling();
         return;
     }
-    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation(), true, false);
     StartTwinkling();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -3903,7 +3906,7 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     if (blockPress_ && mouseStatus_ == MouseStatus::PRESSED) {
-        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation(), true, false);
         StartTwinkling();
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -4491,6 +4494,34 @@ void TextFieldPattern::UltralimitShake()
             context->UpdateTranslateInXY({ 0.0f, 0.0f });
         },
         option.GetOnFinishEvent());
+}
+
+void TextFieldPattern::AdjustFloatingCaretInfo(const Offset& localOffset,
+    const HandleInfoNG& caretInfo, HandleInfoNG& floatingCaretInfo)
+{
+    CHECK_NULL_VOID(selectController_);
+    auto offsetX = localOffset.GetX();
+    auto offsetY = caretInfo.rect.Top();
+    floatingCaretInfo.rect.SetHeight(caretInfo.rect.Height());
+    auto contentRect = GetTextContentRect();
+    offsetX = std::min(std::max(contentRect.Left(), static_cast<float>(offsetX)),
+        contentRect.Right() - caretInfo.rect.Width());
+    offsetY = std::min(std::max(contentRect.Top(), static_cast<float>(offsetY)),
+        contentRect.Bottom() - floatingCaretInfo.rect.Height());
+    floatingCaretInfo.UpdateOffset({offsetX, offsetY});
+    bool reachBoundary = NearEqual(contentRect.Left(), offsetX) ||
+        NearEqual(contentRect.Right() - caretInfo.rect.Width(), static_cast<float>(offsetX));
+    bool distanceMoreThenTenVp = floatingCaretInfo.rect.GetOffset().GetDistance(caretInfo.rect.GetOffset())
+        >= FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE.ConvertToPx();
+    SetShowOriginCursor(reachBoundary ||
+        (selectController_->IsTouchAtLineEndOrBegin(localOffset) && distanceMoreThenTenVp));
+    SetFloatingCursorVisible(true);
+}
+
+void TextFieldPattern::FloatingCaretLand()
+{
+    CHECK_NULL_VOID(floatCaretState_.FloatingCursorVisible && textFieldOverlayModifier_ && selectController_);
+    textFieldOverlayModifier_->StartFloatingCaretLand(selectController_->GetCaretRect().GetOffset());
 }
 
 float TextFieldPattern::MeasureCounterNodeHeight()
@@ -7575,7 +7606,6 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 void TextFieldPattern::OnColorConfigurationUpdate()
 {
     ScrollablePattern::OnColorConfigurationUpdate();
-    colorModeChange_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto theme = GetTheme();
@@ -7590,6 +7620,9 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     if (magnifierController_) {
         magnifierController_->SetColorModeChange(true);
     }
+
+    auto colorMode = SystemProperties::GetColorMode();
+    SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

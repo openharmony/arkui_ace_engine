@@ -535,6 +535,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     }
     pattern->ScheduleDisappearDelayTask();
     pattern->UpdateCaretInfoToController();
+    pattern->FloatingCaretLand();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

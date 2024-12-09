@@ -111,6 +111,16 @@ public:
         return caretInfo_.rect;
     }
 
+    RectF GetFloatingCaretRect() const
+    {
+        return floatingCaretInfo_.rect;
+    }
+
+    void UpdateFloatingCaretInfo(const OffsetF& offset)
+    {
+        floatingCaretInfo_.UpdateOffset(offset);
+    }
+
     double GetSelectHeight() const
     {
         return std::max(firstHandleInfo_.rect.Height(), secondHandleInfo_.rect.Height());
@@ -186,7 +196,7 @@ public:
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
-    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true);
+    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true, bool floatCaret = true);
     OffsetF CalcCaretOffsetByOffset(const Offset& localOffset);
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity = std::nullopt);
@@ -212,6 +222,7 @@ public:
     RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
     bool IsTouchAtLineEnd(const Offset& localOffset);
+    bool IsTouchAtLineEndOrBegin(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
     void UpdateSelectWithBlank(const Offset& localOffset);
 
@@ -244,6 +255,7 @@ private:
     HandleInfoNG firstHandleInfo_;
     HandleInfoNG secondHandleInfo_;
     HandleInfoNG caretInfo_;
+    HandleInfoNG floatingCaretInfo_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<ContentController> contentController_;
     OnAccessibilityCallback onAccessibilityCallback_;
