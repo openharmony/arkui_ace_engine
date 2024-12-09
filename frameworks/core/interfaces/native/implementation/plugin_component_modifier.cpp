@@ -16,8 +16,32 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+    struct PluginComponentOptions {
+        std::optional<RequestPluginInfo> requestPluginInfo;
+        std::string data;
+    }
+} // namespace
+
+namespace Converter{
+    template<>
+    PluginComponentOptions Convert(const Ark_PluginComponentOptions& options)
+    {
+        PluginComponentOptions options;
+        options.requestPluginInfo = OptConvert<RequestPluginInfo>(options.template_);
+        LOGE("PluginComponentModifier::Convert cannot convert data. data is Ark_CustomObject!");
+    }
+    template<>
+    PluginComponentOptions Convert(const Ark_PluginComponentTemplate& template)
+    {
+        RequestPluginInfo info;
+        info.source = Convert<RequestPluginInfo>(template.source);
+        info.bundleName = Convert<RequestPluginInfo>(template.bundleName);
+    }
+} // Converter
 namespace PluginComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -32,8 +56,14 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //PluginComponentModelNG::SetSetPluginComponentOptions(frameNode, convValue);
+
+    auto optInfoData = Converter::OptConvert<RequestPluginInfo>(options);
+    if (optInfoData) {
+        PluginModelNG::SetRequestPluginInfo(frameNode, optInfoData.requestPluginInfo);
+    } else {
+        PluginModelNG::SetRequestPluginInfo(frameNode, std::nullopt);
+    }
+    LOGE("PluginComponentModifier::SetPluginComponentOptionsImpl setData into model isn't supported");
 }
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
@@ -43,8 +73,9 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //PluginComponentModelNG::SetOnComplete(frameNode, convValue);
+#if defined(PLUGIN_COMPONENT_SUPPORTED)
+    
+#endif
 }
 void OnErrorImpl(Ark_NativePointer node,
                  const PluginErrorCallback* value)

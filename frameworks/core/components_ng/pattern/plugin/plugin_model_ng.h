@@ -32,6 +32,10 @@ public:
     static void SetPluginSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
+    RefPtr<FrameNode> PluginModelNG::CreateFrameNode(int32_t nodeId);
+    void PluginModelNG::SetRequestPluginInfo(FrameNode *frameNode, const RequestPluginInfo& pluginInfo);
+    void PluginModelNG::SetOnComplete(FrameNode *frameNode, std::function<void(const std::string&)>&& OnComplete);
+    void PluginModelNG::SetOnError(FrameNode *frameNode, std::function<void(const std::string&)>&& OnError);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_MODEL_NG_H
