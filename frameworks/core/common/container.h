@@ -529,22 +529,61 @@ public:
         return nullptr;
     }
 
+    /*
+     *this interface is just use before api12(not include api12),after api12 when you judge version,use
+     *LessThanAPITargetVersion(PlatformVersion version)
+     */
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContext() &&
+                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+                   : LessThanAPITargetVersion(version);
     }
 
+    /*
+     *this interface is just use before api12(not include api12),after api12 when you judge version,use
+     *GreatOrEqualAPITargetVersion(PlatformVersion version)
+     */
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContext() &&
+                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+                   : GreatOrEqualAPITargetVersion(version);
+    }
+
+    /*
+     *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
+     */
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
+    {
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
+                             static_cast<int32_t>(version)
+                   : LessThanAPITargetVersion(version);
+    }
+
+    /*
+     *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
+     */
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
+    {
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
+                             static_cast<int32_t>(version)
+                   : GreatOrEqualAPITargetVersion(version);
     }
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        CHECK_NULL_RETURN(container, false);
+        if (!container) {
+            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+            return apiTargetVersion < static_cast<int32_t>(version);
+        }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
