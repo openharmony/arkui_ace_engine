@@ -27,6 +27,20 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG::Converter {
+struct FadingEdgeOptions {
+    std::optional<Dimension> fadingEdgeLength;
+};
+
+template<>
+FadingEdgeOptions Convert(const Ark_FadingEdgeOptions& src)
+{
+    FadingEdgeOptions options;
+    options.fadingEdgeLength = OptConvert<Dimension>(src.fadingEdgeLength);
+    return options;
+}
+} // namespace OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableCommonMethodModifier {
 Ark_NativePointer ConstructImpl()
@@ -193,9 +207,23 @@ void FadingEdgeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(enabled);
-    //auto convValue = Converter::OptConvert<type>(enabled); // for enums
-    //ScrollableCommonMethodModelNG::SetFadingEdge(frameNode, convValue);
+
+    std::optional<bool> fadingEdge;
+    if (enabled) {
+        fadingEdge = Converter::OptConvert<bool>(*enabled);
+    }
+
+    std::optional<Converter::FadingEdgeOptions> convOptions;
+    if (options) {
+        convOptions = Converter::OptConvert<Converter::FadingEdgeOptions>(*options);
+    }
+    std::optional<Dimension> fadingEdgeLength;
+    if (convOptions) {
+        fadingEdgeLength = convOptions->fadingEdgeLength;
+    }
+    Validator::ValidateNonNegative(fadingEdgeLength);
+
+    ScrollableModelNG::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
 }
 } // ScrollableCommonMethodModifier
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier()
