@@ -30,6 +30,8 @@ export struct ImageboxGroupBootcamp {
   @State compMargin: number = 0;
   @State enableImage: boolean = true;
   @State image: ResourceStr = $r('app.media.startIcon');
+  @State enableDragGray: boolean = false;
+  @State dragGray: DragPreviewMode = DragPreviewMode.AUTO;
 
   build() {
     NavDestination() {
@@ -58,6 +60,8 @@ export struct ImageboxGroupBootcamp {
           .focusable(useEnabled(this.enableFocusable, this.compFocusable))
           .borderRadius(useEnabled(this.enableBorderRadius, this.imageBorderRadius))
           .margin(useEnabled(this.enableMargin, this.compMargin))
+          .onDragStart(() => {})
+          .dragPreviewOptions({ mode: useEnabled(this.enableDragGray, this.dragGray)})
       }
     }
   }
@@ -107,6 +111,16 @@ export struct ImageboxGroupBootcamp {
           value: $compMargin,
           min: 0,
           max: 20
+        })
+
+        RadioBlock({
+          title: '拖拽背板图样式',
+          isEnabled: $enableDragGray,
+          value: $dragGray,
+          dataSource: [
+            { label: '默认', value: DragPreviewMode.AUTO },
+            { label: '灰显', value: DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT }
+          ]
         })
       }.width('100%')
     }
