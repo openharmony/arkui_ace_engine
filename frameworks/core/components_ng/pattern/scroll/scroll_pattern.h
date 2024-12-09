@@ -62,7 +62,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paint = MakeRefPtr<ScrollPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, nullptr);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        auto drawDirection = (layoutDirection == TextDirection::RTL);
+        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
         paint->SetScrollBar(GetScrollBar());
         CreateScrollBarOverlayModifier();
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -70,6 +76,11 @@ public:
         if (scrollEffect && scrollEffect->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect);
         }
+        if (!scrollContentModifier_) {
+            scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
+        }
+        paint->SetContentModifier(scrollContentModifier_);
+        UpdateFadingEdge(paint);
         return paint;
     }
 
@@ -423,6 +434,8 @@ private:
     float lastPageLength_ = 0.0f;
     float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
+
+    RefPtr<ScrollContentModifier> scrollContentModifier_;
 
     //initialOffset
     std::optional<OffsetT<CalcDimension>> initialOffset_;

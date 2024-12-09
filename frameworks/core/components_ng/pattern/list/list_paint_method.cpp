@@ -50,6 +50,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (padding) {
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
+    UpdateFadingGradient(renderContext);
     bool hasPadding = padding && padding->HasValue();
     bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
     listContentModifier_->SetClipOffset(paddingOffset);

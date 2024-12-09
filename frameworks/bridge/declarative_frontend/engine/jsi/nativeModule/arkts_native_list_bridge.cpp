@@ -302,6 +302,42 @@ ArkUINativeModuleValue ListBridge::ResetListEdgeEffect(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> fadingEdgeArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> fadingEdgeLengthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    CalcDimension fadingEdgeLength = Dimension(32.0f, DimensionUnit::VP); // default value
+
+    if (fadingEdgeArg->IsUndefined() || fadingEdgeArg->IsNull()) {
+        GetArkUINodeModifiers()->getListModifier()->resetListFadingEdge(nativeNode);
+    } else {
+        bool fadingEdge = fadingEdgeArg->ToBoolean(vm)->Value();
+        if (!fadingEdgeLengthArg->IsUndefined() && !fadingEdgeLengthArg->IsNull() &&
+            fadingEdgeLengthArg->IsObject(vm)) {
+            ArkTSUtils::ParseJsLengthMetrics(vm, fadingEdgeLengthArg, fadingEdgeLength);
+        }
+        GetArkUINodeModifiers()->getListModifier()->setListFadingEdge(
+            nativeNode, fadingEdge, fadingEdgeLength.Value(), static_cast<int32_t>(fadingEdgeLength.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetListFadingEdge(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetListDirection(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

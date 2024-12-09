@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -39,13 +40,12 @@ struct DividerInfo {
     bool isVertical = true;
 };
 
-class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ListPaintMethod, NodePaintMethod)
+class ACE_EXPORT ListPaintMethod : public ScrollablePaintMethod {
+    DECLARE_ACE_TYPE(ListPaintMethod, ScrollablePaintMethod)
 public:
     using PositionMap = ListLayoutAlgorithm::PositionMap;
-    ListPaintMethod(
-        const V2::ItemDivider& divider, bool vertical, int32_t lanes, float space)
-        : divider_(divider), vertical_(vertical), lanes_(lanes), space_(space)
+    ListPaintMethod(const V2::ItemDivider& divider, bool vertical, bool isReverse, int32_t lanes, float space)
+        : ScrollablePaintMethod(vertical, isReverse), divider_(divider), lanes_(lanes), space_(space)
     {}
     ~ListPaintMethod() override = default;
 
@@ -130,7 +130,6 @@ public:
 
 private:
     V2::ItemDivider divider_;
-    bool vertical_ = false;
     int32_t lanes_ = 1;
     int32_t totalItemCount_ = 0;
     float space_;

@@ -2399,6 +2399,9 @@ struct ArkUIListModifier {
     void (*resetInitialScroller)(ArkUINodeHandle node);
     void (*setListMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool enabled);
     void (*resetListMaintainVisibleContentPosition)(ArkUINodeHandle node);
+    void (*setListFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
+        ArkUI_Int32 fadingEdgeLengthUnit);
+    void (*resetListFadingEdge)(ArkUINodeHandle node);
     void (*setShowCached)(ArkUINodeHandle node, ArkUI_Bool show);
     void (*resetShowCached)(ArkUINodeHandle node);
     ArkUI_Bool (*getShowCached)(ArkUINodeHandle node);
@@ -2648,6 +2651,9 @@ struct ArkUIGridModifier {
     void (*resetFlingSpeedLimit)(ArkUINodeHandle node);
     void (*setGridAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
     void (*resetGridAlignItems)(ArkUINodeHandle node);
+    void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
+        ArkUI_Int32 fadingEdgeLengthUnit);
+    void (*resetGridFadingEdge)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -2732,6 +2738,9 @@ struct ArkUIScrollModifier {
     void (*resetScrollOnWillScrollCallBack)(ArkUINodeHandle node);
     void (*setOnScrollFrameBeginCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnScrollFrameBeginCallBack)(ArkUINodeHandle node);
+    void (*setScrollFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
+        ArkUI_Int32 fadingEdgeLengthUnit);
+    void (*resetScrollFadingEdge)(ArkUINodeHandle node);
     void (*setScrollFling)(ArkUINodeHandle node, ArkUI_Float64 value);
 };
 
@@ -3602,6 +3611,9 @@ struct ArkUIWaterFlowModifier {
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, ArkUI_Uint32 layoutMode);
     void (*resetWaterFlowLayoutMode)(ArkUINodeHandle node);
     void (*resetWaterFlowSections)(ArkUINodeHandle node);
+    void (*setWaterFlowFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
+        ArkUI_Int32 fadingEdgeLengthUnit);
+    void (*resetWaterFlowFadingEdge)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {

@@ -67,6 +67,10 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -104,7 +108,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     host->SetViewPort(globalViewPort);
     isInitialized_ = true;
     SetScrollSource(SCROLL_FROM_NONE);
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
@@ -224,6 +230,9 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom() const
 {
+    if (LessNotEqual(scrollableDistance_, 0.0f)) {
+        return LessOrEqual(currentOffset_, 0.0f);
+    }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
 

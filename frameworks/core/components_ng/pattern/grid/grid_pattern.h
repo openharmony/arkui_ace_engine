@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -173,6 +174,8 @@ public:
         return gridLayoutInfo_.offsetEnd_;
     }
 
+    bool IsFadingBottom() const override;
+
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
@@ -323,6 +326,8 @@ private:
 
     bool scrollable_ = true;
     bool forceOverScroll_ = false;
+
+    RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
     bool isLeftStep_ = false;

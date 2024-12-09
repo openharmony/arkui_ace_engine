@@ -386,6 +386,19 @@ class ArkListEdgeEffect {
   }
 }
 
+class ArkFadingEdge {
+  value: boolean;
+  options?: FadingEdgeOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkFadingEdge): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
+
 class ArkScrollEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;

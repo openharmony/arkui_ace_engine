@@ -746,7 +746,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
             gridLayoutInfo_.prevOffset_ = 0;
         }
         gridLayoutInfo_.reachStart_ = true;
-        gridLayoutInfo_.offsetEnd_ = true;
+        gridLayoutInfo_.offsetEnd_ = LessOrEqual(gridLayoutInfo_.currentOffset_ + lengthOfItemsInViewport, mainSize);
         return;
     }
 

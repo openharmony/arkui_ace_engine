@@ -35,6 +35,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsReverse() const override;
+    bool IsVerticalReverse() const;
     bool hasFooter()
     {
         return footer_.Upgrade() != nullptr;
