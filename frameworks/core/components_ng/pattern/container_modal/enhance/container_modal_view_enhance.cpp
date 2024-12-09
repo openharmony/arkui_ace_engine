@@ -160,7 +160,11 @@ void ContainerModalViewEnhance::SetTapGestureEvent(
         CHECK_NULL_VOID(windowManager);
         auto containerNode = weakContainerNode.Upgrade();
         CHECK_NULL_VOID(containerNode);
-        bool isMoving = windowManager->
+        bool isMoving = windowManager->WindowIsStartMoving();
+        if (isMoving) {
+            LOGI("window is moving, double-click is not supported.");
+            return;
+        }
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
@@ -194,6 +198,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
             ResetHoverTimer();
+            bool isMoving = windowManager->WindowIsStartMoving();
+            if (isMoving) {
+                LOGI("window is moving, maximization is not supported.");
+                return;
+            }
             auto mode = windowManager->GetWindowMode();
             auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
@@ -218,6 +227,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
                 LOGE("create minBtn callback func failed,windowManager is null!");
                 return;
             }
+            bool isMoving = windowManager->WindowIsStartMoving();
+            if (isMoving) {
+                LOGI("window is moving, minimization is not supported.");
+                return;
+            }
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         });
@@ -231,6 +245,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             auto windowManager = weak.Upgrade();
             if (!windowManager) {
                 LOGE("create closeBtn callback func failed,windowManager is null!");
+                return;
+            }
+            bool isMoving = windowManager->WindowIsStartMoving();
+            if (isMoving) {
+                LOGI("window is moving, close is not supported.");
                 return;
             }
             LOGI("close button clicked");
