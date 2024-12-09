@@ -32,7 +32,7 @@ using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
 using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
-using WindowIsStartMovingCallback = std::function<uint32_t(void)>;
+using WindowIsStartMovingCallback = std::function<bool(void)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
