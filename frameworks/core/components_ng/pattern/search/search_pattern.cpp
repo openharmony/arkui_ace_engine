@@ -243,7 +243,7 @@ void SearchPattern::SetAccessibilityClearAction()
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->IsOperation());
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->HasText());
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
@@ -741,7 +741,7 @@ int32_t SearchPattern::HandleTextContentLines()
     CHECK_NULL_RETURN(textFieldFrameNode, lines);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, lines);
-    if (!textFieldPattern->IsOperation()) {
+    if (!textFieldPattern->HasText()) {
         return lines;
     }
     RectF textRect = textFieldPattern->GetTextRect();

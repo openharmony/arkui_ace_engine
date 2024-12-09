@@ -142,7 +142,7 @@ public:
         return children_;
     }
 
-    RefPtr<UINode> GetLastChild()
+    RefPtr<UINode> GetLastChild() const
     {
         if (children_.empty()) {
             return nullptr;
@@ -150,7 +150,7 @@ public:
         return children_.back();
     }
 
-    RefPtr<UINode> GetFirstChild()
+    RefPtr<UINode> GetFirstChild() const
     {
         if (children_.empty()) {
             return nullptr;

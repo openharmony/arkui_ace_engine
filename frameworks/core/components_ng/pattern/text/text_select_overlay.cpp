@@ -66,20 +66,18 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     return handleInfo;
 }
 
-RectF TextSelectOverlay::GetFirstHandleLocalPaintRect()
+RectF TextSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex)
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, RectF());
-    auto localPaintRect = textPattern->GetTextSelector().firstHandle;
-    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
-    return localPaintRect;
-}
-
-RectF TextSelectOverlay::GetSecondHandleLocalPaintRect()
-{
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, RectF());
-    auto localPaintRect = textPattern->GetTextSelector().secondHandle;
+    RectF localPaintRect;
+    if (dragHandleIndex == DragHandleIndex::FIRST) {
+        localPaintRect = textPattern->GetTextSelector().firstHandle;
+    } else if (dragHandleIndex == DragHandleIndex::SECOND) {
+        localPaintRect = textPattern->GetTextSelector().secondHandle;
+    } else { // dragHandleIndex::NONE
+        return RectF();
+    }
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     return localPaintRect;
 }

@@ -288,8 +288,7 @@ protected:
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
     bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
-    virtual RectF GetFirstHandleLocalPaintRect();
-    virtual RectF GetSecondHandleLocalPaintRect();
+    virtual RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex);
     virtual void CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect);
     bool IsAncestorNodeStartAnimation(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);

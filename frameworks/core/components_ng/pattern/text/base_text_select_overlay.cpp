@@ -59,8 +59,8 @@ void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, boo
     SetIsShowHandleLine(!request.hideHandleLine);
     latestReqeust_ = request;
     if (!SelectOverlayIsOn() && enableHandleLevel_) {
-        auto firstLocalRect = GetFirstHandleLocalPaintRect();
-        auto secondLocalRect = GetSecondHandleLocalPaintRect();
+        auto firstLocalRect = GetHandleLocalPaintRect(DragHandleIndex::FIRST);
+        auto secondLocalRect = GetHandleLocalPaintRect(DragHandleIndex::SECOND);
         CalcHandleLevelMode(firstLocalRect, secondLocalRect);
     }
     if (enableHandleLevel_) {
@@ -736,12 +736,7 @@ void BaseTextSelectOverlay::SetHandleLevelMode(HandleLevelMode mode)
     handleLevelMode_ = mode;
 }
 
-RectF BaseTextSelectOverlay::GetFirstHandleLocalPaintRect()
-{
-    return RectF();
-}
-
-RectF BaseTextSelectOverlay::GetSecondHandleLocalPaintRect()
+RectF BaseTextSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex)
 {
     return RectF();
 }
