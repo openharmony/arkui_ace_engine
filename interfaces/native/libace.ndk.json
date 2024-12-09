@@ -2482,5 +2482,41 @@
     {
         "first_introduced": "14",
         "name": "OH_ArkUI_KeyEvent_SetConsumed"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_PostFrameCallback"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_Destroy"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius"
     }
 ]

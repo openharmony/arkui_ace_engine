@@ -35,6 +35,8 @@ public:
     void SetCaretOffsetAndHeight(PaintWrapper* paintWrapper);
 
 private:
+    static std::vector<RectF> CalculateSelectedRect(
+        const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& selectedRects, float contentWidth);
     const ParagraphManager* pManager_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPaintMethod);
 };

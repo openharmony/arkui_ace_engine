@@ -19,7 +19,6 @@ import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { RichEditorBootcamp } from './RichEditorBootcamp';
 import { SearchBootcamp } from './SearchBootcamp';
 
-
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
   label: '输入类',
@@ -39,7 +38,7 @@ export function InputsDestination(name: string, route: Route) {
     TextAreaBootcamp({ title: route.label })
   } else if (name === 'inputs/richeditor') {
     RichEditorBootcamp({ title: route.label })
-  }else if (name === 'inputs/search') {
+  } else if (name === 'inputs/search') {
     SearchBootcamp({ title: route.label })
   }
 }

@@ -726,12 +726,20 @@ class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorCon
     if (reset) {
       getUINativeModule().text.resetDataDetectorConfig(node);
     } else {
-      getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
+      getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
+        this.value.color, this.value.decoration.type, this.value.decoration.color, this.value.decoration.style,
+        this.value.referenceTime, this.value.detectContext);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
-    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
+    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+    !isBaseOrResourceEqual(this.stageValue.decoration.type, this.value.decoration.type) ||
+    !isBaseOrResourceEqual(this.stageValue.decoration.color, this.value.decoration.color) ||
+    !isBaseOrResourceEqual(this.stageValue.decoration.style, this.value.decoration.style) ||
+    !isBaseOrResourceEqual(this.stageValue.referenceTime, this.value.referenceTime) ||
+    !isBaseOrResourceEqual(this.stageValue.detectContext, this.value.detectContext);
   }
 }
 
@@ -830,6 +838,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    detectorConfig.color = config.color;
+    detectorConfig.decoration = new DecorationStyleInterface();
+    if (config.decoration) {
+      detectorConfig.decoration.type = config.decoration.type;
+      detectorConfig.decoration.color = config.decoration.color;
+      detectorConfig.decoration.style = config.decoration.style;
+    }
+    detectorConfig.referenceTime = config.referenceTime;
+    detectorConfig.detectContext = config.detectContext;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
   }

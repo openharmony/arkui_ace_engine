@@ -16,6 +16,7 @@
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, ColorBlock, useEnabled } from 'common';
 import { LengthMetrics, SelectionMenu, EditorMenuOptions, ExpandedMenuOptions, SelectionMenuOptions } from '@kit.ArkUI';
+import UTD from '@ohos.data.uniformTypeDescriptor';
 
 @Component
 export struct TextBootcamp {
@@ -125,6 +126,7 @@ export struct TextBootcamp {
             }
           } : undefined)
         .copyOption(CopyOptions.LocalDevice)
+        .allowDrop([UTD.UniformDataType.TEXT, UTD.UniformDataType.PLAIN_TEXT])
         .draggable(true)
         .textAlign(useEnabled(this.enableTextAlign, this.textAlign))
         .caretColor(useEnabled(this.enableCaretColor, this.caretColor))

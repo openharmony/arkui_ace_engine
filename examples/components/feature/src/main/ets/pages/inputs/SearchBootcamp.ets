@@ -14,6 +14,7 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
+import UTD from '@ohos.data.uniformTypeDescriptor';
 import { RadioBlock, useEnabled } from 'common';
 
 
@@ -56,6 +57,8 @@ export struct SearchBootcamp {
         .backgroundColor('#F5F5F5')
         .placeholderColor(Color.Grey)
         .textIndent('20px')
+        .allowDrop([UTD.UniformDataType.TEXT, UTD.UniformDataType.PLAIN_TEXT])
+        .draggable(true)
         .onSubmit((value: string) => {
           this.submitValue = value;
         })

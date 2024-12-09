@@ -3130,6 +3130,20 @@ typedef enum {
      *
      */
     NODE_PROGRESS_TYPE,
+    /**
+     * @brief Sets the style of the linear progress indicator.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     * If the progress indicator type is not linear, it will not take effect.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: Use the {@link ArkUI_ProgressLinearStyleOption} object to set the style. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: Use the {@link ArkUI_ProgressLinearStyleOption} object to get the style. \n
+     *
+     * @since 16
+     */
+    NODE_PROGRESS_LINEAR_STYLE,
 
     /**
      * @brief Defines whether the check box is selected.
