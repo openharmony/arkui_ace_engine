@@ -1155,7 +1155,12 @@ template<>
 template<>
 void AssignCast(std::optional<Matrix4>& dst, const Ark_CustomObject& src)
 {
-    if (!src.pointers[0] || !src.pointers[1] || !src.pointers[2] || !src.pointers[3]) {
+    LOGE("This converter is created for testing purposes only. Custom objects are not supported.");
+    double* row1 = (double*)src.pointers[0];
+    double* row2 = (double*)src.pointers[1];
+    double* row3 = (double*)src.pointers[2];
+    double* row4 = (double*)src.pointers[3];
+    if (!row1 || !row2 || !row3 || !row4) {
         dst = std::nullopt;
         return;
     }
@@ -1163,29 +1168,24 @@ void AssignCast(std::optional<Matrix4>& dst, const Ark_CustomObject& src)
         dst = std::nullopt;
         return;
     }
-    double* row1 = (double*)src.pointers[0];
-    double* row2 = (double*)src.pointers[1];
-    double* row3 = (double*)src.pointers[2];
-    double* row4 = (double*)src.pointers[3];
-    dst = Matrix4(row1[0], row1[1], row1[2], row1[3], row2[0], row2[1], row2[2], row2[3],
-        row3[0], row3[1], row3[2], row3[3], row4[0], row4[1], row4[2], row4[3]);
+    double m11 = row1[0], m12 = row1[1], m13 = row1[2], m14 = row1[3],
+        m21 = row2[0], m22 = row2[1], m23 = row2[2], m24 = row2[3],
+        m31 = row3[0], m32 = row3[1], m33 = row3[2], m34 = row3[3],
+        m41 = row4[0], m42 = row4[1], m43 = row4[2], m44 = row4[3];
+    dst = Matrix4(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44);
 }
 template<>
 ClickEffectLevel Convert(const Ark_ClickEffectLevel& src)
 {
     switch (src) {
-    case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT:
-        return ClickEffectLevel::LIGHT;
-        break;
-    case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_MIDDLE:
-        return ClickEffectLevel::MIDDLE;
-        break;
-    case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_HEAVY:
-        return ClickEffectLevel::HEAVY;
-        break;
-    default:
-        return ClickEffectLevel::UNDEFINED;
-        break;
+        case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT:
+            return ClickEffectLevel::LIGHT;
+        case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_MIDDLE:
+            return ClickEffectLevel::MIDDLE;
+        case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_HEAVY:
+            return ClickEffectLevel::HEAVY;
+        default:
+            return ClickEffectLevel::UNDEFINED;
     }
 }
 template<>
@@ -2781,7 +2781,8 @@ void AllowDropImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAllowDrop(frameNode, convValue);
-    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined.CustomObject is not supported.\n");
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined"
+        ".CustomObject is not supported.\n");
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -3856,5 +3857,4 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
     };
     return &ArkUICommonMethodModifierImpl;
 }
-
 }

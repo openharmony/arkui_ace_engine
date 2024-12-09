@@ -51,41 +51,58 @@ struct MotionPathOptionTest {
     std::optional<bool> rotatable = false;
 };
 namespace Converter {
+    bool StrToArrayChar(char (&dst)[20], const char* src)
+    {
+        if (src == nullptr) {
+            LOGE("Error: Source string is null.");
+            return false;
+        }
+        size_t maxLen = sizeof(dst) - 1;
+        size_t srcLen = std::strlen(src);
+        if (srcLen > maxLen) {
+            LOGE("Error: Source string is longer than destination buffer. String will be truncated.");
+            return false;
+        }
+        for (size_t i = 0; i < srcLen && i < maxLen; ++i) {
+            dst[i] = src[i];
+        }
+        dst[std::min(srcLen, maxLen)] = '\0';
+        return true;
+    }
     template<>
     Ark_CustomObject ArkValue(const double (&value)[4][4])
     {
+        LOGE("This reverse converter is created for testing purposes only. Custom objects are not supported.");
         Ark_CustomObject dst;
-        strncpy(dst.kind, "Matrix4", sizeof(dst.kind) - 1);
-        dst.kind[sizeof(dst.kind) - 1] = '\0';
-        for (int i = 0; i < 4; ++i) {
-            dst.pointers[i] = (void*)value[i]; // Приводим к void*
+        if (StrToArrayChar(dst.kind, "Matrix4")) {
+            const int rowCount = sizeof(value) / sizeof(value[0]);
+            for (int i = 0; i < rowCount; ++i) {
+                dst.pointers[i] = (void*)value[i];
+            }
         }
         return dst;
     }
     template<>
     Ark_ClickEffectLevel ArkValue(const ClickEffectLevel& src)
     {
-        switch (src)
-        {
-        case ClickEffectLevel::LIGHT:
-            return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT;
-            break;
-        case ClickEffectLevel::MIDDLE:
-            return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_MIDDLE;
-            break;
-        case ClickEffectLevel::HEAVY:
-            return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_HEAVY;
-            break;
-        default:
-            break;
+        switch (src) {
+            case ClickEffectLevel::LIGHT:
+                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT;
+            case ClickEffectLevel::MIDDLE:
+                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_MIDDLE;
+            case ClickEffectLevel::HEAVY:
+                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_HEAVY;
+            default:
+                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT;
         }
-        return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT;
     }
     template<>
     Ark_ClickEffect ArkValue(const ClickEffect& value)
     {
-        return {.level = Converter::ArkValue<Ark_ClickEffectLevel>(value.level),
-            .scale = Converter::ArkValue<Opt_Number>(value.scale)};
+        return {
+            .level = Converter::ArkValue<Ark_ClickEffectLevel>(value.level),
+            .scale = Converter::ArkValue<Opt_Number>(value.scale)
+        };
     }
     template<>
     Ark_MotionPathOptions ArkValue(const MotionPathOptionTest& src)
@@ -105,6 +122,7 @@ class CommonMethodModifierTest6 : public ModifierTestBase<GENERATED_ArkUICommonM
 public:
     RefPtr<RenderContext> render_;
 };
+
 //////////// Transform
 /*
  * @tc.name: setTransformTestDefaultValues
@@ -124,6 +142,7 @@ HWTEST_F(CommonMethodModifierTest6, setTransformTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSize.Level1)
 {
+    LOGE("Custom objects are not supported.");
     ASSERT_NE(modifier_->setTransform, nullptr);
     using OneTestStep = std::tuple<Ark_CustomObject, std::string>;
     double matrix1[4][4] = {{11, 12, 13, 14}, {21, 22, 23, 24}, {31, 32, 33, 34}, {41, 42, 43, 44}};
@@ -162,10 +181,15 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, Test
     Ark_CustomObject invalidValue1 = {};
     Ark_CustomObject invalidValue2 = {};
     Ark_CustomObject invalidValue3 = {};
-    strncpy(invalidValue2.kind, "invalidType", sizeof(invalidValue2.kind) - 1);
-    invalidValue2.kind[sizeof(invalidValue2.kind) - 1] = '\0';
-    strncpy(invalidValue3.kind, "Matrix4", sizeof(invalidValue3.kind) - 1);
-    invalidValue3.kind[sizeof(invalidValue3.kind) - 1] = '\0';
+
+    if (!Converter::StrToArrayChar(invalidValue2.kind, "invalidType")) {
+        LOGE("Error copying string to invalidValue2.kind");
+        return;
+    }
+    if (!Converter::StrToArrayChar(invalidValue3.kind, "Matrix4")) {
+        LOGE("Error copying string to invalidValue3.kind");
+        return;
+    }
     static const std::vector<OneTestStep> testPlan = {
         {invalidValue1, ATTRIBUTE_TRANSFORM_DEFAULT_VALUE},
         {invalidValue2, ATTRIBUTE_TRANSFORM_DEFAULT_VALUE},
@@ -268,7 +292,8 @@ HWTEST_F(CommonMethodModifierTest6, setAllowDropTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setAllowDropTestValidValues, TestSize.Level1)
 {
-    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined.CustomObject is not supported.\n");
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined"
+        ".CustomObject is not supported.\n");
 }
 
 /*
@@ -278,7 +303,8 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setAllowDropTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setAllowDropTestInvalidValues, TestSize.Level1)
 {
-    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined.CustomObject is not supported.\n");
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined"
+        ".CustomObject is not supported.\n");
 }
 
 //////////// Draggable
@@ -334,7 +360,8 @@ HWTEST_F(CommonMethodModifierTest6, setDragPreviewTestDefaultValues, TestSize.Le
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setDragPreviewTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDragPreview, nullptr);
-    LOGE("ARKOALA: CommonMethod::setsetDragPreview: Ark_Union_CustomBuilder_DragItemInfo_String.DragDropInfo.pixelMap is not supported.\n");
+    LOGE("ARKOALA: CommonMethod::setsetDragPreview: "
+        "Ark_Union_CustomBuilder_DragItemInfo_String.DragDropInfo.pixelMap is not supported.\n");
 }
 
 //////////// MotionPath
@@ -361,8 +388,8 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestValidValues, TestS
     MotionPathOptionTest defaultValue;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_MotionPathOptions>(defaultValue), ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE},
-        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest({.path = "path", .from = 1.0f, .to = 2.0f, .rotatable = true})),
-            ""},
+        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest(
+            {.path = "path", .from = 1.0f, .to = 2.0f, .rotatable = true})), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setMotionPath(node_, &inputValue);
@@ -383,10 +410,10 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestInvalidValues, Tes
     using OneTestStep = std::tuple<Ark_MotionPathOptions, std::string>;
     MotionPathOptionTest defaultValue;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest({.path = "path", .from = 2.0f, .to = 1.0f, .rotatable = true})),
-            ""},
-        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest({.path = "path", .from = -2.0f, .to = -1.0f, .rotatable = true})),
-            ""},
+        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest(
+            {.path = "path", .from = 2.0f, .to = 1.0f, .rotatable = true})), ""},
+        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest(
+            {.path = "path", .from = -2.0f, .to = -1.0f, .rotatable = true})), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setMotionPath(node_, &inputValue);

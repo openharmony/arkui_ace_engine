@@ -3736,7 +3736,6 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::optional<std::s
     } else {
         frameNode->SetAllowDrop({});
     }
-
 }
 
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::optional<std::string>& inspectorId)
