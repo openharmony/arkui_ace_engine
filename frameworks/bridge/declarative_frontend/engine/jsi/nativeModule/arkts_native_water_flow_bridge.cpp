@@ -609,7 +609,7 @@ void SetWaterFlowSections(ArkUIRuntimeCallInfo* runtimeCallInfo)
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
         Framework::JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(frameNode, info, sectionsArgs);
     } else {
-        Framework::JSRef<Framework::JSVal> footerContentArgs = info[4];
+        Framework::JSRef<Framework::JSVal> footerContentArgs = info[4]; // 4 is the index of footerContent
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
         if (!footerContentArgs->IsNull() && footerContentArgs->IsObject()) {

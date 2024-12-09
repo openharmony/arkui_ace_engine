@@ -168,7 +168,7 @@ void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
 
 void JSWaterFlow::UpdateWaterFlowFooterByFrameNode(NG::FrameNode* frameNode, const JSCallbackInfo& args)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[4]);
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[4]); // 4 is the index of footerContent
     if (obj->HasProperty("builderNode_")) {
         JSRef<JSVal> builderNodeParam = obj->GetProperty("builderNode_");
         if (builderNodeParam->IsObject()) {
@@ -183,6 +183,24 @@ void JSWaterFlow::UpdateWaterFlowFooterByFrameNode(NG::FrameNode* frameNode, con
                 NG::WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, refPtrFooterNode);
                 return;
             }
+        }
+    }
+}
+
+void SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject)
+{
+    JSRef<JSVal> builderNodeParam = footerJsObject->GetProperty("builderNode_");
+    if (builderNodeParam->IsObject()) {
+        auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+        JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodeptr.IsEmpty()) {
+            const auto* vm = nodeptr->GetEcmaVM();
+            auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+            WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrFrameNode);
+            return;
         }
     }
 }
@@ -231,20 +249,8 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
             auto footerContentObject = obj->GetProperty("footerContent");
             if (footerContentObject->IsObject()) {
                 auto footerJsObject = JSRef<JSObject>::Cast(footerContentObject);
-                JSRef<JSVal> builderNodeParam = footerJsObject->GetProperty("builderNode_");
-                if (builderNodeParam->IsObject()) {
-                    auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
-                    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
-                    if (!nodeptr.IsEmpty()) {
-                        const auto* vm = nodeptr->GetEcmaVM();
-                        auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
-                        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-                        CHECK_NULL_VOID(frameNode);
-                        RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
-                        WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrFrameNode);
-                        return;
-                    }
-                }
+                SetWaterFlowBuilderNode(footerJsObject);
+                return;
             }
             WaterFlowModel::GetInstance()->SetFooterWithFrameNode(nullptr);
             return;
