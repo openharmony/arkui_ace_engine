@@ -160,6 +160,7 @@ void ContainerModalViewEnhance::SetTapGestureEvent(
         CHECK_NULL_VOID(windowManager);
         auto containerNode = weakContainerNode.Upgrade();
         CHECK_NULL_VOID(containerNode);
+        bool isMoving = windowManager->
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
