@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+#include "frameworks/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 struct TabsOptions {
@@ -398,9 +399,9 @@ void BarBackgroundBlurStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(style);
-    //auto convValue = Converter::OptConvert<type>(style); // for enums
-    //TabsModelNG::SetBarBackgroundBlurStyle1(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto option = Converter::Convert<BlurStyleOption>(*options);
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
 }
 void BarBackgroundEffectImpl(Ark_NativePointer node,
                              const Ark_BackgroundEffectOptions* value)
@@ -408,8 +409,8 @@ void BarBackgroundEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TabsModelNG::SetBarBackgroundEffect(frameNode, convValue);
+    auto options = Converter::Convert<EffectOption>(*value);
+    TabsModelNG::SetBarBackgroundEffect(frameNode, options);
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
                              const OnTabsContentWillChangeCallback* value)
