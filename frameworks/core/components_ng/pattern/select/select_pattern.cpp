@@ -294,11 +294,13 @@ void SelectPattern::RegisterOnHover()
     CHECK_NULL_VOID(host);
     auto inputHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto mouseCallback = [weak = WeakClaim(this), host](bool isHover) {
+    auto mouseCallback = [weak = WeakClaim(this)](bool isHover) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select mouse hover %{public}d", isHover);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetIsHover(isHover);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto* pipeline = host->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
