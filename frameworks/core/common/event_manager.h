@@ -266,6 +266,11 @@ public:
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
 
+    inline const std::unordered_map<int32_t, int32_t>& GetDownFingerIds() const
+    {
+        return downFingerIds_;
+    }
+
     inline const std::unordered_map<int32_t, TouchEvent>& GetIdToTouchPoint() const
     {
         return idToTouchPoints_;
