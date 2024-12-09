@@ -13,34 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef TEST_UNITTEST_CORE_GESTURES_PAN_RECOGNIZER_TEST_UTILS_H
-#define TEST_UNITTEST_CORE_GESTURES_PAN_RECOGNIZER_TEST_UTILS_H
+#ifndef TEST_UNITTEST_CORE_GESTURES_SWIPE_RECOGNIZER_TEST_UTILS_H
+#define TEST_UNITTEST_CORE_GESTURES_SWIPE_RECOGNIZER_TEST_UTILS_H
+
+#include "test/unittest/core/gestures/recognizer_test_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t FORTY_FIVE_DEGREES = 45;
-constexpr int32_t TWENTY_DEGREES = 20;
-constexpr int32_t QUADRANT_COUNT = 8;
-constexpr float HALF_CIRCLE = 180.0f;
+constexpr double SWIPE_MOVE_DISTANCE = 500.0;
+constexpr double SWIPE_MOVE_STEP = 100.0;
 
-enum class PanQuadrantDirection {
-    QUADRANT_ZERO = 0,
-    QUADRANT_ONE = 1,
-    QUADRANT_TWO = 2,
-    QUADRANT_THREE = 3,
-    QUADRANT_FOUR = 4,
-    QUADRANT_FIVE = 5,
-    QUADRANT_SIX = 6,
-    QUADRANT_SEVEN = 7,
-    LINE_ZERO = 8,
-    LINE_ONE = 9,
-    LINE_TWO = 10,
-    LINE_THREE = 11,
-    LINE_FOUR = 12,
-    LINE_FIVE = 13,
-    LINE_SIX = 14,
-    LINE_SEVEN = 15,
+enum class SwipeInputDirection {
+    VERTICAL = 0,
+    HORIZONTAL,
+    VERTICAL_HORIZONTAL,
+    HORIZONTAL_VERTICAL,
 };
+
+double AdjustSpeed(double speed, ComparationResult compare)
+{
+    switch (compare) {
+        case ComparationResult::LESS:
+            return speed /= 2;
+        case ComparationResult::GREAT:
+            return speed *= 2;
+        default:
+            return speed;
+    }
+}
 
 } // namespace
 
