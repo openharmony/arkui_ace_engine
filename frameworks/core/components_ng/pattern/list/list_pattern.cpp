@@ -1301,8 +1301,7 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
     CHECK_NULL_RETURN(pipeline, groupIndexInGroup);
     RefPtr<FrameNode> nextIndexNode;
     auto isNextInGroup = IsListItemGroup(nextIndex, nextIndexNode);
-    CHECK_NULL_RETURN(nextIndexNode, groupIndexInGroup);
-    if (!isNextInGroup) {
+    if (!isNextInGroup || !nextIndexNode) {
         nextIndexInGroup = -1;
         return groupIndexInGroup;
     }
