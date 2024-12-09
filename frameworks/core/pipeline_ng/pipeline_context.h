@@ -106,6 +106,14 @@ public:
 
     void SetupRootElement() override;
 
+    void EnableContainerModalGesture(bool isEnable) override;
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
     void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;

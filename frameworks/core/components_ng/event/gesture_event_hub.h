@@ -743,6 +743,12 @@ public:
         return recreateGesture_;
     }
 
+    void ClearGesture();
+
+    bool IsGestureEmpty() const;
+
+    bool IsPanEventEmpty() const;
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
