@@ -212,7 +212,7 @@ advanced_ui_component/treeview/ @guozonghao11
 component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
 component_ext/ext_common/
-component_ext/movingphoto/ @hanyujia1
+component_ext/movingphoto/ @wangrunsen
 
 [Examples]
 examples/ @arkuipopupwindow
@@ -2437,7 +2437,23 @@ frameworks/core/components_ng/pattern/shape/ @arkuilayout
 frameworks/core/components_ng/pattern/side_bar/ @arkui_superman
 frameworks/core/components_ng/pattern/slider/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/stack/ @arkuilayout
-frameworks/core/components_ng/pattern/stage/ @arkuievent
+frameworks/core/components_ng/pattern/stage/content_root_pattern.cpp @arkuievent
+frameworks/core/components_ng/pattern/stage/content_root_pattern.h @arkuievent
+frameworks/core/components_ng/pattern/stage/page_event_hub.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_event_hub.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_info.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_pattern.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_pattern.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_effect.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_model_ng.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_model_ng.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_model.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_layout_algorithm.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_layout_algorithm.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_manager.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_manager.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_pattern.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_pattern.h @arkui_superman
 frameworks/core/components_ng/pattern/stepper/ @arkui_superman
 frameworks/core/components_ng/pattern/swiper/ @arkuiscroll
 frameworks/core/components_ng/pattern/swiper_indicator/ @arkuiscroll

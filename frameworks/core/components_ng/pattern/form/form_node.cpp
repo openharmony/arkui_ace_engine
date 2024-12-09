@@ -80,6 +80,50 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     return pointerEvent;
 }
 
+#ifdef FORM_MOUSE_AXIS_SUPPORT
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const AxisEvent& point,
+    const WeakPtr<FrameNode>& node)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    if (pointerEvent == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "pointerEvent is nullptr");
+        return nullptr;
+    }
+
+    pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL, point.horizontalAxis);
+    pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL, point.verticalAxis);
+    pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH, point.pinchAxisScale);
+    pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE, point.rotateAxisAngle);
+
+    OHOS::MMI::PointerEvent::PointerItem item;
+    PointF transformPoint(point.x, point.y);
+    NGGestureRecognizer::Transform(transformPoint, node);
+    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
+    item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
+    item.SetWindowXPos(transformPoint.GetX());
+    item.SetWindowYPos(transformPoint.GetY());
+    item.SetDisplayX(static_cast<int32_t>(point.screenX));
+    item.SetDisplayY(static_cast<int32_t>(point.screenY));
+    item.SetPointerId(point.id);
+    MMI::PointerEvent::PointerItem pointerItem;
+    bool ret = point.pointerEvent->GetPointerItem(point.id, pointerItem);
+    if (!ret) {
+        LOGE("get pointer: %{public}d item failed.", point.id);
+        return nullptr;
+    }
+    item.SetToolType(pointerItem.GetToolType());
+    item.SetOriginPointerId(point.originalId);
+    pointerEvent->AddPointerItem(item);
+    pointerEvent->SetSourceType(point.pointerEvent->GetSourceType());
+    pointerEvent->SetPointerAction(point.pointerEvent->GetPointerAction());
+    pointerEvent->SetPointerId(point.id);
+    pointerEvent->SetDeviceId(static_cast<int32_t>(point.deviceId));
+    pointerEvent->SetId(point.touchEventId);
+    pointerEvent->SetTargetDisplayId(point.targetDisplayId);
+    return pointerEvent;
+}
+#endif
+
 class FormAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
     FormAccessibilityChildTreeCallback(const WeakPtr<FormNode> &weakFormNode, int64_t accessibilityId)
@@ -159,6 +203,39 @@ FormNode::~FormNode()
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(GetAccessibilityId());
 }
 
+#ifdef FORM_MOUSE_AXIS_SUPPORT
+HitTestResult FormNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
+{
+    auto testResult = FrameNode::AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, axisResult);
+    if (testResult == HitTestResult::OUT_OF_REGION) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, testResult);
+    auto pattern = GetPattern<FormPattern>();
+    CHECK_NULL_RETURN(pattern, testResult);
+    auto subContainer = pattern->GetSubContainer();
+    CHECK_NULL_RETURN(subContainer, testResult);
+
+    // Send AxisEvent to FormRenderService when Provider is ArkTS Card.
+    if (subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
+        auto callback = [weak = WeakClaim(this)](const AxisEvent& axisEvent, SerializedGesture& serializedGesture) {
+            auto formNode = weak.Upgrade();
+            CHECK_NULL_VOID(formNode);
+            formNode->DispatchPointerEvent(axisEvent, serializedGesture);
+        };
+        auto mgr = context->GetFormEventManager();
+        if (mgr) {
+            mgr->AddEtsCardAxisEventCallback(touchRestrict.touchEvent.id, callback);
+        }
+        return testResult;
+    }
+    return testResult;
+}
+#endif
+
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
@@ -192,7 +269,10 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
             CHECK_NULL_VOID(formNode);
             formNode->DispatchPointerEvent(touchEvent, serializedGesture);
         };
-        context->AddEtsCardTouchEventCallback(touchRestrict.touchEvent.id, callback);
+        auto mgr = context->GetFormEventManager();
+        if (mgr) {
+            mgr->AddEtsCardTouchEventCallback(touchRestrict.touchEvent.id, callback);
+        }
         return testResult;
     }
     auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());
@@ -212,6 +292,19 @@ void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
     auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent, WeakClaim(this));
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
+
+#ifdef FORM_MOUSE_AXIS_SUPPORT
+void FormNode::DispatchPointerEvent(const AxisEvent& axisEvent,
+    SerializedGesture& serializedGesture)
+{
+    auto pattern = GetPattern<FormPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    auto selfGlobalOffset = GetFormOffset();
+    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, axisEvent, WeakClaim(this));
+    pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
+}
+#endif
 
 OffsetF FormNode::GetFormOffset() const
 {

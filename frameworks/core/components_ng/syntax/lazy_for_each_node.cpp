@@ -116,7 +116,10 @@ void LazyForEachNode::OnDataReloaded()
         }
     }
     NotifyChangeWithCount(0, 0, NotificationType::START_CHANGE_POSITION);
-    NotifyChangeWithCount(static_cast<int32_t>(FrameCount()), 0, NotificationType::END_CHANGE_POSITION);
+    if (builder_) {
+        int32_t endChangePos = std::max(builder_->GetHistoryTotalCount(), FrameCount());
+        NotifyChangeWithCount(endChangePos, 0, NotificationType::END_CHANGE_POSITION);
+    }
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -609,7 +612,10 @@ void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperat
                 NotifyChangeWithCount(operation.coupleIndex.second, 0, NotificationType::END_CHANGE_POSITION);
                 break;
             case RELOADOP:
-                NotifyChangeWithCount(static_cast<int32_t>(FrameCount()), 0, NotificationType::END_CHANGE_POSITION);
+                if (builder_) {
+                    int32_t endChangePos = std::max(builder_->GetHistoryTotalCount(), FrameCount());
+                    NotifyChangeWithCount(endChangePos, 0, NotificationType::END_CHANGE_POSITION);
+                }
                 break;
         }
     }

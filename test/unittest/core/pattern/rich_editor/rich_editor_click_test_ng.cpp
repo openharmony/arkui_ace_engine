@@ -12,7 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -24,6 +31,9 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
+int32_t callBack1 = 0;
+int32_t callBack2 = 0;
+int32_t callBack3 = 0;
 const Ace::TextDecoration TEXT_DECORATION_VALUE_2 = Ace::TextDecoration::UNDERLINE;
 } // namespace
 

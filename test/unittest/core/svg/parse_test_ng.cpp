@@ -1406,6 +1406,10 @@ HWTEST_F(ParseTestNg, ParseEllipseTest004, TestSize.Level1)
     EXPECT_EQ(viewPort.Height(), 0.0);
     auto svgEllipse1 = sEllipse->Create();
     svgEllipse1->AsPath(viewPort);
+
+    sEllipse->ParseAndSetSpecializedAttr("ry", "1.0_px");
+    EXPECT_EQ(sEllipse->ellipseAttr_.ry, 1.0_px);
+    sEllipse->AsPath(viewPort);
     delete sEllipse;
 }
 
@@ -1597,6 +1601,13 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest005, TestSize.Level1)
     in.in = static_cast<SvgFeInType>(cnt);
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
+
+    /* *
+     * @tc.steps: step3. call RegisterResult
+     * @tc.expected: Register Successfully
+     */
+    svgFe->RegisterResult("test", imageFilter, resultHash);
+    EXPECT_TRUE(resultHash.find("test") != resultHash.end());
 }
 
 /**

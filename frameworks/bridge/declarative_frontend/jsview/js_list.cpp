@@ -253,7 +253,7 @@ void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
 {
     double defaultSize = 0.0f;
     if (!ParseJsDouble(childrenSizeObj->GetProperty("childDefaultSize"), defaultSize) || !NonNegative(defaultSize)) {
-        LOGW("JSList input parameter defaultSize check failed.");
+        TAG_LOGW(AceLogTag::ACE_LIST, "JSList input parameter defaultSize check failed.");
         return;
     }
     auto listChildrenMainSize = ListModel::GetInstance()->GetOrCreateListChildrenMainSize();
@@ -373,7 +373,7 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         auto minLengthParam = jsObj->GetProperty("minLength");
         auto maxLengthParam = jsObj->GetProperty("maxLength");
         if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
-            LOGW("minLength and maxLength are not both set");
+            TAG_LOGW(AceLogTag::ACE_LIST, "minLength and maxLength are not both set");
             return;
         }
         CalcDimension minLengthValue;

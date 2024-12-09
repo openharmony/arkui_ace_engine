@@ -1266,7 +1266,7 @@ void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_DETECT_RESULT_UPDATE;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextModelNG::SetOnDetectResultUpdate(frameNode, std::move(onDetectResultUpdate));
 }

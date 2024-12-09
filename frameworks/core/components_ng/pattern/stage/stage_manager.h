@@ -118,6 +118,8 @@ protected:
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
     std::string GetSrcPageInfo(const RefPtr<FrameNode>& srcPage);
+    void UpdatePageNeedRemove(const RefPtr<UINode>& pageNode);
+    bool CheckPageInTransition(const RefPtr<UINode>& pageNode);
 
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;

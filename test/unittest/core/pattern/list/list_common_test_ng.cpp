@@ -47,7 +47,6 @@ public:
     int32_t FindFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     std::vector<RefPtr<FrameNode>> GetFlatListItems();
     void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
-    void CreateLazyForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
     AssertionResult VerifyForEachItemsOrder(std::list<std::string> expectKeys);
     AssertionResult VerifyLazyForEachItemsOrder(std::list<std::string> expectKeys);
     RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
@@ -170,31 +169,6 @@ void ListCommonTestNg::CreateForEachList(
         forEachModelNG.CreateNewChildStart(std::to_string(index));
         CreateListItems(1);
         forEachModelNG.CreateNewChildFinish(std::to_string(index));
-    }
-}
-
-void ListCommonTestNg::CreateLazyForEachList(
-    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
-{
-    ListModelNG model = CreateList();
-    model.SetLanes(lanes);
-    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
-    const RefPtr<LazyForEachActuator> lazyForEachActuator = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    LazyForEachModelNG lazyForEachModelNG;
-    lazyForEachModelNG.Create(lazyForEachActuator);
-    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    node->SetParent(weakList); // for InitAllChildrenDragManager
-    lazyForEachModelNG.OnMove(std::move(onMove));
-    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
-    for (int32_t index = 0; index < itemNumber; index++) {
-        CreateListItem();
-        auto listItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        lazyForEachNode->builder_->cachedItems_.try_emplace(
-            index, LazyForEachChild(std::to_string(index), listItemNode));
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
@@ -611,7 +585,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step1. Select item(index:0)
      * @tc.expected: The item(index:0) is selected
      */
-    MouseSelect(Offset(0.f, 0.f), Offset(LIST_WIDTH, 50.f));
+    MouseSelect(Offset(0, 0), Offset(LIST_WIDTH, 50.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     std::vector<RefPtr<FrameNode>> expectSelectItems = { GetChildFrameNode(frameNode_, 0) };
     EXPECT_EQ(pattern_->GetVisibleSelectedItems(), expectSelectItems);
@@ -620,7 +594,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step2. Select from selected item(index:0) to item(index:1)
      * @tc.expected: Selected items unchanged, item(index:0) is selected, item(index:1) is unselected
      */
-    MouseSelect(Offset(0.f, 50.f), Offset(LIST_WIDTH, 150.f));
+    MouseSelect(Offset(0, 50.f), Offset(LIST_WIDTH, 150.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 
@@ -628,7 +602,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step3. Select from unselected item(index:1) to item(index:1)
      * @tc.expected: Selected items changed, item(index:0) is unselected, item(index:1) is selected
      */
-    MouseSelect(Offset(0.f, 150.f), Offset(LIST_WIDTH, 170.f));
+    MouseSelect(Offset(0, 150.f), Offset(LIST_WIDTH, 170.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
     std::vector<RefPtr<FrameNode>> expectSelectItems2 = { GetChildFrameNode(frameNode_, 1) };
@@ -782,7 +756,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect007, TestSize.Level1)
     model.SetMultiSelectable(true);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    MouseSelect(Offset(0.f, 0.f), Offset(1.f, 1.f));
+    MouseSelect(Offset(0, 0), Offset(1.f, 1.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
 }
 
@@ -801,7 +775,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect008, TestSize.Level1)
     model.SetLanes(2);
     CreateGroupWithSetting(2, V2::ListItemGroupStyle::NONE);
     CreateDone();
-    MouseSelect(Offset(0.f, 0.f), Offset(240.f, 150.f));           // start on header
+    MouseSelect(Offset(0, 0), Offset(240.f, 150.f));               // start on header
     std::vector<RefPtr<FrameNode>> listItems = GetFlatListItems(); // flat items
     EXPECT_TRUE(listItems[0]->GetPattern<ListItemPattern>()->IsSelected());
     EXPECT_TRUE(listItems[1]->GetPattern<ListItemPattern>()->IsSelected());
@@ -996,12 +970,15 @@ HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
     CreateList();
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
+
+    MockAnimationManager::GetInstance().SetTicks(TICK);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(TickPosition(-200));
-    EXPECT_TRUE(TickPosition(-400));
+    EXPECT_TRUE(Position(-200));
+    EXPECT_TRUE(Position(-400));
+
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(TickPosition(-200));
-    EXPECT_TRUE(TickPosition(0));
+    EXPECT_TRUE(Position(-200));
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -1111,7 +1088,7 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
      * @tc.steps: step1. Select zone.
      * @tc.expected: The item(index:0) was selected.
      */
-    MouseSelect(Offset(0.f, 0.f), Offset(200.f, 50.f));
+    MouseSelect(Offset(0, 0), Offset(200.f, 50.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 0)->IsSelected());
     pattern_->ClearMultiSelect();
 
@@ -1119,7 +1096,7 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
      * @tc.steps: step2. Change select zone.
      * @tc.expected: Selected items changed.
      */
-    MouseSelect(Offset(0.f, 200.f), Offset(200.f, 150.f));
+    MouseSelect(Offset(0, 200.f), Offset(200.f, 150.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(group, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 1)->IsSelected());
     pattern_->ClearMultiSelect();
@@ -1128,7 +1105,7 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
      * @tc.steps: step3. Click first item.
      * @tc.expected: Each item not selected.
      */
-    MouseSelect(Offset(0.f, 10.f), Offset(0.f, 10.f));
+    MouseSelect(Offset(0, 10.f), Offset(0, 10.f));
     for (int32_t index = 0; index < GROUP_ITEM_NUMBER; index++) {
         EXPECT_FALSE(GetChildPattern<ListItemPattern>(group, index)->IsSelected()) << "Index: " << index;
     }
@@ -1141,9 +1118,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest002, TestSize.Level1)
 {
-    const Offset LEFT_TOP = Offset(0.f, 0.f);
-    const Offset LEFT_BOTTOM = Offset(0.f, 150.f);
-    const Offset RIGHT_TOP = Offset(360.f, 0.f);
+    const Offset LEFT_TOP = Offset(0, 0);
+    const Offset LEFT_BOTTOM = Offset(0, 150.f);
+    const Offset RIGHT_TOP = Offset(360.f, 0);
     const Offset RIGHT_BOTTOM = Offset(360.f, 150.f);
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
@@ -1215,7 +1192,7 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
      * @tc.steps: step2. Select zone.
      * @tc.expected: The 4th item is not selected but 5th item is selected.
      */
-    MouseSelect(Offset(0.f, 350.f), Offset(360.f, 450.f));
+    MouseSelect(Offset(0, 350.f), Offset(360.f, 450.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(group, 3)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 4)->IsSelected());
     EXPECT_TRUE(isFifthItemSelected);
@@ -1280,7 +1257,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag001, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(50.0);
-    info.SetGlobalPoint(Point(0.f, 50.f));
+    info.SetGlobalPoint(Point(0, 50.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
@@ -1306,7 +1283,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag001, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(-50.0);
-    info.SetGlobalPoint(Point(0.f, 50.f));
+    info.SetGlobalPoint(Point(0, 50.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
@@ -1340,7 +1317,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag002, TestSize.Level1)
     dragManager->HandleOnItemDragStart(info);
     info.SetOffsetX(0.0);
     info.SetOffsetY(51.0);
-    info.SetGlobalPoint(Point(0.f, 351.f));
+    info.SetGlobalPoint(Point(0, 351.f));
     dragManager->HandleOnItemDragUpdate(info);
     dragManager->HandleScrollCallback();
     FlushUITasks();
@@ -1359,7 +1336,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag002, TestSize.Level1)
     dragManager->HandleOnItemDragStart(info);
     info.SetOffsetX(0.0);
     info.SetOffsetY(-51.0);
-    info.SetGlobalPoint(Point(0.f, 49.f));
+    info.SetGlobalPoint(Point(0, 49.f));
     dragManager->HandleOnItemDragUpdate(info);
     dragManager->HandleScrollCallback();
     FlushUITasks();
@@ -1405,7 +1382,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag003, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(51.0);
-    info.SetGlobalPoint(Point(0.f, 51.f));
+    info.SetGlobalPoint(Point(0, 51.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
@@ -1416,7 +1393,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag003, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(151.0);
-    info.SetGlobalPoint(Point(0.f, 151.f));
+    info.SetGlobalPoint(Point(0, 151.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "2", "0" }));
@@ -1442,7 +1419,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag003, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(-51.0);
-    info.SetGlobalPoint(Point(0.f, 149.f));
+    info.SetGlobalPoint(Point(0, 149.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
@@ -1453,7 +1430,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag003, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(-151.0);
-    info.SetGlobalPoint(Point(0.f, 49.f));
+    info.SetGlobalPoint(Point(0, 49.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
@@ -1497,7 +1474,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag004, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(51.0);
-    info.SetGlobalPoint(Point(0.f, 51.f));
+    info.SetGlobalPoint(Point(0, 51.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "2", "0" }));
@@ -1508,7 +1485,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag004, TestSize.Level1)
      */
     info.SetOffsetX(121.0);
     info.SetOffsetY(0.0);
-    info.SetGlobalPoint(Point(121.f, 0.f));
+    info.SetGlobalPoint(Point(121.f, 0));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
@@ -1519,7 +1496,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag004, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(0.0);
-    info.SetGlobalPoint(Point(0.f, 0.f));
+    info.SetGlobalPoint(Point(0, 0));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "1", "2" }));
@@ -1633,7 +1610,8 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
         actualFrom = from;
         actualTo = to;
     };
-    CreateLazyForEachList(3, 1, onMoveEvent);
+    ListModelNG model = CreateList();
+    CreateItemsInLazyForEach(3, 100.0f, std::move(onMoveEvent));
     CreateDone();
 
     /**
@@ -1651,7 +1629,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(51.0);
-    info.SetGlobalPoint(Point(0.f, 51.f));
+    info.SetGlobalPoint(Point(0, 51.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "0", "2" }));
@@ -1662,7 +1640,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(151.0);
-    info.SetGlobalPoint(Point(0.f, 151.f));
+    info.SetGlobalPoint(Point(0, 151.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "2", "0" }));
@@ -1688,7 +1666,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(-51.0);
-    info.SetGlobalPoint(Point(0.f, 149.f));
+    info.SetGlobalPoint(Point(0, 149.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "0", "2" }));
@@ -1699,7 +1677,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(-151.0);
-    info.SetGlobalPoint(Point(0.f, 49.f));
+    info.SetGlobalPoint(Point(0, 49.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "0", "1", "2" }));
@@ -1726,7 +1704,9 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
         actualFrom = from;
         actualTo = to;
     };
-    CreateLazyForEachList(4, 2, onMoveEvent); // 2 lanes
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateItemsInLazyForEach(4, 100.0f, std::move(onMoveEvent));
     CreateDone();
 
     /**
@@ -1744,7 +1724,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(51.0);
-    info.SetGlobalPoint(Point(0.f, 51.f));
+    info.SetGlobalPoint(Point(0, 51.f));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "2", "0" }));
@@ -1755,7 +1735,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
      */
     info.SetOffsetX(121.0);
     info.SetOffsetY(0.0);
-    info.SetGlobalPoint(Point(121.f, 0.f));
+    info.SetGlobalPoint(Point(121.f, 0));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "0", "2" }));
@@ -1766,7 +1746,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
      */
     info.SetOffsetX(0.0);
     info.SetOffsetY(0.0);
-    info.SetGlobalPoint(Point(0.f, 0.f));
+    info.SetGlobalPoint(Point(0, 0));
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "0", "1", "2" }));
@@ -1910,7 +1890,7 @@ HWTEST_F(ListCommonTestNg, GetScrollIndexAbility001, TestSize.Level1)
      */
     scrollIndexAbility(FocusHub::SCROLL_TO_HEAD);
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
     /**
      * @tc.steps: step3. Other index
@@ -1941,7 +1921,7 @@ HWTEST_F(ListCommonTestNg, GetCurrentOffset001, TestSize.Level1)
     /**
      * @tc.steps: step2. Set HORIZONTAL, GetCurrentOffset
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
     frameNode_->MarkModifyDone();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

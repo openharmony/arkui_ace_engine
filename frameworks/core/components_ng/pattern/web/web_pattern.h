@@ -849,6 +849,7 @@ private:
     void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
     void ClearDragData();
+    void SetFakeDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
@@ -870,6 +871,8 @@ private:
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
+    void HandleScaleGestureStart(const GestureEvent& event);
+    void HandleScaleGestureEnd(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);

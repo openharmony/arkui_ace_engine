@@ -134,7 +134,7 @@ void Scrollable::InitPanRecognizerNG()
     PanDirection panDirection;
     panDirection.type = axis_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
     double distance = SystemProperties::GetScrollableDistance();
-    if (distance <= 0) {
+    if (LessOrEqual(distance, 0.0)) {
         distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     }
     panRecognizerNG_ =
@@ -269,7 +269,7 @@ void Scrollable::HandleTouchUp()
         }
         return;
     }
-    if (isList_ && state_ != AnimationState::SNAP && startSnapAnimationCallback_) {
+    if (state_ != AnimationState::SNAP && startSnapAnimationCallback_) {
         startSnapAnimationCallback_(0.f, 0.f, 0.f, 0.f);
     }
 }
@@ -798,8 +798,13 @@ void Scrollable::ProcessListSnapMotion(double position)
             touchUp_ = true;
         }
     }
+    if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(
+            nodeId_, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+    }
     currentPos_ = position;
-    if (outBoundaryCallback_ && outBoundaryCallback_() && state_ == AnimationState::SNAP) {
+    if (canOverScroll_ && state_ == AnimationState::SNAP) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
         MarkNeedFlushAnimationStartTime();

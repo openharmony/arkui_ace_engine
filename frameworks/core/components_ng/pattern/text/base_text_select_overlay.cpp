@@ -335,18 +335,31 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
 RectF BaseTextSelectOverlay::MergeSelectedBoxes(
     const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset)
 {
+    if (boxes.empty()) {
+        return RectF();
+    }
     auto frontRect = boxes.front();
     auto backRect = boxes.back();
-    RectF res;
-    if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
-        res.SetRect(contentRect.GetX() + paintOffset.GetX(), frontRect.GetY() + textRect.GetY() + paintOffset.GetY(),
-            contentRect.Width(), backRect.Bottom() - frontRect.Top());
-    } else {
-        res.SetRect(frontRect.GetX() + textRect.GetX() + paintOffset.GetX(),
-            frontRect.GetY() + textRect.GetY() + paintOffset.GetY(), backRect.Right() - frontRect.Left(),
-            backRect.Bottom() - frontRect.Top());
+    float selectAreaRight = frontRect.Right();
+    float selectAreaLeft = frontRect.Left();
+    if (boxes.size() != 1) {
+        std::unordered_map<float, RectF> selectLineRect;
+        for (const auto& box : boxes) {
+            auto combineLineRect = box;
+            auto top = box.Top();
+            if (selectLineRect.find(top) == selectLineRect.end()) {
+                selectLineRect.insert({ top, combineLineRect });
+            } else {
+                combineLineRect = combineLineRect.CombineRectT(selectLineRect[top]);
+                selectLineRect.insert({ top, combineLineRect });
+            }
+            selectAreaRight = std::max(selectAreaRight, combineLineRect.Right());
+            selectAreaLeft = std::min(selectAreaLeft, combineLineRect.Left());
+        }
     }
-    return res;
+    return { selectAreaLeft + textRect.GetX() + paintOffset.GetX(),
+        frontRect.GetY() + textRect.GetY() + paintOffset.GetY(), selectAreaRight - selectAreaLeft,
+        backRect.Bottom() - frontRect.Top() };
 }
 
 void BaseTextSelectOverlay::SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect)

@@ -36,6 +36,8 @@ public:
     void SetActiveCircleColor(const Color& activeCircleColor) override;
     void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
     void SetEnableWaveEffect(bool enableWaveEffect) override;
+    void SetEnableForeground(bool enableForeground) override;
+    void SetSkipUnselectedPoint(bool isSkipUnselectedPoint) override;
 };
 
 } // namespace OHOS::Ace::Framework

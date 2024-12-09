@@ -192,6 +192,7 @@ public:
 
     bool IsLightMode()
     {
+        CHECK_NULL_RETURN(themeConstants_, true);
         auto resAdapter = themeConstants_->GetResourceAdapter();
         CHECK_NULL_RETURN(resAdapter, true);
         return resAdapter->GetResourceColorMode() == ColorMode::LIGHT;

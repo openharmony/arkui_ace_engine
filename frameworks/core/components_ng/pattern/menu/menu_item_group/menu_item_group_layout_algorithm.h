@@ -38,6 +38,11 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void SetItemStartIndex(int32_t val)
+    {
+        itemStartIndex_ = val;
+    }
+
 private:
     bool NeedHeaderPadding(const RefPtr<FrameNode>& host);
     bool NeedFooterPadding(const RefPtr<FrameNode>& host);

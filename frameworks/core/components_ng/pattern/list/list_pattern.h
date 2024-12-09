@@ -134,7 +134,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     void OnTouchDown(const TouchEventInfo& info) override;
-    OverScrollOffset GetOutBoundaryOffset(bool useCurrentDelta) const;
+    OverScrollOffset GetOutBoundaryOffset(float delta, bool useChainDelta = true) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
@@ -375,6 +375,7 @@ private:
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex);
     WeakPtr<FocusHub> ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step);
+    bool HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex);
     bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
         int32_t moveStep, FocusStep step, bool isScrollIndex);

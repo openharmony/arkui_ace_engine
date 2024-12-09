@@ -2005,5 +2005,72 @@ HWTEST_F(PipelineContextTestNg, DragEvent01, TestSize.Level1)
     EXPECT_EQ(305, resampledPointerEvent.x);
     EXPECT_EQ(405, resampledPointerEvent.y);
 }
+
+/**
+ * @tc.name: PipelineCancelDragIfRightBtnPressedTest001
+ * @tc.desc: Test CancelDragIfRightBtnPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineCancelDragIfRightBtnPressedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto manager = context_->GetDragDropManager();
+    ASSERT_NE(manager, nullptr);
+    MouseEvent event;
+
+    /**
+     * @tc.steps2: test function with mouse event button is None.
+     * @tc.expected: dragDropManager's dragCancel flag is false.
+     */
+    manager->SetIsDragCancel(true);
+    context_->CancelDragIfRightBtnPressed(event);
+    EXPECT_FALSE(manager->isDragCancel_);
+
+    /**
+     * @tc.steps3: test function with mouse event button is Right Button.
+     * @tc.expected: dragDropManager's dragCancel flag is true.
+     */
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.action = MouseAction::PRESS;
+    context_->CancelDragIfRightBtnPressed(event);
+    EXPECT_TRUE(manager->isDragCancel_);
+
+    /**
+     * @tc.steps4: test function without dragDropManager_.
+     * @tc.expected: dragDropManager's dragCancel flag is true.
+     */
+    context_->dragDropManager_ = nullptr;
+    context_->CancelDragIfRightBtnPressed(event);
+    EXPECT_TRUE(manager->isDragCancel_);
+}
+
+/**
+ * @tc.name: PipelineOnDragEvent001
+ * @tc.desc: Test reset drag frameNode with pull in.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineOnDragEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto manager = context_->GetDragDropManager();
+    ASSERT_NE(manager, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", -1, AceType::MakeRefPtr<Pattern>(), false);
+    manager->preTargetFrameNode_ = frameNode;
+
+    DragPointerEvent dragEvent;
+    DragEventAction action = DragEventAction::DRAG_EVENT_START;
+    context_->OnDragEvent(dragEvent, action);
+    EXPECT_NE(manager->preTargetFrameNode_, frameNode);
+}
 } // namespace NG
 } // namespace OHOS::Ace

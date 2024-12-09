@@ -205,6 +205,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
     if (offset.GetDistance() > MAX_THRESHOLD) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress move over max threshold");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }

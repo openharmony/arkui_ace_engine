@@ -531,11 +531,6 @@ public:
 
     void SetFocusable(bool focusable, bool isExplicit = true);
 
-    void SetTabStop(bool tabStop)
-    {
-        tabStop_ = tabStop;
-    }
-
     bool GetFocusable() const
     {
         return focusable_;
@@ -548,10 +543,6 @@ public:
 
     bool IsEnabled() const;
 
-    bool IsTabStop() const
-    {
-        return tabStop_;
-    }
     bool IsCurrentFocusWholePath();
 
     bool HasFocusedChild();
@@ -865,7 +856,7 @@ protected:
     bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
-    bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocus(FocusStep moveStep);
     bool RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect);
     bool RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect);
 
@@ -971,7 +962,6 @@ private:
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
     bool arrowKeyStepOut_ { true };
-    bool tabStop_ { false };
     bool isSwitchByEnter_ { false };
     bool enableDirectionalKeyFocus_ { false };
 };

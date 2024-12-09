@@ -162,6 +162,10 @@ void ClickRecognizer::OnAccepted()
         node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+    if (backupTouchPointsForSucceedBlock_.has_value()) {
+        touchPoints_ = backupTouchPointsForSucceedBlock_.value();
+        backupTouchPointsForSucceedBlock_.reset();
+    }
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
@@ -202,6 +206,7 @@ void ClickRecognizer::OnRejected()
     SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
+    backupTouchPointsForSucceedBlock_.reset();
 }
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
@@ -222,9 +227,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
-            "%{public}s",
+            SEC_PLD(%{public}s) ".",
             refereeState_, node ? node->GetTag().c_str() : "null",
-            node ? std::to_string(node->GetId()).c_str() : "invalid");
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
         return;
     }
     InitGlobalValue(event.sourceType);

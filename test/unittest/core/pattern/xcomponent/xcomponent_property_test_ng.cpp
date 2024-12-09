@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "base/geometry/ng/size_t.h"
 
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -2108,5 +2109,47 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest056, TestSize.Level1)
     ASSERT_TRUE(pattern);
     xComponent.EnableSecure(true);
     EXPECT_EQ(pattern->renderContextForSurface_, nullptr);
+}
+
+/**
+ * @tc.name: XComponentLayoutAlgorithmTest007
+ * @tc.desc: Test XComponent layout algorithm functions when XComponent type is surface and layout invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent framenode.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    ArkUI_Int32 nodeId = 0;
+    auto frameNode = XComponentModelNG::CreateFrameNode(
+        nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set XComponentLayoutAlgorithm.
+     *            case: layoutProperty is nullptr
+     * @tc.expected: XComponentLayoutAlgorithm is created successfully
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, nullptr);
+    auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
+    EXPECT_FALSE(xComponentPattern == nullptr);
+    auto xComponentLayoutAlgorithm = xComponentPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(xComponentLayoutAlgorithm == nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set maxSize and call MeasureContent.
+     *            case: maxSize is MAX_SIZE
+     * @tc.expected: xComponentSize is SizeF(0.0f, 0.0f)
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = MAX_SIZE;
+    auto xComponentSize = xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(xComponentSize, SizeF(0.0f, 0.0f));
 }
 } // namespace OHOS::Ace::NG

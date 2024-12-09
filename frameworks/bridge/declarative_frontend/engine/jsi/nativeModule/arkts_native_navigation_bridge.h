@@ -36,6 +36,8 @@ public:
     static ArkUINativeModuleValue SetUsrNavigationMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetHideTitleBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetHideTitleBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEnableModeChangeAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableModeChangeAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetNavBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetNavBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetNavBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);

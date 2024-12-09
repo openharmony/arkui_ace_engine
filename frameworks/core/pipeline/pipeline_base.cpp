@@ -930,45 +930,6 @@ void PipelineBase::SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t s
     }
 }
 
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
-{
-    if (!callback || pointId < 0) {
-        return;
-    }
-
-    etsCardTouchEventCallback_[pointId] = std::move(callback);
-}
-
-void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point,
-    SerializedGesture& serializedGesture)
-{
-    if (point.id < 0) {
-        return;
-    }
-
-    auto iter = etsCardTouchEventCallback_.find(point.id);
-    if (iter == etsCardTouchEventCallback_.end()) {
-        return;
-    }
-    if (iter->second) {
-        iter->second(point, serializedGesture);
-    }
-}
-
-void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t pointId)
-{
-    if (pointId < 0) {
-        return;
-    }
-
-    auto iter = etsCardTouchEventCallback_.find(pointId);
-    if (iter == etsCardTouchEventCallback_.end()) {
-        return;
-    }
-
-    etsCardTouchEventCallback_.erase(iter);
-}
-
 void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
 {
     subWindowVsyncCallbacks_.erase(subWindowId);
@@ -1012,7 +973,6 @@ void PipelineBase::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
-    etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
         "pipeline destroyed, has %{public}zu finish callbacks not executed, finish count is %{public}s",

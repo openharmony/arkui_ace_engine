@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 #define ACE_DEFINE_FOCUS_EVENT(func, type, name)                               \
 public:                                                                        \
-    void Set##func(type&& name)                                                \
+    void Set##func(type&& (name))                                              \
     {                                                                          \
         if (!focusCallbackEvents_) {                                           \
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();          \

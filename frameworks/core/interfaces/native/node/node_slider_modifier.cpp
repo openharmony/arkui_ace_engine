@@ -825,7 +825,7 @@ void SetSliderChange(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_SLIDER_CHANGE;
         event.componentAsyncEvent.data[0].f32 = value;
         event.componentAsyncEvent.data[1].i32 = mode;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     SliderModelNG::SetOnChange(frameNode, std::move(onEvent));
 }

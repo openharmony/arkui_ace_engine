@@ -112,7 +112,7 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
-    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
+    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
     FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
@@ -258,6 +258,11 @@ public:
     }
 
     void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
@@ -1145,6 +1150,13 @@ public:
 
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
 
+    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
+    {
+        if (visibleAreaChangeTriggerReason_ != triggerReason) {
+            visibleAreaChangeTriggerReason_ = triggerReason;
+        }
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1412,6 +1424,7 @@ private:
     std::optional<RectF> syncedFramePaintRect_;
 
     int32_t childrenUpdatedFrom_ = -1;
+    VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
 
     friend class RosenRenderContext;
     friend class RenderContext;

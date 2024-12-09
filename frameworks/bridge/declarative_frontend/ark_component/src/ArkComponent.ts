@@ -3318,7 +3318,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   setNodePtr(nodePtr: KNode) {
+    if (nodePtr === this.nativePtr) {
+      return;
+    }
     this.nativePtr = nodePtr;
+    this._weakPtr = (nodePtr !== undefined && nodePtr !== null) ? getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr) : undefined;
   }
 
   setInstanceId(instanceId: number): void {

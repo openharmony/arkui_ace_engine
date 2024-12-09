@@ -289,6 +289,11 @@ public:
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
+    void SetIsNeedRemove(bool isNeedRemove)
+    {
+        isNeedRemove_ = isNeedRemove;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -354,6 +359,7 @@ protected:
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
+    bool isNeedRemove_ = false;
 
 #if defined(ENABLE_SPLIT_MODE)
     bool needFireObserver_ = true;

@@ -37,6 +37,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -193,6 +194,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         auto nativeEngine = reinterpret_cast<NativeEngine*>(sharedRuntime);
         auto env = reinterpret_cast<napi_env>(nativeEngine);
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
+    }
+}
+
+void ParseLanguage(ConfigurationChange& configurationChange, const std::string& languageTag)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
 } // namespace
@@ -1673,7 +1686,7 @@ private:
 bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
     const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative, int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "RequestAutoSave called");
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
@@ -2331,6 +2344,7 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
     windowManager->SetGetWindowStartMoveFlagCallBack(
         [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
     windowManager->SetWindowSplitPrimaryCallBack(
@@ -2361,11 +2375,9 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> bool {
             return window->GetFreeMultiWindowModeEnabledState();
         });
-    windowManager->SetPerformBackCallback(
-        [window = uiWindow_]() -> void {
-            return window->PerformBack();
-        });
-
+    windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
+        window->OnContainerModalEvent(name, value);
+    });
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
@@ -2441,6 +2453,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 
 void AceContainer::CheckAndSetFontFamily()
 {
+    CHECK_NULL_VOID(pipelineContext_);
     auto fontManager = pipelineContext_->GetFontManager();
     CHECK_NULL_VOID(fontManager);
     if (fontManager->IsUseAppCustomFont()) {
@@ -2473,7 +2486,7 @@ void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
     if (!parsedConfig.fontScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
         if (fontSizeScale != pipelineContext_->GetFontScale()) {
@@ -2482,8 +2495,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
-            parsedConfig.fontWeightScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontWeightScale: %{public}s", parsedConfig.fontWeightScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
         if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
@@ -2543,9 +2555,6 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
         configurationChange.skinUpdate = skinUpdate;
-        if (fontUpdate) {
-            CheckAndSetFontFamily();
-        }
     }
 }
 
@@ -2570,14 +2579,8 @@ void AceContainer::BuildResConfig(
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
     if (!parsedConfig.languageTag.empty()) {
-        std::string language;
-        std::string script;
-        std::string region;
-        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
-        if (!language.empty() || !script.empty() || !region.empty()) {
-            configurationChange.languageUpdate = true;
-            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-        }
+        ParseLanguage(configurationChange, parsedConfig.languageTag);
+        resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
         auto fontManager = pipelineContext_->GetFontManager();
@@ -2617,8 +2620,8 @@ void AceContainer::UpdateConfiguration(
     auto resConfig = GetResourceConfiguration();
     BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
+        ParseLanguage(configurationChange, parsedConfig.preferredLanguage);
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
-        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
@@ -2641,6 +2644,19 @@ void AceContainer::UpdateConfiguration(
     NotifyConfigToSubContainers(parsedConfig, configuration);
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
+}
+
+void AceContainer::UpdateConfigurationSyncForAll(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+
+    if (!parsedConfig.fontId.empty()) {
+        CheckAndSetFontFamily();
+    }
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -3077,7 +3093,7 @@ bool AceContainer::GetCurPointerEventInfo(
     sourceType = currentPointerEvent->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
-    sourceTool = pointerItem.GetToolType();
+    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
     displayId = currentPointerEvent->GetTargetDisplayId();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;

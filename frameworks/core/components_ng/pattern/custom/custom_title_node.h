@@ -28,6 +28,10 @@ const std::string EVENT_NAME_CLOSE_VISIBILITY = "arkui_close_visibility";
 const std::string EVENT_NAME_CLOSE_STATUS = "arkui_close_status";
 const std::string EVENT_NAME_MAXIMIZE_IS_RECOVER = "arkui_maximize_is_recover";
 const std::string EVENT_NAME_MENU_WIDTH_CHANGE = "arkui_menu_width_change";
+const std::string EVENT_NAME_BUTTON_SPACING_CHANGE = "arkui_button_spacing_change";
+const std::string EVENT_NAME_COLOR_CONFIGURATION_LOCKED = "arkui_color_mode_locked";
+const std::string EVENT_NAME_BUTTON_SIZE_CHANGE = "arkui_button_size_change";
+const std::string EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE = "arkui_button_right_offset_change";
 
 namespace {
 inline std::string BoolToString(bool value)
@@ -93,12 +97,12 @@ public:
         }
     }
 
-    void SetCustomCallback(const std::function<void(const std::string& eventName, std::string param)>& callback)
+    void SetCustomCallback(const std::function<void(const std::string& eventName, const std::string& param)>& callback)
     {
         customCallback_ = callback;
     }
 
-    void FireCustomCallback(const std::string& eventName, std::string param)
+    void FireCustomCallback(const std::string& eventName, const std::string& param)
     {
         if (customCallback_) {
             customCallback_(eventName, param);
@@ -118,7 +122,7 @@ private:
     std::function<void()> onWindowFocusedCallback_ = nullptr;
     std::function<void()> onWindowUnfocusedCallback_ = nullptr;
 
-    std::function<void(const std::string&, std::string)> customCallback_ = nullptr;
+    std::function<void(const std::string&, const std::string&)> customCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H

@@ -364,7 +364,10 @@ void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
-void PipelineContext::WindowFocus(bool isFocus) {}
+void PipelineContext::WindowFocus(bool isFocus)
+{
+    onFocus_ = isFocus;
+}
 
 void PipelineContext::ContainerModalUnFocus() {}
 
@@ -435,6 +438,8 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
+
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
@@ -875,6 +880,15 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    return 0;
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1015,8 +1029,6 @@ bool PipelineBase::MaybeRelease()
 {
     return AceType::MaybeRelease();
 }
-
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
 double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {

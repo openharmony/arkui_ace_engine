@@ -218,7 +218,6 @@ void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 void InputMethodManager::HideKeyboardAcrossProcesses()
 {
 #if defined(ENABLE_STANDARD_INPUT)
-    // If Nav, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard FrameNode notNeedSoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {

@@ -1121,10 +1121,9 @@ void WebDelegate::OnRenderProcessNotResponding(
 {}
 void WebDelegate::OnRenderProcessResponding() {}
 void WebDelegate::ScaleGestureChange(double scale, double centerX, double centerY)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-#endif
-}
+{}
+void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScale, double centerX, double centerY)
+{}
 std::string WebDelegate::GetSelectInfo() const
 {
     return "";

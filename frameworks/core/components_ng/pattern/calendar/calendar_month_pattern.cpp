@@ -395,6 +395,9 @@ void CalendarMonthPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto calendarPattern = weak.Upgrade();
         CHECK_NULL_VOID(calendarPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             calendarPattern->OnTouchEvent(info.GetTouches().front().GetLocalLocation(), true);
         }

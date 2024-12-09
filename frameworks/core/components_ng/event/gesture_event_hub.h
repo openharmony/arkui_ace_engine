@@ -182,10 +182,8 @@ public:
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
         int32_t duration = 500);
     // Set by user define, which will replace old one.
-    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance,
-        bool isOverrideDistance = false);
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance,
-        bool isOverrideDistance = false);
+    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
@@ -255,6 +253,10 @@ public:
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
+    bool CheckAllowDrag(const GestureEvent& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<FrameNode>& frameNode);
+    RefPtr<OHOS::Ace::DragEvent> CreateDragEvent(const GestureEvent& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<FrameNode>& frameNode);
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
     void HandleOnDragUpdate(const GestureEvent& info);
@@ -267,7 +269,7 @@ public:
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
-    void HandleNotallowDrag(const GestureEvent& info);
+    void HandleNotAllowDrag(const GestureEvent& info);
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool GetMonopolizeEvents() const;
     void SetMonopolizeEvents(bool monopolizeEvents);

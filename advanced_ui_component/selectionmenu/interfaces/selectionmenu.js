@@ -20,7 +20,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const WITHOUT_BUILDER = -2;
-const MAX_FONT_STANDARD = 1.0
+const MAX_FONT_STANDARD = 1.0;
 const MAX_FONT_SCALE = 2.0;
 const defaultTheme = {
     imageSize: 24,
@@ -376,6 +376,12 @@ class SelectionMenuComponent extends ViewPU {
         }
         this.fontScale = this.getFontScale();
     }
+    hasSystemMenu() {
+        let showMenuOption = this.showCustomerIndex === -1 &&
+            (this.controller || (this.expandedMenuOptions && this.expandedMenuOptions.length > 0));
+        let showBuilder = this.showCustomerIndex > -1 && this.builder;
+        return Boolean(showMenuOption || showBuilder);
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -403,6 +409,10 @@ class SelectionMenuComponent extends ViewPU {
             Scroll.backgroundColor(this.theme.backGroundColor);
             Scroll.shadow(this.theme.iconPanelShadowStyle);
             Scroll.borderRadius(this.theme.containerBorderRadius);
+            Scroll.outline(this.hasSystemMenu() ? {
+                width: this.theme.outlineWidth, color: this.theme.outlineColor,
+                radius: this.theme.containerBorderRadius
+            } : undefined);
             Scroll.constraintSize({
                 maxHeight: `calc(100% - ${this.horizontalMenuHeight > 0 ? this.horizontalMenuHeight + this.theme.menuSpacing : 0}vp)`,
                 minWidth: this.theme.defaultMenuWidth
@@ -635,8 +645,6 @@ class SelectionMenuComponent extends ViewPU {
             Column.width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth);
             Column.shadow(this.theme.iconPanelShadowStyle);
             Column.border({ width: this.theme.borderWidth, color: this.theme.borderColor,
-                radius: this.theme.containerBorderRadius });
-            Column.outline({ width: this.theme.outlineWidth, color: this.theme.outlineColor,
                 radius: this.theme.containerBorderRadius });
             Column.constraintSize({
                 minWidth: this.theme.defaultMenuWidth

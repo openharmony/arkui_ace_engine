@@ -692,7 +692,7 @@ private:
      *   @return     true if process is successful
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
-
+    void ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper);
     // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
     // 2. end show animation: overlay node get focus;

@@ -93,7 +93,9 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto abcPath = abcPathValue->ToString();
     auto entryPoint = entryPointValue->ToString();
 
-    UIExtensionModel::GetInstance()->Create();
+    NG::UIExtensionConfig config;
+    config.sessionType = NG::SessionType::ISOLATED_COMPONENT;
+    UIExtensionModel::GetInstance()->Create(config);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();

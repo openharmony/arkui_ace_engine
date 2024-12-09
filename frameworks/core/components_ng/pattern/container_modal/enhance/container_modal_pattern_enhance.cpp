@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+
+#include <atomic>
+
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
@@ -52,6 +55,8 @@ const Dimension MENU_SAFETY_X = 8.0_vp;
 const Dimension MENU_SAFETY_Y = 96.0_vp;
 const Dimension MENU_ITEM_TEXT_PADDING = 8.0_vp;
 const Color MENU_ITEM_COLOR = Color(0xffffff);
+
+std::atomic<int32_t> g_nextListenerId = 1;
 
 RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
 {
@@ -239,10 +244,12 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
         pattern->SetTapGestureEvent(customTitleRow);
         pattern->SetTapGestureEvent(gestureRow);
+        pattern->SetTapGestureEvent(floatingTitleRow);
         AddPanEvent(customTitleRow);
         AddPanEvent(gestureRow);
         EventHubOnModifyDone(customTitleRow);
         EventHubOnModifyDone(gestureRow);
+        EventHubOnModifyDone(floatingTitleRow);
     }
     
     UpdateGestureRowVisible();
@@ -817,6 +824,22 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     }
 }
 
+void ContainerModalPatternEnhance::CallContainerModalNative(const std::string& name, const std::string& value)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallContainerModalNative name = %{public}s , value = %{public}s", name.c_str(),
+        value.c_str());
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    windowManager->FireWindowCallNativeCallback(name, value);
+}
+
+void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name, const std::string& value)
+{
+    auto controlButtonsNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    controlButtonsNode->FireCustomCallback(name, value);
+}
+
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
 {
     auto buttonRow = GetButtonRowByInspectorId();
@@ -906,4 +929,27 @@ void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MENU_WIDTH_CHANGE, std::to_string(width));
 }
 
+int32_t ContainerModalPatternEnhance::AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener)
+{
+    auto id = g_nextListenerId.fetch_add(1);
+    rectChangeListeners_.emplace(id, listener);
+    return id;
+}
+
+void ContainerModalPatternEnhance::RemoveButtonsRectChangeListener(int32_t id)
+{
+    auto it = rectChangeListeners_.find(id);
+    if (it != rectChangeListeners_.end()) {
+        rectChangeListeners_.erase(it);
+    }
+}
+
+void ContainerModalPatternEnhance::NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect)
+{
+    for (auto& pair : rectChangeListeners_) {
+        if (pair.second) {
+            pair.second(containerModal, buttonsRect);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

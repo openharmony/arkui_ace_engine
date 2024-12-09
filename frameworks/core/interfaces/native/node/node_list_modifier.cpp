@@ -751,7 +751,7 @@ void SetOnListScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_LIST_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(scrollOffset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(scrollState);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
@@ -770,7 +770,7 @@ void SetOnListScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_LIST_SCROLL_FRAME_BEGIN;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
         return scrollRes;
     };
@@ -787,7 +787,7 @@ void SetOnListScrollStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_LIST_SCROLL_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
@@ -802,7 +802,7 @@ void SetOnListScrollStop(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_LIST_SCROLL_STOP;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
@@ -824,7 +824,7 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         scrollRes.offset =
             Dimension(event.componentAsyncEvent.data[0].f32, usePx ? DimensionUnit::PX : DimensionUnit::VP);
         return scrollRes;
@@ -846,7 +846,7 @@ void SetOnListDidScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 =
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollableModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
 }
@@ -864,7 +864,7 @@ void SetOnListScrollIndex(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].i32 = first;
         event.componentAsyncEvent.data[1].i32 = last;
         event.componentAsyncEvent.data[2].i32 = center;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
@@ -878,7 +878,7 @@ void SetOnListReachStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_LIST_REACH_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }
@@ -892,7 +892,7 @@ void SetOnListReachEnd(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_LIST_REACH_END;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }

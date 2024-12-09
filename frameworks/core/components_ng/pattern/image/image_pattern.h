@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/offset.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
@@ -139,7 +140,7 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
-        isImageQualityChange_ = (imageQuality_ != imageQuality);
+        isImageReloadNeeded_ = isImageReloadNeeded_  | (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
 
@@ -386,6 +387,15 @@ public:
         renderedImageInfo_ = renderedImageInfo;
     }
 
+    // Sets the decoding format for the external domain.
+    // Note: Only NV21, RGBA_8888, RGBA_1010102, YCBCR_P010, YCRCB_P010 format is supported at this time.
+    void SetExternalDecodeFormat(PixelFormat externalDecodeFormat);
+
+    PixelFormat GetExternalDecodeFormat()
+    {
+        return externalDecodeFormat_;
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -540,7 +550,9 @@ private:
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
-    bool isImageQualityChange_ = false;
+    PixelFormat externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    // Flag indicating whether the image needs to be reloaded due to parameter changes.
+    bool isImageReloadNeeded_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;

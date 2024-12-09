@@ -302,12 +302,24 @@ public:
         if (scrollBarProxy_) {
             scrollBarProxy_->StartScrollBarAnimator();
         }
+
+        for (auto proxy : nestScrollBarProxy_) {
+            auto scrollBarProxy = proxy.Upgrade();
+            CHECK_NULL_CONTINUE(scrollBarProxy);
+            scrollBarProxy->StartScrollBarAnimator();
+        }
     }
 
     void StopScrollBarAnimatorByProxy()
     {
         if (scrollBarProxy_) {
             scrollBarProxy_->StopScrollBarAnimator();
+        }
+
+        for (auto proxy : nestScrollBarProxy_) {
+            auto scrollBarProxy = proxy.Upgrade();
+            CHECK_NULL_CONTINUE(scrollBarProxy);
+            scrollBarProxy->StopScrollBarAnimator();
         }
     }
 
@@ -874,8 +886,14 @@ private:
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
+    /*
+     *  End of NestableScrollContainer implementations
+     *******************************************************************************/
+
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
     bool HasEdgeEffect(float offset) const;
+    bool HandleOverScroll(float velocity);
+    bool HandleScrollableOverScroll(float velocity);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -899,14 +917,6 @@ private:
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
-
-    /*
-     *  End of NestableScrollContainer implementations
-     *******************************************************************************/
-
-    bool HandleOverScroll(float velocity);
-    bool HandleScrollableOverScroll(float velocity);
-
     void CreateRefreshCoordination()
     {
         if (!refreshCoordination_) {

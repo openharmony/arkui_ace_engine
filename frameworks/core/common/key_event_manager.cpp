@@ -15,6 +15,7 @@
 #include "key_event_manager.h"
 
 #include "base/input_manager/input_manager.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -32,6 +33,7 @@ enum CtrlKeysBit : uint8_t {
 RefPtr<NG::PipelineContext> GetPipelineContext(int32_t instanceId)
 {
     auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
     return AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
 }
 
@@ -114,24 +116,18 @@ uint8_t KeyEventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>&
 
 bool KeyEventManager::IsSystemKeyboardShortcut(const KeyEvent& event)
 {
-    static std::optional<std::vector<HotKey>> systemHotKeys;
-    static std::mutex lock_;
+    static std::vector<HotKey> systemHotKeys;
+    static std::once_flag initFlag;
 
-    if (!systemHotKeys) {
-        std::lock_guard<std::mutex> lockGuard(lock_);
+    std::call_once(initFlag, []() {
         std::vector<HotKey> initHotKeys;
-        if (!systemHotKeys && InputManager::GetSystemHotkeys(initHotKeys)) {
-            systemHotKeys.emplace(initHotKeys);
-        }
-    }
-    if (systemHotKeys.value().empty()) {
+        InputManager::GetSystemHotkeys(systemHotKeys);
+    });
+    if (systemHotKeys.empty()) {
         return false;
     }
 
-    const auto& hotKeys = systemHotKeys.value();
-    std::string info;
-    for (const auto& hotKey : hotKeys) {
-        const auto [prekey, finalkey] = hotKey;
+    for (const auto& [prekey, finalkey] : systemHotKeys) {
         if (static_cast<int32_t>(event.code) != finalkey || (event.pressedCodes.size() != prekey.size() + 1)) {
             continue;
         }
@@ -525,6 +521,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 
     // onKeyPreIme
     if (event.isPreIme) {
+        ResSchedReport::GetInstance().OnKeyEvent(event);
         if (TriggerKeyEventDispatch(event)) {
             return true;
         }
@@ -535,9 +532,6 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         }
         return false;
     }
-
-    auto container = Container::GetContainer(GetInstanceId());
-    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
 
     // process drag cancel
     if (event.code == KeyCode::KEY_ESCAPE) {

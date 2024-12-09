@@ -230,7 +230,6 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     if (textPattern->GetMagnifierController()) {
         textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
-    textPattern->SetTextResponseType(TextResponseType::LONG_PRESS);
     auto textSelector = textPattern->GetTextSelector();
     textPattern->UpdateSelectionSpanType(textSelector.GetTextStart(), textSelector.GetTextEnd());
     textPattern->CalculateHandleOffsetAndShowOverlay();

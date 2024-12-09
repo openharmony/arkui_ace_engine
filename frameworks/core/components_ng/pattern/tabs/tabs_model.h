@@ -144,6 +144,7 @@ public:
     virtual void SetAnimateMode(TabAnimateMode mode) {}
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) {}
     virtual void SetBarBackgroundEffect(const EffectOption& effectOption) {}
+    virtual void SetPageFlipMode(int32_t pageFlipMode) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

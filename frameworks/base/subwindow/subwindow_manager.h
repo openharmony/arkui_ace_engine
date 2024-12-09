@@ -191,14 +191,14 @@ private:
     static thread_local RefPtr<Subwindow> currentSubwindow_;
 
     std::mutex toastMutex_;
-    SubwindowMap toastWindowMap_;
+    SubwindowMixMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
     std::mutex systemToastMutex_;
-    SubwindowMap systemToastWindowMap_;
+    SubwindowMixMap systemToastWindowMap_;
     Rect uiExtensionWindowRect_;
 };
 

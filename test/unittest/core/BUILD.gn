@@ -100,7 +100,6 @@ group("linux_core_unittest") {
     "pattern/navigator:navigator_test_ng",
     "pattern/navrouter:navrouter_test_ng",
     "pattern/node_container:node_container_test_ng",
-    "pattern/option:option_test_ng",
     "pattern/overlay:overlay_manager_test_ng",
     "pattern/panel:panel_test_ng",
     "pattern/particle:particle_test_ng",

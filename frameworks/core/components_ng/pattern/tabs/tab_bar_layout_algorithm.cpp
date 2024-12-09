@@ -108,14 +108,20 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     auto frameSize = idealSize.ConvertToSizeT();
-
+    auto tabBarFocusNode = host->GetFocusHub();
     if ((axis_ == Axis::VERTICAL && NearZero(idealSize.ConvertToSizeT().Width())) ||
         (axis_ == Axis::HORIZONTAL && NearZero(idealSize.ConvertToSizeT().Height()))) {
         layoutWrapper->SetActive(false);
         geometryNode->SetFrameSize(SizeF());
+        if (tabBarFocusNode) {
+            tabBarFocusNode->SetFocusable(false);
+        }
         return;
     } else {
         layoutWrapper->SetActive(true);
+        if (tabBarFocusNode) {
+            tabBarFocusNode->SetFocusable(true);
+        }
     }
     if (!constraint->selfIdealSize.Height().has_value() && axis_ == Axis::HORIZONTAL) {
         defaultHeight_ = (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE &&

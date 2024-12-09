@@ -78,6 +78,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 
 void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvent)
 {
+    CHECK_NULL_VOID(pointerEvent);
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
@@ -149,6 +150,27 @@ void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, M
     mouseEvent.originalId = mouseEvent.id;
 }
 
+TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
+{
+    TouchEvent event;
+    event.SetId(touchPoint.id)
+        .SetX(touchPoint.x)
+        .SetY(touchPoint.y)
+        .SetScreenX(touchPoint.screenX)
+        .SetScreenY(touchPoint.screenY)
+        .SetType(TouchType::UNKNOWN)
+        .SetPullType(TouchType::UNKNOWN)
+        .SetSize(touchPoint.size)
+        .SetForce(touchPoint.force)
+        .SetTiltX(touchPoint.tiltX)
+        .SetTiltY(touchPoint.tiltY)
+        .SetSourceType(SourceType::NONE)
+        .SetSourceTool(touchPoint.sourceTool)
+        .SetOriginalId(touchPoint.originalId)
+        .SetSourceType(SourceType::NONE);
+    return event;
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(pointerEvent, TouchEvent());
@@ -160,27 +182,13 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         return TouchEvent();
     }
     auto touchPoint = ConvertTouchPoint(item);
+    TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
-    TouchEvent event;
-    event.SetId(touchPoint.id)
-        .SetX(touchPoint.x)
-        .SetY(touchPoint.y)
-        .SetScreenX(touchPoint.screenX)
-        .SetScreenY(touchPoint.screenY)
-        .SetType(TouchType::UNKNOWN)
-        .SetPullType(TouchType::UNKNOWN)
-        .SetTime(time)
-        .SetSize(touchPoint.size)
-        .SetForce(touchPoint.force)
-        .SetTiltX(touchPoint.tiltX)
-        .SetTiltY(touchPoint.tiltY)
+    event.SetTime(time)
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
-        .SetSourceType(SourceType::NONE)
-        .SetSourceTool(touchPoint.sourceTool)
-        .SetTouchEventId(pointerEvent->GetId())
-        .SetOriginalId(touchPoint.originalId);
+        .SetTouchEventId(pointerEvent->GetId());
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
@@ -556,6 +564,9 @@ void GetPointerEventAction(int32_t action, DragPointerEvent& event)
     }
 }
 
+/**
+ * Only for UIExtension to convert drag event type and dispatch.
+ */
 void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const PointerAction action)
 {
     if (action == PointerAction::PULL_IN_WINDOW) {
@@ -563,6 +574,9 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     }
     if (action == PointerAction::PULL_OUT_WINDOW) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
+    }
+    if (action == PointerAction::UP) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     }
 }
 

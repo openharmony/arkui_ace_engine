@@ -148,29 +148,26 @@ void TextModelNG::SetTextColor(const Color& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
 void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)

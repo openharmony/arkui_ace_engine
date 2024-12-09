@@ -316,6 +316,10 @@ constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
 constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 
+constexpr int32_t PINCH_START_TYPE = 1;
+constexpr int32_t PINCH_UPDATE_TYPE = 3;
+constexpr int32_t PINCH_END_TYPE = 2;
+
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
 constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
@@ -412,6 +416,7 @@ private:
 WebPattern::WebPattern()
 {
     InitMagnifier();
+    renderMode_ = RenderMode::ASYNC_RENDER;
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
@@ -819,9 +824,7 @@ void WebPattern::InitEvent()
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
     InitPanEvent(gestureHub);
-    if (GetWebInfoType() == WebInfoType::TYPE_2IN1) {
-        InitPinchEvent(gestureHub);
-    }
+    InitPinchEvent(gestureHub);
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -962,6 +965,8 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->zoomErrorCount_ = 0;
             TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionStartTask startPinchScale: %{public}f",
                 pattern->startPinchScale_);
+            
+            pattern->HandleScaleGestureStart(event);
         }
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
@@ -973,7 +978,13 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->HandleScaleGestureChange(event);
         }
     };
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleScaleGestureEnd(event);
+        }
+    };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
 
     pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
@@ -1099,10 +1110,17 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     CHECK_NULL_VOID(frameNode);
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f centerX: "
-        "%{public}f centerY: %{public}f offset X: %{public}f offset Y: %{public}f",
-        curScale, scale, newScale, centerX, centerY, offset.GetX(), offset.GetY());
+        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
+        " originScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
+        " offset Y: %{public}f",
+        curScale, scale, newScale, event.GetScale(), centerX, centerY, offset.GetX(), offset.GetY());
+
+    // deprecated
     delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
+
+    // Plan two
+    delegate_->ScaleGestureChangeV2(
+        PINCH_UPDATE_TYPE, newScale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     if (LessNotEqual(scale, DEFAULT_PINCH_SCALE)) {
@@ -1184,6 +1202,38 @@ double WebPattern::GetNewScale(double& scale) const
     }
 
     return newScale;
+}
+
+void WebPattern::HandleScaleGestureStart(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale = event.GetScale();
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
+
+    delegate_->ScaleGestureChangeV2(
+        PINCH_START_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
+}
+
+void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale = event.GetScale();
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
+
+    delegate_->ScaleGestureChangeV2(
+        PINCH_END_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1876,7 +1926,7 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     // fake drag data when enter
     delegate_->GetOrCreateDragData();
     // use summary to set fake data
-    ClearDragData();
+    SetFakeDragData();
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
     // RequestFocus to show the carret frame_caret
     WebRequestFocus();
@@ -1946,7 +1996,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(info->GetX() - offset.value_or(OffsetF()).GetX()) * viewScale;
     int32_t localY = static_cast<int32_t>(info->GetY() - offset.value_or(OffsetF()).GetY()) * viewScale;
-
+    ClearDragData();
     RefPtr<UnifiedData> aceData = info->GetData();
     // get data from ace(from udmf), and send it to chromium
     if (aceData && aceData->GetSize() >= 1) {
@@ -2060,6 +2110,17 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
         delegate_->dragData_->ClearImageFileNames();
+    }
+}
+
+void WebPattern::SetFakeDragData()
+{
+    CHECK_NULL_VOID(delegate_);
+    std::string plain = " ";
+    std::string htmlContent = " ";
+    if (delegate_->dragData_) {
+        delegate_->dragData_->SetFragmentText(plain);
+        delegate_->dragData_->SetFragmentHtml(htmlContent);
     }
 }
 
@@ -2444,7 +2505,10 @@ void WebPattern::OnAreaChangedInner()
         isKeyboardInSafeArea_ = false;
     }
     if (layoutMode_ == WebLayoutMode::NONE && renderMode_ == RenderMode::ASYNC_RENDER) {
-        drawSize_ = size;
+        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+            drawSize_ = size;
+            TAG_LOGD(AceLogTag::ACE_WEB, "ASYNC_RENDER, drawsize_ : %{public}s", drawSize_.ToString().c_str());
+        }
         if (webOffset_ == offset) {
             return;
         }
@@ -3266,17 +3330,17 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
 {
     isResizeContentAvoid_ = false;
     isKeyboardInSafeArea_ = false;
-    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardHide layoutMode is FIT_CONTENT");
-        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
-        return true;
-    }
     if (safeAreaEnabled) {
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         return false;
     }
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         return false;
+    }
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardHide layoutMode is FIT_CONTENT");
+        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+        return true;
     }
     drawSize_.SetSize(drawSizeCache_);
     visibleViewportSize_.SetWidth(-1.0);
@@ -3755,13 +3819,14 @@ void WebPattern::CheckHandles(SelectHandleInfo& handleInfo,
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    float dipScale = std::ceil(pipeline->GetDipScale());
     float viewPortY = handle->GetViewPortY();
     RectF visibleRect;
     RectF visibleInnerRect;
     RectF frameRect;
     host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-    visibleInnerRect.SetRect(visibleInnerRect.GetX(), visibleInnerRect.GetY() + viewPortY - 1,
-        visibleInnerRect.Width(), visibleInnerRect.Height() - viewPortY + 1);
+    visibleInnerRect.SetRect(visibleInnerRect.GetX(), visibleInnerRect.GetY() + viewPortY - dipScale,
+        visibleInnerRect.Width(), visibleInnerRect.Height() - viewPortY + dipScale);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() };
     PointF topPoint = { paintRect.Left(), paintRect.Top() };
@@ -3812,8 +3877,15 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     } else if (y > size.Height()) {
         y = offset.GetY() + size.Height();
     } else {
-        y = y + offset.GetY();
-        y = y - edgeHeight;
+        float diff = 0;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline) {
+            auto dipScale = pipeline->GetDipScale();
+            if (dipScale != 0) {
+                diff = edgeHeight - static_cast<int32_t>(static_cast<int32_t>(edgeHeight / dipScale) * dipScale);
+            }
+        }
+        y = y + offset.GetY() - edgeHeight + diff;
     }
 
     paintRect.SetOffset({ x, y });
@@ -5456,7 +5528,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
         CHECK_NULL_VOID(option);
         auto optionPattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
-        auto optionPaintProperty = option->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         optionPaintProperty->SetIdealWidthForWeb(width - OPTION_MARGIN.ConvertToPx());
         optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * dipScale));
@@ -5466,7 +5538,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
             optionPattern->UpdateNextNodeDivider(false);
             optionPaintProperty->UpdateNeedDivider(false);
         }
-        auto hub = option->GetEventHub<OptionEventHub>();
+        auto hub = option->GetEventHub<MenuItemEventHub>();
         CHECK_NULL_VOID(hub);
         if (optionIndex >= 0 && static_cast<uint32_t>(optionIndex) < items.size()) {
             hub->SetEnabled(items[optionIndex]->GetIsEnabled());
@@ -6710,7 +6782,7 @@ void WebPattern::OnShowAutofillPopup(
         };
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
-            auto hub = optionNode->GetEventHub<OptionEventHub>();
+            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
             auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
             if (!hub || !optionPattern) {
                 continue;
@@ -6992,6 +7064,8 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
         if (isSelected) {
             webPattern->CloseSelectOverlay();
             webPattern->SelectCancel();
+            CHECK_NULL_VOID(webPattern->delegate_);
+            webPattern->delegate_->OnContextMenuHide("");
         }
     };
     imageAnalyzerManager_->SetNotifySelectedCallback(std::move(selectedTask));
@@ -7006,6 +7080,11 @@ void WebPattern::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, 
         TAG_LOGI(AceLogTag::ACE_WEB,
             "OnOverlayStateChanged, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
             offsetX, offsetY, rectWidth, rectHeight);
+        if (!rectWidth || !rectHeight) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnOverlayStateChanged failed: rect is empty, begin to destroy overlay");
+            DestroyAnalyzerOverlay();
+            return;
+        }
         imageAnalyzerManager_->UpdateOverlayStatus(true, offsetX, offsetY, rectWidth, rectHeight);
     }
 }
@@ -7020,6 +7099,7 @@ void WebPattern::OnTextSelected()
 void WebPattern::DestroyAnalyzerOverlay()
 {
     if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::DestroyAnalyzerOverlay");
         imageAnalyzerManager_->DestroyAnalyzerOverlay();
         delegate_->OnDestroyImageAnalyzerOverlay();
     }

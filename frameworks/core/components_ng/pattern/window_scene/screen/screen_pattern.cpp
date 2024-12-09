@@ -221,7 +221,13 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(container, false);
     auto window = static_cast<RosenWindow*>(container->GetWindow());
     CHECK_NULL_RETURN(window, false);
-    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
+    auto* rsWindow = window->GetRSWindow().GetRefPtr();
+    CHECK_NULL_RETURN(rsWindow, false);
+    if (rsWindow->GetClassType() != "RootScene") {
+        LOGI("class type is %{public}s", rsWindow->GetClassType().c_str());
+        return true;
+    }
+    Rosen::RootScene* rootScene = static_cast<Rosen::RootScene*>(rsWindow);
     CHECK_NULL_RETURN(rootScene, false);
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
@@ -229,7 +235,9 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     float density = GetDensityInCurrentResolution();
     rootScene->SetDisplayDensity(density);
     int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+    uint64_t displayId = screenSession_->GetScreenId();
     rootScene->SetDisplayOrientation(orientation);
+    rootScene->SetDisplayId(displayId);
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     return true;
 }

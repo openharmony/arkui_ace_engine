@@ -828,9 +828,9 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     }
     if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
         SetIsDisableDefaultDropAnimation(true);
-        OnDragEnd(DragPointerEvent(
-            touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
-            "");
+        DragPointerEvent dragPointerEvent;
+        DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
+        OnDragEnd(dragPointerEvent, "");
     }
 }
 

@@ -629,7 +629,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest014, TestSize.Level1)
      * @tc.expected: the return value is equal to HOST_DEPTH.
      */
     int32_t hostDepth = layoutWrapper->GetHostDepth();
-    EXPECT_EQ(hostDepth, Infinity<int32_t>());
+    EXPECT_EQ(hostDepth, 1);
 
     /**
      * @tc.steps: step3. call GetHostDepth and set hostNode_ is null.

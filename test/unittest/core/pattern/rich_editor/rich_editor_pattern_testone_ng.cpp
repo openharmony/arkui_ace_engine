@@ -12,9 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#define private public
-#define protected public
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -429,6 +435,9 @@ HWTEST_F(RichEditorPatternTestOneNg, UpdateTextFieldManager001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
@@ -494,40 +503,6 @@ HWTEST_F(RichEditorPatternTestOneNg, JudgeSelectType001, TestSize.Level1)
     richEditorPattern->editingLongPress_ = true;
     selectType = richEditorPattern->JudgeSelectType(offset).second;
     EXPECT_NE(selectType, SelectType::SELECT_FORWARD);
-}
-
-/**
- * @tc.name: HandleSelectOverlayWithOptions001
- * @tc.desc: test RichEditorPattern HandleSelectOverlayWithOptions
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleSelectOverlayWithOptions001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = false;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->sourceType_ = SourceType::TOUCH;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = false;
-    richEditorPattern->sourceType_ = SourceType::TOUCH;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    ClearSpan();
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    ASSERT_EQ(richEditorPattern->SelectOverlayIsOn(), false);
 }
 
 /**
@@ -971,71 +946,6 @@ HWTEST_F(RichEditorPatternTestOneNg, MoveCaretAndStartFocus001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnlyImageSelected001
- * @tc.desc: test HandleOnlyImageSelected
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleOnlyImageSelected001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richeditor pattern and add add text span
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    /**
-     * @tc.steps: step2. request focus
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-
-    /**
-     * @tc.step: step3. create a scene where the text menu has popped up
-     */
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->textSelector_.Update(1, 2);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-
-    /**
-     * @tc.step: step4. test OnMenuItemAction
-     */
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::TOUCH_MENU);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
-
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::NO_MENU);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    Offset globalOffset;
-    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
-    auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
-    auto selectInfoSecHandle = selectOverlayInfo->secondHandle;
-    selectInfoFirstHandle.isShow = true;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-
-    selectInfoFirstHandle.isShow = false;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-
-    selectInfoFirstHandle.isShow = true;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
-
-    selectInfoFirstHandle.isShow = false;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
-
-    EXPECT_EQ(richEditorPattern->selectOverlay_->IsBothHandlesShow(), false);
-}
-
-/**
  * @tc.name: HandleBlurEvent001
  * @tc.desc: test HandleBlurEvent
  * @tc.type: FUNC
@@ -1087,7 +997,6 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleFocusEvent001, TestSize.Level1)
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->isCaretInContentArea_ = true;
 
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = true;

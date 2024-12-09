@@ -30,6 +30,7 @@ public:
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
+    void SetEnableModeChangeAnimation(bool isEnable) override;
     void SetHideTitleBar(bool hideTitleBar, bool animated = false) override;
     void SetHideNavBar(bool hideNavBar) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,

@@ -12,8 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -115,162 +119,5 @@ void RichEditorCommonTestNg::ClearSpan()
     richEditorNode_->children_.clear();
     richEditorPattern->spans_.clear();
     richEditorPattern->caretPosition_ = 0;
-}
-
-void RichEditorCommonTestNg::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
-{
-    EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
-        .WillRepeatedly([](const std::string& text, int8_t offset) -> int8_t {
-            if (text.empty()) {
-                return DEFAULT_RETURN_VALUE;
-            }
-            if (text.length() <= WORD_LIMIT_LEN) {
-                return WORD_LIMIT_RETURN;
-            } else {
-                return BEYOND_LIMIT_RETURN;
-            }
-        });
-
-    EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
-        .WillRepeatedly([](const std::string& text, int8_t offset) -> std::vector<int8_t> {
-            if (text.empty()) {
-                return std::vector<int8_t> { -1, -1 };
-            }
-
-            if (text.length() <= WORD_LIMIT_LEN) {
-                return std::vector<int8_t> { 2, 3 };
-            } else {
-                return std::vector<int8_t> { 0, 2 };
-            }
-        });
-}
-
-void RichEditorCommonTestNg::RequestFocus()
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-}
-
-void RichEditorCommonTestNg::GetFocus(const RefPtr<RichEditorPattern>& pattern)
-{
-    ASSERT_NE(pattern, nullptr);
-    auto focushHub = pattern->GetFocusHub();
-    focushHub->currentFocus_ = true;
-    pattern->HandleFocusEvent();
-    FlushLayoutTask(richEditorNode_);
-}
-
-void RichEditorCommonTestNg::OnDrawVerify(
-    const SelectSpanType& type, const std::string& text, SymbolSpanOptions options, Offset offset, bool selected)
-{
-    /**
-     * @tc.steps: step1. Initialize text input and get focus
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
-    richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
-    if (type == SelectSpanType::TYPESPAN) {
-        AddSpan(text);
-    } else if (type == SelectSpanType::TYPEIMAGE) {
-        AddImageSpan();
-    } else if (type == SelectSpanType::TYPESYMBOLSPAN) {
-        auto richEditorController = richEditorPattern->GetRichEditorController();
-        ASSERT_NE(richEditorController, nullptr);
-        richEditorController->AddSymbolSpan(options);
-    }
-
-    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    GetFocus(richEditorPattern);
-
-    if (!selected) {
-        GestureEvent info;
-        info.localLocation_ = offset;
-        richEditorPattern->HandleClickEvent(info);
-    } else {
-        richEditorPattern->HandleOnSelectAll();
-    }
-
-    /**
-     * @tc.steps: step2. Move handle
-     */
-    auto controller = richEditorPattern->GetMagnifierController();
-    ASSERT_NE(controller, nullptr);
-    controller->SetLocalOffset(OffsetF(1.0f, 1.0f));
-
-    /**
-     * @tc.steps: step3. Test magnifier open or close
-     * @tc.expected: magnifier is open
-     */
-    auto ret = controller->GetShowMagnifier();
-    EXPECT_TRUE(ret);
-
-    /**
-     * @tc.steps: step4. Craete RichEditorOverlayModifier
-     */
-    EdgeEffect edgeEffect;
-    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto scrollBarModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
-    auto richFieldOverlayModifier = AceType::MakeRefPtr<RichEditorOverlayModifier>(
-        richEditorPattern, AceType::WeakClaim(AceType::RawPtr(scrollBarModifier)), scrollEdgeEffect);
-    ASSERT_NE(richFieldOverlayModifier, nullptr);
-
-    /**
-     * @tc.steps: step5. Create DrawingContext
-     */
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-
-    /**
-     * @tc.steps: step6. Do onDraw(context)
-     */
-    richFieldOverlayModifier->onDraw(context);
-
-    /**
-     * @tc.steps: step7. When handle move done
-     */
-    richEditorPattern->selectOverlay_->ProcessOverlay();
-    RectF handleRect;
-    richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
-
-    /**
-     * @tc.steps: step8. Test magnifier open or close
-     * @tc.expected: magnifier is close
-     */
-    ret = controller->GetShowMagnifier();
-    EXPECT_FALSE(ret);
-    richEditorNode_->GetGeometryNode()->SetContentSize(contentRect.GetSize());
-}
-
-void RichEditorCommonTestNg::InitMagnifierParams(const SizeF& frameSize)
-{
-    // set frameSize to RichEditor
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto geometryNode = richEditorNode_->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameSize(frameSize);
-
-    // set frameSize to RootNode
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto rootUINode = pipeline->GetRootElement();
-    ASSERT_NE(rootUINode, nullptr);
-    auto rootGeometryNode = rootUINode->GetGeometryNode();
-    ASSERT_NE(rootGeometryNode, nullptr);
-    rootGeometryNode->SetFrameSize(frameSize);
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto textfieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textfieldTheme));
 }
 } // namespace OHOS::Ace::NG

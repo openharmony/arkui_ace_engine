@@ -90,6 +90,7 @@ struct TextConfig;
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class OneStepDragController;
 
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
@@ -193,12 +194,14 @@ public:
         bool isMoveCaret = false;
         Offset touchDownOffset;
         const Dimension minDistance = 5.0_vp;
+        std::optional<int32_t> touchFingerId = std::nullopt;
 
         void Reset()
         {
             isTouchCaret = false;
             isMoveCaret = false;
             touchDownOffset.Reset();
+            touchFingerId.reset();
         }
     };
 
@@ -224,15 +227,6 @@ public:
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
-    };
-
-    struct OneStepDragParam {
-        std::function<void()> menuBuilder = nullptr;
-        std::function<void()> previewBuilder = nullptr;
-        std::function<void(int32_t, int32_t)> onAppear = nullptr;
-        MenuParam menuParam;
-        OneStepDragParam(const std::function<void()>& builder, const SelectMenuParam& selectMenuParam);
-        MenuParam GetMenuParam(const RefPtr<ImageSpanNode>& imageNode);
     };
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
@@ -515,6 +509,7 @@ public:
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
+    SelectionInfo GetSpansInfoByRange(int32_t start, int32_t end);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -534,11 +529,9 @@ public:
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
-    void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
-    void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
     void UpdateSelectionInfo(int32_t start, int32_t end);
     bool IsEditing();
@@ -551,6 +544,7 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void UpdateParentOffsetAndOverlay();
+    void OnParentOffsetChange();
     void CreateHandles() override;
     void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
@@ -563,6 +557,7 @@ public:
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     std::pair<OffsetF, float> CalculateEmptyValueCaretRect();
+    void UpdateModifierCaretOffsetAndHeight();
     void NotifyCaretChange();
     TextAlign GetTextAlignByDirection();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
@@ -628,10 +623,12 @@ public:
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
+    void CreateDragNode();
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
     bool BetweenSelection(const Offset& globalOffset);
+    bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
@@ -938,7 +935,8 @@ public:
 
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
 
-    void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
+    void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& builder, const SelectMenuParam& menuParam);
+
     void RequestFocusWhenSelected()
     {
         CHECK_NULL_VOID(!HasFocus());
@@ -970,6 +968,7 @@ public:
     {
         ForceTriggerAvoidOnCaretChange(true);
         isTriggerAvoidOnCaretAvoidMode_ = false;
+        UpdateModifierCaretOffsetAndHeight();
         TriggerAvoidOnCaretChange();
     }
 
@@ -1017,12 +1016,13 @@ protected:
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
 private:
+    friend class RichEditorSelectOverlay;
+    friend class OneStepDragController;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
-    friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
@@ -1050,7 +1050,6 @@ private:
     bool HandleUserDoubleClickEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
-    void HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool);
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
@@ -1084,16 +1083,19 @@ private:
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);
+    void HandleMouseSelect(const Offset& localOffset);
     void HandleMouseLeftButtonPress(const MouseInfo& info);
     void HandleMouseLeftButtonRelease(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const TouchEventInfo& info);
+    std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
+    void HandleTouchDown(const TouchLocationInfo& info);
     void HandleTouchUp();
+    void ResetTouchAndMoveCaretState();
     void HandleTouchUpAfterLongPress();
-    void HandleTouchMove(const Offset& offset);
+    void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const Offset& offset);
     Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
@@ -1113,11 +1115,13 @@ private:
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
+    RefPtr<UINode> GetChildByIndex(int32_t index) const override;
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
     void ResetAfterTextChange() override {};
     void AddOprationWhenAddImage(int32_t beforeCaretPos);
     void UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options);
+    void UpdateTextBackgroundStyle(RefPtr<SpanNode>& spanNode, const std::optional<TextBackgroundStyle>& style);
     void InitPlaceholderSpansMap(
         RefPtr<SpanItem>& newSpanItem, const RefPtr<SpanItem>& spanItem, size_t& index, size_t& placeholderGains);
     void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
@@ -1198,7 +1202,7 @@ private:
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
     void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
     void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
-        RichEditorDeleteDirection direction = RichEditorDeleteDirection::FORWARD, bool isResetSelection = true);
+        RichEditorDeleteDirection direction = RichEditorDeleteDirection::FORWARD);
     RefPtr<SpanItem> GetDelPartiallySpanItem(
         RichEditorChangeValue& changeValue, std::string& originalStr, int32_t& originalPos);
     void FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength);
@@ -1259,6 +1263,7 @@ private:
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
     RectF GetSelectArea();
+    void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
     void DeleteForward(int32_t currentPosition, int32_t length);
@@ -1320,25 +1325,17 @@ private:
 
     OffsetF GetGlobalOffset() const;
     void MergeAdjacentSpans(int32_t caretPosition);
-    void EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable);
+    void HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode);
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
-    void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
-    void SetImageSelfResponseEvent(bool isEnable);
-    void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void AddSpanHoverEvent(
         RefPtr<SpanItem> spanItem, const RefPtr<FrameNode>& frameNode, const SpanOptionBase& options);
-    void UpdateImagePreviewParam();
-    void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
     void ClearOnFocusTextField();
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
-    bool SetPreviewTextCn(const std::string& previewTextValue, const PreviewRange& range);
-    bool SetPreviewTextEn(const std::string& previewTextValue, const PreviewRange& range);
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool ReplaceText(const std::string& previewTextValue, const PreviewRange& range);
-    bool AppendText(const std::string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
 
@@ -1421,7 +1418,6 @@ private:
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
     bool isShowMenu_ = true;
-    bool isOnlyImageDrag_ = false;
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
@@ -1443,8 +1439,6 @@ private:
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
     bool isTextPreviewSupported_ = true;
-    float lastFontScale_ = -1;
-    bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
     bool isMoveCaretAnywhere_ = false;
@@ -1457,13 +1451,11 @@ private:
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
-    std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
-    std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
-    bool isImageSelfResponseEvent_ = true;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
+    std::unique_ptr<OneStepDragController> oneStepDragController_;
 };
 } // namespace OHOS::Ace::NG
 

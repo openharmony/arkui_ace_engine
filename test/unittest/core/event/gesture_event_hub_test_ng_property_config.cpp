@@ -1605,7 +1605,7 @@ HWTEST_F(GestureEventHubTestNg, WebDragAction001, TestSize.Level1)
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(dragActionStart), std::move(dragActionUpdate), std::move(dragActionEnd), std::move(dragActionCancel));
     gestureEventHub->SetCustomDragEvent(dragEvent, PAN_DIRECTION_ALL, FINGERS, DISTANCE);
-    gestureEventHub->HandleNotallowDrag(GestureEvent());
+    gestureEventHub->HandleNotAllowDrag(GestureEvent());
 
     /**
      * @tc.steps: step3. create taskExecutor to fire task callBack.

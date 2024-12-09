@@ -488,7 +488,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest040, TestSize.Le
     ASSERT_NE(pipelineContext, nullptr);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPreDragStatus(PreDragStatus::PREVIEW_LANDING_STARTED);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::PREVIEW_LANDING_STARTED);
     dragEventActuator->HandleTouchUpEvent();
     dragEventActuator->SetResponseRegionFull();
     dragEventActuator->ResetResponseRegion();
@@ -716,5 +716,79 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest045, TestSize.Le
     dragEventActuator->isNotInPreviewState_ = false;
     (*(dragEventActuator->panRecognizer_->onReject_))();
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: DragEventActuatorDragGestureTest001
+ * @tc.desc: Create DragEventActuator and invoke OnCollectTouchTarget function, then test recognizer callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorDragGestureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragEventActuator and collect drag event.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](
+                                       GestureEvent& info) { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; };
+    GestureEventFunc actionLongPress = [&unknownPropertyValue](
+                                           GestureEvent& info) { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; };
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {
+        unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE;
+    };
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
+        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
+    dragEvent->SetLongPressEventFunc(std::move(actionLongPress));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    ASSERT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
+    ASSERT_NE(dragEventActuator->longPressRecognizer_->onAction_, nullptr);
+    ASSERT_NE(dragEventActuator->SequencedRecognizer_->onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step2. call actionCancel function.
+     */
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    frameNode->SetDraggable(false);
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+
+    /**
+     * @tc.steps: step3. call sequenceCancel function.
+     */
+    dragEventActuator->longPressRecognizer_->refereeState_ = RefereeState::READY;
+    (*(dragEventActuator->SequencedRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    dragEventActuator->longPressRecognizer_->refereeState_ = RefereeState::SUCCEED;
+    (*(dragEventActuator->SequencedRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+
+    /**
+     * @tc.steps: step3. call longPressAction function.
+     */
+    GestureEvent info = GestureEvent();
+    dragEventActuator->isDragPrepareFinish_ = true;
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    dragEventActuator->isDragPrepareFinish_ = false;
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 }
 } // namespace OHOS::Ace::NG

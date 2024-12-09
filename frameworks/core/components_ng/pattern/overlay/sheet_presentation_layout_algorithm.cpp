@@ -14,12 +14,11 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
-
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SHEET_HALF_SIZE = 2;
+constexpr int32_t DOUBLE_SIZE = 2;
 constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 constexpr Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
@@ -90,8 +89,8 @@ void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutW
         float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
         sheetOffsetY_ = (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_)
                             ? (SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() +
-                                  (upScreenHeight - frameSizeHeight) / SHEET_HALF_SIZE)
-                            : (foldCreaseRect.Bottom() + (downScreenHeight - frameSizeHeight) / SHEET_HALF_SIZE);
+                                  (upScreenHeight - frameSizeHeight) / DOUBLE_SIZE)
+                            : (foldCreaseRect.Bottom() + (downScreenHeight - frameSizeHeight) / DOUBLE_SIZE);
     }
 }
 
@@ -116,7 +115,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         sheetMaxHeight_ = maxSize.Height();
         sheetMaxWidth_ = maxSize.Width();
         sheetWidth_ = GetWidthByScreenSizeType(maxSize, layoutWrapper);
-        sheetHeight_ = GetHeightByScreenSizeType(maxSize);
+        sheetHeight_ = GetHeightByScreenSizeType(maxSize, layoutWrapper);
         if (sheetStyle_.width.has_value()) {
             float width = 0.0f;
             if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
@@ -191,11 +190,11 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     const auto& pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
+    sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
     if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
-        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
+        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
     } else if (sheetType_ == SheetType::SHEET_CENTER) {
-        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
+        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
     } else if (sheetType_ == SheetType::SHEET_POPUP) {
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(frameNode);
@@ -308,10 +307,10 @@ bool SheetPresentationLayoutAlgorithm::CheckPlacementBottom(const SizeF& targetS
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     return GreatOrEqual(
         windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx(),
-        targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE + sheetWidth_ / SHEET_HALF_SIZE) &&
+        targetOffset.GetX() + targetSize.Width() / DOUBLE_SIZE + sheetWidth_ / DOUBLE_SIZE) &&
         LessOrEqual(
             WINDOW_EDGE_SPACE.ConvertToPx(),
-            targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE - sheetWidth_ / SHEET_HALF_SIZE);
+            targetOffset.GetX() + targetSize.Width() / DOUBLE_SIZE - sheetWidth_ / DOUBLE_SIZE);
 }
 
 bool SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft(const SizeF& targetSize, const OffsetF& targetOffset)
@@ -333,21 +332,21 @@ bool SheetPresentationLayoutAlgorithm::CheckPlacementBottomRight(const SizeF& ta
 
 OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottom(const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    arrowOffsetX_ = sheetWidth_ / SHEET_HALF_SIZE;
-    return OffsetF(targetOffset.GetX() + (targetSize.Width() - sheetWidth_) / SHEET_HALF_SIZE,
+    arrowOffsetX_ = sheetWidth_ / DOUBLE_SIZE;
+    return OffsetF(targetOffset.GetX() + (targetSize.Width() - sheetWidth_) / DOUBLE_SIZE,
         targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
 }
 
 OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft(const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    arrowOffsetX_ = targetSize.Width() / SHEET_HALF_SIZE;
+    arrowOffsetX_ = targetSize.Width() / DOUBLE_SIZE;
     auto sheetOffset =
         OffsetF(targetOffset.GetX(), targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
 
     // if the arrow overlaps the sheet left corner, move sheet to the 6vp from the left edge
     if (LessNotEqual(arrowOffsetX_ - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(), sheetRadius_)) {
         sheetOffset.SetX(WINDOW_EDGE_SPACE.ConvertToPx());
-        arrowOffsetX_ = targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE - sheetOffset.GetX();
+        arrowOffsetX_ = targetOffset.GetX() + targetSize.Width() / DOUBLE_SIZE - sheetOffset.GetX();
         TAG_LOGD(AceLogTag::ACE_SHEET, "Adjust sheet to the left boundary of the screen");
     }
 
@@ -363,14 +362,14 @@ OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight(const SizeF& 
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    arrowOffsetX_ = sheetWidth_ - targetSize.Width() / SHEET_HALF_SIZE;
+    arrowOffsetX_ = sheetWidth_ - targetSize.Width() / DOUBLE_SIZE;
     auto sheetOffset = OffsetF(targetOffset.GetX() + targetSize.Width() - sheetWidth_,
         targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
 
     // if the arrow overlaps the sheet right corner, move sheet to the 6vp from the right edge
     if (GreatNotEqual(arrowOffsetX_ + sheetRadius_ + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(), sheetWidth_)) {
         sheetOffset.SetX(windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx() - sheetWidth_);
-        arrowOffsetX_ = targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE - sheetOffset.GetX();
+        arrowOffsetX_ = targetOffset.GetX() + targetSize.Width() / DOUBLE_SIZE - sheetOffset.GetX();
         TAG_LOGD(AceLogTag::ACE_SHEET, "Adjust sheet to the right boundary of the screen");
     }
 
@@ -382,7 +381,8 @@ OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight(const SizeF& 
     return sheetOffset;
 }
 
-float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& maxSize) const
+float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& maxSize,
+    LayoutWrapper* layoutWrapper) const
 {
     float height = maxSize.Height();
     switch (sheetType_) {
@@ -393,10 +393,10 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& m
             break;
         case SheetType::SHEET_BOTTOM_OFFSET:
         case SheetType::SHEET_CENTER:
-            height = GetHeightBySheetStyle();
+            height = GetHeightBySheetStyle(layoutWrapper);
             break;
         case SheetType::SHEET_POPUP:
-            height = GetHeightBySheetStyle() + SHEET_ARROW_HEIGHT.ConvertToPx();
+            height = GetHeightBySheetStyle(layoutWrapper) + SHEET_ARROW_HEIGHT.ConvertToPx();
             break;
         default:
             break;
@@ -435,7 +435,7 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
     return width;
 }
 
-float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
+float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(LayoutWrapper* layoutWrapper) const
 {
     float height = 0.0f;
     bool isMediumOrLargeMode = false;
@@ -448,7 +448,16 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
             sheetMaxHeight = sheetMaxHeight_ - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
                 SHEET_SPLIT_AI_BAR.ConvertToPx();
         }
-        auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
+        NG::RectF floatButtons;
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_RETURN(host, 0.0f);
+        auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_RETURN(sheetPattern, 0.0f);
+        auto maxHeight = (std::min(sheetMaxHeight, sheetMaxWidth_)) * POPUP_LARGE_SIZE;
+        if (sheetPattern->GetWindowButtonRect(floatButtons)) {
+            maxHeight = sheetMaxHeight - DOUBLE_SIZE *
+                (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+        }
         if (sheetStyle_.height->Unit() == DimensionUnit::PERCENT) {
             height = sheetStyle_.height->ConvertToPxWithSize(maxHeight);
         } else if (isMediumOrLargeMode) {

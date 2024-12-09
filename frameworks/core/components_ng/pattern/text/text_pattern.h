@@ -167,6 +167,9 @@ public:
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpTextStyleInfo();
+    void DumpTextStyleInfo2();
+    void DumpTextStyleInfo3();
+    void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
     void DumpParagraphsInfo();
@@ -354,6 +357,7 @@ public:
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
+    void ClearDragEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     virtual std::function<void(Offset)> GetThumbnailCallback();
@@ -370,7 +374,7 @@ public:
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
-    RefPtr<UINode> GetChildByIndex(int32_t index) const;
+    virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
     ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     virtual void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem);
@@ -626,6 +630,7 @@ public:
     // add for capi NODE_TEXT_CONTENT_WITH_STYLED_STRING
     void SetExternalParagraph(void* paragraph)
     {
+        ACE_TEXT_SCOPED_TRACE("SetExternalParagraph");
         externalParagraph_ = paragraph;
     }
 
@@ -797,6 +802,7 @@ protected:
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void InitKeyEvent();
+    void UpdateShiftFlag(const KeyEvent& keyEvent);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleOnSelect(KeyCode code);
     void HandleSelectionUp();
@@ -969,8 +975,6 @@ private:
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
 
-    void DumpTextLayoutProperty();
-
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;
@@ -1016,6 +1020,7 @@ private:
     std::optional<std::function<void()>> afterLayoutCallback_;
     Offset lastLeftMouseMoveLocation_;
     bool isAutoScrollByMouse_ = false;
+    bool shiftFlag_ = false;
 };
 } // namespace OHOS::Ace::NG
 
