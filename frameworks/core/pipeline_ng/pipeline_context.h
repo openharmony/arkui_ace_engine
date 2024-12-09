@@ -48,6 +48,7 @@
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -845,6 +846,11 @@ public:
         return onceVsyncListener_ != nullptr;
     }
 
+    const RefPtr<MemoryManager>& GetMemoryManager() const
+    {
+        return memoryMgr_;
+    }
+
     const RefPtr<NavigationManager>& GetNavigationManager() const
     {
         return navigationMgr_;
@@ -1290,6 +1296,7 @@ private:
 
     int32_t preNodeId_ = -1;
 
+    RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
