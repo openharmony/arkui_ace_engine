@@ -295,6 +295,9 @@ void MovingPhotoPattern::UpdateImageNode()
     DynamicRangeModeConvert(dynamicRangeMode_);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, image);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, image);
+    auto imagePattern = image->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetOrientation(ImageRotateOrientation::AUTO);
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set HDR.%{public}d", dynamicRangeMode_);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -319,8 +322,6 @@ void MovingPhotoPattern::UpdateImageNode()
         auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
         imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        auto imagePattern = image->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(imagePattern);
         MovingPhotoFormatConvert(movingPhotoFormat_);
         imagePattern->SetExternalDecodeFormat(imageFormat_);
         imageLayoutProperty->UpdateImageFit(imageFit);
@@ -1058,14 +1059,13 @@ void MovingPhotoPattern::StartAnimation()
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption,
-        [imageRsContext, videoRsContext, flag = historyAutoAndRepeatLevel_]() {
+        [imageRsContext, videoRsContext, repeatFlag = historyAutoAndRepeatLevel_]() {
             imageRsContext->UpdateOpacity(0.0);
-            if (flag == PlaybackMode::REPEAT || flag == PlaybackMode::AUTO) {
+            imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+            if (repeatFlag == PlaybackMode::REPEAT) {
                 videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-                imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
             } else {
                 videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-                imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
             }
         }, animationOption.GetOnFinishEvent());
 }
@@ -1158,18 +1158,13 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
-    
+    videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    video->MarkModifyDone();
+
     imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     imageRsContext->UpdateOpacity(0.0);
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT || historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-    } else {
-        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-    }
+    imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
     image->MarkModifyDone();
-    video->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption option;
     option.SetDuration(ANIMATION_DURATION_300);
