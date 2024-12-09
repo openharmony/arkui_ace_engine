@@ -31,7 +31,11 @@ std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<DataPanelPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            host->GetGeometryNode()->ResetContent();
+        } else {
+            host->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     // 1.If user set the width and height, use the selfIdealSize.
