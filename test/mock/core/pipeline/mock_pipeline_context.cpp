@@ -901,6 +901,23 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
     }
 }
 
+void NG::PipelineContext::EnableContainerModalGesture(bool isEnable) {}
+
+bool NG::PipelineContext::GetContainerFloatingTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerCustomTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerControlButtonVisible() 
+{
+    return false;
+}
+
 void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
 
 void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
