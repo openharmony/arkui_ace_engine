@@ -15,20 +15,57 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "arkoala_api_generated.h"
 
-struct ProgressMaskPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+inline std::optional<float> ConvertProgressMaskValue(const Ark_Number* value)
+{
+    CHECK_NULL_RETURN(value, std::nullopt);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidateNonNegative(convValue);
+    return convValue;
+}
+
+void SetProgressMaskValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Number* value)
+{
+    auto convValue = ConvertProgressMaskValue(value);
+    CHECK_NULL_VOID(convValue);
+    property->SetValue(*convValue);
+}
+
+void SetProgressMaskMaxValue(const RefPtr<ProgressMaskProperty>& property, const Ark_Number* value)
+{
+    auto convValue = ConvertProgressMaskValue(value);
+    CHECK_NULL_VOID(convValue);
+    property->SetMaxValue(*convValue);
+}
+
+void SetProgressMaskColor(const RefPtr<ProgressMaskProperty>& property, const Ark_ResourceColor* value)
+{
+    CHECK_NULL_VOID(value);
+    const auto convColor = Converter::OptConvert<Color>(*value);
+    CHECK_NULL_VOID(convColor);
+    property->SetColor(convColor.value());
+}
+} // namespace
 namespace ProgressMaskAccessor {
 void DestroyPeerImpl(ProgressMaskPeer* peer)
 {
+    delete peer;
 }
 ProgressMaskPeer* CtorImpl(const Ark_Number* value,
                            const Ark_Number* total,
                            const Ark_ResourceColor* color)
 {
-    return new ProgressMaskPeer();
+    auto peer = new ProgressMaskPeer();
+    const auto& property = peer->GetProperty();
+    SetProgressMaskValue(property, value);
+    SetProgressMaskMaxValue(property, total);
+    SetProgressMaskColor(property, color);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -37,14 +74,20 @@ Ark_NativePointer GetFinalizerImpl()
 void UpdateProgressImpl(ProgressMaskPeer* peer,
                         const Ark_Number* value)
 {
+    CHECK_NULL_VOID(peer);
+    SetProgressMaskValue(peer->GetProperty(), value);
 }
 void UpdateColorImpl(ProgressMaskPeer* peer,
                      const Ark_ResourceColor* value)
 {
+    CHECK_NULL_VOID(peer);
+    SetProgressMaskColor(peer->GetProperty(), value);
 }
 void EnableBreathingAnimationImpl(ProgressMaskPeer* peer,
                                   Ark_Boolean value)
 {
+    CHECK_NULL_VOID(peer);
+    peer->GetProperty()->SetEnableBreathe(Converter::Convert<bool>(value));
 }
 } // ProgressMaskAccessor
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor()
