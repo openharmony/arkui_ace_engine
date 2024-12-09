@@ -15899,10 +15899,11 @@ class ArkFontWeight {
 
 class ArkNavigationTitle {
   constructor() {
+    this.value = undefined;
     this.navigationTitleOptions = undefined;
   }
   isEqual(another) {
-    return this.navigationTitleOptions === another.navigationTitleOptions;
+    return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
   }
 }
 
@@ -19803,7 +19804,13 @@ class ArkNavDestinationComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   title(value, options) {
+    if (isUndefined(value) || isNull(value)) {
+      modifierWithKey(this._modifiersWithKeys, NavDestinationTitleModifier.identity,
+        NavDestinationTitleModifier, undefined);
+      return this;
+    }
     let arkNavigationTitle = new ArkNavigationTitle();
+    arkNavigationTitle.value = value;
     if (!isUndefined(options) && !isNull(options) && isObject(options)) {
       if (Object.keys(options).length !== 0) {
         arkNavigationTitle.navigationTitleOptions = options;
@@ -19811,6 +19818,16 @@ class ArkNavDestinationComponent extends ArkComponent {
     }
     modifierWithKey(this._modifiersWithKeys, NavDestinationTitleModifier.identity,
       NavDestinationTitleModifier, arkNavigationTitle);
+    return this;
+  }
+  menus(value) {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
+        NavDestinationMenusModifier, undefined);
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, NavDestinationMenusModifier.identity,
+        NavDestinationMenusModifier, value);
     return this;
   }
   hideTitleBar(isHide, animated) {
@@ -19969,7 +19986,7 @@ class NavDestinationTitleModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().navDestination.resetTitle(node);
     } else {
-      getUINativeModule().navDestination.setTitle(node, this.value?.navigationTitleOptions);
+      getUINativeModule().navDestination.setTitle(node, this.value?.value, this.value?.navigationTitleOptions);
     }
   }
   checkObjectDiff() {
@@ -19977,6 +19994,39 @@ class NavDestinationTitleModifier extends ModifierWithKey {
   }
 }
 NavDestinationTitleModifier.identity = Symbol('title');
+
+class NavDestinationMenusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetMenus(node);
+    } else {
+      getUINativeModule().navDestination.setMenus(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
+      return true;
+    }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+NavDestinationMenusModifier.identity = Symbol('menus');
 
 //@ts-ignore
 if (globalThis.NavDestination !== undefined) {
@@ -20601,7 +20651,13 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   title(value, options) {
+    if (isUndefined(value) || isNull(value)) {
+      modifierWithKey(this._modifiersWithKeys, TitleModifier.identity,
+        TitleModifier, undefined);
+      return this;
+    }
     let arkNavigationTitle = new ArkNavigationTitle();
+    arkNavigationTitle.value = value;
     if (!isUndefined(options) && !isNull(options) && isObject(options)) {
       if (Object.keys(options).length !== 0) {
         arkNavigationTitle.navigationTitleOptions = options;
@@ -20639,7 +20695,12 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   menus(value) {
-    throw new Error('Method not implemented.');
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, undefined);
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, value);
+    return this;
   }
   toolBar(value) {
     throw new Error('Method not implemented.');
@@ -20946,6 +21007,39 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey {
 }
 IgnoreNavLayoutSafeAreaModifier.identity = Symbol('ignoreLayoutSafeArea');
 
+class MenusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetMenus(node);
+    } else {
+      getUINativeModule().navigation.setMenus(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
+      return true;
+    }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+MenusModifier.identity = Symbol('menus');
+
 class TitleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -20954,7 +21048,7 @@ class TitleModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().navigation.resetTitle(node);
     } else {
-      getUINativeModule().navigation.setTitle(node, this.value?.navigationTitleOptions);
+      getUINativeModule().navigation.setTitle(node, this.value?.value, this.value?.navigationTitleOptions);
     }
   }
   checkObjectDiff() {

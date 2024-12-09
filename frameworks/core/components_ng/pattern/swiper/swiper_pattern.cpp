@@ -2412,7 +2412,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
-    HandleSwiperCustomAnimation(-currentDelta_);
+    HandleSwiperCustomAnimation(offset);
     MarkDirtyNodeSelf();
 }
 

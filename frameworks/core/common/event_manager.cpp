@@ -1222,13 +1222,14 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
         }
         if (event.action == MouseAction::PRESS) {
             pressMouseTestResultsMap_[event.button] = currMouseTestResults_;
+        } else if (event.action == MouseAction::RELEASE) {
+            DoSingleMouseActionRelease(event.button);
         }
     }
-    auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
-    if (event.action == MouseAction::RELEASE) {
-        DoSingleMouseActionRelease(event.button);
+    if (event.pullAction == MouseAction::PULL_UP) {
+        DoMouseActionRelease();
     }
-    return result;
+    return DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
 }
 
 bool EventManager::DispatchMouseEventInLessAPI13(const MouseEvent& event)
@@ -1239,13 +1240,34 @@ bool EventManager::DispatchMouseEventInLessAPI13(const MouseEvent& event)
         DispatchMouseEventToPressResults(event, pressMouseTestResults_, handledResults, isStopPropagation);
         if (event.action == MouseAction::PRESS) {
             pressMouseTestResults_ = currMouseTestResults_;
+        } else if (event.action == MouseAction::RELEASE) {
+            DoMouseActionRelease();
         }
     }
-    auto result = DispatchMouseEventToCurResultsInLessAPI13(event, handledResults, isStopPropagation);
-    if (event.action == MouseAction::RELEASE) {
+    if (event.pullAction == MouseAction::PULL_UP) {
         DoMouseActionRelease();
     }
-    return result;
+    for (const auto& mouseTarget : currMouseTestResults_) {
+        if (!mouseTarget) {
+            continue;
+        }
+        if (!isStopPropagation) {
+            auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
+            // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
+            if (ret && mouseTarget->HandleMouseEvent(event)) {
+                return true;
+            }
+            continue;
+        }
+        if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
+            pressMouseTestResults_.end()) {
+            // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
+            if (mouseTarget->HandleMouseEvent(event)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
@@ -1282,32 +1304,6 @@ bool EventManager::DispatchMouseEventToCurResults(
         if ((mouseTargetIter != pressMouseTestResultsMap_.end() &&
             std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
             mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResultsMap_.end()) {
-            // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
-            if (mouseTarget->HandleMouseEvent(event)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-bool EventManager::DispatchMouseEventToCurResultsInLessAPI13(
-    const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
-{
-    for (const auto& mouseTarget : currMouseTestResults_) {
-        if (!mouseTarget) {
-            continue;
-        }
-        if (!isStopPropagation) {
-            auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
-            // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
-            if (ret && mouseTarget->HandleMouseEvent(event)) {
-                return true;
-            }
-            continue;
-        }
-        if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
-            pressMouseTestResults_.end()) {
             // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
             if (mouseTarget->HandleMouseEvent(event)) {
                 return true;
@@ -2154,9 +2150,6 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint)
     for (const auto& iter : downFingerIds_) {
         falsifyEvent.id = iter.first;
         falsifyEvent.pointers = lastTouchEvent_.pointers;
-        if (touchPoint.id != iter.first) {
-            falsifyEvent.history.clear();
-        }
         DispatchTouchEvent(falsifyEvent);
     }
 }

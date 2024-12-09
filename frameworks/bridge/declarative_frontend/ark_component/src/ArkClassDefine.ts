@@ -1521,13 +1521,15 @@ class ArkFontWeight {
 }
 
 class ArkNavigationTitle {
+  value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined;
   navigationTitleOptions?: NavigationTitleOptions | undefined;
 
   constructor() {
+    this.value = undefined;
     this.navigationTitleOptions = undefined;
   }
   isEqual(another: ArkNavigationTitle): boolean {
-    return this.navigationTitleOptions === another.navigationTitleOptions;
+    return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
   }
 }
 

@@ -819,4 +819,53 @@ void NavDestinationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationT
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
 }
+
+void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    // if previous menu is custom, just remove it and create new menu, otherwise update old menu
+    if (navDestinationGroupNode->GetPrevMenuIsCustom().value_or(false)) {
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (navDestinationGroupNode->GetMenu()) {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+        }
+    }
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    navDestinationPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+}
+
+void NavDestinationModelNG::SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto menuItems = navDestinationPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).action = action;
+        navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavDestinationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto menuItems = navDestinationPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).iconSymbol = symbol;
+        navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
 } // namespace OHOS::Ace::NG
