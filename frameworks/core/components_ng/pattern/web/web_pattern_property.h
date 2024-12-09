@@ -67,6 +67,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverScrollMode, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurOnKeyboardHideMode, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MetaViewport, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedModeEnabled, bool);

@@ -55,6 +55,11 @@ enum OverScrollMode {
     ALWAYS,
 };
 
+enum BlurOnKeyboardHideMode {
+    SILENT = 0,
+    BLUR = 1,
+};
+
 enum class WebDarkMode {
     Off,
     On,

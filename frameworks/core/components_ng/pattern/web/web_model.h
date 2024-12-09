@@ -171,6 +171,7 @@ public:
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
     virtual void SetOverScrollMode(OverScrollMode mode) {};
+    virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void SetCopyOptionMode(CopyOptions mode) {};
 
     virtual void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};

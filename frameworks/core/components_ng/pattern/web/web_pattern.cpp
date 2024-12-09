@@ -2387,6 +2387,13 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
     }
 }
 
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
+{
+    if (delegate_) {
+        delegate_->UpdateBlurOnKeyboardHideMode(mode);
+    }
+}
+
 void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
 {
     if (delegate_) {
@@ -2918,6 +2925,7 @@ void WebPattern::OnModifyDone()
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
+        delegate_->UpdateBlurOnKeyboardHideMode(GetBlurOnKeyboardHideModeValue(BlurOnKeyboardHideMode::SILENT));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         if (GetMetaViewport()) {
@@ -5363,6 +5371,7 @@ bool WebPattern::OnBackPressed()
         inputMethod->Close();
         CHECK_NULL_RETURN(delegate_, true);
         delegate_->CloseCustomKeyboard();
+        delegate_->GestureBackBlur();
         return true;
     }
     return false;
