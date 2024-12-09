@@ -170,7 +170,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     std::vector<ModifierKey> keys { ModifierKey::ALT, ModifierKey::CTRL, ModifierKey::SHIFT, ModifierKey::SHIFT };
     auto ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     /**
      * @tc.steps: step3. Call GetKeyboardShortcutKeys with keys CTRL SHIFT ALT.
@@ -180,7 +180,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
     ret = eventManager->GetKeyboardShortcutKeys(keys);
     uint8_t target = static_cast<uint8_t>(CtrlKeysBit::CTRL) | static_cast<uint8_t>(CtrlKeysBit::SHIFT) |
                      static_cast<uint8_t>(CtrlKeysBit::ALT);
-    ASSERT_EQ(ret, target);
+    EXPECT_EQ(ret, target);
 
     /**
      * @tc.steps: step4. Call GetKeyboardShortcutKeys with keys CTRL CTRL.
@@ -188,7 +188,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     keys = std::vector<ModifierKey>({ ModifierKey::CTRL, ModifierKey::CTRL });
     ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     /**
      * @tc.steps: step5. Call GetKeyboardShortcutKeys with keys SHIFT SHIFT.
@@ -196,7 +196,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     keys = std::vector<ModifierKey>({ ModifierKey::SHIFT, ModifierKey::SHIFT });
     ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     /**
      * @tc.steps: step6. Call GetKeyboardShortcutKeys with keys SHIFT SHIFT.
@@ -204,7 +204,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     keys = std::vector<ModifierKey>({ ModifierKey::ALT, ModifierKey::ALT });
     ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -228,7 +228,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest009, TestSize.Level1)
     auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NUM_SHIFT_VALUE, nullptr);
     frameNodeShift->eventHub_->SetKeyboardShortcut(SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
-    ASSERT_GT(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_GT(eventManager->keyboardShortcutNode_.size(), 0);
 }
 
 /**
@@ -278,7 +278,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest010, TestSize.Level1)
     RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(touchId);
     ASSERT_NE(scope, nullptr);
     eventManager->refereeNG_->gestureScopes_.insert(std::make_pair(touchId, scope));
-    ASSERT_TRUE(eventManager->refereeNG_->QueryAllDone(touchId));
+    EXPECT_TRUE(eventManager->refereeNG_->QueryAllDone(touchId));
 }
 
 /**
@@ -482,7 +482,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest015, TestSize.Level1)
      */
     KeyEvent event;
     auto retFlag = eventManager->DispatchTabIndexEventNG(event, mainNode);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 }
 
 /**
@@ -515,7 +515,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
      */
     KeyEvent event;
     auto retFlag = eventManager->DispatchKeyEventNG(event, focusNode);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 }
 
 /**
@@ -544,9 +544,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
     event.action = MouseAction::WINDOW_LEAVE;
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
     eventManager->currHoverTestResults_.push_back(hoverEventTarget);
-    ASSERT_FALSE(eventManager->currHoverTestResults_.empty());
+    EXPECT_FALSE(eventManager->currHoverTestResults_.empty());
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->currHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->currHoverTestResults_.empty());
 
     /**
      * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_ENTER
@@ -554,9 +554,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
      */
     event.action = MouseAction::WINDOW_ENTER;
     eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
-    ASSERT_FALSE(eventManager->lastHoverTestResults_.empty());
+    EXPECT_FALSE(eventManager->lastHoverTestResults_.empty());
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->lastHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->lastHoverTestResults_.empty());
 
     /**
      * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
@@ -565,8 +565,8 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
     event.action = MouseAction::HOVER;
     eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->lastHoverTestResults_.empty());
-    ASSERT_TRUE(eventManager->currHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->lastHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->currHoverTestResults_.empty());
 }
 
 /**
@@ -597,7 +597,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
     auto retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG
@@ -607,7 +607,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     event.pullAction = MouseAction::MOVE;
     retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step3. Call DispatchMouseEventNG
@@ -617,7 +617,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     event.pullAction = MouseAction::PULL_UP;
     retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step4. Call DispatchMouseEventNG
@@ -631,7 +631,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     eventManager->currMouseTestResults_.push_back(mouseTestResult);
 
     retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 }
 
 /**
@@ -663,7 +663,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
     eventManager->lastHoverDispatchLength_++;
 
     auto retFlag = eventManager->DispatchMouseHoverEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 
     /**
      * @tc.steps: step2. Call DispatchMouseHoverEventNG with lastHoverTestResults == currHoverTestResults
@@ -675,7 +675,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
     eventManager->currHoverTestResults_.push_back(hoverEventTarget);
 
     retFlag = eventManager->DispatchMouseHoverEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -701,7 +701,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
     event.verticalAxis = 0;
     event.pinchAxisScale = 0;
     auto retFlag = eventManager->DispatchAxisEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step3. Call DispatchAxisEventNG with axisTestResults_ empty
@@ -709,7 +709,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
      */
     event.horizontalAxis = 1;
     retFlag = eventManager->DispatchAxisEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 
     /**
      * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
@@ -721,7 +721,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
 
     eventManager->axisTestResults_.push_back(axisEventTarget);
     retFlag = eventManager->DispatchAxisEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -772,9 +772,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
     KeyEvent event;
     event.action = KeyAction::DOWN;
     eventManager->DispatchKeyboardShortcut(event);
-    ASSERT_EQ(frameNodeCtrlShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlShift);
-    ASSERT_EQ(frameNodeCtrlAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlAlt);
-    ASSERT_EQ(frameNodeAltShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, altShift);
+    EXPECT_EQ(frameNodeCtrlShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlShift);
+    EXPECT_EQ(frameNodeCtrlAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlAlt);
+    EXPECT_EQ(frameNodeAltShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, altShift);
 }
 
 /**
@@ -825,9 +825,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
     KeyEvent event;
     event.action = KeyAction::DOWN;
     eventManager->DispatchKeyboardShortcut(event);
-    ASSERT_EQ(frameNodeCtrl->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrl);
-    ASSERT_EQ(frameNodeAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, alt);
-    ASSERT_EQ(frameNodeShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, shift);
+    EXPECT_EQ(frameNodeCtrl->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrl);
+    EXPECT_EQ(frameNodeAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, alt);
+    EXPECT_EQ(frameNodeShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, shift);
 }
 
 /**
@@ -1146,7 +1146,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest032, TestSize.Level1)
      * @tc.expected: eventManager->axisNode_.Upgrade() is not null.
      */
     bool retFlag = eventManager->DispatchAxisEvent(axisEvent);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -1170,7 +1170,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest033, TestSize.Level1)
     eventManager->DumpEvent(EventTreeType::TOUCH);
     std::list<std::pair<int32_t, std::string>> dumpList;
     eventManager->eventTree_.Dump(dumpList, 0);
-    ASSERT_TRUE(dumpList.empty());
+    EXPECT_TRUE(dumpList.empty());
 }
 
 /**
@@ -1194,7 +1194,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest034, TestSize.Level1)
     MouseEvent event;
     event.action = MouseAction::PRESS;
     bool retFlag = eventManager->DispatchMouseEvent(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -1393,7 +1393,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest036, TestSize.Level1)
      */
     MouseEvent event;
     bool retFlag = eventManager->DispatchMouseHoverEvent(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
