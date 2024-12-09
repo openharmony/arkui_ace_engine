@@ -50,6 +50,7 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavDestinationGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(tag, nodeId, pattern);
+    CHECK_NULL_RETURN(navDestinationNode, nullptr);
     navDestinationNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(navDestinationNode);
     return navDestinationNode;
@@ -281,6 +282,7 @@ void NavDestinationGroupNode::FinishSystemTransitionPush(bool transitionIn, cons
     }
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
     CHECK_NULL_VOID(navigation);
     bool isInvisible = IsNodeInvisible(navigation);
