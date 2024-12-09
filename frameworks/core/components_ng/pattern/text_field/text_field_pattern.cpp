@@ -1443,6 +1443,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    if (textSize == 0) {
+        return; // no content
+    }
     if (inlineStyle) {
         auto dotPos = contentController_->GetTextUtf16Value().rfind(u'.');
         if (dotPos != std::string::npos && static_cast<int32_t>(dotPos) < textSize - FIND_TEXT_ZERO_INDEX) {
