@@ -372,6 +372,11 @@ public:
     void ResetOptionPropertyHeight();
     void ResetTotalDelta();
 
+    void SetDisableTextStyleAnimation(bool value)
+    {
+        isDisableTextStyleAnimation_ = value;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -431,6 +436,8 @@ private:
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly, bool isDirectlyClear);
+    void UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
 
     RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
@@ -515,6 +522,8 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+
+    bool isDisableTextStyleAnimation_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

@@ -4260,6 +4260,11 @@ struct ArkUITextPickerModifier {
     ArkUI_Int32 (*getTextPickerCanLoop)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node, ArkUI_Int32 dUnit);
     void (*resetTextPickerDividerNull)(ArkUINodeHandle node);
+    void (*setTextPickerDisableTextStyleAnimation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextPickerDisableTextStyleAnimation)(ArkUINodeHandle node);
+    void (*setTextPickerDefaultTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+        ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow);
+    void (*resetTextPickerDefaultTextStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
