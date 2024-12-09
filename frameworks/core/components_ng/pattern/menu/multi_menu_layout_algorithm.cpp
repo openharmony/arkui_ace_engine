@@ -87,9 +87,10 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // constraint min width base on grid column
         auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
         CHECK_NULL_VOID(columnInfo);
-        CHECK_NULL_VOID(columnInfo->GetParent());
+        auto columnParent = columnInfo->GetParent();
+        CHECK_NULL_VOID(columnParent);
         if (!UpdateColumnWidth(node, columnInfo)) {
-            columnInfo->GetParent()->BuildColumnWidth();
+            columnParent->BuildColumnWidth();
         }
         auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
         childConstraint.minSize.SetWidth(minWidth);
