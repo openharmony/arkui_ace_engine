@@ -363,12 +363,13 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         if (isOverride) {
             result = eventHub->FireOnBackPressedEvent();
         }
+        auto navigation = navigationWeak.Upgrade();
+        CHECK_NULL_RETURN(navigation, false);
+        navigation->CheckIsNeedForceExitWindow(result);
         if (result) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation user onBackPress return true");
             return true;
         }
-        auto navigation = navigationWeak.Upgrade();
-        CHECK_NULL_RETURN(navigation, false);
         // if set hideNavBar and stack size is one, return false
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
         auto pattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
@@ -452,6 +453,58 @@ bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
         navDestinationPattern->GetName().c_str());
     GestureEvent gestureEvent;
     return navDestination->GetNavDestinationBackButtonEvent()(gestureEvent);
+}
+
+void NavigationGroupNode::CheckIsNeedForceExitWindow(bool result)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetInstallationFree() || !result) {
+        // if is not atommic service and result is false, don't process.
+        return;
+    }
+    
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto isHasParentNavigation = navigationPattern->GetParentNavigationPattern();
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    int32_t pageSize = stageManager->GetStageNode() ? stageManager->GetStageNode()->GetChildren().size() : 0;
+    if (navigationStack->GetSize() != 1 || isHasParentNavigation || !overlayManager->IsModalEmpty() || pageSize != 1) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "don't process when stackSize and pageSize not equal to one, or has parentNavigation, or has modalPage.");
+        return;
+    }
+    
+    /*
+    * when stack size is one, there four situations.
+    * 1.split mode, navbar visible.
+    * 2.split mode, navbar invisible.
+    * 3.stack mode, navbar visible.
+    * 4.stack mode, navbar invisible.
+    * Only the third situation don't need to be intercepted
+    */
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    bool isSplitMode = GetNavigationMode() == NavigationMode::SPLIT;
+    bool isLastNavdesNeedIntercept = isSplitMode || layoutProperty->GetHideNavBar().value_or(false);
+    if (!isLastNavdesNeedIntercept) {
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        container->TerminateUIExtension();
+    } else {
+        auto windowManager = context->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowPerformBack();
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination onbackpress intercepted, exit window.");
 }
 
 bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride)
