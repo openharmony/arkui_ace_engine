@@ -3524,6 +3524,25 @@
             ]
         },
         {
+            "name": "Polyline",
+            "disable": [
+                "setPointsTestDefaultValues", // No value in json
+                "setPointsTestValidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "height",
+                    "default": "0.00vp",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                },
+                {
+                    "name": "width",
+                    "default": "0.00vp",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                },
+            ]
+        },
+        {
             "name": "Progress",
             "includes": ["core/components/progress/progress_theme.h"],
             "themes": ["ProgressTheme"],
