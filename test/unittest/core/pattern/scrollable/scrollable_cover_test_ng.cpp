@@ -337,7 +337,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     container->SetUseNewPipeline();
     EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
-    scrollable->Initialize(MockPipelineContext::GetCurrent());
+    scrollable->Initialize(scroll_);
 
     /**
      * @tc.steps: step2. Verify Scrollable initialize success and event trigger
@@ -1233,8 +1233,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
     RefPtr<Container> conainer = Container::Current();
     ASSERT_NE(conainer, nullptr);
     conainer->SetUseNewPipeline();
-    auto context = MockPipelineContext::GetCurrent();
-    scrollable->Initialize(AceType::RawPtr(context));
+    scrollable->Initialize(scroll_);
     ASSERT_NE(scrollable->panRecognizerNG_, nullptr);
     auto panRecognizerNG = scrollable->panRecognizerNG_;
     GestureEvent gestureEvent;

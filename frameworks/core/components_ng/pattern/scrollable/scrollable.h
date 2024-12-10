@@ -92,9 +92,7 @@ public:
     static double GetVelocityScale();
     static void SetFriction(double sFriction);
 
-    void Initialize(const WeakPtr<PipelineContext>& context);
-
-    void Initialize(PipelineContext* context);
+    void Initialize(const RefPtr<FrameNode>& host);
 
     bool IsMotionStop() const
     {
@@ -486,6 +484,7 @@ public:
     void StopSpringAnimation(bool reachFinalPosition = false);
     void StopSnapAnimation();
 
+    void AttachAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSpringProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSnapProperty();
@@ -565,6 +564,7 @@ private:
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
+    WeakPtr<FrameNode> weakHost_;
     WeakPtr<PipelineContext> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
