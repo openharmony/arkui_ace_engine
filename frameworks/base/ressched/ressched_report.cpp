@@ -391,7 +391,6 @@ void ResSchedReport::AxisEventReportEnd()
         payload[UP_SPEED_KEY] = std::to_string(GetAxisUpVelocity(lastAxisEvent_, curAxisEvent_));
         payload[AXIS_EVENT_TYPE] = AXIS_IS_PAD;
     }
-
     ResSchedReport::GetInstance().ResSchedDataReport(Ressched::RES_TYPE_AXIS_EVENT, Ressched::AXIS_OFF_EVENT, payload);
 }
 
