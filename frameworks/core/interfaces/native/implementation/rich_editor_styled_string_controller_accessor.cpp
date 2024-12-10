@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Materialized& dst, const std::string& src)
@@ -66,9 +67,8 @@ void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
     CHECK_NULL_VOID(styledString->ptr);
     auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    RefPtr<SpanStringBase> spanString;
-    spanString = *reinterpret_cast<RefPtr<SpanStringBase>*>(styledString->ptr);
-    peerImpl->SetStyledString(spanString);
+    auto styledStringPeer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
+    peerImpl->SetStyledString(styledStringPeer->spanString);
 }
 Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
 {
@@ -76,7 +76,7 @@ Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer
     auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     LOGW("RichEditorStyledString Accessor:: GetStyledStringImpl is not implemented");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
 {
@@ -109,7 +109,7 @@ void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
         const StyledStringChangeValue& value) {
         auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
         arkCallback.Invoke(changeValue.range, changeValue.range);
-        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temprorary and will be fixed");
+        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temporary and will be fixed");
     };
     peerImpl->SetOnDidChange(std::move(onDidChange));
 }

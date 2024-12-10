@@ -34,7 +34,7 @@ const std::string g_message = "message";
 class TransitionEffectAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITransitionEffectAccessor,
     &GENERATED_ArkUIAccessors::getTransitionEffectAccessor, TransitionEffectPeer> {
 public:
-    TransitionEffectPeer* CreatePeerInstance() override
+    void *CreatePeerInstance() override
     {
         Ark_String arkType = Converter::ArkValue<Ark_String>(g_message);
         Ark_TransitionEffects* arkEffects = new(Ark_TransitionEffects);
@@ -137,9 +137,21 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getAsymmetricTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->asymmetric, nullptr);
+    auto app = new(Ark_TransitionEffect);
+    auto appPeer = new(TransitionEffectPeer);
+    app->ptr = appPeer;
+    auto disapp = new(Ark_TransitionEffect);
+    auto disappPeer = new(TransitionEffectPeer);
+    disapp->ptr = disappPeer;
+    auto peer = accessor_->asymmetric(app, disapp);
+    ASSERT_NE(peer, nullptr);
+    delete disappPeer;
+    delete disapp;
+    delete appPeer;
+    delete app;
 }
 
 /**

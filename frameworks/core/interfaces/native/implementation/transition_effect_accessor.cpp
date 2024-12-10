@@ -27,6 +27,7 @@ const auto ROTATE_TOKEN = "rotate";
 const auto SCALE_TOKEN = "scale";
 const auto OPACITY_TOKEN = "opacity";
 const auto MOVE_TOKEN = "move";
+const auto ASYMMETRIC_TOKEN = "asymmetric";
 
 void DestroyPeerImpl(TransitionEffectPeer* peer)
 {
@@ -44,10 +45,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         auto x = Converter::OptConvert<CalcDimension>(effect->translate.x.value);
         auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
         auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
-        TranslateOptions translate(
-            x.value_or(emptyDimension),
-            y.value_or(emptyDimension),
-            z.value_or(emptyDimension));
+        TranslateOptions translate(x.value_or(emptyDimension), y.value_or(emptyDimension), z.value_or(emptyDimension));
         peer->handler = new ChainedTranslateEffect(translate);
     } else if (valueText == ROTATE_TOKEN) {
         auto x = Converter::Convert<float>(effect->rotate.x.value);
@@ -61,8 +59,7 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
         RotateOptions rotate(x, y, z, angle.value_or(0),
             centerX.value_or(emptyDimension),
             centerY.value_or(emptyDimension),
-            centerZ.value_or(emptyDimension),
-            perspective);
+            centerZ.value_or(emptyDimension), perspective);
         peer->handler = new ChainedRotateEffect(rotate);
     } else if (valueText == SCALE_TOKEN) {
         auto x = Converter::Convert<float>(effect->scale.x.value);
@@ -78,6 +75,15 @@ Ark_NativePointer CtorImpl(const Ark_String* type,
     } else if (valueText == MOVE_TOKEN) {
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
         peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
+    } else if (valueText == ASYMMETRIC_TOKEN) {
+        CHECK_NULL_RETURN(effect, nullptr);
+        CHECK_NULL_RETURN(effect->asymmetric.appear.ptr, nullptr);
+        auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
+        CHECK_NULL_RETURN(app, nullptr);
+        CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
+        auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
+        CHECK_NULL_RETURN(disapp, nullptr);
+        peer->handler = new ChainedAsymmetricEffect(app->handler, disapp->handler);
     }
     return peer;
 }
@@ -134,8 +140,15 @@ Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
 {
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
-    LOGE("TransitionEffectAccessor::AsymmetricImpl Not implemented.");
-    return nullptr;
+
+    Ark_String type = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
+    Ark_Literal_TransitionEffect_appear_disappear asymm;
+    asymm.appear = *appear;
+    asymm.disappear = *disappear;
+    Ark_TransitionEffects effects {
+        .asymmetric = asymm
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)

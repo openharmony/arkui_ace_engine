@@ -67,11 +67,8 @@ namespace OHOS::Ace::NG {
         Ark_GridRowDirection direction;
         std::string directionStr;
     };
-namespace Converter {
-    template<>
-    Ark_GutterOption ArkValue(const GutterOption& src)
+    void AssignArkValue(Ark_GutterOption& dst, const GutterOption& src)
     {
-        Ark_GutterOption dst;
         auto emptyValue = Converter::ArkUnion<Opt_Union_Length_GridRowSizeOption>(Ark_Empty());
         if (src.x.has_value()) {
             auto arkLength = Converter::ArkValue<Ark_Length>(src.x.value());
@@ -89,11 +86,10 @@ namespace Converter {
         } else {
             dst.y = emptyValue;
         }
-        return dst;
     }
     void AssignArkValue(Ark_GridRowSizeOption& dst, const Dimension& src)
     {
-        auto optLenValue = Converter::ArkValue<Opt_Length>(std::optional<Dimension>(src));
+        auto optLenValue = Converter::ArkValue<Opt_Length>(src);
         dst.xs = optLenValue;
         dst.sm = optLenValue;
         dst.md = optLenValue;
@@ -105,7 +101,7 @@ namespace Converter {
     {
         auto dimensionValue = Dimension(src);
         auto arkNumberValue = Converter::ArkValue<Ark_Number>(dimensionValue);
-        auto optValue = Converter::ArkValue<Opt_Number>(std::optional<Ark_Number>(arkNumberValue));
+        auto optValue = Converter::ArkValue<Opt_Number>(arkNumberValue);
         dst.xs = optValue;
         dst.sm = optValue;
         dst.md = optValue;
@@ -122,7 +118,6 @@ namespace Converter {
         dst.xl = Converter::ArkValue<Opt_Number>(src.xl);
         dst.xxl = Converter::ArkValue<Opt_Number>(src.xxl);
     }
-} // namespace Converter
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_GUTTER_NAME = "gutter";
@@ -366,7 +361,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestValidValues, TestSiz
 
     auto initValueDirection = [this, &inputValue](const Ark_GridRowDirection& initValue) {
         inputValue.direction =
-            Converter::ArkValue<Opt_GridRowDirection>(std::optional<Ark_GridRowDirection>(initValue));
+            Converter::ArkValue<Opt_GridRowDirection>(initValue);
     };
 
     for (auto idx = 0; idx < testGutterOptionValidValues.size(); idx++) {
@@ -378,11 +373,10 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestValidValues, TestSiz
         initValueGutter(gutterInput);
         initValueColumns(columnsInput);
         Converter::ArkArrayHolder<Array_String> listHolder(arrayInput);
-        auto optArrayString
-            = Converter::ArkValue<Opt_Array_String>(std::optional<Array_String>(listHolder.ArkValue()));
+        auto optArrayString = listHolder.OptValue<Opt_Array_String>();
         auto optBreakpointsReference = Converter::ArkValue<Opt_BreakpointsReference>(referenceInput);
         Ark_BreakPoints arkBreakPoints = {.value=optArrayString, .reference=optBreakpointsReference};
-        inputValue.breakpoints =  Converter::ArkValue<Opt_BreakPoints>(std::optional<Ark_BreakPoints>(arkBreakPoints));
+        inputValue.breakpoints =  Converter::ArkValue<Opt_BreakPoints>(arkBreakPoints);
         initValueDirection(directionInput);
         expected.gutter = gutterExpected;
         expected.columns = columnsExpected;
@@ -390,7 +384,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestValidValues, TestSiz
         expected.direction = directionValue;
         expected.directionStr = directionExpected;
         // set valid values
-        auto optInputValue = Converter::ArkValue<Opt_GridRowOptions>(std::optional<Ark_GridRowOptions>(inputValue));
+        auto optInputValue = Converter::ArkValue<Opt_GridRowOptions>(inputValue);
         modifier_->setGridRowOptions(node_, &optInputValue);
         // Check valid values
         checkOptionValue(GetJsonValue(node_), value, inputValue, expected);
@@ -425,7 +419,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestInvalidValues, TestS
 
     auto initValueDirection = [this, &inputValue](const Ark_GridRowDirection& initValue) {
         inputValue.direction =
-            Converter::ArkValue<Opt_GridRowDirection>(std::optional<Ark_GridRowDirection>(initValue));
+            Converter::ArkValue<Opt_GridRowDirection>(initValue);
     };
 
     for (auto idx = 0; idx < testGutterOptionInvalidValues.size(); idx++) {
@@ -437,11 +431,10 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestInvalidValues, TestS
         initValueGutter(gutterInput);
         initValueColumns(columnsInput);
         Converter::ArkArrayHolder<Array_String> listHolder(arrayInput);
-        auto optArrayString =
-            Converter::ArkValue<Opt_Array_String>(std::optional<Array_String>(listHolder.ArkValue()));
+        auto optArrayString = listHolder.OptValue<Opt_Array_String>();
         auto optBreakpointsReference = Converter::ArkValue<Opt_BreakpointsReference>(referenceInput);
         Ark_BreakPoints arkBreakPoints = {.value=optArrayString, .reference=optBreakpointsReference};
-        inputValue.breakpoints =  Converter::ArkValue<Opt_BreakPoints>(std::optional<Ark_BreakPoints>(arkBreakPoints));
+        inputValue.breakpoints =  Converter::ArkValue<Opt_BreakPoints>(arkBreakPoints);
         initValueDirection(directionInput);
 
         value = {.gutter = gutterValue, .columns = columnsValue,
@@ -451,7 +444,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestInvalidValues, TestS
             .breakpoints = {arrayExpected, referenceValue, referenceExpected}, .direction = directionValue,
             .directionStr = directionExpected};
         // set invalid values
-        auto optInputValue = Converter::ArkValue<Opt_GridRowOptions>(std::optional<Ark_GridRowOptions>(inputValue));
+        auto optInputValue = Converter::ArkValue<Opt_GridRowOptions>(inputValue);
         modifier_->setGridRowOptions(node_, &optInputValue);
         // Check invalid values
         checkOptionValue(GetJsonValue(node_), value, inputValue, expected);

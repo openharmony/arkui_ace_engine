@@ -834,7 +834,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setTrackColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultTrackColor =

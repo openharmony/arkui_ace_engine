@@ -17,6 +17,7 @@
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -487,6 +488,18 @@ std::optional<Color> ResourceConverter::ToColor()
 }
 
 template<>
+ScaleOpt Convert(const Ark_ScaleOptions& src)
+{
+    ScaleOpt scaleOptions;
+    scaleOptions.x = OptConvert<float>(src.x);
+    scaleOptions.y = OptConvert<float>(src.y);
+    scaleOptions.z = OptConvert<float>(src.z);
+    scaleOptions.centerX = OptConvert<Dimension>(src.centerX);
+    scaleOptions.centerY = OptConvert<Dimension>(src.centerY);
+    return scaleOptions;
+}
+
+template<>
 SelectionOptions Convert(const Ark_SelectionOptions& options)
 {
     SelectionOptions selectionOptions;
@@ -868,6 +881,28 @@ Header Convert(const Ark_Header& src)
 }
 
 template<>
+std::map<std::string, std::string> Convert(const Map_String_String& src)
+{
+    Array_String arkKeys {
+        .array = src.keys,
+        .length = src.size
+    };
+    Array_String arkValues {
+        .array = src.values,
+        .length = src.size
+    };
+
+    std::vector<std::string> keys = Convert<std::vector<std::string>>(arkKeys);
+    std::vector<std::string> values = Convert<std::vector<std::string>>(arkValues);
+
+    std::map<std::string, std::string> m;
+    for (size_t i = 0; i < values.size(); ++i) {
+        m[keys[i]] = values[i];
+    }
+    return m;
+}
+
+template<>
 std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
 {
     std::pair<Color, Dimension> gradientColor;
@@ -900,6 +935,25 @@ TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
     return options;
+}
+
+template<>
+TranslateOptions Convert(const Ark_TranslateOptions& src)
+{
+    TranslateOptions translateOptions;
+    auto coord = OptConvert<Dimension>(src.x);
+    if (coord.has_value()) {
+        translateOptions.x = coord.value();
+    }
+    coord = OptConvert<Dimension>(src.y);
+    if (coord.has_value()) {
+        translateOptions.y = coord.value();
+    }
+    coord = OptConvert<Dimension>(src.z);
+    if (coord.has_value()) {
+        translateOptions.z = coord.value();
+    }
+    return translateOptions;
 }
 
 template<>
@@ -985,8 +1039,8 @@ RefPtr<Curve> Convert(const Ark_Curve& src)
 template<>
 RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
-    LOGE("Convert [Ark_ICurve] to [RefPtr<Curve>] is not supported");
-    return nullptr;
+    auto peer = reinterpret_cast<ICurvePeer*>(src.ptr);
+    return peer ? peer->handler : nullptr;
 }
 
 template<>
@@ -1062,6 +1116,28 @@ DimensionRect Convert(const Ark_Rectangle &src)
 }
 
 template<>
+EffectOption Convert(const Ark_BackgroundEffectOptions& src)
+{
+    EffectOption dst;
+    auto radiusOpt = OptConvert<Dimension>(src.radius);
+    Validator::ValidateNonNegative(radiusOpt);
+    dst.radius = radiusOpt.value_or(dst.radius);
+    auto saturationOpt = Converter::OptConvert<float>(src.saturation);
+    Validator::ValidateNonNegative(saturationOpt);
+    dst.saturation = saturationOpt.value_or(dst.saturation);
+    auto brightnessOpt = Converter::OptConvert<float>(src.brightness);
+    Validator::ValidateNonNegative(brightnessOpt);
+    dst.brightness = brightnessOpt.value_or(dst.brightness);
+    dst.color = OptConvert<Color>(src.color).value_or(dst.color);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
+    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    LOGE("OHOS::Ace::NG::Converter::Convert -> EffectOption::BlurType is not supported");
+    return dst;
+}
+
+template<>
 PaddingProperty Convert(const Ark_Padding& src)
 {
     PaddingProperty padding;
@@ -1103,6 +1179,35 @@ AnimateParam Convert(const Ark_AnimateParam& src)
     option.curve = Converter::OptConvert<RefPtr<Curve>>(src.curve);
     option.frameRateRange = Converter::OptConvert<RefPtr<FrameRateRange>>(src.expectedFrameRateRange);
     return option;
+}
+
+template<>
+BlurOption Convert(const Ark_BlurOptions& src)
+{
+    auto value0 = Converter::Convert<int32_t>(src.grayscale.value0);
+    auto value1 = Converter::Convert<int32_t>(src.grayscale.value1);
+    constexpr int32_t GRAYSCALE_MAX = 127;
+    constexpr int32_t GRAYSCALE_MIN = 0;
+    value0 = (value0 < GRAYSCALE_MIN || value0 > GRAYSCALE_MAX) ? 0 : value0;
+    value1 = (value1 < GRAYSCALE_MIN || value1 > GRAYSCALE_MAX) ? 0 : value1;
+    return BlurOption {
+        .grayscale = { value0, value1 }
+    };
+}
+
+template<>
+BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
+{
+    BlurStyleOption dst;
+    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
+        dst.scale = static_cast<double>(*scaleOpt);
+    }
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
+    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    return dst;
 }
 
 template<>
@@ -1273,6 +1378,52 @@ PickerTextStyle Convert(const Ark_PickerTextStyle& src)
 }
 
 template<>
+PickerTime Convert(const Ark_Date& src)
+{
+    auto hours = src / 3600000;
+    auto minutes = (src % 3600000) / 60000 ;
+    auto seconds = (src % 3600000 % 60000) / 1000;
+    return PickerTime(hours, minutes, seconds);
+}
+
+template<>
+PickerTime Convert(const Ark_TimePickerResult& src)
+{
+    auto second = Converter::OptConvert<uint32_t>(src.second).value_or(0);
+    auto minute = Converter::OptConvert<uint32_t>(src.minute).value_or(0);
+    auto hour = Converter::OptConvert<uint32_t>(src.hour).value_or(0);
+    return PickerTime(hour, minute, second);
+}
+
+template<>
+ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
+{
+    ButtonInfo info;
+    info.type = OptConvert<ButtonType>(src.type);
+    info.buttonStyle = OptConvert<ButtonStyleMode>(src.style);
+    info.role = OptConvert<ButtonRole>(src.role);
+
+    if (auto fontSize = OptConvert<Dimension>(src.fontSize); fontSize) {
+        Validator::ValidatePositive(fontSize);
+        Validator::ValidateNonPercent(fontSize);
+        info.fontSize = fontSize;
+    }
+    info.fontColor = OptConvert<Color>(src.fontColor);
+    if (auto fontfamiliesOpt = OptConvert<FontFamilies>(src.fontFamily); fontfamiliesOpt) {
+        info.fontFamily = fontfamiliesOpt->families;
+    }
+    info.fontWeight = OptConvert<FontWeight>(src.fontWeight);
+
+    info.backgroundColor = OptConvert<Color>(src.backgroundColor);
+    info.borderRadius = OptConvert<BorderRadiusProperty>(src.borderRadius);
+    if (auto isPrimary = OptConvert<bool>(src.primary); isPrimary) {
+        info.isPrimary = isPrimary.value();
+    }
+
+    return info;
+}
+
+template<>
 void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
 {
     if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
@@ -1409,5 +1560,96 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;
+}
+
+template<>
+PickerRangeType Convert(const Array_String& src)
+{
+    std::pair<bool, std::vector<NG::RangeContent>> dst;
+    std::vector<std::string> tmp;
+    tmp = Converter::Convert<std::vector<std::string>>(src);
+    for (const auto& str : tmp) {
+        NG::RangeContent content;
+        content.icon_ = "";
+        content.text_ = str;
+        dst.second.push_back(content);
+    }
+    dst.first = false;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Array_Array_String& src)
+{
+    std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
+    std::vector<std::vector<std::string>> tmp;
+    auto tmpVector = Converter::Convert<std::vector<std::vector<std::string>>>(src);
+    for (const auto& strVector : tmpVector) {
+        NG::TextCascadePickerOptions value;
+        for (const auto& str : strVector) {
+            value.rangeResult.push_back(str);
+        }
+        dst.second.push_back(value);
+    }
+    dst.first = false;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Ark_Resource& src)
+{
+    std::pair<bool, std::vector<NG::RangeContent>> dst;
+    auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
+    if (tmp) {
+        for (const auto& str : tmp.value()) {
+            NG::RangeContent content;
+            content.icon_ = "";
+            content.text_ = str;
+            dst.second.push_back(content);
+        }
+    }
+    dst.first = false;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Array_TextPickerRangeContent& src)
+{
+    std::pair<bool, std::vector<NG::RangeContent>> dst;
+    dst.second = Converter::Convert<std::vector<NG::RangeContent>>(src);
+    dst.first = true;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
+{
+    std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
+    dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);
+    dst.first = true;
+    return dst;
+}
+
+template<>
+RangeContent Convert(const Ark_TextPickerRangeContent& src)
+{
+    RangeContent dst;
+    auto iconOpt = OptConvert<std::string>(src.icon);
+    auto textOpt = OptConvert<std::string>(src.text);
+    dst.icon_ = iconOpt.value_or("");
+    dst.text_ = textOpt.value_or("");
+    return dst;
+}
+
+template<>
+TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src)
+{
+    TextCascadePickerOptions dst;
+    auto textOpt = OptConvert<std::string>(src.text);
+    dst.rangeResult.push_back(textOpt.value_or(""));
+    auto optionsOpt = OptConvert<std::vector<TextCascadePickerOptions>>(src.children);
+    std::vector<TextCascadePickerOptions> empty;
+    dst.children = optionsOpt.value_or(empty);
+    return dst;
 }
 } // namespace OHOS::Ace::NG::Converter

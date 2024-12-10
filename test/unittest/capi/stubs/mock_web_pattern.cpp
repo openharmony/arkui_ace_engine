@@ -391,4 +391,14 @@ RefPtr<WebController> WebPattern::GetWebController() const
 {
     return webController_;
 }
+
+void WebPattern::SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
+{
+    onControllerAttachedCallback_ = std::move(callback);
+}
+
+WebPattern::OnControllerAttachedCallback WebPattern::GetOnControllerAttachedCallback()
+{
+    return onControllerAttachedCallback_;
+}
 } // namespace OHOS::Ace::NG

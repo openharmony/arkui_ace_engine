@@ -16,11 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_PAINT_PROPERTY_H
 
+#ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_shader_input_buffer.h"
+#include "test/unittest/capi/stubs/mock_custom_render_descriptor.h"
+#else
 #include "custom/custom_render_descriptor.h"
 #include "custom/shader_input_buffer.h"
 #include "data_type/geometry/geometry.h"
 #include "data_type/gltf_animation.h"
-
+#endif // ARKUI_CAPI_UNITTEST
 #include "base/geometry/animatable_float.h"
 #include "base/geometry/vec3.h"
 #include "core/components_ng/pattern/model/model_light.h"

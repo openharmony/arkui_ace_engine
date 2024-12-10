@@ -1298,7 +1298,6 @@ HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
 {
     // default values
@@ -1314,10 +1313,7 @@ HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
     };
-    Ark_Union_Optional_Undefined divider = {
-        .selector = 0,
-        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
-    };
+    auto divider = ArkValue<Opt_DividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -1337,23 +1333,19 @@ HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
     };
-    divider = {
-        .selector = 0,
-        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
-    };
+    divider = ArkValue<Opt_DividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FF123456");
 }
-#endif
+
 /**
  * @tc.name: setDividerUndefinedTest
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
@@ -1363,10 +1355,7 @@ HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = {.tag = ARK_TAG_UNDEFINED}
     };
-    Ark_Union_Optional_Undefined divider = {
-        .selector = 0,
-        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
-    };
+    auto divider = ArkValue<Opt_DividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -1380,23 +1369,18 @@ HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
     EXPECT_EQ(colorCheckValue, "#00000000");
 
     // set Ark_Undefined
-    divider = {
-        .selector = 1,
-        .value1 = Ark_Undefined()
-    };
+    divider = ArkValue<Opt_DividerOptions>();
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     auto dividerCheckValue = GetAttrValue<std::string>(fullJson, "divider");
     EXPECT_EQ(dividerCheckValue, "");
 }
-#endif
 
 /**
  * @tc.name: setDividerColorStringTest
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
 {
     // set color as Ark_String
@@ -1406,16 +1390,12 @@ HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
     };
-    Ark_Union_Optional_Undefined divider = {
-        .selector = 0,
-        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
-    };
+    auto divider = ArkValue<Opt_DividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#11223344");
 }
-#endif
 
 } // namespace OHOS::Ace::NG

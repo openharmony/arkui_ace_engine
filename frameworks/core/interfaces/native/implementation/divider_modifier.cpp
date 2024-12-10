@@ -32,11 +32,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 namespace DividerInterfaceModifier {
 void SetDividerOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //DividerModelNG::SetSetDividerOptions(frameNode, convValue);
+    // Nothing to implement
 }
 } // DividerInterfaceModifier
 

@@ -36,14 +36,18 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components/web/web_event.h"
+#include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -64,6 +68,9 @@ std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 }
 
 using StringArray = std::vector<std::string>;
+using PickerRangeType = std::variant<
+    std::pair<bool, std::vector<NG::RangeContent>>,
+    std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>;
 
 namespace Converter {
     constexpr double PERCENT_100 = 100.0;
@@ -211,6 +218,12 @@ namespace Converter {
     }
 
     template<>
+    inline std::string Convert(const Ark_Buffer& src)
+    {
+        return (src.data != nullptr) ? std::string(static_cast<char*>(src.data), src.length) : "";
+    }
+
+    template<>
     inline Ark_CharPtr Convert(const Ark_String& src)
     {
         return src.chars;
@@ -223,9 +236,23 @@ namespace Converter {
     }
 
     template<>
+    inline long Convert(const Ark_Number& src)
+    {
+        LOGE("Ark_Number doesn`t support long type");
+        return static_cast<long>(Convert<int>(src));
+    }
+
+    template<>
     inline float Convert(const Ark_Number& src)
     {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
+    }
+
+    template<>
+    inline double Convert(const Ark_Number& src)
+    {
+        LOGE("Ark_Number doesn`t support double type");
+        return src.tag == ARK_TAG_FLOAT32 ? static_cast<double>(src.f32) : static_cast<double>(src.i32);
     }
 
     // Implementation is in cpp
@@ -249,6 +276,18 @@ namespace Converter {
     inline std::vector<uint32_t> Convert(const Ark_Number& src)
     {
         return { Convert<uint32_t>(src) };
+    }
+
+    template<>
+    inline std::string Convert(const Array_String& src)
+    {
+        return src.array ? Convert<std::string>(src.array[0]) : "";
+    }
+
+    template<>
+    inline std::vector<std::string> Convert(const Ark_String& src)
+    {
+        return { Convert<std::string>(src) };
     }
 
     template<>
@@ -357,6 +396,8 @@ namespace Converter {
     // Converter declarations should be here, because they can be used in other converters!
     // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
     template<> AnimateParam Convert(const Ark_AnimateParam& src);
+    template<> BlurOption Convert(const Ark_BlurOptions& src);
+    template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Length& src);
@@ -365,12 +406,14 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_EdgeWidths& src);
     template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
+    template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Dimension Convert(const Ark_Length& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
+    template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
     template<> Gradient Convert(const Ark_LinearGradient_common& value);
@@ -380,24 +423,36 @@ namespace Converter {
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
+    template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
-    template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
+    template<> PickerRangeType Convert(const Ark_Resource& src);
+    template<> PickerRangeType Convert(const Array_Array_String& src);
+    template<> PickerRangeType Convert(const Array_String& src);
+    template<> PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src);
+    template<> PickerRangeType Convert(const Array_TextPickerRangeContent& src);
     template<> PickerSelectedType Convert(const Ark_Number& src);
     template<> PickerSelectedType Convert(const Array_Number& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
+    template<> PickerTime Convert(const Ark_Date& src);
+    template<> PickerTime Convert(const Ark_TimePickerResult& src);
     template<> PickerValueType Convert(const Ark_String& src);
     template<> PickerValueType Convert(const Array_String& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
+    template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
+    template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
+    template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
+    template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
+    template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
@@ -452,7 +507,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
+    template<> void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
+    template<> void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src);
     template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
     template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
@@ -463,9 +520,11 @@ namespace Converter {
     template<> void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src);
     template<> void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src);
     template<> void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src);
+    template<> void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
+    template<> void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
@@ -482,6 +541,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);
+    template<> void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageAnalyzerType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src);
     template<> void AssignCast(std::optional<ImageInterpolation>& dst, const Ark_ImageInterpolation& src);
@@ -498,15 +558,25 @@ namespace Converter {
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
     template<> void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src);
     template<> void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src);
+    template<> void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
+    template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);
     template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);
+    template<> void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
+    template<> void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src);
+    template<> void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src);
+    template<> void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src);
+    template<> void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src);
+    template<> void AssignCast(
+        std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src);
     template<> void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src);
     template<> void AssignCast(std::optional<ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
+    template<> void AssignCast(std::optional<SelectionMenuType>& dst, const Ark_MenuType& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src);
     template<> void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src);
@@ -514,6 +584,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
     template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
     template<> void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src);
+    template<> void AssignCast(std::optional<SslError>& dst, const Ark_SslError& src);
     template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
     template<> void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
@@ -532,8 +603,11 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
     template<> void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src);
     template<> void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& src);
+    template<> void AssignCast(std::optional<ThreatType>& dst, const Ark_ThreatType& src);
+    template<> void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src);
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
     template<> void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);
+    template<> void AssignCast(std::optional<ViewportFit>& dst, const Ark_ViewportFit& src);
     template<> void AssignCast(std::optional<V2::EditMode>& dst, const Ark_EditMode& src);
     template<> void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src);
     template<> void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGroupStyle& src);
@@ -542,18 +616,19 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
-    template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
     template<> void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src);
+    template<> void AssignCast(std::optional<WebCacheMode>& dst, const Ark_CacheMode& src);
+    template<> void AssignCast(std::optional<WebDarkMode>& dst, const Ark_WebDarkMode& src);
+    template<> void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src);
+    template<> void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src);
+    template<> void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
-
 
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
     template<>
     void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src);
-    template<>
-    void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

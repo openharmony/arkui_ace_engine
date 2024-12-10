@@ -17,7 +17,9 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "canvas_gradient_peer.h"
-
+namespace {
+    const auto DEFAULT_NEGATIVE_OFFSET = -1.0f;
+}
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasGradientAccessor {
 void DestroyPeerImpl(CanvasGradientPeer* peer)
@@ -38,6 +40,14 @@ void AddColorStopImpl(CanvasGradientPeer* peer,
                       const Ark_Number* offset,
                       const Ark_String* color)
 {
+    CHECK_NULL_VOID(peer);
+    auto opt = color ? Converter::OptConvert<Color>(*color) : std::nullopt;
+    if (!offset || !opt) {
+        peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
+        return;
+    }
+    auto value = Converter::Convert<float>(*offset);
+    peer->AddColorStop(value, *opt);
 }
 } // CanvasGradientAccessor
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()

@@ -77,7 +77,7 @@ public:
     virtual void SetUp(void)
     {
         ASSERT_NE(this->accessor_->ctor, nullptr);
-        this->peer_ = reinterpret_cast<PeerType*>(this->accessor_->ctor());
+        this->peer_ = static_cast<PeerType *>(this->accessor_->ctor());
         ASSERT_NE(this->peer_, nullptr);
         AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
     }
@@ -89,12 +89,12 @@ public:
     virtual void SetUp(void)
     {
         ASSERT_NE(this->accessor_->ctor, nullptr);
-        this->peer_ = CreatePeerInstance();
+        this->peer_ = static_cast<PeerType *>(CreatePeerInstance());
         ASSERT_NE(this->peer_, nullptr);
         AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
     }
 
-    virtual PeerType* CreatePeerInstance() = 0;
+    virtual void *CreatePeerInstance() = 0;
 };
 
 } // namespace OHOS::Ace::NG

@@ -20,23 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockContextMenuResult : public ContextMenuResult {
-public:
-    MOCK_METHOD(void, Cancel, (), (const));
-    MOCK_METHOD(void, CopyImage, (), (const));
-    MOCK_METHOD(void, Copy, (), (const));
-    MOCK_METHOD(void, Paste, (), (const));
-    MOCK_METHOD(void, Cut, (), (const));
-    MOCK_METHOD(void, SelectAll, (), (const));
-};
-} // namespace
 
 class WebContextMenuResultAccessorTest : public AccessorTestBase<GENERATED_ArkUIWebContextMenuResultAccessor,
     &GENERATED_ArkUIAccessors::getWebContextMenuResultAccessor, WebContextMenuResultPeer> {

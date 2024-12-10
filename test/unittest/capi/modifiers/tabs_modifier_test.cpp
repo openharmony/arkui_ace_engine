@@ -39,6 +39,29 @@ const auto ATTRIBUTE_BAR_HEIGHT_NAME = "barHeightAttr";
 const auto ATTRIBUTE_BAR_HEIGHT_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_BAR_BACKGROUND_COLOR_NAME = "barBackgroundColor";
 const auto ATTRIBUTE_BAR_BACKGROUND_COLOR_DEFAULT_VALUE = "#00000000";
+const auto ATTRIBUTE_BAR_BACKGROUND_EFFECT = "barBackgroundEffect";
+const auto ATTRIBUTE_BAR_BACKGROUND_EFFECT_RADIUS = "radius";
+const auto DEFAULT_BAR_BACKGROUND_EFFECT_RADIUS = 0.0;
+const auto ATTRIBUTE_BAR_BACKGROUND_EFFECT_SATURATION = "saturation";
+const auto DEFAULT_BAR_BACKGROUND_EFFECT_SATURATION = 1.0;
+const auto ATTRIBUTE_BAR_BACKGROUND_EFFECT_BRIGHTNESS = "brightness";
+const auto DEFAULT_BAR_BACKGROUND_EFFECT_BRIGHTNESS = 1.0;
+const auto ATTRIBUTE_BAR_BACKGROUND_EFFECT_COLOR = "color";
+const auto DEFAULT_BAR_BACKGROUND_EFFECT_COLOR = "#00000000";
+const auto ATTRIBUTE_ADAPTIVE_COLOR = "adaptiveColor";
+const auto DEFAULT_ADAPTIVE_COLOR = "AdaptiveColor.Default";
+const auto ATTRIBUTE_POLICY = "policy";
+const auto DEFAULT_POLICY = "BlurStyleActivePolicy.ALWAYS_ACTIVE";
+const auto ATTRIBUTE_BAR_BACKGROUND_EFFECT_TYPE = "TYPE";
+const auto DEFAULT_BAR_BACKGROUND_EFFECT_TYPE = "WITHIN_WINDOW";
+const auto ATTRIBUTE_INACTIVE_COLOR = "inactiveColor";
+const auto DEFAULT_INACTIVE_COLOR = "#00000000";
+const auto ATTRIBUTE_BAR_BACKGROUND_BLUR_STYLE_OPTIONS = "barBackgroundBlurStyleOptions";
+const auto ATTRIBUTE_BLUR_OPTION = "blurOption";
+const auto ATTRIBUTE_BLUR_OPTION_COUNT = 2;
+const auto ATTRIBUTE_BLUR_OPTION_POS0 = 0;
+const auto ATTRIBUTE_BLUR_OPTION_POS1 = 1;
+const auto DEFAULT_BLUR_OPTION = 0;
 const auto ATTRIBUTE_BAR_GRID_ALIGN_NAME = "barGridAlign";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_SM_NAME = "sm";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_SM_DEFAULT_VALUE = "-1";
@@ -50,6 +73,9 @@ const auto ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME = "margin";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME = "gutter";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_DEFAULT_VALUE = "0.00vp";
+const auto ATTRIBUTE_COLOR_MODE = "colorMode";
+const auto DEFAULT_COLOR_MODE = "ThemeColorMode.System";
+const auto ATTRIBUTE_SCALE = "scale";
 const auto COLOR_BLUE = "#FF0000FF";
 const auto COLOR_GREEN = "#FF00FF00";
 const auto COLOR_RED = "#FFFF0000";
@@ -59,6 +85,18 @@ const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
 const auto RES_STRING_FAKE_ID = IntResourceId{22222, Converter::ResourceType::STRING};
 const auto RES_STRING_REGISTERED_ID = IntResourceId{33333, Converter::ResourceType::STRING};
 constexpr double ANIMATION_DURATION_DEFAULT = 300.0;
+constexpr double COMPARING_DELTA = 0.0001;
+constexpr double GRAY_SCALE0 = 20.0;
+constexpr double GRAY_SCALE1 = 30.0;
+const auto POLICY = "BlurStyleActivePolicy.ALWAYS_INACTIVE";
+const auto ADAPTIVE_COLOR_AVERAGE = "AdaptiveColor.Average";
+const auto COLOR_MODE_DARK = "ThemeColorMode.Dark";
+const auto EFFECT_COLOR = "#FF123123";
+constexpr double EFFECT_RADIUS = 123.45;
+constexpr double EFFECT_SATURATION = 0.123;
+constexpr double EFFECT_BRIGHTNESS = 100;
+constexpr double SCALE = 0.123;
+constexpr double DEFAULT_SCALE = 1.0;
 
 Ark_ScrollableBarModeOptions CreateScrollableMode(Opt_Length margin, Ark_LayoutStyle layoutStyle)
 {
@@ -100,7 +138,7 @@ const std::vector<ScrollableBarModeTestStep> SCROLLABLE_BAR_MODE_TEST_PLAN = {
         "BarMode.Scrollable,"
         "{\"margin\":\"-32.70vp\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}" },
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(RES_ARK_LENGTH)),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(RES_ARK_LENGTH),
         ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
         "BarMode.Scrollable,"
         "{\"margin\":\"10.00px\","
@@ -327,7 +365,6 @@ HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setAnimationMode
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
 {
     const std::string PROP_NAME("animationMode");
@@ -387,7 +424,6 @@ HWTEST_F(TabsModifierTest, setEdgeEffectTest, TestSize.Level1)
     checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
     EXPECT_EQ(checkVal, edgeEffectTestPlan[edgeEffectTestPlan.size()-1].second);
 }
-#endif
 
 /**
  * @tc.name: setBarPositionTest
@@ -1047,6 +1083,197 @@ HWTEST_F(TabsModifierTest, setDividerNullTest, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setBarBackgroundEffectTestDefaultValues
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setBarBackgroundEffectTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    ASSERT_NE(jsonValue, nullptr);
+    auto effect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_EFFECT);
+    ASSERT_NE(effect, nullptr);
+    auto radius = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_RADIUS);
+    ASSERT_NEAR(radius, DEFAULT_BAR_BACKGROUND_EFFECT_RADIUS, COMPARING_DELTA);
+    auto saturation = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_SATURATION);
+    ASSERT_NEAR(saturation, DEFAULT_BAR_BACKGROUND_EFFECT_SATURATION, COMPARING_DELTA);
+    auto brightness = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_BRIGHTNESS);
+    ASSERT_NEAR(brightness, DEFAULT_BAR_BACKGROUND_EFFECT_BRIGHTNESS, COMPARING_DELTA);
+    auto color = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_COLOR);
+    EXPECT_EQ(color, DEFAULT_BAR_BACKGROUND_EFFECT_COLOR);
+    auto adaptiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_ADAPTIVE_COLOR);
+    EXPECT_EQ(adaptiveColor, DEFAULT_ADAPTIVE_COLOR);
+    auto policy = GetAttrValue<std::string>(effect, ATTRIBUTE_POLICY);
+    EXPECT_EQ(policy, DEFAULT_POLICY);
+    auto type = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_TYPE);
+    EXPECT_EQ(type, DEFAULT_BAR_BACKGROUND_EFFECT_TYPE);
+    auto inactiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_INACTIVE_COLOR);
+    EXPECT_EQ(inactiveColor, DEFAULT_INACTIVE_COLOR);
+    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(effect, ATTRIBUTE_BLUR_OPTION);
+    ASSERT_NE(blurOption, nullptr);
+    ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
+    auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
+    ASSERT_NE(gray1, nullptr);
+    ASSERT_NEAR(gray1->GetDouble(), DEFAULT_BLUR_OPTION, COMPARING_DELTA);
+    auto gray2 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS1);
+    ASSERT_NE(gray2, nullptr);
+    ASSERT_NEAR(gray2->GetDouble(), DEFAULT_BLUR_OPTION, COMPARING_DELTA);
+}
+
+/*
+ * @tc.name: setBarBackgroundEffectTestValidValues
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setBarBackgroundEffectTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBarBackgroundEffect, nullptr);
+    Ark_BackgroundEffectOptions inputValValid = {
+        .radius = Converter::ArkValue<Ark_Number>(EFFECT_RADIUS),
+        .saturation = Converter::ArkValue<Opt_Number>(EFFECT_SATURATION),
+        .brightness = Converter::ArkValue<Opt_Number>(EFFECT_BRIGHTNESS),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123123),
+        .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+        .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+            .grayscale = {Converter::ArkValue<Ark_Number>(GRAY_SCALE0), Converter::ArkValue<Ark_Number>(GRAY_SCALE1)}
+        }),
+        .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
+        .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
+    };
+    modifier_->setBarBackgroundEffect(node_, &inputValValid);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    ASSERT_NE(jsonValue, nullptr);
+    auto effect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_EFFECT);
+    ASSERT_NE(effect, nullptr);
+    auto radius = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_RADIUS);
+    ASSERT_NEAR(radius, EFFECT_RADIUS, COMPARING_DELTA);
+    auto saturation = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_SATURATION);
+    ASSERT_NEAR(saturation, EFFECT_SATURATION, COMPARING_DELTA);
+    auto brightness = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_BRIGHTNESS);
+    ASSERT_NEAR(brightness, EFFECT_BRIGHTNESS, COMPARING_DELTA);
+    auto color = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_COLOR);
+    EXPECT_EQ(color, EFFECT_COLOR);
+    auto adaptiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_ADAPTIVE_COLOR);
+    EXPECT_EQ(adaptiveColor, ADAPTIVE_COLOR_AVERAGE);
+    auto policy = GetAttrValue<std::string>(effect, ATTRIBUTE_POLICY);
+    EXPECT_EQ(policy, POLICY);
+    auto type = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_TYPE);
+    EXPECT_EQ(type, DEFAULT_BAR_BACKGROUND_EFFECT_TYPE);
+    auto inactiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_INACTIVE_COLOR);
+    EXPECT_EQ(inactiveColor, COLOR_GREEN);
+    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(effect, ATTRIBUTE_BLUR_OPTION);
+    ASSERT_NE(blurOption, nullptr);
+    ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
+    auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
+    ASSERT_NE(gray1, nullptr);
+    ASSERT_NEAR(gray1->GetDouble(), GRAY_SCALE0, COMPARING_DELTA);
+    auto gray2 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS1);
+    ASSERT_NE(gray2, nullptr);
+    ASSERT_NEAR(gray2->GetDouble(), GRAY_SCALE1, COMPARING_DELTA);
+}
+
+/*
+ * @tc.name: DISABLED_setBarBackgroundEffectTestInvalidValues
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestInvalidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
+ * @tc.name: setBarBackgroundBlurStyle1TestDefaultValues
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundBlurStyle1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle1TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    ASSERT_NE(jsonValue, nullptr);
+    auto option = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_BLUR_STYLE_OPTIONS);
+    ASSERT_NE(option, nullptr);
+    auto colorMode = GetAttrValue<std::string>(option, ATTRIBUTE_COLOR_MODE);
+    EXPECT_EQ(colorMode, DEFAULT_COLOR_MODE);
+    auto adaptiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_ADAPTIVE_COLOR);
+    EXPECT_EQ(adaptiveColor, DEFAULT_ADAPTIVE_COLOR);
+    auto scale = GetAttrValue<double>(option, ATTRIBUTE_SCALE);
+    ASSERT_NEAR(scale, DEFAULT_SCALE, COMPARING_DELTA);
+    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(option, ATTRIBUTE_BLUR_OPTION);
+    ASSERT_NE(blurOption, nullptr);
+    ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
+    auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
+    ASSERT_NE(gray1, nullptr);
+    ASSERT_NEAR(gray1->GetDouble(), DEFAULT_BLUR_OPTION, COMPARING_DELTA);
+    auto gray2 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS1);
+    ASSERT_NE(gray2, nullptr);
+    ASSERT_NEAR(gray2->GetDouble(), DEFAULT_BLUR_OPTION, COMPARING_DELTA);
+    auto policy = GetAttrValue<std::string>(option, ATTRIBUTE_POLICY);
+    EXPECT_EQ(policy, DEFAULT_POLICY);
+    auto inactiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_INACTIVE_COLOR);
+    EXPECT_EQ(inactiveColor, DEFAULT_INACTIVE_COLOR);
+}
+
+/*
+ * @tc.name: setBarBackgroundBlurStyle1TestValidValues
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundBlurStyle1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle1TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBarBackgroundBlurStyle1, nullptr);
+
+    Ark_BlurStyle inputStyleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+
+    Ark_BackgroundBlurStyleOptions inputOptionValid = {
+        .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+        .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+        .scale = Converter::ArkValue<Opt_Number>(SCALE),
+        .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+            .grayscale = {Converter::ArkValue<Ark_Number>(GRAY_SCALE0), Converter::ArkValue<Ark_Number>(GRAY_SCALE1)}
+        }),
+        .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
+        .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
+    };
+
+    modifier_->setBarBackgroundBlurStyle1(node_, inputStyleValid, &inputOptionValid);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    ASSERT_NE(jsonValue, nullptr);
+    auto option = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_BLUR_STYLE_OPTIONS);
+    ASSERT_NE(option, nullptr);
+    auto colorMode = GetAttrValue<std::string>(option, ATTRIBUTE_COLOR_MODE);
+    EXPECT_EQ(colorMode, COLOR_MODE_DARK);
+    auto adaptiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_ADAPTIVE_COLOR);
+    EXPECT_EQ(adaptiveColor, ADAPTIVE_COLOR_AVERAGE);
+    auto scale = GetAttrValue<double>(option, ATTRIBUTE_SCALE);
+    ASSERT_NEAR(scale, SCALE, COMPARING_DELTA);
+    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(option, ATTRIBUTE_BLUR_OPTION);
+    ASSERT_NE(blurOption, nullptr);
+    ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
+    auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
+    ASSERT_NE(gray1, nullptr);
+    ASSERT_NEAR(gray1->GetDouble(), GRAY_SCALE0, COMPARING_DELTA);
+    auto gray2 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS1);
+    ASSERT_NE(gray2, nullptr);
+    ASSERT_NEAR(gray2->GetDouble(), GRAY_SCALE1, COMPARING_DELTA);
+    auto policy = GetAttrValue<std::string>(option, ATTRIBUTE_POLICY);
+    EXPECT_EQ(policy, POLICY);
+    auto inactiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_INACTIVE_COLOR);
+    EXPECT_EQ(inactiveColor, COLOR_GREEN);
+}
+
+/*
+ * @tc.name: DISABLED_setBarBackgroundBlurStyle1TestInvalidValues
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundBlurStyle1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestInvalidValues, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
  * @tc.name: setBarBackgroundColorTestDefaultValues
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundColor
  * @tc.type: FUNC
@@ -1156,29 +1383,29 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'sm' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignSmValidValues = {
-    {"sm_0", Converter::ArkValue<Opt_Number>(std::optional(0)), "0"},
-    {"sm_2", Converter::ArkValue<Opt_Number>(std::optional(2)), "2"},
-    {"sm_4", Converter::ArkValue<Opt_Number>(std::optional(4)), "4"}
+    {"sm_0", Converter::ArkValue<Opt_Number>(0), "0"},
+    {"sm_2", Converter::ArkValue<Opt_Number>(2), "2"},
+    {"sm_4", Converter::ArkValue<Opt_Number>(4), "4"}
 };
 
 // Valid values for attribute 'md' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignMdValidValues = {
-    {"md_0", Converter::ArkValue<Opt_Number>(std::optional(0)), "0"},
-    {"md_2", Converter::ArkValue<Opt_Number>(std::optional(2)), "2"},
-    {"md_4", Converter::ArkValue<Opt_Number>(std::optional(4)), "4"},
-    {"md_6", Converter::ArkValue<Opt_Number>(std::optional(6)), "6"},
-    {"md_8", Converter::ArkValue<Opt_Number>(std::optional(8)), "8"}
+    {"md_0", Converter::ArkValue<Opt_Number>(0), "0"},
+    {"md_2", Converter::ArkValue<Opt_Number>(2), "2"},
+    {"md_4", Converter::ArkValue<Opt_Number>(4), "4"},
+    {"md_6", Converter::ArkValue<Opt_Number>(6), "6"},
+    {"md_8", Converter::ArkValue<Opt_Number>(8), "8"}
 };
 
 // Valid values for attribute 'lg' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignLgValidValues = {
-    {"lg_0", Converter::ArkValue<Opt_Number>(std::optional(0)), "0"},
-    {"lg_2", Converter::ArkValue<Opt_Number>(std::optional(2)), "2"},
-    {"lg_4", Converter::ArkValue<Opt_Number>(std::optional(4)), "4"},
-    {"lg_6", Converter::ArkValue<Opt_Number>(std::optional(6)), "6"},
-    {"lg_8", Converter::ArkValue<Opt_Number>(std::optional(8)), "8"},
-    {"lg_10", Converter::ArkValue<Opt_Number>(std::optional(10)), "10"},
-    {"lg_12", Converter::ArkValue<Opt_Number>(std::optional(12)), "12"}
+    {"lg_0", Converter::ArkValue<Opt_Number>(0), "0"},
+    {"lg_2", Converter::ArkValue<Opt_Number>(2), "2"},
+    {"lg_4", Converter::ArkValue<Opt_Number>(4), "4"},
+    {"lg_6", Converter::ArkValue<Opt_Number>(6), "6"},
+    {"lg_8", Converter::ArkValue<Opt_Number>(8), "8"},
+    {"lg_10", Converter::ArkValue<Opt_Number>(10), "10"},
+    {"lg_12", Converter::ArkValue<Opt_Number>(12), "12"}
 };
 
 // Valid values for attribute 'margin' of method 'barGridAlign'
@@ -1316,25 +1543,25 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
 // Invalid values for attribute 'sm' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignSmInvalidValues = {
     {"sm_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"sm_Negative", Converter::ArkValue<Opt_Number>(std::optional(-1))},
-    {"sm_Invalid_14", Converter::ArkValue<Opt_Number>(std::optional(14))},
-    {"sm_Invalid_3", Converter::ArkValue<Opt_Number>(std::optional(3))}
+    {"sm_Negative", Converter::ArkValue<Opt_Number>(-1)},
+    {"sm_Invalid_14", Converter::ArkValue<Opt_Number>(14)},
+    {"sm_Invalid_3", Converter::ArkValue<Opt_Number>(3)}
 };
 
 // Invalid values for attribute 'md' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignMdInvalidValues = {
     {"md_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"md_negative", Converter::ArkValue<Opt_Number>(std::optional(-1))},
-    {"md_invalid_14", Converter::ArkValue<Opt_Number>(std::optional(14))},
-    {"md_invalid_3", Converter::ArkValue<Opt_Number>(std::optional(3))}
+    {"md_negative", Converter::ArkValue<Opt_Number>(-1)},
+    {"md_invalid_14", Converter::ArkValue<Opt_Number>(14)},
+    {"md_invalid_3", Converter::ArkValue<Opt_Number>(3)}
 };
 
 // Invalid values for attribute 'lg' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignLgInvalidValues = {
     {"lg_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"lg_negative", Converter::ArkValue<Opt_Number>(std::optional(-1))},
-    {"lg_invalid_14", Converter::ArkValue<Opt_Number>(std::optional(14))},
-    {"lg_invalid_3", Converter::ArkValue<Opt_Number>(std::optional(3))}
+    {"lg_negative", Converter::ArkValue<Opt_Number>(-1)},
+    {"lg_invalid_14", Converter::ArkValue<Opt_Number>(14)},
+    {"lg_invalid_3", Converter::ArkValue<Opt_Number>(3)}
 };
 
 // Invalid values for attribute 'margin' of method 'barGridAlign'

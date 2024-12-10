@@ -48,6 +48,8 @@ public:
         bool fadingEdge, const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge,
         const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
+    static void SetFadingEdge(FrameNode* frameNode, const std::optional<bool>& fadingEdge,
+        const std::optional<Dimension>& fadingEdgeLength);
     static void SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& rect);
 
     static void SetEdgeEffect(

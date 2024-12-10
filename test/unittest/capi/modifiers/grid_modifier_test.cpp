@@ -233,7 +233,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
 
     Ark_Scroller arkScroller;
     arkScroller.ptr = peerImplPtr;
-    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(std::optional<Ark_Scroller>(arkScroller));
+    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(arkScroller);
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
 
@@ -1383,7 +1383,7 @@ HWTEST_F(GridModifierTest, setEdgeEffectTestValidValues, TestSize.Level1)
 
     // EdgeEffect - Fade, alwaysEnabled - true
     inputValue0 = ARK_EDGE_EFFECT_FADE;
-    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(true));
+    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(true);
     modifier_->setEdgeEffect(node_, inputValue0, &inputValue1);
     strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
     EXPECT_EQ(strResult, "EdgeEffect.Fade");
@@ -1403,7 +1403,7 @@ HWTEST_F(GridModifierTest, setEdgeEffectTestValidValues, TestSize.Level1)
 
     // EdgeEffect - Spring, alwaysEnabled - false
     inputValue0 = ARK_EDGE_EFFECT_SPRING;
-    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(false));
+    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(false);
     modifier_->setEdgeEffect(node_, inputValue0, &inputValue1);
     strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
     EXPECT_EQ(strResult, "EdgeEffect.Spring");
@@ -1664,20 +1664,19 @@ HWTEST_F(GridModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(GridModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_GridItemAlignment inputValue;
 
     // check Stretch
-    inputValue = Converter::ArkValue<Opt_GridItemAlignment>(std::optional(ARK_GRID_ITEM_ALIGNMENT_STRETCH));
+    inputValue = Converter::ArkValue<Opt_GridItemAlignment>(ARK_GRID_ITEM_ALIGNMENT_STRETCH);
     modifier_->setAlignItems(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
     EXPECT_EQ(strResult, "GridItemAlignment.Stretch");
 
     // check Default
-    inputValue = Converter::ArkValue<Opt_GridItemAlignment>(std::optional(ARK_GRID_ITEM_ALIGNMENT_DEFAULT));
+    inputValue = Converter::ArkValue<Opt_GridItemAlignment>(ARK_GRID_ITEM_ALIGNMENT_DEFAULT);
     modifier_->setAlignItems(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
     EXPECT_EQ(strResult, "GridItemAlignment.Default");
@@ -1699,5 +1698,4 @@ HWTEST_F(GridModifierTest, setAlignItemsTestInvalidValues, TestSize.Level1)
     strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
     EXPECT_EQ(strResult, "GridItemAlignment.Default");
 }
-#endif // WRONG_OPT
 } // namespace OHOS::Ace::NG

@@ -18,8 +18,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct WebCookiePeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
 void DestroyPeerImpl(WebCookiePeer* peer)

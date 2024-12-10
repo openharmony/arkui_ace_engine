@@ -27,6 +27,7 @@ const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 class WebPattern : public Pattern {
     DECLARE_ACE_TYPE(WebPattern, Pattern);
 public:
+    using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
     ~WebPattern() override;
 
@@ -106,6 +107,16 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController);
     RefPtr<WebController> GetWebController() const;
+
+    void SetNewDragStyle(bool isNewDragStyle)
+    {
+        isNewDragStyle_ = isNewDragStyle;
+    }
+
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
+
+    void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback);
+    OnControllerAttachedCallback GetOnControllerAttachedCallback();
 
 private:
     std::string GetMixedModeAsString() const;
@@ -192,6 +203,8 @@ private:
     };
     RefPtr<WebController> webController_;
     std::optional<std::string> webData_;
+    bool isNewDragStyle_ = false;
+    OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H

@@ -33,8 +33,7 @@ namespace {
 const auto ATTRIBUTE_NESTED_SCROLL_NAME = "nestedScroll";
 const auto ATTRIBUTE_EDGE_EFFECT_NAME = "edgeEffect";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME = "options";
-const auto ATTRIBUTE_FADING_EDGE_NAME = "fadingEdge";
-const auto ATTRIBUTE_FADING_EDGE_I_OPTIONS_NAME = "options";
+const auto ATTRIBUTE_FADING_EDGE_OPTION_NAME = "fadingEdgeOption";
 const auto ATTRIBUTE_SCROLL_BAR_NAME = "scrollBar";
 const auto ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE = "BarState.Off";
 const auto ATTRIBUTE_SCROLL_BAR_COLOR_NAME = "scrollBarColor";
@@ -57,10 +56,10 @@ const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME = "edgeEffect";
 const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_NAME = "alwaysEnabled";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_FADING_EDGE_I_ENABLED_NAME = "enabled";
-const auto ATTRIBUTE_FADING_EDGE_I_ENABLED_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_FADING_EDGE_I_OPTIONS_I_FADING_EDGE_LENGTH_NAME = "fadingEdgeLength";
-const auto ATTRIBUTE_FADING_EDGE_I_OPTIONS_I_FADING_EDGE_LENGTH_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_FADING_EDGE_NAME = "fadingEdge";
+const auto ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_NAME = "fadingEdgeLength";
+const auto ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_DEFAULT_VALUE = "32.00vp";
 } // namespace
 
 class ScrollableCommonMethodModifierTest
@@ -894,31 +893,162 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setFadingEdgeTestDefaultValues, TestSize.Level1)
+HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultFadingEdge =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
-    std::unique_ptr<JsonValue> resultOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultFadingEdge, ATTRIBUTE_FADING_EDGE_I_OPTIONS_NAME);
+    std::unique_ptr<JsonValue> resultFadingEdgeOption =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FADING_EDGE_OPTION_NAME);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(resultFadingEdge, ATTRIBUTE_FADING_EDGE_I_ENABLED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_I_ENABLED_DEFAULT_VALUE) <<
-        "Default value for attribute 'fadingEdge.enabled'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE) << "Default value for attribute 'fadingEdge'";
 
-    resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_FADING_EDGE_I_OPTIONS_I_FADING_EDGE_LENGTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_I_OPTIONS_I_FADING_EDGE_LENGTH_DEFAULT_VALUE) <<
-        "Default value for attribute 'fadingEdge.options.fadingEdgeLength'";
+    resultStr =
+        GetAttrValue<std::string>(resultFadingEdgeOption, ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_DEFAULT_VALUE) <<
+        "Default value for attribute 'fadingEdgeOption.fadingEdgeLength'";
 }
 
 /*
- * @tc.name: setFadingEdgeTestValidValues
+ * @tc.name: setFadingEdgeTestFadingEdgeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setFadingEdgeTestValidValues, TestSize.Level1)
+HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeValidValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Opt_Boolean initValueFadingEdge;
+    Opt_FadingEdgeOptions initValueFadingEdgeOption;
+
+    // Initial setup
+    initValueFadingEdge = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueFadingEdgeOption).fadingEdgeLength =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
+
+    auto checkValue = [this, &initValueFadingEdge, &initValueFadingEdgeOption](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueFadingEdge = initValueFadingEdge;
+        Opt_FadingEdgeOptions inputValueFadingEdgeOption = initValueFadingEdgeOption;
+
+        inputValueFadingEdge = value;
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdge";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setFadingEdgeTestFadingEdgeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueFadingEdge;
+    Opt_FadingEdgeOptions initValueFadingEdgeOption;
+
+    // Initial setup
+    initValueFadingEdge = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueFadingEdgeOption).fadingEdgeLength =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
+
+    auto checkValue = [this, &initValueFadingEdge, &initValueFadingEdgeOption](
+                          const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueFadingEdge = initValueFadingEdge;
+        Opt_FadingEdgeOptions inputValueFadingEdgeOption = initValueFadingEdgeOption;
+
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        inputValueFadingEdge = value;
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdge";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setFadingEdgeTestFadingEdgeOptionFadingEdgeLengthValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(
+    ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeOptionFadingEdgeLengthValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueFadingEdge;
+    Opt_FadingEdgeOptions initValueFadingEdgeOption;
+
+    // Initial setup
+    initValueFadingEdge = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueFadingEdgeOption).fadingEdgeLength =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
+
+    auto checkValue = [this, &initValueFadingEdge, &initValueFadingEdgeOption](
+                          const std::string& input, const std::string& expectedStr, const Opt_LengthMetrics& value) {
+        Opt_Boolean inputValueFadingEdge = initValueFadingEdge;
+        Opt_FadingEdgeOptions inputValueFadingEdgeOption = initValueFadingEdgeOption;
+
+        WriteTo(inputValueFadingEdgeOption).fadingEdgeLength = value;
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultFadingEdgeOption =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FADING_EDGE_OPTION_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultFadingEdgeOption, ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdgeOption.fadingEdgeLength";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthMetricsNonNegValidValues) {
+        checkValue(input, expected, ArkValue<Opt_LengthMetrics>(value));
+    }
+}
+
+/*
+ * @tc.name: setFadingEdgeTestFadingEdgeOptionFadingEdgeLengthInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(
+    ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeOptionFadingEdgeLengthInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueFadingEdge;
+    Opt_FadingEdgeOptions initValueFadingEdgeOption;
+
+    // Initial setup
+    initValueFadingEdge = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    WriteTo(initValueFadingEdgeOption).fadingEdgeLength =
+        ArkValue<Opt_LengthMetrics>(std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]));
+
+    auto checkValue = [this, &initValueFadingEdge, &initValueFadingEdgeOption](
+                          const std::string& input, const Opt_LengthMetrics& value) {
+        Opt_Boolean inputValueFadingEdge = initValueFadingEdge;
+        Opt_FadingEdgeOptions inputValueFadingEdgeOption = initValueFadingEdgeOption;
+
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        WriteTo(inputValueFadingEdgeOption).fadingEdgeLength = value;
+        modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultFadingEdgeOption =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FADING_EDGE_OPTION_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultFadingEdgeOption, ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdgeOption.fadingEdgeLength";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthMetricsNonNegInvalidValues) {
+        checkValue(input, ArkValue<Opt_LengthMetrics>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_LengthMetrics>());
 }
 } // namespace OHOS::Ace::NG

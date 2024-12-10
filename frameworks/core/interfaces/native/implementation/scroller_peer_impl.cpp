@@ -71,11 +71,9 @@ inline ScrollEdgeOptions Convert(const Ark_ScrollEdgeOptions& src)
 template<>
 inline ScrollToIndexOptions Convert(const Ark_ScrollToIndexOptions& src)
 {
-    LOGE("ARKOALA Conversion from Ark_CustomObject to float is not supported.");
-    // wait for Ark_LengthMetrics instead of Ark_CustomObject in CAPI
+    auto offset = Converter::OptConvert<Dimension>(src.extraOffset);
     ScrollToIndexOptions scrollToIndexOptions = {
-        //.extraOffset = Converter::OptConvert<float>(src.extraOffset),
-        .extraOffset = std::nullopt, // temp stub
+        .extraOffset = offset ? std::optional<float>(offset.value().ConvertToPx()) : std::nullopt
     };
     return scrollToIndexOptions;
 }
@@ -263,8 +261,6 @@ void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Number* value, const Opt_B
         std::optional<ScrollToIndexOptions> scrollToIndexOptions =
             Converter::OptConvert<ScrollToIndexOptions>(*options);
         if (scrollToIndexOptions) {
-            LOGE("ARKOALA Conversion from Ark_CustomObject to float is not supported.");
-            // wait for Ark_LengthMetrics instead of Ark_CustomObject in CAPI
             extraOffset = scrollToIndexOptions.value().extraOffset;
         }
     }

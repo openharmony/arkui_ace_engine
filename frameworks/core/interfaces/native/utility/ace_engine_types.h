@@ -102,6 +102,28 @@ enum class MessageLevel {
     LOG = 5
 };
 
+enum class RenderExitReason {
+    ABNORMAL_TERMINATION = 0,
+    WAS_KILLED = 1,
+    CRASHED = 2,
+    OOM = 3,
+    EXIT_UNKNOWN = 4
+};
+
+enum class SslError {
+    INVALID = 0,
+    HOST_MISMATCH = 1,
+    DATE_INVALID = 2,
+    UNTRUSTED = 3,
+};
+
+enum class ThreatType {
+    ILLEGAL = 0,
+    FRAUD = 1,
+    RISK = 2,
+    WARNING = 3,
+};
+
 struct Header {
     std::string headerKey;
     std::string headerValue;
@@ -122,6 +144,14 @@ struct PointLightStyle {
     std::optional<LightSource> lightSource;
     std::optional<int> illuminationType;
     std::optional<float> bloom;
+};
+
+struct ScaleOpt {
+    std::optional<float> x;
+    std::optional<float> y;
+    std::optional<float> z;
+    std::optional<Dimension> centerX;
+    std::optional<Dimension> centerY;
 };
 
 } // namespace OHOS::Ace::NG::Converter

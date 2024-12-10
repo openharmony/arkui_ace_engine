@@ -22,18 +22,6 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::Converter {
-template<>
-void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src)
-{
-    switch (src) {
-        case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE: dst = TimePickerFormat::HOUR_MINUTE; break;
-        case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE_SECOND: dst = TimePickerFormat::HOUR_MINUTE_SECOND; break;
-        default: LOGE("Unexpected enum value in Ark_TimePickerFormat: %{public}d", src);
-    }
-}
-}
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -137,15 +125,7 @@ void OnChangeImpl(Ark_NativePointer node,
     auto onChange = [frameNode](const BaseEventInfo* event) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
         auto resultStr = eventInfo->GetSelectedStr();
-        auto data = JsonUtil::ParseJsonString(resultStr);
-        auto hour = data->GetValue("hour")->GetInt();
-        auto minute = data->GetValue("minute")->GetInt();
-        auto second = data->GetValue("second")->GetInt();
-        Ark_TimePickerResult result = {
-            .hour = Converter::ArkValue<Ark_Number>(hour),
-            .minute = Converter::ArkValue<Ark_Number>(minute),
-            .second = Converter::ArkValue<Ark_Number>(second)
-        };
+        auto result = Converter::ArkValue<Ark_TimePickerResult>(resultStr);
         GetFullAPI()->getEventsAPI()->getTimePickerEventsReceiver()->onChange(frameNode->GetId(), result);
     };
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();

@@ -38,6 +38,9 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#ifdef MODEL_COMPONENT_SUPPORTED
+#include "core/components_ng/pattern/model/model_view_ng.h"
+#endif //MODEL_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
@@ -65,6 +68,9 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#endif //WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
@@ -82,6 +88,7 @@
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
+#include "core/components_ng/pattern/shape/polygon_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
@@ -111,9 +118,16 @@
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #endif // WEB_SUPPORTED
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_model.h"
+#endif // WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/extension_companion_node.h"
 #include "core/pipeline/base/element_register.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/components_ng/pattern/plugin/plugin_model_ng.h"
+#endif
 
 namespace OHOS::Ace::NG::GeneratedViewModel {
 
@@ -623,7 +637,11 @@ void* createCommonShapeMethodNode(ArkUI_Int32 nodeId)
 
 void* createCommonNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = CommonViewModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createScrollableCommonMethodNode(ArkUI_Int32 nodeId)
@@ -633,7 +651,14 @@ void* createScrollableCommonMethodNode(ArkUI_Int32 nodeId)
 
 void* createComponent3DNode(ArkUI_Int32 nodeId)
 {
+#ifdef MODEL_COMPONENT_SUPPORTED
+    auto frameNode = ModelViewNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif // MODEL_COMPONENT_SUPPORTED
 }
 
 void* createContainerSpanNode(ArkUI_Int32 nodeId)
@@ -827,17 +852,30 @@ void* createPatternLockNode(ArkUI_Int32 nodeId)
 
 void* createPluginComponentNode(ArkUI_Int32 nodeId)
 {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    auto frameNode = PluginModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif
 }
 
 void* createPolygonNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createPolylineNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRectNode(ArkUI_Int32 nodeId)
@@ -870,7 +908,13 @@ void* createRichTextNode(ArkUI_Int32 nodeId)
 
 void* createRootSceneNode(ArkUI_Int32 nodeId)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto rootSceneNode = RootSceneModel::CreateRootSceneNode(nodeId);
+    rootSceneNode->IncRefCount();
+    return AceType::RawPtr(rootSceneNode);
+#else
     return nullptr;
+#endif // WINDOW_SCENE_SUPPORTED
 }
 
 void* createSaveButtonNode(ArkUI_Int32 nodeId)
@@ -883,7 +927,14 @@ void* createSaveButtonNode(ArkUI_Int32 nodeId)
 
 void* createScreenNode(ArkUI_Int32 nodeId)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNode = ScreenModel::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif // WINDOW_SCENE_SUPPORTED
 }
 
 void* createScrollBarNode(ArkUI_Int32 nodeId)
@@ -987,7 +1038,13 @@ void* createRemoteWindowNode(ArkUI_Int32 nodeId)
 
 void* createUIExtensionComponentNode(ArkUI_Int32 nodeId)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNode = UIExtensionModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif //WINDOW_SCENE_SUPPORTED
 }
 
 void* createLinearIndicatorNode(ArkUI_Int32 nodeId)

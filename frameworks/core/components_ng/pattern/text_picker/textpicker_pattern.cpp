@@ -896,34 +896,6 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
     return ParseDirectionKey(textPickerColumnPattern, code, static_cast<int32_t>(childSize));
 }
 
-std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,
-    const std::vector<uint32_t>& indexs, int32_t status) const
-{
-    std::string result = "";
-    result = std::string("{\"value\":") + "[";
-    const size_t valueSize = values.size();
-    for (uint32_t i = 0; i < valueSize; i++) {
-        result += "\"" + values[i];
-        if (valueSize > 0 && i != valueSize - 1) {
-            result += "\",";
-        } else {
-            result += "\"]";
-        }
-    }
-    result += std::string(",\"index\":") + "[";
-    const size_t indexSize = indexs.size();
-    for (uint32_t i = 0; i < indexSize; i++) {
-        result += std::to_string(indexs[i]);
-        if (indexSize > 0 && indexSize != i + 1) {
-            result += ",";
-        } else {
-            result += "]";
-        }
-    }
-    result += ",\"status\":" + std::to_string(status) + "}";
-    return result;
-}
-
 std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t status) const
 {
     std::vector<std::string> values;
@@ -964,13 +936,6 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
                 values[0] + "\"" + ",\"newSelected\":" + std::to_string(indexs[0]) +
                ",\"status\":" + std::to_string(status) + "}";
     }
-}
-
-std::string TextPickerPattern::GetSelectedObjectStr(const std::string value,
-    const uint32_t index, int32_t status) const
-{
-    return std::string("{\"value\":") + "\"" + value + "\"" + ",\"index\":" + std::to_string(index) +
-           ",\"status\":" + std::to_string(status) + "}";
 }
 
 void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
