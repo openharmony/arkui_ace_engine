@@ -36,11 +36,11 @@ constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and m
 const std::tuple<std::string, int32_t> TEST_FONT_SIZE = { "16.00vp", 16 };
 const std::tuple<Ace::FontWeight, int32_t> TEST_FONT_WEIGHT = { FontWeight::W900, 900 };
 const std::vector<std::string> TEST_FONT_FAMILIES = { "Arial" };
-const std::tuple<std::string, Ark_Color> TEST_FONT_COLOR =
-        { "#FFFF0000", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED) };
+const std::tuple<std::string, Ark_Color> TEST_FONT_COLOR = {
+    "#FFFF0000", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED) };
 const Ace::FontStyle TEST_FONT_STYLE = Ace::FontStyle::ITALIC;
-const std::tuple<std::string, Ark_Color> TEST_DCRN_COLOR =
-        { "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
+const std::tuple<std::string, Ark_Color> TEST_DCRN_COLOR = {
+    "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
 const Ace::TextDecoration TEST_DCRN_TYPE = Ace::TextDecoration::UNDERLINE;
 const Ace::TextDecorationStyle TEST_DCRN_STYLE = TextDecorationStyle::SOLID;
 const std::tuple<std::string, int> TEST_BASELINE_OFFSET = { "10.00vp", 10 };
@@ -344,7 +344,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansFont, TestSiz
     if (font.GetFontWeight().has_value()) {
         EXPECT_EQ(font.GetFontWeight().value(), std::get<0>(TEST_FONT_WEIGHT));
     }
-
 }
 
 /**

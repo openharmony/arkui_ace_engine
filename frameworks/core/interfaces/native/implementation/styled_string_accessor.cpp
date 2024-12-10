@@ -70,7 +70,7 @@ BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
 {
     BorderRadiusProperty dst;
     if (auto value = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
-        value.has_value() ) {
+        value.has_value()) {
         dst = value.value();
     }
     return dst;
@@ -377,6 +377,9 @@ void DestroyPeerImpl(StyledStringPeer* peer)
 std::vector<RefPtr<SpanBase>> ParseSpanBaseVector(const std::vector<StyleOptions>& styles, int32_t maxLength)
 {
     std::vector<RefPtr<SpanBase>> spanBaseVector;
+    if (styles.empty()) {
+        return spanBaseVector;
+    }
     spanBaseVector.reserve(styles.size());
     for (const auto& style : styles) {
         StyleOptions styleTmp = style;
@@ -401,12 +404,11 @@ StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* va
                 std::string data = Converter::OptConvert<std::string>(arkText).value_or("");
                 spanString = AceType::MakeRefPtr<SpanString>(data);
                 if (!data.empty() && styles && styles->tag != ARK_TAG_UNDEFINED) {
-                    auto styleOptions = Converter::OptConvert<std::vector<StyleOptions>>(*styles);
-                    if (styleOptions.has_value()) {
-                        int32_t maxLength = StringUtils::ToWstring(data).length();
-                        auto spanBases = ParseSpanBaseVector(styleOptions.value(), maxLength);
-                        spanString->BindWithSpans(spanBases);
-                    }
+                    auto styleOptions = Converter::OptConvert<std::vector<StyleOptions>>(*styles).value_or(
+                        std::vector<StyleOptions>());
+                    int32_t maxLength = StringUtils::ToWstring(data).length();
+                    auto spanBases = ParseSpanBaseVector(styleOptions, maxLength);
+                    spanString->BindWithSpans(spanBases);
                 }
             },
             [&spanString](const Ark_ImageAttachment& arkImageAttachment) {
