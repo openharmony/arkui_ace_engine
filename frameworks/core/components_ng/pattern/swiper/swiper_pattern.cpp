@@ -725,17 +725,20 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     if (HasRightButtonNode()) {
         ++skipCnt;
     }
-    swiperFocusHub->AllChildFocusHub<true>(
-        [&skipCnt, &showChildFocusHub, this](const RefPtr<FocusHub>& child) {
-            if (--skipCnt >= 0 || !child) {
-                return;
-            }
-            if (IsUseCustomAnimation() && hasTabsAncestor_) {
-                child->SetParentFocusable(child == showChildFocusHub);
-            } else {
-                child->SetParentFocusable(IsFocusNodeInItemPosition(child));
-            }
-        });
+    std::list<RefPtr<FocusHub>> focusNodes;
+    swiperFocusHub->FlushChildrenFocusHub(focusNodes);
+    for (auto iter = focusNodes.begin(); iter != focusNodes.end(); ++iter) {
+        const auto& node = *iter;
+        if (skipCnt > 0 || !node) {
+            --skipCnt;
+            continue;
+        }
+        if (IsUseCustomAnimation() && hasTabsAncestor_) {
+            node->SetParentFocusable(node == showChildFocusHub);
+        } else {
+            node->SetParentFocusable(IsFocusNodeInItemPosition(node));
+        }
+    }
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
