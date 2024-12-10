@@ -5378,4 +5378,10 @@ void ViewAbstract::SetPrivacySensitive(FrameNode* frameNode, const std::optional
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void ViewAbstract::SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDrawModifier(drawModifier);
+}
+
 } // namespace OHOS::Ace::NG

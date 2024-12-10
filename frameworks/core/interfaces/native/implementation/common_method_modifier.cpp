@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -1213,8 +1214,20 @@ void DrawModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetDrawModifier(frameNode, convValue);
+    if (!frameNode->IsSupportDrawModifier()) {
+        return;
+    }
+    auto convValue = value ? Converter::OptConvert<Ark_DrawModifier>(*value) : std::nullopt;
+    if (!convValue) {
+        return;
+    }
+    auto peer = reinterpret_cast<DrawModifierPeer*>(convValue.value().ptr);
+    CHECK_NULL_VOID(peer);
+    if (!peer->drawModifier) {
+        peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
+    }
+    peer->frameNode = AceType::WeakClaim(frameNode);
+    ViewAbstract::SetDrawModifier(frameNode, peer->drawModifier);
 }
 void ResponseRegionImpl(Ark_NativePointer node,
                         const Ark_Union_Array_Rectangle_Rectangle* value)

@@ -791,6 +791,7 @@ public:
     static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
+    static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
 
 private:
     static void AddDragFrameNodeToManager();
