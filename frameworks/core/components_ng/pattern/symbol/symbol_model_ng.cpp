@@ -33,6 +33,13 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode});
 }
 
+RefPtr<FrameNode> SymbolModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(
+        V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    return symbolNode;
+}
+
 void SymbolModelNG::SetFontWeight(const Ace::FontWeight& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
@@ -117,5 +124,10 @@ void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOpt
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions, frameNode);
+}
+
+void SymbolModelNG::SetSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId)
+{
+    InitialSymbol(frameNode, symbolId);
 }
 } // namespace OHOS::Ace::NG
