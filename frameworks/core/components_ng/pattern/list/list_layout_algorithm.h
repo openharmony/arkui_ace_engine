@@ -47,7 +47,7 @@ struct ListItemInfo {
     float endPos;
     bool isGroup;
     bool isPressed = false;
-    std::optional<ListItemGroupLayoutInfo> groupInfo;
+    std::optional<ListItemGroupLayoutInfo> groupInfo = std::nullopt;
 };
 
 struct ListPredictLayoutParam {
