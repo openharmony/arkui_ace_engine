@@ -3605,7 +3605,7 @@ void SwiperPattern::PlayTranslateAnimation(
                 swiper->GetLoopIndex(swiper->currentIndex_), swiper->GetLoopIndex(nextIndex), info);
             swiper->FireAndCleanScrollingListener();
         },
-        [weak, nextIndex, restartAutoPlay, finishAnimation]() {
+        [weak, finishAnimation]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             AceAsyncTraceEndCommercial(
@@ -3774,17 +3774,16 @@ void SwiperPattern::PlayFadeAnimation()
     option.SetCurve(Curves::LINEAR);
 
     host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, fadeOffset_);
-    constexpr float end = 0.0f;
     nextIndex_ = currentIndex_;
     fadeAnimation_ = AnimationUtils::StartAnimation(
         option,
-        [weak, end]() {
+        [weak]() {
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->OnFadeAnimationStart();
             auto host = swiperPattern->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, end);
+            host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0.f);
         },
         [weak]() {
             auto swiperPattern = weak.Upgrade();
@@ -3841,7 +3840,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     nextIndex_ = currentIndex_;
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
-        [weak = AceType::WeakClaim(this), dragVelocity, delta]() {
+        [weak = AceType::WeakClaim(this), delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f", delta);
             auto swiperPattern = weak.Upgrade();
@@ -5501,7 +5500,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     CHECK_NULL_VOID(taskExecutor);
 
     auto timeout = tabContentAnimatedTransition.timeout;
-    auto timeoutTask = [weak = AceType::WeakClaim(AceType::RawPtr(proxy)), fromIndex, toIndex] {
+    auto timeoutTask = [weak = AceType::WeakClaim(AceType::RawPtr(proxy))] {
         auto transitionProxy = weak.Upgrade();
         CHECK_NULL_VOID(transitionProxy);
         transitionProxy->FinishTransition();
