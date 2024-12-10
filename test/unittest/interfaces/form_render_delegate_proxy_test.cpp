@@ -227,11 +227,12 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_009, TestSize.
         new FormRendererDelegateProxy(static_cast<FormRendererDelegateProxy>(iremoteObject));
     ASSERT_NE(renderDelegate, nullptr);
 
-    int32_t top = 0;
-    int32_t left = 0;
+    AccessibilityParentRectInfo parentRectInfo;
+    parentRectInfo.top = 0;
+    parentRectInfo.left = 0;
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_OK));
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_OK);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_OK);
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_INVALID_VALUE));
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_INVALID_VALUE);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_INVALID_VALUE);
 }
 }
