@@ -70,8 +70,27 @@ public:
         }
     }
 
+    void UpdateListLanes(std::optional<int32_t> lanes,
+        std::optional<Dimension> minLength, std::optional<Dimension> maxLength)
+    {
+        listLanes_ = lanes;
+        listLaneMinLength_ = minLength;
+        listLaneMaxLength_ = maxLength;
+    }
+
+    bool IsListLanesEqual(std::optional<int32_t> lanes,
+        std::optional<Dimension> minLength, std::optional<Dimension> maxLength) const
+    {
+        return (listLanes_ == lanes) && (listLaneMinLength_ == minLength) && (listLaneMaxLength_ == maxLength);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
+
+private:
+    std::optional<int32_t> listLanes_;
+    std::optional<Dimension> listLaneMinLength_;
+    std::optional<Dimension> listLaneMaxLength_;
 };
 } // namespace OHOS::Ace::NG
 

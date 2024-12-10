@@ -259,6 +259,11 @@ bool UITaskScheduler::isEmpty()
     return dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty();
 }
 
+bool UITaskScheduler::IsPredictTaskEmpty()
+{
+    return predictTask_.empty();
+}
+
 void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
     if (isFlushInImplicitAnimationTask) {

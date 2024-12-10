@@ -2357,6 +2357,9 @@ struct ArkUIListModifier {
     void (*resetInitialScroller)(ArkUINodeHandle node);
     void (*setListMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool enabled);
     void (*resetListMaintainVisibleContentPosition)(ArkUINodeHandle node);
+    void (*setShowCached)(ArkUINodeHandle node, ArkUI_Bool show);
+    void (*resetShowCached)(ArkUINodeHandle node);
+    ArkUI_Bool (*getShowCached)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {

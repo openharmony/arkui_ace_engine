@@ -730,10 +730,7 @@ public:
         isWindowAnimation_ = true;
     }
 
-    void StopWindowAnimation() override
-    {
-        isWindowAnimation_ = false;
-    }
+    void StopWindowAnimation() override;
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;

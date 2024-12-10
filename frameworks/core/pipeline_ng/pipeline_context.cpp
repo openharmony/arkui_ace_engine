@@ -4275,6 +4275,14 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
     return false;
 }
 
+void PipelineContext::StopWindowAnimation()
+{
+    isWindowAnimation_ = false;
+    if (taskScheduler_ && !taskScheduler_->IsPredictTaskEmpty()) {
+        RequestFrame();
+    }
+}
+
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
 {
     taskScheduler_->AddSyncGeometryNodeTask(std::move(task));
