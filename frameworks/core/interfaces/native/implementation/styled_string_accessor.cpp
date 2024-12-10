@@ -89,7 +89,7 @@ PaddingProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
 {
     PaddingProperty dst;
     if (auto value = Converter::OptConvert<PaddingProperty>(src.padding);
-        value.has_value() ) {
+        value.has_value()) {
         dst = value.value();
     }
     return dst;
@@ -210,7 +210,6 @@ GestureStyle Convert(const StyleValueOptions& src)
 {
     GestureStyle dst;
     if (auto style = std::get_if<Ark_GestureStyle>(&src); style) {
-        //dst = OptConvert<GestureStyle>(*style).value_or(dst);
         LOGE("Converter::Convert Ark_GestureStyle, the handle support not implemented");
     }
     return dst;
@@ -406,9 +405,7 @@ StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* va
                     if (styleOptions.has_value()) {
                         int32_t maxLength = StringUtils::ToWstring(data).length();
                         auto spanBases = ParseSpanBaseVector(styleOptions.value(), maxLength);
-                        if (!spanBases.empty()) {
-                            spanString->BindWithSpans(spanBases);
-                        }
+                        spanString->BindWithSpans(spanBases);
                     }
                 }
             },

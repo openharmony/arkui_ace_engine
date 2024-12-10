@@ -50,10 +50,10 @@ const int TEST_TEXT_SHADOW_RADIUS = 5;
 const int TEST_TEXT_SHADOW_OFFSET = 3;
 const std::tuple<ShadowType, Ark_ShadowType> TEST_TEXT_SHADOW_TYPE = {
     Ace::ShadowType::COLOR, ARK_SHADOW_TYPE_COLOR };
-const std::tuple<std::string, Ark_Color> TEST_TEXT_SHADOW_COLOR =
-        { "#FFFF0000", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED) };
-const std::tuple<std::string, Ark_Color> TEST_BGCL_COLOR =
-        { "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
+const std::tuple<std::string, Ark_Color> TEST_TEXT_SHADOW_COLOR = {
+    "#FFFF0000", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED) };
+const std::tuple<std::string, Ark_Color> TEST_BGCL_COLOR = {
+    "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
 const std::tuple<std::string, int> TEST_BGCL_RADIUS = { "10.00px", 10 };
 const std::string TEST_URL = "https://www.test.test";
 const std::tuple<Ace::TextAlign, Ark_TextAlign> TEST_PSST_TEXT_ALIGN = {
@@ -131,7 +131,6 @@ namespace {
                 .value3 = {
                     .letterSpacing = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_LETTER_SPACING))
                 }
-    
             }
         },
         Ark_StyleOptions {
@@ -142,14 +141,14 @@ namespace {
                 .selector = 4, // Ark_TextShadowStyle
                 .value4 = {
                     .textShadow = {
-                        .array = new Ark_ShadowOptions[] {
+                        .array = new Ark_ShadowOptions[1] {
                             {
                                 .radius = Converter::ArkUnion<
                                     Ark_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_RADIUS),
                                 .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
                                 .color= Converter::ArkUnion<
                                     Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
-                                        std::get<1>(TEST_TEXT_SHADOW_COLOR)),
+                                    std::get<1>(TEST_TEXT_SHADOW_COLOR)),
                                 .offsetX = Converter::ArkUnion<
                                     Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
                                 .offsetY = Converter::ArkUnion<
@@ -182,7 +181,8 @@ namespace {
                 .value12 = {
                     .textBackgroundStyle = {
                         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_BGCL_COLOR)),
-                        .radius = Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(std::get<1>(TEST_BGCL_RADIUS))
+                        .radius = Converter::ArkUnion<
+                            Opt_Union_Dimension_BorderRadiuses, Ark_Length>(std::get<1>(TEST_BGCL_RADIUS))
                     }
                 }
             }
@@ -387,7 +387,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBaselineOffsetSpan
     auto baselineSpan = AceType::DynamicCast<BaselineOffsetSpan>(spans[0]);
     EXPECT_NE(baselineSpan, nullptr);
     EXPECT_EQ(baselineSpan->GetBaselineOffset().ToString(), std::get<0>(TEST_BASELINE_OFFSET));
-
 }
 
 /**
