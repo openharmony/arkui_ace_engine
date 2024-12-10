@@ -2885,4 +2885,32 @@ HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
     pattern->UnRegisterAfterLayoutCallback();
     EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), false);
 }
+
+/**
+ * @tc.name: TextShiftMultipleSelection001
+ * @tc.desc: test text_pattern.cpp shift multiple selection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern->HandleKeyEvent(keyEvent);
+    pattern->UpdateShiftFlag(keyEvent);
+
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    Offset offset(0.0, 0.0);
+    info.SetGlobalLocation(offset);
+    pattern->HandleMouseEvent(info);
+    pattern->ResetSelection();
+
+    EXPECT_EQ(pattern->IsSelected(), false);
+}
 } // namespace OHOS::Ace::NG
