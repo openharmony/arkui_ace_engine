@@ -19,7 +19,10 @@ module_output_path = "ace_engine_full/jsplugin"
 ohos_unittest("PluginFrontendDelegateTest") {
   module_out_path = module_output_path
 
-  sources = [ "plugin_frontend_delegate_test.cpp" ]
+  sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "plugin_frontend_delegate_test.cpp",
+  ]
 
   configs = [
     ":config_domnode_test",
@@ -48,6 +51,7 @@ ohos_unittest("PluginFrontendTest") {
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
   ]
 

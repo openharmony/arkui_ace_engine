@@ -20,6 +20,7 @@ ohos_unittest("SpringChainTest") {
   module_out_path = module_output_path
 
   sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/animation/mock_animation.cpp",
     "spring_chain_test.cpp",
 
@@ -214,7 +215,9 @@ ohos_unittest("SpringChainTest") {
     ":config_animation_test",
   ]
 
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  deps = [
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+  ]
 
   if (!is_ohos_standard_system) {
     external_deps = [

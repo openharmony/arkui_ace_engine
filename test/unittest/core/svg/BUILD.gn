@@ -115,6 +115,7 @@ ohos_unittest("parse_test_ng") {
   ]
 
   deps = [
+    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_mock",
@@ -304,6 +305,7 @@ ohos_unittest("svg_context_test_ng") {
   ]
 
   deps = [
+    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_mock",
@@ -370,6 +372,7 @@ ohos_unittest("svg_node_test_ng") {
   ]
 
   deps = [
+    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_mock",
