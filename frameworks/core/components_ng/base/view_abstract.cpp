@@ -3738,16 +3738,15 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::optional<std::s
     }
 }
 
-void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::optional<std::string>& inspectorId)
+void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
-    CHECK_NULL_VOID(frameNode);
-    CHECK_EQUAL_VOID(inspectorId.has_value(), false);
-    CHECK_EQUAL_VOID(inspectorId.value().empty(), true);
-    if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId.value()) {
-        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
-            frameNode->GetInspectorIdValue(), frameNode->GetId());
+    if (frameNode) {
+        if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+                frameNode->GetInspectorIdValue(), frameNode->GetId());
+        }
+        frameNode->UpdateInspectorId(inspectorId);
     }
-    frameNode->UpdateInspectorId(inspectorId.value());
 }
 
 void ViewAbstract::SetRestoreId(FrameNode* frameNode, int32_t restoreId)
@@ -3980,20 +3979,19 @@ void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEven
     gestureHub->SetMonopolizeEvents(monopolizeEvents);
 }
 
-void ViewAbstract::SetDraggable(FrameNode* frameNode, const std::optional<bool>& draggable)
+void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
 {
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    bool vDraggable = draggable.has_value() && draggable.value();
-    if (vDraggable) {
+    if (draggable) {
         if (!frameNode->IsDraggable()) {
             gestureHub->InitDragDropEvent();
         }
     } else {
         gestureHub->RemoveDragEvent();
     }
-    frameNode->SetCustomerDraggable(vDraggable);
+    frameNode->SetCustomerDraggable(draggable);
 }
 
 void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)

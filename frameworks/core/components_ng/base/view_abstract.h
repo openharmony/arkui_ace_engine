@@ -590,7 +590,7 @@ public:
         GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
     static void SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop);
-    static void SetInspectorId(FrameNode* frameNode, const std::optional<std::string>& inspectorId);
+    static void SetInspectorId(FrameNode* frameNode, const std::string& inspectorId);
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
@@ -619,7 +619,7 @@ public:
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
-    static void SetDraggable(FrameNode* frameNode, const std::optional<bool>& draggable);
+    static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetClickEffectLevel(FrameNode* frameNode, const std::optional<ClickEffectLevel>& level,
                                     const std::optional<float>& scaleValue);

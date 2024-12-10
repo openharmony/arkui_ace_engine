@@ -2967,7 +2967,8 @@ void KeyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<std::string>(*value) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
     ViewAbstract::SetInspectorId(frameNode, convValue);
 }
 void IdImpl(Ark_NativePointer node,
