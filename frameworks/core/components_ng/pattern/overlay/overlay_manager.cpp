@@ -4439,19 +4439,19 @@ void OverlayManager::PlaySheetTransition(
     sheetNode->OnAccessibilityEvent(
         isTransitionIn ? AccessibilityEventType::PAGE_OPEN : AccessibilityEventType::PAGE_CLOSE,
         WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
 
     // current sheet animation
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
-    option.SetFillMode(FillMode::FORWARDS);
+    sheetPattern->SetSheetAnimationOption(option);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateRenderGroup(true, false, true);
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
     CHECK_NULL_VOID(sheetParent);
