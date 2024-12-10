@@ -1059,13 +1059,14 @@ void MovingPhotoPattern::StartAnimation()
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption,
-        [imageRsContext, videoRsContext, repeatFlag = historyAutoAndRepeatLevel_]() {
+        [imageRsContext, videoRsContext, flag = historyAutoAndRepeatLevel_]() {
             imageRsContext->UpdateOpacity(0.0);
-            imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-            if (repeatFlag == PlaybackMode::REPEAT) {
+            if (flag == PlaybackMode::REPEAT || flag == PlaybackMode::AUTO) {
                 videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+                imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
             } else {
                 videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+                imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
             }
         }, animationOption.GetOnFinishEvent());
 }
@@ -1158,13 +1159,18 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
-    videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-    video->MarkModifyDone();
 
     imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     imageRsContext->UpdateOpacity(0.0);
-    imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    if (autoAndRepeatLevel_ == PlaybackMode::REPEAT || autoAndRepeatLevel_ == PlaybackMode::AUTO) {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+    } else {
+        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    }
     image->MarkModifyDone();
+    video->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption option;
     option.SetDuration(ANIMATION_DURATION_300);
