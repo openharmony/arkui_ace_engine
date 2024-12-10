@@ -3819,9 +3819,6 @@ void TextPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     CHECK_NULL_VOID(!textLayoutProperty->GetTextColorFlagByUserValue(false));
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    CHECK_NULL_VOID(!renderContext->HasForegroundColor());
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
@@ -3831,11 +3828,6 @@ void TextPattern::OnColorConfigurationUpdate()
         magnifierController_->SetColorModeChange(true);
     }
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
-}
-
-void TextPattern::OnForegroundColorUpdate(const Color& value)
-{
-    UpdateFontColor(value);
 }
 
 OffsetF TextPattern::GetDragUpperLeftCoordinates()
@@ -4617,12 +4609,6 @@ bool TextPattern::IsMarqueeOverflow() const
 
 void TextPattern::UpdateFontColor(const Color& value)
 {
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto& fontStyle = textLayoutProperty->GetOrCreateFontStyle();
-    CHECK_NULL_VOID(fontStyle);
-    CHECK_NULL_VOID(!fontStyle->CheckTextColor(value));
-    textLayoutProperty->UpdateTextColor(value);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
