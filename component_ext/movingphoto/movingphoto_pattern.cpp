@@ -1059,16 +1059,27 @@ void MovingPhotoPattern::StartAnimation()
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption,
-        [imageRsContext, videoRsContext, flag = historyAutoAndRepeatLevel_]() {
+        [imageRsContext, videoRsContext, flag = historyAutoAndRepeatLevel_, movingPhotoPattern]() {
             imageRsContext->UpdateOpacity(0.0);
-            if (flag == PlaybackMode::REPEAT || flag == PlaybackMode::AUTO) {
-                videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-                imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-            } else {
-                videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-                imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-            }
+            auto movingPhoto = movingPhotoPattern.Upgrade();
+            CHECK_NULL_VOID(movingPhoto);
+            movingPhoto->RsContextUpdateTransformScale(imageRsContext, videoRsContext, flag);
         }, animationOption.GetOnFinishEvent());
+}
+
+void MovingPhotoPattern::RsContextUpdateTransformScale(RefPtr<RenderContext>& imageRsContext,
+            RefPtr<RenderContext>& imageRsContext, PlaybackMode playbackMode))
+{
+    if (playbackMode == PlaybackMode::REPEAT) {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    } else if (playbackMode == PlaybackMode::AUTO) {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+    } else {
+        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    }
 }
 
 void MovingPhotoPattern::StopPlayback()
@@ -1162,13 +1173,7 @@ void MovingPhotoPattern::StopAnimation()
 
     imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     imageRsContext->UpdateOpacity(0.0);
-    if (autoAndRepeatLevel_ == PlaybackMode::REPEAT || autoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-    } else {
-        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-    }
+    RsContextUpdateTransformScale(imageRsContext, videoRsContext, autoAndRepeatLevel_);
     image->MarkModifyDone();
     video->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);
