@@ -204,6 +204,19 @@ namespace OHOS::Ace::NG::Converter {
         dst.value0 = ArkValue<Ark_Length>(src.first);
         dst.value1 = ArkValue<Ark_Length>(src.second);
     }
+    
+    inline void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
+    {
+        auto data = JsonUtil::ParseJsonString(src);
+        auto hour = data->GetValue("hour")->GetInt();
+        auto minute = data->GetValue("minute")->GetInt();
+        auto second = data->GetValue("second")->GetInt();
+        dst = {
+            .hour = ArkValue<Ark_Number>(hour),
+            .minute = ArkValue<Ark_Number>(minute),
+            .second = ArkValue<Ark_Number>(second),
+        };
+    }
 
     // SORTED_SECTION
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
@@ -267,6 +280,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    void AssignArkValue(Ark_TextPickerResult& dst, const std::string& src);
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);

@@ -1344,6 +1344,52 @@ PickerTextStyle Convert(const Ark_PickerTextStyle& src)
 }
 
 template<>
+PickerTime Convert(const Ark_Date& src)
+{
+    auto hours = src / 3600000;
+    auto minutes = (src % 3600000) / 60000 ;
+    auto seconds = (src % 3600000 % 60000) / 1000;
+    return PickerTime(hours, minutes, seconds);
+}
+
+template<>
+PickerTime Convert(const Ark_TimePickerResult& src)
+{
+    auto second = Converter::OptConvert<uint32_t>(src.second).value_or(0);
+    auto minute = Converter::OptConvert<uint32_t>(src.minute).value_or(0);
+    auto hour = Converter::OptConvert<uint32_t>(src.hour).value_or(0);
+    return PickerTime(hour, minute, second);
+}
+
+template<>
+ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
+{
+    ButtonInfo info;
+    info.type = OptConvert<ButtonType>(src.type);
+    info.buttonStyle = OptConvert<ButtonStyleMode>(src.style);
+    info.role = OptConvert<ButtonRole>(src.role);
+
+    if (auto fontSize = OptConvert<Dimension>(src.fontSize); fontSize) {
+        Validator::ValidatePositive(fontSize);
+        Validator::ValidateNonPercent(fontSize);
+        info.fontSize = fontSize;
+    }
+    info.fontColor = OptConvert<Color>(src.fontColor);
+    if (auto fontfamiliesOpt = OptConvert<FontFamilies>(src.fontFamily); fontfamiliesOpt) {
+        info.fontFamily = fontfamiliesOpt->families;
+    }
+    info.fontWeight = OptConvert<FontWeight>(src.fontWeight);
+    
+    info.backgroundColor = OptConvert<Color>(src.backgroundColor);
+    info.borderRadius = OptConvert<BorderRadiusProperty>(src.borderRadius);
+    if (auto isPrimary = OptConvert<bool>(src.primary); isPrimary) {
+        info.isPrimary = isPrimary.value();
+    }
+
+    return info;
+}
+
+template<>
 void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
 {
     if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
@@ -1480,5 +1526,96 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;
+}
+
+template<>
+PickerRangeType Convert(const Array_String& src)
+{
+    std::pair<bool, std::vector<NG::RangeContent>> dst;
+    std::vector<std::string> tmp;
+    tmp = Converter::Convert<std::vector<std::string>>(src);
+    for (const auto& str : tmp) {
+        NG::RangeContent content;
+        content.icon_ = "";
+        content.text_ = str;
+        dst.second.push_back(content);
+    }
+    dst.first = false;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Array_Array_String& src)
+{
+    std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
+    std::vector<std::vector<std::string>> tmp;
+    auto tmpVector = Converter::Convert<std::vector<std::vector<std::string>>>(src);
+    for (const auto& strVector : tmpVector) {
+        NG::TextCascadePickerOptions value;
+        for (const auto& str : strVector) {
+            value.rangeResult.push_back(str);
+        }
+        dst.second.push_back(value);
+    }
+    dst.first = false;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Ark_Resource& src)
+{
+    std::pair<bool, std::vector<NG::RangeContent>> dst;
+    auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
+    if (tmp) {
+        for (const auto& str : tmp.value()) {
+            NG::RangeContent content;
+            content.icon_ = "";
+            content.text_ = str;
+            dst.second.push_back(content);
+        }
+    }
+    dst.first = false;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Array_TextPickerRangeContent& src)
+{
+    std::pair<bool, std::vector<NG::RangeContent>> dst;
+    dst.second = Converter::Convert<std::vector<NG::RangeContent>>(src);
+    dst.first = true;
+    return dst;
+}
+
+template<>
+PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
+{
+    std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
+    dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);
+    dst.first = true;
+    return dst;
+}
+
+template<>
+RangeContent Convert(const Ark_TextPickerRangeContent& src)
+{
+    RangeContent dst;
+    auto iconOpt = OptConvert<std::string>(src.icon);
+    auto textOpt = OptConvert<std::string>(src.text);
+    dst.icon_ = iconOpt.value_or("");
+    dst.text_ = textOpt.value_or("");
+    return dst;
+}
+
+template<>
+TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src)
+{
+    TextCascadePickerOptions dst;
+    auto textOpt = OptConvert<std::string>(src.text);
+    dst.rangeResult.push_back(textOpt.value_or(""));
+    auto optionsOpt = OptConvert<std::vector<TextCascadePickerOptions>>(src.children);
+    std::vector<TextCascadePickerOptions> empty;
+    dst.children = optionsOpt.value_or(empty);
+    return dst;
 }
 } // namespace OHOS::Ace::NG::Converter
