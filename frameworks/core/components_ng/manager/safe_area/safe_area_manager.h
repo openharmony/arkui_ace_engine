@@ -257,6 +257,8 @@ public:
         keyboardChangeCbsConsideringUIExt_.erase(nodeId);
     }
 
+    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
+
 private:
     bool isAtomicService_ = false;
 

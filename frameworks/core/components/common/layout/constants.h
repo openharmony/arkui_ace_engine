@@ -852,6 +852,12 @@ enum class MarqueeUpdateStrategy : uint32_t {
     PRESERVE_POSITION,
 };
 
+enum class EdgeType {
+    MARGIN,
+    PADDING,
+    SAFE_AREA_PADDING,
+};
+
 enum class SafeAreaSyncType : uint32_t {
     SYNC_TYPE_NONE = 0,
     SYNC_TYPE_KEYBOARD,

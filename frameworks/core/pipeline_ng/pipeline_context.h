@@ -294,6 +294,9 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+
     void AddDragWindowVisibleTask(std::function<void()>&& task)
     {
         dragWindowVisibleCallback_ = std::move(task);
@@ -304,6 +307,7 @@ public:
     void FlushFreezeNode();
     void FlushDirtyPropertyNodes();
     void FlushDirtyNodeUpdate();
+    void FlushSafeAreaPaddingProcess();
 
     void SetRootRect(double width, double height, double offset) override;
 
