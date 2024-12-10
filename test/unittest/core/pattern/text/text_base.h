@@ -60,7 +60,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
-#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"

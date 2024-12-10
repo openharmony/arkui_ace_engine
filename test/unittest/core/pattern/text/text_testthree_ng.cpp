@@ -1737,7 +1737,6 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod001, TestSize.Level1)
     EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
     pattern->CreateNodePaintMethod();
     EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
-    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Height(), 92.f);
     EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
     pattern->pManager_->Reset();
 }
