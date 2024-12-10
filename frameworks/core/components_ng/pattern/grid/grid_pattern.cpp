@@ -43,6 +43,12 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
     std::vector<std::string> rows;
     StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
+
+    // When rowsTemplate and columnsTemplate is both not setting, use adaptive layout algorithm.
+    if (rows.empty() && cols.empty()) {
+        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
+    }
+
     auto crossCount = cols.empty() ? Infinity<int32_t>() : static_cast<int32_t>(cols.size());
     auto mainCount = rows.empty() ? Infinity<int32_t>() : static_cast<int32_t>(rows.size());
     if (!gridLayoutProperty->IsVertical()) {
@@ -55,11 +61,6 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
     if (!rows.empty() && !cols.empty()) {
         return MakeRefPtr<GridLayoutAlgorithm>(info_, crossCount, mainCount);
-    }
-
-    // When rowsTemplate and columnsTemplate is both not setting, use adaptive layout algorithm.
-    if (rows.empty() && cols.empty()) {
-        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
