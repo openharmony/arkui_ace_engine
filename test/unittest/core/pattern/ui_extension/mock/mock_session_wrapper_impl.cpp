@@ -244,4 +244,13 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 {
     return 1;
 }
+
+uint32_t SessionWrapperImpl::GetReasonDump() const
+{
+    return 1;
+}
+
+void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+}
 } // namespace OHOS::Ace::NG

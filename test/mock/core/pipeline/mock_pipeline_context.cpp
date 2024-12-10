@@ -857,6 +857,11 @@ bool PipelineBase::HasFloatTitle() const
     return true;
 }
 
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
@@ -923,5 +928,9 @@ void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
 void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
+
+void NG::PipelineContext::DumpUIExt() const
+{
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

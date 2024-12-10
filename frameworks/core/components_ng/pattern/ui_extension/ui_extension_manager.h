@@ -122,6 +122,8 @@ public:
 
     void AddAliveUIExtension(int32_t nodeId, const WeakPtr<SecurityUIExtensionPattern>& uiExtension);
 
+    void DumpUIExt();
+
 private:
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     WeakPtr<SecurityUIExtensionPattern> securityUiExtensionFocused_;

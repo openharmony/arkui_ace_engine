@@ -76,7 +76,8 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     return frameNode;
 }
 
-void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<FrameNode>& placeholderNode,
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
+    const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
     bool transferringCaller, bool densityDpi)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -86,7 +87,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, con
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedCheckWindowSceneId(true);
-    pattern->SetPlaceholderNode(placeholderNode);
+    pattern->SetPlaceholderMap(placeholderMap);
     pattern->UpdateWant(wantWrap);
     pattern->SetDensityDpi(densityDpi);
     stack->Push(frameNode);

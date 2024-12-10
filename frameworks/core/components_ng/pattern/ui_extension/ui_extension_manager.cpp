@@ -71,6 +71,13 @@ bool UIExtensionManager::OnBackPressed()
     return HandleUnfocusedModalUecBackPressed();
 }
 
+void UIExtensionManager::DumpUIExt()
+{
+    auto pattern = uiExtensionFocused_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DumpOthers();
+}
+
 bool UIExtensionManager::HandleUnfocusedModalUecBackPressed()
 {
     RefPtr<SessionWrapper> session = nullptr;

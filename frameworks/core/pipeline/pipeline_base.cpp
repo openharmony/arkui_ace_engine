@@ -502,6 +502,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     // the first param is the key word of dump.
     if (params[0] == "-memory") {
         MemoryMonitor::GetInstance().Dump();
+        DumpUIExt();
         return true;
     }
     if (params[0] == "-jscrash") {
@@ -519,6 +520,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     ContainerScope scope(instanceId_);
     if (params[0] == "-frontend") {
         DumpFrontend();
+        DumpUIExt();
         return true;
     }
     return OnDumpInfo(params);
@@ -827,6 +829,59 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
         return;
     }
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
+}
+
+bool PipelineBase::FireUIExtensionEventValid()
+{
+    if (!uiExtensionEventCallback_ || !IsFocusWindowIdSetted()) {
+        return false;
+    }
+    return true;
+}
+
+void PipelineBase::SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback)
+{
+    ACE_FUNCTION_TRACE();
+    uiExtensionEventCallback_ = callback;
+}
+
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    ACE_SCOPED_TRACE("AddUIExtensionCallbackEvent event[%u]", static_cast<uint32_t>(eventId));
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
+void PipelineBase::FireAllUIExtensionEvents()
+{
+    if (!FireUIExtensionEventValid() || uiExtensionEvents_.empty()) {
+        return;
+    }
+    std::vector<uint32_t> eventIds;
+    for (auto it = uiExtensionEvents_.begin(); it != uiExtensionEvents_.end();) {
+        eventIds.push_back(static_cast<uint32_t>(it->eventId));
+        if (!it->repeat) {
+            it = uiExtensionEvents_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto id : eventIds) {
+        FireUIExtensionEventInner(id);
+    }
+}
+
+void PipelineBase::FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId)
+{
+    if (!FireUIExtensionEventValid()) {
+        return;
+    }
+    FireUIExtensionEventInner(static_cast<uint32_t>(eventId));
+}
+
+void PipelineBase::FireUIExtensionEventInner(uint32_t eventId)
+{
+    auto callback = uiExtensionEventCallback_;
+    callback(eventId);
 }
 
 void PipelineBase::SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback)

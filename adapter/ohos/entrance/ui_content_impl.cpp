@@ -95,6 +95,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -2547,6 +2548,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
+        if (container->IsUIExtensionWindow()) {
+            pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
+        }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
@@ -2554,6 +2558,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
             "ArkUIPromiseViewportConfig");
     } else {
+        if (container->IsUIExtensionWindow()) {
+            pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
+        }
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
     viewportConfigMgr_->StoreConfig(aceViewportConfig);
@@ -2726,6 +2733,13 @@ void UIContentImpl::NotifyRotationAnimationEnd()
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    std::string currentPid = std::to_string(getpid());
+    for (auto param : params) {
+        if (param == currentPid) {
+            LOGE("DumpInfo pid has appeared");
+            return;
+        }
+    }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
