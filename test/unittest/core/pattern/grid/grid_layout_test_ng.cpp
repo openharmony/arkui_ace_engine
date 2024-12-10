@@ -458,4 +458,88 @@ HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, GRID_HEIGHT - padding));
 }
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest001
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest001, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::COLUMN);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest002
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest002, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::ROW);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest003
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest003, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest004
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest004, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
 } // namespace OHOS::Ace::NG
