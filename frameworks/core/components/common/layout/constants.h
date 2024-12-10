@@ -185,6 +185,7 @@ enum class AccessibilityRoleType {
     WATER_FLOW = 121,
     WEB = 122,
     XCOMPONENT = 123,
+    ROLE_NONE = 124,
 };
 
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
