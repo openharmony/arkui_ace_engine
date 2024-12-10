@@ -20,6 +20,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
@@ -132,6 +133,36 @@ public:
 
     bool IsLargeSize(const RefPtr<CalendarTheme>& theme);
 
+    void InitFoldState()
+    {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        container->InitIsFoldable();
+        if (container->IsFoldable()) {
+            currentFoldStatus_ = container->GetCurrentFoldStatus();
+        }
+    }
+
+    void FireIsFoldStatusChanged()
+    {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (!container->IsFoldable()) {
+            return;
+        }
+        auto foldStatus = container->GetCurrentFoldStatus();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx();
+        if (foldStatus != currentFoldStatus_ && colSpace_ != colSpace && monthState_ == MonthState::CUR_MONTH) {
+            currentFoldStatus_ = foldStatus;
+            InitCalendarVirtualNode();
+            SetFocusNode(focusedCalendarDay_.index, true);
+        }
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;
@@ -173,9 +204,11 @@ private:
     RefPtr<FrameNode> lineNode_;
     double dayHeight_ = 0;
     double dayWidth_ = 0;
+    double colSpace_ = 0;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     std::string selectedTxt_;
     std::string disabledDesc_;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     std::vector<RefPtr<AccessibilityProperty>> accessibilityPropertyVec_;
     std::vector<RefPtr<FrameNode>> buttonAccessibilityNodeVec_;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
