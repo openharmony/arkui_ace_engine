@@ -1267,7 +1267,7 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidEdgesBottomValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setOffsetTestValidLocalizedEdgesValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setOffsetTestValidLocalizedEdgesValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDirection, nullptr);
     ASSERT_NE(modifier_->setOffset, nullptr);

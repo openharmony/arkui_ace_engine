@@ -303,8 +303,13 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
                 params_.emplace_back(resource.params.value.array[i].chars);
             }
         }
-
         themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
+        if (!themeConstants_) {
+            auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+            auto themeManager = context->GetThemeManager();
+            CHECK_NULL_VOID(themeManager);
+            themeConstants_ = themeManager->GetThemeConstants(bundleName_.c_str(), moduleName_.c_str());
+        }
     } else {
         LOGE("ResourceConverter illegal id tag: id.tag = %{public}d", resource.id.tag);
     }
@@ -1079,6 +1084,16 @@ PaddingProperty Convert(const Ark_LocalizedPadding& src)
 }
 
 template<>
+PaddingProperty Convert(const Ark_LengthMetrics& src)
+{
+    PaddingProperty dst;
+    if (auto padding = Converter::OptConvert<CalcLength>(src); padding.has_value()) {
+        dst.SetEdges(padding.value());
+    }
+    return dst;
+}
+
+template<>
 AnimateParam Convert(const Ark_AnimateParam& src)
 {
     AnimateParam option;
@@ -1123,6 +1138,17 @@ BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 
 template<>
 BorderRadiusProperty Convert(const Ark_Length& src)
+{
+    BorderRadiusProperty dst;
+    dst.multiValued = false;
+    if (auto radius = Converter::Convert<Dimension>(src); !radius.IsNegative()) {
+        dst.SetRadius(radius);
+    }
+    return dst;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderRadiusProperty dst;
     dst.multiValued = false;
@@ -1360,6 +1386,7 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
         dst = DATE_MIN;
     }
 }
+
 
 template<>
 LightSource Convert(const Ark_LightSource& src)

@@ -1155,14 +1155,12 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1ScaleTest, TestSize.Level1)
 
     for (const auto& expectedX : NUMBER_ALPHA_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_ALPHA_TEST_PLAN) {
-            auto param = std::make_shared<OHOS::Ace::TransformParam>();
-            param->scaleX = expectedX;
-            param->scaleY = expectedY;
-            param->skewX = valD;
-            param->skewY = valD;
-            param->translateX = valD;
-            param->translateY = valD;
-            peer->SetTransformParam(param);
+            peer->transform.scaleX = expectedX;
+            peer->transform.scaleY = expectedY;
+            peer->transform.skewX = valD;
+            peer->transform.skewY = valD;
+            peer->transform.translateX = valD;
+            peer->transform.translateY = valD;
 
             holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);
@@ -1201,14 +1199,12 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1SkewTest, TestSize.Level1)
 
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto param = std::make_shared<OHOS::Ace::TransformParam>();
-            param->scaleX = valS;
-            param->scaleY = valS;
-            param->skewX = expectedX;
-            param->skewY = expectedY;
-            param->translateX = valD;
-            param->translateY = valD;
-            peer->SetTransformParam(param);
+            peer->transform.scaleX = valS;
+            peer->transform.scaleY = valS;
+            peer->transform.skewX = expectedX;
+            peer->transform.skewY = expectedY;
+            peer->transform.translateX = valD;
+            peer->transform.translateY = valD;
 
             holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);
@@ -1243,14 +1239,12 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1TranslateTest, TestSize.Level1
 
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto param = std::make_shared<OHOS::Ace::TransformParam>();
-            param->scaleX = valS;
-            param->scaleY = valS;
-            param->skewX = valD;
-            param->skewY = valD;
-            param->translateX = expectedX;
-            param->translateY = expectedY;
-            peer->SetTransformParam(param);
+            peer->transform.scaleX = valS;
+            peer->transform.scaleY = valS;
+            peer->transform.skewX = valD;
+            peer->transform.skewY = valD;
+            peer->transform.translateX = expectedX;
+            peer->transform.translateY = expectedY;
 
             holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);

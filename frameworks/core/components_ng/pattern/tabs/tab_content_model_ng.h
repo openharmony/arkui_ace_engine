@@ -75,6 +75,8 @@ public:
     static void SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign);
     static void SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible);
     static void SetIconStyle(FrameNode* node, const std::optional<IconStyle>& iconStyle);
+    static void SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow);
+    static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

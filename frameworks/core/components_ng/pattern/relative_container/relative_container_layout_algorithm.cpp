@@ -20,7 +20,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float HALF_MULTIPLY = 0.5f;
 constexpr float DEFAULT_WEIGHT = 0.0f;
 const std::string CONCAT_ID_PREFIX = "@concat";
@@ -429,7 +428,7 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const ChildMeasureWr
     ChainInfo chainInfo = flexItem->GetHorizontalChainStyleValue();
     CHECK_NULL_VOID(chainInfo.direction.has_value());
     CHECK_NULL_VOID(chainInfo.style.has_value());
-    BiasPair bias(0.5f, 0.5f);
+    BiasPair bias(DEFAULT_BIAS, DEFAULT_BIAS);
     float totalChainWeight = DEFAULT_WEIGHT;
     if (flexItem->HasBias()) {
         bias = flexItem->GetBiasValue();
@@ -517,7 +516,7 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const ChildMeasureWrap
     const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
     AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue();
     ChainInfo chainInfo = flexItem->GetVerticalChainStyleValue();
-    BiasPair bias(0.5f, 0.5f);
+    BiasPair bias(DEFAULT_BIAS, DEFAULT_BIAS);
     float totalChainWeight = DEFAULT_WEIGHT;
     CHECK_NULL_VOID(chainInfo.direction.has_value());
     CHECK_NULL_VOID(chainInfo.style.has_value());

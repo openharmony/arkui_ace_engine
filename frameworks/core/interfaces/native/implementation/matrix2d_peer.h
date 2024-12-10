@@ -12,23 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/render/adapter/matrix2d.h"
+#include "core/pipeline/pipeline_base.h"
 
 struct Matrix2DPeer {
-public:
-    const std::shared_ptr<OHOS::Ace::TransformParam>& GetTransformParam() const
+    Matrix2DPeer() = default;
+    explicit Matrix2DPeer(OHOS::Ace::CanvasUnit value)
     {
-        return param_;
+        Matrix2DPeer();
+        unit = value;
     }
-    void SetTransformParam(const std::shared_ptr<OHOS::Ace::TransformParam>& param)
+    ~Matrix2DPeer()  = default;
+
+    double GetDensity() const
     {
-        param_ = param;
+        double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
+        return ((unit == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
     }
 
-private:
-    std::shared_ptr<OHOS::Ace::TransformParam> param_ = nullptr;
+    OHOS::Ace::TransformParam transform;
+    OHOS::Ace::CanvasUnit unit = OHOS::Ace::CanvasUnit::DEFAULT;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H

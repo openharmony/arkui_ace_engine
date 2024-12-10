@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "matrix2d_peer.h"
 
@@ -36,21 +37,37 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, nullptr);
+    Matrix2D::Identity(peer->transform);
+    LOGE("ARKOALA Matrix2DAccessor::IdentityImpl return type Ark_NativePointer "
+        "should be replaced with a Matrix2DPeer pointer type.");
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, nullptr);
+    bool retValue = NG::Matrix2D::Invert(peer->transform);
+    if (!retValue) {
+        peer->transform.scaleX = NAN;
+        peer->transform.scaleY = NAN;
+        peer->transform.skewX = NAN;
+        peer->transform.skewY = NAN;
+        peer->transform.translateX = NAN;
+        peer->transform.translateY = NAN;
+    }
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
                                const Opt_Matrix2D* other)
 {
+    LOGE("ARKOALA Matrix2DAccessor::MultiplyImpl is not implemented as deprecated.");
     return 0;
 }
 Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer,
                               const Opt_Number* rx,
                               const Opt_Number* ry)
 {
+    LOGE("ARKOALA Matrix2DAccessor::Rotate0Impl is not implemented as deprecated.");
     return 0;
 }
 Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
@@ -58,31 +75,66 @@ Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
                               const Opt_Number* rx,
                               const Opt_Number* ry)
 {
+    LOGE("ARKOALA Matrix2DAccessor::Rotate1Impl is not implemented as deprecated.");
     return 0;
 }
 Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
                                 const Opt_Number* tx,
                                 const Opt_Number* ty)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(tx, nullptr);
+    CHECK_NULL_RETURN(ty, nullptr);
+    auto optX = Converter::OptConvert<float>(*tx);
+    auto optY = Converter::OptConvert<float>(*ty);
+    double transX = static_cast<double>(optX.has_value() ? *optX : 0);
+    double transY = static_cast<double>(optY.has_value() ? *optY : 0);
+    double density = peer->GetDensity();
+    transX *= density;
+    transY *= density;
+    NG::Matrix2D::Translate(peer->transform, transX, transY);
+    LOGE("ARKOALA Matrix2DAccessor::TranslateImpl return type Ark_NativePointer "
+        "should be replaced with a Matrix2DPeer pointer type.");
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,
                             const Opt_Number* sx,
                             const Opt_Number* sy)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(sx, nullptr);
+    CHECK_NULL_RETURN(sy, nullptr);
+    auto optX = Converter::OptConvert<float>(*sx);
+    auto optY = Converter::OptConvert<float>(*sy);
+    double scaleX = static_cast<double>(optX.has_value() ? *optX : 1);
+    double scaleY = static_cast<double>(optY.has_value() ? *optY : 1);
+    NG::Matrix2D::Scale(peer->transform, scaleX, scaleY);
+    LOGE("ARKOALA Matrix2DAccessor::ScaleImpl return type Ark_NativePointer "
+        "should be replaced with a Matrix2DPeer type.");
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_Int32 GetScaleXImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    LOGE("ARKOALA Matrix2DAccessor::GetScaleXImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->transform.scaleX));
 }
 void SetScaleXImpl(Matrix2DPeer* peer,
                    const Ark_Number* scaleX)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(scaleX);
+    auto opt = Converter::OptConvert<float>(*scaleX);
+    CHECK_NULL_VOID(opt);
+    peer->transform.scaleX = static_cast<double>(*opt);
 }
 Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    LOGE("ARKOALA Matrix2DAccessor::GetRotateYImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->transform.skewY));
 }
 void SetRotateYImpl(Matrix2DPeer* peer,
                     const Ark_Number* rotateY)
@@ -90,7 +142,10 @@ void SetRotateYImpl(Matrix2DPeer* peer,
 }
 Ark_Int32 GetRotateXImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    LOGE("ARKOALA Matrix2DAccessor::GetRotateXImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->transform.skewX));
 }
 void SetRotateXImpl(Matrix2DPeer* peer,
                     const Ark_Number* rotateX)
@@ -98,7 +153,10 @@ void SetRotateXImpl(Matrix2DPeer* peer,
 }
 Ark_Int32 GetScaleYImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    LOGE("ARKOALA Matrix2DAccessor::GetScaleYImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->transform.scaleY));
 }
 void SetScaleYImpl(Matrix2DPeer* peer,
                    const Ark_Number* scaleY)
@@ -106,7 +164,10 @@ void SetScaleYImpl(Matrix2DPeer* peer,
 }
 Ark_Int32 GetTranslateXImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    LOGE("ARKOALA Matrix2DAccessor::GetTranslateXImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->transform.translateX));
 }
 void SetTranslateXImpl(Matrix2DPeer* peer,
                        const Ark_Number* translateX)
@@ -114,7 +175,10 @@ void SetTranslateXImpl(Matrix2DPeer* peer,
 }
 Ark_Int32 GetTranslateYImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    LOGE("ARKOALA Matrix2DAccessor::GetTranslateYImpl return type Ark_Int32 "
+        "should be replaced with a Ark_Number type.");
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(peer->transform.translateY));
 }
 void SetTranslateYImpl(Matrix2DPeer* peer,
                        const Ark_Number* translateY)

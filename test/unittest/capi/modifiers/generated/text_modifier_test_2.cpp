@@ -1200,7 +1200,7 @@ HWTEST_F(TextModifierTest, setLineBreakStrategyTestLineBreakStrategyInvalidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setCaretColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1214,7 +1214,7 @@ HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setCaretColorTestCaretColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueCaretColor;
 
@@ -1253,7 +1253,7 @@ HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setCaretColorTestCaretColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueCaretColor;
 
@@ -1288,7 +1288,7 @@ HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorInvalidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setSelectedBackgroundColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1303,13 +1303,13 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestDefaultValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColorValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setSelectedBackgroundColorTestSelectedBackgroundColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueSelectedBackgroundColor;
 
     // Initial setup
     initValueSelectedBackgroundColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedBackgroundColor](
                           const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
@@ -1323,16 +1323,16 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgr
                                           ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20EnumValidValues) {
         checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20NumValidValues) {
         checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20ResValidValues) {
         checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20StrValidValues) {
         checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
 }
@@ -1342,13 +1342,13 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgr
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueSelectedBackgroundColor;
 
     // Initial setup
     initValueSelectedBackgroundColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedBackgroundColor](
                           const std::string& input, const Ark_ResourceColor& value) {
@@ -1364,11 +1364,11 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgr
             << ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureColorsAlpha20EnumInvalidValues) {
         checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsAlpha20StrInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));

@@ -392,6 +392,26 @@ void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src)
     }
 }
 
+void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
+{
+    switch (src) {
+        case Ace::SpanType::Font: dst = ARK_STYLED_STRING_KEY_FONT; break;
+        case Ace::SpanType::Decoration: dst = ARK_STYLED_STRING_KEY_DECORATION; break;
+        case Ace::SpanType::BaselineOffset: dst = ARK_STYLED_STRING_KEY_BASELINE_OFFSET; break;
+        case Ace::SpanType::LetterSpacing: dst = ARK_STYLED_STRING_KEY_LETTER_SPACING; break;
+        case Ace::SpanType::TextShadow: dst = ARK_STYLED_STRING_KEY_TEXT_SHADOW; break;
+        case Ace::SpanType::LineHeight: dst = ARK_STYLED_STRING_KEY_LINE_HEIGHT; break;
+        case Ace::SpanType::BackgroundColor: dst = ARK_STYLED_STRING_KEY_BACKGROUND_COLOR; break;
+        case Ace::SpanType::Url: dst = ARK_STYLED_STRING_KEY_URL; break;
+        case Ace::SpanType::Gesture: dst = ARK_STYLED_STRING_KEY_GESTURE; break;
+        case Ace::SpanType::ParagraphStyle: dst = ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE; break;
+        case Ace::SpanType::Image: dst = ARK_STYLED_STRING_KEY_IMAGE; break;
+        case Ace::SpanType::CustomSpan: dst = ARK_STYLED_STRING_KEY_CUSTOM_SPAN; break;
+        case Ace::SpanType::ExtSpan: dst = ARK_STYLED_STRING_KEY_USER_DATA; break;
+        default: LOGE("Unexpected enum value in SpanType: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
 {
     switch (src) {
