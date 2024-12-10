@@ -2262,7 +2262,7 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class tabStopModifier extends ModifierWithKey<boolean> {
+class TabStopModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -3892,9 +3892,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   tabStop(value: boolean): this {
     if (typeof value === 'boolean') {
-      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, value);
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, value);
     } else {
-      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, undefined);
     }
     return this;
   }
