@@ -688,4 +688,12 @@ void WaterFlowModelNG::SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode m
     CHECK_NULL_VOID(pattern);
     pattern->SetLayoutMode(mode);
 }
+
+WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, WaterFlowLayoutMode::TOP_DOWN);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, WaterFlowLayoutMode::TOP_DOWN);
+    return pattern->GetLayoutMode();
+}
 } // namespace OHOS::Ace::NG
