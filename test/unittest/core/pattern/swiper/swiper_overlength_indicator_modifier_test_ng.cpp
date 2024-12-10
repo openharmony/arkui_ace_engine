@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 class SwiperOverLengthIndicatorModifierTestNg : public SwiperTestNg {
@@ -768,5 +769,33 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, StopAnimation001, TestSize.Lev
     EXPECT_FALSE(dotIndicatorModifier.blackPointsAnimEnd_);
     dotIndicatorModifier.StopAnimation(true);
     EXPECT_FALSE(dotIndicatorModifier.blackPointsAnimEnd_);
+}
+
+/**
+ * @tc.name: ChangeIndex001
+ * @tc.desc: Test change index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, ChangeIndex001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(true);
+    SwiperParameters swiperParameters;
+    swiperParameters.maxDisplayCountVal = std::make_optional<int32_t>(6);
+    model.SetDotIndicatorStyle(swiperParameters);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto modifier = indicatorPattern->overlongDotIndicatorModifier_;
+    FlushUITasks();
+    EXPECT_EQ(modifier->currentSelectedIndex_, 0);
+    EXPECT_EQ(modifier->currentOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+
+    layoutProperty_->UpdateIndex(5);
+    pattern_->OnModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(modifier->currentSelectedIndex_, 3);
+    EXPECT_EQ(modifier->currentOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT);
 }
 } // namespace OHOS::Ace::NG
