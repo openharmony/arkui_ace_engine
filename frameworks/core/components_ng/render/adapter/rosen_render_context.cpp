@@ -3492,6 +3492,8 @@ void RosenRenderContext::RecalculatePosition()
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
 {
     CHECK_NULL_VOID(rsNode_);
+    // When zindex is combined with transform/rotate, zindex has the action of controlling camera height
+    rsNode_->SetPositionZApplicableCamera3D(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN));
     rsNode_->SetPositionZ(static_cast<float>(value));
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
