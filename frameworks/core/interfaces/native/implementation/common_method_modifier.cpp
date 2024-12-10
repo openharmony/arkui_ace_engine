@@ -1090,7 +1090,7 @@ NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
     return NG::LinearGradientBlurPara(blurRadius, fractionStops, direction);
 }
 template<>
-    void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
+void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
 {
     switch (src) {
         case ARK_BLEND_APPLY_TYPE_FAST: dst = BlendApplyType::FAST; break;
@@ -1192,6 +1192,36 @@ template<>
     }
 }
 
+Ark_PreDragStatus ArkValue(const PreDragStatus& src)
+{
+    Ark_PreDragStatus dst;
+    switch (src) {
+        case PreDragStatus::ACTION_DETECTING_STATUS:
+            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_ACTION_DETECTING_STATUS;
+            break;
+        case PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION:
+            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_READY_TO_TRIGGER_DRAG_ACTION;
+            break;
+        case PreDragStatus::PREVIEW_LIFT_STARTED:
+            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LIFT_STARTED;
+            break;
+        case PreDragStatus::PREVIEW_LIFT_FINISHED:
+            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LIFT_FINISHED;
+            break;
+        case PreDragStatus::PREVIEW_LANDING_STARTED:
+            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LANDING_STARTED;
+            break;
+        case PreDragStatus::PREVIEW_LANDING_FINISHED:
+            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LANDING_FINISHED;
+            break;
+        case PreDragStatus::ACTION_CANCELED_BEFORE_DRAG:
+            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_ACTION_CANCELED_BEFORE_DRAG;
+            break;
+        default:
+            break;
+    }
+    return dst;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -2706,6 +2736,9 @@ void OnDragStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnDragStart(frameNode, convValue);
+    LOGE("DragDropInfo contains pixelMap which is not supported by C-API. "
+        "The OnDragStartFunc callback returns a value of type DragDropInfo."
+        " Callbacks with return values are not supported.");
 }
 void OnDragEnterImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Void* value)
@@ -2713,8 +2746,15 @@ void OnDragEnterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDragEnter(frameNode, convValue);
+    /*
+    typedef struct Callback_DragEvent_String_Void {
+        Ark_CallbackResource resource;
+        void (*call)(const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams);
+    } Callback_DragEvent_String_Void;
+    */
+    auto convValue = Converter::OptConvert<type_name>(*value);
+    using OnDragEnterFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+    ViewAbstract::SetOnDragEnter(frameNode, convValue);
 }
 void OnDragMoveImpl(Ark_NativePointer node,
                     const Callback_DragEvent_String_Void* value)
@@ -2785,8 +2825,10 @@ void OnPreDragImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnPreDrag(frameNode, convValue);
+    auto OnPreDrag = [callback = CallbackHelper(*value)](const PreDragStatus info) {
+        callback.Invoke(Converter::ArkValue<Ark_PreDragStatus>(info));
+    };
+    ViewAbstract::SetOnPreDrag(frameNode, OnPreDrag);
 }
 void LinearGradientImpl(Ark_NativePointer node,
                         const Ark_Type_CommonMethod_linearGradient_value* value)
