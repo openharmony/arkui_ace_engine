@@ -110,7 +110,6 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
             napi_typeof(env, returnValue, &valueType);
             if (valueType != napi_object) {
                 LOGE("parse result fail");
-                napi_delete_async_work(env, asyncContext->work);
                 delete asyncContext;
                 return;
             }
