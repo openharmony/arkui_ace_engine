@@ -19,6 +19,12 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+ArkUI_Int32 GetContentClip(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    return static_cast<int32_t>(ScrollableModelNG::GetContentClip(frameNode));
+}
+
 void SetContentClip(ArkUINodeHandle node, ArkUI_Int32 mode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -128,6 +134,7 @@ const ArkUIScrollableModifier* GetScrollableModifier()
 {
     constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIScrollableModifier modifier = {
+        .getContentClip = GetContentClip,
         .setContentClip = SetContentClip,
         .resetContentClip = ResetContentClip,
         .getEdgeEffect = GetEdgeEffect,
