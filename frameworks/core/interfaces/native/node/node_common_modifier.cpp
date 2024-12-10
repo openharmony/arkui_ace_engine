@@ -3580,18 +3580,31 @@ void ResetForegroundBrightness(ArkUINodeHandle node)
 
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
 {
-    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
-        previewOption.ResetDragPreviewMode();
-        isAuto = true;
-        return;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-        previewOption.isScaleEnabled = false;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
-        previewOption.isDefaultShadowEnabled = true;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
-        previewOption.isDefaultRadiusEnabled = true;
+    switch (modeValue) {
+        case static_cast<int32_t>(NG::DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            isAuto = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            isAuto = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            isAuto = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            isAuto = false;
+            break;
+        default:
+            isAuto = false;
+            break;
     }
-    isAuto = false;
 }
 
 void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
@@ -3627,8 +3640,8 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, true, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(
+        frameNode, { true, false, false, false, false, false, true, false, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(

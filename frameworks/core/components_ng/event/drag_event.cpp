@@ -2073,7 +2073,8 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {imageNode, offset, width, height, width / 2.0f, height / 2.0f};
+    gatherNodeChildInfo = { imageNode, offset, width, height, width / 2.0f, height / 2.0f,
+        WeakPtr<FrameNode>(frameNode) };
     return imageNode;
 }
 
