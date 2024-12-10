@@ -5103,6 +5103,20 @@ typedef enum {
     NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
 
     /**
+     * @brief Sets the layout mode for this <b>WaterFlow</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: layout mode. The parameter type is {@link ArkUI_WaterFlowLayoutMode}.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: layout mode. The parameter type is {@link ArkUI_WaterFlowLayoutMode}.
+     *
+     * @since 16
+     */
+    NODE_WATER_FLOW_LAYOUT_MODE,
+
+    /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
      * default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent

@@ -606,6 +606,13 @@ void SetWaterFlowScroller(ArkUINodeHandle node, ArkUINodeHandle controller, ArkU
     WaterFlowModelNG::SetScroller(frameNode, scrollController, scrollProxy);
 }
 
+ArkUI_Int32 GetWaterFlowLayoutMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return static_cast<int32_t>(WaterFlowModelNG::GetLayoutMode(frameNode));
+}
+
 void SetWaterFlowLayoutMode(ArkUINodeHandle node, ArkUI_Uint32 layoutMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -722,6 +729,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .resetWaterFlowFlingSpeedLimit = ResetWaterFlowFlingSpeedLimit,
         .getScrollController = GetScrollController,
         .setWaterFlowScroller = SetWaterFlowScroller,
+        .getWaterFlowLayoutMode = GetWaterFlowLayoutMode,
         .setWaterFlowLayoutMode = SetWaterFlowLayoutMode,
         .resetWaterFlowLayoutMode = ResetWaterFlowLayoutMode,
         .resetWaterFlowSections = ResetWaterFlowSections,
