@@ -6869,7 +6869,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         }
     }
 
-    if (currentMouseStyle_ == MouseFormat::DEFAULT) {
+    if (currentMouseStyle_ == MouseFormat::DEFAULT && !IsDragging()) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
         currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
