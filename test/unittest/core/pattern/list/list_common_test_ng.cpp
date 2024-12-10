@@ -1728,6 +1728,9 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "2", "0" }));
+    auto fromTo = lazyForEachNode->builder_->moveFromTo_.value();
+    EXPECT_EQ(fromTo.first, 0);
+    EXPECT_EQ(fromTo.second, 2);
 
     /**
      * @tc.steps: step3. Drag right-up delta > half size
@@ -1739,6 +1742,9 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "0", "2" }));
+    fromTo = lazyForEachNode->builder_->moveFromTo_.value();
+    EXPECT_EQ(fromTo.first, 0);
+    EXPECT_EQ(fromTo.second, 1);
 
     /**
      * @tc.steps: step4. Drag left delta > itemWidth/2
@@ -1750,12 +1756,16 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
     dragManager->HandleOnItemDragUpdate(info);
     FlushUITasks();
     EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "0", "1", "2" }));
+    fromTo = lazyForEachNode->builder_->moveFromTo_.value();
+    EXPECT_EQ(fromTo.first, 0);
+    EXPECT_EQ(fromTo.second, 0);
 
     /**
      * @tc.steps: step5. Drag end
      * @tc.expected: No trigger onMoveEvent
      */
     dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(lazyForEachNode->builder_->moveFromTo_, std::nullopt);
     EXPECT_EQ(actualFrom, -1);
     EXPECT_EQ(actualTo, -1);
 }
