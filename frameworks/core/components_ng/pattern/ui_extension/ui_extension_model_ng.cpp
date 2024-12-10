@@ -267,6 +267,7 @@ void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Wa
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnResultCallback(std::move(onResult));
 }
 
@@ -274,6 +275,7 @@ void UIExtensionModelNG::SetOnResult(FrameNode* frameNode, std::function<void(in
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnResultCallback(std::move(onResult));
 }
 
@@ -290,6 +292,7 @@ void UIExtensionModelNG::SetOnTerminated(
     }
 
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnTerminatedCallback(std::move(onTerminated));
 }
 
@@ -305,6 +308,7 @@ void UIExtensionModelNG::SetOnTerminated(FrameNode* frameNode,
     }
 
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnTerminatedCallback(std::move(onTerminated));
 }
 
@@ -321,6 +325,7 @@ void UIExtensionModelNG::SetOnReceive(
     }
 
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnReceiveCallback(std::move(onReceive));
 }
 
@@ -337,6 +342,7 @@ void UIExtensionModelNG::SetOnReceive(FrameNode* frameNode,
     }
 
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnReceiveCallback(std::move(onReceive));
 }
 
