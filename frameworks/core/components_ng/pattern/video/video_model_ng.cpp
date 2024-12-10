@@ -73,6 +73,15 @@ void VideoModelNG::SetSrc(const std::string& src, const std::string& bundleName,
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo);
 }
 
+void VideoModelNG::SetShowFirstFrame(bool showFirstFrame)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->UpdateShowFirstFrame(showFirstFrame);
+}
+
 void VideoModelNG::SetProgressRate(double progressRate)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
