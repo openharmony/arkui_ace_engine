@@ -72,6 +72,11 @@ template("ace_core_interfaces_native") {
       external_deps += [ "hilog:libhilog" ]
     }
 
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      defines += [ "PLUGIN_COMPONENT_SUPPORTED" ]
+    }
+
     external_deps += [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
