@@ -53,6 +53,7 @@ const LinearMapNode<RefPtr<Curve>> CURVE_MAP[] = {
     { "linear", Curves::LINEAR },
 };
 
+static constexpr int ARGS_LENGTH = 2;
 constexpr double DEFAULT_DURATION = 1000.0;
 constexpr ScrollAlign ALIGN_TABLE[] = {
     ScrollAlign::START,
@@ -76,6 +77,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
     JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScroller::IsAtEnd);
     JSClass<JSScroller>::CustomMethod("getItemRect", &JSScroller::GetItemRect);
+    JSClass<JSScroller>::CustomMethod("getItemIndex", &JSScroller::GetItemIndex);
     JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
@@ -358,5 +360,43 @@ void JSScroller::GetItemRect(const JSCallbackInfo& args)
     } else {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
     }
+}
+
+void JSScroller::GetItemIndex(const JSCallbackInfo& args)
+{
+    if (args.Length() != ARGS_LENGTH) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter length failed.");
+        return;
+    }
+
+    Dimension xOffset;
+    Dimension yOffset;
+    if (!ConvertFromJSValue(args[0], xOffset) ||
+        !ConvertFromJSValue(args[1], yOffset)) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+
+    ContainerScope scope(instanceId_);
+    auto deltaX = xOffset.Value();
+    auto deltaY = yOffset.Value();
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            deltaX = context->NormalizeToPx(xOffset);
+            deltaY = context->NormalizeToPx(yOffset);
+        }
+    }
+    int32_t itemIndex = scrollController->GetItemIndex(deltaX, deltaY);
+    auto retVal = JSRef<JSVal>::Make(ToJSValue(itemIndex));
+    args.SetReturnValue(retVal);
+
+    return;
 }
 } // namespace OHOS::Ace::Framework

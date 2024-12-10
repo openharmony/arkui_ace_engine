@@ -177,6 +177,10 @@ public:
         return positionController_;
     }
     
+    int32_t ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
+    int32_t ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
     void TriggerModifyDone();
 
     float GetTotalHeight() const override;
@@ -193,7 +197,11 @@ public:
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
+    ListItemIndex GetItemIndexInGroup(double x, double y) const;
+    bool GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode, int32_t& index,
+        ListItemIndex& itemIndex) const;
     void OnAnimateStop() override;
     float GetMainContentSize() const override
     {

@@ -490,6 +490,11 @@ public:
         return Rect();
     };
 
+    virtual int32_t GetItemIndex(double x, double y) const
+    {
+        return -1;
+    }
+
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     {
         edgeEffect_ = edgeEffect;
