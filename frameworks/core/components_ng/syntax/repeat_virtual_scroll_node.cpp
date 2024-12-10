@@ -327,6 +327,8 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         "needBuild==true, node: %{public}s .", static_cast<int32_t>(GetId()), static_cast<int32_t>(index),
         key->c_str(), caches_.DumpUINode(node4Index).c_str());
 
+    node4Index->UpdateThemeScopeId(GetThemeScopeId());
+
     if (isActive_) {
         node4Index->SetJSViewActive(true);
     }
