@@ -1107,7 +1107,7 @@ void SetTextOnCopy(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onCopy = reinterpret_cast<std::function<void(const std::u16string&)>*>(callback);
         TextModelNG::SetOnCopy(frameNode, std::move(*onCopy));
     } else {
         TextModelNG::SetOnCopy(frameNode, nullptr);

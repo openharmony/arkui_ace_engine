@@ -55,7 +55,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
-    RefPtr<MutableSpanString> CreateTextStyledString(const std::string& content);
+    RefPtr<MutableSpanString> CreateTextStyledString(const std::u16string& content);
     RefPtr<MutableSpanString> CreateImageStyledString();
     RefPtr<MutableSpanString> CreateCustomSpanStyledString();
     void SetTypingStyle();
@@ -91,7 +91,7 @@ void RichEditorContentModifierTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-RefPtr<MutableSpanString> RichEditorContentModifierTestNg::CreateTextStyledString(const std::string& content)
+RefPtr<MutableSpanString> RichEditorContentModifierTestNg::CreateTextStyledString(const std::u16string& content)
 {
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();

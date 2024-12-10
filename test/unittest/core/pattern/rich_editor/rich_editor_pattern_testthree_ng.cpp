@@ -406,7 +406,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, ClearContent001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     auto placeholderSpanItem = placeholderSpanNode->GetSpanItem();
     ASSERT_NE(placeholderSpanItem, nullptr);
-    placeholderSpanItem->content = " ";
+    placeholderSpanItem->content = u" ";
     placeholderSpanNode->MountToParent(richEditorNode_);
     richEditorPattern->ClearContent(placeholderSpanNode);
     EXPECT_TRUE(placeholderSpanItem->content.empty());
@@ -1074,7 +1074,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     size_t index = 0;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = "test";
+    spanItem->content = u"test";
     spanItem->rangeStart = 0;
     spanItem->position = 4;
     richEditorPattern->spans_.push_back(spanItem);
@@ -1093,7 +1093,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     size_t index = 0;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = " test";
+    spanItem->content = u" test";
     spanItem->rangeStart = 0;
     spanItem->position = 5;
     richEditorPattern->spans_.push_back(spanItem);
@@ -1394,7 +1394,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, AdjustIndexSkipLineSeparator003, TestSize
     ASSERT_NE(richEditorPattern, nullptr);
     int32_t currentPosition = 10;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = "AdjustInd\nxSkipLineSeparator";
+    spanItem->content = u"AdjustInd\nxSkipLineSeparator";
     richEditorPattern->spans_.push_back(spanItem);
     EXPECT_TRUE(richEditorPattern->AdjustIndexSkipLineSeparator(currentPosition));
 }
@@ -1618,7 +1618,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, SetResultObjectText001, TestSize.Level0)
     ResultObject resultObject;
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     EXPECT_NE(spanItem, nullptr);
-    spanItem->content = "test";
+    spanItem->content = u"test";
     richEditorPattern->previewTextRecord_.previewContent = "text";
     richEditorPattern->SetResultObjectText(resultObject, spanItem);
     EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
@@ -1718,13 +1718,12 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetParagraphEndPosition001, TestSize.Leve
     auto iter = richEditorPattern->spans_.cbegin();
     auto span = *iter;
     ASSERT_NE(span, nullptr);
-    auto content = StringUtils::ToWstring(span->content);
-    int32_t position = span->position - static_cast<int32_t>(content.length());
+    int32_t position = span->position - static_cast<int32_t>(span->content.length());
     richEditorPattern->GetParagraphEndPosition(caretPosition);
-    EXPECT_EQ(position, span->position - static_cast<int32_t>(content.length()));
+    EXPECT_EQ(position, span->position - static_cast<int32_t>(span->content.length()));
     caretPosition = 1;
     richEditorPattern->GetParagraphEndPosition(caretPosition);
-    EXPECT_EQ(position, span->position - static_cast<int32_t>(content.length()));
+    EXPECT_EQ(position, span->position - static_cast<int32_t>(span->content.length()));
 }
 
 /**

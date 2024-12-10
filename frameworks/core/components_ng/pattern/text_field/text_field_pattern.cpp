@@ -2062,7 +2062,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         auto arr = UdmfClient::GetInstance()->GetSpanStringRecord(data);
         if (arr.size() > 0) {
             auto spanStr = SpanString::DecodeTlv(arr);
-            str += UtfUtils::Str8ToStr16(spanStr->GetString());
+            str += spanStr->GetU16string();
         } else {
             auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
             if (records.empty()) {
@@ -8776,10 +8776,10 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     // serialize the selected text
     info.selectStart = selectController_->GetStartIndex();
     info.selectEnd = selectController_->GetEndIndex();
-    auto selectContent = UtfUtils::Str16ToStr8(contentController_->GetSelectedValue(info.selectStart, info.selectEnd));
+    auto selectContent = contentController_->GetSelectedValue(info.selectStart, info.selectEnd);
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
     spanString->EncodeTlv(info.selectBuffer);
-    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetWideString()));
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{private}s",
         info.selectStart, info.selectEnd, spanString->GetString().c_str());
 
@@ -8802,7 +8802,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     }
     info.start = info.selectStart - sentenceStart;
     info.end = info.selectEnd - sentenceStart;
-    auto sentenceContent = UtfUtils::Str16ToStr8(contentController_->GetSelectedValue(sentenceStart, sentenceEnd));
+    auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
     spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
     spanString->EncodeTlv(info.sentenceBuffer);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{private}s",
@@ -8842,7 +8842,7 @@ void TextFieldPattern::HandleOnAIWrite()
 void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
 {
     RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
-    auto resultText = UtfUtils::Str8ToStr16(spanString->GetString());
+    auto resultText = spanString->GetU16string();
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{private}s",
         start, end, spanString->GetString().c_str());
     if (spanString->GetSpanItems().empty()) {

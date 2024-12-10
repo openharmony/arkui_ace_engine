@@ -154,7 +154,7 @@ struct ResultObject {
     SpanPosition spanPosition;
     SelectSpanType type = SelectSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
-    std::string valueString;
+    std::u16string valueString;
     std::string previewText;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
