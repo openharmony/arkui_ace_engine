@@ -210,6 +210,8 @@ CounterResource.COUNTER_INLINE_DATE_TEXT_MARGIN = 12;
 CounterResource.COUNTER_INLINE_INPUT_TEXT_MARGIN = 12;
 CounterResource.COUNTER_BUTTON_INITIAL_OPACITY = 1;
 CounterResource.COUNTER_BUTTON_DISABLE_OPACITY = 0.4;
+CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE = 2;
+CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE = 1;
 
 class CounterConstant {
 }
@@ -894,6 +896,17 @@ export class CounterComponent extends ViewPU {
 
     set max(h19) {
         this.__max.set(h19);
+    }
+
+    getTextInputFontSize() {
+        let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
+        let uiContext = this.getUIContext();
+        let fontSizeScale = uiContext.getHostContext()?.config?.fontSizeScale ?? 1;
+        if (fontSizeScale < 1) {
+            return fontSize + 'fp';
+        } else {
+            return fontSize + 'vp';
+        }
     }
 
     convertNumberToString(g19) {
@@ -1597,6 +1610,7 @@ export class CounterComponent extends ViewPU {
                         Text.create(this.numberStyleOptions.label);
                         Text.direction(this.counterDirection);
                         Text.fontSize(CounterResource.COUNTER_LIST_LABEL_SIZE);
+                        Text.maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE);
                         Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                         Text.margin({
                             start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_LIST_LEFT_PADDING))
@@ -1727,6 +1741,7 @@ export class CounterComponent extends ViewPU {
                                     Text.width(this.textWidth.toString());
                                     Text.textAlign(TextAlign.Center);
                                     Text.fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE);
+                                    Text.maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
                                     Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                                     Text.margin({
                                         start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
@@ -1743,6 +1758,7 @@ export class CounterComponent extends ViewPU {
                                     Text.direction(this.counterDirection);
                                     Text.textAlign(TextAlign.Center);
                                     Text.fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE);
+                                    Text.maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
                                     Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                                     Text.margin({
                                         start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
@@ -1965,6 +1981,7 @@ export class CounterComponent extends ViewPU {
                                     Text.create(this.value.toString());
                                     Text.textAlign(TextAlign.Center);
                                     Text.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                                    Text.maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
                                     Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                                     Text.width(this.textWidth.toString());
                                     Text.margin({
@@ -1982,6 +1999,7 @@ export class CounterComponent extends ViewPU {
                                     Text.direction(this.counterDirection);
                                     Text.textAlign(TextAlign.Center);
                                     Text.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                                    Text.maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
                                     Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                                     Text.margin({
                                         start: LengthMetrics.vp(CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN),
@@ -2090,6 +2108,7 @@ export class CounterComponent extends ViewPU {
                         Text.direction(this.counterDirection);
                         Text.margin({ top: CounterResource.COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE });
                         Text.fontSize(CounterResource.COUNTER_COMPACT_LABEL_SIZE);
+                        Text.maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE);
                         Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                         Text.align(Alignment.Top);
                     }, Text);
@@ -2139,7 +2158,7 @@ export class CounterComponent extends ViewPU {
                                     TextInput.type(InputType.PhoneNumber);
                                     TextInput.caretColor(Color.Transparent);
                                     TextInput.copyOption(CopyOptions.None);
-                                    TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                                    TextInput.fontSize(this.getTextInputFontSize());
                                     TextInput.fontWeight(FontWeight.Medium);
                                     TextInput.fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                                     TextInput.maxLength(this.getMaxLength());
@@ -2295,7 +2314,7 @@ export class CounterComponent extends ViewPU {
                                     TextInput.type(InputType.PhoneNumber);
                                     TextInput.caretColor(Color.Transparent);
                                     TextInput.copyOption(CopyOptions.None);
-                                    TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                                    TextInput.fontSize(this.getTextInputFontSize());
                                     TextInput.fontWeight(FontWeight.Medium);
                                     TextInput.fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                                     TextInput.maxLength(this.getMaxLength());
@@ -2612,7 +2631,7 @@ export class CounterComponent extends ViewPU {
                         TextInput.type(InputType.Number);
                         TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
-                        TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
                         TextInput.fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                         TextInput.maxLength(5);
@@ -2730,6 +2749,7 @@ export class CounterComponent extends ViewPU {
                         Text.direction(this.counterDirection);
                         Text.textAlign(TextAlign.Center);
                         Text.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        Text.maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
                         Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                         Text.width('8vp');
                     }, Text);
@@ -2743,7 +2763,7 @@ export class CounterComponent extends ViewPU {
                         TextInput.type(InputType.Number);
                         TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
-                        TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
                         TextInput.fontColor(this.hasFocusText2 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                         TextInput.maxLength(3);
@@ -2872,6 +2892,7 @@ export class CounterComponent extends ViewPU {
                         Text.direction(this.counterDirection);
                         Text.textAlign(TextAlign.Center);
                         Text.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        Text.maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
                         Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
                         Text.width('8vp');
                     }, Text);
@@ -2885,7 +2906,7 @@ export class CounterComponent extends ViewPU {
                         TextInput.type(InputType.Number);
                         TextInput.caretColor(Color.Transparent);
                         TextInput.copyOption(CopyOptions.None);
-                        TextInput.fontSize(CounterResource.COUNTER_NUMBER_SIZE);
+                        TextInput.fontSize(this.getTextInputFontSize());
                         TextInput.fontWeight(FontWeight.Medium);
                         TextInput.fontColor(this.hasFocusText3 ? Color.White : CounterResource.COUNTER_TEXT_COLOR);
                         TextInput.maxLength(3);
