@@ -161,7 +161,8 @@ enum class RequestFocusReason {
     AUTO_FILL,
     CLEAN_NODE,
     MOUSE,
-    SYSTEM
+    SYSTEM,
+    DRAG_ENTER
 };
 
 
@@ -1865,6 +1866,7 @@ private:
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void ResetTouchAndMoveCaretState();
     void UpdateSelectionAndHandleVisibility();
+    void ProcessAutoFillOnFocus();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2056,6 +2058,7 @@ private:
     float lastCaretPos_ = 0.0f;
     std::optional<float> maxFontSizeScale_;
     std::optional<bool> hasFocusBeforeTouchDown_;
+    RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
 };
 } // namespace OHOS::Ace::NG
 

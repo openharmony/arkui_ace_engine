@@ -1024,9 +1024,27 @@ void TextFieldPattern::HandleFocusEvent()
         needSelectAll_ = true;
     }
     ProcessFocusStyle();
+    ProcessAutoFillOnFocus();
     RequestKeyboardByFocusSwitch();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::ProcessAutoFillOnFocus()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        requestFocusReason_ = RequestFocusReason::UNKNOWN;
+        return;
+    }
+
+    auto isIgnoreFocusReason =
+        requestFocusReason_ == RequestFocusReason::DRAG_ENTER || requestFocusReason_ == RequestFocusReason::DRAG_MOVE ||
+        requestFocusReason_ == RequestFocusReason::DRAG_END || requestFocusReason_ == RequestFocusReason::AUTO_FILL ||
+        requestFocusReason_ == RequestFocusReason::CLICK || requestFocusReason_ == RequestFocusReason::MOUSE;
+    if (needToRequestKeyboardOnFocus_ && !isIgnoreFocusReason && !IsModalCovered() && IsTriggerAutoFillPassword()) {
+        DoProcessAutoFill();
+    }
+    requestFocusReason_ = RequestFocusReason::UNKNOWN;
 }
 
 void TextFieldPattern::ProcessFocusStyle()
@@ -1370,6 +1388,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     ReportEvent();
     ScheduleDisappearDelayTask();
+    requestFocusReason_ = RequestFocusReason::UNKNOWN;
 }
 
 void TextFieldPattern::ModifyInnerStateInBlurEvent()
@@ -2253,7 +2272,7 @@ void TextFieldPattern::InitDragDropCallBack()
         pattern->ResetPreviewTextState();
         auto focusHub = pattern->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
-        if (focusHub->RequestFocusImmediately()) {
+        if (pattern->TextFieldRequestFocus(RequestFocusReason::DRAG_ENTER)) {
             pattern->StartTwinkling();
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
                 "%{public}d TextField onDragEnter Request Focus Success", host->GetId());
@@ -2278,7 +2297,7 @@ void TextFieldPattern::InitDragDropCallBack()
         if (!pattern->HasFocus()) {
             auto focusHub = pattern->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
-            if (focusHub->RequestFocusImmediately()) {
+            if (pattern->TextFieldRequestFocus(RequestFocusReason::DRAG_MOVE)) {
                 pattern->StartTwinkling();
                 TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
                     "%{public}d TextField onDragMove Request Focus Success", host->GetId());
@@ -2707,12 +2726,37 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
         TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "Get current container is nullptr.");
         return false;
     }
-    SetAutoFillTriggeredStateByType(autoFillType);
-    SetFillRequestFinish(false);
     if (IsTriggerAutoFillPassword() && autoFillType == AceAutoFillType::ACE_UNSPECIFIED) {
         autoFillType = AceAutoFillType::ACE_USER_NAME;
     }
-    return (container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_));
+    auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "onUIExtNodeDestroy called.");
+        auto textFieldNode = weak.Upgrade();
+        CHECK_NULL_VOID(textFieldNode);
+        auto pageNode = textFieldNode->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(false);
+    };
+    auto onUIExtNodeBindingCompleted = [weak = WeakPtr<FrameNode>(host)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "onUIExtNodeBindingCompleted called.");
+        auto textFieldNode = weak.Upgrade();
+        CHECK_NULL_VOID(textFieldNode);
+        auto pageNode = textFieldNode->GetPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetIsModalCovered(true);
+    };
+
+    auto resultCode = container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_, true,
+        onUIExtNodeDestroy, onUIExtNodeBindingCompleted);
+    if (resultCode != AceAutoFillError::ACE_AUTO_FILL_PREVIOUS_REQUEST_NOT_FINISHED) {
+        SetAutoFillTriggeredStateByType(autoFillType);
+        SetFillRequestFinish(false);
+    }
+    return resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -5365,6 +5409,7 @@ bool TextFieldPattern::TextFieldRequestFocus(RequestFocusReason reason)
         host->GetId(), TextFieldPattern::RequestFocusReasonToString(reason).c_str());
     auto focusHub = GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
+    requestFocusReason_ = reason;
     return focusHub->RequestFocusImmediately();
 }
 
@@ -5376,6 +5421,9 @@ std::string TextFieldPattern::RequestFocusReasonToString(RequestFocusReason reas
         }
         case RequestFocusReason::DRAG_MOVE: {
             return "DragMove";
+        }
+        case RequestFocusReason::DRAG_ENTER: {
+            return "DragEnter";
         }
         case RequestFocusReason::CLICK: {
             return "Click";
