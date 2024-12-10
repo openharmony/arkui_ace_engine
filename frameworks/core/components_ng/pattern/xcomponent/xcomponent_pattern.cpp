@@ -562,6 +562,7 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     }
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
     json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
+    json->PutExtAttr("hdrBrightness", std::to_string(hdrBrightness_).c_str(), filter);
 }
 
 void XComponentPattern::SetRotation(uint32_t rotation)
@@ -2056,5 +2057,6 @@ void XComponentPattern::HdrBrightness(float hdrBrightness)
     }
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContextForSurface_->SetHDRBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
+    hdrBrightness_ = std::clamp(hdrBrightness, 0.0f, 1.0f);
 }
 } // namespace OHOS::Ace::NG
