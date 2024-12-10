@@ -15,8 +15,6 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, useEnabled, SliderBlock, IconBlock, ColorBlock } from 'common';
-import { Image } from '@ohos.graphics.scene';
-import { drawing, common2D } from '@kit.ArkGraphics2D';
 
 @Component
 export struct ImageboxGroupBootcamp {
@@ -32,8 +30,6 @@ export struct ImageboxGroupBootcamp {
   @State compMargin: number = 0;
   @State enableImage: boolean = true;
   @State image: ResourceStr = $r('app.media.startIcon');
-  // @State enableAlt: boolean = false;
-  // @State alt: string = $r('app.media.app_icon')
   @State enableObjectFit: boolean = false;
   @State objectFit: ImageFit = ImageFit.Cover;
   @State enableObjectRepeat: boolean = false;
@@ -61,7 +57,6 @@ export struct ImageboxGroupBootcamp {
   @State enableEnableColorFilter: boolean = false;
   @State enableColorFilter: boolean = false;
   private colorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
-  private color: common2D.Color = { alpha: 255, red: 255, green: 0, blue: 0 };
   @State colorFilter: ColorFilter | undefined = undefined
   @State enableDraggable: boolean = false;
   @State eDraggable: boolean = false;
@@ -110,7 +105,6 @@ export struct ImageboxGroupBootcamp {
             .focusable(useEnabled(this.enableFocusable, this.compFocusable))
             .borderRadius(useEnabled(this.enableBorderRadius, this.imageBorderRadius))
             .margin(useEnabled(this.enableMargin, this.compMargin))
-              // .alt(useEnabled(this.enableAlt,this.alt))
             .objectFit(useEnabled(this.enableObjectFit,this.objectFit))
             .objectRepeat(useEnabled(this.enableObjectRepeat,this.objectRepeat))
             .interpolation(useEnabled(this.enableInterpolation,this.interpolation))
