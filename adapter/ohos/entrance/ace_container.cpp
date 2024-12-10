@@ -516,6 +516,46 @@ bool AceContainer::RemoveOverlayBySubwindowManager(int32_t instanceId)
     return false;
 }
 
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContext()
+{
+    auto context = runtimeContext_.lock();
+    if (context == nullptr) {
+        LOGW("runtimeContext_ is null.");
+    }
+
+    return context;
+}
+
+void AceContainer::SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext)
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->SetJsContext(jsContext);
+}
+
+std::shared_ptr<Framework::JsValue> AceContainer::GetJsContext()
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_RETURN(jsEngine, nullptr);
+    return jsEngine->GetJsContext();
+}
+
 bool AceContainer::OnBackPressed(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -2038,6 +2078,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         }
     }
 #endif
+
+    if (isDynamicRender_) {
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
+    }
 
     auto windowDensityCallback = [weak = WeakClaim(this)]() {
         auto container = weak.Upgrade();

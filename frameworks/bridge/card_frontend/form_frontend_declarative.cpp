@@ -49,6 +49,23 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative run page url = %{public}s, entryPoint = %{public}s",
         url.c_str(), entryPoint.c_str());
+    auto container = Container::Current();
+    if (!container) {
+        return UIContentErrorCode::NULL_POINTER;
+    }
+
+    auto uiContentType = container->GetUIContentType();
+    if (uiContentType == UIContentType::DYNAMIC_COMPONENT) {
+        return InnerRunDynamicPage(url, params, entryPoint);
+    }
+
+    return InnerRunCardPage(url, params, entryPoint);
+}
+
+UIContentErrorCode FormFrontendDeclarative::InnerRunCardPage(
+    const std::string& url, const std::string& params, const std::string& entryPoint)
+{
+    LOGI("InnerRunCardPage");
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
     if (urlPath.empty()) {
         return UIContentErrorCode::NULL_URL;
@@ -66,6 +83,19 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
     }
 
     return UIContentErrorCode::NULL_POINTER;
+}
+
+UIContentErrorCode FormFrontendDeclarative::InnerRunDynamicPage(
+    const std::string& url, const std::string& params, const std::string& entryPoint)
+{
+    LOGI("InnerRunDynamicPage");
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+    container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
+    CHECK_NULL_RETURN(delegate_, UIContentErrorCode::NULL_POINTER);
+    auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
+    CHECK_NULL_RETURN(delegate, UIContentErrorCode::NULL_POINTER);
+    return delegate->RunCard(url, params, "", cardId_, entryPoint);
 }
 
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)
