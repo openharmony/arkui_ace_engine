@@ -37,6 +37,7 @@ ace_unittest("capi_all_accessors_test") {
     "image_bitmap_accessor_test.cpp",
     "js_geolocation_accessor_test.cpp",
     "js_result_accessor_test.cpp",
+    "layout_manager_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
     "matrix2d_accessor_test.cpp",
     "nav_destination_context_accessor_test.cpp",

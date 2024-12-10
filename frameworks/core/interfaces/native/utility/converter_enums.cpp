@@ -1289,4 +1289,28 @@ void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
         default: LOGE("Unknown transition Ark_BlendMode type: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src)
+{
+    switch (src) {
+        case ARK_RECT_HEIGHT_STYLE_TIGHT: dst = RectHeightStyle::TIGHT; break;
+        case ARK_RECT_HEIGHT_STYLE_MAX: dst = RectHeightStyle::MAX; break;
+        case ARK_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_MIDDLE: dst = RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE; break;
+        case ARK_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_TOP: dst = RectHeightStyle::INCLUDE_LINE_SPACE_TOP; break;
+        case ARK_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_BOTTOM: dst = RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM; break;
+        case ARK_RECT_HEIGHT_STYLE_STRUT: dst = RectHeightStyle::STRUT; break;
+        default: LOGE("Unexpected enum value in Ark_RectHeightStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src)
+{
+    switch (src) {
+        case ARK_RECT_WIDTH_STYLE_TIGHT: dst = RectWidthStyle::TIGHT; break;
+        case ARK_RECT_WIDTH_STYLE_MAX: dst = RectWidthStyle::MAX; break;
+        default: LOGE("Unexpected enum value in Ark_RectWidthStyle: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
