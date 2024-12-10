@@ -111,7 +111,7 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
-    void SetWindowIsStartMovingCallback(WindowIsStartMovingCallback&& callback)
+    void SetWindowIsStartMovingCallBack(WindowIsStartMovingCallback&& callback)
     {
         WindowIsStartMovingCallback_ = std::move(callback);
     }
