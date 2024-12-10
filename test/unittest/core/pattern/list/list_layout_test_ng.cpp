@@ -173,7 +173,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
      */
     ClearOldNodes();
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     CreateListItemGroups(2);
     CreateDone();
     offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
@@ -531,7 +531,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(itemNumber);
     CreateDone();
 
@@ -567,7 +567,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset007, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateDone();
 
     EXPECT_FALSE(pattern_->IsOutOfBoundary());
@@ -1954,7 +1954,7 @@ HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest001, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     model.SetInitialIndex(4);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     for (int32_t i = 0; i < 9; i++) {
         CreateListItem();
         ViewStackProcessor::GetInstance()->Pop();
@@ -2245,7 +2245,7 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest001, TestSize.Level1)
      * @tc.steps: step1. Create List
      */
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(6);
     CreateDone();
 
@@ -2276,7 +2276,7 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest002, TestSize.Level1)
      * @tc.steps: step1. Create List
      */
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(9);
     CreateDone();
 

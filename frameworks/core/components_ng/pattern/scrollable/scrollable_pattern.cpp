@@ -632,10 +632,12 @@ void ScrollablePattern::SetStartSnapAnimationCallback(const RefPtr<Scrollable>& 
 {
     CHECK_NULL_VOID(scrollable);
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](float snapDelta, float animationVelocity,
-                                          float predictVelocity, float dragDistance) -> bool {
+                                          float predictVelocity, float dragDistance,
+                                          SnapDirection snapDirection) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->StartSnapAnimation(snapDelta, animationVelocity, predictVelocity, dragDistance);
+
+        return pattern->StartSnapAnimation(snapDelta, animationVelocity, predictVelocity, dragDistance, snapDirection);
     };
     scrollable->SetStartSnapAnimationCallback(std::move(startSnapAnimationCallback));
 }
@@ -678,6 +680,16 @@ void ScrollablePattern::SetOnContinuousSliding(const RefPtr<Scrollable>& scrolla
     });
 }
 
+void ScrollablePattern::SetGetSnapTypeCallback(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    scrollable->SetGetSnapTypeCallback([weak = WeakClaim(this)]() -> SnapType {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, SnapType::NONE_SNAP);
+        return pattern->GetSnapType();
+    });
+}
+
 RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
 {
     auto host = GetHost();
@@ -703,6 +715,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetNeedScrollSnapToSideCallback(scrollable);
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
+    SetGetSnapTypeCallback(scrollable);
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
@@ -901,10 +914,11 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](float delta, float animationVelocity,
-                                          float predictVelocity, float dragDistance) -> bool {
+                                          float predictVelocity, float dragDistance,
+                                          SnapDirection snapDirection) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->StartSnapAnimation(delta, animationVelocity, predictVelocity, dragDistance);
+        return pattern->StartSnapAnimation(delta, animationVelocity, predictVelocity, dragDistance, snapDirection);
     };
     scrollBar_->SetStartSnapAnimationCallback(std::move(startSnapAnimationCallback));
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
@@ -1116,9 +1130,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
-            if (!pattern || pattern->GetAxis() == Axis::NONE) {
-                return false;
-            }
+            CHECK_NULL_RETURN(pattern && pattern->GetAxis() != Axis::NONE, false);
             if (!nestedScroll) {
                 return pattern->UpdateCurrentOffset(offset, source);
             }
@@ -1143,17 +1155,17 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         pattern->ScrollEndCallback(nestedScroll, pattern->GetVelocity());
     };
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](float delta, float animationVelocity,
-                                          float predictVelocity, float dragDistance) -> bool {
+                                          float predictVelocity, float dragDistance,
+                                          SnapDirection snapDirection) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->StartSnapAnimation(delta, animationVelocity, predictVelocity, dragDistance);
+        return pattern->StartSnapAnimation(delta, animationVelocity, predictVelocity, dragDistance, snapDirection);
     };
     auto scrollbarFRcallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         return pattern->NotifyFRCSceneInfo(CUSTOM_SCROLL_BAR_SCENE, velocity, sceneStatus);
     };
-
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1463,7 +1475,11 @@ void ScrollablePattern::InitSpringOffsetProperty()
         }
         bool stopAnimation = false;
         auto delta = pattern->GetScrollDelta(offset, stopAnimation);
-        if (!pattern->UpdateCurrentOffset(delta, SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
+        auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
+        if (pattern->GetLastSnapTargetIndex() >= 0) {
+            source = SCROLL_FROM_ANIMATION;
+        }
+        if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }
     };
@@ -2253,6 +2269,9 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     UpdateNestedScrollVelocity(offset, state);
     bool moved = HandleScrollImpl(offset, source);
+    if (!moved && source == SCROLL_FROM_AXIS) {
+        SetScrollableCurrentPos(-GetTotalOffset());
+    }
     NotifyMoved(moved);
     return result;
 }
@@ -2718,6 +2737,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             onScrollStop();
             AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
             SetScrollSource(SCROLL_FROM_NONE);
+            SetLastSnapTargetIndex(-1);
         }
         auto scrollBar = GetScrollBar();
         if (scrollBar) {

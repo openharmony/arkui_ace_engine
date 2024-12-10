@@ -385,14 +385,14 @@ void SetScrollSnapAlign(ArkUINodeHandle node, ArkUI_Int32 scrollSnapAlign)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetScrollSnapAlign(frameNode, static_cast<V2::ScrollSnapAlign>(scrollSnapAlign));
+    ListModelNG::SetScrollSnapAlign(frameNode, static_cast<ScrollSnapAlign>(scrollSnapAlign));
 }
 
 void ResetScrollSnapAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
+    ListModelNG::SetScrollSnapAlign(frameNode, ScrollSnapAlign::NONE);
 }
 
 void SetContentStartOffset(ArkUINodeHandle node, ArkUI_Float32 startOffset)
