@@ -2557,8 +2557,9 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
     HandleUserClickEvent(info);
     CHECK_NULL_VOID(!info.IsPreventDefault());
-
-    if (textSelector_.IsValid() && !isMouseSelect_) {
+    bool isMouseClick = info.GetSourceDevice() == SourceType::MOUSE;
+    bool isMouseClickWithShift = shiftFlag_ && isMouseClick;
+    if (textSelector_.IsValid() && !isMouseSelect_ && !isMouseClickWithShift) {
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -2571,18 +2572,19 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
     if (auto focusHub = GetFocusHub(); focusHub) {
-        IF_TRUE(info.GetSourceDevice() != SourceType::MOUSE || blockPress_, SetCaretPosition(position));
+        IF_TRUE(!isMouseClick || blockPress_, SetCaretPosition(position));
+        IF_TRUE(isMouseClickWithShift, HandleShiftSelect(position));
         if (focusHub->IsCurrentFocus()) {
             HandleOnEditChanged(true);
         }
         if (focusHub->RequestFocusImmediately()) {
-            StartTwinkling();
+            IF_TRUE(!shiftFlag_ || textSelector_.SelectNothing(), StartTwinkling());
             RequestKeyboard(false, true, true);
         }
     }
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(info.GetLocalLocation());
-    CHECK_NULL_VOID(info.GetSourceDevice() != SourceType::MOUSE);
+    CHECK_NULL_VOID(!isMouseClick);
     if (IsShowSingleHandleByClick(info, lastCaretPosition, lastCaretRect, isCaretTwinkling)) {
         CreateAndShowSingleHandle();
     }
@@ -2668,7 +2670,7 @@ void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
     if (focusHub) {
         SetCaretPosition(position);
         if (focusHub->RequestFocusImmediately()) {
-            StartTwinkling();
+            IF_TRUE(!shiftFlag_ || textSelector_.SelectNothing(), StartTwinkling());
             if (overlayMod_) {
                 RequestKeyboard(false, true, true);
             }
@@ -2898,6 +2900,7 @@ void RichEditorPattern::HandleBlurEvent()
     isLongPress_ = false;
     previewLongPress_ = false;
     editingLongPress_ = false;
+    shiftFlag_ = false;
     moveCaretState_.Reset();
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
@@ -5885,6 +5888,16 @@ void RichEditorPattern::AddOperationRecord(const OperationRecord& record)
     operationRecords_.emplace_back(record);
 }
 
+void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
+{
+    bool flag = keyEvent.action == KeyAction::DOWN
+        && (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT));
+    if (flag != shiftFlag_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag to %{public}d", flag);
+        shiftFlag_ = flag;
+    }
+}
+
 bool RichEditorPattern::HandleOnEscape()
 {
     CloseSelectOverlay();
@@ -6644,11 +6657,13 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-    if (textSelector_.baseOffset != textSelector_.destinationOffset) {
-        ResetSelection();
+    int32_t position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
+    if (shiftFlag_) {
+        HandleShiftSelect(position);
+    } else {
+        IF_TRUE(!textSelector_.SelectNothing(), ResetSelection());
+        textSelector_.Update(position);
     }
-    int32_t extend = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
-    textSelector_.Update(extend);
     leftMousePress_ = true;
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     mouseStatus_ = MouseStatus::PRESSED;
@@ -6662,6 +6677,17 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     UseHostToUpdateTextFieldManager();
     MoveCaretAndStartFocus(textOffset);
     CalcCaretInfoByClick(info.GetLocalLocation());
+}
+
+void RichEditorPattern::HandleShiftSelect(int32_t position)
+{
+    CHECK_NULL_VOID(shiftFlag_);
+    int32_t start = textSelector_.SelectNothing() ? caretPosition_ : textSelector_.baseOffset;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleShiftSelect [%{public}d-%{public}d]", start, position);
+    UpdateSelector(start, position);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)

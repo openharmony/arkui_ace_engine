@@ -432,6 +432,7 @@ public:
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
     void AddOperationRecord(const OperationRecord& record);
+    void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
@@ -1085,6 +1086,7 @@ private:
     void HandleMouseLeftButtonMove(const MouseInfo& info);
     void HandleMouseSelect(const Offset& localOffset);
     void HandleMouseLeftButtonPress(const MouseInfo& info);
+    void HandleShiftSelect(int32_t position);
     void HandleMouseLeftButtonRelease(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
@@ -1345,6 +1347,7 @@ private:
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
     const bool isAPI14Plus;
+    bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;
