@@ -49,8 +49,7 @@ public:
         if (property->IgnoreItemSpace()) {
             return 0.0f;
         }
-        auto scale = property->GetLayoutConstraint()->scaleProperty;
-        return ConvertToPx(property->GetItemSpace().value_or(0.0_px), scale).value_or(0);
+        return property->GetItemSpace().value_or(0.0_px).ConvertToPx();
     }
 
     static LayoutConstraintF CreateChildConstraint(
