@@ -2796,7 +2796,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    this.changeArray.splice(0);
+    UIUtilsImpl.instance().getTarget(this).changeArray.splice(0);
   }
 }
 
