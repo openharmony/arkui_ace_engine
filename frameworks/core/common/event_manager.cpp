@@ -1167,7 +1167,7 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
             currMouseTestResults_.emplace_back(mouseResult);
         }
         auto hoverResult = AceType::DynamicCast<HoverEventTarget>(result);
-        if (hoverResult) {
+        if (hoverResult && hoverResult->IsHoverTarget()) {
             hoverTestResult.emplace_back(hoverResult);
         }
         if (!hoverNode.Upgrade()) {
