@@ -24,6 +24,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/geometry/offset.h"
+#include "core/event/axis_event.h"
 
 namespace OHOS::Ace {
 namespace ResDefine {
