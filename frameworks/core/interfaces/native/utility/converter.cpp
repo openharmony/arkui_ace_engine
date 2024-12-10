@@ -17,6 +17,7 @@
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -992,8 +993,8 @@ RefPtr<Curve> Convert(const Ark_Curve& src)
 template<>
 RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
-    LOGE("Convert [Ark_ICurve] to [RefPtr<Curve>] is not supported");
-    return nullptr;
+    auto peer = reinterpret_cast<ICurvePeer*>(src.ptr);
+    return peer ? peer->handler : nullptr;
 }
 
 template<>
