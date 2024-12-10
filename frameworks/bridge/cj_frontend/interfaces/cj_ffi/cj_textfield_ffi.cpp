@@ -18,6 +18,7 @@
 #include "cj_lambda.h"
 #include "securec.h"
 
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/text_field/textfield_theme.h"
 
@@ -36,10 +37,13 @@ const std::vector<TextInputType> TEXT_INPUT_TYPES = { TextInputType::TEXT, TextI
     TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD, TextInputType::NUMBER_DECIMAL, TextInputType::URL };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
-const std::function<void(std::string)> FormatCharFunction(void (*callback)(const char* value))
+const std::function<void(std::u16string)> FormatCharFunction(void (*callback)(const char* value))
 {
-    const std::function<void(std::string)> result = [lambda = CJLambda::Create(callback)](
-                                                        const std::string& value) -> void { lambda(value.c_str()); };
+    const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)]
+        (const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     return result;
 }
 
@@ -492,7 +496,7 @@ void FfiOHOSAceFrameworkTextFieldSetShowError(const char* errorText)
         isVisible = true;
     }
 
-    TextFieldModel::GetInstance()->SetShowError(error, isVisible);
+    TextFieldModel::GetInstance()->SetShowError(UtfUtils::Str8ToStr16(error), isVisible);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetShowPasswordIcon(bool isShow)
@@ -621,7 +625,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
     auto onChange = [func = FormatCharFunction(callback)](
-                        const std::string& val, PreviewText& previewText) { func(val); };
+                        const std::u16string& val, PreviewText& previewText) { func(val); };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
@@ -638,7 +642,7 @@ void FfiOHOSAceFrameworkTextFieldOnCut(void (*callback)(const char* value))
 void FfiOHOSAceFrameworkTextFieldOnPaste(void (*callback)(const char* value))
 {
     auto onPaste = [func = FormatCharFunction(callback)](
-                       const std::string& val, NG::TextCommonEvent& info) { func(val); };
+                       const std::u16string& val, NG::TextCommonEvent& info) { func(val); };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
 
@@ -667,7 +671,8 @@ void FfiOHOSAceFrameworkTextFieldOnDidDelete(
     auto onDidDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> void {
         double deleteOffset = Info.deleteOffset;
         int32_t direction = static_cast<int32_t>(Info.direction);
-        const char* deleteValue = Info.deleteValue.c_str();
+        const std::string deleteStr = UtfUtils::Str16ToStr8(Info.deleteValue);
+        const char* deleteValue = deleteStr.c_str();
         lambda(deleteOffset, direction, deleteValue);
     };
     TextFieldModel::GetInstance()->SetOnDidDeleteEvent(onDidDelete);
@@ -679,7 +684,8 @@ void FfiOHOSAceFrameworkTextFieldOnWillDelete(
     auto onWillDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> bool {
         double deleteOffset = Info.deleteOffset;
         int32_t direction = static_cast<int32_t>(Info.direction);
-        const char* deleteValue = Info.deleteValue.c_str();
+        const std::string deleteStr = UtfUtils::Str16ToStr8(Info.deleteValue);
+        const char* deleteValue = deleteStr.c_str();
         return lambda(deleteOffset, direction, deleteValue);
     };
     TextFieldModel::GetInstance()->SetOnWillDeleteEvent(onWillDelete);
@@ -689,7 +695,8 @@ void FfiOHOSAceFrameworkTextFieldOnDidInsert(void (*callback)(double insertOffse
 {
     auto onDidInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> void {
         double insertOffset = Info.insertOffset;
-        const char* insertValue = Info.insertValue.c_str();
+        const std::string insertStr = UtfUtils::Str16ToStr8(Info.insertValue);
+        const char* insertValue = insertStr.c_str();
         lambda(insertOffset, insertValue);
     };
     TextFieldModel::GetInstance()->SetOnDidInsertValueEvent(onDidInsert);
@@ -699,7 +706,8 @@ void FfiOHOSAceFrameworkTextFieldOnWillInsert(bool (*callback)(double insertOffs
 {
     auto onWillInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> bool {
         double insertOffset = Info.insertOffset;
-        const char* insertValue = Info.insertValue.c_str();
+        const std::string insertStr = UtfUtils::Str16ToStr8(Info.insertValue);
+        const char* insertValue = insertStr.c_str();
         return lambda(insertOffset, insertValue);
     };
     TextFieldModel::GetInstance()->SetOnWillInsertValueEvent(onWillInsert);
@@ -708,8 +716,10 @@ void FfiOHOSAceFrameworkTextFieldOnWillInsert(bool (*callback)(double insertOffs
 void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
     void (*callback)(const char* value, int32_t offset, const char* text))
 {
-    auto onChange = [func = CJLambda::Create(callback)](const std::string& val, PreviewText& previewText) {
-        func(val.c_str(), previewText.offset, previewText.value.c_str());
+    auto onChange = [func = CJLambda::Create(callback)](const std::u16string& val, PreviewText& previewText) {
+        const std::string valStr = UtfUtils::Str16ToStr8(val);
+        const std::string previewTextStr = UtfUtils::Str16ToStr8(previewText.value);
+        func(valStr.c_str(), previewText.offset, previewTextStr.c_str());
     };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
@@ -720,7 +730,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t valu
     auto task = [func = CJLambda::Create(callback), node = targetNode](int32_t key, NG::TextFieldCommonEvent& event) {
         PipelineContext::SetCallBackNode(node);
         auto submitEvent = std::make_unique<CJSubmitEvent>();
-        std::string text = event.GetText();
+        std::string text = UtfUtils::Str16ToStr8(event.GetText());
         size_t len = text.length() + 1;
         submitEvent->text = (char*)malloc(len);
         submitEvent->keepEditable = event.IsKeepEditable();

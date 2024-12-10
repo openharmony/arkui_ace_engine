@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/ime/text_range.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -30,18 +31,18 @@ enum class TextDeleteDirection { BACKWARD = 0, FORWARD = 1 };
 
 struct InsertValueInfo {
     int32_t insertOffset = 0;
-    std::string insertValue;
+    std::u16string insertValue;
 };
 
 struct DeleteValueInfo {
     int32_t deleteOffset = 0;
     TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
-    std::string deleteValue;
+    std::u16string deleteValue;
 };
 
 struct PreviewText {
     int32_t offset;
-    std::string value;
+    std::u16string value;
 
     bool operator==(const PreviewText& other) const
     {
@@ -70,17 +71,17 @@ public:
     {
         keepEditable_ = keepEditable;
     }
-    std::string GetText() const
+    std::u16string GetText() const
     {
         return text_;
     }
-    void SetText(std::string text)
+    void SetText(std::u16string text)
     {
         text_ = text;
     }
 private:
     bool keepEditable_ = false;
-    std::string text_;
+    std::u16string text_;
 };
 
 class TextFieldEventHub : public EventHub {
@@ -90,15 +91,15 @@ public:
     TextFieldEventHub() = default;
     ~TextFieldEventHub() override = default;
 
-    void SetOnInputFilterError(const std::function<void(const std::string&)>& onInputFilterError)
+    void SetOnInputFilterError(const std::function<void(const std::u16string&)>& onInputFilterError)
     {
         onInputFilterError_ = onInputFilterError;
     }
 
-    void FireOnInputFilterError(const std::string& value) const
+    void FireOnInputFilterError(const std::u16string& value) const
     {
         if (onInputFilterError_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On filter error %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On filter error %{private}s", UtfUtils::Str16ToStr8(value).c_str());
             onInputFilterError_(value);
         }
     }
@@ -142,17 +143,17 @@ public:
         }
     }
 
-    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func)
+    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func)
     {
         onChange_ = std::move(func);
     }
 
-    const std::function<void(const std::string&, PreviewText&)>& GetOnChange() const
+    const std::function<void(const std::u16string&, PreviewText&)>& GetOnChange() const
     {
         return onChange_;
     }
 
-    void FireOnChange(const std::string& value, PreviewText& previewText)
+    void FireOnChange(const std::u16string& value, PreviewText& previewText)
     {
         if (lastValue_.has_value() && lastValue_.value() == value && lastPreviewText_ == previewText) {
             return;
@@ -202,51 +203,51 @@ public:
         }
     }
 
-    void SetOnCopy(std::function<void(const std::string&)>&& func)
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func)
     {
         onCopy_ = std::move(func);
     }
 
-    void FireOnCopy(const std::string& value)
+    void FireOnCopy(const std::u16string& value)
     {
         if (onCopy_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy %{private}s", UtfUtils::Str16ToStr8(value).c_str());
             onCopy_(value);
         }
     }
 
-    void SetOnCut(std::function<void(const std::string&)>&& func)
+    void SetOnCut(std::function<void(const std::u16string&)>&& func)
     {
         onCut_ = std::move(func);
     }
 
-    void FireOnCut(const std::string& value)
+    void FireOnCut(const std::u16string& value)
     {
         if (onCut_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On cut %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On cut %{private}s", UtfUtils::Str16ToStr8(value).c_str());
             onCut_(value);
         }
     }
 
-    void SetOnPaste(std::function<void(const std::string&)>&& func)
+    void SetOnPaste(std::function<void(const std::u16string&)>&& func)
     {
         onPaste_ = std::move(func);
     }
 
-    void FireOnPaste(const std::string& value)
+    void FireOnPaste(const std::u16string& value)
     {
         if (onPaste_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On paste %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On paste %{private}s", UtfUtils::Str16ToStr8(value).c_str());
             onPaste_(value);
         }
     }
 
-    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+    void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func)
     {
         onPasteWithEvent_ = std::move(func);
     }
 
-    void FireOnPasteWithEvent(const std::string& value, NG::TextCommonEvent& event)
+    void FireOnPasteWithEvent(const std::u16string& value, NG::TextCommonEvent& event)
     {
         if (onPasteWithEvent_) {
             onPasteWithEvent_(value, event);
@@ -313,7 +314,7 @@ public:
         return onScrollIndexEvent_;
     }
 
-    void SetOnChangeEvent(std::function<void(const std::string&)>&& func)
+    void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func)
     {
         onValueChangeEvent_ = std::move(func);
     }
@@ -381,7 +382,7 @@ public:
     }
 
 private:
-    std::optional<std::string> lastValue_;
+    std::optional<std::u16string> lastValue_;
     PreviewText lastPreviewText_ {};
 
     OnScrollEvent onScrollEvent_;
@@ -392,19 +393,19 @@ private:
     OnScrollIndexEvent onScrollIndexEvent_;
     std::function<void(float, float)> onScrollChangeEvent_;
 
-    std::function<void(const std::string&)> onInputFilterError_;
+    std::function<void(const std::u16string&)> onInputFilterError_;
     std::function<void(bool)> onEditChanged_;
     std::function<void(bool)> onSecurityStateChanged_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
-    std::function<void(const std::string&, PreviewText&)> onChange_;
+    std::function<void(const std::u16string&, PreviewText&)> onChange_;
     std::function<void(float, float)> onContentSizeChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 
-    std::function<void(const std::string&)> onCopy_;
-    std::function<void(const std::string&)> onCut_;
-    std::function<void(const std::string&)> onPaste_;
-    std::function<void(const std::string&, NG::TextCommonEvent&)> onPasteWithEvent_;
-    std::function<void(const std::string&)> onValueChangeEvent_;
+    std::function<void(const std::u16string&)> onCopy_;
+    std::function<void(const std::u16string&)> onCut_;
+    std::function<void(const std::u16string&)> onPaste_;
+    std::function<void(const std::u16string&, NG::TextCommonEvent&)> onPasteWithEvent_;
+    std::function<void(const std::u16string&)> onValueChangeEvent_;
 
     std::function<bool(const InsertValueInfo&)> onWillInsertValueEvent_;
     std::function<void(const InsertValueInfo&)> onDidInsertValueEvent_;

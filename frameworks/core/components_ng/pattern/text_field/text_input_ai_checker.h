@@ -28,7 +28,7 @@ public:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
     constexpr static float AIPOS_RECTIFIED_INTERVAL_MS = 1000.0f;
 
-    static bool NeedAIAnalysis(const std::string& content, NG::CaretUpdateType targetType,
+    static bool NeedAIAnalysis(bool isEmpty, NG::CaretUpdateType targetType,
         std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout);
 
     static bool IsSingleClickAtBoundary(int32_t position, int32_t textLength);

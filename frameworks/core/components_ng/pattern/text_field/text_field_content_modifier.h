@@ -47,9 +47,9 @@ public:
     void SetContentOffset(OffsetF& value);
     float GetContentOffsetY();
     void SetContentSize(SizeF& value);
-    void SetTextValue(std::string& value);
-    void SetErrorTextValue(const std::string& value);
-    void SetPlaceholderValue(std::string&& value);
+    void SetTextValue(std::u16string& value);
+    void SetErrorTextValue(const std::u16string& value);
+    void SetPlaceholderValue(std::u16string&& value);
     void SetTextRectY(const float value);
     float GetTextRectX();
     void SetTextObscured(bool value);
@@ -109,9 +109,9 @@ private:
     RefPtr<PropertyFloat> textRectY_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
-    RefPtr<PropertyString> textValue_;
-    RefPtr<PropertyString> errorTextValue_;
-    RefPtr<PropertyString> placeholderValue_;
+    RefPtr<PropertyU16String> textValue_;
+    RefPtr<PropertyU16String> errorTextValue_;
+    RefPtr<PropertyU16String> placeholderValue_;
     RefPtr<PropertyBool> textObscured_;
     RefPtr<PropertyBool> dragStatus_;
     RefPtr<PropertyInt> textAlign_;

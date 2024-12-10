@@ -16,6 +16,7 @@
 #include <limits>
 #include "gtest/gtest.h"
 #include "text_base.h"
+#include "base/utils/string_utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/property/property.h"
@@ -917,7 +918,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan001, TestSize.Level1)
     dragSpanPosition.spanStart = 1;
     dragSpanPosition.spanEnd = 3;
     std::string textForAI = "Test1234";
-    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
@@ -930,7 +931,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan001, TestSize.Level1)
     dragSpanPosition.spanStart = 2;
     dragSpanPosition.spanEnd = 3;
     textForAI = "Test1234";
-    wTextForAI = StringUtils::ToWstring(textForAI);
+    wTextForAI = StringUtils::Str8ToStr16(textForAI);
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
@@ -978,7 +979,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan002, TestSize.Level1)
     dragSpanPosition.spanStart = 1;
     dragSpanPosition.spanEnd = 4;
     std::string textForAI = "Test1234";
-    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
@@ -991,7 +992,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan002, TestSize.Level1)
     dragSpanPosition.spanStart = 2;
     dragSpanPosition.spanEnd = 4;
     textForAI = "Test1234";
-    wTextForAI = StringUtils::ToWstring(textForAI);
+    wTextForAI = StringUtils::Str8ToStr16(textForAI);
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
@@ -1039,7 +1040,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan003, TestSize.Level1)
     dragSpanPosition.spanStart = 1;
     dragSpanPosition.spanEnd = 20;
     std::string textForAI = "Test1234";
-    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
