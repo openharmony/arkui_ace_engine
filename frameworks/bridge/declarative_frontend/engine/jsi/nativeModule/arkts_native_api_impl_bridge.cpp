@@ -2448,6 +2448,13 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetTitle));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetTitle));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSystemTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
+        NavDestinationBridge::SetNavDestinationSystemTransition));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSystemTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
+        NavDestinationBridge::ResetNavDestinationSystemTransition));
+
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);

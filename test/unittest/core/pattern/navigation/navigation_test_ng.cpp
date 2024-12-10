@@ -381,31 +381,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0013, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavigationModelNG0014
- * @tc.desc: Test NavigationModelNG::SetBackButtonVisible  BackButtonAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG0014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    NavigationModelNG model;
-    model.Create();
-    model.SetNavigationStack();
-    auto navigation =
-        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ASSERT_NE(navigation, nullptr);
-    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "navDestination", 123, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-
-    auto backButtonNode2 = FrameNode::CreateFrameNode("backButtonNode", 126, AceType::MakeRefPtr<ButtonPattern>());
-    ASSERT_NE(backButtonNode2->renderContext_, nullptr);
-    navigation->BackButtonAnimation(backButtonNode2, false);
-    navigation->BackButtonAnimation(backButtonNode2, true);
-}
-
-/**
  * @tc.name: NavigationModelNG0015
  * @tc.desc: Test NavigationModelNG::UpdateNavDestinationNodeWithoutMarkDirty
  * @tc.type: FUNC

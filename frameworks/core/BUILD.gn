@@ -38,6 +38,13 @@ template("ace_core_source_set") {
       include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
     }
 
+    if (ace_engine_feature_enable_nav_split_mode &&
+        defined(
+            vendor_configs.ace_engine_advanced_navigation_split_mode_dirs)) {
+      include_dirs +=
+          vendor_configs.ace_engine_advanced_navigation_split_mode_dirs
+    }
+
     # add common source file needed by all product platform here
     sources = [
       # accessibility
