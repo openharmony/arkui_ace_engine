@@ -113,6 +113,80 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LongPressRecognizerIssue003
+ * @tc.desc: Test LongPressRecognizer callback info
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer and set onAction.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, 1, false);
+    GestureEvent eventInfo;
+    auto onActionStart = [&eventInfo](GestureEvent& info) { eventInfo = info; };
+    longPressRecognizer->SetOnAction(onActionStart);
+
+    /**
+     * @tc.steps: step2. DispatchTouchEvent and compare callback info.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent downEvent;
+    downEvent.SetId(0)
+        .SetType(TouchType::DOWN)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetDeviceId(2);
+    longPressRecognizer->HandleEvent(downEvent);
+    TouchEvent downFingerOneEvent;
+    downFingerOneEvent.SetId(1)
+        .SetType(TouchType::DOWN)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetDeviceId(2);
+    longPressRecognizer->touchPoints_[1] = downFingerOneEvent;
+    TouchEvent moveEvent;
+    auto moveTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(moveTime);
+    moveEvent.SetId(0)
+        .SetType(TouchType::MOVE)
+        .SetX(100.0f)
+        .SetY(100.0f)
+        .SetScreenX(200.0f)
+        .SetScreenY(200.0f)
+        .SetSourceType(SourceType::TOUCH)
+        .SetSourceTool(SourceTool::FINGER)
+        .SetTime(TimeStamp(nanoseconds))
+        .SetForce(100.0f)
+        .SetTiltX(10.0f)
+        .SetTiltY(10.0f)
+        .SetTargetDisplayId(2);
+    longPressRecognizer->HandleEvent(moveEvent);
+    longPressRecognizer->OnAccepted();
+    EXPECT_EQ(eventInfo.GetTimeStamp().time_since_epoch().count(), moveTime);
+    EXPECT_EQ(eventInfo.GetRepeat(), false);
+    EXPECT_EQ(eventInfo.GetFingerList().size(), 2);
+    EXPECT_EQ(eventInfo.GetSourceDevice(), SourceType::TOUCH);
+    EXPECT_EQ(eventInfo.GetDeviceId(), 2);
+    EXPECT_EQ(eventInfo.GetGlobalPoint().GetX(), 100.0f);
+    EXPECT_EQ(eventInfo.GetGlobalPoint().GetY(), 100.0f);
+    EXPECT_EQ(eventInfo.GetScreenLocation().GetX(), 200.0f);
+    EXPECT_EQ(eventInfo.GetScreenLocation().GetY(), 200.0f);
+    EXPECT_EQ(eventInfo.GetGlobalLocation().GetX(), 100.0f);
+    EXPECT_EQ(eventInfo.GetGlobalLocation().GetY(), 100.0f);
+    EXPECT_EQ(eventInfo.GetLocalLocation().GetX(), 100.0f);
+    EXPECT_EQ(eventInfo.GetLocalLocation().GetY(), 100.0f);
+    EXPECT_EQ(eventInfo.GetForce(), 100.0f);
+    EXPECT_EQ(eventInfo.GetTiltX(), 10.0f);
+    EXPECT_EQ(eventInfo.GetTiltY(), 10.0f);
+    EXPECT_EQ(eventInfo.GetSourceTool(), SourceTool::FINGER);
+    EXPECT_EQ(eventInfo.GetInputEventType(), InputEventType::TOUCH_SCREEN);
+}
+
+/**
  * @tc.name: PanRecognizerIssue001
  * @tc.desc: Test PanRecognizer: Test the finger information of the current recognizer in the case of setting a single
  *           finger by pressing multiple fingers and lifting them.
