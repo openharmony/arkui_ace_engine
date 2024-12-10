@@ -19,6 +19,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_data_url_analyzer_mgr.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,6 +30,7 @@ class RichEditorPatternTestSixNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
+    void InitDataUrlAnalyzer(MockDataUrlAnalyzerMgr& mockDataUrlAnalyzerMgr);
     static void TearDownTestSuite();
 };
 
@@ -59,6 +61,41 @@ void RichEditorPatternTestSixNg::TearDown()
 void RichEditorPatternTestSixNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+}
+
+void RichEditorPatternTestSixNg::InitDataUrlAnalyzer(MockDataUrlAnalyzerMgr& mockDataUrlAnalyzerMgr)
+{
+    EXPECT_CALL(mockDataUrlAnalyzerMgr, AnalyzeUrls(_))
+        .WillRepeatedly([](const std::string& text) -> std::vector<UrlEntity> {
+            std::vector<UrlEntity> data;
+            if (text.empty()) {
+                return data;
+            }
+            UrlEntity urlEntity;
+            urlEntity.text = text;
+            urlEntity.charOffset = text.length();
+            data.push_back(urlEntity);
+            return data;
+        });
+}
+
+/*
+ * @tc.name: AnalyzeUrls001
+ * @tc.desc: test url Analyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, AnalyzeUrls001, TestSize.Level1)
+{
+    MockDataUrlAnalyzerMgr mockDataUrlAnalyzerMgr;
+    InitDataUrlAnalyzer(mockDataUrlAnalyzerMgr);
+
+    std::string text = "";
+    std::vector<UrlEntity> data = mockDataUrlAnalyzerMgr.AnalyzeUrls(text);
+    EXPECT_TRUE(data.empty());
+
+    text = "test1";
+    data = mockDataUrlAnalyzerMgr.AnalyzeUrls(text);
+    EXPECT_FALSE(data.empty());
 }
 
 /**
