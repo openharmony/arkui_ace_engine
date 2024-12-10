@@ -33,6 +33,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "base/log/log_wrapper.h"
 
 namespace {
@@ -2854,9 +2855,9 @@ void Mask0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMask0(frameNode, convValue);
+    CHECK_NULL_VOID(value && value->ptr);
+    const auto& progressMask = reinterpret_cast<ProgressMaskPeer*>(value->ptr)->GetProperty();
+    ViewAbstract::SetProgressMask(frameNode, progressMask);
 }
 void Mask1Impl(Ark_NativePointer node,
                const Ark_Type_CommonMethod_mask_value* value)
@@ -2864,9 +2865,15 @@ void Mask1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("CommonMethodModifier::Mask1Impl, not implemented due to deprecated");
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMask1(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [node](const Ark_ProgressMask& value) {
+            Mask0Impl(node, &value);
+        },
+        [node](const auto& value) {
+            LOGE("CommonMethodModifier::Mask1Impl is not implemented yet");
+        },
+        []() {}
+    );
 }
 void MaskShapeImpl(Ark_NativePointer node,
                    const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
