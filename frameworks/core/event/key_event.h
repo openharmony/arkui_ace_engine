@@ -593,6 +593,7 @@ struct KeyEvent final {
     bool enableCapsLock = false;
     bool isPreIme = false;
     bool isRedispatch = false;
+    uint32_t unicode = 0;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
 
@@ -626,6 +627,7 @@ public:
         SetTimeStamp(event.timeStamp);
         SetPressedKeyCodes(event.pressedCodes);
         keyMsg_ = event.msg;
+        unicode_ = event.unicode;
     };
     ~KeyEventInfo() override = default;
 
@@ -658,6 +660,11 @@ public:
     {
         metaKey_ = metaKey;
     }
+
+    uint32_t GetUnicode() const
+    {
+        return unicode_;
+    }
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";
@@ -666,6 +673,7 @@ private:
     SourceType keySource_ = SourceType::NONE;
     KeyIntention keyIntention_ = KeyIntention::INTENTION_UNKNOWN;
     std::string keyMsg_ = "";
+    uint32_t unicode_ = 0;
 };
 
 enum class BlurReason : int32_t {
