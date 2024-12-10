@@ -136,6 +136,7 @@ void SelectPattern::OnModifyDone()
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     } else {
@@ -345,6 +346,7 @@ void SelectPattern::RegisterOnPress()
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
