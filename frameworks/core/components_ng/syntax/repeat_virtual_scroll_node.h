@@ -73,6 +73,9 @@ public:
      */
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
+    void OnRecycle() override;
+    void OnReuse() override;
+
     /**
      * scenario: called by layout informs:
      *   - start: the first visible index
