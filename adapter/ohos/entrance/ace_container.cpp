@@ -2599,6 +2599,9 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
         configurationChange.skinUpdate = skinUpdate;
+        if ((isDynamicRender_ || isFormRender_) && fontUpdate) {
+            CheckAndSetFontFamily();
+        }
     }
 }
 
