@@ -156,8 +156,8 @@ Font Convert(const Ark_TextStyle_styled_string& src)
         .fontWeight = OptConvert<FontWeight>(src.fontWeight),
         .fontSize = OptConvert<Dimension>(src.fontSize),
         .fontStyle = OptConvert<Ace::FontStyle>(src.fontStyle),
-        .fontFamilies = OptConvert<FontFamilies>(src.fontFamily).value_or(FontFamilies()).families,
-        .fontColor = OptConvert<Color>(src.fontColor)
+        .fontColor = OptConvert<Color>(src.fontColor),
+        .fontFamiliesNG = OptConvert<FontFamilies>(src.fontFamily).value_or(FontFamilies()).families
     };
 }
 
@@ -403,7 +403,7 @@ StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* va
                 spanString = AceType::MakeRefPtr<SpanString>(data);
                 if (!data.empty() && styles && styles->tag != ARK_TAG_UNDEFINED) {
                     auto styleOptions = Converter::OptConvert<std::vector<StyleOptions>>(*styles);
-                    if (!styleOptions.has_value()) {
+                    if (styleOptions.has_value()) {
                         int32_t maxLength = StringUtils::ToWstring(data).length();
                         auto spanBases = ParseSpanBaseVector(styleOptions.value(), maxLength);
                         if (!spanBases.empty()) {
