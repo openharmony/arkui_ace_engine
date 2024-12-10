@@ -3049,7 +3049,7 @@ uint32_t OH_ArkUI_SwiperIndicator_GetColor(ArkUI_SwiperIndicator* indicator);
  * @brief Sets the color of the selected dot for the navigation indicator.
  *
  * @param indicator Indicates the pointer to the indicator.
- * @param color the color of the selected dot, in 0xARGB format.
+ * @param selectedColor the color of the selected dot, in 0xARGB format.
  * @since 12
 */
 void OH_ArkUI_SwiperIndicator_SetSelectedColor(ArkUI_SwiperIndicator* indicator, uint32_t selectedColor);
