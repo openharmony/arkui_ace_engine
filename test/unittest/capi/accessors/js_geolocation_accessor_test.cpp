@@ -19,18 +19,12 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockWebGeolocation : public WebGeolocation {
-public:
-    MOCK_METHOD(void, Invoke, (const std::string&, const bool&, const bool&));
-};
-} // namespace
 
 class JsGeolocationAccessorTest : public AccessorTestBase<GENERATED_ArkUIJsGeolocationAccessor,
     &GENERATED_ArkUIAccessors::getJsGeolocationAccessor, JsGeolocationPeer> {

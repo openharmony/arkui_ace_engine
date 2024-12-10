@@ -223,6 +223,13 @@ namespace Converter {
     }
 
     template<>
+    inline long Convert(const Ark_Number& src)
+    {
+        LOGE("Ark_Number doesn`t support long type");
+        return static_cast<long>(Convert<int>(src));
+    }
+
+    template<>
     inline float Convert(const Ark_Number& src)
     {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);

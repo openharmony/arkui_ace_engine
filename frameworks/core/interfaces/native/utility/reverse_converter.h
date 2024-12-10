@@ -88,6 +88,20 @@ namespace OHOS::Ace::NG::Converter {
         dst.i32 = src;
     }
 
+    inline void AssignArkValue(Ark_Number& dst, const long& src)
+    {
+        LOGE("Ark_Number doesn`t support long");
+        dst.tag = ARK_TAG_INT32;
+        dst.i32 = static_cast<int32_t>(src);
+    }
+
+    inline void AssignArkValue(Ark_Number& dst, const long long& src)
+    {
+        LOGE("Ark_Number doesn`t support long long");
+        dst.tag = ARK_TAG_INT32;
+        dst.i32 = static_cast<int32_t>(src);
+    }
+
     inline void AssignArkValue(Ark_Number& dst, const uint32_t& src)
     {
         dst.tag = ARK_TAG_INT32;

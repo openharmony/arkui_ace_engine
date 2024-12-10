@@ -19,20 +19,12 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockResult : public Result {
-public:
-    MOCK_METHOD(void, Confirm, (const std::string&));
-    MOCK_METHOD(void, Confirm, ());
-    MOCK_METHOD(void, Cancel, ());
-};
-} // namespace
 
 class JsResultAccessorTest : public AccessorTestBase<GENERATED_ArkUIJsResultAccessor,
     &GENERATED_ArkUIAccessors::getJsResultAccessor, JsResultPeer> {

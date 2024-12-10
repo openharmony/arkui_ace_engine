@@ -17,9 +17,16 @@
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #endif // WEB_SUPPORTED
+#include "core/interfaces/native/implementation/console_message_peer_impl.h"
+#include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
+#include "core/interfaces/native/implementation/js_result_peer_impl.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
+#include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
+#include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace {
 #ifdef WEB_SUPPORTED
@@ -458,155 +465,440 @@ void MetaViewportImpl(Ark_NativePointer node,
 void OnPageEndImpl(Ark_NativePointer node,
                    const Callback_OnPageEndEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnPageEnd(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPageEnd = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageFinishEvent>(info);
+        Ark_OnPageEndEvent parameter;
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnPageFinish(frameNode, onPageEnd);
+#endif // WEB_SUPPORTED
 }
 void OnPageBeginImpl(Ark_NativePointer node,
                      const Callback_OnPageBeginEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnPageBegin(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPageBegin = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageStartEvent>(info);
+        Ark_OnPageBeginEvent parameter;
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnPageStart(frameNode, onPageBegin);
+#endif // WEB_SUPPORTED
 }
 void OnProgressChangeImpl(Ark_NativePointer node,
                           const Callback_OnProgressChangeEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnProgressChange(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onProgressChange = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
+        Ark_OnProgressChangeEvent parameter;
+        parameter.newProgress = Converter::ArkValue<Ark_Number>(eventInfo->GetNewProgress());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnProgressChange(frameNode, onProgressChange);
+#endif // WEB_SUPPORTED
 }
 void OnTitleReceiveImpl(Ark_NativePointer node,
                         const Callback_OnTitleReceiveEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnTitleReceive(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onTitleReceive = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info);
+        Ark_OnTitleReceiveEvent parameter;
+        parameter.title = Converter::ArkValue<Ark_String>(eventInfo->GetTitle());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnTitleReceive(frameNode, onTitleReceive);
+#endif // WEB_SUPPORTED
 }
 void OnGeolocationHideImpl(Ark_NativePointer node,
                            const Callback_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnGeolocationHide(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onGeolocationHide = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        arkCallback.Invoke();
+    };
+    WebModelNG::SetOnGeolocationHide(frameNode, onGeolocationHide);
+#endif // WEB_SUPPORTED
 }
 void OnGeolocationShowImpl(Ark_NativePointer node,
                            const Callback_OnGeolocationShowEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnGeolocationShow(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onGeolocationShow = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationShowEvent>(info);
+        Ark_OnGeolocationShowEvent parameter;
+        parameter.origin = Converter::ArkValue<Ark_String>(eventInfo->GetOrigin());
+        auto peer = new JsGeolocationPeer();
+        peer->webGeolocation = eventInfo->GetWebGeolocation();
+        parameter.geolocation.ptr = peer;
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnGeolocationShow(frameNode, onGeolocationShow);
+#endif // WEB_SUPPORTED
 }
 void OnRequestSelectedImpl(Ark_NativePointer node,
                            const Callback_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnRequestSelected(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onRequestSelected = [arkCallback = CallbackHelper(*value), weakNode]
+        (const BaseEventInfo* info) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        arkCallback.Invoke();
+    };
+    WebModelNG::SetOnRequestFocus(frameNode, onRequestSelected);
+#endif // WEB_SUPPORTED
 }
 void OnAlertImpl(Ark_NativePointer node,
                  const Callback_OnAlertEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnAlert(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onAlert = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
+        Ark_OnAlertEvent parameter;
+        parameter.message = Converter::ArkValue<Ark_String>(eventInfo->GetMessage());
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+        auto peer = new JsResultPeer();
+        peer->result = eventInfo->GetResult();
+        parameter.result.ptr = peer;
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnAlertImpl return value can be incorrect");
+        return false;
+    };
+    WebModelNG::SetOnCommonDialog(frameNode, onAlert, DialogEventType::DIALOG_EVENT_ALERT);
+#endif // WEB_SUPPORTED
 }
 void OnBeforeUnloadImpl(Ark_NativePointer node,
                         const Callback_OnBeforeUnloadEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnBeforeUnload(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onBeforeUnload = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
+        Ark_OnBeforeUnloadEvent parameter;
+        parameter.message = Converter::ArkValue<Ark_String>(eventInfo->GetMessage());
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+        auto peer = new JsResultPeer();
+        peer->result = eventInfo->GetResult();
+        parameter.result.ptr = peer;
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnBeforeUnloadImpl return value can be incorrect");
+        return false;
+    };
+    WebModelNG::SetOnCommonDialog(frameNode, onBeforeUnload, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+#endif // WEB_SUPPORTED
 }
 void OnConfirmImpl(Ark_NativePointer node,
                    const Callback_OnConfirmEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnConfirm(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onConfirm = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
+        Ark_OnConfirmEvent parameter;
+        parameter.message = Converter::ArkValue<Ark_String>(eventInfo->GetMessage());
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+        auto peer = new JsResultPeer();
+        peer->result = eventInfo->GetResult();
+        parameter.result.ptr = peer;
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnConfirmImpl return value can be incorrect");
+        return false;
+    };
+    WebModelNG::SetOnCommonDialog(frameNode, onConfirm, DialogEventType::DIALOG_EVENT_CONFIRM);
+#endif // WEB_SUPPORTED
 }
 void OnPromptImpl(Ark_NativePointer node,
                   const Callback_OnPromptEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnPrompt(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPrompt = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
+        Ark_OnPromptEvent parameter;
+        parameter.message = Converter::ArkValue<Ark_String>(eventInfo->GetMessage());
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+        auto peer = new JsResultPeer();
+        peer->result = eventInfo->GetResult();
+        parameter.result.ptr = peer;
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnPromptImpl return value can be incorrect");
+        return false;
+    };
+    WebModelNG::SetOnCommonDialog(frameNode, onPrompt, DialogEventType::DIALOG_EVENT_PROMPT);
+#endif // WEB_SUPPORTED
 }
 void OnConsoleImpl(Ark_NativePointer node,
                    const Callback_OnConsoleEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnConsole(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onConsole = [arkCallback = CallbackHelper(*value), weakNode]
+        (const BaseEventInfo* info) -> bool {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebConsoleLogEvent>(info);
+        Ark_OnConsoleEvent parameter;
+        auto peer = new ConsoleMessagePeer();
+        peer->webConsoleLog = eventInfo->GetMessage();
+        parameter.message.ptr = peer;
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(parameter, continuation);
+        LOGE("WebAttributeModifier::OnConsoleImpl return value can be incorrect");
+        return false;
+    };
+    WebModelNG::SetOnConsoleLog(frameNode, onConsole);
+#endif // WEB_SUPPORTED
 }
 void OnErrorReceiveImpl(Ark_NativePointer node,
                         const Callback_OnErrorReceiveEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnErrorReceive(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onErrorReceive = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
+        Ark_OnErrorReceiveEvent parameter;
+        auto errorPeer = new WebResourceErrorPeer();
+        errorPeer->handler = eventInfo->GetError();
+        parameter.error.ptr = errorPeer;
+        auto requestPeer = new WebResourceRequestPeer();
+        requestPeer->webRequest = eventInfo->GetRequest();
+        parameter.request.ptr = requestPeer;
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnErrorReceive(frameNode, onErrorReceive);
+#endif // WEB_SUPPORTED
 }
 void OnHttpErrorReceiveImpl(Ark_NativePointer node,
                             const Callback_OnHttpErrorReceiveEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnHttpErrorReceive(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onHttpErrorReceive = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedHttpErrorEvent>(info);
+        Ark_OnHttpErrorReceiveEvent parameter;
+        auto requestPeer = new WebResourceRequestPeer();
+        requestPeer->webRequest = eventInfo->GetRequest();
+        parameter.request.ptr = requestPeer;
+        auto responsePeer = new WebResourceResponsePeer();
+        responsePeer->handler = eventInfo->GetResponse();
+        parameter.response.ptr = responsePeer;
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnHttpErrorReceive(frameNode, onHttpErrorReceive);
+#endif // WEB_SUPPORTED
 }
 void OnDownloadStartImpl(Ark_NativePointer node,
                          const Callback_OnDownloadStartEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnDownloadStart(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onDownloadStart = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
+        Ark_OnDownloadStartEvent parameter;
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+        parameter.mimetype = Converter::ArkValue<Ark_String>(eventInfo->GetMimetype());
+        parameter.contentDisposition = Converter::ArkValue<Ark_String>(eventInfo->GetContentDisposition());
+        parameter.userAgent = Converter::ArkValue<Ark_String>(eventInfo->GetUserAgent());
+        parameter.contentLength = Converter::ArkValue<Ark_Number>(eventInfo->GetContentLength());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetOnDownloadStart(frameNode, onDownloadStart);
+#endif // WEB_SUPPORTED
 }
 void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
                                   const Callback_OnRefreshAccessedHistoryEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnRefreshAccessedHistory(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onRefreshAccessedHistory = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<RefreshAccessedHistoryEvent>(info);
+        Ark_OnRefreshAccessedHistoryEvent parameter;
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetVisitedUrl());
+        parameter.isRefreshed = Converter::ArkValue<Ark_Boolean>(eventInfo->IsRefreshed());
+        arkCallback.Invoke(parameter);
+    };
+    WebModelNG::SetRefreshAccessedHistoryId(frameNode, onRefreshAccessedHistory);
+#endif // WEB_SUPPORTED
 }
 void OnUrlLoadInterceptImpl(Ark_NativePointer node,
                             const Type_WebAttribute_onUrlLoadIntercept_callback* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnUrlLoadIntercept(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onUrlLoadIntercept = [arkCallback = CallbackHelper(*value), weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
+        Ark_Literal_Union_String_WebResourceRequest_data parameter;
+        parameter.data = Converter::ArkUnion<Ark_Union_String_WebResourceRequest, Ark_String>(
+            Converter::ArkValue<Ark_String>(eventInfo->GetData()));
+        auto optParam = Converter::ArkValue<Opt_Literal_Union_String_WebResourceRequest_data>(
+            std::optional<Ark_Literal_Union_String_WebResourceRequest_data>(parameter));
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(optParam, continuation);
+        LOGE("WebAttributeModifier::OnUrlLoadInterceptImpl return value can be incorrect");
+        return false;
+    };
+    WebModelNG::SetOnUrlLoadIntercept(frameNode, onUrlLoadIntercept);
+#endif // WEB_SUPPORTED
 }
 void OnSslErrorReceiveImpl(Ark_NativePointer node,
                            const Callback_Literal_Function_handler_Object_error_Void* value)
