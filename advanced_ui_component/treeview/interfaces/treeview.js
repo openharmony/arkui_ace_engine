@@ -31,10 +31,11 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
-
 const hilog = requireNapi('hilog');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi('resourceManager');
+const accessibility = requireNapi('accessibility');
+const Prompt = requireNapi('prompt');
 
 const u = 24;
 const a1 = 24;
@@ -74,6 +75,7 @@ const n2 = 12;
 const o2 = 8;
 const i16 = 'TreeView';
 const j16 = 0x3900;
+const j17 = 2000;
 const ARROW_DOWN = {
     'id': -1,
     'type': 20000,
@@ -696,8 +698,13 @@ export class TreeView extends ViewPU {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         }, this, 'listItemBgColor');
+        this.m16 = new ObservedPropertyObjectPU([], this, 'allParentNode');
         this.u7 = new ObservedPropertyObjectPU(e3.getInstance(), this, 'treeViewTheme');
         this.addProvidedVar('treeViewTheme', this.u7, false);
+        this.n16 = new ObservedPropertySimplePU(true, this, 'clickButtonFlag');
+        this.addProvidedVar('clickButtonFlag', this.n16, false);
+        this.o16 = new ObservedPropertySimplePU(true, this, 'clickNodeFlag');
+        this.addProvidedVar('clickNodeFlag', this.o16, false);
         this.listTreeViewMenu = this.NullBuilder;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -764,7 +771,7 @@ export class TreeView extends ViewPU {
                 params: ['sys.float.padding_level0'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
-            }
+            },
         };
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
@@ -801,8 +808,17 @@ export class TreeView extends ViewPU {
         if (params.listItemBgColor !== undefined) {
             this.listItemBgColor = params.listItemBgColor;
         }
+        if (params.allParentNode !== undefined) {
+            this.allParentNode = params.allParentNode;
+        }
         if (params.treeViewTheme !== undefined) {
             this.treeViewTheme = params.treeViewTheme;
+        }
+        if (params.clickButtonFlag !== undefined) {
+            this.clickButtonFlag = params.clickButtonFlag;
+        }
+        if (params.clickNodeFlag !== undefined) {
+            this.clickNodeFlag = params.clickNodeFlag;
         }
         if (params.listTreeViewMenu !== undefined) {
             this.listTreeViewMenu = params.listTreeViewMenu;
@@ -848,7 +864,10 @@ export class TreeView extends ViewPU {
         this.r7.purgeDependencyOnElmtId(rmElmtId);
         this.s7.purgeDependencyOnElmtId(rmElmtId);
         this.t7.purgeDependencyOnElmtId(rmElmtId);
+        this.m16.purgeDependencyOnElmtId(rmElmtId);
         this.u7.purgeDependencyOnElmtId(rmElmtId);
+        this.n16.purgeDependencyOnElmtId(rmElmtId);
+        this.o16.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -860,7 +879,10 @@ export class TreeView extends ViewPU {
         this.r7.aboutToBeDeleted();
         this.s7.aboutToBeDeleted();
         this.t7.aboutToBeDeleted();
+        this.m16.aboutToBeDeleted();
         this.u7.aboutToBeDeleted();
+        this.n16.aboutToBeDeleted();
+        this.o16.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -929,12 +951,36 @@ export class TreeView extends ViewPU {
         this.t7.set(newValue);
     }
 
+    get allParentNode() {
+        return this.m16.get();
+    }
+
+    set allParentNode(newValue) {
+        this.m16.set(newValue);
+    }
+
     get treeViewTheme() {
         return this.u7.get();
     }
 
     set treeViewTheme(newValue) {
         this.u7.set(newValue);
+    }
+
+    get clickButtonFlag() {
+        return this.n16.get();
+    }
+
+    set clickButtonFlag(newValue) {
+        this.n16.set(newValue);
+    }
+
+    get clickNodeFlag() {
+        return this.o16.get();
+    }
+
+    set clickNodeFlag(newValue) {
+        this.o16.set(newValue);
     }
 
     NullBuilder(parent = null) {
@@ -961,7 +1007,7 @@ export class TreeView extends ViewPU {
             this.item = this.treeController.v7().w7;
         }
         let w17 = this.getUIContext();
-        this.followingSystemFontScale = w17.isFollowingSystemFontScale();
+        this.followingSystemFontScale = w17.isFollowingSystemFontScale();;
         this.maxAppFontScale = w17.getMaxFontScale();
     }
 
@@ -1208,7 +1254,7 @@ export class TreeView extends ViewPU {
                     }
                 }
                 this.listNodeDataSource.q8(index);
-                this.listNodeDataSource.r8(flag, index - 1, c17);
+                this.listNodeDataSource.r8(flag, index - 1, c17, ObservedObject.GetRawObject(this.allParentNode));
                 if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.s8()) {
                     this.listNodeDataSource.t8(this.listNodeDataSource.findIndex(currentNodeId), currentNodeId, index);
                 }
@@ -1230,6 +1276,7 @@ export class TreeView extends ViewPU {
                 this.listNodeDataSource.z8();
             });
             List.onDrop((event, extraParams) => {
+                this.clickNodeFlag = false;
                 this.listNodeDataSource.y8();
                 let m16 = n1;
                 this.listNodeDataSource.v8(m16);
@@ -1336,6 +1383,18 @@ export class TreeView extends ViewPU {
                     });
                 }
                 this.listNodeDataSource.lastIndex = x16;
+                let eventInfo = ({
+                    type: 'requestFocusForAccessibility',
+                    bundleName: getContext()?.abilityInfo?.bundleName,
+                    triggerAction: 'common',
+                    customId: `treeView_node${t16}`
+                });
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    setTimeout(() => {
+                        this.clickNodeFlag = true;
+                    }, j17);
+                    console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(eventInfo)}`);
+                });
             });
         }, List);
         {
@@ -1378,6 +1437,22 @@ export class TreeView extends ViewPU {
                                 this.listNodeDataSource.u8(false);
                                 return;
                             }
+                            let primaryTitle = f16.t6()?.primaryTitle === undefined ? '' :
+                                f16.t6()?.primaryTitle;
+                            let secondaryTitle = f16.t6()?.secondaryTitle === undefined ? '' :
+                                f16.t6()?.secondaryTitle;
+                            let title = `${primaryTitle}, ${secondaryTitle}`;
+                            Prompt.showToast({
+                                message: this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
+                                    title)
+                            });
+                            let b21 = [];
+                            for (let c21 = 0; c21 < this.listNodeDataSource.w7.length; c21++) {
+                                if (this.listNodeDataSource.w7[c21].f6() === -1) {
+                                    b21.push(this.listNodeDataSource.w7[c21].e6());
+                                }
+                            }
+                            this.allParentNode = b21;
                             return {
                                 builder: () => {
                                     this.draggingPopup.call(this, f16);
@@ -1429,7 +1504,7 @@ export class TreeView extends ViewPU {
                                         index: this.listNodeDataSource.findIndex(u15.e6()),
                                         listTreeViewMenu: this.listTreeViewMenu,
                                     }, undefined, elmtId, () => {
-                                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1133, x9: 13 });
+                                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1145, x9: 13 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -1544,7 +1619,7 @@ export class TreeController {
             if (nodeParam.primaryTitle !== undefined &&
                 !this.listNodeDataSource.i10(nodeParam.primaryTitle.toString())) {
                 throw new Error('ListTreeNode[addNode]: ' +
-                    'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
+                    'The directory name cannot contain the following characters\ /: *? " < > | or exceeds the maximum length.');
                 return this;
             }
             if (nodeParam.primaryTitle === null && nodeParam.icon === null) {
@@ -2520,7 +2595,84 @@ class h3 extends g3 {
         }
     }
 
-    r8(flag, index, k11) {
+    g16(j5) {
+        let k5 = [];
+        while (j5 !== -1) {
+            if (j5 === undefined) {
+                return;
+            }
+            let m5 = this.f10(j5);
+            let l5 = this.v10.get(m5);
+            if (l5 === undefined || m5 === undefined) {
+                return;
+            }
+            let primaryTitle = this.a15(l5).t6().primaryTitle === undefined
+                ? '' : this.a15(l5).t6().primaryTitle;
+            let secondaryTitle = this.a15(l5).t6().secondaryTitle === undefined
+                ? '' : this.a15(l5).t6().secondaryTitle;
+            k5.unshift(`${primaryTitle}${secondaryTitle}`);
+            j5 = l5.currentNodeId;
+        }
+        return k5.join(',');
+    }
+
+    p16(w20) {
+        let x20 = [];
+        while (w20 !== -1) {
+            if (w20 === undefined) {
+                return;
+            }
+            let y20 = this.f10(w20);
+            let z20 = this.findIndex(y20);
+            let a21 = this.v10.get(y20);
+            if (a21 === undefined || y20 === undefined) {
+                return;
+            }
+            let primaryTitle = this.getData(z20)?.t6().primaryTitle === undefined
+                ? '' : this.getData(z20)?.t6().primaryTitle;
+            let secondaryTitle = this.getData(z20)?.t6().secondaryTitle === undefined
+                ? '' : this.getData(z20)?.t6().secondaryTitle;
+            x20.unshift(`${primaryTitle}${secondaryTitle}`);
+            w20 = a21.currentNodeId;
+        }
+        return x20.join(',');
+    }
+
+    h16(q20, r20) {
+        this.g16(r20);
+        if (r20 === undefined) {
+            return;
+        }
+        let parentId = this.f10(r20);
+        let s20 = this.findIndex(r20);
+        let f5 = this.findIndex(parentId);
+        let h5 = q20.indexOf(r20) + 2;
+        let t20 = this.b10(parentId);
+        let u20 = t20.map(item => item.itemId);
+        let i5 = u20.indexOf(r20) + 2;
+        if (parentId === -1 && this.j9(r20) === z2.COLLAPSE ||
+            parentId === -1 && this.j9(r20) === undefined) {
+            Prompt.showToast({
+                message: this.getStringByName('treeview_accessibility_move_node_parent', h5)
+            });
+        } else if (this.j9(r20) === z2.EXPAND) {
+            Prompt.showToast({
+                message: this.getStringByName('treeview_accessibility_move_node_child', this.g16(r20), 1)
+            });
+        } else if (parentId !== -1) {
+            Prompt.showToast({
+                message: this.getStringByName('treeview_accessibility_move_node_child', this.g16(r20), i5)
+            });
+        }
+    }
+
+    getStringByName(resName, ...args) {
+        let resourceManager = getContext()?.resourceManager;
+        let result = resourceManager?.getStringByNameSync(resName, ...args);
+        return result;
+    }
+
+    r8(flag, index, k11, l20) {
         let l11 = (this.n11 !== index || this.flag !== flag) ? true : false;
         this.n11 = index;
         if ((l11 || k11) && this.e11) {
@@ -2530,7 +2682,8 @@ class h3 extends g3 {
             if (currentNodeId !== undefined) {
                 m11 = (this.a11.get(currentNodeId) === z2.EXPAND &&
                     this.flag === w2.DOWN_FLAG) ? (m11 ? m11 + 1 : undefined) : m11;
-                if (this.l11 !== this.INITIAL_INVALID_VALUE && this.b11.has(this.l11)) {
+                if (this.l11 !== this.INITIAL_INVALID_VALUE &&
+                this.b11.has(this.l11)) {
                     let n11 = this.b11.get(this.l11);
                     this.w7.forEach((value) => {
                         if (value.e6() === this.l11) {
@@ -2539,6 +2692,9 @@ class h3 extends g3 {
                     });
                     this.g9(n11);
                 }
+                let m20 = this.getData(index + 2)?.e6();
+                let n20 = this.getData(index + 1)?.e6();
+                let o20 = this.v10.get(n20);
                 if (this.flag === w2.DOWN_FLAG && index < this.totalCount() - 1) {
                     this.getData(index)?.w6(false);
                     this.getData(index + 1)?.w6(true);
@@ -2547,6 +2703,12 @@ class h3 extends g3 {
                     this.g9(index);
                     this.g9(index + 1);
                     this.l11 = this.getData(index + 1)?.e6();
+                    let p20 = this.v10.get(n20);
+                    if (!p20?.p6.a13) {
+                        this.h16(l20, n20);
+                    } else {
+                        this.h16(l20, m20);
+                    }
                 } else if (this.flag === w2.UP_FLAG && index < this.totalCount() - 1) {
                     this.getData(index)?.w6(true);
                     this.getData(index + 1)?.w6(false);
@@ -2555,6 +2717,9 @@ class h3 extends g3 {
                     this.g9(index);
                     this.g9(index + 1);
                     this.l11 = this.getData(index)?.e6();
+                    if (o20?.p6.a13 && o20?.parentNodeId !== -1) {
+                        this.h16(l20, n20);
+                    }
                 } else if (index >= this.totalCount() - 1) {
                     if (this.flag === w2.DOWN_FLAG) {
                         this.getData(index)?.w6(false);
@@ -3343,7 +3508,7 @@ class h3 extends g3 {
     }
 
     i10(title) {
-        if (new RegExp('/[\\\/:*?"<>|]/').test(title)) {
+        if (new RegExp('/[\\\/:*?" < > |]/').test(title)){
             return false;
         }
         if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_CN_LENGTH) ||
@@ -3425,6 +3590,33 @@ class h3 extends g3 {
     }
 }
 
+class k16 {
+    constructor(controller) {
+        this.fontSize = 1;
+        this.controller = null;
+        this.controller = controller;
+    }
+
+    applyGesture(event) {
+        if (this.fontSize >= k16.minFontSize) {
+            event.addGesture(new LongPressGestureHandler({ repeat: false, duration: k16.e16 })
+                .onAction(() => {
+                    if (event) {
+                        this.controller?.open();
+                    }
+                })
+                .onActionEnd(() => {
+                    this.controller?.close();
+                }));
+        } else {
+            event.clearGestures();
+        }
+    }
+}
+
+k16.e16 = 500;
+k16.minFontSize = 1.75;
+
 export class i3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -3441,6 +3633,8 @@ export class i3 extends ViewPU {
         this.r7 = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
         this.s7 = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
         this.u7 = this.initializeConsume('treeViewTheme', 'treeViewTheme');
+        this.n16 = this.initializeConsume('clickButtonFlag', 'clickButtonFlag');
+        this.o16 = this.initializeConsume('clickNodeFlag', 'clickNodeFlag');
         this.listTreeViewMenu = undefined;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -3507,7 +3701,7 @@ export class i3 extends ViewPU {
                 params: ['sys.float.padding_level0'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
-            }
+            },
         };
         this.inputFontSize = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
         this.setInitiallyProvidedValue(params);
@@ -3589,6 +3783,8 @@ export class i3 extends ViewPU {
         this.r7.purgeDependencyOnElmtId(rmElmtId);
         this.s7.purgeDependencyOnElmtId(rmElmtId);
         this.u7.purgeDependencyOnElmtId(rmElmtId);
+        this.n16.purgeDependencyOnElmtId(rmElmtId);
+        this.o16.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -3601,6 +3797,8 @@ export class i3 extends ViewPU {
         this.r7.aboutToBeDeleted();
         this.s7.aboutToBeDeleted();
         this.u7.aboutToBeDeleted();
+        this.n16.aboutToBeDeleted();
+        this.o16.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -3673,12 +3871,28 @@ export class i3 extends ViewPU {
         this.u7.set(newValue);
     }
 
+    get clickButtonFlag() {
+        return this.n16.get();
+    }
+
+    set clickButtonFlag(newValue) {
+        this.n16.set(newValue);
+    }
+
+    get clickNodeFlag() {
+        return this.o16.get();
+    }
+
+    set clickNodeFlag(newValue) {
+        this.o16.set(newValue);
+    }
+
     aboutToAppear() {
         if (this.item.k6().v3) {
             this.item.j4 = this.item.k6().v3?.source;
         }
         let j7 = this.getUIContext();
-        this.followingSystemFontScale = j7.isFollowingSystemFontScale();
+        this.followingSystemFontScale = j7.isFollowingSystemFontScale();;
         this.maxAppFontScale = j7.getMaxFontScale();
     }
 
@@ -3713,11 +3927,76 @@ export class i3 extends ViewPU {
     }
 
     checkInvalidPattern(title) {
-        return new RegExp('/[\\\/:*?"<>|]/').test(title);
+        return new RegExp('/[\\\/:*?" < > |]/').test(title);
     }
 
     checkIsAllCN(title) {
         return new RegExp('/^[\u4e00-\u9fa5]+$/').test(title);
+    }
+
+    getAccessibilityReadText(currentNodeId) {
+        let b20 = this.listNodeDataSource.v10.get(currentNodeId);
+        if (b20 === undefined || currentNodeId === undefined) {
+            return '';
+        }
+        let c20 = this.listNodeDataSource.a15(b20);
+        let primaryTitle = c20?.t6()?.primaryTitle?.toString() === undefined
+            ? '' : c20?.t6()?.primaryTitle?.toString();
+        let secondaryTitle = c20?.t6()?.secondaryTitle?.toString() === undefined
+            ? '' : c20?.t6()?.secondaryTitle?.toString();
+        let title = `${primaryTitle},${secondaryTitle}`;
+        let parentId = this.listNodeDataSource.f10(currentNodeId);
+        let d20 = [];
+        let e20 = 0;
+        let f20 = this.listNodeDataSource.b10(parentId);
+        let g20 = f20.map(item => item.itemId);
+        let h20 = g20.indexOf(currentNodeId) + 1;
+        let i20 = this.listNodeDataSource.g16(currentNodeId);
+        if (i20 === undefined) {
+            return '';
+        }
+        if (this.clickNodeFlag === false) {
+            if (this.listNodeDataSource.f10(currentNodeId) === -1) {
+                for (let k20 = 0; k20 < this.listNodeDataSource.w7.length; k20++) {
+                    if (this.listNodeDataSource.w7[k20].f6() === -1) {
+                        d20.push(this.listNodeDataSource.w7[k20].e6());
+                    }
+                }
+                e20 = d20.indexOf(currentNodeId) + 1;
+                return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_parent', e20);
+            } else {
+                return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_child', i20, h20);
+            }
+        } else {
+            return title;
+        }
+    }
+
+    getAccessibilityDescription() {
+        if (this.clickNodeFlag === false) {
+            return '';
+        } else {
+            return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
+        }
+    }
+
+    getAccessibilityReadButtonText(a20) {
+        if (this.clickButtonFlag === false) {
+            return this.item.k6().x3?.c8 === ARROW_RIGHT
+                ? this.listNodeDataSource.getStringByName('treeview_accessibility_folded_node')
+                : this.listNodeDataSource.getStringByName('treeview_accessibility_expanded_node');
+        } else {
+            return a20 ? this.listNodeDataSource.getStringByName('treeview_accessibility_expand_node')
+                : this.listNodeDataSource.getStringByName('treeview_accessibility_fold_node');
+        }
+    }
+
+    getAccessibilityReadButtonDescription() {
+        if (this.clickButtonFlag === false) {
+            return '';
+        } else {
+            return '单指双击即可执行';
+        }
     }
 
     popupForShowTitle(text, backgroundColor, fontColor, parent = null) {
@@ -3871,6 +4150,11 @@ export class i3 extends ViewPU {
                                 this.item.k6().w3?.j8(true);
                                 let a7 = { currentNodeId: z6 };
                                 this.appEventBus.emit(TreeListenType.NODE_CLICK, a7);
+                                Prompt.showToast({
+                                    message: this.item.s6()
+                                        ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+                                        `${this.getAccessibilityReadText(this.item.e6())}`) : ''
+                                });
                             }
                             if (this.listNodeDataSource.u9() !== -1 && this.index !== this.listNodeDataSource.u9()) {
                                 this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
@@ -3935,16 +4219,19 @@ export class i3 extends ViewPU {
                         Row.create({});
                         Row.focusable(true);
                         Row.width('100%');
-                        Gesture.create(GesturePriority.Low);
-                        TapGesture.create({ count: 2 });
-                        TapGesture.onAction((event) => {
-                            this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(this.item.e6()));
-                        });
-                        TapGesture.pop();
-                        Gesture.pop();
                         Row.height(this.item.h6());
                         Row.padding({ start: LengthMetrics.vp(this.item.g6()) });
                         Row.bindContextMenu({ builder: this.builder.bind(this) }, ResponseType.RightClick);
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Row.create();
+                        Row.height(i1);
+                        Row.layoutWeight(1);
+                        Row.focusable(true);
+                        Row.accessibilityGroup(true);
+                        Row.id(`treeView_node${this.item.e6()}`);
+                        Row.accessibilityText(this.getAccessibilityReadText(this.item.e6()));
+                        Row.accessibilityDescription(this.getAccessibilityDescription());
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
@@ -4042,39 +4329,39 @@ export class i3 extends ViewPU {
                                         bottom: LengthMetrics.resource(this.textInputPadding.bottom),
                                     });
                                     TextInput.onChange((value) => {
-                                        let g6 = this.listNodeDataSource.findIndex(this.item.e6());
-                                        let h6 = '';
-                                        let i6 = false;
-                                        let j6 = false;
+                                        let o19 = this.listNodeDataSource.findIndex(this.item.e6());
+                                        let p19 = '';
+                                        let q19 = false;
+                                        let r19 = false;
                                         if (this.checkInvalidPattern(value)) {
-                                            for (let k6 = 0; k6 < value.length; k6++) {
-                                                if (!this.checkInvalidPattern(value[k6])) {
-                                                    h6 += value[k6];
+                                            for (let s19 = 0; s19 < value.length; s19++) {
+                                                if (!this.checkInvalidPattern(value[s19])) {
+                                                    p19 += value[s19];
                                                 }
                                             }
-                                            i6 = true;
-                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.INVALID_ERROR, true, g6);
+                                            q19 = true;
+                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.INVALID_ERROR, true, o19);
                                         } else {
-                                            h6 = value;
-                                            i6 = false;
+                                            p19 = value;
+                                            q19 = false;
                                         }
-                                        if ((this.checkIsAllCN(h6) && h6.length > this.MAX_CN_LENGTH) ||
-                                            (!this.checkIsAllCN(h6) && h6.length > this.MAX_EN_LENGTH)) {
-                                            h6 = this.checkIsAllCN(h6) ?
-                                            h6.substr(0, this.MAX_CN_LENGTH) : h6.substr(0, this.MAX_EN_LENGTH);
-                                            j6 = true;
-                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.LENGTH_ERROR, true, g6);
+                                        if ((this.checkIsAllCN(p19) && p19.length > this.MAX_CN_LENGTH) ||
+                                            (!this.checkIsAllCN(p19) && p19.length > this.MAX_EN_LENGTH)) {
+                                            p19 = this.checkIsAllCN(p19) ?
+                                            p19.substr(0, this.MAX_CN_LENGTH) : p19.substr(0, this.MAX_EN_LENGTH);
+                                            r19 = true;
+                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.LENGTH_ERROR, true, o19);
                                         } else {
-                                            j6 = false;
+                                            r19 = false;
                                         }
-                                        if (!j6 && !i6) {
-                                            this.listNodeDataSource.v13(g6, h6);
+                                        if (!r19 && !q19) {
+                                            this.listNodeDataSource.v13(o19, p19);
                                         }
                                     });
                                     TextInput.onSubmit((enterKey) => {
-                                        let f6 = this.listNodeDataSource.findIndex(this.item.e6());
-                                        this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, f6);
-                                        this.listNodeDataSource.w9(f6, t2.COMMIT_NODE);
+                                        let n19 = this.listNodeDataSource.findIndex(this.item.e6());
+                                        this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, n19);
+                                        this.listNodeDataSource.w9(n19, t2.COMMIT_NODE);
                                     });
                                 }, TextInput);
                                 Row.pop();
@@ -4106,7 +4393,8 @@ export class i3 extends ViewPU {
                                             params: ['sys.float.padding_level0'],
                                             'bundleName': '__harDefaultBundleName__',
                                             'moduleName': '__harDefaultModuleName__',
-                                        }) : LengthMetrics.resource(this.listNodeDataSource.q14().margin.right)
+                                        }) :
+                                        LengthMetrics.resource(this.listNodeDataSource.q14().margin.right)
                                     });
                                 }, Row);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -4132,38 +4420,60 @@ export class i3 extends ViewPU {
                         }
                     }, If);
                     If.pop();
+                    Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.item.k6().x3) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Row.create();
-                                    Row.focusable(true);
-                                    Row.height(this.item.k6().x3?.itemHeight);
-                                    Row.width(this.item.k6().x3?.itemWidth);
-                                }, Row);
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.item.k6().x3?.c8);
-                                    Image.fillColor(this.item.k6().x3?.y12 ?
-                                    this.treeViewTheme.i4 : z1);
-                                    Image.align(Alignment.End);
-                                    Image.objectFit(ImageFit.Contain);
-                                    Image.height(this.item.k6().x3?.itemHeight);
-                                    Image.width(this.item.k6().x3?.itemWidth);
-                                    Image.opacity(!this.item.g7() ?
-                                        this.item.k6().x3?.opacity : this.item.k6().x3?.k15);
-                                    Image.onTouch((event) => {
-                                        if (event.type === TouchType.Down) {
-                                            this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(this.item.e6()));
-                                            this.listNodeDataSource.s14(this.item.e6());
-                                        }
-                                        event.stopPropagation();
-                                    });
-                                    Image.focusable(true);
-                                    Image.matchTextDirection((this.item.k6().x3?.c8 === ARROW_RIGHT ||
-                                        this.item.k6().x3?.c8 === s2) ? true : false);
-                                }, Image);
-                                Row.pop();
+                                if (!If.canRetake(`treeView_button${this.item.e6()}`)) {
+                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                        Row.create();
+                                        Row.focusable(true);
+                                        Row.height(this.item.k6().x3?.itemHeight);
+                                        Row.width(this.item.k6().x3?.itemWidth);
+                                        Row.id(`treeView_button${this.item.e6()}`);
+                                        Row.accessibilityText(this.getAccessibilityReadButtonText(this.item.k6()
+                                            .x3?.c8 === ARROW_RIGHT));
+                                        Row.accessibilityDescription(this.getAccessibilityReadButtonDescription());
+                                        Row.accessibilityLevel('yes');
+                                    }, Row);
+                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                        Image.create(this.item.k6().x3?.c8);
+                                        Image.fillColor(this.item.k6().x3?.y12 ?
+                                        this.treeViewTheme.i4 : z1);
+                                        Image.align(Alignment.End);
+                                        Image.objectFit(ImageFit.Contain);
+                                        Image.height(this.item.k6().x3?.itemHeight);
+                                        Image.width(this.item.k6().x3?.itemWidth);
+                                        Image.opacity(!this.item.g7() ?
+                                            this.item.k6().x3?.opacity : this.item.k6().x3?.k15);
+                                        Image.onTouch((event) => {
+                                            if (event.type === TouchType.Down) {
+                                                this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(this.item.e6()));
+                                                this.listNodeDataSource.s14(this.item.e6());
+                                                this.clickButtonFlag = false;
+                                            }
+                                            if (event.type === TouchType.Up) {
+                                                let eventInfo = ({
+                                                    type: 'requestFocusForAccessibility',
+                                                    bundleName: getContext()?.abilityInfo?.bundleName,
+                                                    triggerAction: 'common',
+                                                    customId: `treeView_button${this.item.e6()}`
+                                                });
+                                                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                                                    setTimeout(() => {
+                                                        this.clickButtonFlag = true;
+                                                    }, j17);
+                                                });
+                                            }
+                                            event.stopPropagation();
+                                        });
+                                        Image.focusable(true);
+                                        Image.matchTextDirection((this.item.k6().x3?.c8 === ARROW_RIGHT ||
+                                            this.item.k6().x3?.c8 === s2) ? true : false);
+                                    }, Image);
+                                    Row.pop();
+                                }
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
