@@ -4918,6 +4918,12 @@ void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
     rsNode_->SetFrameGravity(gravity);
 }
 
+void RosenRenderContext::SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUIFirstSwitch(uiFirstSwitch);
+}
+
 int32_t RosenRenderContext::CalcExpectedFrameRate(const std::string& scene, float speed)
 {
     if (rsNode_ == nullptr) {

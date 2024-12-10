@@ -4486,6 +4486,7 @@ void OverlayManager::PlaySheetTransition(
                 context->UpdateRenderGroup(false, false, true);
                 TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+                pattern->SetUIFirstSwitch(isFirst, true);
                 if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
                     isFirst) {
                     pattern->OnAppear();
@@ -4497,6 +4498,7 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
         ACE_SCOPED_TRACE("Sheet start admission");
+        sheetPattern->SetUIFirstSwitch(isFirstTransition, false);
         AnimationUtils::Animate(
             option,
             [context, offset]() {
