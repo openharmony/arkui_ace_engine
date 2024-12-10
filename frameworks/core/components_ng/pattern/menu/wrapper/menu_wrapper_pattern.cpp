@@ -423,7 +423,8 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             CHECK_NULL_VOID(menuWrapperChildGeometryNode);
             auto childOffset = menuWrapperChildNode->GetPaintRectOffset();
             auto childSize = menuWrapperChildGeometryNode->GetFrameSize();
-            auto menuWrapperChildZone = RectF(childOffset.GetX(), childOffset.GetY(), childSize.Width(), childSize.Height());
+            auto menuWrapperChildZone = RectF(childOffset.GetX(), childOffset.GetY(),
+                childSize.Width(), childSize.Height());
             if (menuWrapperChildZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
                 currentTouchItem_ = FindTouchedMenuItem(menuWrapperChildNode, position);
                 ChangeCurMenuItemBgColor();
