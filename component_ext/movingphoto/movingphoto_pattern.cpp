@@ -1059,7 +1059,7 @@ void MovingPhotoPattern::StartAnimation()
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption,
-        [imageRsContext, videoRsContext, flag = historyAutoAndRepeatLevel_, movingPhotoPattern]() {
+        [imageRsContext, videoRsContext, flag = autoAndRepeatLevel_, movingPhotoPattern]() {
             imageRsContext->UpdateOpacity(0.0);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
@@ -1067,8 +1067,8 @@ void MovingPhotoPattern::StartAnimation()
         }, animationOption.GetOnFinishEvent());
 }
 
-void MovingPhotoPattern::RsContextUpdateTransformScale(RefPtr<RenderContext>& imageRsContext,
-            RefPtr<RenderContext>& imageRsContext, PlaybackMode playbackMode))
+void MovingPhotoPattern::RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
+    const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode)
 {
     if (playbackMode == PlaybackMode::REPEAT) {
         videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});

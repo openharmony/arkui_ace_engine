@@ -195,8 +195,8 @@ private:
     void SelectPlaybackMode(PlaybackMode mode);
     void StartPlayback();
     void StartAnimation();
-    void RsContextUpdateTransformScale(RefPtr<RenderContext>& imageRsContext,
-            RefPtr<RenderContext>& imageRsContext, PlaybackMode playbackMode);
+    void RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
+            const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode);
     void StopPlayback();
     void PausePlayback();
     void RefreshMovingPhoto();
