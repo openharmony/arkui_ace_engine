@@ -4264,7 +4264,7 @@ bool PipelineContext::CompensatePointerMoveEventFromUnhandledEvents(
     if (dragEvents_.empty()) {
         return false;
     }
-    
+
     auto iter = dragEvents_.find(node);
     if (iter == dragEvents_.end()) {
         return false;
@@ -5408,5 +5408,14 @@ void PipelineContext::SetEnableSwipeBack(bool isEnable)
     auto rootPattern = rootNode_->GetPattern<RootPattern>();
     CHECK_NULL_VOID(rootPattern);
     rootPattern->SetEnableSwipeBack(isEnable);
+}
+
+void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
+{
+    lastHostParentOffsetToWindow_ = offset;
+    CHECK_NULL_VOID(rootNode_);
+    auto renderContext = rootNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->RequestNextFrame();
 }
 } // namespace OHOS::Ace::NG
