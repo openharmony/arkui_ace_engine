@@ -654,7 +654,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->Initialize(host->GetContextRefPtr());
+    scrollable->Initialize(host);
     scrollable->SetMaxFlingVelocity(MAX_FLING_VELOCITY);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

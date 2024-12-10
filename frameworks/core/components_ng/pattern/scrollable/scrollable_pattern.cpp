@@ -504,21 +504,6 @@ void ScrollablePattern::OnScrollEnd()
     SelectOverlayScrollNotifier::NotifyOnScrollEnd(WeakClaim(this));
 }
 
-void ScrollablePattern::AttachAnimatableProperty(RefPtr<Scrollable> scrollable)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto property = scrollable->GetFrictionProperty();
-    renderContext->AttachNodeAnimatableProperty(property);
-
-    property = scrollable->GetSpringProperty();
-    renderContext->AttachNodeAnimatableProperty(property);
-    property = scrollable->GetSnapProperty();
-    renderContext->AttachNodeAnimatableProperty(property);
-}
-
 void ScrollablePattern::AddScrollEvent()
 {
     auto gestureHub = GetGestureHub();
@@ -705,8 +690,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     auto scrollable = MakeRefPtr<Scrollable>(std::move(scrollCallback), GetAxis());
     scrollable->SetNodeId(host->GetAccessibilityId());
     scrollable->SetNodeTag(host->GetTag());
-    scrollable->Initialize(host->GetContextRefPtr());
-    AttachAnimatableProperty(scrollable);
+    scrollable->Initialize(host);
     SetHandleScrollCallback(scrollable);
     SetOverScrollCallback(scrollable);
     SetIsReverseCallback(scrollable);

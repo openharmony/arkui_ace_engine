@@ -837,7 +837,6 @@ private:
     float GetScrollDelta(float offset, bool& stopAnimation);
 
     void OnAttachToFrameNode() override;
-    void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
 

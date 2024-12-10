@@ -100,18 +100,14 @@ Scrollable::~Scrollable()
     StopSnapAnimation();
 }
 
-void Scrollable::Initialize(PipelineContext* context)
+void Scrollable::Initialize(const RefPtr<FrameNode>& host)
 {
-    auto weakContext = WeakClaim(context);
-    Initialize(weakContext);
-}
-
-void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
-{
-    context_ = context;
+    CHECK_NULL_VOID(host);
+    weakHost_ = host;
+    auto pipeline = host->GetContextRefPtr();
+    context_ = pipeline;
     InitPanRecognizerNG();
     available_ = true;
-    auto pipeline = context_.Upgrade();
     CHECK_NULL_VOID(pipeline);
     auto scrollableTheme = pipeline->GetTheme<ScrollableTheme>();
     CHECK_NULL_VOID(scrollableTheme);
@@ -905,7 +901,7 @@ void Scrollable::UpdateSpringMotion(double mainPosition, const ExtentPair& exten
         "position is %{public}f, minExtent is "
         "%{public}f, maxExtent is %{public}f, initMinExtent is %{public}f, initMaxExtent is %{public}f",
         mainPosition, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
-    if (state_ != AnimationState::SPRING) {
+    if (state_ != AnimationState::SPRING || !springOffsetProperty_) {
         return;
     }
     float finalPosition = 0.0f;
@@ -1169,6 +1165,15 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
     }
 }
 
+void Scrollable::AttachAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property)
+{
+    auto host = weakHost_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->AttachNodeAnimatableProperty(property);
+}
+
 RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
 {
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
@@ -1196,6 +1201,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         scroll->lastPosition_ = position;
     };
     frictionOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    AttachAnimatableProperty(frictionOffsetProperty_);
     return frictionOffsetProperty_;
 }
 
@@ -1225,6 +1231,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
         scroll->StopSpringAnimation();
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    AttachAnimatableProperty(springOffsetProperty_);
     return springOffsetProperty_;
 }
 
@@ -1261,6 +1268,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         }
     };
     snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    AttachAnimatableProperty(snapOffsetProperty_);
     return snapOffsetProperty_;
 }
 
@@ -1269,6 +1277,7 @@ void Scrollable::StopFrictionAnimation()
     if (state_ == AnimationState::FRICTION) {
         ACE_SCOPED_TRACE("StopFrictionAnimation, id:%d, tag:%s", nodeId_, nodeTag_.c_str());
         state_ = AnimationState::IDLE;
+        CHECK_NULL_VOID(frictionOffsetProperty_);
         AnimationOption option;
         option.SetCurve(Curves::EASE);
         option.SetDuration(0);
@@ -1290,6 +1299,7 @@ void Scrollable::StopSpringAnimation(bool reachFinalPosition)
             "StopSpringAnimation, reachFinalPosition:%u, id:%d, tag:%s", reachFinalPosition, nodeId_, nodeTag_.c_str());
         state_ = AnimationState::IDLE;
         isFadingAway_ = false;
+        CHECK_NULL_VOID(springOffsetProperty_);
         AnimationOption option;
         option.SetCurve(Curves::EASE);
         option.SetDuration(0);
@@ -1318,6 +1328,7 @@ void Scrollable::StopSnapAnimation()
     if (state_ == AnimationState::SNAP) {
         ACE_SCOPED_TRACE("StopSnapAnimation, animation state:%d, id:%d, tag:%s", state_, nodeId_, nodeTag_.c_str());
         state_ = AnimationState::IDLE;
+        CHECK_NULL_VOID(snapOffsetProperty_);
         AnimationOption option;
         option.SetCurve(Curves::EASE);
         option.SetDuration(0);
