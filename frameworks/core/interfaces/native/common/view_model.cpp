@@ -65,6 +65,9 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#endif //WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
@@ -987,7 +990,13 @@ void* createRemoteWindowNode(ArkUI_Int32 nodeId)
 
 void* createUIExtensionComponentNode(ArkUI_Int32 nodeId)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNode = UIExtensionModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif //WINDOW_SCENE_SUPPORTED
 }
 
 void* createLinearIndicatorNode(ArkUI_Int32 nodeId)
