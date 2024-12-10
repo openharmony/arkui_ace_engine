@@ -17,6 +17,7 @@
 
 #include "accessor_test_base.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -27,6 +28,13 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
+
+namespace {
+class MockCurve : public Curve {
+public:
+    MOCK_METHOD(float, MoveInternal, (float));
+};
+} // namespace
 
 namespace {
 class StubScrollController : public ScrollControllerBase {
@@ -809,12 +817,41 @@ HWTEST_F(ScrollerAccessorTest, scrollToCurveTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_scrollToICurveTest
+ * @tc.name: scrollToICurveTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, DISABLED_scrollToICurveTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToICurveTest, TestSize.Level1)
 {
-    // Ark_ICurve supporting is not implemented
+    Dimension position = Dimension(1, DimensionUnit::VP);
+    float duration = 1000.0f;
+    bool smooth = false;
+    bool canOverScroll = false;
+
+    Ark_ScrollOptions options;
+    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+
+    ASSERT_NE(accessor_->scrollTo, nullptr);
+
+    Ark_ScrollAnimationOptions scrollAnimationOptions;
+    scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+
+    ICurvePeer peer;
+    peer.handler = Referenced::MakeRefPtr<MockCurve>();
+    Ark_ICurve ICurve;
+    ICurve.ptr = &peer;
+    Ark_Union_Curve_ICurve arkCurve =  Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_ICurve>(ICurve);
+    scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(
+        std::optional<Ark_Union_Curve_ICurve>(arkCurve));
+    options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
+                scrollAnimationOptions)));
+    EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
+    EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, peer.handler, smooth, canOverScroll))
+        .Times(1);
+    accessor_->scrollTo(peer_, &options);
 }
 } // namespace OHOS::Ace::NG
