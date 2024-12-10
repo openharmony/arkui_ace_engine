@@ -14,7 +14,7 @@
  */
 
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
-import { Drawer, RadioBlock, SliderBlock, useEnabled } from 'common';
+import { Drawer, RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
 
 @Component
 export struct GridBootcamp {
@@ -26,10 +26,77 @@ export struct GridBootcamp {
   @State fadingEdgeLengthValue: number = 32;
   @State enableFadingEdgeLengthUnit: boolean = false;
   @State fadingEdgeLengthUnit: LengthUnit = LengthUnit.VP;
-  @State enableDirection: boolean = false;
-  @State directionMode: Direction = Direction.Ltr;
-  @State enableColumnCount: boolean = false;
-  @State columnCount: number = 2;
+  @State enableFrCount: boolean = false;
+  @State frCount: number = 2;
+  @State enableColumnsGap: boolean = false;
+  @State columnsGap: Length	= 0;
+  @State enableRowsGap: boolean = false;
+  @State rowsGap: Length	= 0;
+  @State enableScrollBar: boolean = false;
+  @State scrollBar: BarState = BarState.Auto;
+  @State enableScrollBarColor: boolean = false;
+  @State scrollBarColor: Color | number | string = '#182431';
+  @State enableScrollBarWidth: boolean = false;
+  @State scrollBarWidth: number | string = 4;
+  @State enableCachedCount: boolean = false;
+  @State cachedCount: number = 1;
+  @State enableEditMode: boolean = false;
+  @State editMode: boolean = false;
+  @State enableLayoutDirection: boolean = false;
+  @State layoutDirection: GridDirection = GridDirection.Row;
+  @State enableMaxCount: boolean = false;
+  @State maxCount: number = Infinity;
+  @State enableMinCount: boolean = false;
+  @State minCount: number = 1;
+  @State enableCellLength: boolean = false;
+  @State cellLength: number = 0;
+  @State enableMultiSelectable: boolean = false;
+  @State multiSelectable: boolean = false;
+  @State enableSupportAnimation: boolean = false;
+  @State supportAnimation: boolean = false;
+  @State enableEdgeEffect: boolean = false;
+  @State edgeEffect: EdgeEffect = EdgeEffect.None;
+  @State enableEdgeEffectOptionsAlwaysEnabled: boolean = false;
+  @State edgeEffectOptionsAlwaysEnabled: boolean = false;
+  @State enableEnableScrollInteraction: boolean = false;
+  @State enableScrollInteraction: boolean = true;
+  @State enableNestedScrollScrollForward: boolean = false;
+  @State nestedScrollScrollForward: NestedScrollMode = NestedScrollMode.SELF_ONLY;
+  @State enableNestedScrollScrollBackward: boolean = false;
+  @State nestedScrollScrollBackward: NestedScrollMode = NestedScrollMode.SELF_ONLY;
+  @State enableFriction: boolean = false;
+  @State friction: number = 0.75;
+  @State enableAlignItems: boolean = false;
+  @State alignItems: Optional<GridItemAlignment> = GridItemAlignment.DEFAULT;
+  @State enableCompWidth: boolean = false;
+  @State compWidth: Length = 'auto';
+  @State enableCompHeight: boolean = false;
+  @State compHeight: Length = 'auto';
+  @State enableCompPadding: boolean = false;
+  @State compPadding: number = 0;
+  @State enableCompMargin: boolean = false;
+  @State compMargin: number = 0;
+  @State enableCompBackgroundColor: boolean = false;
+  @State compBackgroundColor: ResourceColor = '#ff000000';
+  @State enableCompBorderWidth: boolean = false;
+  @State compBorderWidth: number = 0;
+  @State enableCompBorderColor: boolean = false;
+  @State compBorderColor: ResourceColor = Color.Black;
+  @State enableCompBorderRadius: boolean = false;
+  @State compBorderRadius: number = 0;
+  @State enableCompBorderStyle: boolean = false;
+  @State compBorderStyle: BorderStyle = BorderStyle.Solid;
+  @State enableCompFlexBasis: boolean = false;
+  @State compFlexBasis: number | string = 'auto';
+  @State enableCompOpacity: boolean = false;
+  @State compOpacity: number = 1;
+  @State enableCompVisibility: boolean = false;
+  @State compVisibility: Visibility = Visibility.Visible;
+  @State enableCompDirection: boolean = false;
+  @State compDirection: Direction = Direction.Auto;
+  @State enableCompClip: boolean = false;
+  @State compClip: boolean = false;
+
   @State totalCount: number = 30;
   scrollerForV: Scroller = new Scroller();
   scrollerForH: Scroller = new Scroller();
@@ -82,9 +149,50 @@ export struct GridBootcamp {
               .borderRadius(12)
             }, (row: string) => row)
           }
-          .rowsGap(8)
-          .columnsGap(8)
-          .columnsTemplate(Array(this.columnCount).fill('1fr').join(' '))
+          .columnsTemplate(Array(this.frCount).fill('1fr').join(' '))
+          .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
+          .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
+          .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
+          .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
+          .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+          .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
+          .editMode(useEnabled(this.enableEditMode, this.editMode))
+          .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
+          .maxCount(useEnabled(this.enableMaxCount, this.maxCount))
+          .minCount(useEnabled(this.enableMinCount, this.minCount))
+          .cellLength(useEnabled(this.enableCellLength, this.cellLength))
+          .multiSelectable(useEnabled(this.enableMultiSelectable, this.multiSelectable))
+          .supportAnimation(useEnabled(this.enableSupportAnimation, this.supportAnimation))
+          .edgeEffect(
+            useEnabled(this.enableEdgeEffect, this.edgeEffect),
+            {
+              alwaysEnabled: useEnabled(
+                this.enableEdgeEffectOptionsAlwaysEnabled,
+                this.edgeEffectOptionsAlwaysEnabled
+              )
+            }
+          )
+          .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
+          .nestedScroll({
+            scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
+            scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
+          })
+          .friction(useEnabled(this.enableFriction, this.friction))
+          .alignItems(useEnabled(this.enableAlignItems, this.alignItems))
+          .width(useEnabled(this.enableCompWidth, this.compWidth))
+          .height(useEnabled(this.enableCompHeight, this.compHeight))
+          .padding(useEnabled(this.enableCompPadding, this.compPadding))
+          .margin(useEnabled(this.enableCompMargin, this.compMargin))
+          .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+          .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+          .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+          .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+          .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+          .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
+          .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
+          .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
+          .direction(useEnabled(this.enableCompDirection, this.compDirection))
+          .clip(useEnabled(this.enableCompClip, this.compClip))
           .fadingEdge(
             useEnabled(this.enableFadingEdge, this.fadingEdge),
             useEnabled<FadingEdgeOptions>(this.fadingEdge, {
@@ -103,10 +211,50 @@ export struct GridBootcamp {
               .borderRadius(12)
             }, (row: string) => row)
           }
-          .rowsGap(8)
-          .columnsGap(8)
-          .rowsTemplate(Array(this.columnCount).fill('1fr').join(' '))
-          .direction(useEnabled(this.enableDirection, this.directionMode))
+          .rowsTemplate(Array(this.frCount).fill('1fr').join(' '))
+          .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
+          .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
+          .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
+          .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
+          .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+          .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
+          .editMode(useEnabled(this.enableEditMode, this.editMode))
+          .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
+          .maxCount(useEnabled(this.enableMaxCount, this.maxCount))
+          .minCount(useEnabled(this.enableMinCount, this.minCount))
+          .cellLength(useEnabled(this.enableCellLength, this.cellLength))
+          .multiSelectable(useEnabled(this.enableMultiSelectable, this.multiSelectable))
+          .supportAnimation(useEnabled(this.enableSupportAnimation, this.supportAnimation))
+          .edgeEffect(
+            useEnabled(this.enableEdgeEffect, this.edgeEffect),
+            {
+              alwaysEnabled: useEnabled(
+                this.enableEdgeEffectOptionsAlwaysEnabled,
+                this.edgeEffectOptionsAlwaysEnabled
+              )
+            }
+          )
+          .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
+          .nestedScroll({
+            scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
+            scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
+          })
+          .friction(useEnabled(this.enableFriction, this.friction))
+          .alignItems(useEnabled(this.enableAlignItems, this.alignItems))
+          .width(useEnabled(this.enableCompWidth, this.compWidth))
+          .height(useEnabled(this.enableCompHeight, this.compHeight))
+          .padding(useEnabled(this.enableCompPadding, this.compPadding))
+          .margin(useEnabled(this.enableCompMargin, this.compMargin))
+          .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+          .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+          .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+          .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+          .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+          .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
+          .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
+          .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
+          .direction(useEnabled(this.enableCompDirection, this.compDirection))
+          .clip(useEnabled(this.enableCompClip, this.compClip))
           .fadingEdge(
             useEnabled(this.enableFadingEdge, this.fadingEdge),
             useEnabled<FadingEdgeOptions>(this.fadingEdge, {
@@ -126,27 +274,216 @@ export struct GridBootcamp {
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+        SliderBlock({
+          title: 'columnsGap',
+          isEnabled: $enableColumnsGap,
+          value: $columnsGap,
+          min: -5,
+          max: 20
+        })
+
+        SliderBlock({
+          title: 'rowsGap',
+          isEnabled: $enableRowsGap,
+          value: $rowsGap,
+          min: -5,
+          max: 20
+        })
+
         RadioBlock({
-          title: '开启渐隐效果',
-          isEnabled: this.enableFadingEdge,
-          value: this.fadingEdge,
+          title: 'scrollBar',
+          isEnabled: $enableScrollBar,
+          value: $scrollBar,
           dataSource: [
-            { label: '开启', value: true },
-            { label: '关闭', value: false }
+            { label: 'Off', value: BarState.Off },
+            { label: 'On', value: BarState.On },
+            { label: 'Auto', value: BarState.Auto }
+          ]
+        })
+
+        ColorBlock({
+          title: 'scrollBarColor',
+          isEnabled: $enableScrollBarColor,
+          color: $scrollBarColor
+        })
+
+        SliderBlock({
+          title: 'scrollBarWidth',
+          isEnabled: $enableScrollBarWidth,
+          value: $scrollBarWidth,
+          min: 1,
+          max: 8
+        })
+
+        SliderBlock({
+          title: 'cachedCount',
+          isEnabled: $enableCachedCount,
+          value: $cachedCount,
+          min: 0,
+          max: 50
+        })
+
+        RadioBlock({
+          title: 'editMode',
+          isEnabled: $enableEditMode,
+          value: $editMode,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'layoutDirection',
+          isEnabled: $enableLayoutDirection,
+          value: $layoutDirection,
+          dataSource: [
+            { label: 'Row', value: GridDirection.Row },
+            { label: 'Column', value: GridDirection.Column },
+            { label: 'RowReverse', value: GridDirection.RowReverse },
+            { label: 'ColumnReverse', value: GridDirection.ColumnReverse }
+          ]
+        })
+
+        SliderBlock({
+          title: 'maxCount',
+          isEnabled: $enableMaxCount,
+          value: $maxCount,
+          min: 0,
+          max: 20
+        })
+
+        SliderBlock({
+          title: 'minCount',
+          isEnabled: $enableMinCount,
+          value: $minCount,
+          min: 0,
+          max: 10
+        })
+
+        SliderBlock({
+          title: 'cellLength',
+          isEnabled: $enableCellLength,
+          value: $cellLength,
+          min: 0,
+          max: 100
+        })
+
+        RadioBlock({
+          title: 'multiSelectable',
+          isEnabled: $enableMultiSelectable,
+          value: $multiSelectable,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'supportAnimation',
+          isEnabled: $enableSupportAnimation,
+          value: $supportAnimation,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'edgeEffect',
+          isEnabled: $enableEdgeEffect,
+          value: $edgeEffect,
+          dataSource: [
+            { label: 'Spring', value: EdgeEffect.Spring },
+            { label: 'Fade', value: EdgeEffect.Fade },
+            { label: 'None', value: EdgeEffect.None }
+          ]
+        })
+
+        RadioBlock({
+          title: 'edgeEffect.options.alwaysEnabled',
+          isEnabled: $enableEdgeEffectOptionsAlwaysEnabled,
+          value: $edgeEffectOptionsAlwaysEnabled,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'enableScrollInteraction',
+          isEnabled: $enableEnableScrollInteraction,
+          value: $enableScrollInteraction,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'nestedScroll.scrollForward',
+          isEnabled: $enableNestedScrollScrollForward,
+          value: $nestedScrollScrollForward,
+          dataSource: [
+            { label: 'SELF_ONLY', value: NestedScrollMode.SELF_ONLY },
+            { label: 'SELF_FIRST', value: NestedScrollMode.SELF_FIRST },
+            { label: 'PARENT_FIRST', value: NestedScrollMode.PARENT_FIRST },
+            { label: 'PARALLEL', value: NestedScrollMode.PARALLEL }
+          ]
+        })
+
+        RadioBlock({
+          title: 'nestedScroll.scrollBackward',
+          isEnabled: $enableNestedScrollScrollBackward,
+          value: $nestedScrollScrollBackward,
+          dataSource: [
+            { label: 'SELF_ONLY', value: NestedScrollMode.SELF_ONLY },
+            { label: 'SELF_FIRST', value: NestedScrollMode.SELF_FIRST },
+            { label: 'PARENT_FIRST', value: NestedScrollMode.PARENT_FIRST },
+            { label: 'PARALLEL', value: NestedScrollMode.PARALLEL }
+          ]
+        })
+
+        SliderBlock({
+          title: 'friction',
+          isEnabled: $enableFriction,
+          value: $friction,
+          min: 0,
+          max: 1,
+          step: 0.05
+        })
+
+        RadioBlock({
+          title: 'alignItems',
+          isEnabled: $enableAlignItems,
+          value: $alignItems,
+          dataSource: [
+            { label: 'DEFAULT', value: GridItemAlignment.DEFAULT },
+            { label: 'STRETCH', value: GridItemAlignment.STRETCH }
+          ]
+        })
+
+        RadioBlock({
+          title: 'fadingEdge',
+          isEnabled: $enableFadingEdge,
+          value: $fadingEdge,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
         if (this.fadingEdge) {
           SliderBlock({
-            title: '渐隐长度值',
-            isEnabled: this.enableFadingEdgeLengthValue,
-            value: this.fadingEdgeLengthValue,
+            title: 'fadingEdge.length',
+            isEnabled: $enableFadingEdgeLengthValue,
+            value: $fadingEdgeLengthValue,
             min: 0,
             max: 500
           })
           RadioBlock({
-            title: '渐隐长度单位',
-            isEnabled: this.enableFadingEdgeLengthUnit,
-            value: this.fadingEdgeLengthUnit,
+            title: 'fadingEdge.length.unit',
+            isEnabled: $enableFadingEdgeLengthUnit,
+            value: $fadingEdgeLengthUnit,
             dataSource: [
               { label: 'px', value: LengthUnit.PX },
               { label: 'vp', value: LengthUnit.VP },
@@ -156,21 +493,133 @@ export struct GridBootcamp {
             ]
           })
         }
-        RadioBlock({
-          title: '镜像模式',
-          isEnabled: this.enableDirection,
-          value: this.directionMode,
-          dataSource: [
-            { label: '正常', value: Direction.Ltr },
-            { label: '镜像', value: Direction.Rtl }
-          ]
-        })
+
         SliderBlock({
-          title: '列/行数',
-          isEnabled: this.enableColumnCount,
-          value: this.columnCount,
+          title: 'frCount',
+          isEnabled: $enableFrCount,
+          value: $frCount,
           min: 1,
           max: 6
+        })
+
+        SliderBlock({
+          title: 'width',
+          isEnabled: $enableCompWidth,
+          value: $compWidth,
+          min: 100,
+          max: 600
+        })
+
+        SliderBlock({
+          title: 'height',
+          isEnabled: $enableCompHeight,
+          value: $compHeight,
+          min: 50,
+          max: 400
+        })
+
+        SliderBlock({
+          title: 'padding',
+          isEnabled: $enableCompPadding,
+          value: $compPadding,
+          min: 0,
+          max: 50
+        })
+
+        SliderBlock({
+          title: 'margin',
+          isEnabled: $enableCompMargin,
+          value: $compMargin,
+          min: 0,
+          max: 100
+        })
+
+        ColorBlock({
+          title: 'backgroundColor',
+          isEnabled: $enableCompBackgroundColor,
+          color: $compBackgroundColor
+        })
+
+        SliderBlock({
+          title: 'borderWidth',
+          isEnabled: $enableCompBorderWidth,
+          value: $compBorderWidth,
+          min: 0,
+          max: 20
+        })
+
+        ColorBlock({
+          title: 'borderColor',
+          isEnabled: $enableCompBorderColor,
+          color: $compBorderColor
+        })
+
+        SliderBlock({
+          title: 'borderRadius',
+          isEnabled: $enableCompBorderRadius,
+          value: $compBorderRadius,
+          min: 0,
+          max: 100
+        })
+
+        RadioBlock({
+          title: 'borderStyle',
+          isEnabled: $enableCompBorderStyle,
+          value: $compBorderStyle,
+          dataSource: [
+            { label: 'Solid', value: BorderStyle.Solid },
+            { label: 'Dotted', value: BorderStyle.Dotted },
+            { label: 'Dashed', value: BorderStyle.Dashed },
+          ]
+        })
+
+        SliderBlock({
+          title: 'flexBasis',
+          isEnabled: $enableCompFlexBasis,
+          value: $compFlexBasis,
+          min: 10,
+          max: 200
+        })
+
+        SliderBlock({
+          title: 'opacity',
+          isEnabled: $enableCompOpacity,
+          value: $compOpacity,
+          min: 0,
+          max: 1,
+          step: 0.1
+        })
+
+        RadioBlock({
+          title: 'visibility',
+          isEnabled: $enableCompVisibility,
+          value: $compVisibility,
+          dataSource: [
+            { label: 'None', value: Visibility.None },
+            { label: 'Hidden', value: Visibility.Hidden },
+            { label: 'Visible', value: Visibility.Visible }
+          ]
+        })
+
+        RadioBlock({
+          title: 'direction',
+          isEnabled: $enableCompDirection,
+          value: $compDirection,
+          dataSource: [
+            { label: 'Auto', value: Direction.Auto },
+            { label: 'Ltr', value: Direction.Ltr },
+            { label: 'Rtl', value: Direction.Rtl }
+          ]
+        })
+
+        RadioBlock({
+          title: 'clip',
+          isEnabled: $enableCompClip,
+          value: $compClip,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
         })
       }
       .width('100%')
