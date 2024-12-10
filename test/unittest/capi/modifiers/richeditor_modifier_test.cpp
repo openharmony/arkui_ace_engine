@@ -17,6 +17,7 @@
 #include "modifiers_test_utils.h"
 
 #include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -195,6 +196,41 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions0Test, TestSize.Level1)
     textSpanOptions.value = TEST_VALUE_2;
     result = peer.AddTextSpanImpl(textSpanOptions2);
     ASSERT_EQ(result, TEST_INDEX_2);
+}
+
+/**
+ * @tc.name: setRichEditorOptions1Test
+ * @tc.desc: Check the functionality of setRichEditorOptions1
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setRichEditorOptions1Test, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setRichEditorOptions1, nullptr);
+
+    // assume nothing bad with invalid and empty options
+    modifier_->setRichEditorOptions1(node_, nullptr);
+
+    Ark_RichEditorStyledStringOptions controllerUndef;
+    controllerUndef.controller.ptr = nullptr;
+    modifier_->setRichEditorOptions1(node_, &controllerUndef);
+
+    // Check the internal controller
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto internalController = RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
+    ASSERT_NE(internalController, nullptr);
+    void* ptr = internalController.GetRawPtr();
+    RichEditorStyledStringController *rawPtr = reinterpret_cast<RichEditorStyledStringController *>(ptr);
+    ASSERT_NE(rawPtr->GetStyledString().GetRawPtr(), nullptr);
+
+    GeneratedModifier::RichEditorStyledStringControllerPeerImpl peer;
+    auto controller = Converter::ArkValue<Ark_RichEditorStyledStringOptions>(&peer);
+    modifier_->setRichEditorOptions1(node_, &controller);
+
+    auto string = peer.GetStyledString();
+    ASSERT_NE(string.GetRawPtr(), nullptr);
+    peer.SetStyledString(string);
+    ASSERT_NE(string.GetRawPtr(), peer.GetStyledString().GetRawPtr());
 }
 
 /**

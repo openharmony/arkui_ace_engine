@@ -84,6 +84,27 @@ RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController(
     return pattern->GetRichEditorController();
 }
 
+RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorStyledStringController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetRichEditorStyledStringController();
+}
+
+void RichEditorModelNG::SetStyledStringMode(FrameNode* frameNode, bool isStyledStringMode)
+{
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    richEditorPattern->SetSpanStringMode(isStyledStringMode);
+    if (isStyledStringMode) {
+        richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
+        richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
+    } else {
+        richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+        richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
+    }
+}
+
 void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();

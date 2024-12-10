@@ -165,25 +165,6 @@ ImageSpanSize Convert(const Ark_Tuple_Dimension_Dimension& src)
 }
 
 template<>
-VerticalAlign Convert(const Ark_ImageSpanAlignment& src)
-{
-    switch (src) {
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP:
-            return VerticalAlign::TOP;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER:
-            return VerticalAlign::CENTER;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM:
-            return VerticalAlign::BOTTOM;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE:
-            return VerticalAlign::BASELINE;
-        default:
-            LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
-            break;
-    }
-    return VerticalAlign::NONE;
-}
-
-template<>
 BorderRadiusProperty Convert(const Ark_RichEditorLayoutStyle& src)
 {
     BorderRadiusProperty ret;

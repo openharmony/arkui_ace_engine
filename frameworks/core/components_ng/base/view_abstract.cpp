@@ -2498,9 +2498,14 @@ void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
     ACE_UPDATE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect);
 }
 
-void ViewAbstract::SetSystemBarEffect(FrameNode *frameNode, bool enable)
+void ViewAbstract::SetSystemBarEffect(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, enable, frameNode);
+    if (enable.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, enable.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, SystemBarEffect, frameNode);
+    }
 }
 
 void ViewAbstract::SetHueRotate(float hueRotate)
@@ -3137,9 +3142,15 @@ void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleO
     }
 }
 
-void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode, const NG::LinearGradientBlurPara& blurPara)
+void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode,
+                                         const std::optional<NG::LinearGradientBlurPara>& blurPara)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara, frameNode);
+    if (blurPara.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, LinearGradientBlur, frameNode);
+    }
 }
 
 void ViewAbstract::SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset)
@@ -3419,10 +3430,14 @@ void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, value, frameNode);
 }
 
-void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)
+void ViewAbstract::MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, *value, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Anchor, frameNode);
+    }
 }
 
 void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
@@ -3499,14 +3514,18 @@ void ViewAbstract::SetAlignSelf(FrameNode* frameNode, FlexAlign value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, value, frameNode);
 }
 
-void ViewAbstract::SetFlexBasis(FrameNode* frameNode, const Dimension& value)
+void ViewAbstract::SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
-    if (LessNotEqual(value.Value(), 0.0f)) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension(), frameNode);
-        return;
+    if (optValue.has_value()) {
+        if (LessNotEqual(optValue.value().Value(), 0.0f)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension(), frameNode);
+            return;
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value, frameNode);
 }
 
 void ViewAbstract::ResetFlexShrink(FrameNode* frameNode)
@@ -3587,10 +3606,15 @@ void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeigh
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, maxHeight));
 }
 
-void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules)
+void ViewAbstract::SetAlignRules(FrameNode* frameNode,
+    const std::optional<std::map<AlignDirection, AlignRule>>& alignRules)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
+    if (alignRules.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules.value(), frameNode);
+    } else {
+        ResetAlignRules(frameNode);
+    }
 }
 
 std::map<AlignDirection, AlignRule> ViewAbstract::GetAlignRules(FrameNode* frameNode)
@@ -3708,9 +3732,15 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, const std::optional
     }
 }
 
-void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption)
+void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const std::optional<MotionBlurOption>& motionBlurOption)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (motionBlurOption.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption.value(), frameNode);
+    } else {
+        MotionBlurOption motionBlurOptionDef;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOptionDef, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
@@ -3810,9 +3840,14 @@ void ViewAbstract::SetSharedTransition(
     }
 }
 
-void ViewAbstract::SetTransition(FrameNode* frameNode, const TransitionOptions& options)
+void ViewAbstract::SetTransition(FrameNode* frameNode, const std::optional<TransitionOptions>& options)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (options.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options.value(), frameNode);
+    } else {
+        CleanTransition(frameNode);
+    }
 }
 
 void ViewAbstract::CleanTransition(FrameNode* frameNode)
@@ -3858,14 +3893,24 @@ void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, const std::optiona
     }
 }
 
-void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
+void ViewAbstract::SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode, frameNode);
+    if (blendMode.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendMode, frameNode);
+    }
 }
 
-void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
+void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType, frameNode);
+    if (blendApplyType) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, BackBlendApplyType, frameNode);
+    }
 }
 
 void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
@@ -4886,7 +4931,7 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
-void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -4973,9 +5018,26 @@ NG::BorderWidthProperty ViewAbstract::GetOuterBorderWidth(FrameNode* frameNode)
     return outBorderWidth.value_or(borderWidth);
 }
 
-void ViewAbstract::SetBias(FrameNode* frameNode, const BiasPair& biasPair)
+void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair)
 {
     CHECK_NULL_VOID(frameNode);
+    if (biasPair.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair.value(), frameNode);
+    } else {
+        ResetBias(frameNode);
+    }
+}
+
+void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+    const std::optional<float>& vertical)
+{
+    auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    if (horisontal.has_value()) {
+        biasPair.first = horisontal.value();
+    }
+    if (vertical.has_value()) {
+        biasPair.second = vertical.value();
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair, frameNode);
 }
 
@@ -5110,22 +5172,25 @@ void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const 
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
-void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
-    bool arrowKeyStepOut)
+void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
+    const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
+    bool isGroupValue = isGroup.value_or(DEFAULT_FOCUS_IS_GROUP);
+    bool arrowKeyStepOutValue = arrowKeyStepOut.value_or(DEFAULT_FOCUS_ARROW_KEY_STEP_OUT);
+    focusHub->SetFocusScopeId(focusScopeId, isGroupValue, arrowKeyStepOutValue);
 }
 
 void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
-    const uint32_t focusPriority)
+    const std::optional<uint32_t>& focusPriority)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+    auto proirity = focusPriority.value_or(static_cast<uint32_t>(FocusPriority::AUTO));
+    focusHub->SetFocusScopePriority(focusScopeId, proirity);
 }
 
 uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)
@@ -5179,6 +5244,26 @@ void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
+}
+
+void ViewAbstract::SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (markAnchorStart.has_value()) {
+        layoutProperty->UpdateMarkAnchorStart(markAnchorStart.value());
+    } else {
+        layoutProperty->ResetMarkAnchorStart();
+    }
+}
+
+void ViewAbstract::ResetMarkAnchorStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
 }
 
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)

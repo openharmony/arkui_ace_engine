@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -270,8 +271,10 @@ void OnWillShowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TabContentModelNG::SetOnWillShow(frameNode, convValue);
+    auto onWillShow = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    TabContentModelNG::SetOnWillShow(frameNode, std::move(onWillShow));
 }
 void OnWillHideImpl(Ark_NativePointer node,
                     const VoidCallback* value)
@@ -279,8 +282,10 @@ void OnWillHideImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TabContentModelNG::SetOnWillHide(frameNode, convValue);
+    auto onWillHide = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    TabContentModelNG::SetOnWillHide(frameNode, std::move(onWillHide));
 }
 } // TabContentAttributeModifier
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier()

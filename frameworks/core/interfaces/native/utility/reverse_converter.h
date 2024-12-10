@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -124,21 +125,21 @@ namespace OHOS::Ace::NG::Converter {
 
     inline void AssignArkValue(Ark_Length& dst, const int& src)
     {
-        dst.type = ARK_TAG_INT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
     }
 
     inline void AssignArkValue(Ark_Length& dst, const float& src)
     {
-        dst.type = ARK_TAG_FLOAT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
     }
 
     inline void AssignArkValue(Ark_Length& dst, const Dimension& src)
     {
-        dst.type = ARK_TAG_FLOAT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
         dst.unit = static_cast<int32_t>(src.Unit());
     }
@@ -244,6 +245,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
+    void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);

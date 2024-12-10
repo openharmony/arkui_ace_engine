@@ -233,6 +233,8 @@ public:
 
     void UpdateFlexBasis(const Dimension& flexBasis);
 
+    void ResetFlexBasis();
+
     void UpdateAlignSelf(const FlexAlign& flexAlign);
 
     void ResetAlignSelf();
@@ -373,6 +375,11 @@ public:
     void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
     {
         markAnchorStart_ = markAnchorStart;
+    }
+
+    void ResetMarkAnchorStart()
+    {
+        markAnchorStart_.reset();
     }
 
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);

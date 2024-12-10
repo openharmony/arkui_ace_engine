@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 
@@ -99,7 +100,7 @@ public:
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
     static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
-    static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
+    static RefPtr<TabsControllerNG> GetSwiperController(FrameNode* frameNode);
     static void InitIndex(FrameNode* tabsNode, const std::optional<int32_t>& indexOpt);
 
 private:

@@ -46,6 +46,11 @@ public:
         ListItemGroupIndex itemGroupIndex = { x, y, -1 };
         return itemGroupIndex;
     }
+
+    void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) override
+    {
+        onFinishCallback();
+    }
 };
 
 class MockListScrollController : public StubListScrollController {
@@ -56,7 +61,6 @@ public:
     MOCK_METHOD(void, JumpToItemInGroup, (int32_t, int32_t, bool, ScrollAlign, int32_t));
     MOCK_METHOD(Rect, GetItemRectInGroup, (int32_t, int32_t), (const override));
     MOCK_METHOD(ListItemGroupIndex, GetItemIndexInGroup, (double, double), (const override));
-    MOCK_METHOD(void, CloseAllSwipeActions, (OnFinishFunc&&));
 };
 } // namespace
 
@@ -491,8 +495,25 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, DISABLED_CloseAllSwipeActionsImplTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, CloseAllSwipeActionsImplTest, TestSize.Level1)
 {
-    // not implemented yet
+    ASSERT_NE(accessor_->closeAllSwipeActions, nullptr);
+    const int32_t contextId = 123;
+
+    static std::optional<int32_t> checkData;
+    void (*checkCallback)(const Ark_Int32 resourceId) =
+        [](const Ark_Int32 resourceId) { checkData = resourceId; };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto сallbackVoid = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(сallbackVoid);
+    Ark_CloseSwipeActionOptions arkClose = {.onFinish = optCallback};
+    auto arkCloseOpt = Converter::ArkValue<Opt_CloseSwipeActionOptions>(arkClose);
+    accessor_->closeAllSwipeActions(peer_, &arkCloseOpt);
+
+    // check the invoking result
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(checkData.value(), contextId);
 }
 } // namespace OHOS::Ace::NG
