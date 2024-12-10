@@ -91,6 +91,10 @@ class ComputedV2 {
     return this.prop_;
   }
 
+  public getComputedFuncName(): string {
+    return this.propertyComputeFunc_.name;
+  }
+
   // register current watchId while executing compute function
   private observeObjectAccess(): Object | undefined {
     ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
