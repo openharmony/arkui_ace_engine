@@ -201,6 +201,7 @@ export struct ChipGroupBootcamp {
             { label: 'false', value: false }
           ]
         })
+        
         SliderBlock({
           title: 'options.chipGroupSpace.itemSpace',
           isEnabled: this.enableChipGroupChipGroupSpaceItemSpace,
