@@ -175,6 +175,7 @@ protected:
 
 private:
     static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems);
+    static bool CheckNestedScrollMode(const int32_t& modeValue);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
