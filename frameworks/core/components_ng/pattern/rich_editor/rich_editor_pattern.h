@@ -1331,7 +1331,7 @@ private:
     void AddSpanHoverEvent(
         RefPtr<SpanItem> spanItem, const RefPtr<FrameNode>& frameNode, const SpanOptionBase& options);
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
-    void ClearOnFocusTextField();
+    void ClearOnFocusTextField(FrameNode* node);
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange& range);
