@@ -55,6 +55,7 @@ public:
 
     void SetWindowInfo(double screenWidth, double density, double dipScale)
     {
+        std::lock_guard<std::mutex> guard(lock);
         screenWidth_ = screenWidth;
         density_ = density;
         dipScale_ = dipScale;
@@ -63,6 +64,7 @@ public:
 
     void SetWindowInfo(double density, double dipScale)
     {
+        std::lock_guard<std::mutex> guard(lock);
         density_ = density;
         dipScale_ = dipScale;
         viewScale_ = density / dipScale;
@@ -72,6 +74,7 @@ public:
 
     double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const
     {
+        std::lock_guard<std::mutex> guard(lock);
         if (pipeline) {
             return pipeline->GetRootWidth();
         }
@@ -80,6 +83,7 @@ public:
 
     double GetDipScale() const
     {
+        std::lock_guard<std::mutex> guard(lock);
         return dipScale_;
     }
 
@@ -87,11 +91,13 @@ public:
 
     ScreenSizeType GetCurrentSize() const
     {
+        std::lock_guard<std::mutex> guard(lock);
         return currentSize_;
     }
 
     double GetDensity() const
     {
+        std::lock_guard<std::mutex> guard(lock);
         return density_;
     }
 
@@ -105,7 +111,7 @@ private:
 private:
     ScreenSystemManager() = default;
     ~ScreenSystemManager() = default;
-
+    static std::mutex lock;
     ACE_DISALLOW_COPY_AND_MOVE(ScreenSystemManager);
 };
 
