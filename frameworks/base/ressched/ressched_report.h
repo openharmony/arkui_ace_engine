@@ -46,6 +46,8 @@ public:
     void OnTouchEvent(const TouchEvent& touchEvent);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
+    void OnAxisEvent(const AxisEvent& axisEvent);
+    void AxisEventReportEnd();
 
 private:
     ResSchedReport() {}
@@ -63,10 +65,19 @@ private:
         const TouchEvent& upEventInfo);
     void RecordTouchEvent(const TouchEvent& touchEvent, bool enforce = false);
 
+    void HandleAxisBegin(const AxisEvent& axisEvent);
+    void HandleAxisUpdate(const AxisEvent& axisEvent);
+    void HandleAxisEnd(const AxisEvent& axisEvent);
+
+    void RecordAxisEvent(const AxisEvent& axisEvent, bool enforce = false);
+    double GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent);
+
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;
     TouchEvent curTouchEvent_;
     TouchEvent lastTouchEvent_;
+    AxisEvent curAxisEvent_;
+    AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     bool isInSlide_ = false;
     bool isInTouch_ = false;
