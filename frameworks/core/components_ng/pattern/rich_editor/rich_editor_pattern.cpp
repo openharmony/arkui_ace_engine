@@ -10652,6 +10652,7 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         SetCaretPositionWithAffinity({ end, TextAffinity::UPSTREAM });
         MoveCaretToContentRect();
     }
+    UpdateSelectionType(GetSpansInfo(start, end, GetSpansMethod::ONSELECT));
     if (info.GetSourceDevice() == SourceType::TOUCH) {
         showSelect_ = true;
         RequestKeyboard(false, true, true);
