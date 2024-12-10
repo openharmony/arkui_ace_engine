@@ -109,8 +109,8 @@ export struct ChipGroupBootcamp {
           useEnabled(this.enableChipGroupItemStyleBackgroundColor,
             this.chipGroupItemStyleBackgroundColor),
           fontColor:
-          useEnabled(this.enableChipGroupItemStyleFontColor, t
-          his.chipGroupItemStyleFontColor),
+          useEnabled(this.enableChipGroupItemStyleFontColor,
+            this.chipGroupItemStyleFontColor),
           selectedBackgroundColor:
           useEnabled(this.enableChipGroupItemStyleSelectedBackgroundColor,
             this.chipGroupItemStyleSelectedBackgroundColor),
@@ -189,7 +189,7 @@ export struct ChipGroupBootcamp {
           dataSource: [
             { label: 'selectAll', value: [0, 1, 2, 3, 4, 5] },
             { label: '024', value: [0 ,2, 4,] },
-            { label: '024', value: [1 ,3, 5,] }
+            { label: '135', value: [1 ,3, 5,] }
           ]
         })
         RadioBlock({
