@@ -34,7 +34,7 @@ class LayoutManagerAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUILay
 public:
     LayoutManagerPeer* CreatePeerInstance() override
     {
-       return accessor_->ctor();
+        return accessor_->ctor();
     }
 };
 /**
