@@ -979,9 +979,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
      */
     const PointF globalPoint;
     const PointF parentLocalPoint;
+    const PointF parentRevertPoint;
+    TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
     FRAME_NODE2->eventHub_->GetOrCreateInputEventHub();
-    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
     EXPECT_NE(FRAME_NODE2->eventHub_->inputEventHub_, nullptr);
 }
 

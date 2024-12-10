@@ -371,8 +371,12 @@ public:
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
 
-    HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
+    HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
+        TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
+
+    void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+        const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
+        TouchRestrict& touchRestrict);
 
     void AnimateHoverEffect(bool isHovered) const;
 
