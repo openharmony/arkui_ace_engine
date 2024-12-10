@@ -2644,7 +2644,6 @@ void JSRichEditorBaseController::GetLayoutManager(const JSCallbackInfo& args)
     JSRef<JSObject> obj = JSClass<JSLayoutManager>::NewInstance();
     auto jsLayoutManager = Referenced::Claim(obj->Unwrap<JSLayoutManager>());
     CHECK_NULL_VOID(jsLayoutManager);
-    jsLayoutManager->IncRefCount();
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     auto layoutInfoInterface = controller->GetLayoutInfoInterface();
