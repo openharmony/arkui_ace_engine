@@ -839,6 +839,7 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
 
 float SystemProperties::GetDefaultResolution()
 {
+    // always return density of main screen, don't use this interface unless you need density when no window exists
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
