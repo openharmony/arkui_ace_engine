@@ -93,12 +93,9 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         target->textLineStyle->UpdateLeadingMargin(leadingMargin);
     }
 
-    if (source->textLineStyle->HasLeadingMargin()) {
-        auto leadingMargin = source->textLineStyle->GetLeadingMarginValue();
-        leadingMargin.pixmap.Reset();
-        target->textLineStyle->UpdateLeadingMargin(leadingMargin);
+    if (source->textLineStyle->HasTextAlign()) {
+        target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
     }
-
 }
 
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureEmptyContentSize(
