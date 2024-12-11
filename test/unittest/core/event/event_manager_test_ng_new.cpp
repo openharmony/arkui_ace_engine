@@ -1806,4 +1806,53 @@ HWTEST_F(EventManagerTestNg, EventManagerTest088, TestSize.Level1)
     eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
     EXPECT_EQ(touchPoint.isFalsified, false);
 }
+
+/**
+ * @tc.name: CleanRecognizersForDragBeginTest001
+ * @tc.desc: Test CleanRecognizersForDragBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRecognizersForDragBeginTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->downFingerIds_.clear();
+    eventManager->touchTestResults_.clear();
+
+    /**
+     * @tc.steps: step2. Call CleanRecognizersForDragBegin.
+     * @tc.expected: downFingerIds_ erase id.
+     */
+    TouchEvent event;
+    event.id = 100;
+    event.type = TouchType::CANCEL;
+    eventManager->downFingerIds_[event.id] = event.id;
+    eventManager->CleanRecognizersForDragBegin(event);
+    EXPECT_EQ(eventManager->downFingerIds_.size(), 0);
+
+    /**
+     * @tc.steps: step3. Call CleanRecognizersForDragBegin.
+     * @tc.expected: pan recognizer actionCancel called.
+     */
+    TouchTestResult resultList;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+    panRecognizer->refereeState_ = RefereeState::SUCCEED;
+    panRecognizer->fingersId_.insert(event.id);
+    panRecognizer->currentFingers_ = 1;
+    bool unknownPropertyValue = false;
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() { unknownPropertyValue = true; };
+    panRecognizer->SetOnActionCancel(actionCancel);
+    resultList.emplace_back(panRecognizer);
+    eventManager->touchTestResults_.emplace(event.id, resultList);
+    eventManager->downFingerIds_[event.id] = event.id;
+    eventManager->CleanRecognizersForDragBegin(event);
+    EXPECT_EQ(eventManager->downFingerIds_.size(), 0);
+    EXPECT_TRUE(unknownPropertyValue);
+}
 } // namespace OHOS::Ace::NG
