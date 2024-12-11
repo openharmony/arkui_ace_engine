@@ -164,6 +164,8 @@ private:
     void InitPressEvent();
     void HandlePressEvent(bool isPressed);
     void InitDisableStyle();
+    void InitOnFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;

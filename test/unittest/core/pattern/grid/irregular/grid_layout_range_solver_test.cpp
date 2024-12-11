@@ -831,6 +831,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         WeakPtr<FocusHub> next;
         algo.getNextFocusNode(FocusStep::TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
+        next.Upgrade()->RequestFocusImmediately();
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
         EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
@@ -839,6 +840,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         WeakPtr<FocusHub> next;
         algo.getNextFocusNode(FocusStep::SHIFT_TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
+        next.Upgrade()->RequestFocusImmediately();
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
         EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
