@@ -318,8 +318,8 @@ void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string&
     eventHub->FireOnError(json->ToString());
 }
 
- void PluginPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
- {
+void PluginPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
     Pattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
@@ -334,7 +334,7 @@ void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string&
     templateJSON->Put("source", requestPluginInfo ? requestPluginInfo->source.c_str() : "");
     templateJSON->Put("bundleName", requestPluginInfo ? requestPluginInfo->bundleName.c_str() : "");
     json->PutExtAttr("template", templateJSON, filter);
- }
+}
 
 void PluginPattern::OnActionEvent(const std::string& action) const
 {

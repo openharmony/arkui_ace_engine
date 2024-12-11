@@ -20,14 +20,14 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG { 
+namespace OHOS::Ace::NG {
 namespace {
     struct PluginComponentOptions {
         std::optional<RequestPluginInfo> requestPluginInfo;
         std::string data;
     };
 } // namespace
-namespace Converter{
+namespace Converter {
     template<>
     PluginComponentOptions Convert(const Ark_PluginComponentOptions& options)
     {
