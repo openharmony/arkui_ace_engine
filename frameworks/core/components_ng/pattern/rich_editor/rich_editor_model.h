@@ -366,7 +366,8 @@ public:
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
-    virtual void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const NG::SelectMenuParam& menuParam) {}
+    virtual void SetPreviewMenuParam(NG::TextSpanType spanType, std::function<void()>& buildFunc,
+        const NG::SelectMenuParam& menuParam) {}
     virtual void SetBarState(DisplayMode mode) {}
 private:
     static std::unique_ptr<RichEditorModel> instance_;
