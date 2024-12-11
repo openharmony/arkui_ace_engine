@@ -2718,7 +2718,6 @@ void ClickEffectImpl(Ark_NativePointer node,
     const std::optional<float> scaleValue = Converter::OptConvert<float>(convValue.value().scale);
     ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);
 }
-
 void OnDragStartImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
 {
@@ -3858,4 +3857,5 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
     };
     return &ArkUICommonMethodModifierImpl;
 }
+
 }
