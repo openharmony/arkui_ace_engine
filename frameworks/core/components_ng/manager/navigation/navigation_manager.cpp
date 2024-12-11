@@ -338,7 +338,7 @@ void NavigationManager::AddButtonsRectChangeListener(int32_t id, std::function<v
             AceType::RawPtr(pipeline), std::move(containerModalListener));
         hasRegisterListener_ = true;
     }
-    buttonsRectChangeListeners_.emplace(id, listener);
+    buttonsRectChangeListeners_[id] = listener;
 }
 
 void NavigationManager::RemoveButtonsRectChangeListener(int32_t id)

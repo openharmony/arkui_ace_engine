@@ -182,6 +182,13 @@ void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
