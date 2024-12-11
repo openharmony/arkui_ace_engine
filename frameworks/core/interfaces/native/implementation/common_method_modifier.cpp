@@ -1090,7 +1090,7 @@ NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
     return NG::LinearGradientBlurPara(blurRadius, fractionStops, direction);
 }
 template<>
-void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
+    void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
 {
     switch (src) {
         case ARK_BLEND_APPLY_TYPE_FAST: dst = BlendApplyType::FAST; break;
@@ -2766,12 +2766,13 @@ void OnDragEnterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto OnPreDrag = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& extraParams) {
+    auto onDragEnter = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                           const std::string& extraParams) {
         CHECK_NULL_VOID(dragEvent);
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
         callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
-    ViewAbstract::SetOnDragEnter(frameNode, OnPreDrag);
+    ViewAbstract::SetOnDragEnter(frameNode, onDragEnter);
 }
 void OnDragMoveImpl(Ark_NativePointer node,
                     const Callback_DragEvent_String_Void* value)
@@ -2779,8 +2780,13 @@ void OnDragMoveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDragMove(frameNode, convValue);
+    auto onDragMove = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                          const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
+        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragMove(frameNode, onDragMove);
 }
 void OnDragLeaveImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Void* value)
@@ -2788,8 +2794,13 @@ void OnDragLeaveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDragLeave(frameNode, convValue);
+    auto onDragLeave = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                           const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
+        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragLeave(frameNode, onDragLeave);
 }
 void OnDropImpl(Ark_NativePointer node,
                 const Callback_DragEvent_String_Void* value)
@@ -2797,8 +2808,13 @@ void OnDropImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDrop(frameNode, convValue);
+    auto onDrop = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                      const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
+        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDrop(frameNode, onDrop);
 }
 void OnDragEndImpl(Ark_NativePointer node,
                    const Callback_DragEvent_String_Void* value)
@@ -2806,8 +2822,13 @@ void OnDragEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDragEnd(frameNode, convValue);
+    auto onDragEnd = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
+        std::string extraParams = "";
+        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragEnd(frameNode, onDragEnd);
 }
 void AllowDropImpl(Ark_NativePointer node,
                    const Ark_Union_Array_UniformDataType_Null* value)
@@ -2842,10 +2863,10 @@ void OnPreDragImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto OnPreDrag = [callback = CallbackHelper(*value)](const PreDragStatus info) {
+    auto onPreDrag = [callback = CallbackHelper(*value)](const PreDragStatus info) {
         callback.Invoke(Converter::ArkValue<Ark_PreDragStatus>(info));
     };
-    ViewAbstract::SetOnPreDrag(frameNode, OnPreDrag);
+    ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }
 void LinearGradientImpl(Ark_NativePointer node,
                         const Ark_Type_CommonMethod_linearGradient_value* value)
@@ -3028,7 +3049,7 @@ void GeometryTransition0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetGeometryTransition0(frameNode, qconvValue);
+    //CommonMethodModelNG::SetGeometryTransition0(frameNode, convValue);
 }
 void GeometryTransition1Impl(Ark_NativePointer node,
                              const Ark_String* id,
