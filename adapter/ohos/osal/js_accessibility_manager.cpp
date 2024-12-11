@@ -393,7 +393,6 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
                node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
         nodeInfo.SetVisible(false);
     }
-    manager->UpdateElementInfoInnerWindowId(nodeInfo, nodeInfo.GetAccessibilityId());
     manager->UpdateNodeChildIds(node);
     for (const auto& child : node->GetChildIds()) {
         nodeInfo.AddChild(child);
