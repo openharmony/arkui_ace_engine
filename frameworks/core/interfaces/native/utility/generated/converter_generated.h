@@ -1053,7 +1053,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ResourceColor_LinearGradient& src)
+                   const Ark_Union_ResourceColor_LinearGradient_common& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1281,7 +1281,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Resource_LinearGradient& src)
+                   const Ark_Union_String_Resource_LinearGradient_common& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1991,6 +1991,21 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ResourceColor_LinearGradient_data_panel& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -2847,6 +2862,8 @@ ASSIGN_OPT(Opt_Callback_SwipeActionState_Void)
 ASSIGN_OPT(Opt_Callback_Void)
 ASSIGN_OPT(Opt_Callback_Any)
 ASSIGN_OPT(Opt_Union_Length_GridRowSizeOption)
+ASSIGN_OPT(Opt_Array_Tuple_ResourceColor_Number)
+ASSIGN_OPT(Opt_GradientDirection)
 ASSIGN_OPT(Opt_CanvasPattern)
 ASSIGN_OPT(Opt_CanvasGradient)
 ASSIGN_OPT(Opt_SheetSize)
@@ -2955,7 +2972,7 @@ ASSIGN_OPT(Opt_BreakpointsReference)
 ASSIGN_OPT(Opt_GridRowColumnOption)
 ASSIGN_OPT(Opt_GutterOption)
 ASSIGN_OPT(Opt_GridColColumnOption)
-ASSIGN_OPT(Opt_LinearGradient)
+ASSIGN_OPT(Opt_LinearGradient_common)
 ASSIGN_OPT(Opt_Scene)
 ASSIGN_OPT(Opt_DrawingCanvas)
 ASSIGN_OPT(Opt_Size)
@@ -3210,8 +3227,8 @@ ASSIGN_OPT(Opt_GridItemStyle)
 ASSIGN_OPT(Opt_GridItemAlignment)
 ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number_Number_Number)
 ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number)
-ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient)
-ASSIGN_OPT(Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number)
+ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient_common)
+ASSIGN_OPT(Opt_Array_Tuple_Union_ResourceColor_LinearGradient_common_Number)
 ASSIGN_OPT(Opt_FormShape)
 ASSIGN_OPT(Opt_FormRenderingMode)
 ASSIGN_OPT(Opt_FormDimension)
@@ -3223,7 +3240,8 @@ ASSIGN_OPT(Opt_FlexAlign)
 ASSIGN_OPT(Opt_ItemAlign)
 ASSIGN_OPT(Opt_FlexWrap)
 ASSIGN_OPT(Opt_FlexDirection)
-ASSIGN_OPT(Opt_Array_Union_ResourceColor_LinearGradient)
+ASSIGN_OPT(Opt_LinearGradient_data_panel)
+ASSIGN_OPT(Opt_Array_Union_ResourceColor_LinearGradient_data_panel)
 ASSIGN_OPT(Opt_DataPanelType)
 ASSIGN_OPT(Opt_ModelType)
 ASSIGN_OPT(Opt_Union_ResourceStr_Scene)
@@ -3274,7 +3292,6 @@ ASSIGN_OPT(Opt_ImageModifier)
 ASSIGN_OPT(Opt_Union_DragPreviewMode_Array_DragPreviewMode)
 ASSIGN_OPT(Opt_SharedTransitionEffectType)
 ASSIGN_OPT(Opt_MotionPathOptions)
-ASSIGN_OPT(Opt_GradientDirection)
 ASSIGN_OPT(Opt_Array_FractionStop)
 ASSIGN_OPT(Opt_TransitionFinishCallback)
 ASSIGN_OPT(Opt_BlurOptions)
@@ -3285,7 +3302,6 @@ ASSIGN_OPT(Opt_PathShape)
 ASSIGN_OPT(Opt_EllipseShape)
 ASSIGN_OPT(Opt_CircleShape)
 ASSIGN_OPT(Opt_ProgressMask)
-ASSIGN_OPT(Opt_Array_Tuple_ResourceColor_Number)
 ASSIGN_OPT(Opt_Tuple_Length_Length)
 ASSIGN_OPT(Opt_DragItemInfo)
 ASSIGN_OPT(Opt_DragBehavior)
@@ -3311,7 +3327,7 @@ ASSIGN_OPT(Opt_Union_OutlineRadiuses_Dimension)
 ASSIGN_OPT(Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors)
 ASSIGN_OPT(Opt_Union_EdgeOutlineWidths_Dimension)
 ASSIGN_OPT(Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths)
-ASSIGN_OPT(Opt_Union_String_Resource_LinearGradient)
+ASSIGN_OPT(Opt_Union_String_Resource_LinearGradient_common)
 ASSIGN_OPT(Opt_RepeatMode)
 ASSIGN_OPT(Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths)
 ASSIGN_OPT(Opt_Union_EdgeStyles_BorderStyle)
@@ -3859,7 +3875,7 @@ ASSIGN_OPT(Opt_Tuple_Number_Number_Number_Number)
 ASSIGN_OPT(Opt_GridLayoutOptions)
 ASSIGN_OPT(Opt_GaugeIndicatorOptions)
 ASSIGN_OPT(Opt_GaugeShadowOptions)
-ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_Number)
+ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_common_Number)
 ASSIGN_OPT(Opt_Type_GaugeAttribute_colors_colors)
 ASSIGN_OPT(Opt_GaugeOptions)
 ASSIGN_OPT(Opt_FormLinkOptions)
@@ -3882,6 +3898,7 @@ ASSIGN_OPT(Opt_EmbeddedType)
 ASSIGN_OPT(Opt_EllipseOptions)
 ASSIGN_OPT(Opt_DatePickerResult)
 ASSIGN_OPT(Opt_DatePickerOptions)
+ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient_data_panel)
 ASSIGN_OPT(Opt_DataPanelShadowOptions)
 ASSIGN_OPT(Opt_DataPanelOptions)
 ASSIGN_OPT(Opt_SceneOptions)
@@ -3994,7 +4011,6 @@ ASSIGN_OPT(Opt_Type_CommonMethod_mask_value)
 ASSIGN_OPT(Opt_Type_CommonMethod_clip_value)
 ASSIGN_OPT(Opt_Type_CommonMethod_radialGradient_value)
 ASSIGN_OPT(Opt_Type_CommonMethod_sweepGradient_value)
-ASSIGN_OPT(Opt_Tuple_ResourceColor_Number)
 ASSIGN_OPT(Opt_Type_CommonMethod_linearGradient_value)
 ASSIGN_OPT(Opt_PreDragStatus)
 ASSIGN_OPT(Opt_Callback_PreDragStatus_Void)
@@ -4035,6 +4051,7 @@ ASSIGN_OPT(Opt_Union_Dimension_OutlineRadiuses)
 ASSIGN_OPT(Opt_Union_Dimension_EdgeOutlineWidths)
 ASSIGN_OPT(Opt_Union_OutlineStyle_EdgeOutlineStyles)
 ASSIGN_OPT(Opt_OutlineOptions)
+ASSIGN_OPT(Opt_Tuple_ResourceColor_Number)
 ASSIGN_OPT(Opt_BorderImageOption)
 ASSIGN_OPT(Opt_BorderOptions)
 ASSIGN_OPT(Opt_Filter)

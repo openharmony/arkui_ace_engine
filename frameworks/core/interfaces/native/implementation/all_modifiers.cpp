@@ -89,6 +89,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
 void SetAppendGroupedLog(void* pFunc) {}
 
+const GENERATED_ArkUIRootModifier* GetRootModifier();
+const GENERATED_ArkUIComponentRootModifier* GetComponentRootModifier();
 const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier();
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier();
 const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier();
@@ -301,6 +303,8 @@ const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorContro
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
     static const GENERATED_ArkUINodeModifiers modifiersImpl = {
+        GetRootModifier,
+        GetComponentRootModifier,
         GetAbilityComponentModifier,
         GetAlphabetIndexerModifier,
         GetAnimatorModifier,
