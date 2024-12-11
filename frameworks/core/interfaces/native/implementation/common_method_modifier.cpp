@@ -3191,8 +3191,8 @@ void ObscuredImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::vector<std::optional<ObscuredReasons>>>(*value);
     auto vec = std::vector<ObscuredReasons>();
-    for(auto reason : convValue) {
-        if(reason.has_value()) {
+    for (auto reason : convValue) {
+        if (reason.has_value()) {
             vec.emplace_back(reason.value());
         }
     }
@@ -3205,8 +3205,8 @@ void ReuseIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::Convert<std::string>(*value);
--   //CommonMethodModelNG::SetReuseId(frameNode, convValue);
-    LOGE("CommonMethodModifier::ReuseIdImpl, Method not implemented.");
+    //CommonMethodModelNG::SetReuseId(frameNode, convValue);
+    LOGE("ARKOALA CommonMethod::ReuseIdImpl: Method not implemented in ViewAbstract!");
 }
 void RenderFitImpl(Ark_NativePointer node,
                    Ark_RenderFit value)

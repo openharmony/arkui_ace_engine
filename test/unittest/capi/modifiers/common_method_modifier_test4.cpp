@@ -841,7 +841,7 @@ HWTEST_F(CommonMethodModifierTest4, setObscuredTestDefaultValues, TestSize.Level
     std::string resultStr;
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
- }
+}
 
 /*
  * @tc.name: setObscuredTestValues
