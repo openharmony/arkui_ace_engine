@@ -90,7 +90,7 @@ public:
 };
 
 /* Auto generated test
- * @tc.name: SetOnPreDragTest
+ * @tc.name: SetOnPreDrag
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
@@ -142,4 +142,57 @@ HWTEST_F(CommonMethodModifierTest7, SetOnPreDragTest, TestSize.Level1)
     Test(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
 }
 
+/* Auto generated test
+ * @tc.name: SetOnDragEnter
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnDragEnterTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        PreDragStatus preDragStatus;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onDragEnter = [](Ark_Int32 nodeId, const Ark_PreDragStatus preDragStatus) {
+        checkEvent = {
+            .nodeId = nodeId,
+            .preDragStatus = Converter::Convert<PreDragStatus>(preDragStatus),
+        };
+    };
+
+    Callback_PreDragStatus_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDragEnter
+    };
+
+    auto Test = [this, &callBackValue, eventHub, frameNode](const RefPtr<DragEvent>& testDragEventPtr,
+                                                            const std::string& testStrValue) {
+        checkEvent = std::nullopt;
+        modifier_->setOnDragEnter(node_, &callBackValue);
+        EXPECT_FALSE(checkEvent.has_value());
+        auto onDragEnterFunc = eventHub->GetOnDragEnter();
+        onDragEnterFunc(testDragEventPtr, testStrValue);
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->preDragStatus, testValue);
+    };
+
+    Test(PreDragStatus::ACTION_DETECTING_STATUS);
+    Test(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION);
+    Test(PreDragStatus::PREVIEW_LIFT_STARTED);
+    Test(PreDragStatus::PREVIEW_LIFT_FINISHED);
+    Test(PreDragStatus::PREVIEW_LANDING_STARTED);
+    Test(PreDragStatus::PREVIEW_LANDING_FINISHED);
+    Test(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+}
 }

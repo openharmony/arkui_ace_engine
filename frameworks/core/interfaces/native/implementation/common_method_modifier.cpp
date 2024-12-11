@@ -1222,6 +1222,26 @@ Ark_PreDragStatus ArkValue(const PreDragStatus& src)
     }
     return dst;
 }
+template<>
+Ark_DragBehavior ArkValue(const DragBehavior& src)
+{
+    switch (src) {
+        case DragBehavior::COPY: return ARK_DRAG_BEHAVIOR_COPY;
+        case DragBehavior::MOVE: return ARK_DRAG_BEHAVIOR_MOVE;
+        default:
+            return ARK_DRAG_BEHAVIOR_COPY;
+    }
+}
+template<>
+Ark_DragEvent ArkValue(const OHOS::Ace::DragEvent& src)
+{
+    Ark_DragEvent dst;
+    OHOS::Ace::DragEvent& nonConstSrc = const_cast<OHOS::Ace::DragEvent&>(src);
+    bool isUseCustomAnimation2 = nonConstSrc.IsUseCustomAnimation();
+    dst.useCustomDropAnimation = ArkValue<Ark_Boolean>(isUseCustomAnimation2);
+    dst.dragBehavior = ArkValue<Ark_DragBehavior>(src.GetDragBehavior());
+    return dst;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -2746,15 +2766,11 @@ void OnDragEnterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    /*
-    typedef struct Callback_DragEvent_String_Void {
-        Ark_CallbackResource resource;
-        void (*call)(const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams);
-    } Callback_DragEvent_String_Void;
-    */
-    auto convValue = Converter::OptConvert<type_name>(*value);
-    using OnDragEnterFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-    ViewAbstract::SetOnDragEnter(frameNode, convValue);
+    auto OnPreDrag = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& extraParams) {
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
+        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragEnter(frameNode, OnPreDrag);
 }
 void OnDragMoveImpl(Ark_NativePointer node,
                     const Callback_DragEvent_String_Void* value)
@@ -3011,7 +3027,7 @@ void GeometryTransition0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetGeometryTransition0(frameNode, convValue);
+    //CommonMethodModelNG::SetGeometryTransition0(frameNode, qconvValue);
 }
 void GeometryTransition1Impl(Ark_NativePointer node,
                              const Ark_String* id,
