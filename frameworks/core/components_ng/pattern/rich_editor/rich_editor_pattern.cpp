@@ -4625,12 +4625,14 @@ bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, c
         record.replacedRange.Set(record.startOffset, record.endOffset);
         record.newPreviewContent = previewTextValue;
         record.needReplacePreviewText = true;
+        record.needUpdateCaret = caretPosition_ == record.endOffset;
         ProcessInsertValue(previewTextValue, OperationType::IME, false);
         record.previewContent = record.newPreviewContent;
         record.newPreviewContent.clear();
         record.endOffset =
             record.startOffset + static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
         record.needReplacePreviewText = false;
+        record.needUpdateCaret = true;
     } else {
         if (range.start < record.startOffset || range.end > record.endOffset || range.end < range.start) {
             TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
@@ -5076,6 +5078,7 @@ void RichEditorPattern::AfterInsertValue(
     isTextChange_ = true;
     moveDirection_ = MoveDirection::FORWARD;
     moveLength_ += insertValueLength;
+    IF_TRUE(!previewTextRecord_.needUpdateCaret, moveLength_ = 0);
     UpdateSpanPosition();
     if (isIME || aiWriteAdapter_->GetAIWrite()) {
         AfterIMEInsertValue(spanNode, insertValueLength, isCreate);
@@ -6338,7 +6341,7 @@ void RichEditorPattern::CursorMove(CaretMoveIntent direction)
 
 void RichEditorPattern::MoveCaretAfterTextChange()
 {
-    CHECK_NULL_VOID(isTextChange_ && !IsPreviewTextInputting());
+    CHECK_NULL_VOID(isTextChange_ && moveLength_ != 0);
     isTextChange_ = false;
     switch (moveDirection_) {
         case MoveDirection::BACKWARD:
