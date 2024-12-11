@@ -29,11 +29,19 @@ class IndexRange {
     return this.end - this.start;
   }
 
+  toSet(target?: Set<number>): Set<number> {
+    const set = target ?? new Set<number>();
+    for (let i = this.start; i < this.end; ++i) {
+      set.add(i);
+    }
+    return set;
+  }
+
   contains(value: IndexRange | number): boolean {
     if (typeof value === 'object') {
-      return this.start <= (value as IndexRange).start && (value as IndexRange).end <= this.end;
+      return this.start <= value.start && value.end <= this.end;
     } else {
-      return this.start <= (value as number) && (value as number) < this.end;
+      return this.start <= value && value < this.end;
     }
   }
 
@@ -60,8 +68,12 @@ class IndexRange {
     }
   }
 
-  format(): string {
-    return `[${this.start}..${this.end})`;
+  equals(other: IndexRange): boolean {
+    return this.start === other.start && this.end === other.end;
+  }
+
+  toString(): string {
+    return `[${this.start}, ${this.end})`;
   }
 }
 
@@ -70,5 +82,13 @@ class IndexRangeArray extends Array<IndexRange> {
     this.forEach((range) => {
       range.forEachIndex(callback);
     });
+  }
+
+  toSet(): Set<number> {
+    const set = new Set<number>();
+    this.forEach((range) => {
+      range.toSet(set);
+    });
+    return set;
   }
 }
