@@ -45,8 +45,8 @@ public:
 private:
     RefPtr<FrameNode> GetSheetNode(PaintWrapper* paintWrapper);
     void SetBorderPenStyle(RSPen& pen, const Dimension& borderWidth, const Color& borderColor);
-    void GetBorderDrawPath(
-        RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme, float borderWidth);
+    void GetBorderDrawPath(RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme,
+        float borderWidth, const BorderRadiusProperty& sheetRadius);
     bool IsDrawBorder(PaintWrapper* paintWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetWrapperPaintMethod);
