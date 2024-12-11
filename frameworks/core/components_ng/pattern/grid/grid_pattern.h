@@ -248,6 +248,8 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    void HandleOnItemFocus(int32_t index);
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -264,8 +266,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
     bool OnKeyEvent(const KeyEvent& event);
 
     void ClearMultiSelect() override;

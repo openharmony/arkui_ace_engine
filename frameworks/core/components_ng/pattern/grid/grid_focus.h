@@ -57,6 +57,11 @@ public:
         focusIndex_.reset();
     }
 
+    void SetFocusIndex(int32_t index)
+    {
+        focusIndex_ = index;
+    }
+
 private:
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
     void FireFocus();

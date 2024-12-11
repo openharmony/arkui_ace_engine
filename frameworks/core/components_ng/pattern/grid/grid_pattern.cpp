@@ -664,37 +664,6 @@ void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
-
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
-    });
-
-    focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleBlurEvent();
-        }
-    });
-}
-
-void GridPattern::HandleFocusEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
-
-    auto child = focusHub->GetLastWeakFocusNode();
-    focusHandler_.HandleFocusEvent(child);
-}
-
-void GridPattern::HandleBlurEvent()
-{
-    TAG_LOGI(AceLogTag::ACE_GRID, "Grid lost focus");
 }
 
 bool GridPattern::OnKeyEvent(const KeyEvent& event)
@@ -1634,5 +1603,10 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
                 nextFocusNode = grid->focusHandler_.GetNextFocusNode(step, currFocusNode);
             }
         });
+}
+
+void GridPattern::HandleOnItemFocus(int32_t index)
+{
+    focusHandler_.SetFocusIndex(index);
 }
 } // namespace OHOS::Ace::NG
