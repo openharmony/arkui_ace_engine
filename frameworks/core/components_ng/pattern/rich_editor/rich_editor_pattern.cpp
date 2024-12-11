@@ -4819,8 +4819,9 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
         StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{private}s]", StringUtils::RestoreEscape(insertValue).c_str());
 
-    if (isIME && calledByImf && !IsEditing()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow physical keyboard input in preview state");
+    if (isIME && calledByImf && (!isEditing_ || isDragging_)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow input, isEditing=%{public}d, isDragging=%{public}d",
+            isEditing_, isDragging_);
         return;
     }
     if (isSpanStringMode_) {
@@ -5228,7 +5229,9 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 void RichEditorPattern::DeleteBackward(int32_t oriLength)
 {
     int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, caretPosition_) : oriLength;
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d, isDragging=%{public}d",
+        oriLength, length, isDragging_);
+    CHECK_NULL_VOID(!isDragging_);
     if (isSpanStringMode_) {
         DeleteBackwardInStyledString(length);
         return;
@@ -5294,7 +5297,9 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
 void RichEditorPattern::DeleteForward(int32_t oriLength)
 {
     int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, GetTextContentLength() - caretPosition_) : oriLength;
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d, isDragging=%{public}d",
+        oriLength, length, isDragging_);
+    CHECK_NULL_VOID(!isDragging_);
     if (isSpanStringMode_) {
         DeleteForwardInStyledString(length);
         return;
