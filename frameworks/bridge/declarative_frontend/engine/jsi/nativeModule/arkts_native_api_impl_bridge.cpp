@@ -1529,6 +1529,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetBorderRadius));
     imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderRadius"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetBorderRadius));
+    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColorFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetColorFilter));
+    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColorFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetColorFilter));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageSpan"), imageSpan);
 
     auto blank = panda::ObjectRef::New(vm);

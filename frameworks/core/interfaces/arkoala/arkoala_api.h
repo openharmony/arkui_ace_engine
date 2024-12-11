@@ -3464,6 +3464,8 @@ struct ArkUIImageSpanModifier {
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetImageSpanBorderRadius)(ArkUINodeHandle node);
     ArkUI_Float32 (*getImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    void (*setImageSpanColorFilter)(ArkUINodeHandle node, const ArkUI_Float32* array, ArkUI_Int32 length);
+    void (*resetImageSpanColorFilter)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuModifier {
