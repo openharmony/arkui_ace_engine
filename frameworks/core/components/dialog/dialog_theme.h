@@ -41,6 +41,7 @@ constexpr double DEFAULT_DIALOG_MAXSIZE_SCALE_PORTRAIT = 0.8f;
 constexpr int DEFAULT_DIALOG_SCROLL_FLEX_ALIGN = 1;
 constexpr int DEFAULT_DIALOG_COLUMN_MEASURE_TYPE = 1;
 constexpr int DIALOG_TITLE_MAX_LINES_VALUE = 2;
+constexpr int DEFAULT_DIALOG_BACKGROUND_BLUR_STYLE = 12;
 
 } // namespace
 /**
@@ -518,6 +519,11 @@ public:
         return dialogLandscapeHeightBoundary_;
     }
 
+    const int& GetDialogBackgroundBlurStyle() const
+    {
+        return dialogBackgroundBlurStyle_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -613,6 +619,7 @@ private:
     Color dialogOuterBorderColor_;
     double dialogInnerBorderWidth_ = 0.0f;
     Color dialogInnerBorderColor_;
+    int dialogBackgroundBlurStyle_ = DEFAULT_DIALOG_BACKGROUND_BLUR_STYLE;
 };
 
 } // namespace OHOS::Ace

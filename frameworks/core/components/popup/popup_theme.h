@@ -31,6 +31,7 @@ constexpr uint32_t HIDE_TIME = 250; // unit is ms.
 constexpr Dimension TARGET_SPACE = 8.0_vp;
 constexpr Dimension BORDER_RADIUS_POPUP = 20.0_vp;
 constexpr double DEFAULT_OPACITY = 0.95;
+constexpr int DEFAULT_POPUP_BACKGROUND_BLUR_STYLE = 12;
 } // namespace
 
 /**
@@ -97,6 +98,8 @@ public:
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
             theme->popupShadowStyle_ = static_cast<ShadowStyle>(
                 pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->popupBackgroundBlurStyle_ =
+                pattern->GetAttr<int>("popup_background_blur_style", DEFAULT_POPUP_BACKGROUND_BLUR_STYLE);
         }
     };
 
@@ -335,6 +338,11 @@ public:
         return popupShadowStyle_;
     }
 
+    const int& GetPopupBackgroundBlurStyle() const
+    {
+        return popupBackgroundBlurStyle_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -387,6 +395,7 @@ private:
     Color fontPrimaryColor_;
     Color fontSecondaryColor_;
     ShadowStyle popupShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    int popupBackgroundBlurStyle_ = DEFAULT_POPUP_BACKGROUND_BLUR_STYLE;
 };
 
 } // namespace OHOS::Ace
