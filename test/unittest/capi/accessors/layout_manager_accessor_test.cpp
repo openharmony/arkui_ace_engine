@@ -32,6 +32,11 @@ const std::string g_message = "message";
 class LayoutManagerAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUILayoutManagerAccessor,
     &GENERATED_ArkUIAccessors::getLayoutManagerAccessor, LayoutManagerPeer> {
 public:
+    void SetUp(void) override
+    {
+        AccessorTestCtorBase::SetUp();
+        peer_->handler = new LayoutInfoInterface();
+    }
     LayoutManagerPeer* CreatePeerInstance() override
     {
         return accessor_->ctor();

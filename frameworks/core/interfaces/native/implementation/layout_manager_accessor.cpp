@@ -30,7 +30,6 @@ void DestroyPeerImpl(LayoutManagerPeer* peer)
 LayoutManagerPeer* CtorImpl()
 {
     LayoutManagerPeer* peer =  new LayoutManagerPeer();
-    peer->handler = new LayoutInfoInterface();
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
