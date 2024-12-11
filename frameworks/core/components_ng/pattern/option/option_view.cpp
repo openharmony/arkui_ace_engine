@@ -35,7 +35,7 @@ RefPtr<FrameNode> Create(int32_t index)
     // set border radius
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
