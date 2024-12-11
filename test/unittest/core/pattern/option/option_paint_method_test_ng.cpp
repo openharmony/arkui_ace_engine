@@ -130,7 +130,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg001, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -148,7 +153,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg001, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -166,7 +172,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -184,7 +195,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -202,7 +214,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg003, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -220,7 +237,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg003, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -238,7 +256,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -256,7 +279,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -274,7 +298,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -293,7 +322,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -311,7 +341,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg006, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -330,7 +365,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg006, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -348,7 +384,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg007, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -367,7 +408,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg007, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -385,7 +427,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg008, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -404,7 +451,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg008, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -422,7 +470,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg009, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -441,7 +494,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg009, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -459,7 +513,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg010, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -478,7 +537,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg010, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -496,7 +556,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg011, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -516,7 +581,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg011, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -534,7 +600,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg012, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -554,7 +625,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg012, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -572,7 +644,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg013, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -592,7 +669,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg013, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -610,7 +688,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg014, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -630,7 +713,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg014, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -648,7 +732,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg015, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -666,7 +755,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg015, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -686,7 +776,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg016, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -704,7 +799,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg016, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -724,7 +820,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg017, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -742,7 +843,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg017, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -762,7 +864,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg018, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -780,7 +887,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg018, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -800,7 +908,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg019, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -819,7 +932,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg019, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -839,7 +953,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg020, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -858,7 +977,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg020, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -878,7 +998,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg021, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -897,7 +1022,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg021, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -917,7 +1043,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg022, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -936,7 +1067,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg022, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -956,7 +1088,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg023, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -975,7 +1112,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg023, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -995,7 +1133,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg024, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -1014,7 +1157,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg024, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -1034,7 +1178,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg025, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -1054,7 +1203,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg025, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -1074,7 +1224,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg026, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -1094,7 +1249,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg026, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -1114,7 +1270,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg027, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -1134,7 +1295,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg027, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
@@ -1154,7 +1316,12 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg028, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -1174,7 +1341,8 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg028, TestSize.Level1)
      * @tc.steps: step2. update hover to true.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
