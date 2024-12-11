@@ -188,7 +188,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollIndex002, TestSize.Level1)
         centerIndex = center;
     };
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetOnScrollIndex(event);
     CreateListItems(2);
     CreateDone();
@@ -230,7 +230,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollIndex003, TestSize.Level1)
         centerIndex = center;
     };
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetOnScrollIndex(event);
     CreateListItems(4);
     CreateDone();
@@ -752,7 +752,7 @@ HWTEST_F(ListScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
 HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     model.SetChainAnimation(true);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();

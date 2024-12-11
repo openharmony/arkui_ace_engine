@@ -57,7 +57,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex001, TestSize.Level1)
     ScrollToIndex(index, true, ScrollAlign::END);
     EXPECT_TRUE(Position(-(200 + offset)));
 
-    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    layoutProperty_->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
     ScrollToIndex(index, true, ScrollAlign::START);
     EXPECT_TRUE(Position(-index * groupHeight));
     ScrollToIndex(index, true, ScrollAlign::CENTER);
@@ -466,7 +466,7 @@ HWTEST_F(ListScrollerTestNg, JumpToItemInGroup003, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -220);
     EXPECT_EQ(pattern_->itemPosition_[2].endPos, 400);
 
-    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    layoutProperty_->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::HEADER);
     JumpToItemInGroup(2, 1, true, ScrollAlign::START);
     MockAnimationManager::GetInstance().Tick();
