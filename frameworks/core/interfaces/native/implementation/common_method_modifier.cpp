@@ -2767,6 +2767,7 @@ void OnDragEnterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto OnPreDrag = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
         Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(*dragEvent);
         callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
     };
