@@ -1741,6 +1741,47 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleFocusEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSelect002
+ * @tc.desc: test HandleSelect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    int32_t selectStart = 0;
+    int32_t selectEnd = 2;
+    SelectOverlayInfo selectInfo;
+    auto pipeline = richEditorNode_->GetContext();
+    auto selectOverlayManager = pipeline->GetSelectOverlayManager();
+    selectOverlayManager->selectOverlayInfo_.isUsingMouse = true;
+    richEditorPattern->HandleSelect(info, selectStart, selectEnd);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: HandleDoubleClickOrLongPress002
+ * @tc.desc: test HandleDoubleClickOrLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleDoubleClickOrLongPress002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    auto localOffset = info.GetLocalLocation();
+    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
+    EXPECT_TRUE(localOffset == richEditorPattern->ConvertGlobalToLocalOffset(info.GetGlobalLocation()));
+    richEditorPattern->overlayMod_ = nullptr;
+    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
+    EXPECT_TRUE(richEditorPattern->isEditing_);
+}
+
+/**
  * @tc.name: HandleDraggableFlag
  * @tc.desc: test HandleDraggableFlag
  * @tc.type: FUNC

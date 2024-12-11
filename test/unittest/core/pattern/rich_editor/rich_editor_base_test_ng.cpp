@@ -896,4 +896,26 @@ void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEd
     EXPECT_FALSE(controller->GetShowMagnifier());
     EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
 }
+
+/**
+ * @tc.name: UpdateSpanStyle001
+ * @tc.desc: test UpdateSpanStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, UpdateSpanStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorController->updateSpanStyle_.useThemeFontColor = false;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"UpdateSpanStyle");
+    TextStyle textStyle;
+    ImageSpanAttribute imageStyle;
+    richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
+    EXPECT_FALSE(richEditorPattern->updateSpanStyle_.useThemeFontColor);
+}
+
 } // namespace OHOS::Ace::NG
