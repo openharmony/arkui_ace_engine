@@ -1311,17 +1311,14 @@ void ScrollablePattern::ScrollTo(float position)
 void ScrollablePattern::AnimateTo(
     float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
-    float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
         CHECK_NULL_VOID(scrollableEvent_);
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
-        currVelocity = -scrollable->GetCurrentVelocity();
         scrollAbort_ = true;
         StopScrollable();
     }
     if (!isAnimationStop_) {
-        currVelocity = GetCurrentVelocity();
         scrollAbort_ = true;
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
