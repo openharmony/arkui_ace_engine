@@ -578,11 +578,11 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     if (this.item.value === PUBLIC_OK) {
-      return this.toStringFormat($r('sys.string.icon_save'));
+      return getContext()?.resourceManager?.getStringByNameSync('icon_save');
     } else if (this.item.value === PUBLIC_CANCEL) {
-      return this.toStringFormat($r('sys.string.icon_cancel'));
+      return getContext()?.resourceManager?.getStringByNameSync('icon_cancel');
     } else if (this.item.value === PUBLIC_BACK) {
-      return this.toStringFormat($r('sys.string.icon_back'));
+      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
     } else if (this.item.accessibilityText) {
       return this.toStringFormat(this.item.accessibilityText);
     } else if (this.item.label) {
@@ -592,10 +592,8 @@ struct ImageMenuItem {
   }
 
   private getRightIconAccessibilityLevel(): string {
-    if (this.item.accessibilityLevel === 'yes') {
-      return 'yes';
-    } else if (this.item.accessibilityLevel === 'no') {
-      return 'no';
+    if (this.item.accessibilityLevel && this.item.accessibilityLevel !== '') {
+      return this.item.accessibilityLevel;
     }
     return 'auto';
   }
@@ -734,6 +732,7 @@ struct EditableTitleBarDialog {
             })
             .fontSize(SYMBOL_TITLE_SIZE)
             .fontColor([$r('sys.color.icon_primary')])
+            .direction(Direction.Ltr)
         } else {
           Image(this.itemEditableDialog.value)
             .width(IMAGE_SIZE)
@@ -743,6 +742,7 @@ struct EditableTitleBarDialog {
               bottom: $r('sys.float.padding_level8'),
             })
             .fillColor($r('sys.color.icon_primary'))
+            .direction(Direction.Ltr)
         }
         Column() {
           Text(this.textEditableTitleBarDialog)
@@ -786,6 +786,7 @@ struct EditableTitleBarDialog {
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius(($r('sys.float.corner_radius_level10')))
       .justifyContent(FlexAlign.Center)
+      .direction(Direction.Ltr)
     }
   }
 
