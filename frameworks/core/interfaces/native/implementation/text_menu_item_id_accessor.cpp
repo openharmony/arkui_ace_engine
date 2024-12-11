@@ -15,14 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
-struct TextMenuItemIdPeer {};
+#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(TextMenuItemIdPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->id = std::nullopt;
+    delete peer;
 }
 TextMenuItemIdPeer* CtorImpl()
 {
@@ -34,12 +38,17 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer OfImpl(const Ark_ResourceStr* id)
 {
-    return 0;
+    auto peer = CtorImpl();
+    peer->id = Converter::OptConvert<std::string>(*id);
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_Boolean EqualsImpl(TextMenuItemIdPeer* peer,
                        const Ark_TextMenuItemId* id)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && id && id->ptr, false);
+    auto peer2 = reinterpret_cast<TextMenuItemIdPeer*>(id->ptr);
+    CHECK_NULL_RETURN(peer->id && peer2->id, false);
+    return Converter::ArkValue<Ark_Boolean>(peer->id.value() == peer2->id.value());
 }
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
