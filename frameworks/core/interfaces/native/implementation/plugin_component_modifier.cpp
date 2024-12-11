@@ -16,14 +16,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
-#ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#endif
+#include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG {
-#ifdef PLUGIN_COMPONENT_SUPPORTED  
+namespace OHOS::Ace::NG { 
 namespace {
     struct PluginComponentOptions {
         std::optional<RequestPluginInfo> requestPluginInfo;
@@ -48,7 +45,6 @@ namespace Converter{
         return info;
     }
 } // Converter
-#endif
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -63,7 +59,6 @@ namespace PluginComponentInterfaceModifier {
 void SetPluginComponentOptionsImpl(Ark_NativePointer node,
                                    const Ark_PluginComponentOptions* options)
 {
-#ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
@@ -75,7 +70,6 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
         PluginModelNG::SetRequestPluginInfo(frameNode, std::nullopt);
     }
     LOGE("PluginComponentModifier::SetPluginComponentOptionsImpl setData into model isn't supported");
-#endif
 }
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {

@@ -166,6 +166,17 @@ HWTEST_F(
 }
 
 /*
+ * @tc.name: setPluginComponentOptionsTestOptionsTemplateBundleNameValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    PluginComponentModifierTest, DISABLED_setPluginComponentOptionsTestOptionsTemplateDataValidValues, TestSize.Level1)
+{
+    // test not implemented
+}
+
+/*
  * @tc.name: setOnCompleteTest
  * @tc.desc: check functionality setOnComplete
  * @tc.type: FUNC

@@ -4955,28 +4955,5 @@
                 }
             ]
         },
-        {
-            "name": "PluginComponent",
-            // "disable": [
-            //     "setFontColorTestValidValues",
-            //     "setSymbolSpanOptionsTestDefaultValues",
-            //     "setSymbolSpanOptionsTestValidValues",
-            // ],
-            "attributes": [
-                {
-                    "name": "template",
-                    "attributes": [
-                        {
-                            "name": "source",
-                            "default": ""
-                        },
-                        {
-                            "name": "bundleName",
-                            "default": ""
-                        },
-                    ]
-                },
-            ]
-       },
     ]
 }
