@@ -446,6 +446,7 @@ float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThre
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
+double SystemProperties::scrollableDistance_ = GetScrollableDistance();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -593,6 +594,7 @@ void SystemProperties::InitDeviceInfo(
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
+    scrollableDistance_ = GetScrollableDistance();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
