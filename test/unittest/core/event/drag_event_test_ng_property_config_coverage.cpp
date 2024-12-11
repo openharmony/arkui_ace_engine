@@ -791,4 +791,33 @@ HWTEST_F(DragEventTestNg, DragEventActuatorDragGestureTest001, TestSize.Level1)
     (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 }
+
+/**
+ * @tc.name: DragEventActuatorMountGatherNodeTest032
+ * @tc.desc: Test UpdateGatherAnimatePosition function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNodeChildInfo
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step1. Test UpdateGatherAnimatePosition
+     */
+    std::vector<GatherNodeChildInfo> gatherNodeChildInfo(1);
+    gatherNodeChildInfo[0].imageNode = frameNode;
+    auto tempOffset = OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f));
+    auto targetOffset = OffsetT<Dimension>(Dimension(COORDINATE_OFFSET.GetX()), Dimension(COORDINATE_OFFSET.GetY()));
+    EXPECT_EQ(renderContext->GetPositionValue(tempOffset), tempOffset);
+    DragEventActuator::UpdateGatherAnimatePosition(
+        gatherNodeChildInfo, { COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY() });
+    EXPECT_EQ(renderContext->GetPositionValue(tempOffset), targetOffset);
+}
 } // namespace OHOS::Ace::NG
