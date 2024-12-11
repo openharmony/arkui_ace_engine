@@ -94,7 +94,8 @@ public:
     {}
     ~LayoutAlgorithmWrapper() override = default;
 
-    static RefPtr<LayoutAlgorithmWrapper> CreateLayoutAlgorithmWrapper(const RefPtr<AceKit::LayoutAlgorithm>& layoutAlgorithm)
+    static RefPtr<LayoutAlgorithmWrapper> CreateLayoutAlgorithmWrapper(
+        const RefPtr<AceKit::LayoutAlgorithm>& layoutAlgorithm)
     {
         auto layoutAlgorithmWrapper = MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
         layoutAlgorithmWrapper->SetAbsLayoutAlgorithm(layoutAlgorithm);

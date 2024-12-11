@@ -215,9 +215,7 @@ ohos_unittest("SpringChainTest") {
     ":config_animation_test",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-  ]
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
   if (!is_ohos_standard_system) {
     external_deps = [
