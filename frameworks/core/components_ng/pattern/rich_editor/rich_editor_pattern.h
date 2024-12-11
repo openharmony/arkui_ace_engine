@@ -1188,6 +1188,8 @@ private:
     }
 
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
+    RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
+    RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
     RectF GetSelectArea();
     bool IsTouchInFrameArea(const PointF& touchPoint);

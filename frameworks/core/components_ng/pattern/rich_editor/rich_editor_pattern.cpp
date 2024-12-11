@@ -4017,7 +4017,9 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
             int32_t oldEnd = spanEndPos;
             auto spanStart = oldStart <= start ? 0 : oldStart - start;
             auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
-            auto newSpanItem = spanItem->GetSameStyleSpanItem();
+            auto newSpanItem = GetSameSpanItem(spanItem);
+            CHECK_NULL_CONTINUE(newSpanItem);
+            newSpanItem->spanItemType = spanItem->spanItemType;
             newSpanItem->interval = {spanStart, spanEnd};
             newSpanItem->position = spanStart;
             newSpanItem->rangeStart = spanEnd;
@@ -4030,6 +4032,50 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
     }
     spanString->SetString(text);
     spanString->SetSpanItems(std::move(subSpans));
+}
+
+RefPtr<SpanItem> RichEditorPattern::GetSameSpanItem(const RefPtr<SpanItem>& spanItem)
+{
+    CHECK_NULL_RETURN(spanItem, nullptr);
+    if (spanItem->spanItemType == SpanItemType::IMAGE) {
+        auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
+        CHECK_NULL_RETURN(imageSpanItem, nullptr);
+        auto newSpanItem = MakeRefPtr<ImageSpanItem>();
+        auto options = imageSpanItem->options;
+        if (!options.imagePixelMap) {
+            auto imageNode = GetImageSpanNodeBySpanItem(imageSpanItem);
+            CHECK_NULL_RETURN(imageNode, nullptr);
+            auto pattern = imageNode->GetPattern<ImagePattern>();
+            CHECK_NULL_RETURN(pattern, nullptr);
+            auto image = pattern->GetCanvasImage();
+            CHECK_NULL_RETURN(image, nullptr);
+            auto pixelMap = image->GetPixelMap();
+            if (!pixelMap) {
+                pixelMap = imageNode->GetPixelMap();
+            }
+            options.imagePixelMap = pixelMap;
+        }
+        newSpanItem->SetImageSpanOptions(options);
+        return newSpanItem;
+    } else if (spanItem->spanItemType == SpanItemType::NORMAL) {
+        auto newSpanItem = spanItem->GetSameStyleSpanItem();
+        return newSpanItem;
+    }
+    return nullptr;
+}
+
+RefPtr<ImageSpanNode> RichEditorPattern::GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto uiNodes = host->GetChildren();
+    auto it = std::find_if(uiNodes.begin(), uiNodes.end(), [spanItem](const RefPtr<UINode>& uiNode) {
+        auto imageSpanNode = DynamicCast<ImageSpanNode>(uiNode);
+        CHECK_NULL_RETURN(imageSpanNode, false);
+        return imageSpanNode->GetSpanItem() == spanItem;
+    });
+    CHECK_NULL_RETURN(it != uiNodes.end(), nullptr);
+    return DynamicCast<ImageSpanNode>(*it);
 }
 
 void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)

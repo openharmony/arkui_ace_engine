@@ -2369,6 +2369,26 @@
     },
     {
         "first_introduced": "14",
+        "name": "OH_ArkUI_StyledString_Descriptor_Create"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_StyledString_Descriptor_Destroy"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_UnmarshallStyledStringDescriptor"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_MarshallStyledStringDescriptor"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ConvertToHtml"
+    },
+    {
+        "first_introduced": "14",
         "name": "OH_NativeXComponent_RegisterKeyEventCallbackWithResult"
     }
 ]

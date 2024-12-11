@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_TEXT_ACE_TEXT_HTML_UTILS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_TEXT_ACE_TEXT_HTML_UTILS_H
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
 
-class MutableSpanString;
-class SpanString;
-
-class ACE_FORCE_EXPORT HtmlUtils {
-public:
-    static RefPtr<MutableSpanString> FromHtml(const std::string& str);
-    static std::string ToHtml(const SpanString* str);
-};
+// Currently not completed
+std::string HtmlUtils::ToHtml(const SpanString* str)
+{
+    return "";
+}
 
 } // namespace OHOS::Ace
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_TEXT_ACE_TEXT_HTML_UTILS_H
