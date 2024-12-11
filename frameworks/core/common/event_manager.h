@@ -235,6 +235,16 @@ public:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
+    const std::unordered_map<size_t, TouchTestResult>& GetAxisTouchTestResults() const
+    {
+        return axisTouchTestResults_;
+    }
+
+    void SetAxisTouchTestResults(std::unordered_map<size_t, TouchTestResult>& axisTouchTestResults)
+    {
+        axisTouchTestResults_ = axisTouchTestResults;
+    }
+
     void SetInnerFlag(bool value)
     {
         innerEventWin_ = value;

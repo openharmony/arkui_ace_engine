@@ -3531,13 +3531,11 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             axisEventChecker_.GetPreAction());
     }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
     auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
     if (event.action != AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
-#endif
 
     auto dragManager = GetDragDropManager();
     if (dragManager && !dragManager->IsDragged()) {
@@ -3550,6 +3548,15 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             // If received rotate event, no need to touchtest.
             if (!event.isRotationEvent) {
                 eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
+                if (formEventMgr) {
+                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
+                }
+                auto formGestureMgr =  this->GetFormGestureManager();
+                if (formGestureMgr) {
+                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
+                        etsSerializedGesture, eventManager_);
+                }
             }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
@@ -3562,11 +3569,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         eventManager_->AxisTest(scaleEvent, node);
         eventManager_->DispatchAxisEventNG(scaleEvent);
     }
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
-#endif
     if (scaleEvent.action == AxisAction::BEGIN) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
         ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
@@ -3579,11 +3584,10 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
     auto mouseEvent = ConvertAxisToMouse(event);
     OnMouseMoveEventForAxisEvent(mouseEvent, node);
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
     if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
         formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
+        formEventMgr->RemoveEtsCardTouchEventCallback(event.id);
     }
-#endif
 }
 
 void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
@@ -3958,9 +3962,7 @@ void PipelineContext::Destroy()
     auto formEventMgr = this->GetFormEventManager();
     if (formEventMgr) {
         formEventMgr->ClearEtsCardTouchEventCallback();
-#ifdef FORM_MOUSE_AXIS_SUPPORT
         formEventMgr->ClearEtsCardAxisEventCallback();
-#endif
     }
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
