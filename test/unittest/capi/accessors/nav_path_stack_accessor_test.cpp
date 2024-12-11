@@ -166,7 +166,7 @@ HWTEST_F(NavPathStackAccessorTest, pushPath1Test, TestSize.Level1)
     EXPECT_EQ(accessor_->size(peer_), 0);
 
     Ark_NavPathInfo path {
-        .name = ArkValue<Ark_String>(std::string()),
+        .name = ArkValue<Ark_String>(""),
         .param = ArkValue<Opt_CustomObject>(),
         .onPop = ArkValue<Opt_Callback_PopInfo_Void>(),
         .isEntry = ArkValue<Opt_Boolean>()

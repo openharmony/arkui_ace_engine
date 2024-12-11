@@ -208,7 +208,8 @@ void OnSubmitImpl(Ark_NativePointer node,
     auto onSubmit = [arkCallback = CallbackHelper(*value)](
                         const int32_t& value, const NG::TextFieldCommonEvent& event) {
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(value));
-        auto submitEvent = Ark_SubmitEvent { .text = Converter::ArkValue<Ark_String>(event.GetText()) };
+        Converter::ConvContext ctx;
+        auto submitEvent = Ark_SubmitEvent { .text = Converter::ArkValue<Ark_String>(event.GetText(), &ctx) };
         arkCallback.Invoke(enterKeyType, submitEvent);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, onSubmit);

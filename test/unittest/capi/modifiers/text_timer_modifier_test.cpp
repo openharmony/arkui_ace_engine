@@ -226,8 +226,7 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestController, TestSize.Leve
 
     Ark_TextTimerController arkController;
     arkController.ptr = controllerPtr;
-    opts.value.controller = Converter::ArkValue<Opt_TextTimerController>(
-        std::optional<Ark_TextTimerController>(arkController));
+    opts.value.controller = Converter::ArkValue<Opt_TextTimerController>(arkController);
     modifier_->setTextTimerOptions(node_, &opts);
 
     RefPtr<TextTimerController> controller = pattern->GetTextTimerController();

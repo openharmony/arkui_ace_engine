@@ -943,13 +943,13 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
     Opt_Boolean inputValue;
 
     // Initial setup
-    inputValue = Converter::ArkValue<Opt_Boolean>(std::optional(true));
+    inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setRecoverable(node_, &inputValue);
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);
     EXPECT_EQ(boolResult, true);
 
     // Verifying attribute's other values
-    inputValue = Converter::ArkValue<Opt_Boolean>(std::optional(false));
+    inputValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setRecoverable(node_, &inputValue);
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);
     EXPECT_EQ(boolResult, false);

@@ -1384,7 +1384,7 @@ HWTEST_F(IndexerModifierTest, setPopupPositionX, TestSize.Level1)
 
     for (const auto &[value, expectVal] : POPUP_POSITION_TEST_PLAN) {
         const Ark_Position& position = {
-            Converter::ArkValue<Opt_Length>(std::optional(value)),
+            Converter::ArkValue<Opt_Length>(value),
             Converter::ArkValue<Opt_Length>(Ark_Empty())
         };
         modifier_->setPopupPosition(node_, &position);
@@ -1412,7 +1412,7 @@ HWTEST_F(IndexerModifierTest, setPopupPositionY, TestSize.Level1)
     for (const auto &[value, expectVal] : POPUP_POSITION_TEST_PLAN) {
         const Ark_Position& position = {
             Converter::ArkValue<Opt_Length>(Ark_Empty()),
-            Converter::ArkValue<Opt_Length>(std::optional(value))
+            Converter::ArkValue<Opt_Length>(value)
         };
         modifier_->setPopupPosition(node_, &position);
 

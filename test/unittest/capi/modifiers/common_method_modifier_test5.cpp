@@ -32,31 +32,15 @@ namespace {
     const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_BLEND_MODE_NAME = "blendMode";
     const auto ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE = "0";
-}
-namespace Converter {
-    template<>
-    Array_FractionStop ArkValue(const std::vector<std::pair<float, float>>& fractionStopValue)
+
+    struct FractionStop {
+        float first;
+        float second;
+    };
+    void AssignArkValue(Ark_FractionStop& dst, const FractionStop& fractionStopValue)
     {
-        Array_FractionStop arr;
-        arr.length = fractionStopValue.size();
-        arr.array = new Ark_FractionStop[arr.length];
-        for (auto i = 0; i < fractionStopValue.size(); ++i) {
-            arr.array[i].value0 = ArkValue<Ark_Number>(fractionStopValue[i].first);
-            arr.array[i].value1 = ArkValue<Ark_Number>(fractionStopValue[i].second);
-        }
-        return arr;
-    }
-    template<>
-    void AssignArkValue(Opt_BlendApplyType& dst, const BlendApplyType& src)
-    {
-        Ark_BlendApplyType arkDst;
-        switch (src) {
-            case BlendApplyType::FAST: arkDst = ARK_BLEND_APPLY_TYPE_FAST; break;
-            case BlendApplyType::OFFSCREEN: arkDst = ARK_BLEND_APPLY_TYPE_OFFSCREEN; break;
-            default:
-                arkDst = ARK_BLEND_APPLY_TYPE_FAST;
-        }
-        dst = ArkValue<Opt_BlendApplyType>(arkDst);
+        dst.value0 = Converter::ArkValue<Ark_Number>(fractionStopValue.first);
+        dst.value1 = Converter::ArkValue<Ark_Number>(fractionStopValue.second);
     }
 }
 
@@ -93,25 +77,24 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSi
 {
     ASSERT_NE(modifier_->setLinearGradientBlur, nullptr);
     using OneTestStep = std::tuple<Ark_Number, Ark_LinearGradientBlurOptions, std::string>;
-    std::vector<std::pair<float, float>> val1 = {{1.1f, 2.2f}, {3.3f, 4.4f}, {5.5f, 6.6f}};
+    std::vector<FractionStop> val1 = {{1.1f, 2.2f}, {3.3f, 4.4f}, {5.5f, 6.6f}};
+    Converter::ArkArrayHolder<Array_FractionStop> frac(val1);
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Number>(12), {
-            .direction = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_BOTTOM,
-            .fractionStops = Converter::ArkValue<Array_FractionStop>(val1)},
+        {
+            Converter::ArkValue<Ark_Number>(12),
+            {
+                .direction = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_BOTTOM,
+                .fractionStops = frac.ArkValue()
+            },
             "{\"value\":\"12.00vp\",\"options\":{\"direction\":\"BOTTOM\","
-            "\"fractionStops\":[\"1.100000,2.200000\",\"3.300000,4.400000\",\"5.500000,6.600000\"]}}"},
-    };
-    auto freeArray = [](Array_FractionStop& arr) {
-        delete[] arr.array;
-        arr.array = nullptr;
-        arr.length = 0;
+            "\"fractionStops\":[\"1.100000,2.200000\",\"3.300000,4.400000\",\"5.500000,6.600000\"]}}"
+        },
     };
     for (auto [inputValueNum, inputValueGradient, expectedValue]: testPlan) {
         modifier_->setLinearGradientBlur(node_, &inputValueNum, &inputValueGradient);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-        freeArray(inputValueGradient.fractionStops);
     }
 }
 
@@ -181,36 +164,35 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level
 {
     ASSERT_NE(modifier_->setBlendMode, nullptr);
     using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
+    auto blendType = Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST);
     static const std::vector<OneTestStep> testPlan = {
-        {Ark_BlendMode::ARK_BLEND_MODE_NONE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST),
-            ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE},
-        {Ark_BlendMode::ARK_BLEND_MODE_CLEAR, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "1"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "2"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "3"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OVER, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "4"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OVER, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "5"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_IN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "6"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_IN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "7"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OUT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "8"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OUT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "9"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_ATOP, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "10"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_ATOP, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "11"},
-        {Ark_BlendMode::ARK_BLEND_MODE_XOR, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "12"},
-        {Ark_BlendMode::ARK_BLEND_MODE_PLUS, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "13"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MODULATE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "14"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "15"},
-        {Ark_BlendMode::ARK_BLEND_MODE_OVERLAY, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "16"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DARKEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "17"},
-        {Ark_BlendMode::ARK_BLEND_MODE_LIGHTEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "18"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_DODGE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST),
-            "19"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_BURN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "20"},
-        {Ark_BlendMode::ARK_BLEND_MODE_HARD_LIGHT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "21"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SOFT_LIGHT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "22"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DIFFERENCE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "23"},
-        {Ark_BlendMode::ARK_BLEND_MODE_EXCLUSION, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "24"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MULTIPLY, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "25"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "15"},
+        {Ark_BlendMode::ARK_BLEND_MODE_NONE, blendType, ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE},
+        {Ark_BlendMode::ARK_BLEND_MODE_CLEAR, blendType, "1"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC, blendType, "2"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST, blendType, "3"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OVER, blendType, "4"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_OVER, blendType, "5"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_IN, blendType, "6"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_IN, blendType, "7"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OUT, blendType, "8"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_OUT, blendType, "9"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_ATOP, blendType, "10"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_ATOP, blendType, "11"},
+        {Ark_BlendMode::ARK_BLEND_MODE_XOR, blendType, "12"},
+        {Ark_BlendMode::ARK_BLEND_MODE_PLUS, blendType, "13"},
+        {Ark_BlendMode::ARK_BLEND_MODE_MODULATE, blendType, "14"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
+        {Ark_BlendMode::ARK_BLEND_MODE_OVERLAY, blendType, "16"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DARKEN, blendType, "17"},
+        {Ark_BlendMode::ARK_BLEND_MODE_LIGHTEN, blendType, "18"},
+        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_DODGE, blendType, "19"},
+        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_BURN, blendType, "20"},
+        {Ark_BlendMode::ARK_BLEND_MODE_HARD_LIGHT, blendType, "21"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SOFT_LIGHT, blendType, "22"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DIFFERENCE, blendType, "23"},
+        {Ark_BlendMode::ARK_BLEND_MODE_EXCLUSION, blendType, "24"},
+        {Ark_BlendMode::ARK_BLEND_MODE_MULTIPLY, blendType, "25"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
     };
     for (auto [inputValueMode, inputValueType, expectedValue]: testPlan) {
         modifier_->setBlendMode(node_, inputValueMode, &inputValueType);
@@ -229,36 +211,35 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues2, TestSize.Level
 {
     ASSERT_NE(modifier_->setBlendMode, nullptr);
     using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
+    auto blendType = Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_OFFSCREEN);
     static const std::vector<OneTestStep> testPlan = {
-        {Ark_BlendMode::ARK_BLEND_MODE_NONE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX),
-            ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE},
-        {Ark_BlendMode::ARK_BLEND_MODE_CLEAR, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "1"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "2"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "3"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OVER, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "4"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OVER, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "5"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_IN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "6"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_IN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "7"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OUT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "8"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OUT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "9"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_ATOP, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "10"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_ATOP, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "11"},
-        {Ark_BlendMode::ARK_BLEND_MODE_XOR, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "12"},
-        {Ark_BlendMode::ARK_BLEND_MODE_PLUS, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "13"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MODULATE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "14"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "15"},
-        {Ark_BlendMode::ARK_BLEND_MODE_OVERLAY, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "16"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DARKEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "17"},
-        {Ark_BlendMode::ARK_BLEND_MODE_LIGHTEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "18"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_DODGE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX),
-            "19"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_BURN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "20"},
-        {Ark_BlendMode::ARK_BLEND_MODE_HARD_LIGHT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "21"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SOFT_LIGHT, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "22"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DIFFERENCE, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "23"},
-        {Ark_BlendMode::ARK_BLEND_MODE_EXCLUSION, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "24"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MULTIPLY, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "25"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::MAX), "15"},
+        {Ark_BlendMode::ARK_BLEND_MODE_NONE, blendType, ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE},
+        {Ark_BlendMode::ARK_BLEND_MODE_CLEAR, blendType, "1"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC, blendType, "2"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST, blendType, "3"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OVER, blendType, "4"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_OVER, blendType, "5"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_IN, blendType, "6"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_IN, blendType, "7"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OUT, blendType, "8"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_OUT, blendType, "9"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SRC_ATOP, blendType, "10"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DST_ATOP, blendType, "11"},
+        {Ark_BlendMode::ARK_BLEND_MODE_XOR, blendType, "12"},
+        {Ark_BlendMode::ARK_BLEND_MODE_PLUS, blendType, "13"},
+        {Ark_BlendMode::ARK_BLEND_MODE_MODULATE, blendType, "14"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
+        {Ark_BlendMode::ARK_BLEND_MODE_OVERLAY, blendType, "16"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DARKEN, blendType, "17"},
+        {Ark_BlendMode::ARK_BLEND_MODE_LIGHTEN, blendType, "18"},
+        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_DODGE, blendType, "19"},
+        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_BURN, blendType, "20"},
+        {Ark_BlendMode::ARK_BLEND_MODE_HARD_LIGHT, blendType, "21"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SOFT_LIGHT, blendType, "22"},
+        {Ark_BlendMode::ARK_BLEND_MODE_DIFFERENCE, blendType, "23"},
+        {Ark_BlendMode::ARK_BLEND_MODE_EXCLUSION, blendType, "24"},
+        {Ark_BlendMode::ARK_BLEND_MODE_MULTIPLY, blendType, "25"},
+        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
     };
     for (auto [inputValueMode, inputValueType, expectedValue]: testPlan) {
         modifier_->setBlendMode(node_, inputValueMode, &inputValueType);
@@ -273,8 +254,8 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestInvalidValues, TestSize.Leve
     ASSERT_NE(modifier_->setBlendMode, nullptr);
     using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {static_cast<Ark_BlendMode>(-1), Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "0"},
-        {static_cast<Ark_BlendMode>(999), Converter::ArkValue<Opt_BlendApplyType>(BlendApplyType::FAST), "0"},
+        {static_cast<Ark_BlendMode>(-1), Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
+        {static_cast<Ark_BlendMode>(999), Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
     };
     for (const auto& [blendMode, applyType, expectedValue] : testPlan) {
         modifier_->setBlendMode(node_, blendMode, &applyType);
@@ -292,8 +273,7 @@ HWTEST_F(CommonMethodModifierTest5, setDrawModifierTest, TestSize.Level1)
     auto peer = DrawModifierPeer();
     Ark_DrawModifier drawModifier;
     drawModifier.ptr = &peer;
-    Opt_DrawModifier drawModifierOpt = Converter::ArkValue<Opt_DrawModifier>(
-        std::optional<Ark_DrawModifier>(drawModifier));
+    Opt_DrawModifier drawModifierOpt = Converter::ArkValue<Opt_DrawModifier>(drawModifier);
     EXPECT_EQ(peer.drawModifier, nullptr);
     EXPECT_EQ(peer.frameNode.Upgrade(), nullptr);
     modifier_->setDrawModifier(node_, &drawModifierOpt);

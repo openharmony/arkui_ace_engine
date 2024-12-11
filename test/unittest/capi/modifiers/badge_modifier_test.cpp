@@ -247,8 +247,8 @@ HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions0TestValidValues, TestSize.L
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(12)));
-    position.y = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(14)));
+    position.x = Converter::ArkValue<Opt_Length>(12);
+    position.y = Converter::ArkValue<Opt_Length>(14);
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
@@ -425,8 +425,8 @@ HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions1TestValidValues, TestSize.L
     InitStringOptions(inputValueOptions);
 
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(16.00f)));
-    position.y = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(24.00f)));
+    position.x = Converter::ArkValue<Opt_Length>(16.00f);
+    position.y = Converter::ArkValue<Opt_Length>(24.00f);
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_BadgePosition>(
         Converter::ArkValue<Ark_BadgePosition>(BadgePosition::LEFT)

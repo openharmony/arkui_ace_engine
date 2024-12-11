@@ -309,13 +309,11 @@ HWTEST_F(WebControllerAccessorTest, loadDataTest, TestSize.Level1)
     std::string historyUrl = "historyUrl";
 
     Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType options;
-    options.baseUrl = Converter::ArkValue<Opt_String>(std::optional<Ark_String>(
-        Converter::ArkValue<Ark_String>(baseUrl)));
+    options.baseUrl = Converter::ArkValue<Opt_String>(baseUrl);
     options.data = Converter::ArkValue<Ark_String>(data);
     options.mimeType = Converter::ArkValue<Ark_String>(mimeType);
     options.encoding = Converter::ArkValue<Ark_String>(encoding);
-    options.historyUrl = Converter::ArkValue<Opt_String>(std::optional<Ark_String>(
-        Converter::ArkValue<Ark_String>(historyUrl)));
+    options.historyUrl = Converter::ArkValue<Opt_String>(historyUrl);
 
     ASSERT_NE(accessor_->loadData, nullptr);
 
@@ -344,7 +342,7 @@ HWTEST_F(WebControllerAccessorTest, DISABLED_loadUrlTest, TestSize.Level1)
     header.headerValue = Converter::ArkValue<Ark_String>(headerValue);
     std::vector<Ark_Header> vec { header };
     Converter::ArkArrayHolder<Array_Header> vecHolder(vec);
-    options.headers = Converter::ArkValue<Opt_Array_Header>(std::optional<Array_Header>(vecHolder.ArkValue()));
+    options.headers = vecHolder.OptValue<Opt_Array_Header>();
 
     ASSERT_NE(accessor_->loadUrl, nullptr);
 

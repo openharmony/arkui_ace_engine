@@ -205,7 +205,7 @@ public:
         useCustomAnimation_ = useCustomAnimation;
     }
 
-    bool IsUseCustomAnimation()
+    bool IsUseCustomAnimation() const
     {
         return useCustomAnimation_;
     }

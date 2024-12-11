@@ -81,9 +81,6 @@ HWTEST_F(ReverseConvertorTest, SimpleTypes, TestSize.Level1)
 
     auto ptrResult = Converter::ArkValue<Ark_NativePointer>(&numberResult);
     EXPECT_EQ(ptrResult, &numberResult);
-
-    auto funcResult = Converter::ArkValue<Ark_Function>(123);
-    EXPECT_EQ(funcResult.id, 123);
 }
 
 /**
@@ -150,7 +147,8 @@ HWTEST_F(ReverseConvertorTest, ArrayTypes, TestSize.Level1)
  */
 HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
 {
-    auto optNumber = Converter::ArkValue<Opt_Number>(std::optional<int>{});
+    auto emptyOpt = std::optional<int>{};
+    auto optNumber = Converter::ArkValue<Opt_Number>(emptyOpt);
     EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
 
     optNumber = Converter::ArkValue<Opt_Number>();
@@ -162,7 +160,8 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
     optNumber = Converter::ArkValue<Opt_Number>(std::nullopt);
     EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
 
-    optNumber = Converter::ArkValue<Opt_Number>(std::optional(123));
+    auto numOpt = std::optional(123);
+    optNumber = Converter::ArkValue<Opt_Number>(numOpt);
     EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
     EXPECT_EQ(optNumber.value.tag, ARK_TAG_INT32);
     EXPECT_EQ(optNumber.value.i32, 123);
@@ -226,5 +225,29 @@ HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
 
     optUnionResult = Converter::ArkUnion<Opt_Union_Number_String>(Ark_Empty());
     EXPECT_EQ(optUnionResult.tag, ARK_TAG_UNDEFINED);
+}
+
+/**
+ * @tc.name:
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ReverseConvertorTest, WithContext, TestSize.Level1)
+{
+    Converter::ConvContext ctx;
+
+    auto str = "abcd";
+    auto stringResult = Converter::ArkValue<Ark_String>(str, &ctx);
+    EXPECT_NE(stringResult.chars, str);
+    EXPECT_STREQ(stringResult.chars, str);
+    EXPECT_EQ(stringResult.length, 4);
+
+    std::vector<std::string> vec{"abc", "1234"};
+    auto stringArrayResult = Converter::ArkValue<Array_String>(vec, &ctx);
+    EXPECT_EQ(stringArrayResult.length, 2);
+    EXPECT_EQ(stringArrayResult.array[0].chars, "abc"sv);
+    EXPECT_EQ(stringArrayResult.array[0].length, 3);
+    EXPECT_EQ(stringArrayResult.array[1].chars, "1234"sv);
+    EXPECT_EQ(stringArrayResult.array[1].length, 4);
 }
 } // namespace OHOS::Ace::NG

@@ -45,8 +45,15 @@ static const auto ATTRIBUTE_COPY_OPTIONS_IN_APP_VALUE = "CopyOptions.InApp";
 static const auto ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME = "enableDataDetector";
 static const auto ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME = "textPreviewSupported";
 static const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME = "dataDetectorConfig";
+static const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_VALUE_ARR = {
+    ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER,
+    ARK_TEXT_DATA_DETECTOR_TYPE_URL,
+    ARK_TEXT_DATA_DETECTOR_TYPE_EMAIL,
+    ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS,
+    ARK_TEXT_DATA_DETECTOR_TYPE_DATE_TIME,
+};
 static const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_VALUE = "phoneNum,url,email,location,datetime";
-static const auto ATTRIBUTE_DATA_DETECTOR_STYLE_VALUE = TextDecorationStyle::DASHED;
+static const auto ATTRIBUTE_DATA_DETECTOR_STYLE_VALUE = ARK_TEXT_DECORATION_STYLE_DASHED;
 static const auto ATTRIBUTE_PLACEHOLDER_NAME = "placeholder";
 static const auto ATTRIBUTE_PLACEHOLDER_VALUE_NAME = "value";
 static const auto ATTRIBUTE_PLACEHOLDER_STYLE_NAME = "style";
@@ -78,76 +85,6 @@ static const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" }};
-
-namespace Converter {
-void AssignArkValue(Ark_RichEditorTextSpanOptions& dst, const OHOS::Ace::TextSpanOptions& src)
-{
-    dst.offset = Converter::ArkValue<Opt_Number>(src.offset);
-}
-
-void AssignArkValue(Ark_CopyOptions& dst, const OHOS::Ace::CopyOptions& src)
-{
-    switch (src) {
-        case CopyOptions::InApp:
-            dst = ARK_COPY_OPTIONS_IN_APP;
-            break;
-        case CopyOptions::None:
-            dst = ARK_COPY_OPTIONS_NONE;
-            break;
-        case CopyOptions::Local:
-            dst = ARK_COPY_OPTIONS_LOCAL_DEVICE;
-            break;
-        case CopyOptions::Distributed:
-            dst = ARK_COPY_OPTIONS_CROSS_DEVICE;
-            break;
-        default:
-            break;
-    }
-}
-void AssignArkValue(Opt_ResourceColor& dst, const OHOS::Ace::Color& src)
-{
-    dst.value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(src.ToString());
-}
-void AssignArkValue(Array_TextDataDetectorType& dst, const std::string& src)
-{
-    std::map<std::string, Ark_TextDataDetectorType> typeMap = {
-        {"phoneNum", ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER},
-        {"url", ARK_TEXT_DATA_DETECTOR_TYPE_URL},
-        {"email", ARK_TEXT_DATA_DETECTOR_TYPE_EMAIL},
-        {"location", ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS},
-        {"datetime", ARK_TEXT_DATA_DETECTOR_TYPE_DATE_TIME}
-    };
-    std::vector<Ark_TextDataDetectorType> values;
-    std::istringstream ss(src);
-    std::string token;
-    while (std::getline(ss, token, ',')) {
-        if (typeMap.find(token) != typeMap.end()) {
-            values.push_back(typeMap[token]);
-        }
-    }
-
-    if (values.size() == 0) {
-        return;
-    }
-    dst.length = values.size();
-    dst.array = new Ark_TextDataDetectorType[dst.length];
-    for (int i = 0; i < dst.length; ++i) {
-        dst.array[i] = values[i];
-    }
-}
-
-void AssignArkValue(Opt_DecorationStyleInterface &dst, const TextDecorationStyle& src)
-{
-    dst.value.style = Converter::ArkValue<Opt_TextDecorationStyle>(src);
-}
-
-void AssignArkValue(Ark_TextDataDetectorConfig &dst, const OHOS::Ace::TextDetectConfig& src)
-{
-    dst.color = Converter::ArkValue<Opt_ResourceColor>(src.entityColor);
-    dst.types = Converter::ArkValue<Array_TextDataDetectorType>(src.types);
-    dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(src.entityDecorationStyle);
-}
-} // Converter
 
 using namespace testing;
 using namespace testing::ext;
@@ -247,8 +184,7 @@ HWTEST_F(RichEditorModifierTest, setCopyOptionTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE);
 
-    CopyOptions options = CopyOptions::InApp;
-    auto optionsConverted = Converter::ArkValue<Ark_CopyOptions>(options);
+    auto optionsConverted = ARK_COPY_OPTIONS_IN_APP;
     modifier_->setCopyOptions(node_, optionsConverted);
 
     jsonValue = GetLayoutJsonValue(node_);
@@ -319,10 +255,13 @@ HWTEST_F(RichEditorModifierTest, setDataDetectorConfigTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
     EXPECT_EQ(resultStr, "");
 
-    TextDetectConfig config;
-    config.entityColor = Color::RED;
-    config.types = ATTRIBUTE_DATA_DETECTOR_CONFIG_VALUE;
-    config.entityDecorationStyle = ATTRIBUTE_DATA_DETECTOR_STYLE_VALUE;
+    Ark_TextDataDetectorConfig config;
+    config.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(TEST_COLOR);
+    Converter::ArkArrayHolder<Array_TextDataDetectorType> types(ATTRIBUTE_DATA_DETECTOR_CONFIG_VALUE_ARR);
+    config.types = types.ArkValue();
+    config.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(Ark_DecorationStyleInterface{
+        .style = Converter::ArkValue<Opt_TextDecorationStyle>(ATTRIBUTE_DATA_DETECTOR_STYLE_VALUE)
+    });
 
     auto configConverted = Converter::ArkValue<Ark_TextDataDetectorConfig>(config);
     modifier_->setDataDetectorConfig(node_, &configConverted);

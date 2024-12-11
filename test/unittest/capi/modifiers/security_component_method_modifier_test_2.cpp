@@ -78,7 +78,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionXValues,
     Ark_Position position;
     std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        position.x = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        position.x = Converter::ArkValue<Opt_Length>(arkLength);
         position.y = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
         modifier_->setOffset(node_, &value);
@@ -101,7 +101,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionYValues,
     std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         position.x = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        position.y = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        position.y = Converter::ArkValue<Opt_Length>(arkLength);
         auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
@@ -122,7 +122,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesLeftValues,
     Ark_Edges edges;
     std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
-        edges.left = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        edges.left = Converter::ArkValue<Opt_Length>(arkLength);
         edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
@@ -151,7 +151,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesTopValues, 
     std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         edges.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.top = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        edges.top = Converter::ArkValue<Opt_Length>(arkLength);
         edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
@@ -180,7 +180,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesRightValues
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         edges.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.right = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        edges.right = Converter::ArkValue<Opt_Length>(arkLength);
         edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
         modifier_->setOffset(node_, &value);
@@ -209,7 +209,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidEdgesBottomValue
         edges.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        edges.bottom = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        edges.bottom = Converter::ArkValue<Opt_Length>(arkLength);
         auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
