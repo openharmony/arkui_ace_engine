@@ -370,6 +370,8 @@ void TabBarLayoutAlgorithm::MeasureVisibleItems(LayoutWrapper* layoutWrapper, La
         if (GreatNotEqual(visibleChildrenMainSize_, scrollMargin_ * TWO)) {
             jumpIndex_.reset();
         }
+    } else if (focusIndex_) {
+        MeasureFocusIndex(layoutWrapper, childLayoutConstraint);
     } else {
         MeasureWithOffset(layoutWrapper, childLayoutConstraint);
     }
@@ -422,6 +424,20 @@ void TabBarLayoutAlgorithm::MeasureJumpIndex(LayoutWrapper* layoutWrapper, Layou
     LayoutBackward(layoutWrapper, childLayoutConstraint, startIndex, startPos);
 
     AdjustPosition(layoutWrapper, childLayoutConstraint, startIndex, endIndex, startPos, endPos);
+}
+
+void TabBarLayoutAlgorithm::MeasureFocusIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
+{
+    MeasureItem(layoutWrapper, childLayoutConstraint, focusIndex_.value());
+    currentDelta_ = focusIndex_.value() < visibleItemPosition_.begin()->first ?
+        visibleItemLength_[focusIndex_.value()] : -visibleItemLength_[focusIndex_.value()];
+    if (focusIndex_.value() == 0) {
+        currentDelta_ += scrollMargin_;
+    } else if (focusIndex_.value() == childCount_ - 1) {
+        currentDelta_ -= scrollMargin_;
+    }
+    visibleChildrenMainSize_ = scrollMargin_ * TWO;
+    MeasureWithOffset(layoutWrapper, childLayoutConstraint);
 }
 
 void TabBarLayoutAlgorithm::MeasureWithOffset(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
