@@ -19,8 +19,7 @@
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 #include "core/components_ng/pattern/plugin/plugin_node.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
-#include "core/components/plugin/plugin_sub_container.h"
-#include "core/components/plugin/resource/plugin_manager_delegate.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> PluginModelNG::CreateFrameNode(int32_t nodeId)
@@ -33,27 +32,27 @@ RefPtr<FrameNode> PluginModelNG::CreateFrameNode(int32_t nodeId)
 
 void PluginModelNG::SetRequestPluginInfo(FrameNode *frameNode, const std::optional<RequestPluginInfo>& pluginInfo)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // if (pluginInfo) {
-    //     ACE_UPDATE_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo, frameNode);
-    // } else {
-    //     ACE_RESET_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, frameNode);
-    // }
+    CHECK_NULL_VOID(frameNode);
+    if (pluginInfo) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, *pluginInfo, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, frameNode);
+    }
 }
 
 void PluginModelNG::SetOnComplete(FrameNode *frameNode, std::function<void(const std::string&)>&& OnComplete)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto eventHub = frameNode->GetEventHub<PluginEventHub>();
-    // CHECK_NULL_VOID(eventHub);
-    // eventHub->SetOnComplete(std::move(OnComplete));
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(OnComplete));
 };
 
 void PluginModelNG::SetOnError(FrameNode *frameNode, std::function<void(const std::string&)>&& OnError)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto eventHub = frameNode->GetEventHub<PluginEventHub>();
-    // CHECK_NULL_VOID(eventHub);
-    // eventHub->SetOnError(std::move(OnError));
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(OnError));
 };
 } // namespace OHOS::Ace::NG

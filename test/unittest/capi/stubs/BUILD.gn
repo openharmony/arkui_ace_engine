@@ -23,6 +23,7 @@ ohos_source_set("capi-ut-stubs") {
     "mock_custom_render_descriptor.cpp",
     "mock_form_pattern.cpp",
     "mock_model_pattern.cpp",
+    "mock_plugin_pattern.cpp",
     "mock_pointer_event.cpp",
     "mock_shader_input_buffer.cpp",
     "mock_text_picker_dialog_view.cpp",

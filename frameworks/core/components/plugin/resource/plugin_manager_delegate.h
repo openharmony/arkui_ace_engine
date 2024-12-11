@@ -23,7 +23,9 @@
 #include "core/components/plugin/resource/plugin_request_data.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
+#ifndef ARKUI_CAPI_UNITTEST
 #include "want.h"
+#endif
 #endif
 
 namespace OHOS::Ace {
@@ -60,8 +62,10 @@ public:
     void OnPluginError(const std::string& param);
 
 #ifdef OHOS_STANDARD_SYSTEM
+#ifndef ARKUI_CAPI_UNITTEST
     void ProcessPluginUninstall(const int64_t PluginId);
     void OnDeathReceived() {}
+#endif
 #endif
 
 private:
