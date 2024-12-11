@@ -316,6 +316,8 @@ typedef struct Callback_Any Callback_Any;
 typedef struct Opt_Callback_Any Opt_Callback_Any;
 typedef struct Ark_Union_Length_GridRowSizeOption Ark_Union_Length_GridRowSizeOption;
 typedef struct Opt_Union_Length_GridRowSizeOption Opt_Union_Length_GridRowSizeOption;
+typedef struct Array_Tuple_ResourceColor_Number Array_Tuple_ResourceColor_Number;
+typedef struct Opt_Array_Tuple_ResourceColor_Number Opt_Array_Tuple_ResourceColor_Number;
 typedef Ark_Materialized Ark_CanvasPattern;
 typedef struct Opt_CanvasPattern Opt_CanvasPattern;
 typedef Ark_Materialized Ark_CanvasGradient;
@@ -486,8 +488,8 @@ typedef struct Ark_GutterOption Ark_GutterOption;
 typedef struct Opt_GutterOption Opt_GutterOption;
 typedef struct Ark_GridColColumnOption Ark_GridColColumnOption;
 typedef struct Opt_GridColColumnOption Opt_GridColColumnOption;
-typedef struct Ark_LinearGradient Ark_LinearGradient;
-typedef struct Opt_LinearGradient Opt_LinearGradient;
+typedef struct Ark_LinearGradient_common Ark_LinearGradient_common;
+typedef struct Opt_LinearGradient_common Opt_LinearGradient_common;
 typedef struct Ark_Scene Ark_Scene;
 typedef struct Opt_Scene Opt_Scene;
 typedef struct Ark_DrawingCanvas Ark_DrawingCanvas;
@@ -842,16 +844,18 @@ typedef struct Callback_Number_Tuple_Number_Number_Number_Number Callback_Number
 typedef struct Opt_Callback_Number_Tuple_Number_Number_Number_Number Opt_Callback_Number_Tuple_Number_Number_Number_Number;
 typedef struct Callback_Number_Tuple_Number_Number Callback_Number_Tuple_Number_Number;
 typedef struct Opt_Callback_Number_Tuple_Number_Number Opt_Callback_Number_Tuple_Number_Number;
-typedef struct Ark_Union_ResourceColor_LinearGradient Ark_Union_ResourceColor_LinearGradient;
-typedef struct Opt_Union_ResourceColor_LinearGradient Opt_Union_ResourceColor_LinearGradient;
-typedef struct Array_Tuple_Union_ResourceColor_LinearGradient_Number Array_Tuple_Union_ResourceColor_LinearGradient_Number;
-typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number;
+typedef struct Ark_Union_ResourceColor_LinearGradient_common Ark_Union_ResourceColor_LinearGradient_common;
+typedef struct Opt_Union_ResourceColor_LinearGradient_common Opt_Union_ResourceColor_LinearGradient_common;
+typedef struct Array_Tuple_Union_ResourceColor_LinearGradient_common_Number Array_Tuple_Union_ResourceColor_LinearGradient_common_Number;
+typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_common_Number Opt_Array_Tuple_Union_ResourceColor_LinearGradient_common_Number;
 typedef struct Ark_WindowStatusType Ark_WindowStatusType;
 typedef struct Opt_WindowStatusType Opt_WindowStatusType;
 typedef struct Ark_FlexSpaceOptions Ark_FlexSpaceOptions;
 typedef struct Opt_FlexSpaceOptions Opt_FlexSpaceOptions;
-typedef struct Array_Union_ResourceColor_LinearGradient Array_Union_ResourceColor_LinearGradient;
-typedef struct Opt_Array_Union_ResourceColor_LinearGradient Opt_Array_Union_ResourceColor_LinearGradient;
+typedef struct Ark_LinearGradient_data_panel Ark_LinearGradient_data_panel;
+typedef struct Opt_LinearGradient_data_panel Opt_LinearGradient_data_panel;
+typedef struct Array_Union_ResourceColor_LinearGradient_data_panel Array_Union_ResourceColor_LinearGradient_data_panel;
+typedef struct Opt_Array_Union_ResourceColor_LinearGradient_data_panel Opt_Array_Union_ResourceColor_LinearGradient_data_panel;
 typedef struct Ark_Union_ResourceStr_Scene Ark_Union_ResourceStr_Scene;
 typedef struct Opt_Union_ResourceStr_Scene Opt_Union_ResourceStr_Scene;
 typedef struct Ark_RectShape Ark_RectShape;
@@ -936,8 +940,6 @@ typedef struct Ark_CircleShape Ark_CircleShape;
 typedef struct Opt_CircleShape Opt_CircleShape;
 typedef Ark_Materialized Ark_ProgressMask;
 typedef struct Opt_ProgressMask Opt_ProgressMask;
-typedef struct Array_Tuple_ResourceColor_Number Array_Tuple_ResourceColor_Number;
-typedef struct Opt_Array_Tuple_ResourceColor_Number Opt_Array_Tuple_ResourceColor_Number;
 typedef struct Ark_Tuple_Length_Length Ark_Tuple_Length_Length;
 typedef struct Opt_Tuple_Length_Length Opt_Tuple_Length_Length;
 typedef struct Ark_DragItemInfo Ark_DragItemInfo;
@@ -976,8 +978,8 @@ typedef struct Ark_Union_EdgeOutlineWidths_Dimension Ark_Union_EdgeOutlineWidths
 typedef struct Opt_Union_EdgeOutlineWidths_Dimension Opt_Union_EdgeOutlineWidths_Dimension;
 typedef struct Ark_Union_Length_EdgeWidths_LocalizedEdgeWidths Ark_Union_Length_EdgeWidths_LocalizedEdgeWidths;
 typedef struct Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths;
-typedef struct Ark_Union_String_Resource_LinearGradient Ark_Union_String_Resource_LinearGradient;
-typedef struct Opt_Union_String_Resource_LinearGradient Opt_Union_String_Resource_LinearGradient;
+typedef struct Ark_Union_String_Resource_LinearGradient_common Ark_Union_String_Resource_LinearGradient_common;
+typedef struct Opt_Union_String_Resource_LinearGradient_common Opt_Union_String_Resource_LinearGradient_common;
 typedef struct Ark_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths Ark_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths;
 typedef struct Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths;
 typedef struct Ark_Union_EdgeStyles_BorderStyle Ark_Union_EdgeStyles_BorderStyle;
@@ -1928,8 +1930,8 @@ typedef struct Ark_GaugeIndicatorOptions Ark_GaugeIndicatorOptions;
 typedef struct Opt_GaugeIndicatorOptions Opt_GaugeIndicatorOptions;
 typedef struct Ark_GaugeShadowOptions Ark_GaugeShadowOptions;
 typedef struct Opt_GaugeShadowOptions Opt_GaugeShadowOptions;
-typedef struct Ark_Tuple_Union_ResourceColor_LinearGradient_Number Ark_Tuple_Union_ResourceColor_LinearGradient_Number;
-typedef struct Opt_Tuple_Union_ResourceColor_LinearGradient_Number Opt_Tuple_Union_ResourceColor_LinearGradient_Number;
+typedef struct Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number;
+typedef struct Opt_Tuple_Union_ResourceColor_LinearGradient_common_Number Opt_Tuple_Union_ResourceColor_LinearGradient_common_Number;
 typedef struct Ark_Type_GaugeAttribute_colors_colors Ark_Type_GaugeAttribute_colors_colors;
 typedef struct Opt_Type_GaugeAttribute_colors_colors Opt_Type_GaugeAttribute_colors_colors;
 typedef struct Ark_GaugeOptions Ark_GaugeOptions;
@@ -1972,6 +1974,8 @@ typedef struct Ark_DatePickerResult Ark_DatePickerResult;
 typedef struct Opt_DatePickerResult Opt_DatePickerResult;
 typedef struct Ark_DatePickerOptions Ark_DatePickerOptions;
 typedef struct Opt_DatePickerOptions Opt_DatePickerOptions;
+typedef struct Ark_Union_ResourceColor_LinearGradient_data_panel Ark_Union_ResourceColor_LinearGradient_data_panel;
+typedef struct Opt_Union_ResourceColor_LinearGradient_data_panel Opt_Union_ResourceColor_LinearGradient_data_panel;
 typedef struct Ark_DataPanelShadowOptions Ark_DataPanelShadowOptions;
 typedef struct Opt_DataPanelShadowOptions Opt_DataPanelShadowOptions;
 typedef struct Ark_DataPanelOptions Ark_DataPanelOptions;
@@ -2152,8 +2156,6 @@ typedef struct Ark_Type_CommonMethod_radialGradient_value Ark_Type_CommonMethod_
 typedef struct Opt_Type_CommonMethod_radialGradient_value Opt_Type_CommonMethod_radialGradient_value;
 typedef struct Ark_Type_CommonMethod_sweepGradient_value Ark_Type_CommonMethod_sweepGradient_value;
 typedef struct Opt_Type_CommonMethod_sweepGradient_value Opt_Type_CommonMethod_sweepGradient_value;
-typedef struct Ark_Tuple_ResourceColor_Number Ark_Tuple_ResourceColor_Number;
-typedef struct Opt_Tuple_ResourceColor_Number Opt_Tuple_ResourceColor_Number;
 typedef struct Ark_Type_CommonMethod_linearGradient_value Ark_Type_CommonMethod_linearGradient_value;
 typedef struct Opt_Type_CommonMethod_linearGradient_value Opt_Type_CommonMethod_linearGradient_value;
 typedef struct Callback_PreDragStatus_Void Callback_PreDragStatus_Void;
@@ -2226,6 +2228,8 @@ typedef struct Ark_Union_OutlineStyle_EdgeOutlineStyles Ark_Union_OutlineStyle_E
 typedef struct Opt_Union_OutlineStyle_EdgeOutlineStyles Opt_Union_OutlineStyle_EdgeOutlineStyles;
 typedef struct Ark_OutlineOptions Ark_OutlineOptions;
 typedef struct Opt_OutlineOptions Opt_OutlineOptions;
+typedef struct Ark_Tuple_ResourceColor_Number Ark_Tuple_ResourceColor_Number;
+typedef struct Opt_Tuple_ResourceColor_Number Opt_Tuple_ResourceColor_Number;
 typedef struct Ark_BorderImageOption Ark_BorderImageOption;
 typedef struct Opt_BorderImageOption Opt_BorderImageOption;
 typedef struct Ark_BorderOptions Ark_BorderOptions;
@@ -2505,6 +2509,21 @@ typedef struct Opt_TitleHeight {
     Ark_Tag tag;
     Ark_TitleHeight value;
 } Opt_TitleHeight;
+typedef enum Ark_GradientDirection {
+    ARK_GRADIENT_DIRECTION_LEFT = 0,
+    ARK_GRADIENT_DIRECTION_TOP = 1,
+    ARK_GRADIENT_DIRECTION_RIGHT = 2,
+    ARK_GRADIENT_DIRECTION_BOTTOM = 3,
+    ARK_GRADIENT_DIRECTION_LEFT_TOP = 4,
+    ARK_GRADIENT_DIRECTION_LEFT_BOTTOM = 5,
+    ARK_GRADIENT_DIRECTION_RIGHT_TOP = 6,
+    ARK_GRADIENT_DIRECTION_RIGHT_BOTTOM = 7,
+    ARK_GRADIENT_DIRECTION_NONE = 8,
+} Ark_GradientDirection;
+typedef struct Opt_GradientDirection {
+    Ark_Tag tag;
+    Ark_GradientDirection value;
+} Opt_GradientDirection;
 typedef enum Ark_SheetSize {
     ARK_SHEET_SIZE_MEDIUM = 0,
     ARK_SHEET_SIZE_LARGE = 1,
@@ -3690,21 +3709,6 @@ typedef struct Opt_SharedTransitionEffectType {
     Ark_Tag tag;
     Ark_SharedTransitionEffectType value;
 } Opt_SharedTransitionEffectType;
-typedef enum Ark_GradientDirection {
-    ARK_GRADIENT_DIRECTION_LEFT = 0,
-    ARK_GRADIENT_DIRECTION_TOP = 1,
-    ARK_GRADIENT_DIRECTION_RIGHT = 2,
-    ARK_GRADIENT_DIRECTION_BOTTOM = 3,
-    ARK_GRADIENT_DIRECTION_LEFT_TOP = 4,
-    ARK_GRADIENT_DIRECTION_LEFT_BOTTOM = 5,
-    ARK_GRADIENT_DIRECTION_RIGHT_TOP = 6,
-    ARK_GRADIENT_DIRECTION_RIGHT_BOTTOM = 7,
-    ARK_GRADIENT_DIRECTION_NONE = 8,
-} Ark_GradientDirection;
-typedef struct Opt_GradientDirection {
-    Ark_Tag tag;
-    Ark_GradientDirection value;
-} Opt_GradientDirection;
 typedef enum Ark_AdaptiveColor {
     ARK_ADAPTIVE_COLOR_DEFAULT = 0,
     ARK_ADAPTIVE_COLOR_AVERAGE = 1,
@@ -5376,6 +5380,14 @@ typedef struct Opt_Union_Length_GridRowSizeOption {
     Ark_Tag tag;
     Ark_Union_Length_GridRowSizeOption value;
 } Opt_Union_Length_GridRowSizeOption;
+typedef struct Array_Tuple_ResourceColor_Number {
+    Ark_Tuple_ResourceColor_Number* array;
+    Ark_Int32 length;
+} Array_Tuple_ResourceColor_Number;
+typedef struct Opt_Array_Tuple_ResourceColor_Number {
+    Ark_Tag tag;
+    Array_Tuple_ResourceColor_Number value;
+} Opt_Array_Tuple_ResourceColor_Number;
 typedef struct Opt_CanvasPattern {
     Ark_Tag tag;
     Ark_CanvasPattern value;
@@ -6138,13 +6150,16 @@ typedef struct Opt_GridColColumnOption {
     Ark_Tag tag;
     Ark_GridColColumnOption value;
 } Opt_GridColColumnOption;
-typedef struct Ark_LinearGradient {
-    Ark_String __stub;
-} Ark_LinearGradient;
-typedef struct Opt_LinearGradient {
+typedef struct Ark_LinearGradient_common {
+    Opt_Union_Number_String angle;
+    Opt_GradientDirection direction;
+    Array_Tuple_ResourceColor_Number colors;
+    Opt_Boolean repeating;
+} Ark_LinearGradient_common;
+typedef struct Opt_LinearGradient_common {
     Ark_Tag tag;
-    Ark_LinearGradient value;
-} Opt_LinearGradient;
+    Ark_LinearGradient_common value;
+} Opt_LinearGradient_common;
 typedef struct Ark_Scene {
     Ark_String __SceneStub;
 } Ark_Scene;
@@ -7753,25 +7768,25 @@ typedef struct Opt_Callback_Number_Tuple_Number_Number {
     Ark_Tag tag;
     Callback_Number_Tuple_Number_Number value;
 } Opt_Callback_Number_Tuple_Number_Number;
-typedef struct Ark_Union_ResourceColor_LinearGradient {
+typedef struct Ark_Union_ResourceColor_LinearGradient_common {
     Ark_Int32 selector;
     union {
         Ark_ResourceColor value0;
-        Ark_LinearGradient value1;
+        Ark_LinearGradient_common value1;
     };
-} Ark_Union_ResourceColor_LinearGradient;
-typedef struct Opt_Union_ResourceColor_LinearGradient {
+} Ark_Union_ResourceColor_LinearGradient_common;
+typedef struct Opt_Union_ResourceColor_LinearGradient_common {
     Ark_Tag tag;
-    Ark_Union_ResourceColor_LinearGradient value;
-} Opt_Union_ResourceColor_LinearGradient;
-typedef struct Array_Tuple_Union_ResourceColor_LinearGradient_Number {
-    Ark_Tuple_Union_ResourceColor_LinearGradient_Number* array;
+    Ark_Union_ResourceColor_LinearGradient_common value;
+} Opt_Union_ResourceColor_LinearGradient_common;
+typedef struct Array_Tuple_Union_ResourceColor_LinearGradient_common_Number {
+    Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number* array;
     Ark_Int32 length;
-} Array_Tuple_Union_ResourceColor_LinearGradient_Number;
-typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number {
+} Array_Tuple_Union_ResourceColor_LinearGradient_common_Number;
+typedef struct Opt_Array_Tuple_Union_ResourceColor_LinearGradient_common_Number {
     Ark_Tag tag;
-    Array_Tuple_Union_ResourceColor_LinearGradient_Number value;
-} Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number;
+    Array_Tuple_Union_ResourceColor_LinearGradient_common_Number value;
+} Opt_Array_Tuple_Union_ResourceColor_LinearGradient_common_Number;
 typedef struct Ark_WindowStatusType {
     Ark_String __WindowStatusTypeStub;
 } Ark_WindowStatusType;
@@ -7787,14 +7802,21 @@ typedef struct Opt_FlexSpaceOptions {
     Ark_Tag tag;
     Ark_FlexSpaceOptions value;
 } Opt_FlexSpaceOptions;
-typedef struct Array_Union_ResourceColor_LinearGradient {
-    Ark_Union_ResourceColor_LinearGradient* array;
-    Ark_Int32 length;
-} Array_Union_ResourceColor_LinearGradient;
-typedef struct Opt_Array_Union_ResourceColor_LinearGradient {
+typedef struct Ark_LinearGradient_data_panel {
+    void *handle;
+} Ark_LinearGradient_data_panel;
+typedef struct Opt_LinearGradient_data_panel {
     Ark_Tag tag;
-    Array_Union_ResourceColor_LinearGradient value;
-} Opt_Array_Union_ResourceColor_LinearGradient;
+    Ark_LinearGradient_data_panel value;
+} Opt_LinearGradient_data_panel;
+typedef struct Array_Union_ResourceColor_LinearGradient_data_panel {
+    Ark_Union_ResourceColor_LinearGradient_data_panel* array;
+    Ark_Int32 length;
+} Array_Union_ResourceColor_LinearGradient_data_panel;
+typedef struct Opt_Array_Union_ResourceColor_LinearGradient_data_panel {
+    Ark_Tag tag;
+    Array_Union_ResourceColor_LinearGradient_data_panel value;
+} Opt_Array_Union_ResourceColor_LinearGradient_data_panel;
 typedef struct Ark_Union_ResourceStr_Scene {
     Ark_Int32 selector;
     union {
@@ -8189,14 +8211,6 @@ typedef struct Opt_ProgressMask {
     Ark_Tag tag;
     Ark_ProgressMask value;
 } Opt_ProgressMask;
-typedef struct Array_Tuple_ResourceColor_Number {
-    Ark_Tuple_ResourceColor_Number* array;
-    Ark_Int32 length;
-} Array_Tuple_ResourceColor_Number;
-typedef struct Opt_Array_Tuple_ResourceColor_Number {
-    Ark_Tag tag;
-    Array_Tuple_ResourceColor_Number value;
-} Opt_Array_Tuple_ResourceColor_Number;
 typedef struct Ark_Tuple_Length_Length {
     Ark_Length value0;
     Ark_Length value1;
@@ -8374,18 +8388,18 @@ typedef struct Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths {
     Ark_Tag tag;
     Ark_Union_Length_EdgeWidths_LocalizedEdgeWidths value;
 } Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths;
-typedef struct Ark_Union_String_Resource_LinearGradient {
+typedef struct Ark_Union_String_Resource_LinearGradient_common {
     Ark_Int32 selector;
     union {
         Ark_String value0;
         Ark_Resource value1;
-        Ark_LinearGradient value2;
+        Ark_LinearGradient_common value2;
     };
-} Ark_Union_String_Resource_LinearGradient;
-typedef struct Opt_Union_String_Resource_LinearGradient {
+} Ark_Union_String_Resource_LinearGradient_common;
+typedef struct Opt_Union_String_Resource_LinearGradient_common {
     Ark_Tag tag;
-    Ark_Union_String_Resource_LinearGradient value;
-} Opt_Union_String_Resource_LinearGradient;
+    Ark_Union_String_Resource_LinearGradient_common value;
+} Opt_Union_String_Resource_LinearGradient_common;
 typedef struct Ark_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths {
     Ark_Int32 selector;
     union {
@@ -12603,20 +12617,20 @@ typedef struct Opt_GaugeShadowOptions {
     Ark_Tag tag;
     Ark_GaugeShadowOptions value;
 } Opt_GaugeShadowOptions;
-typedef struct Ark_Tuple_Union_ResourceColor_LinearGradient_Number {
-    Ark_Union_ResourceColor_LinearGradient value0;
+typedef struct Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number {
+    Ark_Union_ResourceColor_LinearGradient_common value0;
     Ark_Number value1;
-} Ark_Tuple_Union_ResourceColor_LinearGradient_Number;
-typedef struct Opt_Tuple_Union_ResourceColor_LinearGradient_Number {
+} Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number;
+typedef struct Opt_Tuple_Union_ResourceColor_LinearGradient_common_Number {
     Ark_Tag tag;
-    Ark_Tuple_Union_ResourceColor_LinearGradient_Number value;
-} Opt_Tuple_Union_ResourceColor_LinearGradient_Number;
+    Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number value;
+} Opt_Tuple_Union_ResourceColor_LinearGradient_common_Number;
 typedef struct Ark_Type_GaugeAttribute_colors_colors {
     Ark_Int32 selector;
     union {
         Ark_ResourceColor value0;
-        Ark_LinearGradient value1;
-        Array_Tuple_Union_ResourceColor_LinearGradient_Number value2;
+        Ark_LinearGradient_common value1;
+        Array_Tuple_Union_ResourceColor_LinearGradient_common_Number value2;
     };
 } Ark_Type_GaugeAttribute_colors_colors;
 typedef struct Opt_Type_GaugeAttribute_colors_colors {
@@ -12802,11 +12816,22 @@ typedef struct Opt_DatePickerOptions {
     Ark_Tag tag;
     Ark_DatePickerOptions value;
 } Opt_DatePickerOptions;
+typedef struct Ark_Union_ResourceColor_LinearGradient_data_panel {
+    Ark_Int32 selector;
+    union {
+        Ark_ResourceColor value0;
+        Ark_LinearGradient_data_panel value1;
+    };
+} Ark_Union_ResourceColor_LinearGradient_data_panel;
+typedef struct Opt_Union_ResourceColor_LinearGradient_data_panel {
+    Ark_Tag tag;
+    Ark_Union_ResourceColor_LinearGradient_data_panel value;
+} Opt_Union_ResourceColor_LinearGradient_data_panel;
 typedef struct Ark_DataPanelShadowOptions {
     Opt_Union_Number_Resource radius;
     Opt_Union_Number_Resource offsetX;
     Opt_Union_Number_Resource offsetY;
-    Opt_Array_Union_ResourceColor_LinearGradient colors;
+    Opt_Array_Union_ResourceColor_LinearGradient_data_panel colors;
 } Ark_DataPanelShadowOptions;
 typedef struct Opt_DataPanelShadowOptions {
     Ark_Tag tag;
@@ -13718,14 +13743,6 @@ typedef struct Opt_Type_CommonMethod_sweepGradient_value {
     Ark_Tag tag;
     Ark_Type_CommonMethod_sweepGradient_value value;
 } Opt_Type_CommonMethod_sweepGradient_value;
-typedef struct Ark_Tuple_ResourceColor_Number {
-    Ark_ResourceColor value0;
-    Ark_Number value1;
-} Ark_Tuple_ResourceColor_Number;
-typedef struct Opt_Tuple_ResourceColor_Number {
-    Ark_Tag tag;
-    Ark_Tuple_ResourceColor_Number value;
-} Opt_Tuple_ResourceColor_Number;
 typedef struct Ark_Type_CommonMethod_linearGradient_value {
     Opt_Union_Number_String angle;
     Opt_GradientDirection direction;
@@ -14138,10 +14155,18 @@ typedef struct Opt_OutlineOptions {
     Ark_Tag tag;
     Ark_OutlineOptions value;
 } Opt_OutlineOptions;
+typedef struct Ark_Tuple_ResourceColor_Number {
+    Ark_ResourceColor value0;
+    Ark_Number value1;
+} Ark_Tuple_ResourceColor_Number;
+typedef struct Opt_Tuple_ResourceColor_Number {
+    Ark_Tag tag;
+    Ark_Tuple_ResourceColor_Number value;
+} Opt_Tuple_ResourceColor_Number;
 typedef struct Ark_BorderImageOption {
     Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths slice;
     Opt_RepeatMode repeat;
-    Opt_Union_String_Resource_LinearGradient source;
+    Opt_Union_String_Resource_LinearGradient_common source;
     Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths width;
     Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths outset;
     Opt_Boolean fill;
@@ -14342,6 +14367,18 @@ typedef struct Opt_Union_Array_Rectangle_Rectangle {
 } Opt_Union_Array_Rectangle_Rectangle;
 
 typedef Opt_Length Opt_Dimension;
+
+typedef struct GENERATED_ArkUIRootModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    int dummy;
+} GENERATED_ArkUIRootModifier;
+
+typedef struct GENERATED_ArkUIComponentRootModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    int dummy;
+} GENERATED_ArkUIComponentRootModifier;
 
 typedef struct GENERATED_ArkUIAbilityComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -15188,7 +15225,7 @@ typedef struct GENERATED_ArkUIDataPanelModifier {
     void (*setCloseEffect)(Ark_NativePointer node,
                            Ark_Boolean value);
     void (*setValueColors)(Ark_NativePointer node,
-                           const Array_Union_ResourceColor_LinearGradient* value);
+                           const Array_Union_ResourceColor_LinearGradient_data_panel* value);
     void (*setTrackBackgroundColor)(Ark_NativePointer node,
                                     const Ark_ResourceColor* value);
     void (*setStrokeWidth)(Ark_NativePointer node,
@@ -16055,7 +16092,7 @@ typedef struct GENERATED_ArkUIProgressModifier {
     void (*setValue)(Ark_NativePointer node,
                      const Ark_Number* value);
     void (*setColor)(Ark_NativePointer node,
-                     const Ark_Union_ResourceColor_LinearGradient* value);
+                     const Ark_Union_ResourceColor_LinearGradient_common* value);
     void (*setStyle)(Ark_NativePointer node,
                      const Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions* value);
     void (*setPrivacySensitive)(Ark_NativePointer node,
@@ -16575,7 +16612,7 @@ typedef struct GENERATED_ArkUISliderModifier {
     void (*setBlockColor)(Ark_NativePointer node,
                           const Ark_ResourceColor* value);
     void (*setTrackColor)(Ark_NativePointer node,
-                          const Ark_Union_ResourceColor_LinearGradient* value);
+                          const Ark_Union_ResourceColor_LinearGradient_common* value);
     void (*setSelectedColor)(Ark_NativePointer node,
                              const Ark_ResourceColor* value);
     void (*setMinLabel)(Ark_NativePointer node,
@@ -20298,6 +20335,8 @@ typedef struct GENERATED_ArkUIUIExtensionComponentEventsReceiver {
  * layout checks.
  */
 typedef struct GENERATED_ArkUINodeModifiers {
+    const GENERATED_ArkUIRootModifier* (*getRootModifier)();
+    const GENERATED_ArkUIComponentRootModifier* (*getComponentRootModifier)();
     const GENERATED_ArkUIAbilityComponentModifier* (*getAbilityComponentModifier)();
     const GENERATED_ArkUIAlphabetIndexerModifier* (*getAlphabetIndexerModifier)();
     const GENERATED_ArkUIAnimatorModifier* (*getAnimatorModifier)();
@@ -20581,8 +20620,6 @@ typedef struct GENERATED_ArkUIEventsAPI {
 } GENERATED_ArkUIEventsAPI;
 
 typedef enum GENERATED_Ark_NodeType {
-    GENERATED_ARKUI_ROOT,
-    GENERATED_ARKUI_COMPONENT_ROOT,
     GENERATED_ARKUI_CUSTOM_NODE,
     GENERATED_ARKUI_ABILITY_COMPONENT,
     GENERATED_ARKUI_ALPHABET_INDEXER,
@@ -20604,6 +20641,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_COMMON_SHAPE_METHOD,
     GENERATED_ARKUI_COMMON_TRANSITION,
     GENERATED_ARKUI_COMPONENT_3D,
+    GENERATED_ARKUI_COMPONENT_ROOT,
     GENERATED_ARKUI_CONTAINER_SPAN,
     GENERATED_ARKUI_COUNTER,
     GENERATED_ARKUI_DATA_PANEL,
@@ -20661,6 +20699,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_REMOTE_WINDOW,
     GENERATED_ARKUI_RICH_EDITOR,
     GENERATED_ARKUI_RICH_TEXT,
+    GENERATED_ARKUI_ROOT,
     GENERATED_ARKUI_ROOT_SCENE,
     GENERATED_ARKUI_ROW,
     GENERATED_ARKUI_ROW_SPLIT,

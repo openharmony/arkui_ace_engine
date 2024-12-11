@@ -50,7 +50,7 @@ ColorStopArray Convert(const Ark_ResourceColor& src)
 }
 
 template<>
-ColorStopArray Convert(const Ark_LinearGradient& src)
+ColorStopArray Convert(const Ark_LinearGradient_common& src)
 {
     LOGE("OHOS::Ace::NG::Converter::Convert, Ark_LinearGradient to ColorStopArray is not implemented yet\n");
     return ColorStopArray();
@@ -77,7 +77,7 @@ void AssignTo(std::optional<GaugeColors>& dst, const Ark_ResourceColor& src)
 }
 
 template<>
-void AssignTo(std::optional<GaugeColors>& dst, const Ark_LinearGradient& src)
+void AssignTo(std::optional<GaugeColors>& dst, const Ark_LinearGradient_common& src)
 {
     auto colorStop = Convert<ColorStopArray>(src);
     if (!colorStop.empty()) {
@@ -89,7 +89,7 @@ void AssignTo(std::optional<GaugeColors>& dst, const Ark_LinearGradient& src)
 }
 
 template<>
-void AssignCast(std::optional<GaugeColors>& dst, const Ark_Tuple_Union_ResourceColor_LinearGradient_Number& src)
+void AssignCast(std::optional<GaugeColors>& dst, const Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number& src)
 {
     AssignTo(dst, src.value0);
     if (dst && dst->weights.size() < dst->gradient.size()) {
@@ -98,7 +98,8 @@ void AssignCast(std::optional<GaugeColors>& dst, const Ark_Tuple_Union_ResourceC
 }
 
 template<>
-void AssignCast(std::optional<GaugeColors>& dst, const Array_Tuple_Union_ResourceColor_LinearGradient_Number& src)
+void AssignCast(std::optional<GaugeColors>& dst,
+    const Array_Tuple_Union_ResourceColor_LinearGradient_common_Number& src)
 {
     const auto length = std::min(Convert<int32_t>(src.length), COLORS_MAX_COUNT);
     for (int i = 0; i < length; ++i) {

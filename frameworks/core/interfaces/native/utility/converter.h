@@ -272,7 +272,7 @@ namespace Converter {
     }
 
     template<>
-    inline ImageSourceInfo Convert(const Ark_LinearGradient& value)
+    inline ImageSourceInfo Convert(const Ark_LinearGradient_common& value)
     {
         LOGE("Convert [Ark_LinearGradient] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
@@ -373,7 +373,7 @@ namespace Converter {
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
-    template<> Gradient Convert(const Ark_LinearGradient& value);
+    template<> Gradient Convert(const Ark_LinearGradient_common& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> Header Convert(const Ark_Header& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);

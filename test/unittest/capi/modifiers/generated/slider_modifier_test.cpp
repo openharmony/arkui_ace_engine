@@ -843,15 +843,15 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestDefaultValues, TestSize.L
  */
 HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_LinearGradient initValueTrackColor;
+    Ark_Union_ResourceColor_LinearGradient_common initValueTrackColor;
 
     // Initial setup
-    initValueTrackColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+    initValueTrackColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueTrackColor](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_ResourceColor_LinearGradient& value) {
-        Ark_Union_ResourceColor_LinearGradient inputValueTrackColor = initValueTrackColor;
+                          const Ark_Union_ResourceColor_LinearGradient_common& value) {
+        Ark_Union_ResourceColor_LinearGradient_common inputValueTrackColor = initValueTrackColor;
 
         inputValueTrackColor = value;
         modifier_->setTrackColor(node_, &inputValueTrackColor);
@@ -863,22 +863,22 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, Te
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_String>(value)));
     }
 }
@@ -890,15 +890,15 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, Te
  */
 HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_LinearGradient initValueTrackColor;
+    Ark_Union_ResourceColor_LinearGradient_common initValueTrackColor;
 
     // Initial setup
-    initValueTrackColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+    initValueTrackColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueTrackColor](
-                          const std::string& input, const Ark_Union_ResourceColor_LinearGradient& value) {
-        Ark_Union_ResourceColor_LinearGradient inputValueTrackColor = initValueTrackColor;
+                          const std::string& input, const Ark_Union_ResourceColor_LinearGradient_common& value) {
+        Ark_Union_ResourceColor_LinearGradient_common inputValueTrackColor = initValueTrackColor;
 
         modifier_->setTrackColor(node_, &inputValueTrackColor);
         inputValueTrackColor = value;
@@ -910,17 +910,17 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorInvalidValues, 
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                               ArkUnion<Ark_ResourceColor, Ark_String>(value)));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                               ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_Empty>(nullptr));
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_Empty>(nullptr));
 }
 
 /*

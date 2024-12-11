@@ -937,7 +937,6 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(NavigationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
 {
     bool boolResult;
@@ -972,7 +971,6 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestInvalidValues, TestSize.Level
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);
     EXPECT_EQ(boolResult, ATTRIBUTE_RECOVERABLE_DEFAULT_VALUE);
 }
-#endif
 
 /*
  * @tc.name: DISABLED_setIgnoreLayoutSafeAreaDefaultValues

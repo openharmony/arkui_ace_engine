@@ -426,15 +426,15 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(ProgressModifierTest, setColorTestColorValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_LinearGradient initValueColor;
+    Ark_Union_ResourceColor_LinearGradient_common initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+    initValueColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueColor](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_ResourceColor_LinearGradient& value) {
-        Ark_Union_ResourceColor_LinearGradient inputValueColor = initValueColor;
+                          const Ark_Union_ResourceColor_LinearGradient_common& value) {
+        Ark_Union_ResourceColor_LinearGradient_common inputValueColor = initValueColor;
 
         inputValueColor = value;
         modifier_->setColor(node_, &inputValueColor);
@@ -445,22 +445,22 @@ HWTEST_F(ProgressModifierTest, setColorTestColorValidValues, TestSize.Level1)
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_String>(value)));
     }
 }
@@ -472,15 +472,15 @@ HWTEST_F(ProgressModifierTest, setColorTestColorValidValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_LinearGradient initValueColor;
+    Ark_Union_ResourceColor_LinearGradient_common initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+    initValueColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueColor](
-                          const std::string& input, const Ark_Union_ResourceColor_LinearGradient& value) {
-        Ark_Union_ResourceColor_LinearGradient inputValueColor = initValueColor;
+                          const std::string& input, const Ark_Union_ResourceColor_LinearGradient_common& value) {
+        Ark_Union_ResourceColor_LinearGradient_common inputValueColor = initValueColor;
 
         modifier_->setColor(node_, &inputValueColor);
         inputValueColor = value;
@@ -492,17 +492,17 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                               ArkUnion<Ark_ResourceColor, Ark_String>(value)));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
+        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
                               ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_Empty>(nullptr));
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_Empty>(nullptr));
 }
 
 /*

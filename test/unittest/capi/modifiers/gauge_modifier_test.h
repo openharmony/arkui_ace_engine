@@ -22,8 +22,8 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-inline void AssignArkValue(Ark_Tuple_Union_ResourceColor_LinearGradient_Number& dst,
-    const std::tuple<Ark_Union_ResourceColor_LinearGradient, Ark_Number>& src)
+inline void AssignArkValue(Ark_Tuple_Union_ResourceColor_LinearGradient_common_Number& dst,
+    const std::tuple<Ark_Union_ResourceColor_LinearGradient_common, Ark_Number>& src)
 {
     std::tie(dst.value0, dst.value1) = src;
 }

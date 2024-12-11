@@ -427,7 +427,6 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> recoverabl
  * @tc.desc:
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(NavDestinationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
@@ -484,7 +483,6 @@ HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.L
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
-#endif
 
 /*
  * @tc.name: setIgnoreLayoutSafeAreaTestDefaultValues

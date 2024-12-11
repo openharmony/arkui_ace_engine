@@ -796,12 +796,11 @@ Font Convert(const Ark_Font& src)
 }
 
 template<>
-Gradient Convert(const Ark_LinearGradient& value)
+Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
 
-#ifdef WRONG_GRADIENT
     // angle
     auto linearGradient = gradient.GetLinearGradient();
     linearGradient->angle = Converter::OptConvert<Dimension>(value.angle);
@@ -835,7 +834,6 @@ Gradient Convert(const Ark_LinearGradient& value)
             gradient.AddColor(gradientColor);
         }
     }
-#endif
 
     return gradient;
 }

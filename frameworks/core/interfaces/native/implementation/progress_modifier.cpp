@@ -203,7 +203,7 @@ void ValueImpl(Ark_NativePointer node,
     ProgressModelNG::SetValue(frameNode, convValue);
 }
 void ColorImpl(Ark_NativePointer node,
-               const Ark_Union_ResourceColor_LinearGradient* value)
+               const Ark_Union_ResourceColor_LinearGradient_common* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -227,7 +227,7 @@ void ColorImpl(Ark_NativePointer node,
             ProgressModelNG::SetGradientColor(frameNode, gradientOpt);
             ProgressModelNG::SetColor(frameNode, colorOpt);
         },
-        [frameNode](const Ark_LinearGradient& linearGradient) {
+        [frameNode](const Ark_LinearGradient_common& linearGradient) {
             ProgressModelNG::SetGradientColor(frameNode, Converter::Convert<Gradient>(linearGradient));
         },
         []() {}

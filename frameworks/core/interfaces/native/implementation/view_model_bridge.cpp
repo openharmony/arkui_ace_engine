@@ -23,8 +23,6 @@
 
 namespace OHOS::Ace::NG {
 namespace GeneratedViewModel {
-    Ark_NodeHandle createRootNode(Ark_Int32 nodeId);
-    Ark_NodeHandle createComponentRootNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCustomNodeNode(Ark_Int32 nodeId);
     Ark_NodeHandle createAbilityComponentNode(Ark_Int32 nodeId);
     Ark_NodeHandle createAlphabetIndexerNode(Ark_Int32 nodeId);
@@ -46,6 +44,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createCommonShapeMethodNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCommonTransitionNode(Ark_Int32 nodeId);
     Ark_NodeHandle createComponent3DNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createComponentRootNode(Ark_Int32 nodeId);
     Ark_NodeHandle createContainerSpanNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCounterNode(Ark_Int32 nodeId);
     Ark_NodeHandle createDataPanelNode(Ark_Int32 nodeId);
@@ -103,6 +102,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createRemoteWindowNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRichEditorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRichTextNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createRootNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRootSceneNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRowNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRowSplitNode(Ark_Int32 nodeId);
@@ -154,8 +154,6 @@ namespace GeneratedBridge {
         }
 
         switch (type) {
-            case GENERATED_ARKUI_ROOT: return GeneratedViewModel::createRootNode(id);
-            case GENERATED_ARKUI_COMPONENT_ROOT: return GeneratedViewModel::createComponentRootNode(id);
             case GENERATED_ARKUI_CUSTOM_NODE: return GeneratedViewModel::createCustomNodeNode(id);
             case GENERATED_ARKUI_ABILITY_COMPONENT: return GeneratedViewModel::createAbilityComponentNode(id);
             case GENERATED_ARKUI_ALPHABET_INDEXER: return GeneratedViewModel::createAlphabetIndexerNode(id);
@@ -177,6 +175,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_COMMON_SHAPE_METHOD: return GeneratedViewModel::createCommonShapeMethodNode(id);
             case GENERATED_ARKUI_COMMON_TRANSITION: return GeneratedViewModel::createCommonTransitionNode(id);
             case GENERATED_ARKUI_COMPONENT_3D: return GeneratedViewModel::createComponent3DNode(id);
+            case GENERATED_ARKUI_COMPONENT_ROOT: return GeneratedViewModel::createComponentRootNode(id);
             case GENERATED_ARKUI_CONTAINER_SPAN: return GeneratedViewModel::createContainerSpanNode(id);
             case GENERATED_ARKUI_COUNTER: return GeneratedViewModel::createCounterNode(id);
             case GENERATED_ARKUI_DATA_PANEL: return GeneratedViewModel::createDataPanelNode(id);
@@ -234,6 +233,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_REMOTE_WINDOW: return GeneratedViewModel::createRemoteWindowNode(id);
             case GENERATED_ARKUI_RICH_EDITOR: return GeneratedViewModel::createRichEditorNode(id);
             case GENERATED_ARKUI_RICH_TEXT: return GeneratedViewModel::createRichTextNode(id);
+            case GENERATED_ARKUI_ROOT: return GeneratedViewModel::createRootNode(id);
             case GENERATED_ARKUI_ROOT_SCENE: return GeneratedViewModel::createRootSceneNode(id);
             case GENERATED_ARKUI_ROW: return GeneratedViewModel::createRowNode(id);
             case GENERATED_ARKUI_ROW_SPLIT: return GeneratedViewModel::createRowSplitNode(id);

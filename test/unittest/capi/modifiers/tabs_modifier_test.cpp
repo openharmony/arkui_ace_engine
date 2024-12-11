@@ -327,7 +327,6 @@ HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setAnimationMode
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
 {
     const std::string PROP_NAME("animationMode");
@@ -387,7 +386,6 @@ HWTEST_F(TabsModifierTest, setEdgeEffectTest, TestSize.Level1)
     checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
     EXPECT_EQ(checkVal, edgeEffectTestPlan[edgeEffectTestPlan.size()-1].second);
 }
-#endif
 
 /**
  * @tc.name: setBarPositionTest

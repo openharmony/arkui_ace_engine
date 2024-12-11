@@ -169,7 +169,7 @@ void BlockColorImpl(Ark_NativePointer node,
     SliderModelNG::SetBlockColor(frameNode, convValue);
 }
 void TrackColorImpl(Ark_NativePointer node,
-                    const Ark_Union_ResourceColor_LinearGradient* value)
+                    const Ark_Union_ResourceColor_LinearGradient_common* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
