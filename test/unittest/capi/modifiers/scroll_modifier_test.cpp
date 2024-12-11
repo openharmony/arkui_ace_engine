@@ -760,7 +760,8 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 {
-    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -794,7 +795,8 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestSize.Level1)
 {
-    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

@@ -21,9 +21,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContainerSpanModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto spanNode = SpanModelNG::CreateContainerSpanNode(id);
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
 }
 } // ContainerSpanModifier
 namespace ContainerSpanInterfaceModifier {

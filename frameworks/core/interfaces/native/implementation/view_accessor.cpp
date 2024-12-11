@@ -24,7 +24,7 @@ namespace ViewAccessor {
 void DestroyPeerImpl(ViewPeer* peer)
 {
 }
-ViewPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ViewPeer();
 }

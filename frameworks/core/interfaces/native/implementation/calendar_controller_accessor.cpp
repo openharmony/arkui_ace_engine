@@ -26,7 +26,7 @@ void DestroyPeerImpl(CalendarControllerPeer* peer)
     peer->controller = nullptr;
     delete peer;
 }
-CalendarControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new CalendarControllerPeer {
         .controller = Referenced::MakeRefPtr<CalendarControllerNg>()

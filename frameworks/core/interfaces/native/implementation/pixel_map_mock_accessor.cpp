@@ -25,7 +25,7 @@ void DestroyPeerImpl(PixelMapMockPeer* peer)
 {
     delete peer;
 }
-PixelMapMockPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new PixelMapMockPeer();
 }

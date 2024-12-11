@@ -24,7 +24,7 @@ namespace TextBaseControllerAccessor {
 void DestroyPeerImpl(TextBaseControllerPeer* peer)
 {
 }
-TextBaseControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextBaseControllerPeer();
 }
@@ -43,7 +43,7 @@ void CloseSelectionMenuImpl(TextBaseControllerPeer* peer)
 }
 Ark_NativePointer GetLayoutManagerImpl(TextBaseControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // TextBaseControllerAccessor
 const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()

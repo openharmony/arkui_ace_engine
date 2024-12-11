@@ -222,9 +222,13 @@ void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderSty
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = RichEditorModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // RichEditorModifier
 namespace RichEditorInterfaceModifier {

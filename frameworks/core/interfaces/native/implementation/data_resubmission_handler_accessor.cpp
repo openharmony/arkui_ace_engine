@@ -26,7 +26,7 @@ void DestroyPeerImpl(DataResubmissionHandlerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-DataResubmissionHandlerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new DataResubmissionHandlerPeer();
 }

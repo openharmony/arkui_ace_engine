@@ -794,7 +794,7 @@ Font Convert(const Ark_Font& src)
 }
 
 template<>
-Gradient Convert(const Ark_LinearGradient& value)
+Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);

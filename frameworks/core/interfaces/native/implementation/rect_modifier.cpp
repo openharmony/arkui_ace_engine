@@ -99,9 +99,13 @@ Dimension Convert(const Array_CustomObject& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RectModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = RectModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // RectModifier
 namespace RectInterfaceModifier {

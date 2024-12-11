@@ -112,9 +112,13 @@ SelectDivider Convert(const Ark_DividerOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = SelectModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // SelectModifier
 namespace SelectInterfaceModifier {
@@ -348,7 +352,7 @@ void MenuItemContentModifierImpl(Ark_NativePointer node,
     //SelectModelNG::SetMenuItemContentModifier(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_Opt_DividerOptions_Null* value)
+                 const Opt_DividerOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

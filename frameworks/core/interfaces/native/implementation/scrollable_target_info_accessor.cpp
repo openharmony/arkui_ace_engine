@@ -24,7 +24,7 @@ namespace ScrollableTargetInfoAccessor {
 void DestroyPeerImpl(ScrollableTargetInfoPeer* peer)
 {
 }
-ScrollableTargetInfoPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ScrollableTargetInfoPeer();
 }

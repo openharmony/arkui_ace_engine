@@ -64,9 +64,13 @@ MenuItemGroupOptions Convert(const Ark_MenuItemGroupOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemGroupModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = MenuItemGroupView::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // MenuItemGroupModifier
 namespace MenuItemGroupInterfaceModifier {

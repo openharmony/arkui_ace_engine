@@ -232,9 +232,13 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = SwiperModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // SwiperModifier
 namespace SwiperInterfaceModifier {
@@ -515,12 +519,9 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
 
     transitionInfo.transition =
         [arkCallback = CallbackHelper(value->transition)](const RefPtr<SwiperContentTransitionProxy>& proxy) {
-        auto accessor = GetSwiperContentTransitionProxyAccessor();
-        CHECK_NULL_VOID(accessor && accessor->ctor);
-        auto peer = (*accessor->ctor)();
+        auto peer = new SwiperContentTransitionProxyPeer();
         CHECK_NULL_VOID(peer);
         peer->SetHandler(proxy);
-
         arkCallback.Invoke(Ark_SwiperContentTransitionProxy{ .ptr = peer });
     };
     SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);

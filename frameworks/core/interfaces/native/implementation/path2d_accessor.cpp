@@ -24,7 +24,7 @@ namespace Path2DAccessor {
 void DestroyPeerImpl(Path2DPeer* peer)
 {
 }
-Path2DPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new Path2DPeer();
 }

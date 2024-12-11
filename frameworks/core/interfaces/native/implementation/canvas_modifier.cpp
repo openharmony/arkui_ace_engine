@@ -37,9 +37,13 @@ GeneratedModifier::CanvasRenderingContext2DPeerImpl* Convert(const Ark_Materiali
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = CanvasModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // CanvasModifier
 namespace CanvasInterfaceModifier {

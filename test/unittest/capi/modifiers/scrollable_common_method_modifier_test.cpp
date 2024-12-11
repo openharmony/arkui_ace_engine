@@ -43,6 +43,11 @@ class ScrollableCommonMethodModifierTest
     : public ModifierTestBase<GENERATED_ArkUIScrollableCommonMethodModifier,
           &GENERATED_ArkUINodeModifiers::getScrollableCommonMethodModifier, GENERATED_ARKUI_WATER_FLOW> {
 public:
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getWaterFlowModifier()->construct(GetId(), 0);
+    }
+
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();

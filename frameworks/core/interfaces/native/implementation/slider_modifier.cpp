@@ -121,9 +121,13 @@ void* Convert(const Ark_RectAttribute& src)
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SliderModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = SliderModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // SliderModifier
 namespace SliderInterfaceModifier {
@@ -165,7 +169,7 @@ void BlockColorImpl(Ark_NativePointer node,
     SliderModelNG::SetBlockColor(frameNode, convValue);
 }
 void TrackColorImpl(Ark_NativePointer node,
-                    const Ark_Union_ResourceColor_LinearGradient* value)
+                    const Ark_Union_ResourceColor_LinearGradient_common* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -18,12 +18,19 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = BlankModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // BlankModifier
 namespace BlankInterfaceModifier {

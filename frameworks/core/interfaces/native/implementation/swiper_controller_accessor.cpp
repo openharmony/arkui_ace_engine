@@ -35,7 +35,7 @@ void DestroyPeerImpl(SwiperControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-SwiperControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<SwiperControllerPeerImpl>();
     peerImpl->IncRefCount();

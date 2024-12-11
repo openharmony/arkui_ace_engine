@@ -24,7 +24,7 @@ namespace MutableStyledStringAccessor {
 void DestroyPeerImpl(MutableStyledStringPeer* peer)
 {
 }
-MutableStyledStringPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new MutableStyledStringPeer();
 }

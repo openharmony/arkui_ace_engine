@@ -26,7 +26,7 @@ void DestroyPeerImpl(PermissionRequestPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-PermissionRequestPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new PermissionRequestPeer();
 }

@@ -19,9 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Component3DModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // Component3DModifier
 namespace Component3DInterfaceModifier {

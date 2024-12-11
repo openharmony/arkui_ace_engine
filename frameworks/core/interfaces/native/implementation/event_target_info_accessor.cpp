@@ -24,7 +24,7 @@ namespace EventTargetInfoAccessor {
 void DestroyPeerImpl(EventTargetInfoPeer* peer)
 {
 }
-EventTargetInfoPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new EventTargetInfoPeer();
 }

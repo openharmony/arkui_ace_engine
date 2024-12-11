@@ -24,7 +24,7 @@ namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(TextMenuItemIdPeer* peer)
 {
 }
-TextMenuItemIdPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextMenuItemIdPeer();
 }
@@ -34,7 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer OfImpl(const Ark_ResourceStr* id)
 {
-    return 0;
+    return nullptr;
 }
 Ark_Boolean EqualsImpl(TextMenuItemIdPeer* peer,
                        const Ark_TextMenuItemId* id)

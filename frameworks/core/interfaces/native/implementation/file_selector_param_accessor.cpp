@@ -28,7 +28,7 @@ void DestroyPeerImpl(FileSelectorParamPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-FileSelectorParamPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new FileSelectorParamPeer();
 }
@@ -49,7 +49,7 @@ Ark_NativePointer GetModeImpl(FileSelectorParamPeer* peer)
     peer->handler->GetMode();
     // mode need to be returned
     LOGE("FileSelectorParamAccessor::GetModeImpl - return value need to be supported");
-    return 0;
+    return nullptr;
 }
 void GetAcceptTypeImpl(FileSelectorParamPeer* peer)
 {

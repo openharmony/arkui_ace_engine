@@ -32,9 +32,13 @@ void AssignCast(std::optional<StepperItemModelNG::ItemState>& dst, const Ark_Ite
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperItemModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = StepperItemModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // StepperItemModifier
 namespace StepperItemInterfaceModifier {

@@ -18,9 +18,11 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "arkoala_api_generated.h"
+
 
 namespace OHOS::Ace::NG {
 struct ButtonOptions {
@@ -79,9 +81,13 @@ ButtonParameters Convert(const Ark_LabelStyle& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ButtonModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = ButtonModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ButtonModifier
 namespace ButtonInterfaceModifier {

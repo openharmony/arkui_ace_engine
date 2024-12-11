@@ -46,7 +46,8 @@ struct ScrollBarOptions {
         const std::optional<Ark_ScrollBarDirection>& direction = std::nullopt,
         const std::optional<Ark_BarState>& state = std::nullopt)
     {
-        auto scrollerPeer = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+        auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+        auto scrollerPeer = static_cast<ScrollerPeer *>(peer);
         scrollerPeer->SetScrollBarProxy(proxy);
         value = {
             .scroller { .ptr = reinterpret_cast<Ark_NativePointer>(scrollerPeer) },

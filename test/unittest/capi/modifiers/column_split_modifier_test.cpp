@@ -67,8 +67,7 @@ class ColumnSplitModifierTest : public ModifierTestBase<GENERATED_ArkUIColumnSpl
             if (attribute == ATTRIBUTE_DIVIDER_END_MARGIN) {
                 inputValue.endMargin = checkVal;
             }
-            auto divider = Converter::ArkUnion<Ark_Union_ColumnSplitDividerStyle_Null,
-                Ark_ColumnSplitDividerStyle>(inputValue);
+            auto divider = Converter::ArkValue<Opt_ColumnSplitDividerStyle>(inputValue);
             modifier_->setDivider(node_, &divider);
             jsonValue = GetJsonValue(node_);
             divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);

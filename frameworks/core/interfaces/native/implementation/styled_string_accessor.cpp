@@ -24,7 +24,7 @@ namespace StyledStringAccessor {
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
 }
-StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                            const Opt_Array_StyleOptions* styles)
 {
     return new StyledStringPeer();
@@ -51,7 +51,7 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
                                       const Ark_Number* start,
                                       const Opt_Number* length)
 {
-    return 0;
+    return nullptr;
 }
 void FromHtmlImpl(const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)

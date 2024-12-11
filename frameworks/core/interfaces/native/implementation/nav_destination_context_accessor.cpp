@@ -25,7 +25,7 @@ void DestroyPeerImpl(NavDestinationContextPeer* peer)
 {
     delete peer;
 }
-NavDestinationContextPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new NavDestinationContextPeer();
 }
