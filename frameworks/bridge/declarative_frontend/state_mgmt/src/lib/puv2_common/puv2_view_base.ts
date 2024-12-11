@@ -774,4 +774,18 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     return dfxCommands;
   }
+
+  // dump state var for v1 and v2 and send the dump value to ide to show in inspector
+  public onDumpInspector(): string {
+    const dumpInfo: DumpInfo = new DumpInfo();
+    dumpInfo.viewInfo = { componentName: this.constructor.name, id: this.id__() };
+    stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
+    let resInfo: string = '';
+    try {
+      resInfo = JSON.stringify(dumpInfo);
+    } catch (error) {
+      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+    }
+    return resInfo;
+  }
 } // class PUV2ViewBase

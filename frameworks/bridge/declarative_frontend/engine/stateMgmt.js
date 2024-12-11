@@ -2998,6 +2998,93 @@ class stateMgmtDFX {
             syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
         };
     }
+    /**
+     * Dump decorated variable for v1 and v2
+     *
+     * @param view viewPU or ViewV2
+     * @param dumpInfo contains state variable decorator, propertyName, etc.
+     */
+    static getDecoratedVariableInfo(view, dumpInfo) {
+        if (view instanceof ViewV2) {
+            stateMgmtDFX.dumpV2VariableInfo(view, dumpInfo);
+        }
+        else if (view instanceof ViewPU) {
+            stateMgmtDFX.dumpV1VariableInfo(view, dumpInfo);
+        }
+    }
+    static dumpV1VariableInfo(view, dumpInfo) {
+        Object.getOwnPropertyNames(view)
+            .filter((varName) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
+            .forEach((varName) => {
+            const prop = Reflect.get(view, varName);
+            if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
+                const observedProp = prop;
+                dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
+            }
+        });
+    }
+    static dumpV2VariableInfo(view, dumpInfo) {
+        const meta = view[ObserveV2.V2_DECO_META];
+        // no decorated variables, return view info directly
+        if (!meta) {
+            return;
+        }
+        Object.getOwnPropertyNames(meta)
+            .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
+            .forEach((varName) => {
+            dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.dumpSingleV2VariableInfo(view, varName, meta));
+        });
+    }
+    static dumpSingleV2VariableInfo(view, varName, meta) {
+        let decorators = '';
+        const decorator = Reflect.get(meta, varName);
+        let prop = Reflect.get(view, ObserveV2.OB_PREFIX + varName);
+        if ('deco' in decorator) {
+            decorators = decorator.deco;
+            if (decorators === '@Consumer') {
+                prop = Reflect.get(view, varName);
+            }
+            if (decorators === '@Computed') {
+                prop = Reflect.get(view, ComputedV2.COMPUTED_CACHED_PREFIX + varName);
+            }
+            if (decorators === '@Monitor' || decorators === '@Event') {
+                prop = `${Reflect.get(view, varName)}`;
+            }
+        }
+        if ('deco2' in decorator) {
+            decorators += decorator.deco2;
+        }
+        if ('aliasName' in decorator) {
+            decorators += `(${decorator.aliasName})`;
+        }
+        let dependentElmIds = undefined;
+        if (view[ObserveV2.SYMBOL_REFS]) {
+            dependentElmIds = view[ObserveV2.SYMBOL_REFS][varName];
+        }
+        return {
+            decorator: decorators, propertyName: varName, id: -1, value: stateMgmtDFX.getRawValue(prop),
+            dependentElementIds: { mode: 'V2', trackPropertiesDependencies: [], propertyDependencies: stateMgmtDFX.dumpDepenetElementV2(dependentElmIds) },
+            syncPeers: []
+        };
+    }
+    static dumpDepenetElementV2(dependentElmIds) {
+        let dumpElementIds = [];
+        dependentElmIds === null || dependentElmIds === void 0 ? void 0 : dependentElmIds.forEach((elmtId) => {
+            if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
+                dumpElementIds.push(ObserveV2.getObserve().getElementInfoById(elmtId));
+            }
+            else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+                dumpElementIds.push(`@Computed ${ObserveV2.getObserve().getComputedInfoById(elmtId)}`);
+            }
+            else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
+                dumpElementIds.push(`@Monitor ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`);
+            }
+            else {
+                dumpElementIds.push(`PersistenceV2[${elmtId}]`);
+            }
+        });
+        return dumpElementIds;
+    }
     static getType(item) {
         try {
             return Object.prototype.toString.call(item);
@@ -3046,26 +3133,32 @@ class stateMgmtDFX {
         }
         return tempObj;
     }
-    static getRawValue(observedProp) {
-        let wrappedValue = observedProp.getUnmonitored();
-        if (typeof wrappedValue !== 'object') {
-            return wrappedValue;
-        }
-        let rawObject = ObservedObject.GetRawObject(wrappedValue);
-        if (rawObject instanceof Map) {
-            return stateMgmtDFX.dumpMap(rawObject);
-        }
-        else if (rawObject instanceof Set) {
-            return stateMgmtDFX.dumpItems(Array.from(rawObject.values()));
-        }
-        else if (rawObject instanceof Array) {
-            return stateMgmtDFX.dumpItems(Array.from(rawObject));
-        }
-        else if (rawObject instanceof Date) {
-            return rawObject;
+    static getRawValue(prop) {
+        let rawValue;
+        if (prop instanceof ObservedPropertyAbstract) {
+            let wrappedValue = prop.getUnmonitored();
+            rawValue = ObservedObject.GetRawObject(wrappedValue);
         }
         else {
-            return stateMgmtDFX.dumpObjectProperty(rawObject);
+            rawValue = ObserveV2.IsProxiedObservedV2(prop) ? prop[ObserveV2.SYMBOL_PROXY_GET_TARGET] : prop;
+        }
+        if (typeof rawValue !== 'object') {
+            return rawValue;
+        }
+        if (rawValue instanceof Map) {
+            return stateMgmtDFX.dumpMap(rawValue);
+        }
+        else if (rawValue instanceof Set) {
+            return stateMgmtDFX.dumpItems(Array.from(rawValue.values()));
+        }
+        else if (rawValue instanceof Array) {
+            return stateMgmtDFX.dumpItems(Array.from(rawValue));
+        }
+        else if (rawValue instanceof Date) {
+            return rawValue;
+        }
+        else {
+            return stateMgmtDFX.dumpObjectProperty(rawValue);
         }
     }
     static getRawValueLength(observedProp) {
@@ -4621,6 +4714,20 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             }
         }
         return dfxCommands;
+    }
+    // dump state var for v1 and v2 and send the dump value to ide to show in inspector
+    onDumpInspector() {
+        const dumpInfo = new DumpInfo();
+        dumpInfo.viewInfo = { componentName: this.constructor.name, id: this.id__() };
+        stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
+        let resInfo = '';
+        try {
+            resInfo = JSON.stringify(dumpInfo);
+        }
+        catch (error) {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${error.message}`);
+        }
+        return resInfo;
     }
 } // class PUV2ViewBase
 // List of inactive components used for Dfx
@@ -7221,31 +7328,6 @@ class ViewPU extends PUV2ViewBase {
         }
         return retVaL;
     }
-    /**
-      * onDumpInspector is invoked by native side to create Inspector tree including state variables
-      * @returns dump info
-      */
-    onDumpInspector() {
-        let res = new DumpInfo();
-        res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
-        Object.getOwnPropertyNames(this)
-            .filter((varName) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
-            .forEach((varName) => {
-            const prop = Reflect.get(this, varName);
-            if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
-                const observedProp = prop;
-                res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
-            }
-        });
-        let resInfo = '';
-        try {
-            resInfo = JSON.stringify(res);
-        }
-        catch (error) {
-            stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${error.message}`);
-        }
-        return resInfo;
-    }
 } // class ViewPU
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
@@ -8476,6 +8558,16 @@ class ObserveV2 {
         let view;
         return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId) : '';
     }
+    getComputedInfoById(computedId) {
+        let weak = this.id2cmp_[computedId];
+        let computedV2;
+        return (weak && (computedV2 = weak.deref()) && (computedV2 instanceof ComputedV2)) ? computedV2.getComputedFuncName() : '';
+    }
+    getMonitorInfoById(computedId) {
+        let weak = this.id2cmp_[computedId];
+        let monitorV2;
+        return (weak && (monitorV2 = weak.deref()) && (monitorV2 instanceof MonitorV2)) ? monitorV2.getMonitorFuncName() : '';
+    }
 } // class ObserveV2
 // meta data about decorated variable inside prototype
 ObserveV2.V2_DECO_META = Symbol('__v2_deco_meta__');
@@ -8855,6 +8947,9 @@ class MonitorV2 {
     getTarget() {
         return this.target_;
     }
+    getMonitorFuncName() {
+        return this.monitorFunction.name;
+    }
     /**
         Return array of those monitored paths
         that changed since previous invocation
@@ -9099,6 +9194,9 @@ class ComputedV2 {
     }
     getProp() {
         return this.prop_;
+    }
+    getComputedFuncName() {
+        return this.propertyComputeFunc_.name;
     }
     // register current watchId while executing compute function
     observeObjectAccess() {
@@ -9596,17 +9694,17 @@ class ViewV2 extends PUV2ViewBase {
             return retVal;
         }
         Object.getOwnPropertyNames(meta)
-            .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
+            .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
             .forEach((varName) => {
             const prop = Reflect.get(meta, varName);
             if ('deco' in prop) {
-                retVal += ` ${prop['deco']}`; // main decorator
+                retVal += ` ${prop.deco}`; // main decorator
             }
             if ('deco2' in prop) {
-                retVal += ` ${prop['deco2']}`; // sub decorator like @Once
+                retVal += ` ${prop.deco2}`; // sub decorator like @Once
             }
             if ('aliasName' in prop) {
-                retVal += `(${prop['aliasName']})`; // aliasName for provider & consumer
+                retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
             }
             retVal += ` varName: ${varName}`;
             let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];
@@ -9864,6 +9962,7 @@ const Consumer = (aliasName) => {
 const Monitor = function (key, ...keys) {
     const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
     return function (target, _, descriptor) {
+        ObserveV2.addVariableDecoMeta(target, descriptor.value.name, '@Monitor');
         
         let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
         const monitorFunc = descriptor.value;
@@ -9889,6 +9988,7 @@ const Monitor = function (key, ...keys) {
   */
 const Computed = (target, propertyKey, descriptor) => {
     
+    ObserveV2.addVariableDecoMeta(target, propertyKey, '@Computed');
     let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + target.constructor.name);
     const computeFunction = descriptor.get;
     target[watchProp] ? target[watchProp][propertyKey] = computeFunction
