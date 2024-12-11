@@ -448,6 +448,27 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Event008
+ * @tc.desc: Test scroll callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, Event008, TestSize.Level1)
+{
+    bool isTrigger = false;
+    auto event = [&isTrigger](Dimension offset, ScrollState state) { isTrigger = true; };
+    ListModelNG model = CreateList();
+    model.SetOnScroll(event);
+    CreateListItems(2);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Scroll down to end
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    EXPECT_FALSE(isTrigger);
+}
+
+/**
  * @tc.name: onWillScrollAndOnDidScroll001
  * @tc.desc: Test scroll callback
  * @tc.type: FUNC
