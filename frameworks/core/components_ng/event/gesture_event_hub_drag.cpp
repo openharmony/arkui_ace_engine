@@ -998,6 +998,7 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 void GestureEventHub::HandleDragEndAction(const DragframeNodeInfo& info)
 {
     auto frameNode = info.frameNode;
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
