@@ -849,6 +849,8 @@ public:
         return dragStatus_ == DragStatus::DRAGGING;
     }
 
+    bool BetweenSelectedPosition(GestureEvent& info);
+
     bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
         if (!IsSelected()) {

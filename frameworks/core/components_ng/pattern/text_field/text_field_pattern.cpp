@@ -3338,8 +3338,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(!IsHandleDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation()) || GetIsPreviewText() ||
-        IsOnPasswordByPosition(info.GetGlobalLocation()) || IsOnCleanNodeByPosition(info.GetGlobalLocation())) {
+    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetLocalLocation()) || GetIsPreviewText() ||
+        IsOnPasswordByPosition(info.GetLocalLocation()) || IsOnCleanNodeByPosition(info.GetLocalLocation())) {
         return;
     }
     moveCaretState_.isTouchCaret = false;
@@ -3357,7 +3357,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     StartVibratorByLongPress();
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (BetweenSelectedPosition(info)) {
         gestureHub->SetIsTextDraggable(true);
         return;
     }
@@ -3366,7 +3366,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         TextFieldRequestFocus(RequestFocusReason::LONG_PRESS);
     }
-    auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+
+    auto localOffset = info.GetLocalLocation();
     if (CanChangeSelectState()) {
         selectController_->UpdateSelectWithBlank(localOffset);
         StopTwinkling();
@@ -3382,6 +3383,24 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     StartGestureSelection(start, end, localOffset);
     TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::BetweenSelectedPosition(GestureEvent& info)
+{
+    if (!IsSelected()) {
+        return false;
+    }
+    auto localOffset = info.GetLocalLocation();
+    auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+    auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
+    Offset offset = localOffset - Offset(offsetX, offsetY);
+    for (const auto& rect : selectController_->GetSelectedRects()) {
+        bool isInRange = rect.IsInRegion({ offset.GetX(), offset.GetY() });
+        if (isInRange) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextFieldPattern::CanChangeSelectState()
@@ -3404,7 +3423,7 @@ bool TextFieldPattern::IsAccessibilityClick()
     return accessibilityProperty->GetAccessibilityFocusState();
 }
 
-bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
+bool TextFieldPattern::IsOnUnitByPosition(const Offset& localOffset)
 {
     if (!IsShowUnit()) {
         return false;
@@ -3413,27 +3432,24 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
     CHECK_NULL_RETURN(unitArea, false);
     auto frameNode = unitArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
-bool TextFieldPattern::IsOnPasswordByPosition(const Offset& globalOffset)
+bool TextFieldPattern::IsOnPasswordByPosition(const Offset& localOffset)
 {
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_RETURN(passwordArea, false);
     auto frameNode = passwordArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
-bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& globalOffset)
+bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& localOffset)
 {
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
     CHECK_NULL_RETURN(cleanNodeResponseArea, false);
     auto frameNode = cleanNodeResponseArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
