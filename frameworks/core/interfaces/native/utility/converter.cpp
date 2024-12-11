@@ -1403,6 +1403,7 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
     }
 }
 
+
 template<>
 LightSource Convert(const Ark_LightSource& src)
 {
