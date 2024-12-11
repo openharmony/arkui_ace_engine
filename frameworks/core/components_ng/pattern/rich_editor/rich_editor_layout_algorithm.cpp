@@ -78,7 +78,13 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         auto typingTextStyle = typingTextStyle_.value();
         target->fontStyle->UpdateFontSize(typingTextStyle.GetFontSize());
         target->textLineStyle->UpdateLineHeight(typingTextStyle.GetLineHeight());
-        return;
+    } else {
+        if (source->fontStyle->HasFontSize()) {
+            target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
+        }
+        if (source->textLineStyle->HasLineHeight()) {
+            target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeightValue());
+        }
     }
 
     if (source->textLineStyle->HasLeadingMargin()) {
@@ -87,12 +93,8 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         target->textLineStyle->UpdateLeadingMargin(leadingMargin);
     }
 
-    if (source->fontStyle->HasFontSize()) {
-        target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
-    }
-
-    if (source->textLineStyle->HasLineHeight()) {
-        target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeightValue());
+    if (source->textLineStyle->HasTextAlign()) {
+        target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
     }
 }
 
