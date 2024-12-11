@@ -2845,6 +2845,7 @@ void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately, bool stopL
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    isTouchDownOnOverlong_ = true;
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
     UpdateNodeRate();
