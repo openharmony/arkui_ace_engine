@@ -4772,11 +4772,6 @@ struct ArkUIXComponentModifier {
     // differentiate which VM shall be used to load. Embedder code must use kind
     // matching VM we're embedding into. errorCallbackId is invoked if operation
     // cannot be completed.
-    ArkUIVMObject (*loadXComponent)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUIVMKind vmKind,
-        ArkUI_CharPtr libraryName, ArkUI_Int32 errorCallbackId);
-    void (*setXComponentOptions)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
-    ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
-    ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
     void (*setXComponentEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetXComponentEnableAnalyzer)(ArkUINodeHandle node);
     void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
