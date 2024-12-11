@@ -370,7 +370,7 @@ void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
                 continue;
             }
             const auto* vm = nodePtr->GetEcmaVM();
-            if(!(nodePtr->GetLocalHandle()->IsNativePointer(vm))){
+            if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
                 continue;
             }
             auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
@@ -422,7 +422,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
                 break;
             }
             const auto* vm = nodePtr->GetEcmaVM();
-            if(!(nodePtr->GetLocalHandle()->IsNativePointer(vm))){
+            if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
                 break;
             }
             auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();

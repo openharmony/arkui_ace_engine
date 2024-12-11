@@ -24,7 +24,7 @@ ArkUINativeModuleValue PluginBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);   // 0: index of parameter frameNode
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);  // 1: index of parameter width
     Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter height
-    if(!nodeArg->IsNativePointer(vm)) {
+    if (!nodeArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
@@ -54,7 +54,7 @@ ArkUINativeModuleValue PluginBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
-    if(!nodeArg->IsNativePointer(vm)) {
+    if (!nodeArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
@@ -78,7 +78,7 @@ ArkUINativeModuleValue PluginBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(1);
-    if(!nodeArg->IsNativePointer(vm)) {
+    if (!nodeArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
@@ -101,7 +101,7 @@ ArkUINativeModuleValue PluginBridge::ResetSize(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    if(!nodeArg->IsNativePointer(vm)) {
+    if (!nodeArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
@@ -114,7 +114,7 @@ ArkUINativeModuleValue PluginBridge::ResetWidth(ArkUIRuntimeCallInfo* runtimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    if(!nodeArg->IsNativePointer(vm)) {
+    if (!nodeArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
@@ -127,7 +127,7 @@ ArkUINativeModuleValue PluginBridge::ResetHeight(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    if(!nodeArg->IsNativePointer(vm)) {
+    if (!nodeArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
