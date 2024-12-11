@@ -626,7 +626,11 @@ void* createCommonShapeMethodNode(ArkUI_Int32 nodeId)
 
 void* createCommonNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = CommonViewModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createScrollableCommonMethodNode(ArkUI_Int32 nodeId)
