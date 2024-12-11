@@ -37,6 +37,8 @@ public:
     PluginPattern() = default;
     ~PluginPattern() override;
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
     void OnActionEvent(const std::string& action) const;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

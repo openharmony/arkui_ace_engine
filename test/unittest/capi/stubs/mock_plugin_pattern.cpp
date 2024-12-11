@@ -27,4 +27,22 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 {
     return false;
 }
+
+void PluginPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pluginLayoutProperty = host->GetLayoutProperty<PluginLayoutProperty>();
+    auto requestPluginInfo = pluginLayoutProperty->GetRequestPluginInfo();
+    auto templateJSON = JsonUtil::Create(true);
+    
+    templateJSON->Put("source", requestPluginInfo ? requestPluginInfo->source.c_str() : "");
+    templateJSON->Put("bundleName", requestPluginInfo ? requestPluginInfo->bundleName.c_str() : "");
+    json->PutExtAttr("template", templateJSON, filter);
+}
 }
