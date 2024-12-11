@@ -352,8 +352,10 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto id = host->GetId();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
+
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
+    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -364,6 +366,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
+    pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
 }
 
 void NavDestinationPattern::DumpInfo()

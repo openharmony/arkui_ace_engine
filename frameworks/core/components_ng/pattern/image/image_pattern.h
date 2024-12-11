@@ -116,6 +116,7 @@ public:
     void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
+    bool RecycleImageData();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnWindowShow() override;

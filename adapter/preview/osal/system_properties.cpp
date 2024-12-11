@@ -77,6 +77,7 @@ std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
+bool SystemProperties::recycleImageEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;

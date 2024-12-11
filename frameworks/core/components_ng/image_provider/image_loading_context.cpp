@@ -32,8 +32,7 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
+RefPtr<ImageData> ImageLoadingContext::QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 {
     ACE_FUNCTION_TRACE();
 #ifndef USE_ROSEN_DRAWING
@@ -67,7 +66,6 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 #endif
     return nullptr;
 }
-} // namespace
 
 ImageLoadingContext::ImageLoadingContext(
     const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)

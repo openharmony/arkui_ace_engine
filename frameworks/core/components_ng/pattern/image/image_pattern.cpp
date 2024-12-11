@@ -730,6 +730,7 @@ void ImagePattern::LoadImage(
         .nodeId_ = host->GetId(),
         .accessibilityId_ = host->GetAccessibilityId(),
         .imageSrc_ = src.ToString().substr(0, MAX_SRC_LENGTH),
+        .isTrimMemRecycle_ = host->IsTrimMemRecycle(),
     };
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_, imageDfxConfig_);
@@ -1087,13 +1088,52 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     }
 }
 
+bool ImagePattern::RecycleImageData()
+{
+    //when image component is [onShow] , [no cache], do not clean image data
+    bool dataValid = false;
+    bool isCheckDataCache =
+        (!loadingCtx_ ||
+        (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
+        SystemProperties::GetDownloadByNetworkEnabled() &&
+        ImageLoadingContext::QueryDataFromCache(loadingCtx_->GetSourceInfo(), dataValid) == nullptr));
+    if (isShow_ || isCheckDataCache) {
+        return false;
+    }
+    auto frameNode = GetHost();
+    if (!frameNode) {
+        return false;
+    }
+    frameNode->SetTrimMemRecycle(true);
+    loadingCtx_ = nullptr;
+    auto rsRenderContext = frameNode->GetRenderContext();
+    if (!rsRenderContext) {
+        return false;
+    }
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
+    image_ = nullptr;
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "OnRecycleImageData imageInfo: %{public}s",
+        imageDfxConfig_.ToStringWithSrc().c_str());
+    ACE_SCOPED_TRACE("OnRecycleImageData imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+    return true;
+}
+
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
     if (isShow_ || level < MEMORY_LEVEL_CRITICAL_STATUS) {
         return;
     }
-    // clean image data
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetTrimMemRecycle(false);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1115,6 +1155,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
     UnregisterWindowStateChangedCallback();
+    frameNode->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::OnReuse()
@@ -1156,7 +1197,11 @@ void ImagePattern::OnWindowShow()
     TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageQualityChange_ = %{public}d",
         imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageQualityChange_);
     isShow_ = true;
-    LoadImageDataIfNeed();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->IsTrimMemRecycle()) {
+        LoadImageDataIfNeed();
+    }
 }
 
 void ImagePattern::OnVisibleChange(bool visible)
@@ -2308,6 +2353,7 @@ void ImagePattern::ResetImage()
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
     }
+    host->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::ResetAltImage()
@@ -2343,6 +2389,7 @@ void ImagePattern::ResetImageAndAlt()
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::ResetPictureSize()
