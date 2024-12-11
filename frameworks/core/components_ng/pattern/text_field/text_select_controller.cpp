@@ -875,7 +875,10 @@ bool TextSelectController::IsTouchAtLineEnd(const Offset& localOffset)
 
 bool TextSelectController::IsTouchAtLineEndOrBegin(const Offset& localOffset)
 {
-    CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), false);
+    CHECK_NULL_RETURN(paragraph_, false);
+    if (contentController_->IsEmpty()) {
+        return true;
+    }
     auto index = ConvertTouchOffsetToPosition(localOffset);
     if (index == 0 || index == static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
         return true;
