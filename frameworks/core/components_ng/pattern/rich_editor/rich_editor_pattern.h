@@ -1188,7 +1188,9 @@ private:
     }
 
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
-
+    void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
+    void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
+ 
     RectF GetSelectArea();
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
