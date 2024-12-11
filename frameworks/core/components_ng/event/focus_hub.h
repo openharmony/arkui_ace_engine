@@ -861,7 +861,7 @@ protected:
     bool RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
-    void OnFocusNode();
+    void OnFocusNode(bool currentHasFocused = false);
     void OnFocusScope(bool currentHasFocused = false);
     void OnBlur();
     void OnBlurNode();
