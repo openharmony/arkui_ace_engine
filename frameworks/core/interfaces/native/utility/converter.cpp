@@ -482,6 +482,18 @@ std::optional<Color> ResourceConverter::ToColor()
 }
 
 template<>
+ScaleOpt Convert(const Ark_ScaleOptions& src)
+{
+    ScaleOpt scaleOptions;
+    scaleOptions.x = OptConvert<float>(src.x);
+    scaleOptions.y = OptConvert<float>(src.y);
+    scaleOptions.z = OptConvert<float>(src.z);
+    scaleOptions.centerX = OptConvert<Dimension>(src.centerX);
+    scaleOptions.centerY = OptConvert<Dimension>(src.centerY);
+    return scaleOptions;
+}
+
+template<>
 SelectionOptions Convert(const Ark_SelectionOptions& options)
 {
     SelectionOptions selectionOptions;
@@ -904,6 +916,25 @@ TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
     return options;
+}
+
+template<>
+TranslateOptions Convert(const Ark_TranslateOptions& src)
+{
+    TranslateOptions translateOptions;
+    auto coord = OptConvert<Dimension>(src.x);
+    if (coord.has_value()) {
+        translateOptions.x = coord.value();
+    }
+    coord = OptConvert<Dimension>(src.y);
+    if (coord.has_value()) {
+        translateOptions.y = coord.value();
+    }
+    coord = OptConvert<Dimension>(src.z);
+    if (coord.has_value()) {
+        translateOptions.z = coord.value();
+    }
+    return translateOptions;
 }
 
 template<>

@@ -124,5 +124,13 @@ struct PointLightStyle {
     std::optional<float> bloom;
 };
 
+struct ScaleOpt {
+    std::optional<float> x;
+    std::optional<float> y;
+    std::optional<float> z;
+    std::optional<Dimension> centerX;
+    std::optional<Dimension> centerY;
+};
+
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H
