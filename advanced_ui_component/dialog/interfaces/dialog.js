@@ -3973,14 +3973,20 @@ export class PopoverDialog extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.onClick(() => {
-                let screenSize = display.getDefaultDisplaySync();
-                let screenWidth = px2vp(screenSize.width);
-                if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-                    this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
-                } else {
-                    this.popover.width = this.dialogWidth;
+                try {
+                    let screenSize = display.getDefaultDisplaySync();
+                    let screenWidth = px2vp(screenSize.width);
+                    if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+                        this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
+                    } else {
+                        this.popover.width = this.dialogWidth;
+                    }
+                    this.visible = !this.visible;
+                } catch (error) {
+                    let code = error.code;
+                    let message = error.message;
+                    hilog.error(0x3900, 'Ace', `dialog popup error, code: ${code}, message: ${message}`);
                 }
-                this.visible = !this.visible;
             });
             Column.bindPopup(this.visible, {
                 builder: this.popover?.builder,
