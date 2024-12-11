@@ -5454,6 +5454,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
                 auto pattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(pattern);
                 pattern->NotifyStartDragTask(true);
             },
             TaskExecutor::TaskType::UI, DRAG_DELAY_MILLISECONDS, "OnDragAndDropDataUdmf");
