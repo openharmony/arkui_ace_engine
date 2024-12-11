@@ -422,6 +422,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;

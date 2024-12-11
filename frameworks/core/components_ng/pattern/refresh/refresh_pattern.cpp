@@ -527,6 +527,7 @@ void RefreshPattern::FireStateChange(int32_t value)
         builder.SetId(inspectorId)
             .SetType(host->GetTag())
             .SetEventType(Recorder::EventType::REFRESH)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }

@@ -29,6 +29,7 @@ void NavigatorEventHub::NavigatePage()
             builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
         }
         builder.SetEventType(Recorder::EventType::NAVIGATOR)
+            .SetHost(host)
             .SetExtra(Recorder::KEY_NAV_PAGE, url_)
             .SetExtra(Recorder::KEY_NAV_PAGE_PARAM, params_)
             .SetExtra(Recorder::KEY_NAV_PAGE_TYPE, GetNavigatorType());
