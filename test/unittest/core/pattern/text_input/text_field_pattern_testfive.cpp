@@ -412,4 +412,48 @@ HWTEST_F(TextFieldPatternTestFive, GetBorder001, TestSize.Level0)
     ASSERT_EQ(pattern_->GetBorderTop(border), 10.0);
     ASSERT_EQ(pattern_->GetBorderBottom(border), 10.0);
 }
+
+/**
+ * @tc.name: CursorMoveUpTest001
+ * @tc.desc: Test the cursor move up
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, CursorMoveUpTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Move up and down in a single-line text
+     * @tc.expected: In single-line text, there is no up and down movement
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    auto ret = pattern_->CursorMoveUp();
+    EXPECT_TRUE(ret);
+    ret = pattern_->CursorMoveDown();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CursorMoveToParagraphEndTest001
+ * @tc.desc: Test the cursor move to pragraph to the end
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, CursorMoveToParagraphEndTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text and move to the pargraph of the line
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    auto ret = pattern_->CursorMoveToParagraphEnd();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.expected: Moving to the paragraph end and check if cursor is on pargraph end
+     */
+    ret = pattern_->CursorMoveLeft();
+    ret = pattern_->CursorMoveToParagraphEnd();
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->GetCaretIndex(), DEFAULT_TEXT.length())
+        << "Text is " + pattern_->GetTextValue() + ", CaretIndex is " + std::to_string(pattern_->GetCaretIndex());
+}
 } // namespace OHOS::Ace::NG
