@@ -737,6 +737,17 @@ private:
     void UpdateSheetWhenSheetTypeChanged();
     void GetCurrentScrollHeight();
 
+    // broadcast
+    void SendTextUpdateEvent();
+    void SendSelectedEvent();
+    void HandleFollowAccessibilityEvent(float currHeight);
+    void HandleDragEndAccessibilityEvent();
+    bool UpdateAccessibilityDetents(float height);
+    void RegisterElementInfoCallBack();
+    uint32_t GetCurrentBroadcastDetentsIndex();
+    uint32_t broadcastPreDetentsIndex_ = 0;
+    SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
+
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     SheetKey sheetKey_;
