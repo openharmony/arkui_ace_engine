@@ -18,8 +18,13 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
+#include "core/interfaces/native/implementation/file_selector_param_peer_impl.h"
+#include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
+#include "core/interfaces/native/implementation/full_screen_exit_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
+#include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/permission_request_peer_impl.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
@@ -32,8 +37,26 @@
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
+
+namespace Converter {
+
+template<>
+void AssignCast(std::optional<RenderExitReason>& dst, const Ark_RenderExitReason& src)
+{
+    switch (src) {
+        case ARK_RENDER_EXIT_REASON_PROCESS_ABNORMAL_TERMINATION: dst = RenderExitReason::ABNORMAL_TERMINATION; break;
+        case ARK_RENDER_EXIT_REASON_PROCESS_WAS_KILLED: dst = RenderExitReason::WAS_KILLED; break;
+        case ARK_RENDER_EXIT_REASON_PROCESS_CRASHED: dst = RenderExitReason::CRASHED; break;
+        case ARK_RENDER_EXIT_REASON_PROCESS_OOM: dst = RenderExitReason::OOM; break;
+        case ARK_RENDER_EXIT_REASON_PROCESS_EXIT_UNKNOWN: dst = RenderExitReason::EXIT_UNKNOWN; break;
+        default: LOGE("Unexpected enum value in Ark_RenderExitReason: %{public}d", src);
+    }
+}
+
+} // namespace Converter
 
 class WebModifierTest : public ModifierTestBase<GENERATED_ArkUIWebModifier,
     &GENERATED_ArkUINodeModifiers::getWebModifier, GENERATED_ARKUI_WEB> {
@@ -803,6 +826,368 @@ HWTEST_F(WebModifierTest, onUrlLoadInterceptTest, TestSize.Level1)
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->data, dataStr);
+}
+
+/*
+ * @tc.name: onRenderExitedTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onRenderExitedTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    RenderExitReason exitedReason = RenderExitReason::CRASHED;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        RenderExitReason exitedReason;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnRenderExitedEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .exitedReason = Converter::OptConvert<RenderExitReason>(parameter.renderExitReason)
+                .value_or(RenderExitReason::EXIT_UNKNOWN),
+        };
+    };
+
+    Callback_OnRenderExitedEvent_Void arkCallback =
+        Converter::ArkValue<Callback_OnRenderExitedEvent_Void>(checkCallback, contextId);
+
+    modifier_->setOnRenderExited0(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnRenderExitedEvent(std::make_shared<RenderExitedEvent>(
+        static_cast<int32_t>(exitedReason)));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->exitedReason, exitedReason);
+}
+
+/*
+ * @tc.name: onShowFileSelectorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onShowFileSelectorTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    RefPtr<WebFileSelectorParam> param = Referenced::MakeRefPtr<MockWebFileSelectorParam>();
+    RefPtr<FileSelectorResult> result = Referenced::MakeRefPtr<MockFileSelectorResult>();
+
+    struct CheckEvent {
+        int32_t resourceId;
+        FileSelectorResultPeer* resultPeer;
+        FileSelectorParamPeer* paramPeer;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnShowFileSelectorEvent parameter,
+        const Callback_Boolean_Void continuation) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .resultPeer = reinterpret_cast<FileSelectorResultPeer*>(parameter.result.ptr),
+            .paramPeer = reinterpret_cast<FileSelectorParamPeer*>(parameter.fileSelector.ptr)
+        };
+    };
+
+    Callback_OnShowFileSelectorEvent_Boolean arkCallback =
+        Converter::ArkValue<Callback_OnShowFileSelectorEvent_Boolean>(checkCallback, contextId);
+
+    modifier_->setOnShowFileSelector(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnFileSelectorShowEvent(std::make_shared<FileSelectorEvent>(param, result));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resultPeer->handler, result);
+    EXPECT_EQ(checkEvent->paramPeer->handler, param);
+    delete checkEvent->resultPeer;
+    delete checkEvent->paramPeer;
+}
+
+/*
+ * @tc.name: onResourceLoadTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onResourceLoadTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    std::string url = "url";
+
+    struct CheckEvent {
+        int32_t resourceId;
+        std::string url;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnResourceLoadEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .url = Converter::Convert<std::string>(parameter.url)
+        };
+    };
+
+    Callback_OnResourceLoadEvent_Void arkCallback =
+        Converter::ArkValue<Callback_OnResourceLoadEvent_Void>(checkCallback, contextId);
+
+    modifier_->setOnResourceLoad(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnResourceLoadEvent(std::make_shared<ResourceLoadEvent>(url));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->url, url);
+}
+
+/*
+ * @tc.name: onFullScreenExitTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onFullScreenExitTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    std::string type = "onFullScreenExit";
+
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        checkEvent = {
+            .resourceId = resourceId
+        };
+    };
+
+    Callback_Void arkCallback =
+        Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+
+    modifier_->setOnFullScreenExit(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnFullScreenExitEvent(std::make_shared<BaseEventInfo>(type));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+}
+
+/*
+ * @tc.name: onFullScreenEnterTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onFullScreenEnterTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    RefPtr<FullScreenExitHandler> handler = Referenced::MakeRefPtr<MockFullScreenExitHandler>();
+    int width = 600;
+    int height = 800;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        FullScreenExitHandlerPeer* peer;
+        int width;
+        int height;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_FullScreenEnterEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .peer = reinterpret_cast<FullScreenExitHandlerPeer*>(parameter.handler.ptr),
+            .width = Converter::OptConvert<int>(parameter.videoWidth).value_or(0),
+            .height = Converter::OptConvert<int>(parameter.videoHeight).value_or(0)
+        };
+    };
+
+    OnFullScreenEnterCallback arkCallback =
+        Converter::ArkValue<OnFullScreenEnterCallback>(checkCallback, contextId);
+
+    modifier_->setOnFullScreenEnter(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnFullScreenEnterEvent(std::make_shared<FullScreenEnterEvent>(handler, width, height));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->peer->handler, handler);
+    EXPECT_EQ(checkEvent->width, width);
+    EXPECT_EQ(checkEvent->height, height);
+    delete checkEvent->peer;
+}
+
+/*
+ * @tc.name: onScaleChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onScaleChangeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    float oldScale = 2.5f;
+    float newScale = 3.5f;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        float oldScale;
+        float newScale;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnScaleChangeEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .oldScale = Converter::Convert<float>(parameter.oldScale),
+            .newScale = Converter::Convert<float>(parameter.newScale)
+        };
+    };
+
+    Callback_OnScaleChangeEvent_Void arkCallback =
+        Converter::ArkValue<Callback_OnScaleChangeEvent_Void>(checkCallback, contextId);
+
+    modifier_->setOnScaleChange(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnScaleChangeEvent(std::make_shared<ScaleChangeEvent>(oldScale, newScale));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_NEAR(checkEvent->oldScale, oldScale, FLT_EPSILON);
+    EXPECT_NEAR(checkEvent->newScale, newScale, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: onHttpAuthRequestTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    RefPtr<AuthResult> result = Referenced::MakeRefPtr<MockAuthResult>();
+    std::string host = "host";
+    std::string realm = "realm";
+
+    struct CheckEvent {
+        int32_t resourceId;
+        HttpAuthHandlerPeer* peer;
+        std::string host;
+        std::string realm;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId,
+        const Ark_OnHttpAuthRequestEvent parameter, const Callback_Boolean_Void continuation) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .peer = reinterpret_cast<HttpAuthHandlerPeer*>(parameter.handler.ptr),
+            .host = Converter::Convert<std::string>(parameter.host),
+            .realm = Converter::Convert<std::string>(parameter.realm)
+        };
+    };
+
+    Callback_OnHttpAuthRequestEvent_Boolean arkCallback =
+        Converter::ArkValue<Callback_OnHttpAuthRequestEvent_Boolean>(checkCallback, contextId);
+
+    modifier_->setOnHttpAuthRequest(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnHttpAuthRequestEvent(std::make_shared<WebHttpAuthEvent>(result, host, realm));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->peer->handler, result);
+    EXPECT_EQ(checkEvent->host, host);
+    EXPECT_EQ(checkEvent->realm, realm);
+    delete checkEvent->peer;
+}
+
+/*
+ * @tc.name: onInterceptRequestTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    std::map<std::string, std::string> headers = {};
+    std::string method = "method";
+    std::string url = "url";
+    bool hasGesture = true;
+    bool isMainFrame = true;
+    bool isRedirect = true;
+    RefPtr<WebRequest> webRequest = Referenced::MakeRefPtr<WebRequest>(
+        headers, method, url, hasGesture, isMainFrame, isRedirect);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        WebResourceRequestPeer* peer;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId,
+        const Ark_OnInterceptRequestEvent parameter, const Callback_WebResourceResponse_Void continuation) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.request.ptr)
+        };
+    };
+
+    Callback_OnInterceptRequestEvent_WebResourceResponse arkCallback =
+        Converter::ArkValue<Callback_OnInterceptRequestEvent_WebResourceResponse>(checkCallback, contextId);
+
+    modifier_->setOnInterceptRequest(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnInterceptRequestEvent(std::make_shared<OnInterceptRequestEvent>(webRequest));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->peer->webRequest, webRequest);
+    delete checkEvent->peer;
+}
+
+/*
+ * @tc.name: onPermissionRequestTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onPermissionRequestTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    RefPtr<WebPermissionRequest> webPermissionRequest = Referenced::MakeRefPtr<MockWebPermissionRequest>();
+
+    struct CheckEvent {
+        int32_t resourceId;
+        PermissionRequestPeer* peer;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnPermissionRequestEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .peer = reinterpret_cast<PermissionRequestPeer*>(parameter.request.ptr)
+        };
+    };
+
+    Callback_OnPermissionRequestEvent_Void arkCallback =
+        Converter::ArkValue<Callback_OnPermissionRequestEvent_Void>(checkCallback, contextId);
+
+    modifier_->setOnPermissionRequest(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnPermissionRequestEvent(std::make_shared<WebPermissionRequestEvent>(webPermissionRequest));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->peer->handler, webPermissionRequest);
+    delete checkEvent->peer;
 }
 
 } // namespace OHOS::Ace::NG

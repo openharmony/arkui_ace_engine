@@ -33,6 +33,40 @@ public:
     MOCK_METHOD(void, Cancel, ());
 };
 
+class MockWebFileSelectorParam : public WebFileSelectorParam {
+public:
+    MOCK_METHOD(std::string, GetTitle, ());
+    MOCK_METHOD(int, GetMode, ());
+    MOCK_METHOD(std::vector<std::string>, GetAcceptType, ());
+    MOCK_METHOD(std::string, GetDefaultFileName, ());
+    MOCK_METHOD(bool, IsCapture, ());
+};
+
+class MockFileSelectorResult : public FileSelectorResult {
+public:
+    MOCK_METHOD(void, HandleFileList, (std::vector<std::string>&));
+};
+
+class MockFullScreenExitHandler : public FullScreenExitHandler {
+public:
+    MOCK_METHOD(void, ExitFullScreen, ());
+};
+
+class MockAuthResult : public AuthResult {
+public:
+    MOCK_METHOD(bool, Confirm, (std::string&, std::string&));
+    MOCK_METHOD(bool, IsHttpAuthInfoSaved, ());
+    MOCK_METHOD(void, Cancel, ());
+};
+
+class MockWebPermissionRequest : public WebPermissionRequest {
+public:
+    MOCK_METHOD(void, Deny, (), (const));
+    MOCK_METHOD(std::string, GetOrigin, (), (const));
+    MOCK_METHOD(std::vector<std::string>, GetResources, (), (const));
+    MOCK_METHOD(void, Grant, (std::vector<std::string>&), (const));
+};
+
 } // namespace OHOS::Ace
 
 #endif // CAPI_STUBS_MOCK_WEB_ENTITIES_H
