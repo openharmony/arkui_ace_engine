@@ -543,7 +543,7 @@ public:
     static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
-    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static void SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseEffect(FrameNode* frameNode, const std::optional<bool>& useEffect);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
