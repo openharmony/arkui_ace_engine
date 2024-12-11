@@ -1589,6 +1589,92 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateNavigationNode
+ * @tc.desc: branch if (usrnavigationMode == NavigationMode::AUTO)
+ *           Condition enableModeChangeAnimation false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, UpdateNavigationMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Navigation
+     * @tc.expected: create success
+     */
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1001, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+  
+    /**
+     * @tc.steps: step2. enableAnimation is false, isFirstTimeLayout:false, isNotOnSwitchAnimation:false
+     * @tc.expected: navigationModeChange is true
+     */
+    navigationPattern->SetNavigationModeChange(false);
+    navigationLayoutProperty->UpdateEnableModeChangeAnimation(false);
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationNode->SetDoingModeSwitchAnimationFlag(false);
+    
+    /**
+     * @tc.steps: step3. call updateNavitionMode
+     * @tc.expected: navigationPattern->GetNavigationModeChange() value is true
+     */
+    auto navigationLayoutAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    ASSERT_NE(navigationLayoutAlgorithm, nullptr);
+    auto frameSize = SizeF(2560, 2340);
+    navigationLayoutAlgorithm->UpdateNavigationMode(navigationLayoutProperty, frameSize, navigationNode);
+    
+    bool value = navigationPattern->GetNavigationModeChange();
+    ASSERT_EQ(value, true);
+}
+
+/**
+ * @tc.name: UpdateNavigationNode
+ * @tc.desc: branch if (usrnavigationMode == NavigationMode::AUTO)
+ *           Condition enableModeChangeAnimation true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, UpdateNavigationMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Navigation
+     * @tc.expected: create success
+     */
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1002, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+  
+    /**
+     * @tc.steps: step2. enableAnimation is true, isFirstTimeLayout:false, isNotOnSwitchAnimation:false
+     * @tc.expected: navigationModeChange is false
+     */
+    navigationPattern->SetNavigationModeChange(false);
+    navigationLayoutProperty->UpdateEnableModeChangeAnimation(true);
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationNode->SetDoingModeSwitchAnimationFlag(false);
+    
+    /**
+     * @tc.steps: step3. call updateNavitionMode
+     * @tc.expected: navigationPattern->GetNavigationModeChange() value is false
+     */
+    auto navigationLayoutAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    ASSERT_NE(navigationLayoutAlgorithm, nullptr);
+    auto frameSize = SizeF(2560, 2340);
+    navigationLayoutAlgorithm->UpdateNavigationMode(navigationLayoutProperty, frameSize, navigationNode);
+    
+    bool value = navigationPattern->GetNavigationModeChange();
+    ASSERT_EQ(value, false);
+}
+
+/**
  * @tc.name: DealNavigationExit003
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
  *               GetEventHub return true
