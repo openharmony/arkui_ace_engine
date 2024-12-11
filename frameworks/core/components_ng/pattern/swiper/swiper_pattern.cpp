@@ -2216,7 +2216,6 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionStartTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->InitIndexCanChangeMap();
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d", info.GetSourceTool());
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             pattern->isFirstAxisAction_ = true;
@@ -2268,17 +2267,19 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
             info.GetMainVelocity(), info.GetSourceTool());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+            pattern->InitIndexCanChangeMap();
             return;
         }
         bool isUsingTouchPad =
             (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
         auto velocity =
             isUsingTouchPad ? info.GetMainVelocity() * pattern->GetVelocityCoefficient() : info.GetMainVelocity();
         // Reverse velocity when receiving.
         pattern->HandleDragEnd(pattern->IsHorizontalAndRightToLeft() ? -velocity : velocity);
+        pattern->InitIndexCanChangeMap();
     };
 }
 
@@ -2298,6 +2299,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag cancel");
             pattern->HandleDragEnd(0.0);
+            pattern->InitIndexCanChangeMap();
         }
     };
 
