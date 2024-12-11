@@ -228,6 +228,11 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 key = text;
             }
+        } else if (param->GetProperty("$value")->IsFunction()) {
+            changeEventVal = param->GetProperty("$value");
+            if (ParseJsString(textValue, text)) {
+                key = text;
+            }
         } else if (param->HasProperty("value") && textValue->IsUndefined()) {
             key = u"";
         } else {

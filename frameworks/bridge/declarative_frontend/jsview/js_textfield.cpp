@@ -137,6 +137,16 @@ void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& ch
     TextFieldModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void ParseTextProperty(const JSRef<JSVal>& textValue, std::optional<std::u16string>& value, std::u16string& text)
+{
+    if (JSViewAbstract::ParseJsString(textValue, text)) {
+        value = text;
+    }
+    if (textValue->IsUndefined()) {
+        value = u"";
+    }
+}
+
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
     std::optional<std::u16string> placeholderSrc;
@@ -162,13 +172,14 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
+            value = u"";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -212,13 +223,13 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
