@@ -48,6 +48,7 @@ public:
     void MarkDirtyFrameNode();
     void AddCustomSpan();
     void RemoveCustomSpan();
+    void SetGroupId(const RefPtr<SpanBase>& span);
     void SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems);
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
@@ -115,6 +116,7 @@ protected:
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
     WeakPtr<NG::FrameNode> framNode_;
+    int32_t groupId_ = 0;
 };
 } // namespace OHOS::Ace
 

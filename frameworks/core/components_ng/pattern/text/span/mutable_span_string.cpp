@@ -117,12 +117,11 @@ void MutableSpanString::ReplaceSpan(int32_t start, int32_t length, const RefPtr<
         auto startIndex = pair.first;
         auto secondIndex = pair.second;
         RemoveSpans(startIndex, secondIndex);
-        AddSpan(span->GetSubSpan(startIndex, startIndex + secondIndex));
     }
     for (const auto& index : specialList) {
         RemoveSpans(index, 1, false);
-        AddSpan(span->GetSubSpan(index, index + 1));
     }
+    AddSpan(span->GetSubSpan(start, start + length));
 }
 
 void MutableSpanString::ApplyReplaceStringToSpans(
