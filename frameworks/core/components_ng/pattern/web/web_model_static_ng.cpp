@@ -567,6 +567,23 @@ void WebModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOpti
     webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
 }
 
+void WebModelNG::SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetNewDragStyle(isNewDragStyle);
+}
+
+void WebModelNG::SetPreviewSelectionMenu(
+    FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetPreviewSelectionMenu(param);
+}
+
 void WebModelNG::SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
