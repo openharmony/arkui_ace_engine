@@ -1371,17 +1371,17 @@ bool TextFieldPattern::HandleOnEscape()
         if (!IsSelected() && HasFocus()) {
             StartTwinkling();
         }
-        return false;
+        return true;
     }
     if (GetIsPreviewText()) {
         ResetPreviewTextState();
-        return false;
+        return true;
     }
     if (HasFocus()) {
         StopTwinkling();
         TextFieldLostFocusToViewRoot();
     }
-    return false;
+    return true;
 }
 
 bool TextFieldPattern::HandleOnTab(bool backward)
