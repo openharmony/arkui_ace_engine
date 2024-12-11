@@ -125,9 +125,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/extension_companion_node.h"
 #include "core/pipeline/base/element_register.h"
-#ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
-#endif
 
 namespace OHOS::Ace::NG::GeneratedViewModel {
 
@@ -852,14 +850,10 @@ void* createPatternLockNode(ArkUI_Int32 nodeId)
 
 void* createPluginComponentNode(ArkUI_Int32 nodeId)
 {
-#ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = PluginModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
-#else
-    return nullptr;
-#endif // PLUGIN_COMPONENT_SUPPORTED
 }
 
 void* createPolygonNode(ArkUI_Int32 nodeId)
