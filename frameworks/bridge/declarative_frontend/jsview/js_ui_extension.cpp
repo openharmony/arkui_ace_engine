@@ -384,7 +384,7 @@ void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
     } while (false);
 }
 namespace {
-void InsertPlaceholderObj(JsiRef<JsiObject>& obj, 
+void InsertPlaceholderObj(JsiRef<JsiObject>& obj,
     std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
 {
     do {
