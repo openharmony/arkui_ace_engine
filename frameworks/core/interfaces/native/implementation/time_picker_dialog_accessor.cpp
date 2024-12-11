@@ -185,8 +185,8 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
     TimePickerDialogView::Show(dialogProps, settingData, buttonInfos,
         timePickerProp, dialogEvent, dialogCancelEvent);
 #else
-    MockTimePickerDialogView::Show(dialogProps, settingData, buttonInfos,
-        timePickerProp, dialogEvent, dialogCancelEvent);
+    MockTimePickerDialogView::SetData(dialogProps, settingData, buttonInfos, timePickerProp);
+    MockTimePickerDialogView::SetCallbacks(dialogEvent, dialogCancelEvent);
 #endif
 }
 } // TimePickerDialogAccessor

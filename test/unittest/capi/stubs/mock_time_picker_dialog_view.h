@@ -20,9 +20,10 @@
 namespace OHOS::Ace::NG {
 class MockTimePickerDialogView {
 public:
-    static void Show(const DialogProperties& dialogProperties,
+    static void SetData(const DialogProperties& dialogProperties,
         const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
-        std::map<std::string, PickerTime> pickerTime, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, PickerTime> pickerTime);
+    static void SetCallbacks(std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static DialogProperties GetDialogProperties();
     static TimePickerSettingData GetSettingData();

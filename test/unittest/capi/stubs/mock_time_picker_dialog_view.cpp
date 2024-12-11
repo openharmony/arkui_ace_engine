@@ -24,15 +24,19 @@ DialogEvent MockTimePickerDialogView::acceptEvent_;
 DialogEvent MockTimePickerDialogView::changeEvent_;
 DialogGestureEvent MockTimePickerDialogView::cancelEvent_;
 
-void MockTimePickerDialogView::Show(const DialogProperties& dialogProperties,
+void MockTimePickerDialogView::SetData(const DialogProperties& dialogProperties,
     const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
-    std::map<std::string, PickerTime> pickerTime, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, PickerTime> pickerTime)
 {
     dialogProperties_ = dialogProperties;
     settingData_ = settingData;
     buttonInfos_ = buttonInfos;
     pickerTime_ = pickerTime["selected"];
+}
+
+void MockTimePickerDialogView::SetCallbacks(std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+{
     acceptEvent_ = dialogEvent["acceptId"];
     changeEvent_ = dialogEvent["changeId"];
     cancelEvent_ = dialogCancelEvent["cancelId"];

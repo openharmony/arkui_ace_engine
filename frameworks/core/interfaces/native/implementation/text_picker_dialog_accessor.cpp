@@ -26,48 +26,6 @@
 
 struct TextPickerDialogPeer {};
 
-namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_TextPickerResult& dst, const std::string& src)
-{
-    Ark_Union_String_Array_String value;
-    Ark_Union_Number_Array_Number index;
-
-    auto data = JsonUtil::ParseJsonString(src);
-
-    auto jsonIndex = data->GetValue("index");
-    if (jsonIndex->IsNumber()) {
-        auto valueInd = data->GetUInt("index");
-        index = ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(ArkValue<Ark_Number>(valueInd));
-    } else if (jsonIndex->IsArray()) {
-        std::vector<uint32_t> indexes;
-        for (auto i = 0; i < jsonIndex->GetArraySize(); i++) {
-            auto valueInd = jsonIndex->GetArrayItem(i)->GetUInt();
-            indexes.push_back(valueInd);
-        }
-        ArkArrayHolder<Array_Number> holder(indexes);
-        Array_Number arkValues = holder.ArkValue();
-        index = ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arkValues);
-    }
-    
-    auto jsonValue = data->GetValue("value");
-    if (jsonValue->IsString()) {
-        auto valueStr = data->GetString("value");
-        value = ArkUnion<Ark_Union_String_Array_String, Ark_String>(ArkValue<Ark_String>(valueStr));
-    } else if (jsonValue->IsArray()) {
-        std::vector<std::string> values;
-        for (auto i = 0; i < jsonValue->GetArraySize(); i++) {
-            auto valueStr = jsonValue->GetArrayItem(i)->GetString();
-            values.push_back(valueStr);
-        }
-        ArkArrayHolder<Array_String> holder(values);
-        Array_String arkValues = holder.ArkValue();
-        value = ArkUnion<Ark_Union_String_Array_String, Array_String>(arkValues);
-    }
-
-    dst.value = value;
-    dst.index = index;
-}
-} // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
 void DestroyPeerImpl(TextPickerDialogPeer* peer)
@@ -271,6 +229,54 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_TextPickerDialogOptions optio
     }
     return buttonInfos;
 }
+DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
+{
+    return [arkCallback = CallbackHelper(callback)](const std::string& info) -> void {
+        Ark_TextPickerResult textPickerRes;
+        auto data = JsonUtil::ParseJsonString(info);
+
+        std::vector<uint32_t> indexes;
+        auto jsonIndex = data->GetValue("index");
+        auto isIndexesArray = jsonIndex->IsArray();
+        if (isIndexesArray) {
+            for (auto i = 0; i < jsonIndex->GetArraySize(); i++) {
+                indexes.push_back(jsonIndex->GetArrayItem(i)->GetUInt());
+            }
+        } else {
+            indexes.push_back(jsonIndex->GetUInt());
+        }
+        Converter::ArkArrayHolder<Array_Number> indexesHolder(indexes);
+        if (isIndexesArray) {
+            Array_Number arkValues = indexesHolder.ArkValue();
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(arkValues);
+        } else if (static_cast<int32_t>(indexes.size()) > 0) {
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Ark_Number>(
+                Converter::ArkValue<Ark_Number>(indexes.at(0)));
+        }
+
+        std::vector<std::string> values;
+        auto jsonValue = data->GetValue("value");
+        auto isValuesArray = jsonValue->IsArray();
+        if (isValuesArray) {
+            for (auto i = 0; i < jsonValue->GetArraySize(); i++) {
+                values.push_back(jsonValue->GetArrayItem(i)->GetString());
+            }
+        } else {
+            values.push_back(data->GetString("value"));
+        }
+        Converter::ArkArrayHolder<Array_String> holder(values);
+        if (isValuesArray) {
+            Array_String arkValues = holder.ArkValue();
+            textPickerRes.value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(arkValues);
+        } else if (static_cast<int32_t>(values.size()) > 0) {
+            textPickerRes.value = Converter::ArkUnion<Ark_Union_String_Array_String, Ark_String>(
+                Converter::ArkValue<Ark_String>(values.at(0)));
+        }
+
+        arkCallback.Invoke(textPickerRes);
+    };
+}
+
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
@@ -286,19 +292,11 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     std::map<std::string, DialogTextEvent> dialogEvent;
     auto acceptCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onAccept);
     if (acceptCallbackOpt) {
-        auto onAcceptFunc = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
-            Ark_TextPickerResult textPickerRes = Converter::ArkValue<Ark_TextPickerResult>(info);
-            arkCallback.Invoke(textPickerRes);
-        };
-        dialogEvent["acceptId"] = onAcceptFunc;
+        dialogEvent["acceptId"] = BuildTextEvent(*acceptCallbackOpt);
     }
     auto changeCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onChange);
     if (changeCallbackOpt) {
-        auto onChangeFunc = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
-            Ark_TextPickerResult textPickerRes = Converter::ArkValue<Ark_TextPickerResult>(info);
-            arkCallback.Invoke(textPickerRes);
-        };
-        dialogEvent["changeId"] = onChangeFunc;
+        dialogEvent["changeId"] = BuildTextEvent(*changeCallbackOpt);
     }
 
     std::map<std::string, DialogGestureEvent> dialogCancelEvent;

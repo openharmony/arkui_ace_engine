@@ -153,9 +153,6 @@ public:
 
     std::string GetSelectedObject(bool isColumnChange, int32_t status = 0) const;
 
-    std::string GetSelectedObjectStr(const std::string value,
-        const uint32_t index, int32_t status = 0) const;
-
     std::string GetOption(uint32_t index) const
     {
         if (index >= GetOptionCount()) {
@@ -485,6 +482,41 @@ public:
         curOpacity_ = opacity;
     }
 
+    static std::string GetSelectedObjectStr(const std::string value,
+        const uint32_t index, int32_t status = 0)
+    {
+        return std::string("{\"value\":") + "\"" + value + "\"" + ",\"index\":" + std::to_string(index) +
+               ",\"status\":" + std::to_string(status) + "}";
+    }
+    
+    static std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
+        const std::vector<uint32_t>& indexs, int32_t status = 0)
+    {
+        std::string result = "";
+        result = std::string("{\"value\":") + "[";
+        const size_t valueSize = values.size();
+        for (uint32_t i = 0; i < valueSize; i++) {
+            result += "\"" + values[i];
+            if (valueSize > 0 && i != valueSize - 1) {
+                result += "\",";
+            } else {
+                result += "\"]";
+            }
+        }
+        result += std::string(",\"index\":") + "[";
+        const size_t indexSize = indexs.size();
+        for (uint32_t i = 0; i < indexSize; i++) {
+            result += std::to_string(indexs[i]);
+            if (indexSize > 0 && indexSize != i + 1) {
+                result += ",";
+            } else {
+                result += "]";
+            }
+        }
+        result += ",\"status\":" + std::to_string(status) + "}";
+        return result;
+    }
+
 private:
     void OnModifyDone() override;
     void SetLayoutDirection(TextDirection textDirection);
@@ -509,8 +541,6 @@ private:
         uint32_t value, uint32_t curColumn, uint32_t replaceColumn);
     void OnColumnsBuildingUnCascade();
     void OnColumnsBuildingCascade();
-    std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
-        const std::vector<uint32_t>& indexs, int32_t status) const;
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);

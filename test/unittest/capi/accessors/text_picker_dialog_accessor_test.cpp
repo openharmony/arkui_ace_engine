@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_style.h"
 #include "test/unittest/capi/stubs/mock_text_picker_dialog_view.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 using Ark_Type_TextPickerOptions_range =
     Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent;
@@ -32,6 +33,7 @@ const std::string TEST_NAME1 = "aa";
 const std::string TEST_NAME2 = "bb";
 const std::string TEST_NAME3 = "cc";
 const std::vector<std::string> testValues { TEST_NAME1, TEST_NAME2, TEST_NAME3 };
+const std::vector<uint32_t> testIndexes = { 1, 2, 3 };
 const std::vector<std::pair<std::string, std::string>> rangeVectorValues {
     { TEST_NAME1, "ic1" },
     { TEST_NAME2, "ic2" },
@@ -81,7 +83,6 @@ const std::string TEST_COLOR = "#FF012345";
 const float TEST_SIZE = 13.0f;
 const float TEST_RADIUS_SIZE = 5.0f;
 const std::string TEST_VALUE_STR = testValues[0];
-const uint32_t TEST_INDEX = 1;
 } // namespace
 
 using namespace testing;
@@ -251,7 +252,8 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataRangeT
         Converter::ArkValue<Ark_String>(TEST_VALUE_STR)
     );
     arkOptions.selected =
-        Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(Converter::ArkValue<Ark_Number>(TEST_INDEX));
+        Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(
+            Converter::ArkValue<Ark_Number>(testIndexes.at(0)));
 
     Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
     accessor_->show(&options);
@@ -263,7 +265,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataRangeT
         EXPECT_EQ(settingData.rangeVector.at(i).text_, std::get<0>(rangeVectorValues.at(i)));
         EXPECT_EQ(settingData.rangeVector.at(i).icon_, std::get<1>(rangeVectorValues.at(i)));
     }
-    EXPECT_EQ(settingData.selected, TEST_INDEX);
+    EXPECT_EQ(settingData.selected, testIndexes.at(0));
 }
 
 /**
@@ -285,7 +287,8 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
         Converter::ArkValue<Ark_String>(TEST_VALUE_STR)
     );
     arkOptions.selected =
-        Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(Converter::ArkValue<Ark_Number>(TEST_INDEX));
+        Converter::ArkUnion<Opt_Union_Number_Array_Number, Ark_Number>(
+            Converter::ArkValue<Ark_Number>(testIndexes.at(0)));
 
     Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
     accessor_->show(&options);
@@ -297,9 +300,9 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
         EXPECT_EQ(settingData.options.at(i).rangeResult.at(0), testValues[i]);
     }
     EXPECT_EQ(settingData.values.size(), 1);
-    EXPECT_EQ(settingData.values.at(0), testValues.at(TEST_INDEX));
+    EXPECT_EQ(settingData.values.at(0), testValues.at(testIndexes.at(0)));
     EXPECT_EQ(settingData.selectedValues.size(), 1);
-    EXPECT_EQ(settingData.selectedValues.at(0), TEST_INDEX);
+    EXPECT_EQ(settingData.selectedValues.at(0), testIndexes.at(0));
 }
 
 /**
@@ -454,40 +457,23 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorButtonInfosTest, 
 }
 
 /**
- * @tc.name: textPickerDialogAccessorCallbacksTest
+ * @tc.name: textPickerDialogAccessorCancelCallbackTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorCallbacksTest, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorCancelCallbackTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
     Ark_TextPickerDialogOptions arkOptions;
-
-    auto json = JsonUtil::Create(true);
-    json->Put("value", TEST_VALUE_STR.c_str());
-    json->Put("index", static_cast<int32_t>(TEST_INDEX));
-    json->Put("status", 0);
-
     static uint32_t contextId = 123;
     static bool wasCancelled = false;
     auto onCancelCallback = [](const Ark_Int32 resourceId) {
+        EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
         wasCancelled = true;
-    };
-    static std::optional<Ark_TextPickerResult> acceptedRes;
-    auto onAcceptCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {
-        acceptedRes = info;
-    };
-    static std::optional<Ark_TextPickerResult> changedRes;
-    auto onChangeCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {
-        changedRes = info;
     };
     arkOptions.onCancel = Converter::ArkValue<Opt_Callback_Void>(
         Converter::ArkValue<Callback_Void>(onCancelCallback, contextId));
-    arkOptions.onAccept = Converter::ArkValue<Opt_Callback_TextPickerResult_Void>(
-        Converter::ArkValue<Callback_TextPickerResult_Void>(onAcceptCallback, contextId));
-    arkOptions.onChange = Converter::ArkValue<Opt_Callback_TextPickerResult_Void>(
-        Converter::ArkValue<Callback_TextPickerResult_Void>(onChangeCallback, contextId));
 
     Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
     accessor_->show(&options);
@@ -495,25 +481,149 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorCallbacksTest, Te
     EXPECT_FALSE(wasCancelled);
     MockTextPickerDialogView::FireCancelEvent();
     EXPECT_TRUE(wasCancelled);
+}
 
-    EXPECT_FALSE(acceptedRes.has_value());
-    MockTextPickerDialogView::FireAcceptEvent(json->ToString());
-    ASSERT_TRUE(acceptedRes.has_value());
-    auto acceptedValue = Converter::OptConvert<std::string>(acceptedRes->value);
-    ASSERT_TRUE(acceptedValue.has_value());
-    EXPECT_EQ(*acceptedValue, TEST_VALUE_STR);
-    auto acceptedIndex = Converter::OptConvert<uint32_t>(acceptedRes->index);
-    ASSERT_TRUE(acceptedIndex.has_value());
-    EXPECT_EQ(*acceptedIndex, TEST_INDEX);
+/**
+ * @tc.name: textPickerDialogAccessorAcceptCallbackTest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTest001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->show, nullptr);
 
-    EXPECT_FALSE(changedRes.has_value());
-    MockTextPickerDialogView::FireChangeEvent(json->ToString());
-    ASSERT_TRUE(changedRes.has_value());
-    auto changedValue = Converter::OptConvert<std::string>(changedRes->value);
-    ASSERT_TRUE(changedValue.has_value());
-    EXPECT_EQ(*changedValue, TEST_VALUE_STR);
-    auto changedIndex = Converter::OptConvert<uint32_t>(changedRes->index);
-    ASSERT_TRUE(changedIndex.has_value());
-    EXPECT_EQ(*changedIndex, TEST_INDEX);
+    Ark_TextPickerDialogOptions arkOptions;
+    auto strValue = TextPickerPattern::GetSelectedObjectStr(testValues.at(0), testIndexes.at(0));
+    static uint32_t contextId = 123;
+
+    auto onAcceptCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {
+        EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
+
+        auto acceptedValue = Converter::OptConvert<std::string>(info.value);
+        ASSERT_TRUE(acceptedValue.has_value());
+        EXPECT_EQ(*acceptedValue, testValues.at(0));
+
+        auto acceptedIndex = Converter::OptConvert<uint32_t>(info.index);
+        ASSERT_TRUE(acceptedIndex.has_value());
+        EXPECT_EQ(*acceptedIndex, testIndexes.at(0));
+    };
+    arkOptions.onAccept = Converter::ArkValue<Opt_Callback_TextPickerResult_Void>(
+        Converter::ArkValue<Callback_TextPickerResult_Void>(onAcceptCallback, contextId));
+
+    Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
+    accessor_->show(&options);
+    
+    MockTextPickerDialogView::FireAcceptEvent(strValue);
+}
+
+/**
+ * @tc.name: textPickerDialogAccessorAcceptCallbackTest002
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTest002, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->show, nullptr);
+
+    Ark_TextPickerDialogOptions arkOptions;
+    auto strValue = TextPickerPattern::GetSelectedObjectMulti(testValues, testIndexes);
+    static uint32_t contextId = 123;
+
+    auto onAcceptCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {
+        EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
+
+        auto acceptedValues = Converter::OptConvert<std::vector<std::string>>(info.value);
+        ASSERT_TRUE(acceptedValues.has_value());
+        EXPECT_EQ(acceptedValues->size(), testValues.size());
+        for (int i = 0; i < static_cast<int32_t>(acceptedValues->size()); i++) {
+            EXPECT_EQ(acceptedValues->at(i), testValues.at(i));
+        }
+
+        auto acceptedIndexes = Converter::OptConvert<std::vector<uint32_t>>(info.index);
+        ASSERT_TRUE(acceptedIndexes.has_value());
+        EXPECT_EQ(acceptedIndexes->size(), testIndexes.size());
+        for (int i = 0; i < static_cast<int32_t>(acceptedIndexes->size()); i++) {
+            EXPECT_EQ(acceptedIndexes->at(i), testIndexes.at(i));
+        }
+    };
+    arkOptions.onAccept = Converter::ArkValue<Opt_Callback_TextPickerResult_Void>(
+        Converter::ArkValue<Callback_TextPickerResult_Void>(onAcceptCallback, contextId));
+
+    Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
+    accessor_->show(&options);
+    
+    MockTextPickerDialogView::FireAcceptEvent(strValue);
+}
+
+/**
+ * @tc.name: textPickerDialogAccessorChangeCallbackTest001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTest001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->show, nullptr);
+
+    Ark_TextPickerDialogOptions arkOptions;
+    auto strValue = TextPickerPattern::GetSelectedObjectStr(testValues.at(0), testIndexes.at(0));
+    static uint32_t contextId = 123;
+
+    auto onChangeCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {
+        EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
+
+        auto changedValue = Converter::OptConvert<std::string>(info.value);
+        ASSERT_TRUE(changedValue.has_value());
+        EXPECT_EQ(*changedValue, testValues.at(0));
+
+        auto changedIndex = Converter::OptConvert<uint32_t>(info.index);
+        ASSERT_TRUE(changedIndex.has_value());
+        EXPECT_EQ(*changedIndex, testIndexes.at(0));
+    };
+    arkOptions.onChange = Converter::ArkValue<Opt_Callback_TextPickerResult_Void>(
+        Converter::ArkValue<Callback_TextPickerResult_Void>(onChangeCallback, contextId));
+
+    Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
+    accessor_->show(&options);
+    
+    MockTextPickerDialogView::FireChangeEvent(strValue);
+}
+
+/**
+ * @tc.name: textPickerDialogAccessorChangeCallbackTest002
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTest002, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->show, nullptr);
+
+    Ark_TextPickerDialogOptions arkOptions;
+    auto strValue = TextPickerPattern::GetSelectedObjectMulti(testValues, testIndexes);
+    static uint32_t contextId = 123;
+
+    auto onChangeCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {
+        EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
+
+        auto changedValues = Converter::OptConvert<std::vector<std::string>>(info.value);
+        ASSERT_TRUE(changedValues.has_value());
+        EXPECT_EQ(changedValues->size(), testValues.size());
+        for (int i = 0; i < static_cast<int32_t>(changedValues->size()); i++) {
+            EXPECT_EQ(changedValues->at(i), testValues.at(i));
+        }
+
+        auto changedIndexes = Converter::OptConvert<std::vector<uint32_t>>(info.index);
+        ASSERT_TRUE(changedIndexes.has_value());
+        EXPECT_EQ(changedIndexes->size(), testIndexes.size());
+        for (int i = 0; i < static_cast<int32_t>(changedIndexes->size()); i++) {
+            EXPECT_EQ(changedIndexes->at(i), testIndexes.at(i));
+        }
+    };
+    arkOptions.onChange = Converter::ArkValue<Opt_Callback_TextPickerResult_Void>(
+        Converter::ArkValue<Callback_TextPickerResult_Void>(onChangeCallback, contextId));
+
+    Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
+    accessor_->show(&options);
+    
+    MockTextPickerDialogView::FireAcceptEvent(strValue);
 }
 } // namespace OHOS::Ace
