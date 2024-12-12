@@ -568,6 +568,18 @@ public:
     bool HasUserCurrentValue();
     int32_t GetUserCurrentValue();
 
+    void SetUserRangeMinValue(const int32_t rangeMinValue);
+    bool HasUserRangeMinValue() const;
+    int32_t GetUserRangeMinValue() const;
+
+    void SetUserRangeMaxValue(const int32_t rangeMaxValue);
+    bool HasUserRangeMaxValue() const;
+    int32_t GetUserRangeMaxValue() const;
+
+    void SetUserRangeCurrentValue(const int32_t rangeCurrentValue);
+    bool HasUserRangeCurrentValue() const;
+    int32_t GetUserRangeCurrentValue() const;
+
     void SetUserTextValue(const std::string& textValue);
     bool HasUserTextValue();
     std::string GetUserTextValue();
@@ -666,6 +678,9 @@ protected:
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;
     std::optional<int32_t> currentValue_;
+    std::optional<int32_t> rangeMinValue_;
+    std::optional<int32_t> rangeMaxValue_;
+    std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
 };
 } // namespace OHOS::Ace::NG

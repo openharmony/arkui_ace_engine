@@ -888,12 +888,12 @@ void GetFrameNodeChildren(
                 return;
             }
         }
-        
+
         auto overlayNode = frameNode->GetOverlayNode();
         if (overlayNode) {
             GetFrameNodeChildren(overlayNode, children, pageId);
         }
-        
+
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
         if (uiVirtualNode != nullptr) {
@@ -1330,10 +1330,17 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 
     UpdateAccessibilityTextValueInfo(accessibilityProperty, nodeInfo);
 
-    if (accessibilityProperty->HasRange()) {
-        RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
-        nodeInfo.SetRange(rangeInfo);
+    RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
+    if (accessibilityProperty->HasUserRangeCurrentValue()) {
+        rangeInfo.SetCurrent(accessibilityProperty->GetUserRangeCurrentValue());
     }
+    if (accessibilityProperty->HasUserRangeMinValue()) {
+        rangeInfo.SetMin(accessibilityProperty->GetUserRangeMinValue());
+    }
+    if (accessibilityProperty->HasUserRangeMaxValue()) {
+        rangeInfo.SetMax(accessibilityProperty->GetUserRangeMaxValue());
+    }
+    nodeInfo.SetRange(rangeInfo);
     if (accessibilityProperty->HasSubComponent()) {
         std::vector<SubComponentInfo> subComponentInfos;
         accessibilityProperty->GetSubComponentInfo(subComponentInfos);
