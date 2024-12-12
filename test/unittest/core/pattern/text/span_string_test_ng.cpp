@@ -1790,4 +1790,49 @@ HWTEST_F(SpanStringTestNg, Tlv011, TestSize.Level1)
     readLeadingMargin = TLVUtil::ReadLeadingMargin(buffer, cursor);
     EXPECT_FALSE(writeLeadingMargin == readLeadingMargin);
 }
+
+/**
+ * @tc.name: GetSpanResultObject001
+ * @tc.desc: Test GetSpanResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GetSpanResultObject001, TestSize.Level1)
+{
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
+    customSpanItem->interval.first = 1;
+    customSpanItem->interval.second = 2;
+    auto resultObject = customSpanItem->GetSpanResultObject(0, 3);
+    EXPECT_TRUE(resultObject.isInit);
+}
+
+/**
+ * @tc.name: GetSpanResultObject002
+ * @tc.desc: Test GetSpanResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GetSpanResultObject002, TestSize.Level1)
+{
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
+    customSpanItem->interval.first = 1;
+    customSpanItem->interval.second = 2;
+    auto resultObject = customSpanItem->GetSpanResultObject(2, 3);
+    EXPECT_FALSE(resultObject.isInit);
+}
+
+/**
+ * @tc.name: GetSpanResultObject003
+ * @tc.desc: Test GetSpanResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GetSpanResultObject003, TestSize.Level1)
+{
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
+    customSpanItem->interval.first = 1;
+    customSpanItem->interval.second = 4;
+    auto resultObject = customSpanItem->GetSpanResultObject(0, 3);
+    EXPECT_FALSE(resultObject.isInit);
+}
 } // namespace OHOS::Ace::NG
