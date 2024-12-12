@@ -1149,6 +1149,7 @@ public:
     std::list<RefPtr<FrameNode>> GetActiveChildren();
 
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+    void OnPropertyChangeMeasure() const;
 
 protected:
     void DumpInfo() override;
