@@ -18,6 +18,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -522,8 +524,16 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
 }
 void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
-void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
+KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
+{
+    return KeyBoardAvoidMode::OFFSET;
+}
+void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
+{
+    return false;
+}
+bool PipelineContext::UsingCaretAvoidMode()
 {
     return false;
 }

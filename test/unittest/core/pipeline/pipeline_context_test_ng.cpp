@@ -1429,7 +1429,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
      * @tc.steps2: Set EnableAvoidKeyboardMode is true.
      * @tc.expected: get KeyboardSafeAreaEnabled is true.
      */
-    context_->SetEnableKeyBoardAvoidMode(true);
+    context_->SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     EXPECT_TRUE(context_->GetSafeAreaManager()->KeyboardSafeAreaEnabled());
 
     /**

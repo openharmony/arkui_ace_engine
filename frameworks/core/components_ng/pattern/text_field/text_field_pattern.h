@@ -1399,6 +1399,10 @@ public:
 
     void ShowCaretAndStopTwinkling();
 
+    void TriggerAvoidOnCaretChange();
+
+    void TriggerAvoidWhenCaretGoesDown();
+
     bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
     bool IsLTRLayout()
@@ -1406,6 +1410,16 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, true);
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
+
+    float GetLastCaretPos()
+    {
+        return lastCaretPos_;
+    }
+
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
     }
 
     void SetEnableHapticFeedback(bool isEnabled)
@@ -1871,6 +1885,7 @@ private:
     uint32_t longPressFingerNum_ = 0;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> maxFontSizeScale_;
+    float lastCaretPos_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
