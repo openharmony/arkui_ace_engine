@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
@@ -535,10 +536,18 @@ OffsetF GetPageOffset()
 std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<OptionParam> params;
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, params);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, params);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut,
+        theme->GetCutLabelInfo(), info->menuInfo.showCut);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy,
+        theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste,
+        theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll,
+        theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
     return params;
 }
 
@@ -652,7 +661,8 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 overlayManager->DestroySelectOverlay(true);
             }
         };
-        params.emplace_back(GetItemContent(item.id, item.content.value_or("")), "", callback);
+        params.emplace_back(
+            GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
         params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
         params.back().disableSystemClick = true;
         itemNum++;
@@ -660,34 +670,293 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
     return params;
 }
 
-void SetOptionDisable(const RefPtr<FrameNode>& option)
+#ifdef OHOS_PLATFORM
+RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<FrameNode>& parent)
 {
-    CHECK_NULL_VOID(option);
-    auto optionEventHub = option->GetEventHub<OptionEventHub>();
-    CHECK_NULL_VOID(optionEventHub);
-    optionEventHub->SetEnabled(false);
-    option->MarkModifyDone();
+    auto textId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textProperty->UpdateFontSize(theme->GetMenuFontSize());
+    textProperty->UpdateFontWeight(FontWeight::REGULAR);
+    textProperty->UpdateTextColor(Color::TRANSPARENT);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_RETURN(textRenderContext, nullptr);
+    textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
+    textProperty->UpdateContent(value);
+    textNode->MountToParent(parent);
+    textNode->MarkModifyDone();
+    return textNode;
 }
 
-void SetOptionsAction(const std::shared_ptr<SelectOverlayInfo>& info, const std::vector<RefPtr<FrameNode>>& options)
+void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<SelectTheme>& theme, bool enabled)
 {
-    if (options.empty()) {
-        return;
-    }
-    if (!info->menuInfo.showCut) {
-        SetOptionDisable(options[OPTION_INDEX_CUT]);
-    }
-    if (!info->menuInfo.showCopy) {
-        SetOptionDisable(options[OPTION_INDEX_COPY]);
-    }
-    if (!info->menuInfo.showPaste) {
-        SetOptionDisable(options[OPTION_INDEX_PASTE]);
-    }
-    if (!info->menuInfo.showCopyAll) {
-        SetOptionDisable(options[OPTION_INDEX_COPY_ALL]);
+    CHECK_NULL_VOID(pasteNode);
+    CHECK_NULL_VOID(theme);
+    auto pasteLayoutProperty = pasteNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(pasteLayoutProperty);
+    auto pastePaintProperty = pasteNode->GetPaintProperty<SecurityComponentPaintProperty>();
+    CHECK_NULL_VOID(pastePaintProperty);
+    pastePaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
+    pasteLayoutProperty->UpdateBackgroundBorderRadius(BorderRadiusProperty(theme->GetInnerBorderRadius()));
+    pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
+    pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
+    pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
+    pasteLayoutProperty->UpdateStateEffect(false);
+    auto horInterval = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
+                       static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto pasteButtonRenderContext = pasteNode->GetRenderContext();
+    CHECK_NULL_VOID(pasteButtonRenderContext);
+    pasteLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval));
+    if (enabled) {
+        pasteButtonRenderContext->UpdateOpacity(1.0);
+    } else {
+        pasteButtonRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
     }
 }
 
+void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftTextNode, OptionParam& param,
+    const RefPtr<SelectTheme>& theme, const RefPtr<FrameNode>& menuItem)
+{
+    auto leftTextRenderContext = leftTextNode->GetRenderContext();
+    CHECK_NULL_VOID(leftTextRenderContext);
+    if (isPaste) {
+        if (!param.enabled) {
+            leftTextRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+            leftTextNode->MarkModifyDone();
+        }
+    }
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    auto eventHub = menuItemPattern->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectedChangeEvent([action = param.action](bool isSelected) {
+        if (isSelected) {
+            action();
+        }
+    });
+    eventHub->SetEnabled(param.enabled);
+    auto focusHub = menuItem->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetEnabled(param.enabled);
+    if (menuItemPattern->IsDisabled()) {
+        leftTextRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        leftTextNode->MarkModifyDone();
+    }
+    menuItemPattern->SetBlockClick(param.disableSystemClick);
+}
+
+void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std::string& content,
+    const std::string& labelInfo, const RefPtr<SelectTheme>& theme, OptionParam& param, bool isPaste)
+{
+    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_VOID(leftRow);
+    auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(leftRowLayoutProps);
+    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+    auto leftTextNode = CreateMenuTextNode(content, leftRow);
+    CHECK_NULL_VOID(leftTextNode);
+    leftRow->MountToParent(menuItem);
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_VOID(rightRow);
+    auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(rightRowLayoutProps);
+    rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+    auto rightTextNode = CreateMenuTextNode(labelInfo, rightRow);
+    CHECK_NULL_VOID(rightTextNode);
+    rightRow->MountToParent(menuItem);
+    auto leftTextRenderContext = leftTextNode->GetRenderContext();
+    CHECK_NULL_VOID(leftTextRenderContext);
+    auto rightTextRenderContext = rightTextNode->GetRenderContext();
+    CHECK_NULL_VOID(rightTextRenderContext);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    UpdatePasteOpacityFont(isPaste, leftTextNode, param, theme, menuItem);
+    rightTextRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+    rightTextNode->MarkModifyDone();
+}
+
+void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode, OptionParam& param,
+    const RefPtr<SelectTheme>& theme)
+{
+    auto eventHub = menuItem->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(false);
+    auto focusHub = menuItem->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetEnabled(false);
+    auto pasteEventHub = pasteNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(pasteEventHub);
+    pasteEventHub->SetEnabled(param.enabled);
+    auto pasteFocusHub = pasteNode->GetFocusHub();
+    CHECK_NULL_VOID(pasteFocusHub);
+    pasteFocusHub->SetEnabled(param.enabled);
+    pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([action = param.action](GestureEvent& info) {
+        if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
+            return;
+        }
+        if (action) {
+            action();
+        }
+    });
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    menuItemPattern->SetBlockClick(param.disableSystemClick);
+    menuItemPattern->SetPasteButton(pasteNode);
+}
+
+RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode)
+{
+    auto relativeContainer =
+        FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    CHECK_NULL_RETURN(relativeContainer, nullptr);
+    auto relativeContainerLayoutProperty = relativeContainer->GetLayoutProperty();
+    CHECK_NULL_RETURN(relativeContainerLayoutProperty, nullptr);
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
+        { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+    auto menuItemRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(menuItemRow, nullptr);
+    auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(buttonRow, nullptr);
+    std::string menuItemRowId = "__menuItemRow__";
+    menuItemRow->UpdateInspectorId(menuItemRowId);
+    auto buttonRowLayoutProperty = buttonRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(buttonRowLayoutProperty, nullptr);
+    buttonRowLayoutProperty->UpdateAlignRules(
+        { { AlignDirection::LEFT, { .anchor = menuItemRowId, .horizontal = HorizontalAlign::START } },
+            { AlignDirection::TOP, { .anchor = menuItemRowId, .vertical = VerticalAlign::TOP } },
+            { AlignDirection::RIGHT, { .anchor = menuItemRowId, .horizontal = HorizontalAlign::END } },
+            { AlignDirection::BOTTOM, { .anchor = menuItemRowId, .vertical = VerticalAlign::BOTTOM } } });
+    auto menuItemLayoutProperty = menuItem->GetLayoutProperty();
+    CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
+    menuItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    menuItem->MountToParent(menuItemRow);
+    pasteNode->MountToParent(buttonRow);
+    relativeContainer->AddChild(menuItemRow);
+    relativeContainer->AddChild(buttonRow);
+    return relativeContainer;
+}
+
+RefPtr<FrameNode> CreateMenuItemPaste(
+    const std::string& labelInfo, RefPtr<FrameNode> innerMenuNode, OptionParam& param, size_t index)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto pasteNode =
+        PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
+    CHECK_NULL_RETURN(pasteNode, nullptr);
+    SetPasteNodeProperties(pasteNode, theme, param.enabled);
+    auto menuItem =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            [index]() { return AceType::MakeRefPtr<MenuItemPattern>(false, index); });
+    CHECK_NULL_RETURN(menuItem, nullptr);
+    BorderRadiusProperty border;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        border.SetRadius(theme->GetMenuDefaultInnerRadius());
+    } else {
+        border.SetRadius(theme->GetInnerBorderRadius());
+    }
+    auto renderContext = menuItem->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateBorderRadius(border);
+    SetupMenuItemChildrenAndFocus(menuItem, "", labelInfo, theme, param, true);
+
+    SetPasteMenuItemEvent(menuItem, pasteNode, param, theme);
+    auto relativeContainer = CreateRelativeContainer(menuItem, pasteNode);
+    CHECK_NULL_RETURN(relativeContainer, nullptr);
+    menuItem->MarkModifyDone();
+    pasteNode->MarkModifyDone();
+    relativeContainer->MountToParent(innerMenuNode);
+    relativeContainer->MarkModifyDone();
+    return relativeContainer;
+}
+
+RefPtr<FrameNode> CreateMenuItem(const std::string& content, const std::string& labelInfo,
+    RefPtr<FrameNode> innerMenuNode, OptionParam& param, size_t index)
+{
+    CHECK_NULL_RETURN(innerMenuNode, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto menuItem =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            [index]() { return AceType::MakeRefPtr<MenuItemPattern>(false, index); });
+    CHECK_NULL_RETURN(menuItem, nullptr);
+    auto renderContext = menuItem->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    BorderRadiusProperty border;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        border.SetRadius(theme->GetMenuDefaultInnerRadius());
+    } else {
+        border.SetRadius(theme->GetInnerBorderRadius());
+    }
+    renderContext->UpdateBorderRadius(border);
+    SetupMenuItemChildrenAndFocus(menuItem, content, labelInfo, theme, param, false);
+    menuItem->MountToParent(innerMenuNode);
+    menuItem->MarkModifyDone();
+    return menuItem;
+}
+#endif
+
+RefPtr<FrameNode> GetMenuWrapper(std::vector<OptionParam>& params, const RefPtr<TextOverlayTheme>& textOverlayTheme)
+{
+    CHECK_NULL_RETURN(textOverlayTheme, nullptr);
+    RefPtr<FrameNode> menuWrapper = nullptr;
+    auto showShortcut = textOverlayTheme->GetShowShortcut();
+    if (showShortcut) {
+        auto* stack = ViewStackProcessor::GetInstance();
+        CHECK_NULL_RETURN(stack, nullptr);
+        auto innerMenuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, stack->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+        CHECK_NULL_RETURN(innerMenuNode, nullptr);
+#ifdef OHOS_PLATFORM
+        RefPtr<FrameNode> menuItem = nullptr;
+        for (size_t i = 0; i < params.size(); i++) {
+            constexpr char BUTTON_PASTE[] = "textoverlay.paste";
+            if (params[i].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+                menuItem = CreateMenuItemPaste(params[i].labelInfo, innerMenuNode, params[i], i);
+            } else {
+                menuItem = CreateMenuItem(params[i].value, params[i].labelInfo, innerMenuNode, params[i], i);
+            }
+            if (!menuItem) {
+                continue;
+            }
+        }
+        menuWrapper = MenuView::Create(innerMenuNode, -1, "SelectOverlayMenuByRightClick",
+            { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU });
+        menuWrapper->UpdateInspectorId("select_overlay_right_click_menuWrapper");
+#else
+        menuWrapper = MenuView::Create(std::move(params), -1, "SelectOverlayMenuByRightClick",
+            MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU, { .isShowInSubWindow = false });
+#endif
+    } else {
+        menuWrapper = MenuView::Create(std::move(params), -1, "SelectOverlayMenuByRightClick",
+            MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU, { .isShowInSubWindow = false });
+    }
+    return menuWrapper;
+}
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const RefPtr<Pattern>& pattern)
@@ -1968,8 +2237,11 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     } else {
         params = GetOptionsParams(info);
     }
-    menuWrapper = MenuView::Create(std::move(params), -1, "SelectOverlayMenuByRightClick",
-        MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU, { .isShowInSubWindow = false });
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, nullptr);
+    menuWrapper = GetMenuWrapper(params, textOverlayTheme);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     ExpandedMenuPluginLoader::GetInstance().CreateServiceCollaborationMenu(menuWrapper, info);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
@@ -1978,8 +2250,6 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     OffsetF pageOffset;
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
@@ -1987,13 +2257,6 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
         pageOffset = GetPageOffset();
     }
     props->UpdateMenuOffset(info->rightClickOffset + pageOffset);
-
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    auto options = menuPattern->GetOptions();
-    if (!info->onCreateCallback.onCreateMenuCallback) {
-        SetOptionsAction(info, options);
-    }
 
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ElementRegister::GetInstance()->AddUINode(menu);
