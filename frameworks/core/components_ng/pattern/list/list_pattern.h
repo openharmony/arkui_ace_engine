@@ -279,6 +279,12 @@ public:
     bool StartSnapAnimation(float snapDelta, float animationVelocity, float predictVelocity = 0.f,
         float dragDistance = 0.f, SnapDirection snapDirection = SnapDirection::NONE) override;
 
+    bool ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign scrollSnapAlign);
+
+    int32_t GetEndIndexExcludeEndOffset();
+
+    int32_t GetStartIndexExcludeStartOffset();
+
     void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
     SnapType GetSnapType() override
