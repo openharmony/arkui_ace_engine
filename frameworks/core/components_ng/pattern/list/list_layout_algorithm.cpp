@@ -1125,7 +1125,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             }
         }
     }
-    if (overScrollFeature_ && canOverScroll_) {
+    if ((overScrollFeature_ && canOverScroll_) || targetIndex_) {
         return;
     }
     // Mark inactive in wrapper.
@@ -1191,10 +1191,9 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         ReMeasureListItemGroup(layoutWrapper, false);
     }
 
-    if (overScrollFeature_) {
+    if (overScrollFeature_ || targetIndex_) {
         return;
     }
-
     // Mark inactive in wrapper.
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
