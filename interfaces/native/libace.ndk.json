@@ -2474,5 +2474,13 @@
     {
         "first_introduced": "14",
         "name": "OH_ArkUI_KeyEvent_SetConsumed"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_GetAxisValue"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
     }
 ]
