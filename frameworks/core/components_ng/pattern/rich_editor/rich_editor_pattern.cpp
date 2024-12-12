@@ -7108,13 +7108,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
     eventHub->FireOnCopy(event);
-    if (event.IsPreventDefault()) {
-        CloseSelectOverlay();
-        ResetSelection();
-        StartTwinkling();
-        return;
-    }
-    OnCopyOperation(isUsingExternalKeyboard);
+    IF_TRUE(!event.IsPreventDefault(), OnCopyOperation(isUsingExternalKeyboard));
     if (selectOverlay_->IsUsingMouse() || isUsingExternalKeyboard) {
         CloseSelectOverlay();
     } else {
