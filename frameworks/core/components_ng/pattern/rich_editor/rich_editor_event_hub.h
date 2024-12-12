@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -280,10 +281,14 @@ public:
     void SetReplacementString(const RefPtr<SpanStringBase>& styledString);
     const RefPtr<SpanStringBase> GetReplacementString() const;
 
+    void SetPreviewText(std::string previewText);
+    std::string GetPreviewText() const;
+
 private:
     TextRange rangeBefore_;
     TextRange rangeAfter_;
     RefPtr<SpanStringBase> replacementString_;
+    std::string previewText_;
 };
 
 class RichEditorEventHub : public EventHub {
