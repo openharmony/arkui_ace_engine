@@ -64,6 +64,9 @@ public:
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
 
+    void SetSystemTransitionType(NG::NavigationSystemTransitionType type) override;
+    static void SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type);
+
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
