@@ -27,6 +27,9 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/touch_event.h"
+#include "core/common/ime/text_input_client.h"
+#include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 
 namespace OHOS::Ace {
 constexpr int32_t HOT_AREA_EXPAND_TIME = 2;
@@ -53,7 +56,8 @@ public:
     bool IsNeedInterceptedTouchEvent(
         const TouchEvent& touchEvent, std::unordered_map<size_t, TouchTestResult> touchTestResults);
 
-    void AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& textFieldNode);
+    void AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& textFieldNode,
+        const WeakPtr<NG::LayoutInfoInterface>& layoutInfo);
     void RemoveTextFieldFrameNode(const int32_t id);
 
     int32_t GetDefaultNodeId() const
@@ -61,34 +65,42 @@ public:
         return nodeId_;
     }
 
+    WeakPtr<NG::LayoutInfoInterface> GetLayoutInfo() const
+    {
+        return layoutInfo_;
+    }
+
+    void SetSelectState(int32_t start, int32_t end, bool showMenu)
+    {
+        sInd_ = start;
+        eInd_ = end;
+        showMenu_ = showMenu;
+    }
+
+    bool HasSelectChanged(int32_t start, int32_t end, bool showMenu)
+    {
+        return (sInd_ != start || eInd_ != end || showMenu_ != showMenu);
+    }
+    
+
 private:
     StylusDetectorMgr();
     ~StylusDetectorMgr() = default;
-
-    class StylusDetectorCallBack : public OHOS::Ace::IStylusDetectorCallback {
-    public:
-        explicit StylusDetectorCallBack() = default;
-        virtual ~StylusDetectorCallBack() = default;
-        static void RequestFocus(int32_t nodeId);
-        static void SetText(int32_t nodeId, std::string args);
-        static std::string GetText(int32_t nodeId);
-
-        static void Redo(int32_t nodeId);
-        static void Undo(int32_t nodeId);
-        void OnDetector(
-            const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback) override;
-        bool OnDetectorSync(const CommandType& command) override;
-    };
 
     bool IsStylusTouchEvent(const TouchEvent& touchEvent) const;
     bool IsHitCleanNodeResponseArea(
         const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp);
 
     std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> textFieldNodes_;
+    std::unordered_map<int32_t, WeakPtr<NG::LayoutInfoInterface>> textFieldLayoutInfos_;
 
     StylusDetectorInstance engine_ = nullptr;
     bool isRegistered_ = false;
     int32_t nodeId_ = 0;
+    WeakPtr<NG::LayoutInfoInterface> layoutInfo_;
+    int32_t sInd_ = -1;
+    int32_t eInd_ = -1;
+    bool showMenu_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STYLUS_STYLUS_DETECTOR_MGR_H

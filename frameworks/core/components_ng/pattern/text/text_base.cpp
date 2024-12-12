@@ -81,6 +81,57 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
     selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
+void TextBase::RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point)
+{
+    auto pattern = targetNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto parent = pattern->GetHost();
+    CHECK_NULL_VOID(parent);
+    std::stack<RefPtr<FrameNode>> nodeStack;
+    while (parent) {
+        nodeStack.push(parent);
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    CHECK_NULL_VOID(!nodeStack.empty());
+    PointF localPoint(point.GetX(), point.GetY());
+    while (!nodeStack.empty()) {
+        parent = nodeStack.top();
+        CHECK_NULL_VOID(parent);
+        nodeStack.pop();
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->GetPointWithRevert(localPoint);
+        auto rectOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        localPoint = localPoint - rectOffset;
+    }
+    point.SetX(localPoint.GetX());
+    point.SetY(localPoint.GetY());
+}
+
+bool TextBase::HasRenderTransform(const RefPtr<FrameNode>& targetNode)
+{
+    auto pattern = targetNode->GetPattern<Pattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto hasTransform = false;
+    while (host) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            break;
+        }
+        if (!hasTransform) {
+            auto noTransformRect = renderContext->GetPaintRectWithoutTransform();
+            auto transformRect = renderContext->GetPaintRectWithTransform();
+            hasTransform = noTransformRect != transformRect;
+        } else {
+            break;
+        }
+        host = host->GetAncestorNodeOfFrame(true);
+    }
+    return hasTransform;
+}
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 {
     if (info.GetTouches().empty()) {

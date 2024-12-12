@@ -211,6 +211,7 @@ enum AceLogTag : uint8_t {
     ACE_LAYOUT_INSPECTOR,     // C03957
     ACE_MEDIA_QUERY,          // C03958
     ACE_LAYOUT,               // C03959
+	ACE_STYLUS,               // C0395A
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
