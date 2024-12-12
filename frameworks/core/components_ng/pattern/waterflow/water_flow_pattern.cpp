@@ -381,7 +381,7 @@ int32_t WaterFlowPattern::GetColumns() const
     return layoutProperty->GetAxis() == Axis::VERTICAL ? layoutInfo_->GetCrossCount() : layoutInfo_->GetMainCount();
 }
 
-void WaterFlowPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollType)
+void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     CHECK_NULL_VOID(IsScrollable());
 
@@ -395,11 +395,18 @@ void WaterFlowPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollTy
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
     float distance = reverse ? mainContentSize : -mainContentSize;
+    if (layoutProperty->IsReverse()) {
+        distance = -distance;
+    }
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
-
+    if (smooth) {
+        float position = layoutInfo_->Offset() + distance;
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+    } else {
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 

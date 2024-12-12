@@ -176,7 +176,8 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    void ScrollPage(bool reverse, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     bool UpdateStartIndex(int32_t index);
 

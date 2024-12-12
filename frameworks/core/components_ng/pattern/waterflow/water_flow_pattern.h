@@ -110,11 +110,11 @@ public:
     /**
      * @brief LayoutMode::SLIDING_WINDOW doesn't support animateTo
      */
-    void AnimateTo(
-        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
         bool useTotalOffset = true) override;
 
-    void ScrollPage(bool reverse, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
         std::optional<float> extraOffset = std::nullopt) override;

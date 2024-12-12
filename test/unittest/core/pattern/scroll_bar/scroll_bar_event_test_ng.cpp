@@ -37,6 +37,26 @@ public:
         auto handleDragEnd = *(pattern_->panRecognizer_->onActionEnd_);
         handleDragEnd(info);
     }
+
+    void HandleMouseEvent(MouseInfo info)
+    {
+        auto handleMouseEvent = pattern_->mouseEvent_->GetOnMouseEventFunc();
+        handleMouseEvent(info);
+    }
+
+    void HandleClickEvent()
+    {
+        ClickInfo info(1);
+        auto handleClickEvent = pattern_->clickRecognizer_->onClick_;
+        handleClickEvent(info);
+    }
+
+    void HandleLongPress()
+    {
+        GestureEvent info;
+        auto handleLongPress = *(pattern_->longPressRecognizer_->onAction_);
+        handleLongPress(info);
+    }
 };
 
 /**
@@ -455,6 +475,47 @@ HWTEST_F(ScrollBarEventTestNg, BarCollectTouchTarget002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BarCollectLongPressTarget001
+ * @tc.desc: Test BarCollectLongPressTarget
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, BarCollectLongPressTarget001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    OffsetF coordinateOffset;
+    GetEventTargetImpl getEventTargetImpl;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pattern_->scrollableEvent_->BarCollectLongPressTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
+    EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
+    EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
+    EXPECT_EQ(result.size(), 2);
+}
+
+/**
+ * @tc.name: InBarRectRegion001
+ * @tc.desc: Test InBarRectRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, InBarRectRegion001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->scrollableEvent_->InBarRectRegion(PointF(), SourceType::KEYBOARD));
+}
+
+/**
  * @tc.name: ScrollScrollBar001
  * @tc.desc: Test scrollCallback event in VERSION_TWELVE
  * @tc.type: FUNC
@@ -479,5 +540,200 @@ HWTEST_F(ScrollBarEventTestNg, ScrollScrollBar001, TestSize.Level1)
     FlushLayoutTask(stackNode_);
 
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: HandleClickEvent001
+ * @tc.desc: HandleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleClickEvent001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Click in scrollBar
+     * @tc.expected: Can not scroll
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetLocalLocation(Offset());
+    HandleMouseEvent(mouseInfo);
+    HandleClickEvent();
+    FlushLayoutTask(stackNode_);
+    EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.steps: step2. Click below scrollBar
+     * @tc.expected: Scroll down
+     */
+    mouseInfo.SetLocalLocation(Offset(0, SCROLL_BAR_CHILD_HEIGHT + 1.f));
+    HandleMouseEvent(mouseInfo);
+    HandleClickEvent();
+    FlushLayoutTask(stackNode_);
+    EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.steps: step3. Click above scrollBar
+     * @tc.expected: Scroll up
+     */
+    // scroll down
+    pattern_->UpdateCurrentOffset(1.f, SCROLL_FROM_BAR);
+    FlushLayoutTask(stackNode_);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 1.f);
+    // click above scrollBar
+    mouseInfo.SetLocalLocation(Offset());
+    HandleMouseEvent(mouseInfo);
+    HandleClickEvent();
+    FlushLayoutTask(stackNode_);
+    EXPECT_GT(scrollPattern_->GetTotalOffset(), 0.f);
+    EXPECT_LT(scrollPattern_->GetTotalOffset(), 1.f);
+}
+
+/**
+ * @tc.name: HandleLongPress001
+ * @tc.desc: HandleLongPress, Press scrollBar will scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleLongPress001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Press below scrollBar
+     * @tc.expected: Scroll down
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetLocalLocation(Offset(-100.f, SCROLL_BAR_CHILD_HEIGHT + 1.f));
+    HandleMouseEvent(mouseInfo);
+    HandleLongPress();
+    EXPECT_FALSE(pattern_->scrollingUp_);
+    EXPECT_TRUE(pattern_->scrollingDown_);
+
+    /**
+     * @tc.steps: step2. Press in scrollBar
+     * @tc.expected: Can not scroll
+     */
+    mouseInfo.SetLocalLocation(Offset());
+    HandleMouseEvent(mouseInfo);
+    HandleLongPress();
+    EXPECT_FALSE(pattern_->scrollingUp_);
+    EXPECT_FALSE(pattern_->scrollingDown_);
+
+    /**
+     * @tc.steps: step3. Press above scrollBar
+     * @tc.expected: Scroll up
+     */
+    mouseInfo.SetLocalLocation(Offset(0, -1.f));
+    HandleMouseEvent(mouseInfo);
+    HandleLongPress();
+    EXPECT_TRUE(pattern_->scrollingUp_);
+    EXPECT_FALSE(pattern_->scrollingDown_);
+}
+
+/**
+ * @tc.name: HandleLongPress002
+ * @tc.desc: HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleLongPress002, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. When scrollingUp_
+     * @tc.expected: Can not scroll down
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetLocalLocation(Offset(-100.f, SCROLL_BAR_CHILD_HEIGHT + 1.f));
+    HandleMouseEvent(mouseInfo);
+    pattern_->scrollingUp_ = true;
+    HandleLongPress();
+    EXPECT_TRUE(pattern_->scrollingUp_);
+    EXPECT_FALSE(pattern_->scrollingDown_);
+
+    /**
+     * @tc.steps: step2. When scrollingDown_
+     * @tc.expected: Can not scroll up
+     */
+    mouseInfo.SetLocalLocation(Offset(0, -1.f));
+    HandleMouseEvent(mouseInfo);
+    pattern_->scrollingUp_ = false;
+    pattern_->scrollingDown_ = true;
+    HandleLongPress();
+    EXPECT_FALSE(pattern_->scrollingUp_);
+    EXPECT_TRUE(pattern_->scrollingDown_);
+}
+
+/**
+ * @tc.name: HandleLongPress003
+ * @tc.desc: HandleLongPress, When use other mouse action, stop scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleLongPress003, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Press below scrollBar
+     * @tc.expected: Scroll down
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetLocalLocation(Offset(-100.f, SCROLL_BAR_CHILD_HEIGHT + 1.f));
+    HandleMouseEvent(mouseInfo);
+    HandleLongPress();
+    EXPECT_FALSE(pattern_->scrollingUp_);
+    EXPECT_TRUE(pattern_->scrollingDown_);
+
+    /**
+     * @tc.steps: step2. Mouse move
+     * @tc.expected: Stop scroll
+     */
+    mouseInfo.SetAction(MouseAction::MOVE);
+    HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(pattern_->scrollingUp_);
+    EXPECT_FALSE(pattern_->scrollingDown_);
+
+    /**
+     * @tc.steps: step3. Press below scrollBar
+     * @tc.expected: Scroll down
+     */
+    mouseInfo.SetAction(MouseAction::PRESS);
+    HandleMouseEvent(mouseInfo);
+    HandleLongPress();
+    EXPECT_FALSE(pattern_->scrollingUp_);
+    EXPECT_TRUE(pattern_->scrollingDown_);
+
+    /**
+     * @tc.steps: step4. Press by other button
+     * @tc.expected: Stop scroll
+     */
+    mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
+    HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(pattern_->scrollingUp_);
+    EXPECT_FALSE(pattern_->scrollingDown_);
 }
 } // namespace OHOS::Ace::NG

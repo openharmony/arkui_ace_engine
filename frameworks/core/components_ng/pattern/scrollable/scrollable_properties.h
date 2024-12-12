@@ -421,6 +421,7 @@ struct ScrollerObserver {
     OnScrollStopEvent onScrollStopEvent;
     OnDidScrollEvent onDidScrollEvent;
 };
+using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 } // namespace OHOS::Ace
 
 #endif
