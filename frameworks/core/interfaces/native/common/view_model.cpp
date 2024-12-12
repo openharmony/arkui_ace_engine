@@ -38,6 +38,9 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#ifdef MODEL_COMPONENT_SUPPORTED
+#include "core/components_ng/pattern/model/model_view_ng.h"
+#endif //MODEL_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
@@ -645,7 +648,14 @@ void* createScrollableCommonMethodNode(ArkUI_Int32 nodeId)
 
 void* createComponent3DNode(ArkUI_Int32 nodeId)
 {
+#ifdef MODEL_COMPONENT_SUPPORTED
+    auto frameNode = ModelViewNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif // MODEL_COMPONENT_SUPPORTED
 }
 
 void* createContainerSpanNode(ArkUI_Int32 nodeId)
