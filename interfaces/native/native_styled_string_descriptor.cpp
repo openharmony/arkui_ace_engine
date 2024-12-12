@@ -37,7 +37,7 @@ int32_t OH_ArkUI_UnmarshallStyledStringDescriptor(
     uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor)
 {
     CHECK_NULL_RETURN(
-        OHOS::Ace::NodeModel::GetFullImpl() ||  OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
+        OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
     return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->unmarshallStyledStringDescriptor(
         buffer, bufferSize, descriptor);
 }
@@ -46,7 +46,7 @@ int32_t OH_ArkUI_MarshallStyledStringDescriptor(
     uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor, size_t* resultSize)
 {
     CHECK_NULL_RETURN(
-        OHOS::Ace::NodeModel::GetFullImpl() ||  OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
+        OHOS::Ace::NodeModel::GetFullImpl() || OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_PARAM_INVALID);
     return OHOS::Ace::NodeModel::GetFullImpl()->getStyledStringAPI()->marshallStyledStringDescriptor(
         buffer, bufferSize, descriptor, resultSize);
 }
