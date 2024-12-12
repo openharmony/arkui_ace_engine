@@ -308,6 +308,7 @@ public:
     virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
+    virtual void SetEllipsisMode(EllipsisMode modal) {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetShowPasswordText(bool value) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
