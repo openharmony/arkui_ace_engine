@@ -559,6 +559,7 @@ private:
         const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
+    bool InsideTabBarRegion(const TouchLocationInfo& locationInfo);
     void InitHoverEvent();
     void InitMouseEvent();
     void SetSurfaceChangeCallback();
