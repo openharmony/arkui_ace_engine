@@ -3728,7 +3728,7 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     modifierAdapter->AttachProperties();
 }
 
-void RosenRenderContext::FlushKitContentModifier(const RefPtr<AceKit::Modifier>& modifier)
+void RosenRenderContext::FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier)
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(modifier);

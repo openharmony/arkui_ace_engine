@@ -59,8 +59,8 @@ public:
     explicit ContentModifierAdapter(const RefPtr<Modifier>& modifier)
         : modifier_(AceType::DynamicCast<ContentModifier>(modifier))
     {}
-    explicit ContentModifierAdapter(const RefPtr<AceKit::Modifier>& modifier)
-        : kitModifier_(AceType::DynamicCast<AceKit::ContentModifier>(modifier))
+    explicit ContentModifierAdapter(const RefPtr<Kit::Modifier>& modifier)
+        : kitModifier_(AceType::DynamicCast<Kit::ContentModifier>(modifier))
     {}
     ~ContentModifierAdapter() override = default;
 
@@ -70,13 +70,13 @@ public:
 
 private:
     WeakPtr<ContentModifier> modifier_;
-    RefPtr<AceKit::ContentModifier> kitModifier_ = nullptr;
+    RefPtr<Kit::ContentModifier> kitModifier_ = nullptr;
     bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
 
-std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<AceKit::Modifier>& modifier);
+std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<Kit::Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertForegroundModifier(const RefPtr<Modifier>& modifier);

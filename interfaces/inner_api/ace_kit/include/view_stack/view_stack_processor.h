@@ -18,19 +18,19 @@
 
 #include <stack>
 
+#include "interfaces/inner_api/ace_kit/include/base/macros.h"
 #include "interfaces/inner_api/ace_kit/include/base/referenced.h"
 #include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
-#include "interfaces/inner_api/ace_kit/include/base/macros.h"
 
-namespace OHOS::AceKit {
+namespace OHOS::Ace::Kit {
 class ACE_FORCE_EXPORT ViewStackProcessor {
 public:
     static int32_t ClaimNodeId();
-    static void Push(const Ace::RefPtr<FrameNode>& node);
+    static void Push(const RefPtr<FrameNode>& node);
 
 private:
-    static std::stack<Ace::RefPtr<FrameNode>> elementStack_;
+    static std::stack<RefPtr<FrameNode>> elementStack_;
 };
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_STACK_VIEW_STACK_PROCESSOR_H

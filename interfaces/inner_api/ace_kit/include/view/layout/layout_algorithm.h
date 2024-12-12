@@ -27,25 +27,25 @@ template<class T>
 struct LayoutConstraintT;
 }
 
-namespace OHOS::AceKit {
+namespace OHOS::Ace::Kit {
 
-class LayoutAlgorithm : public Ace::AceType {
-    DECLARE_ACE_TYPE(LayoutAlgorithm, Ace::AceType);
+class LayoutAlgorithm : public AceType {
+    DECLARE_ACE_TYPE(LayoutAlgorithm, AceType);
 
 public:
-    explicit LayoutAlgorithm(const Ace::WeakPtr<FrameNode>& host) : host_(host) {}
+    explicit LayoutAlgorithm(const WeakPtr<FrameNode>& host) : host_(host) {}
     virtual ~LayoutAlgorithm() = default;
 
     virtual void Measure() {}
 
     virtual void Layout() {}
 
-    virtual void MeasureContent(const Ace::NG::LayoutConstraintT<float>& contentConstraint) {}
+    virtual void MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) {}
 
 protected:
-    Ace::WeakPtr<FrameNode> host_;
+    WeakPtr<FrameNode> host_;
 };
 
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif

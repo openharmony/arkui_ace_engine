@@ -28,9 +28,9 @@ template<class T>
 struct LayoutConstraintT;
 } // namespace OHOS::Ace::NG
 
-namespace OHOS::AceKit {
-class FrameNode : public Ace::AceType {
-    DECLARE_ACE_TYPE(FrameNode, Ace::AceType);
+namespace OHOS::Ace::Kit {
+class FrameNode : public AceType {
+    DECLARE_ACE_TYPE(FrameNode, AceType);
 
 public:
     FrameNode() = default;
@@ -38,10 +38,10 @@ public:
 
     virtual void InitializePatternAndContext() = 0;
 
-    virtual void Measure(const std::optional<Ace::NG::LayoutConstraintT<float>>& parentContraint) = 0;
+    virtual void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) = 0;
     virtual void Layout() = 0;
-    virtual Ace::RefPtr<Ace::NG::LayoutProperty> GetLayoutProperty() = 0;
+    virtual RefPtr<NG::LayoutProperty> GetLayoutProperty() = 0;
 };
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_FRAME_NODE_H

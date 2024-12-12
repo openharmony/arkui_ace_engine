@@ -16,17 +16,15 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_BOX_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_BOX_LAYOUT_ALGORITHM_H
 
+#include "interfaces/inner_api/ace_kit/include/base/macros.h"
 #include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
 #include "interfaces/inner_api/ace_kit/include/view/layout/layout_algorithm.h"
-#include "interfaces/inner_api/ace_kit/include/base/macros.h"
-namespace OHOS::AceKit {
+namespace OHOS::Ace::Kit {
 class ACE_FORCE_EXPORT BoxLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(BoxLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    explicit BoxLayoutAlgorithm(const Ace::WeakPtr<FrameNode>& host)
-        : LayoutAlgorithm(host)
-    {}
+    explicit BoxLayoutAlgorithm(const WeakPtr<FrameNode>& host) : LayoutAlgorithm(host) {}
     ~BoxLayoutAlgorithm() = default;
 
     void Measure() override;
@@ -34,7 +32,7 @@ public:
     void Layout() override;
 
     // TODO: unify LayoutConstraint and return size
-    void MeasureContent(const Ace::NG::LayoutConstraintT<float>& contentConstraint) override;
+    void MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) override;
 
     // Called to perform measure current render node.
     static void PerformMeasureSelf(FrameNode* frameNode);
@@ -45,6 +43,6 @@ public:
     // Called to perform measure current render node.
     static void PerformMeasureSelfWithChildList(FrameNode* frameNode);
 };
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif

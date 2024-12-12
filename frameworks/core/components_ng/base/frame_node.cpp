@@ -6160,7 +6160,7 @@ std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
     return list;
 }
 
-void FrameNode::SetAbsPattern(const RefPtr<AceKit::Pattern> absPattern)
+void FrameNode::SetAbsPattern(const RefPtr<Kit::Pattern> absPattern)
 {
     absPattern_ = absPattern;
 }

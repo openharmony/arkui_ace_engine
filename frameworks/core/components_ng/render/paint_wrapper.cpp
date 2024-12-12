@@ -59,7 +59,7 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
     }
 }
 
-void PaintWrapper::SetKitNodePaintMethod(const RefPtr<AceKit::NodePaintMethod>& nodePaintMethod)
+void PaintWrapper::SetKitNodePaintMethod(const RefPtr<Kit::NodePaintMethod>& nodePaintMethod)
 {
     nodePaintMethod_ = nodePaintMethod;
     auto modifier = nodePaintMethod_->GetContentModifier();

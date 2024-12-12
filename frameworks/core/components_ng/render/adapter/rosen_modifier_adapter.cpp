@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 std::unordered_map<int32_t, std::shared_ptr<RSModifier>> g_ModifiersMap;
 std::mutex g_ModifiersMapLock;
 
-std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<AceKit::Modifier>& modifier)
+std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<Kit::Modifier>& modifier)
 {
     CHECK_NULL_RETURN(modifier, nullptr);
     auto modifierAdapter = std::make_shared<ContentModifierAdapter>(modifier);
@@ -78,7 +78,7 @@ void ModifierAdapter::RemoveModifier(int32_t modifierId)
 void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
     if (kitModifier_) {
-        AceKit::DrawingContext drawingContext = { context.canvas, context.width, context.height };
+        Kit::DrawingContext drawingContext = { context.canvas, context.width, context.height };
         kitModifier_->OnDraw(&drawingContext);
         return;
     }

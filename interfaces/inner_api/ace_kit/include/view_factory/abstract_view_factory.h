@@ -22,12 +22,12 @@
 #include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
 #include "interfaces/inner_api/ace_kit/include/view/pattern.h"
 
-namespace OHOS::AceKit {
+namespace OHOS::Ace::Kit {
 class ACE_FORCE_EXPORT AbstractViewFactory {
 public:
-    static Ace::RefPtr<FrameNode> CreateFrameNode(const std::string& tag, int32_t nodeId,
-        const Ace::RefPtr<Pattern>& pattern, bool isRoot = false, bool isLayoutNode = false);
+    static RefPtr<FrameNode> CreateFrameNode(const std::string& tag, int32_t nodeId,
+        const RefPtr<Pattern>& pattern, bool isRoot = false, bool isLayoutNode = false);
 };
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_FACTORY_ABSTRACT_VIEW_FACTORY_H

@@ -22,7 +22,7 @@ namespace OHOS::Rosen::Drawing {
 class Canvas;
 }
 
-namespace OHOS::AceKit {
+namespace OHOS::Ace::Kit {
 using RSCanvas = OHOS::Rosen::Drawing::Canvas;
 
 struct DrawingContext {
@@ -38,6 +38,6 @@ public:
     Modifier() = default;
     ~Modifier() = default;
 };
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif

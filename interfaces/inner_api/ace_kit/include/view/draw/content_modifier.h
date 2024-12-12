@@ -19,13 +19,13 @@
 #include "interfaces/inner_api/ace_kit/include/base/ace_type.h"
 #include "interfaces/inner_api/ace_kit/include/view/draw/modifier.h"
 
-namespace OHOS::AceKit {
+namespace OHOS::Ace::Kit {
 class ContentModifier : public Modifier {
     DECLARE_ACE_TYPE(ContentModifier, Modifier);
 
 public:
     virtual void OnDraw(DrawingContext* context) = 0;
 };
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_CONTENT_MODIFIER_H

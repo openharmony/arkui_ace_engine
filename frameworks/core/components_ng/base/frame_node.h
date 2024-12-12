@@ -61,7 +61,7 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
-namespace OHOS::AceKit {
+namespace OHOS::Ace::Kit {
 class Pattern;
 }
 
@@ -1159,7 +1159,7 @@ public:
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
     void OnPropertyChangeMeasure() const;
 
-    void SetAbsPattern(const RefPtr<AceKit::Pattern> absPattern);
+    void SetAbsPattern(const RefPtr<Kit::Pattern> absPattern);
 
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
@@ -1445,7 +1445,7 @@ private:
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
 
-    RefPtr<AceKit::Pattern> absPattern_;
+    RefPtr<Kit::Pattern> absPattern_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG

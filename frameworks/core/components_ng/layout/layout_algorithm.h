@@ -95,7 +95,7 @@ public:
     ~LayoutAlgorithmWrapper() override = default;
 
     static RefPtr<LayoutAlgorithmWrapper> CreateLayoutAlgorithmWrapper(
-        const RefPtr<AceKit::LayoutAlgorithm>& layoutAlgorithm)
+        const RefPtr<Kit::LayoutAlgorithm>& layoutAlgorithm)
     {
         auto layoutAlgorithmWrapper = MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
         layoutAlgorithmWrapper->SetAbsLayoutAlgorithm(layoutAlgorithm);
@@ -210,7 +210,7 @@ public:
         return percentHeight_;
     }
 
-    void SetAbsLayoutAlgorithm(const RefPtr<AceKit::LayoutAlgorithm>& absLayoutAlgorithm)
+    void SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm)
     {
         absLayoutAlgorithm_ = absLayoutAlgorithm;
     }
@@ -223,7 +223,7 @@ private:
     bool percentHeight_ = false;
     bool percentWidth_ = false;
     uint64_t frameId = UITaskScheduler::GetFrameId();
-    RefPtr<AceKit::LayoutAlgorithm> absLayoutAlgorithm_;
+    RefPtr<Kit::LayoutAlgorithm> absLayoutAlgorithm_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithmWrapper);
 };

@@ -20,27 +20,27 @@
 #include "interfaces/inner_api/ace_kit/include/view/draw/node_paint_method.h"
 #include "interfaces/inner_api/ace_kit/include/view/layout/layout_algorithm.h"
 
-namespace OHOS::AceKit {
-class Pattern : public Ace::AceType {
-    DECLARE_ACE_TYPE(Pattern, Ace::AceType);
+namespace OHOS::Ace::Kit {
+class Pattern : public AceType {
+    DECLARE_ACE_TYPE(Pattern, AceType);
 
 public:
-    virtual Ace::RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() = 0;
-    virtual Ace::RefPtr<NodePaintMethod> CreateNodePaintMethod() = 0;
+    virtual RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() = 0;
+    virtual RefPtr<NodePaintMethod> CreateNodePaintMethod() = 0;
 
-    void SetHost(const Ace::WeakPtr<FrameNode>& host)
+    void SetHost(const WeakPtr<FrameNode>& host)
     {
         host_ = host;
     }
 
-    const Ace::WeakPtr<FrameNode>& GetHost() const
+    const WeakPtr<FrameNode>& GetHost() const
     {
         return host_;
     }
 
 private:
-    Ace::WeakPtr<FrameNode> host_;
+    WeakPtr<FrameNode> host_;
 };
-} // namespace OHOS::AceKit
+} // namespace OHOS::Ace::Kit
 
 #endif
