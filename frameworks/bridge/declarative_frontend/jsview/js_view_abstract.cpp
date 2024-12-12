@@ -2437,7 +2437,11 @@ void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>
             return;
         }
         const auto* vm = nodePtr->GetEcmaVM();
-        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto localHandle = nodePtr->GetLocalHandle();
+        if (localHandle.IsEmpty()) {
+            return;
+        }
+        auto* node = localHandle->ToNativePointer(vm)->Value();
         auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
         RefPtr<NG::FrameNode> contentNode = AceType::Claim(frameNode);

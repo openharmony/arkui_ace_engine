@@ -1250,8 +1250,10 @@ int32_t GestureEventHub::GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData)
     auto selectItemSize = GetSelectItemSize();
     if (customBadgeNumber.has_value()) {
         badgeNumber = customBadgeNumber.value();
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Use custom badge number, value is %{public}d", badgeNumber);
     } else if (selectItemSize > 1) {
         badgeNumber = selectItemSize;
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Use select item size, value is %{public}d", badgeNumber);
     }
     return badgeNumber;
 }
@@ -1285,7 +1287,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     std::vector<GatherNodeChildInfo> childrenInfo;
     auto gatherNode = DragEventActuator::GetOrCreateGatherNode(overlayManager, dragEventActuator_, childrenInfo);
     auto gatherNodeOffset = isExpandDisplay
-            ? DragDropManager::GetTouchOffsetRelativeToSubwindow(container->GetInstanceId()) + positionToWindow
+            ? DragDropManager::GetTouchOffsetRelativeToSubwindow(dragNodePipeline->GetInstanceId()) + positionToWindow
             : positionToWindow;
     DragEventActuator::UpdateGatherAnimatePosition(childrenInfo, gatherNodeOffset);
 
