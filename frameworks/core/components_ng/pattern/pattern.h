@@ -197,11 +197,6 @@ public:
 
     virtual void OnModifyDone()
     {
-#if (defined(__aarch64__) || defined(__x86_64__))
-        if (IsNeedInitClickEventRecorder()) {
-            InitClickEventRecorder();
-        }
-#endif
         CheckLocalized();
         auto* frameNode = GetUnsafeHostPtr();
         const auto& children = frameNode->GetChildren();
@@ -472,6 +467,8 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
+
     // call by recycle framework.
     virtual void OnRecycle() {}
     virtual void OnReuse() {}
@@ -519,7 +516,6 @@ public:
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
     virtual void OnFontScaleConfigurationUpdate() {}
-    virtual void OnForegroundColorUpdate(const Color& value) {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
@@ -573,16 +569,18 @@ public:
             auto inspectorId = host->GetInspectorId().value_or("");
             auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
-            if (inspectorId.empty() && text.empty() && desc.empty()) {
-                return;
-            }
 
             Recorder::EventParamsBuilder builder;
             builder.SetId(inspectorId)
                 .SetType(host->GetTag())
                 .SetEventType(Recorder::LONG_PRESS)
                 .SetText(text)
+                .SetHost(host)
                 .SetDescription(desc);
+            if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT)) {
+                auto rect = host->GetTransformRectRelativeToWindow().ToBounds();
+                builder.SetExtra(Recorder::KEY_NODE_RECT, std::move(rect));
+            }
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         };
         return longPressCallback;
@@ -662,54 +660,7 @@ protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
-    virtual bool IsNeedInitClickEventRecorder() const
-    {
-        return false;
-    }
-
-    void InitClickEventRecorder()
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto gesture = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gesture);
-        if (!gesture->IsUserClickable()) {
-            if (clickCallback_) {
-                gesture->RemoveClickEvent(clickCallback_);
-                clickCallback_ = nullptr;
-            }
-            return;
-        }
-
-        if (clickCallback_) {
-            return;
-        }
-
-        auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-                return;
-            }
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
-            auto desc = host->GetAutoEventParamValue("");
-            if (inspectorId.empty() && text.empty() && desc.empty()) {
-                return;
-            }
-
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text).SetDescription(desc);
-            Recorder::EventRecorder::Get().OnClick(std::move(builder));
-        };
-        clickCallback_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-        gesture->AddClickEvent(clickCallback_);
-    }
-
     WeakPtr<FrameNode> frameNode_;
-    RefPtr<ClickEvent> clickCallback_;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);

@@ -133,6 +133,7 @@ public:
     MOCK_METHOD1(UpdateTransform, void(const OHOS::Rosen::Transform& transform));
     MOCK_METHOD1(SetContentNodeGrayScale, void(float grayscale));
     MOCK_METHOD1(EnableContainerModalGesture, void(bool isEnable));
+    MOCK_METHOD1(UpdateConfigurationSyncForAll, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
 };
 } // namespace Ace
 } // namespace OHOS

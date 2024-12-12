@@ -35,7 +35,7 @@ using DragNotifyMsg = OHOS::Ace::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using StopDragCallback = std::function<void()>;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 1;
+constexpr int32_t SOURCE_TOOL_PEN = 2;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
@@ -125,6 +125,7 @@ bool ConfirmCurPointerEventInfo(
     } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         dragAction->pointer = PEN_POINTER_ID;
     }
+    dragAction->toolType = sourceTool;
     return getPointSuccess;
 }
 
@@ -170,7 +171,8 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(), dragAction->sourceType,
-        recordSize, pointerId, dragAction->x, dragAction->y, dragAction->displayId, windowId, true, false, summary };
+        recordSize, pointerId, dragAction->toolType, dragAction->x, dragAction->y, dragAction->displayId, windowId,
+        true, false, summary };
 }
 
 void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -633,4 +635,56 @@ void DragDropFuncWrapper::UpdatePositionFromFrameNode(const RefPtr<FrameNode>& t
     UpdateNodePositionToScreen(targetNode, offset);
 }
 
+void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event)
+{
+    event.rawPointerEvent = touchPoint.pointerEvent;
+    event.pointerEventId = touchPoint.touchEventId;
+    event.pointerId = touchPoint.id;
+    event.windowX = touchPoint.x;
+    event.windowY = touchPoint.y;
+    event.displayX = touchPoint.screenX;
+    event.displayY = touchPoint.screenY;
+    event.deviceId = touchPoint.deviceId;
+    event.x = event.windowX;
+    event.y = event.windowY;
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : touchPoint.pressedKeyCodes_) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
+    GetPointerEventAction(touchPoint, event);
+}
+
+void DragDropFuncWrapper::GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event)
+{
+    auto orgAction = touchPoint.type;
+    switch (orgAction) {
+        case TouchType::CANCEL:
+            event.action = PointerAction::CANCEL;
+            break;
+        case TouchType::DOWN:
+            event.action = PointerAction::DOWN;
+            break;
+        case TouchType::MOVE:
+            event.action = PointerAction::MOVE;
+            break;
+        case TouchType::UP:
+            event.action = PointerAction::UP;
+            break;
+        case TouchType::PULL_MOVE:
+            event.action = PointerAction::PULL_MOVE;
+            break;
+        case TouchType::PULL_UP:
+            event.action = PointerAction::PULL_UP;
+            break;
+        case TouchType::PULL_IN_WINDOW:
+            event.action = PointerAction::PULL_IN_WINDOW;
+            break;
+        case TouchType::PULL_OUT_WINDOW:
+            event.action = PointerAction::PULL_OUT_WINDOW;
+            break;
+        default:
+            event.action = PointerAction::UNKNOWN;
+            break;
+    }
+}
 } // namespace OHOS::Ace

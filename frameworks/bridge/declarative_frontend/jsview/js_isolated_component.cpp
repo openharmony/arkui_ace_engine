@@ -94,7 +94,9 @@ void JSIsolatedComponent::Create(const JSCallbackInfo& info)
 
     TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d,  worker name=%{public}s",
         worker->IsRunning(), worker->GetName().c_str());
-    UIExtensionModel::GetInstance()->Create();
+    NG::UIExtensionConfig config;
+    config.sessionType = NG::SessionType::ISOLATED_COMPONENT;
+    UIExtensionModel::GetInstance()->Create(config);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();

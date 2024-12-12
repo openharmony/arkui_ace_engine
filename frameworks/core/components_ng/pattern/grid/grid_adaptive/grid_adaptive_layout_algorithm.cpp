@@ -73,15 +73,15 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(static_cast<float>(childrenCount) / mainCount_)), 1);
     crossCount_ = std::clamp(crossCount_, 1, maxCrossCount);
     displayCount_ = std::min(childrenCount, mainCount_ * crossCount_);
+    crossCount_ = std::min(displayCount_, crossCount_);
+    mainCount_ = std::min(displayCount_, mainCount_);
 
     // Update frame size.
-    auto rowCount = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
-    auto columnCount = axis == Axis::HORIZONTAL ? mainCount_ : crossCount_;
-    rowCount_ = rowCount;
-    columnCount_ = columnCount;
+    rowCount_ = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
+    columnCount_ = axis == Axis::HORIZONTAL ? mainCount_ : crossCount_;
     idealSize.UpdateIllegalSizeWithCheck(
-        OptionalSizeF(columnCount * gridCellSize_.Width() + (columnCount - 1) * columnsGap,
-            rowCount * gridCellSize_.Height() + (rowCount - 1) * rowsGap));
+        OptionalSizeF(columnCount_ * gridCellSize_.Width() + (columnCount_ - 1) * columnsGap,
+            rowCount_ * gridCellSize_.Height() + (rowCount_ - 1) * rowsGap));
     AddPaddingToSize(padding, idealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 
@@ -145,6 +145,7 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(layoutProperty);
             auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
             CHECK_NULL_VOID(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateIndex(itemIdex);
             gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }

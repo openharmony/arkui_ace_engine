@@ -352,6 +352,10 @@ bool PagePattern::OnBackPressed()
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
         return true;
     }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN) && isPageInTransition_) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
+        return true;
+    }
     // if in page transition, do not set to ON_BACK_PRESS
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
@@ -805,10 +809,12 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    FocusViewHide();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        FocusViewHide();
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (type == PageTransitionType::EXIT_POP) {
+    if (type == PageTransitionType::EXIT_POP || isNeedRemove_) {
         auto stageNode = outPage->GetParent();
         CHECK_NULL_VOID(stageNode);
         stageNode->RemoveChild(outPage);
@@ -840,7 +846,9 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    FocusViewShow();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        FocusViewShow();
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
@@ -909,8 +917,10 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     effect = GetDefaultPageTransition(type);
     const RefPtr<InterpolatingSpring> springCurve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-    const float defaultAmplitudePx = 0.005f;
-    springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        const float defaultAmplitudePx = 0.005f;
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+    }
     option.SetCurve(springCurve);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION

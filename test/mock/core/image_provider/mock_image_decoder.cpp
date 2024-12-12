@@ -25,7 +25,7 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
 }
 
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
-    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat imageDecodeFormat)
+    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
 {
     return MakeRefPtr<PixelMapImage>(nullptr);
 }

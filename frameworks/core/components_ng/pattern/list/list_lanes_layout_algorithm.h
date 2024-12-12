@@ -57,7 +57,7 @@ protected:
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos) override;
     int32_t LayoutALineBackward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos) override;
-    float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
+    float CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup) override;
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) override;
     int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index) override;

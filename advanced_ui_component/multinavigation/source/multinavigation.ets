@@ -1052,7 +1052,7 @@ export class MultiNavPathStack extends NavPathStack {
     this.mPolicyMap = policyMap;
   }
 
-  switchFullScreen(isFullScreen?: boolean): boolean {
+  switchFullScreenState(isFullScreen?: boolean): boolean {
     let totalStackSize = this.totalStack.length;
     let subStackListLength = this.subStackList.length;
     if (subStackListLength < 1 || totalStackSize < 1) {

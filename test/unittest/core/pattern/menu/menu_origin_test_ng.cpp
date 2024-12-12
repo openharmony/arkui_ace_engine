@@ -383,7 +383,7 @@ HWTEST_F(MenuTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
      */
     int testIndex = SELECTED_INDEX;
     auto selectFunc = [optionPattern, testIndex](int index) { optionPattern->index_ = testIndex; };
-    auto optionEventHub = frameNode->GetEventHub<OptionEventHub>();
+    auto optionEventHub = frameNode->GetEventHub<MenuItemEventHub>();
     optionEventHub->SetOnSelect(selectFunc);
     optionPattern->RegisterOnClick();
 

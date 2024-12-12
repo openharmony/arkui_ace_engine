@@ -297,6 +297,9 @@ public:
 
     // initial drag gesture event
     void InitPanEvent();
+    void InitOnkeyEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
 
     void HandleDragStart();
 
@@ -316,6 +319,8 @@ public:
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
+    void SetSheetAnimationOption(AnimationOption& option) const;
+
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
     void SetCurrentOffset(float currentOffset)
@@ -331,6 +336,8 @@ public:
         }
         ProcessColumnRect(height_);
     }
+
+    bool GetWindowButtonRect(NG::RectF& floatButtons);
 
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
@@ -441,6 +448,8 @@ public:
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
+
+    void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
     void BubbleStyleSheetTransition(bool isTransitionIn);
 
@@ -646,12 +655,12 @@ public:
 
     bool IsSheetBottomStyle()
     {
+        // sheetType_ is invalid before onModifyDone
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-                   sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
+                   sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
         }
-        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-               sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
+        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
 
     // Nestable Scroll
@@ -734,7 +743,7 @@ private:
     void UpdateSheetWhenSheetTypeChanged();
     void GetCurrentScrollHeight();
     void RecoverAvoidKeyboardStatus();
-    void RecoverScrollOrResizeStatus();
+    void RecoverScrollOrResizeAvoidStatus();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;

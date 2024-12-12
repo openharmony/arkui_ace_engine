@@ -446,6 +446,7 @@ float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThre
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
+double SystemProperties::scrollableDistance_ = GetScrollableDistance();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -593,6 +594,7 @@ void SystemProperties::InitDeviceInfo(
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
+    scrollableDistance_ = GetScrollableDistance();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -839,6 +841,7 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
 
 float SystemProperties::GetDefaultResolution()
 {
+    // always return density of main screen, don't use this interface unless you need density when no window exists
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {

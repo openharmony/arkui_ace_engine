@@ -33,6 +33,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"

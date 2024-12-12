@@ -123,6 +123,7 @@ public:
     void BuildParagraph();
     void UpdateBubbleSize();
     bool UpdateOverlayRect(const SizeF& frameSize);
+    void UpdateThemeParams(const RefPtr<SliderTheme>& theme);
 
 private:
     void PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path);
@@ -161,6 +162,7 @@ private:
     Dimension textFontSize_;
     std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc_;
     int32_t taskId_ = 0;
+    int32_t tipDelayTime_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderTipModifier);
 };

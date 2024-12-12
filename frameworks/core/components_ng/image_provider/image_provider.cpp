@@ -351,7 +351,7 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     // preview and ohos platform
     if (SystemProperties::GetImageFrameworkEnabled()) {
         image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed,
-            imageDecoderOptions.imageDecodeFormat);
+            imageDecoderOptions.photoDecodeFormat);
     } else {
         image = decoder.MakeDrawingImage();
     }

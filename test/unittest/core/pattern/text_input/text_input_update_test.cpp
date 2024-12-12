@@ -427,14 +427,14 @@ HWTEST_F(TextInputUpdateTestNg, AddCounterNode001, TestSize.Level1)
     /**
      * @tc.step: step2. Test counterTextNode_ is null
      */
-    EXPECT_FALSE(pattern_->counterTextNode_.Upgrade());
+    EXPECT_FALSE(pattern_->counterDecorator_);
 
     /**
      * @tc.step: step3. call AddCounterNode
      */
     pattern_->AddCounterNode();
-    EXPECT_TRUE(pattern_->counterTextNode_.Upgrade());
-    pattern_->ClearCounterNode();
+    EXPECT_TRUE(pattern_->counterDecorator_);
+    pattern_->CleanCounterNode();
 }
 
 /**

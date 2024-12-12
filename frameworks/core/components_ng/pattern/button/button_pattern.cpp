@@ -273,6 +273,9 @@ void ButtonPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
@@ -649,5 +652,15 @@ void ButtonPattern::OnFontScaleConfigurationUpdate()
         }
     }
     textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ButtonPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    json->Put(TreeKey::CONTENT, layoutProperty->GetLabelValue("").c_str());
 }
 } // namespace OHOS::Ace::NG

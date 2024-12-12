@@ -31,10 +31,10 @@ public:
 
     std::string GetProperty(const std::string& key) override;
     RefPtr<PixelMap> CreatePixelMap(const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE,
-        bool isHdrDecoderNeed = false, PixelFormat imageDecodeFormat = PixelFormat::UNKNOWN) override;
+        bool isHdrDecoderNeed = false, PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) override;
     RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size,
         AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false,
-        PixelFormat imageDecodeFormat = PixelFormat::UNKNOWN) override;
+        PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) override;
     RefPtr<PixelMap> CreatePixelMap() override;
     Size GetImageSize() override;
     uint32_t GetFrameCount() override;

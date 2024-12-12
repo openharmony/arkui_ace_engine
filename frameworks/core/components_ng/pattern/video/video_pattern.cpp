@@ -410,7 +410,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 ContainerScope scope(video->instanceId_);
                 video->SetIsSeeking(false);
                 video->OnCurrentTimeChange(currentPos);
-                }, "ArkUIVideoSeekDone");
+            }, "ArkUIVideoSeekDone");
     };
     mediaPlayer_->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
 
@@ -744,6 +744,12 @@ void VideoPattern::UpdateLooping()
             mediaPlayer->SetLooping(loop);
             }, "ArkUIVideoUpdateLooping");
     }
+}
+
+void VideoPattern::SetSurfaceBackgroundColor(Color color)
+{
+    CHECK_NULL_VOID(renderContextForMediaPlayer_);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(color);
 }
 
 void VideoPattern::UpdateSpeed()

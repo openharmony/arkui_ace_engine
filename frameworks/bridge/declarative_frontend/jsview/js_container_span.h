@@ -31,6 +31,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetTextBackgroundStyle(const JSCallbackInfo& info);
     static TextBackgroundStyle ParseTextBackgroundStyle(const JSCallbackInfo& info);
+    static TextBackgroundStyle ParseTextBackgroundStyle(const JSRef<JSObject>& obj);
 };
 } // namespace OHOS::Ace::Framework
 

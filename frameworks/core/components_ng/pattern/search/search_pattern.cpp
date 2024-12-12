@@ -879,7 +879,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 
     if (event.action != KeyAction::DOWN) {
-        if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
+        if ((event.code == KeyCode::KEY_TAB ||
+            event.code == KeyCode::KEY_SHIFT_LEFT ||
+            event.code == KeyCode::KEY_SHIFT_RIGHT) &&
+            focusChoice_ == FocusChoice::SEARCH) {
             textFieldPattern->OnKeyEvent(event);
         }
         return false;

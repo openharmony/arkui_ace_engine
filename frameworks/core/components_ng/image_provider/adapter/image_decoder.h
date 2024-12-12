@@ -29,7 +29,7 @@ public:
 
     // decode image using ImageFramework, return true if process is successful.
     RefPtr<CanvasImage> MakePixmapImage(AIImageQuality imageQuality = AIImageQuality::NONE,
-        bool isHdrDecoderNeed = false, PixelFormat imageDecodeFormat = PixelFormat::UNKNOWN);
+        bool isHdrDecoderNeed = false, PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN);
 
 private:
     static std::shared_ptr<RSImage> ForceResizeImage(const std::shared_ptr<RSImage>& image, const RSImageInfo& info);

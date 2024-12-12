@@ -1610,8 +1610,9 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest016, TestSize.Level1)
     info.SetGlobalLocation(globalLocation);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(Dialog);
     CHECK_NULL_VOID(overlayManager);
-    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
-    Recorder::EventRecorder::Get().componentEnable_ = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     dialogPattern->RecordEvent(BUTTONINDEX_TEST_1);
     EXPECT_EQ(dialogPattern->dialogProperties_.buttons.at(BUTTONINDEX_TEST_1).text, "second button");
 }
@@ -1660,8 +1661,9 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest017, TestSize.Level1)
     info.SetGlobalLocation(globalLocation);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(Dialog);
     CHECK_NULL_VOID(overlayManager);
-    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
-    Recorder::EventRecorder::Get().componentEnable_ = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     dialogPattern->RecordEvent(BUTTONINDEX_TEST_2);
     EXPECT_EQ(builderTest1.GetEventType(), Recorder::EventType::DIALOG_CANCEL);
 

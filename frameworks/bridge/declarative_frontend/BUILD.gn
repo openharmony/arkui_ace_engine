@@ -614,7 +614,7 @@ template("declarative_js_engine") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -1039,7 +1039,7 @@ template("declarative_js_engine_ng") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&

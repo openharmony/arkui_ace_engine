@@ -65,7 +65,7 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
 }
 
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
-    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat imageDecodeFormat)
+    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
     auto imageDfxConfig = obj_->GetImageDfxConfig();
@@ -84,9 +84,9 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
     SwapDecodeSize(width, height);
     ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ], [%d-%d-%d]",
         src.c_str(), sourceSize.first, sourceSize.second, width, height, static_cast<int32_t>(isHdrDecoderNeed),
-        static_cast<int32_t>(imageQuality), static_cast<int32_t>(imageDecodeFormat));
+        static_cast<int32_t>(imageQuality), static_cast<int32_t>(photoDecodeFormat));
 
-    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed, imageDecodeFormat);
+    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed, photoDecodeFormat);
     if (!pixmap) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, src = %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
@@ -99,7 +99,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
             "Image Decode success, Info:%{public}s-%{public}s-%{public}s-%{public}d x %{public}d-%{public}d-%{public}d",
             imageDfxConfig.ToStringWithSrc().c_str(), GetResolutionQuality(imageQuality).c_str(),
             desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight(), isHdrDecoderNeed,
-            static_cast<int32_t>(imageDecodeFormat));
+            static_cast<int32_t>(photoDecodeFormat));
         pixmap->SavePixelMapToFile(imageDfxConfig.ToStringWithoutSrc() + "_decode_");
     }
 

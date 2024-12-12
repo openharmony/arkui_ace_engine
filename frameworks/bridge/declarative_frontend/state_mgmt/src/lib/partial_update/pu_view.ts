@@ -303,8 +303,8 @@ abstract class ViewPU extends PUV2ViewBase
   public setActiveInternal(active: boolean): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     if (this.isCompFreezeAllowed()) {
-      this.setActiveCount(active);
-      if (this.isViewActive()) {
+      this.isActive_ = active;
+      if (this.isActive_) {
         this.onActiveInternal();
       } else {
         this.onInactiveInternal();
@@ -320,7 +320,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private onActiveInternal(): void {
-    if (!this.isViewActive()) {
+    if (!this.isActive_) {
       return;
     }
 
@@ -332,7 +332,7 @@ abstract class ViewPU extends PUV2ViewBase
 
 
   private onInactiveInternal(): void {
-    if (this.isViewActive()) {
+    if (this.isActive_) {
       return;
     }
 

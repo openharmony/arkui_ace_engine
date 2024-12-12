@@ -60,9 +60,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
   public static renderingPaused: boolean = false;
 
-  // greater than 0 means the node is active, otherwise node is inactive.
+  // flag if active of inActive
   // inActive means updates are delayed
-  protected activeCount_: number = 1;
+  protected isActive_: boolean = true;
 
   // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
   protected isDeleting_: boolean = false;
@@ -219,21 +219,6 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return this.isCompFreezeAllowed_;
   }
 
-  public setActiveCount(active: boolean): void {
-     // When the child node supports the Component freezing, the root node will definitely recurse to the child node. 
-    // From API16, in order to prevent the child node from being mistakenly activated by the parent node, reference counting is used to control the node status.
-    // active + 1， inactive -1, Expect no more than 1 
-    if (Utils.isApiVersionEQAbove(16)) {
-      this.activeCount_ += active ? 1 : -1;
-    }
-    else {
-      this.activeCount_ = active ? 1 : 0;
-    }
-    if (this.activeCount_ > 1) {
-      stateMgmtConsole.warn(`${this.debugInfo__()} activeCount_ error:${this.activeCount_}`);
-    }
-  }
-
   public getChildViewV2ForElmtId(elmtId: number): ViewV2 | undefined {
     const optComp = this.childrenWeakrefMap_.get(elmtId);
     return optComp?.deref() && (optComp.deref() instanceof ViewV2) ?
@@ -282,7 +267,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected abstract debugInfoStateVars(): string;
 
   public isViewActive(): boolean {
-    return this.activeCount_ > 0;
+    return this.isActive_;
   }
 
   // abstract functions to be implemented by application defined class / transpiled code

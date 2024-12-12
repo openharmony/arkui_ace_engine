@@ -670,6 +670,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     PreloadExports(arkRuntime, global);
     PreloadRequireNative(arkRuntime, global);
 
+#ifdef CROSS_PLATFORM
+    JsiSyscapModule::GetInstance()->InitSyscapModule(arkRuntime, global);
+#endif
+
     // preload js enums
     bool jsEnumStyleResult = PreloadJsEnums(arkRuntime);
     if (!jsEnumStyleResult) {
@@ -1310,7 +1314,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
-        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
+        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode, -1, true }; //FA:true port:-1
         JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
@@ -1473,6 +1477,20 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 
 bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint)
 {
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto uiContentType = container->GetUIContentType();
+    LOGI("ExecuteDynamicAbc uiContentType: %{public}d", static_cast<int32_t>(uiContentType));
+    if (uiContentType == UIContentType::DYNAMIC_COMPONENT) {
+        return InnerExecuteDynamicAbc(fileName, entryPoint);
+    }
+
+    return InnerExecuteIsolatedAbc(fileName, entryPoint);
+}
+
+bool JsiDeclarativeEngine::InnerExecuteIsolatedAbc(
+    const std::string& fileName, const std::string& entryPoint)
+{
     CHECK_NULL_RETURN(runtime_, false);
     auto engine = reinterpret_cast<NativeEngine*>(runtime_);
     CHECK_NULL_RETURN(engine, false);
@@ -1491,6 +1509,53 @@ bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const 
         engine->lastException_ = trycatch.GetException();
         return false;
     }
+    return true;
+}
+
+bool JsiDeclarativeEngine::InnerExecuteDynamicAbc(
+    const std::string& fileName, const std::string& entryPoint)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_RETURN(runtime_, false);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_RETURN(engine, false);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_RETURN(vm, false);
+    CHECK_NULL_RETURN(engineInstance_, false);
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    CHECK_NULL_RETURN(arkJsRuntime, false);
+    auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+    CHECK_NULL_RETURN(frontend, false);
+    auto bundleName = frontend->GetBundleName();
+    auto moduleName = frontend->GetModuleName();
+    if (bundleName.empty() || moduleName.empty()) {
+        LOGI("Get bundleName(%{public}s) or moduleName(%{public}s) failed",
+            bundleName.c_str(), moduleName.c_str());
+        return false;
+    }
+
+    std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
+    LOGI("InnerExecuteDynamicAbc bundleName: %{public}s, moduleName: %{public}s, assetPath: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), assetPath.c_str());
+    panda::TryCatch trycatch(vm);
+    panda::JSNApi::SetModuleInfo(const_cast<EcmaVM*>(vm), assetPath.c_str(), entryPoint);
+    if (trycatch.HasCaught()) {
+        engine->lastException_ = trycatch.GetException();
+        return false;
+    }
+
+    const char binExt[] = ".abc";
+    std::string urlName = entryPoint.substr(bundleName.size() + 1) + binExt;
+    LOGI("InnerExecuteDynamicAbc ExecuteJsBin urlName: %{public}s", urlName.c_str());
+    runtime->ExecuteJsBin(urlName);
+    if (trycatch.HasCaught()) {
+        engine->lastException_ = trycatch.GetException();
+        return false;
+    }
+
     return true;
 }
 
@@ -2549,6 +2614,23 @@ void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* 
     delete nativeValue;
     nativeValue = nullptr;
 #endif
+}
+
+std::shared_ptr<Framework::JsValue> JsiDeclarativeEngine::GetJsContext()
+{
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(
+        JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!arkRuntime || !arkRuntime->GetEcmaVm()) {
+        LOGW("arkRuntime or vm is null.");
+        return nullptr;
+    }
+
+    return JsiContextModule::GetContext(arkRuntime, nullptr, {}, 0);
+}
+
+void JsiDeclarativeEngine::SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext)
+{
+    JsiContextModule::AddContext(instanceId_, jsContext);
 }
 
 void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativeValue)

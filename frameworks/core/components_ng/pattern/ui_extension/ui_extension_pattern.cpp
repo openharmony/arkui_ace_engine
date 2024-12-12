@@ -960,6 +960,21 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     }
 }
 
+void UIExtensionPattern::SetEventProxyFlag(int32_t flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (flag != static_cast<int32_t>(EventProxyFlag::EVENT_NONE)
+        && platformEventProxy_ == nullptr) {
+        platformEventProxy_ = MakeRefPtr<PlatformEventProxy>();
+        platformEventProxy_->SetHostNode(host);
+    }
+
+    if (platformEventProxy_ != nullptr) {
+        platformEventProxy_->SetEventProxyFlag(flag);
+    }
+}
+
 void UIExtensionPattern::HandleDragEvent(const DragPointerEvent& info)
 {
     auto pointerEvent = info.rawPointerEvent;
@@ -1022,6 +1037,7 @@ void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
     UIEXT_LOGI("OnRelease the state is changing from '%{public}s' to 'DESTRUCTION' and releaseCode = %{public}d.",
         ToString(state_), releaseCode);
     state_ = AbilityState::DESTRUCTION;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     if (onReleaseCallback_) {
         onReleaseCallback_(releaseCode);
     }
@@ -1047,6 +1063,7 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
     UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE'.", ToString(state_));
     state_ = AbilityState::NONE;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         if (!IsShowPlaceholder()) {
@@ -1103,6 +1120,7 @@ void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<Wan
         onTerminatedCallback_(code, wantWrap);
     }
     state_ = AbilityState::DESTRUCTION;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
 }
 
 void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback)

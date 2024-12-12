@@ -24,6 +24,7 @@
 
 #include "base/json/node_object.h"
 #include "core/components_ng/base/distributed_ui.h"
+#include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 

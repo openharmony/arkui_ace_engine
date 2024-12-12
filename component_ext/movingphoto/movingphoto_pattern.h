@@ -105,6 +105,11 @@ public:
         movingPhotoFormat_ = format;
     }
 
+    void SetDynamicRangeMode(DynamicRangeMode rangeMode)
+    {
+        dynamicRangeMode_ = rangeMode;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
@@ -145,6 +150,8 @@ private:
     void UpdateVideoNode();
     void UpdatePlayMode();
     void HandleImageAnalyzerMode();
+    void MovingPhotoFormatConvert(MovingPhotoFormat format);
+    void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -188,6 +195,8 @@ private:
     void SelectPlaybackMode(PlaybackMode mode);
     void StartPlayback();
     void StartAnimation();
+    void RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
+            const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode);
     void StopPlayback();
     void PausePlayback();
     void RefreshMovingPhoto();
@@ -241,7 +250,9 @@ private:
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     int64_t currentDateModified_ = -2;
-    MovingPhotoFormat movingPhotoFormat_ = MovingPhotoFormat::NONE;
+    MovingPhotoFormat movingPhotoFormat_ = MovingPhotoFormat::UNKNOWN;
+    PixelFormat imageFormat_ = PixelFormat::UNKNOWN;
+    DynamicRangeMode dynamicRangeMode_ = DynamicRangeMode::HIGH;
 
     bool isEnableAnalyzer_ = false;
     bool isContentSizeChanged_ = false;

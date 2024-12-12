@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
@@ -1399,7 +1400,7 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             auto textFarmeSize = textGeometryNode->GetFrameSize();
             auto textPattern = buttonTextNode->GetPattern<TextPattern>();
             CHECK_NULL_RETURN(textPattern, false);
-            auto textDisplay = textPattern->GetTextForDisplay();
+            auto textDisplay = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
             auto textProps = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_RETURN(textProps, false);
             Dimension buttonTextSize = textProps->GetFontSize().value_or(dialogTheme_->GetButtonTextSize());

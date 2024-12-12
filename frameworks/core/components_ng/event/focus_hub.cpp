@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -31,45 +32,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
-Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
 namespace {
-float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, bool isVertical,
-    float contentStartOffset, float contentEndOffset)
-{
-    constexpr float notMove = 0.0f;
-    CHECK_NULL_RETURN(parentFrameNode, notMove);
-    CHECK_NULL_RETURN(curFrameNode, notMove);
-    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(parentGeometryNode, notMove);
-    auto parentFrameSize = parentGeometryNode->GetFrameSize();
-    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
-    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
-    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
-    auto curGeometry = curFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(curGeometry, notMove);
-    auto curFrameSize = curGeometry->GetFrameSize();
-
-    float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
-    if (NearZero(diffToTarFrame)) {
-        return notMove;
-    }
-    float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
-    float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
-    float focusMarginStart = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentStartOffset);
-    float focusMarginEnd = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentEndOffset);
-
-    bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, (parentFrameLength));
-    float startAlignOffset = -diffToTarFrame + focusMarginStart;
-    float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMarginEnd;
-    bool start2End = LessOrEqual(diffToTarFrame, focusMarginStart);
-    bool needScroll = !NearZero(startAlignOffset, 1.0f) && !NearZero(endAlignOffset, 1.0f) &&
-                      (std::signbit(startAlignOffset) == std::signbit(endAlignOffset));
-    if (needScroll) {
-        return (totallyShow ^ start2End) ? endAlignOffset : startAlignOffset;
-    }
-    return notMove;
-}
-
 template <bool isReverse>
 bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation)
 {
@@ -233,13 +196,6 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
 
 bool FocusHub::HandleEvent(const NonPointerEvent& event)
 {
-    if (!IsCurrentFocus()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "node: %{public}s/%{public}d cannot handle key event because is not current focus",
-            GetFrameName().c_str(), GetFrameId());
-        return false;
-    }
-
     FocusEvent focusEvent(event);
     bool shiftTabPressed = focusEvent.intension == FocusIntension::SHIFT_TAB;
     bool leftArrowPressed = focusEvent.intension == FocusIntension::LEFT;
@@ -258,24 +214,6 @@ bool FocusHub::HandleFocusTravel(const FocusEvent& event)
         return false;
     }
     ACE_DCHECK(IsCurrentFocus());
-    if (focusType_ == FocusType::DISABLE) {
-        return false;
-    }
-    if (focusType_ == FocusType::NODE) {
-        switch (event.intension) {
-            case FocusIntension::ESC:
-                return RequestNextFocusOfKeyEsc();
-            case FocusIntension::SELECT:
-                return RequestNextFocusOfKeyEnter();
-            default:
-                return false;
-        }
-    }
-    
-    if (focusType_ != FocusType::SCOPE) {
-        return false;
-    }
-
     auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
     auto* pipeline = node->GetContext();
@@ -283,14 +221,8 @@ bool FocusHub::HandleFocusTravel(const FocusEvent& event)
     if (!pipeline->GetIsFocusActive()) {
         return false;
     }
-    if (event.intension == FocusIntension::TAB && IsInFocusGroup()) {
-        return false;
-    }
-    if (event.intension == FocusIntension::TAB && pipeline->IsTabJustTriggerOnKeyEvent()) {
+    if (pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
-        return false;
-    }
-    if (!CalculatePosition()) {
         return false;
     }
     return RequestNextFocusByKey(event);
@@ -854,22 +786,25 @@ bool FocusHub::GetNextFocusByStep(const KeyEvent& keyEvent)
 bool FocusHub::RequestNextFocusByKey(const FocusEvent& event)
 {
     switch (event.intension) {
-        case FocusIntension::UP:
-            return RequestNextFocus(FocusStep::UP, GetRect());
-        case FocusIntension::DOWN:
-            return RequestNextFocus(FocusStep::DOWN, GetRect());
-        case FocusIntension::LEFT:
-            return RequestNextFocus(FocusStep::LEFT, GetRect());
-        case FocusIntension::RIGHT:
-            return RequestNextFocus(FocusStep::RIGHT, GetRect());
         case FocusIntension::TAB:
         case FocusIntension::SHIFT_TAB:
             return RequestNextFocusOfKeyTab(event);
+        case FocusIntension::UP:
+            return RequestNextFocus(FocusStep::UP);
+        case FocusIntension::DOWN:
+            return RequestNextFocus(FocusStep::DOWN);
+        case FocusIntension::LEFT:
+            return RequestNextFocus(FocusStep::LEFT);
+        case FocusIntension::RIGHT:
+            return RequestNextFocus(FocusStep::RIGHT);
+        case FocusIntension::SELECT:
+            return RequestNextFocusOfKeyEnter();
+        case FocusIntension::ESC:
+            return RequestNextFocusOfKeyEsc();
         case FocusIntension::HOME:
-            return RequestNextFocus(FocusStep::LEFT_END, GetRect()) || RequestNextFocus(FocusStep::UP_END, GetRect());
+            return RequestNextFocus(FocusStep::LEFT_END) || RequestNextFocus(FocusStep::UP_END);
         case FocusIntension::END:
-            return RequestNextFocus(FocusStep::RIGHT_END, GetRect()) ||
-                   RequestNextFocus(FocusStep::DOWN_END, GetRect());
+            return RequestNextFocus(FocusStep::RIGHT_END) || RequestNextFocus(FocusStep::DOWN_END);
         default:
             return false;
     }
@@ -877,6 +812,9 @@ bool FocusHub::RequestNextFocusByKey(const FocusEvent& event)
 
 bool FocusHub::RequestNextFocusOfKeyTab(const FocusEvent& event)
 {
+    if (IsInFocusGroup()) {
+        return false;
+    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto* context = frameNode->GetContext();
@@ -890,7 +828,7 @@ bool FocusHub::RequestNextFocusOfKeyTab(const FocusEvent& event)
     bool ret = false;
     if (event.intension == FocusIntension::TAB) {
         context->SetIsFocusingByTab(true);
-        ret = RequestNextFocus(FocusStep::TAB, GetRect());
+        ret = RequestNextFocus(FocusStep::TAB);
         if (!ret && isCurrentHandledByFocusView) {
             auto container = Container::GetContainer(context->GetInstanceId());
             auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
@@ -919,7 +857,7 @@ bool FocusHub::RequestNextFocusOfKeyTab(const FocusEvent& event)
         context->SetIsFocusingByTab(false);
     } else if ((event.intension == FocusIntension::SHIFT_TAB)) {
         context->SetIsFocusingByTab(true);
-        ret = RequestNextFocus(FocusStep::SHIFT_TAB, GetRect());
+        ret = RequestNextFocus(FocusStep::SHIFT_TAB);
         if (!ret && isCurrentHandledByFocusView) {
             auto container = Container::GetContainer(context->GetInstanceId());
             auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
@@ -1003,16 +941,19 @@ void FocusHub::RequestFocus() const
     context->AddDirtyFocus(GetFrameNode());
 }
 
-bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
+bool FocusHub::RequestNextFocus(FocusStep moveStep)
 {
+    if (!CalculatePosition()) {
+        return false;
+    }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus on node: %{public}s/" SEC_PLD(%{public}d)
         " by step: %{public}d.",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()), moveStep);
     SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
-        return RequestNextFocusByDefaultAlgorithm(moveStep, rect);
+        return RequestNextFocusByDefaultAlgorithm(moveStep, GetRect());
     }
-    return RequestNextFocusByCustomAlgorithm(moveStep, rect);
+    return RequestNextFocusByCustomAlgorithm(moveStep, GetRect());
 }
 
 bool FocusHub::RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect)
@@ -1788,9 +1729,9 @@ bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
         return true;
     }
 
-    auto operation = [this, step](const RefPtr<FocusHub>& focusHub) {
+    auto operation = [&lastfocus = lastWeakFocusNode_, step](const RefPtr<FocusHub>& focusHub) {
         if (focusHub && focusHub->AcceptFocusOfSpecifyChild(step)) {
-            lastWeakFocusNode_ = focusHub;
+            lastfocus = focusHub;
             return true;
         }
         return false;
@@ -2141,7 +2082,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    auto moveOffset = GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
         scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",

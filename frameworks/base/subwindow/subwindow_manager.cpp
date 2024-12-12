@@ -181,6 +181,19 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
     }
 }
 
+const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId, uint64_t displayId)
+{
+    SubwindowKey searchKey {.instanceId = instanceId, .displayId = displayId };
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
+    auto result = subwindowMap_.find(searchKey);
+    if (result != subwindowMap_.end()) {
+        return result->second;
+    }
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
+        searchKey.ToString().c_str());
+    return nullptr;
+}
+
 const RefPtr<Subwindow> SubwindowManager::GetToastSubwindow(int32_t instanceId)
 {
     SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);

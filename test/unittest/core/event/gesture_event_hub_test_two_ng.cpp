@@ -101,9 +101,9 @@ HWTEST_F(GestureEventHubTestNg, DragForbidden001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     guestureEventHub->SetDragForbiddenForcely(true);
-    ASSERT_EQ(guestureEventHub->IsDragForbidden(), true);
+    EXPECT_EQ(guestureEventHub->IsDragForbidden(), true);
     guestureEventHub->SetDragForbiddenForcely(false);
-    ASSERT_EQ(guestureEventHub->IsDragForbidden(), false);
+    EXPECT_EQ(guestureEventHub->IsDragForbidden(), false);
 }
 
 /**
@@ -274,9 +274,9 @@ HWTEST_F(GestureEventHubTestNg, MonopolizeEvents001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     guestureEventHub->SetMonopolizeEvents(true);
-    ASSERT_EQ(guestureEventHub->GetMonopolizeEvents(), true);
+    EXPECT_EQ(guestureEventHub->GetMonopolizeEvents(), true);
     guestureEventHub->SetMonopolizeEvents(false);
-    ASSERT_EQ(guestureEventHub->GetMonopolizeEvents(), false);
+    EXPECT_EQ(guestureEventHub->GetMonopolizeEvents(), false);
 }
 
 /**
@@ -295,7 +295,7 @@ HWTEST_F(GestureEventHubTestNg, OnTouchInterceptFunc001, TestSize.Level1)
     ASSERT_NE(onGetTouchInterceptfunc, nullptr);
     OHOS::Ace::TouchEventInfo info("unknown");
     auto funcRet = onGetTouchInterceptfunc(info);
-    ASSERT_EQ(funcRet, NG::HitTestMode::HTMTRANSPARENT);
+    EXPECT_EQ(funcRet, NG::HitTestMode::HTMTRANSPARENT);
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(GestureEventHubTestNg, GestureRecognizerJudgeFunc001, TestSize.Level1)
                     const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult(); };
 
     guestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
-    ASSERT_NE(guestureEventHub->GetOnGestureRecognizerJudgeBegin(), nullptr);
+    EXPECT_NE(guestureEventHub->GetOnGestureRecognizerJudgeBegin(), nullptr);
 }
 
 /**
@@ -360,7 +360,7 @@ HWTEST_F(GestureEventHubTestNg, SetDragData001, TestSize.Level1)
     ASSERT_NE(newUnifiedData, nullptr);
     std::string udKey;
     auto ret = gestureEventHub->SetDragData(newUnifiedData, udKey);
-    ASSERT_NE(ret, -1);
+    EXPECT_NE(ret, -1);
 }
 /**
  * @tc.name: SetMouseDragMonitorState
@@ -482,9 +482,9 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
      * @tc.steps: step5. call OnDragStart
      */
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
-    ASSERT_NE(gestureHub->pixelMap_, nullptr);
-    ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
-    ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+    EXPECT_NE(gestureHub->pixelMap_, nullptr);
+    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
+    EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     MockContainer::TearDown();
 }
@@ -556,7 +556,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     gestureHub->OnDragStart(info, pipline, buttonFrameNode, dragDropInfo, event);
     ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
-    ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+    EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     MockContainer::TearDown();
 }
@@ -590,8 +590,8 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart004, TestSize.Level1)
     event->SetResult(DragRet::DRAG_FAIL);
     auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     gestureHub->OnDragStart(info, pipline, buttonFrameNode, dragDropInfo, event);
-    ASSERT_EQ(event->GetResult(), DragRet::DRAG_FAIL);
-    ASSERT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
+    EXPECT_EQ(event->GetResult(), DragRet::DRAG_FAIL);
+    EXPECT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
 }
 
 RefPtr<FrameNode> CreateFrameNodeGroup(int32_t targetId, size_t childCount)
@@ -739,7 +739,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
     ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
-    ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+    EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     SubwindowManager::GetInstance()->SetCurrentSubwindow(nullptr);
     MockContainer::TearDown();

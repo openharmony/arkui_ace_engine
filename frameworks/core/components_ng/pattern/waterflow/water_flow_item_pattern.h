@@ -34,11 +34,6 @@ public:
         return MakeRefPtr<WaterFlowItemLayoutProperty>();
     }
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };

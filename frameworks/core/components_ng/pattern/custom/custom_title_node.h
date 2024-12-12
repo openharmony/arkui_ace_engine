@@ -97,12 +97,12 @@ public:
         }
     }
 
-    void SetCustomCallback(const std::function<void(const std::string& eventName, std::string param)>& callback)
+    void SetCustomCallback(const std::function<void(const std::string& eventName, const std::string& param)>& callback)
     {
         customCallback_ = callback;
     }
 
-    void FireCustomCallback(const std::string& eventName, std::string param)
+    void FireCustomCallback(const std::string& eventName, const std::string& param)
     {
         if (customCallback_) {
             customCallback_(eventName, param);
@@ -122,7 +122,7 @@ private:
     std::function<void()> onWindowFocusedCallback_ = nullptr;
     std::function<void()> onWindowUnfocusedCallback_ = nullptr;
 
-    std::function<void(const std::string&, std::string)> customCallback_ = nullptr;
+    std::function<void(const std::string&, const std::string&)> customCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H

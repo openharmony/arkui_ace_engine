@@ -44,6 +44,11 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+enum class PageFlipMode {
+    CONTINUOUS = 0,
+    SINGLE,
+};
+
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
@@ -132,11 +137,6 @@ public:
         return turnPageRate_;
     }
 
-    float GetGroupTurnPageRate() const
-    {
-        return groupTurnPageRate_;
-    }
-
     GestureState GetGestureState();
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -152,11 +152,6 @@ public:
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
-    }
-
-    void SetGroupTurnPageRate(float groupTurnPageRate)
-    {
-        groupTurnPageRate_ = groupTurnPageRate;
     }
 
     float GetTouchBottomRate() const
@@ -513,8 +508,6 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
-    int32_t DisplayIndicatorTotalCount() const;
-    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
     bool ContentWillChange(int32_t comingIndex);
@@ -612,7 +605,7 @@ public:
 
     bool IsPropertyAnimationRunning() const
     {
-        return usePropertyAnimation_;
+        return propertyAnimationIsRunning_;
     }
 
     bool IsTranslateAnimationRunning() const
@@ -632,6 +625,13 @@ public:
 
     bool IsAutoPlay() const;
 
+    void SetPageFlipMode(int32_t pageFlipMode);
+
+    int32_t GetPageFlipMode() const
+    {
+        return static_cast<int32_t>(pageFlipMode_);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -641,7 +641,14 @@ private:
     void OnDetachFromMainTree() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
+    void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo);
+    void HandleRunningTranslateAnimation();
+    void HandleTargetItemNotFound(
+        const RefPtr<SwiperLayoutProperty>& props, int32_t targetIndexValue, const RefPtr<SwiperLayoutAlgorithm>& algo);
+    bool IsNeedForwardTranslate(const RefPtr<SwiperLayoutProperty>& props, int32_t targetIndexValue);
+    bool IsNeedBackwardTranslate(const RefPtr<SwiperLayoutProperty>& props, int32_t targetIndexValue);
+    void HandleTabsAncestor();
+    void UpdateLayoutProperties(const RefPtr<SwiperLayoutAlgorithm>& algo);
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
@@ -730,7 +737,6 @@ private:
     {
         return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
     }
-    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -812,8 +818,9 @@ private:
      * @brief Stops animations when the scroll starts.
      *
      * @param flushImmediately Whether to flush layout immediately.
+     * @param stopLongPointAnimation Whether to stop indicator long point animation immediately.
      */
-    void StopAnimationOnScrollStart(bool flushImmediately);
+    void StopAnimationOnScrollStart(bool flushImmediately, bool stopLongPointAnimation = false);
     /**
      * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
@@ -1031,7 +1038,6 @@ private:
     float fadeOffset_ = 0.0f;
     float springOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
-    float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
@@ -1108,7 +1114,7 @@ private:
     float motionVelocity_ = 0.0f;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
-    bool usePropertyAnimation_ = false;
+    bool propertyAnimationIsRunning_ = false;
     bool syncCancelAniIsFailed_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
@@ -1120,7 +1126,7 @@ private:
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
-    bool autoLinearReachBoundary = false;
+    bool autoLinearReachBoundary_ = false;
     bool needAdjustIndex_ = false;
     bool hasTabsAncestor_ = false;
     bool isIndicatorInteractive_ = true;
@@ -1164,6 +1170,9 @@ private:
     std::set<int32_t> cachedItems_;
     LayoutConstraintF layoutConstraint_;
     bool requestLongPredict_ = false;
+
+    PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
+    bool isFirstAxisAction_ = true;
 };
 } // namespace OHOS::Ace::NG
 

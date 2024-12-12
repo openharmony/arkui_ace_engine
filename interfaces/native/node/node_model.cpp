@@ -460,6 +460,12 @@ void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
     uiEvent.inputEvent = &(innerEvent->keyEvent);
 }
 
+void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->focusAxisEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -496,7 +502,8 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_TOUCH_INTERCEPT, HandleTouchEvent},
             {NODE_ON_MOUSE, HandleMouseEvent},
             {NODE_ON_KEY_EVENT, HandleKeyEvent},
-            {NODE_ON_KEY_PRE_IME, HandleKeyEvent}
+            {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
+            {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent}
         };
 
         auto it = eventHandlers.find(eventType);
@@ -552,6 +559,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case KEY_INPUT_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->keyEvent.subKind);
+            break;
+        case FOCUS_AXIS_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->focusAxisEvent.subKind);
             break;
         default:
             break; /* Empty */

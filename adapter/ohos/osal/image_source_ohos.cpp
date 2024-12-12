@@ -21,6 +21,34 @@
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
+namespace {
+void InitDecodeOptions(Media::DecodeOptions& options, const std::pair<int32_t, int32_t>& size,
+    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
+{
+    options.preferDma = true;
+    // only hdr image need to decoder in hdr mode
+    if (isHdrDecoderNeed) {
+        options.desiredDynamicRange = Media::DecodeDynamicRange::AUTO;
+    }
+    if (photoDecodeFormat == PixelFormat::NV21) {
+        options.photoDesiredPixelFormat  = Media::PixelFormat::NV21;
+    } else if (photoDecodeFormat == PixelFormat::RGBA_8888) {
+        options.photoDesiredPixelFormat  = Media::PixelFormat::RGBA_8888;
+    } else if (photoDecodeFormat == PixelFormat::RGBA_1010102) {
+        options.photoDesiredPixelFormat  = Media::PixelFormat::RGBA_1010102;
+    } else if (photoDecodeFormat == PixelFormat::YCBCR_P010) {
+        options.photoDesiredPixelFormat  = Media::PixelFormat::YCBCR_P010;
+    } else if (photoDecodeFormat == PixelFormat::YCRCB_P010) {
+        options.photoDesiredPixelFormat  = Media::PixelFormat::YCRCB_P010;
+    }
+    // Pass imageQuality to imageFramework
+    options.resolutionQuality = static_cast<Media::ResolutionQuality>(imageQuality);
+    if (size.first > 0 && size.second > 0) {
+        options.desiredSize = { size.first, size.second };
+    }
+}
+} // namespace
+
 RefPtr<ImageSource> ImageSource::Create(int32_t fd)
 {
     uint32_t errorCode;
@@ -81,30 +109,16 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
 }
 
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
-    const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat imageDecodeFormat)
+    const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
 {
-    return CreatePixelMap(0, size, imageQuality, isHdrDecoderNeed, imageDecodeFormat);
+    return CreatePixelMap(0, size, imageQuality, isHdrDecoderNeed, photoDecodeFormat);
 }
 
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
-    uint32_t index, const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat imageDecodeFormat)
+    uint32_t index, const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
 {
     Media::DecodeOptions options;
-    options.preferDma = true;
-    // only hdr image need to decoder in hdr mode
-    if (isHdrDecoderNeed) {
-        options.desiredDynamicRange = Media::DecodeDynamicRange::AUTO;
-    }
-    if (imageDecodeFormat == PixelFormat::NV21) {
-        options.desiredPixelFormat = Media::PixelFormat::NV21;
-    } else if (imageDecodeFormat == PixelFormat::RGBA_8888) {
-        options.desiredPixelFormat = Media::PixelFormat::RGBA_8888;
-    }
-    options.resolutionQuality = static_cast<Media::ResolutionQuality>(imageQuality);
-    // Pass imageQuality to imageFramework
-    if (size.first > 0 && size.second > 0) {
-        options.desiredSize = { size.first, size.second };
-    }
+    InitDecodeOptions(options, size, imageQuality, isHdrDecoderNeed, photoDecodeFormat);
     uint32_t errorCode;
     auto pixmap = imageSource_->CreatePixelMapEx(index, options, errorCode);
     if (errorCode != Media::SUCCESS) {
