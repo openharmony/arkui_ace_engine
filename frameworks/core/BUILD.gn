@@ -305,6 +305,10 @@ template("ace_core_source_set") {
       sources += [ "common/hdc_register.cpp" ]
     }
 
+    if (ohos_indep_compiler_enable) {
+      include_dirs = indep_compile_includes
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     deps = [
