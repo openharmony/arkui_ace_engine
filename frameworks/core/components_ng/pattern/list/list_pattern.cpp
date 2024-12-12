@@ -116,6 +116,19 @@ void ListPattern::ChangeAxis(RefPtr<UINode> node)
     }
 }
 
+bool ListPattern::HandleTargetIndex(bool isJump)
+{
+    if (isJump) {
+        MarkDirtyNodeSelf();
+        return true;
+    }
+    AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+    // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
+    targetIndex_.reset();
+    targetIndexInGroup_.reset();
+    return false;
+}
+
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -148,14 +161,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         lanes_ = listLayoutAlgorithm->GetLanes();
     }
     float relativeOffset = UpdateTotalOffset(listLayoutAlgorithm, isJump);
-    auto isNeedUpdateIndex = true;
-    if (targetIndex_) {
-        AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
-        // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
-        isNeedUpdateIndex = false;
-        targetIndex_.reset();
-        targetIndexInGroup_.reset();
-    }
+    bool isNeedUpdateIndex = targetIndex_ ? HandleTargetIndex(isJump) : true;
     if (predictSnapOffset.has_value()) {
         if (scrollable_ && !(NearZero(predictSnapOffset.value()) && NearZero(scrollSnapVelocity_)) &&
             !AnimateRunning()) {
@@ -1373,6 +1379,8 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
     SetScrollSource(SCROLL_FROM_JUMP);
     if (!smooth) {
         StopAnimate();
+        targetIndex_.reset();
+        targetIndexInGroup_.reset();
     }
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0.0f;
@@ -1389,6 +1397,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             }
             jumpIndex_ = index;
             scrollAlign_ = align;
+            jumpIndexInGroup_.reset();
         }
         MarkDirtyNodeSelf();
     }
@@ -1422,18 +1431,20 @@ bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
 void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
-    StopAnimate();
+    if (!smooth) {
+        StopAnimate();
+        targetIndex_.reset();
+        targetIndexInGroup_.reset();
+    }
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
-            if (!AnimateToTarget(index, indexInGroup, align)) {
-                if (CheckTargetValid(index, indexInGroup)) {
-                    targetIndex_ = index;
-                    currentDelta_ = 0;
-                    targetIndexInGroup_ = indexInGroup;
-                    scrollAlign_ = align;
-                }
+            if (!AnimateToTarget(index, indexInGroup, align) && CheckTargetValid(index, indexInGroup)) {
+                targetIndex_ = index;
+                currentDelta_ = 0;
+                targetIndexInGroup_ = indexInGroup;
+                scrollAlign_ = align;
             }
         } else {
             jumpIndex_ = index;
