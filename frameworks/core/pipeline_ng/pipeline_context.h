@@ -1149,7 +1149,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
     bool isWindowAnimation_ = false;
-    bool prevKeyboardAvoidMode_ = false;
+    KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;

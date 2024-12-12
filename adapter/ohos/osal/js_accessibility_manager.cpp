@@ -3313,16 +3313,17 @@ void JsAccessibilityManager::DumpTreeNodeSafeAreaInfoNg(const RefPtr<NG::FrameNo
     CHECK_NULL_VOID(manager);
     if (!manager->IsIgnoreAsfeArea() && !manager->IsNeedAvoidWindow() && !manager->IsFullScreen() &&
         !manager->KeyboardSafeAreaEnabled() && !pipeline->GetUseCutout()) {
-        DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
-                                           .append(std::to_string(manager->IsIgnoreAsfeArea()))
-                                           .append(std::string(", isNeedAvoidWindow: ").c_str())
-                                           .append(std::to_string(manager->IsNeedAvoidWindow()))
-                                           .append(std::string(", IisFullScreen: ").c_str())
-                                           .append(std::to_string(manager->IsFullScreen()))
-                                           .append(std::string(", isKeyboardAvoidMode: ").c_str())
-                                           .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
-                                           .append(std::string(", isUseCutout: ").c_str())
-                                           .append(std::to_string(pipeline->GetUseCutout())));
+        DumpLog::GetInstance().AddDesc(
+            std::string("ignoreSafeArea: ")
+                .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                .append(std::string(", isNeedAvoidWindow: ").c_str())
+                .append(std::to_string(manager->IsNeedAvoidWindow()))
+                .append(std::string(", IisFullScreen: ").c_str())
+                .append(std::to_string(manager->IsFullScreen()))
+                .append(std::string(", isKeyboardAvoidMode: ").c_str())
+                .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
+                .append(std::string(", isUseCutout: ").c_str())
+                .append(std::to_string(pipeline->GetUseCutout())));
     }
 }
 
