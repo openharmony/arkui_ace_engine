@@ -469,7 +469,7 @@ HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
  * DISABLED because icon attribute return only default value
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, DISABLED_setSearchOptionsValidValues, TestSize.Level1)
+HWTEST_F(SearchModifierTest, setSearchOptionsValidValues, TestSize.Level1)
 {
     Ark_SearchOptions options = {};
     options.value = ArkValue<Opt_String>(TEST_STRING);
@@ -753,7 +753,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestStyle, TestSize.Level1)
  * In the documentation default value is Local, but in return value is Distributed
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
+HWTEST_F(SearchModifierTest, setCopyOptionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCopyOption, nullptr);
 
