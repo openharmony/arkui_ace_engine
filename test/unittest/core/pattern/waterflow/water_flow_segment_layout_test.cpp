@@ -1540,6 +1540,64 @@ HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Jump003
+ * @tc.desc: Test jump function without user defined height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Jump003, TestSize.Level1)
+{
+    WaterFlowModelNG model;
+    model.Create();
+    GetWaterFlow();
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 15);
+    EXPECT_EQ(info->currentOffset_, 0);
+    for (int i = 0; i <= 36; ++i) {
+        auto seg = info->GetSegment(i);
+        EXPECT_FALSE(secObj->GetSectionInfo()[seg].onGetItemMainSizeByIndex);
+    }
+    const decltype(WaterFlowLayoutInfo::items_) itemsMap = { { {0, { {0, {0, 100}}, {2, {100, 100}}, {3, {200, 200}},
+        {6, {400, 100}}, {7, {500, 200}}, {10, {700, 100}}, {11, {800, 200}} }}, {1, { {1, {0, 200}}, {4, {200, 100}},
+        {5, {300, 200}}, {8, {500, 100}}, {9, {600, 200}}, {12, {800, 100}}, {13, {900, 200}} }} },
+        { {0, { {14, {1100, 100}}, {15, {1200, 200}} }} }, { {0, {}} } };
+    EXPECT_EQ(info->items_, itemsMap);
+
+    pattern_->ScrollToIndex(19, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->currentOffset_, -1800.0f);
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 27);
+    const decltype(WaterFlowLayoutInfo::items_) itemsMap_1 = { { {0, { {0, {0, 100}}, {2, {100, 100}}, {3, {200, 200}},
+        {6, {400, 100}}, {7, {500, 200}}, {10, {700, 100}}, {11, {800, 200}} }}, {1, { {1, {0, 200}}, {4, {200, 100}},
+        {5, {300, 200}}, {8, {500, 100}}, {9, {600, 200}}, {12, {800, 100}}, {13, {900, 200}} }} },
+        { {0, { {14, {1100, 100}}, {15, {1200, 200}}, {16, {1400, 100}}, {17, {1500, 200}}, {18, {1700, 100}},
+        {19, {1800, 200}}, {20, {2000, 100}}, {21, {2100, 200}}, {22, {2300, 100}}, {23, {2400, 200}},
+        {24, {2600, 100}}, {25, {2700, 200}}, {26, {2900, 100}}, {27, {3000, 200}} }} }, { {0, {}} } };
+    EXPECT_EQ(info->items_, itemsMap_1);
+
+    pattern_->ScrollToIndex(28, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->currentOffset_, -3200.0f);
+    EXPECT_EQ(info->startIndex_, 28);
+    EXPECT_EQ(info->endIndex_, 36);
+    const decltype(WaterFlowLayoutInfo::items_) itemsMap_2 = { { {0, { {0, {0, 100}}, {2, {100, 100}}, {3, {200, 200}},
+        {6, {400, 100}}, {7, {500, 200}}, {10, {700, 100}}, {11, {800, 200}} }}, {1, { {1, {0, 200}}, {4, {200, 100}},
+        {5, {300, 200}}, {8, {500, 100}}, {9, {600, 200}}, {12, {800, 100}}, {13, {900, 200}} }} },
+        { {0, { {14, {1100, 100}}, {15, {1200, 200}}, {16, {1400, 100}}, {17, {1500, 200}}, {18, {1700, 100}},
+        {19, {1800, 200}}, {20, {2000, 100}}, {21, {2100, 200}}, {22, {2300, 100}}, {23, {2400, 200}},
+        {24, {2600, 100}}, {25, {2700, 200}}, {26, {2900, 100}}, {27, {3000, 200}}, {28, {3200, 100}},
+        {29, {3300, 200}}, {30, {3500, 100}}, {31, {3600, 200}}, {32, {3800, 100}}, {33, {3900, 200}} }} },
+        { {0, { {34, {4100, 100}}, {35, {4200, 200}}, {36, {4400, 100}} }} } };
+    EXPECT_EQ(info->items_, itemsMap_2);
+}
+
+/**
  * @tc.name: EstimateTotalHeight001
  * @tc.desc: Test EstimateTotalHeight.
  * @tc.type: FUNC
