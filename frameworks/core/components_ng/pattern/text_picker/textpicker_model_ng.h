@@ -90,6 +90,7 @@ public:
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
     void SetDivider(const ItemDivider& divider) override;
     void HasUserDefinedOpacity() override;
+    void SetColumnWidths(const std::vector<Dimension>& widths) override;
 
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const NG::PickerTextStyle& value) override;
@@ -130,6 +131,7 @@ public:
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop);
     static int32_t GetSelectedSize(FrameNode* frameNode);
+    static int32_t GetColumnWidthsSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);
     static std::vector<uint32_t> getTextPickerSelecteds(FrameNode* frameNode);
     static int32_t GetCanLoop(FrameNode* frameNode);
@@ -137,6 +139,8 @@ public:
     static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
     static int32_t GetTextPickerRangeType(FrameNode* frameNode);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static void SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths);
+    static std::vector<Dimension> GetColumnWidths(FrameNode* frameNode);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

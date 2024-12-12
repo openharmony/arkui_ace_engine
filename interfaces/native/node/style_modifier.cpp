@@ -8483,6 +8483,44 @@ void ResetTextPickerValue(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerValue(node->uiNodeHandle, "");
 }
 
+int32_t SetTextPickerColumnWidths(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    if (!item->value) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    uint32_t size = item->size;
+    ArkUI_Float32 values[size];
+    for (uint32_t i = 0; i < size; ++i) {
+        values[i] = item->value[i].f32;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerColumnWidths(node->uiNodeHandle, values, size);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextPickerColumnWidths(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->resetTextPickerColumnWidths(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextPickerColumnWidths(ArkUI_NodeHandle node)
+{
+    uint32_t size = GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerColumnWidthsSize(
+        node->uiNodeHandle);
+    ArkUI_Float32 values[size];
+    GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerColumnWidths(node->uiNodeHandle, values);
+    for (uint32_t i = 0; i < size; ++i) {
+        g_numberValues[i].f32 = values[i];
+    }
+    g_attributeItem.size = size;
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetTextPickerSelected(ArkUI_NodeHandle node)
 {
     int32_t size = GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerSelectedSize(
@@ -13734,7 +13772,8 @@ int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 {
     static Setter* setters[] = { SetTextPickerRange, SetTextPickerSelected, SetTextPickerValue,
         SetTextPickerDisappearTextStyle, SetTextPickerTextStyle, SetTextPickerSelectedTextStyle,
-        SetTextPickerSelectedIndex, SetTextPickerCanLoop, SetTextPickerDefaultPickerItemHeight };
+        SetTextPickerSelectedIndex, SetTextPickerCanLoop, SetTextPickerDefaultPickerItemHeight,
+        SetTextPickerColumnWidths };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textpicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13746,7 +13785,8 @@ const ArkUI_AttributeItem* GetTextPickerAttribute(ArkUI_NodeHandle node, int32_t
 {
     static Getter* getters[] = { GetTextPickerRange, GetTextPickerSelected, GetTextPickerValue,
         GetTextPickerDisappearTextStyle, GetTextPickerTextStyle, GetTextPickerSelectedTextStyle,
-        GetTextPickerSelectedIndex, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
+        GetTextPickerSelectedIndex, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight,
+        GetTextPickerColumnWidths };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -13758,7 +13798,8 @@ void ResetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetTextPickerRange, ResetTextPickerSelectedIndex, ResetTextPickerValue,
         ResetTextPickerDisappearTextStyle, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
-        ResetTextPickerSelectedIndex, ResetTextPickerCanLoop, ResetTextPickerDefaultPickerItemHeight };
+        ResetTextPickerSelectedIndex, ResetTextPickerCanLoop, ResetTextPickerDefaultPickerItemHeight,
+        ResetTextPickerColumnWidths };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

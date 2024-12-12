@@ -44,6 +44,7 @@ public:
     void SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop) override;
     void SetValues(const std::vector<std::string>& values) override {};
     void SetSelecteds(const std::vector<uint32_t>& values) override {};
+    void SetColumnWidths(const std::vector<Dimension>& widths) override {};
     void SetBackgroundColor(const Color& color) override;
     void HasUserDefinedOpacity() override {};
     bool IsSingle() override

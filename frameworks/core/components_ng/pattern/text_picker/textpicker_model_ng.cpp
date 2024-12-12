@@ -243,6 +243,30 @@ void TextPickerModelNG::SetSelected(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values);
 }
 
+void TextPickerModelNG::SetColumnWidths(const std::vector<Dimension>& widths)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->SetColumnWidths(widths);
+}
+
+void TextPickerModelNG::SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->SetColumnWidths(widths);
+}
+
+std::vector<Dimension> TextPickerModelNG::GetColumnWidths(FrameNode* frameNode)
+{
+    std::vector<Dimension> columnWidths;
+    CHECK_NULL_RETURN(frameNode, columnWidths);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    columnWidths = textPickerPattern->GetColumnWidths();
+    return columnWidths;
+}
+
 void TextPickerModelNG::SetRange(const std::vector<NG::RangeContent>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1272,6 +1296,14 @@ int32_t TextPickerModelNG::GetSelectedSize(FrameNode* frameNode)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, 0);
     return textPickerPattern->GetSelecteds().size();
+}
+
+int32_t TextPickerModelNG::GetColumnWidthsSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 0);
+    return textPickerPattern->GetColumnWidths().size();
 }
 
 std::string TextPickerModelNG::getTextPickerValues(FrameNode* frameNode)

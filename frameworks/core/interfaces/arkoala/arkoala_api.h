@@ -4362,6 +4362,10 @@ struct ArkUITextPickerModifier {
         ArkUI_Int32 rangeType);
     ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
+    void (*setTextPickerColumnWidths)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*resetTextPickerColumnWidths)(ArkUINodeHandle node);
+    void (*getTextPickerColumnWidths)(ArkUINodeHandle node, ArkUI_Float32* values);
+    ArkUI_Int32 (*getTextPickerColumnWidthsSize)(ArkUINodeHandle node);
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextPickerDivider)(ArkUINodeHandle node);

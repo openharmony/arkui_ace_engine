@@ -28,6 +28,7 @@ constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
+constexpr float MAX_PERCENT = 100.0f;
 std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
@@ -336,6 +337,47 @@ void SetTextPickerValue(ArkUINodeHandle node, ArkUI_CharPtr valueStr)
     }
 }
 
+void SetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size)
+{
+    std::vector<Dimension> widths;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    for (uint32_t i = 0; i < size; i++) {
+        widths.emplace_back(Dimension(values[i] * MAX_PERCENT, DimensionUnit::PERCENT));
+    }
+    TextPickerModelNG::SetColumnWidths(frameNode, widths);
+}
+
+void ResetTextPickerColumnWidths(ArkUINodeHandle node)
+{
+    std::vector<Dimension> widths;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto childCount = static_cast<float>(frameNode->GetChildren().size());
+    for (uint32_t i = 0; i < childCount; i++) {
+        widths.emplace_back(Dimension(MAX_PERCENT / childCount, DimensionUnit::PERCENT));
+    }
+    TextPickerModelNG::SetColumnWidths(frameNode, widths);
+}
+
+ArkUI_Int32 GetTextPickerColumnWidthsSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return TextPickerModelNG::GetColumnWidthsSize(frameNode);
+}
+
+void GetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto size = GetTextPickerColumnWidthsSize(node);
+    std::vector<Dimension> widths = TextPickerModelNG::GetColumnWidths(frameNode);
+    for (int32_t i = 0; i < size; i++) {
+        values[i] = widths[i].Value() / MAX_PERCENT;
+    }
+}
+
 ArkUI_CharPtr GetTextPickerSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -592,6 +634,10 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .setTextPickerRangeStr = SetTextPickerRangeStr,
         .getTextPickerValue = GetTextPickerValue,
         .setTextPickerValue = SetTextPickerValue,
+        .setTextPickerColumnWidths = SetTextPickerColumnWidths,
+        .resetTextPickerColumnWidths = ResetTextPickerColumnWidths,
+        .getTextPickerColumnWidthsSize = GetTextPickerColumnWidthsSize,
+        .getTextPickerColumnWidths = GetTextPickerColumnWidths,
         .setTextPickerDivider = SetTextPickerDivider,
         .resetTextPickerDivider = ResetTextPickerDivider,
         .setTextPickerGradientHeight = SetTextPickerGradientHeight,
