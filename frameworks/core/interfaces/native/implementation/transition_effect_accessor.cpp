@@ -29,8 +29,6 @@ const auto OPACITY_TOKEN = "opacity";
 const auto MOVE_TOKEN = "move";
 const auto ASYMMETRIC_TOKEN = "asymmetric";
 
-
-
 void DestroyPeerImpl(TransitionEffectPeer* peer)
 {
     CHECK_NULL_VOID(peer);
@@ -47,10 +45,7 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
         auto x = Converter::OptConvert<CalcDimension>(effect->translate.x.value);
         auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
         auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
-        TranslateOptions translate(
-            x.value_or(emptyDimension),
-            y.value_or(emptyDimension),
-            z.value_or(emptyDimension));
+        TranslateOptions translate(x.value_or(emptyDimension), y.value_or(emptyDimension), z.value_or(emptyDimension));
         peer->handler = new ChainedTranslateEffect(translate);
     } else if (valueText == ROTATE_TOKEN) {
         auto x = Converter::Convert<float>(effect->rotate.x.value);
@@ -85,11 +80,9 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
         CHECK_NULL_RETURN(effect, nullptr);
         CHECK_NULL_RETURN(effect->asymmetric.appear.ptr, nullptr);
         auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
-
         CHECK_NULL_RETURN(effect, nullptr);
         CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
         auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
-
         peer->handler = new ChainedAsymmetricEffect(app->handler, disapp->handler);
     }
     return peer;
