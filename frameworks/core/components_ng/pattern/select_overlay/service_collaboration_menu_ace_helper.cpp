@@ -107,6 +107,7 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
     textProperty->UpdateFontSize(textTheme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(richTheme->GetMenuTitleColor());
+    
     textProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(HEADER_MIN_WIDTH)), CalcLength(static_cast<float>(HEADER_MIN_HEIGHT))));
     auto textRenderContext = textNode->GetRenderContext();
