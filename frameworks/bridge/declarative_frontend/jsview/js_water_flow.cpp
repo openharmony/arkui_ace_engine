@@ -166,42 +166,30 @@ void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
     UpdateSections(args, sections, waterFlowSections);
 }
 
-void JSWaterFlow::UpdateWaterFlowFooterByFrameNode(NG::FrameNode* frameNode, const JSCallbackInfo& args)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[4]); // 4 is the index of footerContent
-    if (obj->HasProperty("builderNode_")) {
-        JSRef<JSVal> builderNodeParam = obj->GetProperty("builderNode_");
-        if (builderNodeParam->IsObject()) {
-            auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
-            JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
-            if (!nodeptr.IsEmpty()) {
-                const auto* vm = nodeptr->GetEcmaVM();
-                auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
-                auto* footerNode = reinterpret_cast<NG::FrameNode*>(node);
-                CHECK_NULL_VOID(footerNode);
-                RefPtr<NG::FrameNode> refPtrFooterNode = AceType::Claim(footerNode);
-                NG::WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, refPtrFooterNode);
-                return;
-            }
-        }
-    }
-}
-
-void SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject)
+void SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject, RefPtr<NG::UINode>& refPtrUINode)
 {
     JSRef<JSVal> builderNodeParam = footerJsObject->GetProperty("builderNode_");
     if (builderNodeParam->IsObject()) {
         auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
-        JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
-        if (!nodeptr.IsEmpty()) {
-            const auto* vm = nodeptr->GetEcmaVM();
-            auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
-            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-            CHECK_NULL_VOID(frameNode);
-            RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
-            WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrFrameNode);
+        JSRef<JSVal> nodePtr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodePtr.IsEmpty()) {
+            const auto* vm = nodePtr->GetEcmaVM();
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* myUINode = reinterpret_cast<NG::UINode*>(node);
+            CHECK_NULL_VOID(myUINode);
+            refPtrUINode = AceType::Claim(myUINode);
             return;
         }
+    }
+}
+
+void JSWaterFlow::UpdateWaterFlowFooter(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
+{
+    JSRef<JSObject> footerJsObject = JSRef<JSObject>::Cast(args); // 4 is the index of footerContent
+    if (footerJsObject->HasProperty("builderNode_")) {
+        RefPtr<NG::UINode> refPtrUINode = nullptr;
+        SetWaterFlowBuilderNode(footerJsObject, refPtrUINode);
+        NG::WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, refPtrUINode);
     }
 }
 
@@ -246,15 +234,16 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
         WaterFlowModel::GetInstance()->ResetSections();
 
         if (obj->HasProperty("footerContent")) {
+            RefPtr<NG::UINode> refPtrUINode = nullptr;
             auto footerContentObject = obj->GetProperty("footerContent");
             if (footerContentObject->IsObject()) {
                 auto footerJsObject = JSRef<JSObject>::Cast(footerContentObject);
-                SetWaterFlowBuilderNode(footerJsObject);
-                return;
+                SetWaterFlowBuilderNode(footerJsObject, refPtrUINode);
             }
-            WaterFlowModel::GetInstance()->SetFooterWithFrameNode(nullptr);
+            WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrUINode);
             return;
-        } else if (footerObject->IsFunction()) {
+        }
+        if (footerObject->IsFunction()) {
             // ignore footer if sections are present
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
             auto footerAction = [builderFunc]() { builderFunc->Execute(); };
