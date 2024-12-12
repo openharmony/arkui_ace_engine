@@ -22,7 +22,7 @@
 #include "core/components/plugin/resource/plugin_manager_resource.h"
 #include "core/components/plugin/resource/plugin_request_data.h"
 
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(ARKUI_CAPI_UNITTEST)
+#ifdef OHOS_STANDARD_SYSTEM
 #include "want.h"
 #endif
 
@@ -59,7 +59,7 @@ public:
     void OnPluginUpdate(const std::string& param);
     void OnPluginError(const std::string& param);
 
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(ARKUI_CAPI_UNITTEST)
+#ifdef OHOS_STANDARD_SYSTEM
     void ProcessPluginUninstall(const int64_t PluginId);
     void OnDeathReceived() {}
 #endif

@@ -54,9 +54,9 @@ public:
     void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
 
     std::unique_ptr<DrawDelegate> GetDrawDelegate();
-    #ifndef ARKUI_CAPI_UNITTEST
+#ifndef ARKUI_CAPI_UNITTEST
     const RefPtr<PluginSubContainer>& GetPluginSubContainer() const;
-    #endif
+#endif
 
     const std::string& GetData() const
     {

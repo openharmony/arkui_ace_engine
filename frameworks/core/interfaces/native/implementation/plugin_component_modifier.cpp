@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if defined(PLUGIN_COMPONENT_SUPPORTED)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -22,7 +22,7 @@
 #endif
 #include "arkoala_api_generated.h"
 
-#if defined(PLUGIN_COMPONENT_SUPPORTED)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
 namespace OHOS::Ace::NG {
 namespace {
     struct PluginComponentOptions {
@@ -62,7 +62,7 @@ namespace PluginComponentInterfaceModifier {
 void SetPluginComponentOptionsImpl(Ark_NativePointer node,
                                    const Ark_PluginComponentOptions* options)
 {
-#if defined(PLUGIN_COMPONENT_SUPPORTED)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
@@ -81,7 +81,7 @@ namespace PluginComponentAttributeModifier {
 void OnCompleteImpl(Ark_NativePointer node,
                     const VoidCallback* value)
 {
-#if defined(PLUGIN_COMPONENT_SUPPORTED)
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
