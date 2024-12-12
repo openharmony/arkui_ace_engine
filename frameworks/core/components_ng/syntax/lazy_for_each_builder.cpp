@@ -246,27 +246,27 @@ namespace OHOS::Ace::NG {
             return;
         }
         decltype(cachedItems_) temp(std::move(cachedItems_));
-        if (from < to) {
-            for (const auto& [itemIndex, child] : temp) {
-                auto position = static_cast<size_t>(itemIndex);
-                if (position > from && position <= to && position >= 1) {
-                    cachedItems_.emplace(position - 1, child);
-                } else if (position == from) {
-                    cachedItems_.emplace(to, child);
-                } else {
-                    cachedItems_.emplace(itemIndex, child);
-                }
+        for (const auto& [itemIndex, child] : temp) {
+            auto position = static_cast<size_t>(itemIndex);
+            if (position > from && position <= to && position >= 1) { // from < position <= to
+                cachedItems_.emplace(position - 1, child);
+            } else if (position >= to && position < from) { // to <= position < from
+                cachedItems_.emplace(position + 1, child);
+            } else if (position == from) {
+                cachedItems_.emplace(to, child);
+            } else {
+                cachedItems_.emplace(itemIndex, child);
             }
-        } else {
-            for (const auto& [itemIndex, child] : temp) {
-                auto position = static_cast<size_t>(itemIndex);
-                if (position >= to && position < from) {
-                    cachedItems_.emplace(position + 1, child);
-                } else if (position == from) {
-                    cachedItems_.emplace(to, child);
-                } else {
-                    cachedItems_.emplace(itemIndex, child);
-                }
+        }
+
+        for (const auto& [key, child] : expiringItem_) {
+            auto position = static_cast<size_t>(child.first);
+            if (position > from && position <= to && position >= 1) { // from < position <= to
+                expiringItem_[key] = LazyForEachCacheChild(position - 1, std::move(child.second));
+            } else if (position >= to && position < from) { // to <= position < from
+                expiringItem_[key] = LazyForEachCacheChild(position + 1, std::move(child.second));
+            } else if (position == from) {
+                expiringItem_[key] = LazyForEachCacheChild(to, std::move(child.second));
             }
         }
     }
