@@ -47,6 +47,12 @@ enum SheetType {
     SHEET_BOTTOM_OFFSET,
 };
 
+enum class SheetAccessibilityDetents {
+    HIGH = 0,
+    MEDIUM,
+    LOW,
+};
+
 struct SheetKey {
     SheetKey() {}
     explicit SheetKey(int32_t inputTargetId) : targetId(inputTargetId) {}
