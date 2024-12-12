@@ -91,15 +91,15 @@ void SetResponseDataImpl(WebResourceResponsePeer* peer,
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(data);
     Converter::VisitUnion(*data,
-        [peer, data](const Ark_String& responseData) {
+        [peer](const Ark_String& responseData) {
             std::string str = Converter::Convert<std::string>(responseData);
             peer->handler->SetData(str);
         },
-        [peer, data](const Ark_Number& responseData) {
+        [peer](const Ark_Number& responseData) {
             int32_t fd = Converter::Convert<int32_t>(responseData);
             peer->handler->SetFileHandle(fd);
         },
-        [peer, data](const Ark_Resource& responseData) {
+        [peer](const Ark_Resource& responseData) {
             std::optional<std::string> resourceUrl = Converter::OptConvert<std::string>(responseData);
             std::string url;
             if (resourceUrl) {
@@ -108,8 +108,12 @@ void SetResponseDataImpl(WebResourceResponsePeer* peer,
             }
             peer->handler->SetResourceUrl(url);
         },
-        [peer, data](const Ark_Buffer& responseData) {
-            LOGE("WebResourceResponseAccessor::SetResponseDataImpl - Ark_ArrayBuffer is not fully implemented");
+        [peer](const Ark_Buffer& responseData) {
+            int32_t bufferSize = static_cast<int32_t>(responseData.length);
+            void* buffer = responseData.data;
+            std::string str = Converter::Convert<std::string>(responseData);
+            peer->handler->SetData(str);
+            peer->handler->SetBuffer(static_cast<char*>(buffer), bufferSize);
         },
         []() {}
     );
