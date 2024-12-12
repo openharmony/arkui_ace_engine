@@ -6493,7 +6493,6 @@ void RichEditorPattern::ResetTouchAndMoveCaretState()
         isCursorAlwaysDisplayed_ = false;
         IF_TRUE(isEditing_, StartTwinkling());
     }
-    CheckScrollable();
     moveCaretState_.Reset();
 }
 
@@ -6539,8 +6538,6 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     CHECK_NULL_VOID(moveCaretState_.isMoveCaret);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    scrollable_ = false;
-    SetScrollEnabled(scrollable_);
     if (SelectOverlayIsOn()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
