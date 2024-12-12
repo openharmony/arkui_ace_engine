@@ -1378,9 +1378,7 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     int32_t clickNum = HandleMouseClickEvent(info);
 
     WebSendMouseEvent(info, clickNum);
-    if (info.GetAction() == MouseAction::PRESS) {
-        WebRequestFocus();
-    }
+
     if (info.GetAction() == MouseAction::MOVE) {
         mouseHoveredX_ = localLocation.GetX();
         mouseHoveredY_ = localLocation.GetY();
@@ -3586,7 +3584,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
         }
     }
-    if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false) && !delegate_->IsTouchEditable()) {
+    if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
         WebRequestFocus();
     }
 }

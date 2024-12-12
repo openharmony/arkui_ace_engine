@@ -1099,7 +1099,6 @@ public:
 
     void UnRegisterNativeArkJSFunction(const std::string& objName);
 
-    bool IsTouchEditable();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
