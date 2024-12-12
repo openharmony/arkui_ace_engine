@@ -274,6 +274,12 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundBlurStyleOptions() const
     jsonBlurStyle->Put("type", BLUR_TYPE[static_cast<int>(styleOption.blurType)]);
     jsonBlurStyle->Put("inactiveColor", styleOption.inactiveColor.ColorToString().c_str());
     jsonBlurStyle->Put("scale", styleOption.scale);
+    std::string grayscale = "[0,0]";
+    if (styleOption.blurOption.grayscale.size() > 1) {
+        grayscale = ("[" + std::to_string(styleOption.blurOption.grayscale[0]) + "," +
+            std::to_string(styleOption.blurOption.grayscale[1]) + "]");
+    }
+    jsonBlurStyle->Put("blurOption", grayscale.c_str());
     return jsonBlurStyle;
 }
 
@@ -380,7 +386,7 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundEffect() const
     CHECK_NULL_RETURN(tabBarNode, jsonEffect);
     auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_RETURN(tabBarProperty, jsonEffect);
-    EffectOption effectOption = tabBarProperty->GetTabBarEffectOption().value_or(effectOption);
+    EffectOption effectOption = tabBarProperty->GetTabBarEffectOption().value_or(EffectOption());
     jsonEffect->Put("radius", effectOption.radius.Value());
     jsonEffect->Put("saturation", effectOption.saturation);
     jsonEffect->Put("brightness", effectOption.brightness);
@@ -389,12 +395,12 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundEffect() const
     jsonEffect->Put("policy", POLICY[static_cast<int>(effectOption.policy)]);
     jsonEffect->Put("type", BLUR_TYPE[static_cast<int>(effectOption.blurType)]);
     jsonEffect->Put("inactiveColor", effectOption.inactiveColor.ColorToString().c_str());
-    auto grayscale = "[0,0]";
+    std::string grayscale = "[0,0]";
     if (effectOption.blurOption.grayscale.size() > 1) {
         grayscale = ("[" + std::to_string(effectOption.blurOption.grayscale[0]) + "," +
-            std::to_string(effectOption.blurOption.grayscale[1]) + "]").c_str();
+            std::to_string(effectOption.blurOption.grayscale[1]) + "]");
     }
-    jsonEffect->Put("blurOption", grayscale);
+    jsonEffect->Put("blurOption", grayscale.c_str());
     return jsonEffect;
 }
 } // namespace OHOS::Ace::NG

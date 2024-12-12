@@ -261,7 +261,7 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize
         .brightness = 100,
         .color = Color(0xFF123123),
         .adaptiveColor = AdaptiveColor::AVERAGE,
-        .blurOption = {.grayscale = {123, -9.87f}},
+        .blurOption = {.grayscale = {20, 30}},
         .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
         .inactiveColor = Color(0xFF00FFFF),
         .blurType = BlurType::WITHIN_WINDOW
@@ -278,7 +278,7 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize
         .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123123),
         .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .blurOptions = ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-            .grayscale = {ArkValue<Ark_Number>(123), ArkValue<Ark_Number>(-9.87f)}
+            .grayscale = {ArkValue<Ark_Number>(20), ArkValue<Ark_Number>(30)}
         }),
         .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
         .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
@@ -335,7 +335,7 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyleTestValidValues, TestS
         .colorMode = ThemeColorMode::DARK,
         .scale = 0.123,
         .adaptiveColor = AdaptiveColor::AVERAGE,
-        .blurOption = {.grayscale = {123, -9.87f}},
+        .blurOption = {.grayscale = {20, 30}},
         .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
         .blurType = BlurType::WITHIN_WINDOW,
         .inactiveColor = Color(0xFF00FFFF),
@@ -348,7 +348,7 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyleTestValidValues, TestS
             .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
             .scale = ArkValue<Opt_Number>(0.123f),
             .blurOptions = ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-                .grayscale = {ArkValue<Ark_Number>(123), ArkValue<Ark_Number>(-9.87f)}
+                .grayscale = {ArkValue<Ark_Number>(20), ArkValue<Ark_Number>(30)}
             }),
             .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
             .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
@@ -1361,8 +1361,8 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
 {
     // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
     double blurRadiusBefore = 3.1415;
-    double grayCoeff1 = 2.1;
-    double grayCoeff2 = 5.7;
+    double grayCoeff1 = 2;
+    double grayCoeff2 = 5;
     auto radius = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
     auto grayscale = Converter::ArkValue(
         Converter::ArkValue<Ark_Number>(grayCoeff1),

@@ -496,64 +496,10 @@ uint16_t Convert(const Ark_PixelRoundPolicy& src)
 }
 
 template<>
-BlurOption Convert(const Ark_BlurOptions& src)
-{
-    return BlurOption {
-        .grayscale = {
-            Converter::Convert<float>(src.grayscale.value0),
-            Converter::Convert<float>(src.grayscale.value1)
-        }
-    };
-}
-
-template<>
-void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src)
-{
-    switch (src) {
-        case ARK_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE:
-            dst = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE; break;
-        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE: dst = BlurStyleActivePolicy::ALWAYS_ACTIVE; break;
-        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE: dst = BlurStyleActivePolicy::ALWAYS_INACTIVE; break;
-        default: LOGE("Unexpected enum value in Ark_BlurStyleActivePolicy: %{public}d", src);
-    }
-}
-
-template<>
-EffectOption Convert(const Ark_BackgroundEffectOptions& src)
-{
-    EffectOption dst;
-    dst.radius = OptConvert<Dimension>(src.radius).value_or(dst.radius);
-    dst.saturation = OptConvert<float>(src.saturation).value_or(dst.saturation);
-    dst.brightness = OptConvert<float>(src.brightness).value_or(dst.brightness);
-    dst.color = OptConvert<Color>(src.color).value_or(dst.color);
-    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
-    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
-    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
-    return dst;
-}
-
-template<>
 float Convert(const Ark_ForegroundEffectOptions& src)
 {
     return Convert<float>(src.radius);
 }
-
-template<>
-BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
-{
-    BlurStyleOption dst;
-    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
-    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
-    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
-        dst.scale = static_cast<double>(*scaleOpt);
-    }
-    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
-    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
-    return dst;
-}
-
 
 template<>
 BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)

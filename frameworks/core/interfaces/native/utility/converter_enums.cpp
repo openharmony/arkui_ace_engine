@@ -76,6 +76,18 @@ void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 }
 
 template<>
+void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src)
+{
+    switch (src) {
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE:
+            dst = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE; break;
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE: dst = BlurStyleActivePolicy::ALWAYS_ACTIVE; break;
+        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE: dst = BlurStyleActivePolicy::ALWAYS_INACTIVE; break;
+        default: LOGE("Unexpected enum value in Ark_BlurStyleActivePolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
 {
     switch (src) {
