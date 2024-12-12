@@ -1168,6 +1168,18 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
         return false;
     }
     contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
+    CHECK_NULL_RETURN(CalculateClippedRect(contentRect), false);
+    if (!contentRect.IsEmpty()) {
+        UpdateClipHandleViewPort(contentRect);
+    }
+    rect = contentRect;
+    return true;
+}
+
+bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
         RectF parentContentRect;
@@ -1188,10 +1200,6 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
     contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
-    if (Positive(contentRect.Width()) && Positive(contentRect.Height())) {
-        UpdateClipHandleViewPort(contentRect);
-    }
-    rect = contentRect;
     return true;
 }
 
