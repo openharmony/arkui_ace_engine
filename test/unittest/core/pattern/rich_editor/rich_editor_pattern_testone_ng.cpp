@@ -247,8 +247,8 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertStyledStringByPaste001, TestSize.Leve
     AddSpan("test");
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
     richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
-    std::string data = "abc";
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+    std::u16string data = u"abc";
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(data);
     richEditorPattern->InsertStyledStringByPaste(spanString);
 
@@ -564,7 +564,7 @@ HWTEST_F(RichEditorPatternTestOneNg, MouseDoubleClickParagraphEnd001, TestSize.L
     ASSERT_NE(richEditorPattern, nullptr);
 
     AddSpan("TEST123");
-    std::string content = "TEST123";
+    std::u16string content = u"TEST123";
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
 
@@ -619,11 +619,11 @@ HWTEST_F(RichEditorPatternTestOneNg, GetTextContentLength001, TestSize.Level1)
     richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->GetTextContentLength();
 
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->GetTextContentLength();
 
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->isSpanStringMode_ = false;
     int32_t res = richEditorPattern->GetTextContentLength();
     EXPECT_EQ(res, 0);
@@ -1197,40 +1197,40 @@ HWTEST_F(RichEditorPatternTestOneNg, AddSpansAndReplacePlaceholder001, TestSize.
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto spanString = AceType::MakeRefPtr<SpanString>("test![id1]");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
     auto start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
     richEditorPattern->ClearOperationRecords();
 
-    spanString = AceType::MakeRefPtr<SpanString>("test![id2]");
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id2]");
     start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
     richEditorPattern->ClearOperationRecords();
 
-    richEditorPattern->placeholderSpansMap_["![id3]"] = nullptr;
-    spanString = AceType::MakeRefPtr<SpanString>("test![id3]");
+    richEditorPattern->placeholderSpansMap_[u"![id3]"] = nullptr;
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id3]");
     start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
     richEditorPattern->ClearOperationRecords();
 
-    richEditorPattern->placeholderSpansMap_["![id4]"] = AceType::MakeRefPtr<SpanItem>();
-    spanString = AceType::MakeRefPtr<SpanString>("test![id4]");
+    richEditorPattern->placeholderSpansMap_[u"![id4]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id4]");
     start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
     richEditorPattern->ClearOperationRecords();
 
-    spanString = AceType::MakeRefPtr<SpanString>("![id5]");
-    richEditorPattern->placeholderSpansMap_["![id5]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"![id5]");
+    richEditorPattern->placeholderSpansMap_[u"![id5]"] = AceType::MakeRefPtr<SpanItem>();
     start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 1);
     richEditorPattern->ClearOperationRecords();
 
-    spanString = AceType::MakeRefPtr<SpanString>("");
+    spanString = AceType::MakeRefPtr<SpanString>(u"");
     start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start);
@@ -1248,15 +1248,15 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertSpanByBackData001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto spanString = AceType::MakeRefPtr<SpanString>("");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
     richEditorPattern->textSelector_ = TextSelector(0, 6);
     EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
     richEditorPattern->InsertSpanByBackData(spanString);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
     richEditorPattern->ClearOperationRecords();
 
-    richEditorPattern->placeholderSpansMap_["![id1]"] = AceType::MakeRefPtr<SpanItem>();
-    spanString = AceType::MakeRefPtr<SpanString>("test![id1]");
+    richEditorPattern->placeholderSpansMap_[u"![id1]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
     auto start = richEditorPattern->operationRecords_.size();
     richEditorPattern->InsertSpanByBackData(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
@@ -1444,7 +1444,7 @@ HWTEST_F(RichEditorPatternTestOneNg, GetAIWriteInfo001, TestSize.Level1)
     options.value = INIT_VALUE_3;
     richEditorController->AddTextSpan(options);
     richEditorPattern->textSelector_.Update(0, 5);
-    richEditorPattern->textForDisplay_ = "testtesttest";
+    richEditorPattern->textForDisplay_ = u"testtesttest";
     AIWriteInfo info;
     richEditorPattern->GetAIWriteInfo(info);
     EXPECT_EQ(info.selectStart, 0);
@@ -1469,15 +1469,15 @@ HWTEST_F(RichEditorPatternTestOneNg, AIDeleteComb001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto spanString = AceType::MakeRefPtr<SpanString>("");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
     richEditorPattern->textSelector_ = TextSelector(0, 6);
     EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
     richEditorPattern->InsertSpanByBackData(spanString);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
     richEditorPattern->ClearOperationRecords();
 
-    richEditorPattern->placeholderSpansMap_["![id1]"] = AceType::MakeRefPtr<SpanItem>();
-    spanString = AceType::MakeRefPtr<SpanString>("test![id1]");
+    richEditorPattern->placeholderSpansMap_[u"![id1]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
     auto start = richEditorPattern->operationRecords_.size();
     richEditorPattern->InsertSpanByBackData(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);

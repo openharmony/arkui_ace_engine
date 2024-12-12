@@ -725,17 +725,20 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     if (HasRightButtonNode()) {
         ++skipCnt;
     }
-    swiperFocusHub->AllChildFocusHub<true>(
-        [&skipCnt, &showChildFocusHub, this](const RefPtr<FocusHub>& child) {
-            if (--skipCnt >= 0 || !child) {
-                return;
-            }
-            if (IsUseCustomAnimation() && hasTabsAncestor_) {
-                child->SetParentFocusable(child == showChildFocusHub);
-            } else {
-                child->SetParentFocusable(IsFocusNodeInItemPosition(child));
-            }
-        });
+    std::list<RefPtr<FocusHub>> focusNodes;
+    swiperFocusHub->FlushChildrenFocusHub(focusNodes);
+    for (auto iter = focusNodes.rbegin(); iter != focusNodes.rend(); ++iter) {
+        const auto& node = *iter;
+        if (skipCnt > 0 || !node) {
+            --skipCnt;
+            continue;
+        }
+        if (IsUseCustomAnimation() && hasTabsAncestor_) {
+            node->SetParentFocusable(node == showChildFocusHub);
+        } else {
+            node->SetParentFocusable(IsFocusNodeInItemPosition(node));
+        }
+    }
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
@@ -2213,7 +2216,6 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionStartTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->InitIndexCanChangeMap();
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d", info.GetSourceTool());
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             pattern->isFirstAxisAction_ = true;
@@ -2265,17 +2267,19 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
             info.GetMainVelocity(), info.GetSourceTool());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+            pattern->InitIndexCanChangeMap();
             return;
         }
         bool isUsingTouchPad =
             (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
         auto velocity =
             isUsingTouchPad ? info.GetMainVelocity() * pattern->GetVelocityCoefficient() : info.GetMainVelocity();
         // Reverse velocity when receiving.
         pattern->HandleDragEnd(pattern->IsHorizontalAndRightToLeft() ? -velocity : velocity);
+        pattern->InitIndexCanChangeMap();
     };
 }
 
@@ -2295,6 +2299,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag cancel");
             pattern->HandleDragEnd(0.0);
+            pattern->InitIndexCanChangeMap();
         }
     };
 
@@ -2803,7 +2808,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     }
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
     StopAnimationOnScrollStart(
-        info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
+        info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD, true);
     StopAutoPlay();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
@@ -2825,12 +2830,12 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     SetLazyLoadFeature(false);
 }
 
-void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
+void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately, bool stopLongPointAnimation)
 {
     if (propertyAnimationIsRunning_) {
         StopPropertyTranslateAnimation(isFinishAnimation_);
     }
-    StopIndicatorAnimation();
+    StopIndicatorAnimation(stopLongPointAnimation);
     StopTranslateAnimation();
     StopFadeAnimation();
     if (flushImmediately) {
@@ -2842,6 +2847,7 @@ void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    isTouchDownOnOverlong_ = true;
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
     UpdateNodeRate();
@@ -3602,7 +3608,7 @@ void SwiperPattern::PlayTranslateAnimation(
                 swiper->GetLoopIndex(swiper->currentIndex_), swiper->GetLoopIndex(nextIndex), info);
             swiper->FireAndCleanScrollingListener();
         },
-        [weak, nextIndex, restartAutoPlay, finishAnimation]() {
+        [weak, finishAnimation]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             AceAsyncTraceEndCommercial(
@@ -3771,17 +3777,16 @@ void SwiperPattern::PlayFadeAnimation()
     option.SetCurve(Curves::LINEAR);
 
     host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, fadeOffset_);
-    constexpr float end = 0.0f;
     nextIndex_ = currentIndex_;
     fadeAnimation_ = AnimationUtils::StartAnimation(
         option,
-        [weak, end]() {
+        [weak]() {
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->OnFadeAnimationStart();
             auto host = swiperPattern->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, end);
+            host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0.f);
         },
         [weak]() {
             auto swiperPattern = weak.Upgrade();
@@ -3838,7 +3843,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     nextIndex_ = currentIndex_;
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
-        [weak = AceType::WeakClaim(this), dragVelocity, delta]() {
+        [weak = AceType::WeakClaim(this), delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f", delta);
             auto swiperPattern = weak.Upgrade();
@@ -5498,7 +5503,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     CHECK_NULL_VOID(taskExecutor);
 
     auto timeout = tabContentAnimatedTransition.timeout;
-    auto timeoutTask = [weak = AceType::WeakClaim(AceType::RawPtr(proxy)), fromIndex, toIndex] {
+    auto timeoutTask = [weak = AceType::WeakClaim(AceType::RawPtr(proxy))] {
         auto transitionProxy = weak.Upgrade();
         CHECK_NULL_VOID(transitionProxy);
         transitionProxy->FinishTransition();

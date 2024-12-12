@@ -276,10 +276,28 @@ public:
         predictSnapOffset_ = predictSnapOffset;
     }
 
-    bool StartSnapAnimation(
-        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
+    bool StartSnapAnimation(float snapDelta, float animationVelocity, float predictVelocity = 0.f,
+        float dragDistance = 0.f, SnapDirection snapDirection = SnapDirection::NONE) override;
 
     void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+
+    SnapType GetSnapType() override
+    {
+        auto snapAlign = GetScrollSnapAlign();
+        return snapAlign != ScrollSnapAlign::NONE ? SnapType::LIST_SNAP : SnapType::NONE_SNAP;
+    }
+
+    ScrollSnapAlign GetScrollSnapAlign() const;
+
+    void SetLastSnapTargetIndex(int32_t lastSnapTargetIndex) override
+    {
+        lastSnapTargetIndex_ = lastSnapTargetIndex;
+    }
+
+    int32_t GetLastSnapTargetIndex() override
+    {
+        return lastSnapTargetIndex_;
+    }
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
@@ -353,12 +371,6 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 private:
-
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
@@ -395,7 +407,7 @@ private:
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
-    ScrollAlign GetScrollAlignByScrollSnapAlign() const;
+    ScrollAlign GetInitialScrollAlign() const;
     bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos);
     bool GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, float startPos, float endPos,
         ScrollAlign align, float& targetPos);
@@ -436,6 +448,7 @@ private:
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
+    int32_t lastSnapTargetIndex_ = -1;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;

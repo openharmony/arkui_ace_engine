@@ -74,6 +74,9 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest001, TestSize.Level1)
 
     viewConfig.SetTransformHint(90);
     ASSERT_EQ(viewConfig.TransformHint(), 90);
+
+    viewConfig.SetDisplayId(0);
+    ASSERT_EQ(viewConfig.DisplayId(), 0);
 }
 
 /**

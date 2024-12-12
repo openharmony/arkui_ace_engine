@@ -32,7 +32,7 @@ std::string TextAccessibilityProperty::GetText() const
     } else {
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_RETURN(textPattern, value);
-        value = textPattern->GetTextForDisplay();
+        value = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
     }
     return value;
 }

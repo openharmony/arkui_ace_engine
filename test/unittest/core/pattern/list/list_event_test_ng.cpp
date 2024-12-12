@@ -367,7 +367,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign001, TestSize.Level1)
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
 
@@ -444,7 +444,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign002, TestSize.Level1)
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
     EXPECT_TRUE(Position(0));
@@ -518,7 +518,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign003, TestSize.Level1)
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
 
@@ -587,7 +587,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign003, TestSize.Level1)
 HWTEST_F(ListEventTestNg, ScrollSnapAlign004, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     model.SetEdgeEffect(EdgeEffect::FADE, true);
     CreateListItems();
     CreateDone();
@@ -617,7 +617,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign004, TestSize.Level1)
 HWTEST_F(ListEventTestNg, ScrollSnapAlign005, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
     model.SetEdgeEffect(EdgeEffect::FADE, true);
     CreateListItems();
     CreateDone();
@@ -647,7 +647,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign005, TestSize.Level1)
 HWTEST_F(ListEventTestNg, ScrollSnapAlign006, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetEdgeEffect(EdgeEffect::FADE, true);
     CreateListItems();
     CreateDone();
@@ -679,7 +679,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign007, TestSize.Level1)
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(TOTAL_ITEM_NUMBER);
     SetChildrenMainSize(frameNode_, 1, { 150 });
     CreateDone();
@@ -737,7 +737,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign008, TestSize.Level1)
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     SetChildrenMainSize(frameNode_, 4, { 150 });
     CreateDone();
@@ -795,7 +795,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign009, TestSize.Level1)
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     SetChildrenMainSize(frameNode_, 1, { 150 });
     CreateDone();
@@ -853,7 +853,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign010, TestSize.Level1)
      * @tc.expected: Can not scroll snap
      */
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
     DragAction(frameNode_, Offset(), -100, 0);
@@ -865,7 +865,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign010, TestSize.Level1)
      */
     ClearOldNodes();
     model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(1);
     CreateDone();
     DragAction(frameNode_, Offset(), -100, 0);
@@ -877,7 +877,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign010, TestSize.Level1)
      */
     ClearOldNodes();
     model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    model.SetScrollSnapAlign(ScrollSnapAlign::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
     DragAction(frameNode_, Offset(), -100, 0);
@@ -901,7 +901,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign011, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(itemNumber);
     CreateDone();
 
@@ -937,7 +937,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign012, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(itemNumber);
     CreateDone();
 
@@ -966,7 +966,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign013, TestSize.Level1)
     ListModelNG model = CreateList();
     // Make ListHeight not an integer multiple of ListItems
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
@@ -991,7 +991,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign014, TestSize.Level1)
      * @tc.steps: step1. create List with ScrollSnapAlign::START
      */
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(3);
     CreateDone();
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);

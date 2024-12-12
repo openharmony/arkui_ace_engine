@@ -143,6 +143,18 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
 }
 
+void TextLayoutProperty::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    LayoutProperty::ToTreeJson(json, config);
+    if (json->Contains(TreeKey::CONTENT)) {
+        return;
+    }
+    auto content = UtfUtils::Str16ToStr8(GetContent().value_or(u""));
+    if (!content.empty()) {
+        json->Put(TreeKey::CONTENT, content.c_str());
+    }
+}
+
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     UpdateContent(json->GetString("content"));

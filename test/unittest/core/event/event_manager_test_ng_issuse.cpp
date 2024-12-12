@@ -738,4 +738,125 @@ HWTEST_F(EventManagerTestNg, MouseEventTest013, TestSize.Level1) {
     EXPECT_FALSE(retFlag);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: DispatchAxisEventIssueTest1
+ * @tc.desc: Test DispatchAxisEventNG, axisTestResults_ is deleted each time it is dispatched.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchAxisEventIssueTest1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
+     * @tc.expected: eventManager->axisTestResults_ is empty
+     */
+    auto axisEventTarget = AceType::MakeRefPtr<AxisEventTarget>();
+    auto onAxisCallback = [](AxisInfo&) -> void {};
+    axisEventTarget->SetOnAxisCallback(onAxisCallback);
+    AxisEvent event;
+    event.horizontalAxis = 0;
+    event.verticalAxis = 0;
+    event.pinchAxisScale = 0;
+    eventManager->axisTestResults_.push_back(axisEventTarget);
+    eventManager->DispatchAxisEventNG(event);
+    EXPECT_TRUE(eventManager->axisTestResults_.empty());
+}
+
+/**
+ * @tc.name: MouseLocationTest001
+ * @tc.desc: Test HandleMouseEvent in less than API 14, the x、y location use coordinateOffset_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, MouseLocationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager and set mouse event target callback.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
+    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    mouseEventTarget->coordinateOffset_ = Offset(-100, 0);
+    MouseInfo mouseInfo;
+    const OnMouseEventFunc onMouse = [&mouseInfo](MouseInfo& info) {
+        mouseInfo = info;
+    };
+    mouseEventTarget->SetCallback(onMouse);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseEventNG.
+     * @tc.expected: the mouse local location value is right.
+     */
+    MouseEvent event;
+    event.x = 200.0f;
+    event.y = 200.0f;
+    event.action = MouseAction::PRESS;
+    eventManager->DispatchMouseEventNG(event);
+    EXPECT_EQ(mouseInfo.GetLocalLocation().GetX(), 300.0f);
+    EXPECT_EQ(mouseInfo.GetLocalLocation().GetY(), 200.0f);
+}
+
+/**
+ * @tc.name: MouseLocationTest002
+ * @tc.desc: Test HandleMouseEvent in great or equal API 14, the x、y location use Transform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, MouseLocationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode.
+     */
+    RefPtr<FrameNode> FRAME_NODE_0 = FrameNode::CreateFrameNode("0", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_1 = FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> FRAME_NODE_2 = FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE_2->SetParent(WeakPtr<FrameNode>(FRAME_NODE_1));
+    FRAME_NODE_1->SetParent(WeakPtr<FrameNode>(FRAME_NODE_0));
+
+    /**
+     * @tc.steps: step2. mock local matrix.
+     */
+    FRAME_NODE_0->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_1->localMat_ = Matrix4::CreateIdentity();
+    FRAME_NODE_2->localMat_ = Matrix4::Invert(Matrix4::CreateTranslate(400, 0, 0));
+
+    /**
+     * @tc.steps: step3. Create EventManager, and set mouse event target callback.
+     * @tc.expected: eventManager is not null.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
+    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+    mouseEventTarget->coordinateOffset_ = Offset(-100, 0);
+    mouseEventTarget->AttachFrameNode(FRAME_NODE_2);
+    MouseInfo mouseInfo;
+    const OnMouseEventFunc onMouse = [&mouseInfo](MouseInfo& info) {
+        mouseInfo = info;
+    };
+    mouseEventTarget->SetCallback(onMouse);
+
+    /**
+     * @tc.steps: step4. Call DispatchMouseEventNG.
+     * @tc.expected: the mouse local location value is right.
+     */
+    MouseEvent event;
+    event.x = 200.0f;
+    event.y = 200.0f;
+    event.action = MouseAction::PRESS;
+    eventManager->DispatchMouseEventNG(event);
+    EXPECT_EQ(mouseInfo.GetLocalLocation().GetX(), -200.0f);
+    EXPECT_EQ(mouseInfo.GetLocalLocation().GetY(), 200.0f);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
 }

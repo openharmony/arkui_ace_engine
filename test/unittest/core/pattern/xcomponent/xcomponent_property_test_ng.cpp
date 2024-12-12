@@ -1608,13 +1608,15 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest043, Te
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceCreatedSurfaceId = surfaceId;
+    };
     auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
         onSurfaceChangedSurfaceId = surfaceId;
     };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceDestroyedSurfaceId = surfaceId;
+    };
 
     /**
      * @tc.steps: step2. call CreateFrameNode
@@ -1670,13 +1672,15 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest044, Te
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceCreatedSurfaceId = surfaceId;
+    };
     auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
         onSurfaceChangedSurfaceId = surfaceId;
     };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceDestroyedSurfaceId = surfaceId;
+    };
 
     /**
      * @tc.steps: step2. call CreateFrameNode

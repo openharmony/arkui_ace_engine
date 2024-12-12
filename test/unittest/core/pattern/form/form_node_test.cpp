@@ -404,7 +404,6 @@ HWTEST_F(FormNodeTest, FormNodeTest_013, TestSize.Level1)
     EXPECT_NE(retRef, nullptr);
 }
 
-#ifdef FORM_MOUSE_AXIS_SUPPORT
 /**
  * @tc.name: FormNodeTest_014
  * @tc.desc: AxisTest
@@ -451,5 +450,4 @@ HWTEST_F(FormNodeTest, FormNodeTest_014, TestSize.Level1)
     EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
     pattern->subContainer_ = subContainer;
 }
-#endif
 } // namespace OHOS::Ace::NG

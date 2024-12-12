@@ -16,6 +16,16 @@
 #include "core/components_ng/base/inspector.h"
 
 #include <unistd.h>
+
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
+#include "core/components_ng/pattern/web/web_pattern.h"
+#endif
+#include "core/common/recorder/inspector_tree_collector.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "interfaces/inner_api/ace/ui_event_observer.h"
+#endif
+
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/render_context.h"
@@ -28,8 +38,6 @@ const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_RECT[] = "$rect";
 const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_ROOT[] = "root";
-const char INSPECTOR_PAGE_URL[] = "pageUrl";
-const char INSPECTOR_NAV_DST_NAME[] = "navDstName";
 const char INSPECTOR_WIDTH[] = "width";
 const char INSPECTOR_HEIGHT[] = "height";
 const char INSPECTOR_RESOLUTION[] = "$resolution";
@@ -42,6 +50,9 @@ const char INSPECTOR_CUSTOM_VIEW_TAG[] = "viewTag";
 const char INSPECTOR_COMPONENT_TYPE[] = "type";
 const char INSPECTOR_STATE_VAR[] = "state";
 #endif
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+const char INSPECTOR_PAGE_URL[] = "pageUrl";
+const char INSPECTOR_NAV_DST_NAME[] = "navDstName";
 const char INSPECTOR_ATTR_ID[] = "id";
 const char INSPECTOR_LABEL[] = "label";
 const char INSPECTOR_CONTENT[] = "content";
@@ -49,6 +60,8 @@ const char INSPECTOR_ENABLED[] = "enabled";
 const char INSPECTOR_OPACITY[] = "opacity";
 const char INSPECTOR_ZINDEX[] = "zindex";
 const char INSPECTOR_VISIBILITY[] = "visibility";
+const char INSPECTOR_CHILDREN_COUNT[] = "$childrenCount";
+#endif
 
 
 const uint32_t LONG_PRESS_DELAY = 1000;
@@ -645,10 +658,25 @@ std::string Inspector::GetSubWindowInspector(bool isLayoutInspector)
     return GetInspectorInfo(children, 0, std::move(jsonRoot), isLayoutInspector);
 }
 
-void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode)
-{
-    auto tmpJson = JsonUtil::Create(true);
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+struct InspectorTreeParams {
+    int pageId;
+    bool isActive;
+    TreeParams params;
+    InspectorConfig inspectorCfg;
+    size_t size;
+};
 
+void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+    const TreeParams& params, const InspectorConfig& inspectorCfg)
+{
+    if (params.isNewVersion) {
+        auto tmpJson = JsonUtil::Create(true);
+        parent->ToTreeJson(tmpJson, inspectorCfg);
+        jsonNode->PutRef(INSPECTOR_ATTRS, std::move(tmpJson));
+        return;
+    }
+    auto tmpJson = JsonUtil::Create(true);
     InspectorFilter filter;
     parent->ToJsonValue(tmpJson, filter);
     jsonNode->Put(INSPECTOR_ATTR_ID, tmpJson->GetString(INSPECTOR_ATTR_ID).c_str());
@@ -667,8 +695,8 @@ void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
 }
 
-void GetSimplifiedSpanInspector(
-    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId)
+void GetSimplifiedSpanInspector(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
+    InspectorTreeParams& funcParams)
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
@@ -677,54 +705,116 @@ void GetSimplifiedSpanInspector(
     CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
 
-    FillSimplifiedInspectorAttrs(parent, jsonNode);
+    FillSimplifiedInspectorAttrs(parent, jsonNode, funcParams.params, funcParams.inspectorCfg);
 
+    jsonNode->Put(INSPECTOR_ID, parent->GetId());
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
-void GetSimplifiedInspectorChildren(
-    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId, bool isActive)
+void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG::UINode>>& children, int32_t pageId)
+{
+    if (AceType::InstanceOf<NG::FrameNode>(uiNode) || AceType::InstanceOf<SpanNode>(uiNode) ||
+        AceType::InstanceOf<CustomNode>(uiNode)) {
+        if (uiNode->GetTag() == "page") {
+            if (uiNode->GetPageId() != pageId) {
+                return;
+            }
+        } else if (uiNode->GetTag() != "stage") {
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+            auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+            if ((frameNode && !frameNode->IsInternal()) || spanNode) {
+                children.emplace_back(uiNode);
+                return;
+            }
+        }
+    }
+    for (const auto& frameChild : uiNode->GetChildren()) {
+        GetFrameNodeChildren(frameChild, children, pageId);
+    }
+}
+
+bool CheckNodeRect(const RefPtr<FrameNode>& node, RectF& rect, bool isVisibleOnly)
+{
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    if (paintRect.IsEmpty()) {
+        return false;
+    }
+    rect = node->GetTransformRectRelativeToWindow();
+    if (isVisibleOnly && !deviceRect.IsIntersectWith(rect)) {
+        return false;
+    }
+    return true;
+}
+
+void GetWebContentIfNeed(const RefPtr<FrameNode>& node, const InspectorTreeParams& funcParams)
+{
+#if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (node->GetTag() == V2::WEB_ETS_TAG && funcParams.params.enableWeb && !funcParams.params.webContentJs.empty()) {
+        auto pattern = node->GetPattern<WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetPageContentAsync(funcParams.params.webContentJs);
+    }
+#endif
+}
+
+void GetSimplifiedInspectorChildren(const RefPtr<NG::UINode>& parent,
+    std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, InspectorTreeParams& funcParams)
 {
     // Span is a special case in Inspector since span inherits from UINode
     if (AceType::InstanceOf<SpanNode>(parent)) {
-        GetSimplifiedSpanInspector(parent, jsonNodeArray, pageId);
+        funcParams.size += 1;
+        GetSimplifiedSpanInspector(parent, jsonNodeArray, funcParams);
         return;
     }
     auto jsonNode = JsonUtil::Create(true);
-    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     auto node = AceType::DynamicCast<FrameNode>(parent);
-
-    RectF rect;
-    isActive = isActive && node->IsActive();
-    if (isActive) {
-        rect = node->GetTransformRectRelativeToWindow();
+    auto isActive = funcParams.isActive && node->IsActive();
+    if (!isActive) {
+        return;
     }
-
+    auto lp = node->GetLayoutProperty();
+    CHECK_NULL_VOID(lp);
+    bool isVisible = lp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+    if (!isVisible) {
+        return;
+    }
+    jsonNode->Put(INSPECTOR_ID, node->GetId());
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+    RectF rect;
+    if (!CheckNodeRect(node, rect, funcParams.params.isVisibleOnly)) {
+        return;
+    }
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+    funcParams.size += 1;
+    GetWebContentIfNeed(node, funcParams);
+    FillSimplifiedInspectorAttrs(parent, jsonNode, funcParams.params, funcParams.inspectorCfg);
 
-    FillSimplifiedInspectorAttrs(parent, jsonNode);
-
-    std::vector<RefPtr<NG::UINode>> children;
+    std::list<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
-        GetFrameNodeChildren(item, children, pageId);
+        GetFrameNodeChildren(item, children, funcParams.pageId);
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
     for (auto uiNode : children) {
-        GetSimplifiedInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive);
+        funcParams.isActive = isActive;
+        GetSimplifiedInspectorChildren(uiNode, jsonChildrenArray, funcParams);
     }
     if (jsonChildrenArray->GetArraySize()) {
         jsonNode->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
     }
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
+#endif
 
-std::string Inspector::GetSimplifiedInspector(int32_t containerId)
+std::string Inspector::GetSimplifiedInspector(int32_t containerId, const TreeParams& params, bool isSync)
 {
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspector start: container %{public}d", containerId);
-    auto jsonRoot = JsonUtil::Create(true);
+    auto& jsonRoot = Recorder::InspectorTreeCollector::Get().GetJson();
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
     auto context = NG::PipelineContext::GetContextByContainerId(containerId);
@@ -747,8 +837,8 @@ std::string Inspector::GetSimplifiedInspector(int32_t containerId)
     jsonRoot->Put(INSPECTOR_PAGE_URL, pageInfo->GetPageUrl().c_str());
     jsonRoot->Put(INSPECTOR_NAV_DST_NAME, Recorder::EventRecorder::Get().GetNavDstName().c_str());
 
-    auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
-    std::vector<RefPtr<NG::UINode>> children;
+    auto pageId = pageRootNode->GetPageId();
+    std::list<RefPtr<NG::UINode>> children;
     for (const auto& item : pageRootNode->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
     }
@@ -757,14 +847,19 @@ std::string Inspector::GetSimplifiedInspector(int32_t containerId)
         GetFrameNodeChildren(overlayNode, children, pageId);
     }
     auto jsonNodeArray = JsonUtil::CreateArray(true);
+    InspectorTreeParams funcParams = { pageId, true, params, { params.isContentOnly }, children.size() };
     for (auto& uiNode : children) {
-        GetSimplifiedInspectorChildren(uiNode, jsonNodeArray, pageId, true);
+        GetSimplifiedInspectorChildren(uiNode, jsonNodeArray, funcParams);
     }
     if (jsonNodeArray->GetArraySize()) {
         jsonRoot->PutRef(INSPECTOR_CHILDREN, std::move(jsonNodeArray));
     }
+    jsonRoot->Put(INSPECTOR_CHILDREN_COUNT, funcParams.size);
 
-    return jsonRoot->ToString();
+    return isSync ? jsonRoot->ToString() : "{}";
+#else
+    return "{}";
+#endif
 }
 
 bool Inspector::SendEventByKey(const std::string& key, int action, const std::string& params)

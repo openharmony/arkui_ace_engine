@@ -563,6 +563,20 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
+{
+    auto container = Container::GetContainer(GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto focusNodeHub = rootNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    focusNodeHub->HandleEvent(event);
+    return true;
+}
+
 bool KeyEventManager::TriggerKeyEventDispatch(const KeyEvent& event)
 {
     auto focusManager = GetFocusManager(GetInstanceId());

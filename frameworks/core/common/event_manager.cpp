@@ -22,6 +22,7 @@
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_START_NUMBER = 4;
@@ -1285,6 +1286,7 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
+    bool result = false;
     const static std::set<MouseAction> validAction = {
         MouseAction::PRESS,
         MouseAction::RELEASE,
@@ -1296,9 +1298,12 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         return false;
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        return DispatchMouseEventInGreatOrEqualAPI13(event);
+        result = DispatchMouseEventInGreatOrEqualAPI13(event);
+    } else {
+        result = DispatchMouseEventInLessAPI13(event);
     }
-    return DispatchMouseEventInLessAPI13(event);
+    mouseStyleManager_->VsyncMouseFormat();
+    return result;
 }
 
 bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event)
@@ -1624,6 +1629,7 @@ EventManager::EventManager()
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
+    mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();
@@ -2058,6 +2064,9 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
 {
     if (event.eventType == UIInputEventType::KEY) {
         return OnKeyEvent(static_cast<const KeyEvent&>(event));
+    }
+    if (event.eventType == UIInputEventType::FOCUS_AXIS) {
+        return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
     }
     return false;
 }

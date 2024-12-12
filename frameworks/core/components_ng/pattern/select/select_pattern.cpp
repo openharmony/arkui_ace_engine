@@ -94,6 +94,7 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
             .SetType(host->GetTag())
             .SetIndex(index)
             .SetText(value)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
         if (!inspectorId.empty()) {

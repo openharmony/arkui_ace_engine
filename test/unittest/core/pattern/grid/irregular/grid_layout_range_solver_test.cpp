@@ -685,45 +685,6 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Cache003
- * @tc.desc: Test Grid cached items.
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutRangeTest, Cache003, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetRowsGap(Dimension(5));
-    model.SetCachedCount(1);
-    model.SetLayoutOptions({});
-    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
-    CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
-
-    EXPECT_EQ(pattern_->info_.startIndex_, 0);
-    EXPECT_EQ(pattern_->info_.endIndex_, 23);
-    UpdateCurrentOffset(-200.0f);
-    EXPECT_EQ(pattern_->info_.startIndex_, 9);
-    EXPECT_EQ(pattern_->info_.endIndex_, 32);
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    EXPECT_TRUE(GetItem(6, true));
-    EXPECT_FALSE(GetItem(5, true));
-    EXPECT_EQ(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
-
-    UpdateCurrentOffset(60.0f);
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    EXPECT_EQ(pattern_->info_.startIndex_, 6);
-    ASSERT_TRUE(GetItem(5, true));
-    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
-    EXPECT_EQ(GetItem(5, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 3);
-
-    UpdateCurrentOffset(1.0f);
-    EXPECT_EQ(pattern_->info_.startIndex_, 6);
-    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
-    EXPECT_EQ(GetItem(5, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 3);
-}
-
-/**
  * @tc.name: Drag001
  * @tc.desc: Test grid dragged item
  * @tc.type: FUNC
@@ -831,6 +792,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         WeakPtr<FocusHub> next;
         algo.getNextFocusNode(FocusStep::TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
+        next.Upgrade()->RequestFocusImmediately();
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
         EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
@@ -839,6 +801,7 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         WeakPtr<FocusHub> next;
         algo.getNextFocusNode(FocusStep::SHIFT_TAB, curFocus, next);
         ASSERT_TRUE(next.Upgrade());
+        next.Upgrade()->RequestFocusImmediately();
         EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
         EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();

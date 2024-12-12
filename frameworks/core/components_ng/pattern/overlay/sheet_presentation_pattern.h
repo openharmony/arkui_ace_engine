@@ -319,6 +319,8 @@ public:
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
+    void SetSheetAnimationOption(AnimationOption& option) const;
+
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
     void SetCurrentOffset(float currentOffset)
@@ -446,6 +448,8 @@ public:
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
+
+    void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
     void BubbleStyleSheetTransition(bool isTransitionIn);
 
@@ -737,6 +741,7 @@ private:
     void ResetClipShape();
     void UpdateSheetWhenSheetTypeChanged();
     void GetCurrentScrollHeight();
+    void RecoverScrollOrResizeAvoidStatus();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;

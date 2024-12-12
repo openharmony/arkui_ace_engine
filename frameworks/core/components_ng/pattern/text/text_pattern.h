@@ -179,7 +179,7 @@ public:
         return textSelector_;
     }
 
-    const std::string& GetTextForDisplay() const
+    const std::u16string& GetTextForDisplay() const
     {
         return textForDisplay_;
     }
@@ -234,7 +234,7 @@ public:
     {
         return dataDetectorAdapter_->aiSpanMap_;
     }
-    const std::string& GetTextForAI()
+    const std::u16string& GetTextForAI()
     {
         return dataDetectorAdapter_->textForAI_;
     }
@@ -283,7 +283,7 @@ public:
 
     int32_t GetDisplayWideTextLength()
     {
-        return StringUtils::ToWstring(textForDisplay_).length();
+        return textForDisplay_.length();
     }
 
     // ===========================================================
@@ -371,7 +371,7 @@ public:
     void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
     void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
 
-    std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
+    std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
@@ -777,9 +777,7 @@ protected:
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
     void HandleClickOnTextAndSpan(GestureEvent& info);
-    void RecordClickEvent();
     void ActTextOnClick(GestureEvent& info);
-    void RecordSpanClickEvent(const RefPtr<SpanItem>& span);
     RectF CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc);
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
@@ -840,7 +838,6 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
-    void OnForegroundColorUpdate(const Color& value) override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     bool enabled_ = true;
@@ -855,7 +852,7 @@ protected:
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
     bool isSpanStringMode_ = false;
-    RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>("");
+    RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>(u"");
     bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
@@ -867,7 +864,7 @@ protected:
     RefPtr<TextOverlayModifier> overlayMod_;
     CopyOptions copyOption_ = CopyOptions::None;
 
-    std::string textForDisplay_;
+    std::u16string textForDisplay_;
     std::string paintInfo_ = "NA";
     std::string frameRecord_ = "NA";
     std::optional<TextStyle> textStyle_;
@@ -940,6 +937,7 @@ private:
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
@@ -964,7 +962,7 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
     void ProcessMarqueeVisibleAreaCallback();
-    void ParseOriText(const std::string& currentText);
+    void ParseOriText(const std::u16string& currentText);
     bool IsMarqueeOverflow() const;
     virtual void ResetAfterTextChange();
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);

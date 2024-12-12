@@ -53,6 +53,7 @@
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -1349,7 +1350,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && !contentController_->IsEmpty()) {
         if (isFocusedBeforeClick_) {
             isFocusedBeforeClick_ = false;
-            HandleOnSelectAll(false);
+            HandleOnSelectAll(true);
         } else {
             CloseSelectOverlay(true);
         }
@@ -1371,17 +1372,17 @@ bool TextFieldPattern::HandleOnEscape()
         if (!IsSelected() && HasFocus()) {
             StartTwinkling();
         }
-        return false;
+        return true;
     }
     if (GetIsPreviewText()) {
         ResetPreviewTextState();
-        return false;
+        return true;
     }
     if (HasFocus()) {
         StopTwinkling();
         TextFieldLostFocusToViewRoot();
     }
-    return false;
+    return true;
 }
 
 bool TextFieldPattern::HandleOnTab(bool backward)
@@ -2062,7 +2063,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         auto arr = UdmfClient::GetInstance()->GetSpanStringRecord(data);
         if (arr.size() > 0) {
             auto spanStr = SpanString::DecodeTlv(arr);
-            str += UtfUtils::Str8ToStr16(spanStr->GetString());
+            str += spanStr->GetU16string();
         } else {
             auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
             if (records.empty()) {
@@ -3188,7 +3189,35 @@ void TextFieldPattern::AddTextFireOnChange()
         }
         layoutProperty->UpdatePreviewText(previewText);
         eventHub->FireOnChange(pattern->GetBodyTextValue(), previewText);
+
+        pattern->RecordTextInputEvent();
     });
+}
+
+void TextFieldPattern::RecordTextInputEvent()
+{
+    if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_TEXT_INPUT)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    auto isPwdType = inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
+                     inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
+    if (isPwdType) {
+        return;
+    }
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventCategory(Recorder::EventCategory::CATEGORY_TEXT_INPUT)
+        .SetEventType(Recorder::EventType::TEXT_INPUT)
+        .SetId(host->GetInspectorId().value_or(""))
+        .SetType(host->GetTag())
+        .SetText(UtfUtils::Str16ToStr8(GetBodyTextValue()))
+        .SetDescription(host->GetAutoEventParamValue(""))
+        .SetHost(host);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 void TextFieldPattern::FilterInitializeText()
@@ -3309,8 +3338,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(!IsHandleDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation()) || GetIsPreviewText() ||
-        IsOnPasswordByPosition(info.GetGlobalLocation()) || IsOnCleanNodeByPosition(info.GetGlobalLocation())) {
+    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetLocalLocation()) || GetIsPreviewText() ||
+        IsOnPasswordByPosition(info.GetLocalLocation()) || IsOnCleanNodeByPosition(info.GetLocalLocation())) {
         return;
     }
     moveCaretState_.isTouchCaret = false;
@@ -3328,7 +3357,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     StartVibratorByLongPress();
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (BetweenSelectedPosition(info)) {
         gestureHub->SetIsTextDraggable(true);
         return;
     }
@@ -3337,7 +3366,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         TextFieldRequestFocus(RequestFocusReason::LONG_PRESS);
     }
-    auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+
+    auto localOffset = info.GetLocalLocation();
     if (CanChangeSelectState()) {
         selectController_->UpdateSelectWithBlank(localOffset);
         StopTwinkling();
@@ -3353,6 +3383,24 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     StartGestureSelection(start, end, localOffset);
     TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::BetweenSelectedPosition(GestureEvent& info)
+{
+    if (!IsSelected()) {
+        return false;
+    }
+    auto localOffset = info.GetLocalLocation();
+    auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+    auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
+    Offset offset = localOffset - Offset(offsetX, offsetY);
+    for (const auto& rect : selectController_->GetSelectedRects()) {
+        bool isInRange = rect.IsInRegion({ offset.GetX(), offset.GetY() });
+        if (isInRange) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextFieldPattern::CanChangeSelectState()
@@ -3375,7 +3423,7 @@ bool TextFieldPattern::IsAccessibilityClick()
     return accessibilityProperty->GetAccessibilityFocusState();
 }
 
-bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
+bool TextFieldPattern::IsOnUnitByPosition(const Offset& localOffset)
 {
     if (!IsShowUnit()) {
         return false;
@@ -3384,27 +3432,24 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
     CHECK_NULL_RETURN(unitArea, false);
     auto frameNode = unitArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
-bool TextFieldPattern::IsOnPasswordByPosition(const Offset& globalOffset)
+bool TextFieldPattern::IsOnPasswordByPosition(const Offset& localOffset)
 {
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_RETURN(passwordArea, false);
     auto frameNode = passwordArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
-bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& globalOffset)
+bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& localOffset)
 {
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
     CHECK_NULL_RETURN(cleanNodeResponseArea, false);
     auto frameNode = cleanNodeResponseArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
@@ -3959,9 +4004,10 @@ int32_t TextFieldPattern::GetRequestKeyboardId()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield to request keyboard"
-        "showsoftkeyboard: %{public}d", needShowSoftKeyboard);
-    if (!showKeyBoardOnFocus_ || !HasFocus()) {
+    bool isFocus = HasFocus();
+    if (!showKeyBoardOnFocus_ || !isFocus) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "showKeyBoardOnFocus:%{public}d, isFocus:%{public}d", showKeyBoardOnFocus_,
+            isFocus);
         return false;
     }
     auto tmpHost = GetHost();
@@ -3985,10 +4031,11 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
     MiscServices::TextConfig textConfig = optionalTextConfig.value();
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
-    TAG_LOGI(
-        AceLogTag::ACE_TEXT_FIELD, "node %{public}d RequestKeyboard set calling window id:%{public}u"
-        " inputType: %{public}d enterKeyType: %{public}d", tmpHost->GetId(), textConfig.windowId,
-        textConfig.inputAttribute.inputPattern, textConfig.inputAttribute.enterKeyType);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
+        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d",
+        tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
+        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
@@ -3998,7 +4045,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
 #endif
     if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request SoftKeyboard, Close CustomKeyboard.");
         CloseCustomKeyboard();
     }
     auto context = tmpHost->GetContextRefPtr();
@@ -4082,11 +4129,6 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         auto keyboardOffset = manager->GetKeyboardOffset();
         positionY -= keyboardOffset;
     }
-
-    TAG_LOGI(
-        AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d positionY: %{public}f, height: %{public}f,"
-        "paintOffset: %{public}s, windowRect: %{public}f",
-        tmpHost->GetId(), positionY, height, textPaintOffset.ToString().c_str(), windowRect.Top());
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   textPaintOffset.GetX(),
@@ -4274,8 +4316,6 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::u16string& insertValue, i
     InsertValueInfo insertValueInfo;
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%{public}d,offset:%{public}d",
-        static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
 
@@ -4289,8 +4329,6 @@ void TextFieldPattern::AfterIMEInsertValue(const std::u16string& insertValue)
     auto offset = selectController_->GetCaretIndex();
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%{public}d,offset:%{public}d",
-        static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
 }
 
@@ -5077,6 +5115,7 @@ void TextFieldPattern::RecordSubmitEvent() const
     builder.SetId(inspectorId)
         .SetType(host->GetTag())
         .SetEventType(Recorder::EventType::SEARCH_SUBMIT)
+        .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     if (!isPwdType) {
         builder.SetText(contentController_->GetTextValue());
@@ -6749,6 +6788,13 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueSelectOverlay(json, filter);
+}
+
+void TextFieldPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    json->Put(TreeKey::CONTENT, contentController_->GetTextValue().c_str());
+    json->Put(TreeKey::PLACEHOLDER, GetPlaceHolder().c_str());
 }
 
 void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -8776,10 +8822,10 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     // serialize the selected text
     info.selectStart = selectController_->GetStartIndex();
     info.selectEnd = selectController_->GetEndIndex();
-    auto selectContent = UtfUtils::Str16ToStr8(contentController_->GetSelectedValue(info.selectStart, info.selectEnd));
+    auto selectContent = contentController_->GetSelectedValue(info.selectStart, info.selectEnd);
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
     spanString->EncodeTlv(info.selectBuffer);
-    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetWideString()));
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{private}s",
         info.selectStart, info.selectEnd, spanString->GetString().c_str());
 
@@ -8802,7 +8848,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     }
     info.start = info.selectStart - sentenceStart;
     info.end = info.selectEnd - sentenceStart;
-    auto sentenceContent = UtfUtils::Str16ToStr8(contentController_->GetSelectedValue(sentenceStart, sentenceEnd));
+    auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
     spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
     spanString->EncodeTlv(info.sentenceBuffer);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{private}s",
@@ -8842,7 +8888,7 @@ void TextFieldPattern::HandleOnAIWrite()
 void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
 {
     RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
-    auto resultText = UtfUtils::Str8ToStr16(spanString->GetString());
+    auto resultText = spanString->GetU16string();
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{private}s",
         start, end, spanString->GetString().c_str());
     if (spanString->GetSpanItems().empty()) {

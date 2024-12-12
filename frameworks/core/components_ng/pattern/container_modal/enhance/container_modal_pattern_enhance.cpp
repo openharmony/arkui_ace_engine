@@ -815,9 +815,13 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     CHECK_NULL_VOID(customNode);
 
     auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
-    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, true);
     } else {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, false);

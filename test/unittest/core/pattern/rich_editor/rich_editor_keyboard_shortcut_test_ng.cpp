@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -836,7 +837,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectParagraghPos001, TestSize
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = "test\n123";
+    it->content = u"test\n123";
     it->position = 4;
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isSpanStringMode_ = true;
@@ -918,33 +919,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->GetDeletedSpan(changeValue, innerPosition, length, direction);
     EXPECT_NE(innerPosition, 10);
-}
-
-/**
- * @tc.name: HandleMouseEvent001
- * @tc.desc: test HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto scrollBar = richEditorPattern->GetScrollBar();
-    ASSERT_NE(scrollBar, nullptr);
-    scrollBar->isHover_ = true;
-    scrollBar->isPressed_ = true;
-    MouseInfo info;
-    richEditorPattern->HandleMouseEvent(info);
-    EXPECT_TRUE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**
@@ -1094,7 +1068,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    std::string originalStr;
+    std::u16string originalStr;
     int32_t originalPos = 0;
     int32_t firstLength = static_cast<int32_t>(StringUtils::ToWstring(firstInfo.GetValue()).length());
     firstInfo.SetEraseLength(firstLength);
@@ -1135,7 +1109,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level1)
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = INIT_VALUE_3;
+    it->content = INIT_U16VALUE_3;
     it->position = 0;
     richEditorPattern->caretPosition_ = 1;
 
@@ -1367,5 +1341,53 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1
     bool result =
         ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<RichEditorPattern>()->keyboardAvoidance_;
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleTouchMove002
+ * @tc.desc: test HandleTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->editingLongPress_ = false;
+    richEditorPattern->moveCaretState_.isTouchCaret = true;
+    richEditorPattern->moveCaretState_.isMoveCaret = false;
+    richEditorPattern->moveCaretState_.touchDownOffset = Offset(5.0f, 5.0f);
+    Offset offset(5.0f, 5.0f);
+    auto moveDistance = (offset - richEditorPattern->moveCaretState_.touchDownOffset).GetDistance();
+    ASSERT_GT(richEditorPattern->moveCaretState_.minDistance.ConvertToPx(), moveDistance);
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetGlobalLocation(offset);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
+    EXPECT_EQ(richEditorPattern->moveCaretState_.touchFingerId, touchLocationInfo.fingerId_);
+}
+
+/**
+ * @tc.name: HandleTouchMove003
+ * @tc.desc: test HandleTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->editingLongPress_ = false;
+    richEditorPattern->moveCaretState_.isTouchCaret = true;
+    richEditorPattern->moveCaretState_.isMoveCaret = true;
+    richEditorPattern->moveCaretState_.touchDownOffset = Offset(5.0f, 5.0f);
+    Offset offset(5.01f, 5.01f);
+    auto moveDistance = (offset - richEditorPattern->moveCaretState_.touchDownOffset).GetDistance();
+    ASSERT_LE(moveDistance, richEditorPattern->moveCaretState_.minDistance.ConvertToPx() + 0.001f);
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetGlobalLocation(offset);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
+    EXPECT_NE(richEditorPattern->moveCaretState_.touchFingerId, touchLocationInfo.fingerId_);
 }
 } // namespace OHOS::Ace::NG

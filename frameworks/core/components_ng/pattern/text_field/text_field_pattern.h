@@ -602,6 +602,7 @@ public:
     }
     std::vector<RectF> GetTextBoxesForSelect();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -847,6 +848,8 @@ public:
     {
         return dragStatus_ == DragStatus::DRAGGING;
     }
+
+    bool BetweenSelectedPosition(GestureEvent& info);
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
@@ -1649,6 +1652,7 @@ private:
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
     void AddTextFireOnChange();
+    void RecordTextInputEvent();
 
     void FilterInitializeText();
 

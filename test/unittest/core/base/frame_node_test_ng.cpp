@@ -2024,23 +2024,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg067, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg068
- * @tc.desc: Test OnForegroundColorUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg068, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
-    auto pattern = frameNode->GetPattern();
-    const Color& value = Color::RED;
-    frameNode->OnForegroundColorUpdate(value);
-    pattern->OnForegroundColorUpdate(value);
-    EXPECT_NE(pattern, nullptr);
-}
-
-/**
  * @tc.name: FrameNodeTestNg069
  * @tc.desc: Test CheckAutoSave.
  * @tc.type: FUNC
@@ -2368,6 +2351,121 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg088, TestSize.Level1)
                                 "bottom_: [start: 0, end: 1]\",\"SelfAdjust\":\"RectT (1.00, 1.00) - " \
                                 "[1.00 x 1.00]\",\"ParentSelfAdjust\":\"RectT (0.00, 0.00) - [10.00 x 10.00]\"}";
     EXPECT_EQ(result, expectStr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg089
+ * @tc.desc: Test DumpSimplifyCommonInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg089, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. make geometryNode_->GetFrameRect()
+     * @tc.expect: FrameRect is set to Json
+     */
+    const NG::RectF rect = { 10.0f, 20.0f, 30.0f, 40.0f };
+    frameNode->geometryNode_->frame_.rect_ = rect;
+    /**
+     * @tc.steps: step3. make renderContext_->GetBackgroundColor()
+     * @tc.expect: BackgroundColor is set to Json
+     */
+    frameNode->renderContext_->UpdateBackgroundColor(Color::BLUE);
+
+    /**
+     * @tc.steps: step4. make layoutProperty_->GetVisibility()
+     * @tc.expect: Visible is set to Json
+     */
+    frameNode->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5. make layoutProperty_->GetLayoutRect()
+     * @tc.expect: LayoutRect is set to Json
+     */
+    frameNode->layoutProperty_->SetLayoutRect(rect);
+
+    /**
+     * @tc.steps: step6. make layoutProperty_->GetCalcLayoutConstraint()
+     * @tc.expect: UserDefinedConstraint is set to Json
+     */
+    frameNode->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+
+    /**
+     * @tc.steps: step7. make layoutProperty_->GetPaddingProperty() and layoutProperty_->GetContentLayoutConstraint()
+     * @tc.expect: ContentConstraint is set to Json
+     */
+    frameNode->layoutProperty_->padding_ = std::make_unique<PaddingProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    frameNode->layoutProperty_->contentConstraint_ = constraint;
+
+    /**
+     * @tc.steps: step8. make geometryNode_->GetParentLayoutConstraint()
+     * @tc.expect: ParentLayoutConstraint is set to Json
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.percentReference.width_ = 10.0;
+    frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraint);
+
+    /**
+     * @tc.steps: step9. call DumpSimplifyCommonInfo
+     * @tc.expect: check each key
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    EXPECT_TRUE(json->IsObject());
+    EXPECT_TRUE(json->Contains("FrameRect"));
+    EXPECT_FALSE(json->Contains("PaintRectWithoutTransform"));
+    EXPECT_TRUE(json->Contains("BackgroundColor"));
+    EXPECT_TRUE(json->Contains("Offset"));
+    EXPECT_TRUE(json->Contains("Visible"));
+    EXPECT_EQ(json->GetInt64("Visible"), 1);
+    EXPECT_TRUE(json->Contains("LayoutRect"));
+    EXPECT_TRUE(json->Contains("UserDefinedConstraint"));
+    EXPECT_TRUE(json->Contains("ContentConstraint"));
+    EXPECT_FALSE(json->Contains("ZIndex"));
+    EXPECT_TRUE(json->Contains("ParentLayoutConstraint"));
+}
+
+/**
+ * @tc.name: FrameNodeTestNg090
+ * @tc.desc: Test DumpPadding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg090, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set padding value is not 0
+     * @tc.expect: check each key
+     */
+    std::unique_ptr<NG::PaddingProperty> padding = std::make_unique<NG::PaddingProperty>();
+    padding->top = CalcLength(1.0, DimensionUnit::PX);
+    padding->right = CalcLength("2.0vp");
+    padding->bottom = NG::CalcLength::FromString("3.0vp");
+    padding->left = CalcLength(4.0, DimensionUnit::PX);
+
+    std::string label = "Padding";
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(padding, nullptr);
+
+    /**
+     * @tc.steps: step3. call DumpPadding
+     * @tc.expect: Padding is set to Json
+     */
+    frameNode->DumpPadding(padding, label, json);
+    EXPECT_TRUE(json->Contains(label));
 }
 
 } // namespace OHOS::Ace::NG

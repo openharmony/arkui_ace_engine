@@ -188,7 +188,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollIndex002, TestSize.Level1)
         centerIndex = center;
     };
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetOnScrollIndex(event);
     CreateListItems(2);
     CreateDone();
@@ -230,7 +230,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollIndex003, TestSize.Level1)
         centerIndex = center;
     };
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetOnScrollIndex(event);
     CreateListItems(4);
     CreateDone();
@@ -445,6 +445,27 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
     ScrollTo(ITEM_MAIN_SIZE * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
+}
+
+/**
+ * @tc.name: Event008
+ * @tc.desc: Test scroll callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, Event008, TestSize.Level1)
+{
+    bool isTrigger = false;
+    auto event = [&isTrigger](Dimension offset, ScrollState state) { isTrigger = true; };
+    ListModelNG model = CreateList();
+    model.SetOnScroll(event);
+    CreateListItems(2);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Scroll down to end
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    EXPECT_FALSE(isTrigger);
 }
 
 /**
@@ -752,7 +773,7 @@ HWTEST_F(ListScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
 HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     model.SetChainAnimation(true);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();

@@ -63,7 +63,6 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
-        scrollable_->SetIsList(true);
     }
 
     SetEdgeEffect();
@@ -86,9 +85,6 @@ void ListPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
-    if (IsNeedInitClickEventRecorder()) {
-        Pattern::InitClickEventRecorder();
-    }
     auto overlayNode = host->GetOverlayNode();
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
@@ -256,18 +252,10 @@ void ListPattern::UpdateListDirectionInCardStyle()
     }
 }
 
-ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
+ScrollAlign ListPattern::GetInitialScrollAlign() const
 {
-    auto scrollAlign = ScrollAlign::START;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, scrollAlign);
-    auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(listProperty, scrollAlign);
-    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
-    if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
-        scrollAlign = ScrollAlign::CENTER;
-    }
-    return scrollAlign;
+    auto snapAlign = GetScrollSnapAlign();
+    return snapAlign == ScrollSnapAlign::CENTER ? ScrollAlign::CENTER : ScrollAlign::START;
 }
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
@@ -580,7 +568,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (needUseInitialIndex) {
         jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
         if (NeedScrollSnapAlignEffect()) {
-            scrollAlign_ = GetScrollAlignByScrollSnapAlign();
+            scrollAlign_ = GetInitialScrollAlign();
         }
     }
     if (jumpIndex_) {
@@ -652,30 +640,23 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
 
 bool ListPattern::IsScrollSnapAlignCenter() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(listProperty, false);
-    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
-    if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
-        return true;
-    }
-
-    return false;
+    auto snapAlign = GetScrollSnapAlign();
+    return snapAlign == ScrollSnapAlign::CENTER;
 }
 
 bool ListPattern::NeedScrollSnapAlignEffect() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(listProperty, false);
-    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
-    if (scrollSnapAlign == V2::ScrollSnapAlign::NONE) {
-        return false;
-    }
+    auto snapAlign = GetScrollSnapAlign();
+    return snapAlign != ScrollSnapAlign::NONE;
+}
 
-    return true;
+ScrollSnapAlign ListPattern::GetScrollSnapAlign() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ScrollSnapAlign::NONE);
+    auto listProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, ScrollSnapAlign::NONE);
+    return listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
 }
 
 bool ListPattern::IsAtTop() const
@@ -923,19 +904,50 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
 }
 
 bool ListPattern::StartSnapAnimation(
-    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
+    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance, SnapDirection snapDirection)
 {
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
-    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
-    if (scrollSnapAlign == V2::ScrollSnapAlign::NONE) {
-        return false;
-    }
-    if (AnimateRunning()) {
-        return false;
+    CHECK_NULL_RETURN(!(lastSnapTargetIndex_ < 0 && snapDirection != SnapDirection::NONE && AnimateRunning()), false);
+    auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
+    ScrollAlign align = ScrollAlign::NONE;
+    auto anchorIndex = startIndex_;
+    switch (scrollSnapAlign) {
+        case ScrollSnapAlign::NONE:
+            return false;
+        case ScrollSnapAlign::START:
+            align = ScrollAlign::START;
+            break;
+        case ScrollSnapAlign::CENTER:
+            align = ScrollAlign::CENTER;
+            anchorIndex = centerIndex_;
+            break;
+        case ScrollSnapAlign::END:
+            align = ScrollAlign::END;
+            anchorIndex = endIndex_;
+            break;
     }
     if (!IsScrolling()) {
         snapTrigOnScrollStart_ = true;
+    }
+    if (snapDirection == SnapDirection::FORWARD) {
+        if (lastSnapTargetIndex_ < 0) {
+            lastSnapTargetIndex_ = anchorIndex - 1;
+        } else {
+            lastSnapTargetIndex_--;
+        }
+        lastSnapTargetIndex_ = lastSnapTargetIndex_ < 0 ? 0 : lastSnapTargetIndex_;
+        ScrollToIndex(lastSnapTargetIndex_, true, align);
+        return true;
+    } else if (snapDirection == SnapDirection::BACKWARD) {
+        if (lastSnapTargetIndex_ < 0) {
+            lastSnapTargetIndex_ = anchorIndex + 1;
+        } else {
+            lastSnapTargetIndex_++;
+        }
+        lastSnapTargetIndex_ = lastSnapTargetIndex_ > maxListItemIndex_ ? maxListItemIndex_ : lastSnapTargetIndex_;
+        ScrollToIndex(lastSnapTargetIndex_, true, align);
+        return true;
     }
     predictSnapOffset_ = snapDelta;
     scrollSnapVelocity_ = animationVelocity;

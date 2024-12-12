@@ -1167,6 +1167,7 @@ let KeySource;
 (function (KeySource) {
   KeySource[KeySource.Unknown = 0] = 'Unknown';
   KeySource[KeySource.Keyboard = 4] = 'Keyboard';
+  KeySource[KeySource.JOYSTICK = 5] = 'JOYSTICK';
 })(KeySource || (KeySource = {}));
 
 let SeekMode;
@@ -2803,7 +2804,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    this.changeArray.splice(0);
+    UIUtilsImpl.instance().getTarget(this).changeArray.splice(0);
   }
 }
 
@@ -3529,3 +3530,15 @@ var WebNavigationType;
   WebNavigationType[WebNavigationType['NAVIGATION_TYPE_NEW_SUBFRAME'] = 4] = 'NAVIGATION_TYPE_NEW_SUBFRAME';
   WebNavigationType[WebNavigationType['NAVIGATION_TYPE_AUTO_SUBFRAME'] = 5] = 'NAVIGATION_TYPE_AUTO_SUBFRAME';
 })(WebNavigationType || (WebNavigationType = {}));
+
+let AxisModel;
+(function (AxisModel) {
+  AxisModel[AxisModel.ABS_X = 0] = 'ABS_X';
+  AxisModel[AxisModel.ABS_Y = 1] = 'ABS_Y';
+  AxisModel[AxisModel.ABS_Z = 2] = 'ABS_Z';
+  AxisModel[AxisModel.ABS_RZ = 3] = 'ABS_RZ';
+  AxisModel[AxisModel.ABS_GAS = 4] = 'ABS_GAS';
+  AxisModel[AxisModel.ABS_BRAKE = 5] = 'ABS_BRAKE';
+  AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
+  AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
+})(AxisModel || (AxisModel = {}));

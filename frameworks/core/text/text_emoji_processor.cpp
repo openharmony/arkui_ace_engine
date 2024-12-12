@@ -136,12 +136,6 @@ int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
 }
 
 EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
-    const std::string& content, int32_t& startIndex, int32_t& endIndex)
-{
-    return GetIndexRelationToEmoji(index, StringUtils::Str8ToStr16(content), startIndex, endIndex);
-}
-
-EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
     const std::u16string& u16Content, int32_t& startIndex, int32_t& endIndex)
 {
     endIndex = index;

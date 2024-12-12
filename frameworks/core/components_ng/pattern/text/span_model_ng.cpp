@@ -48,20 +48,18 @@
     } while (false)
 namespace OHOS::Ace::NG {
 
-void SpanModelNG::Create(const std::string& content)
+void SpanModelNG::Create(const std::u16string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     stack->Push(spanNode);
-    if (StringUtils::ToWstring(content).length() == 0 && content.length() != 0) {
-        ACE_UPDATE_SPAN_PROPERTY(Content, TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(content));
-    } else {
-        ACE_UPDATE_SPAN_PROPERTY(Content, content);
-    }
+    auto contentModified = content;
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(contentModified.data()), contentModified.length(), 0);
+    ACE_UPDATE_SPAN_PROPERTY(Content, contentModified);
 }
 
-RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::string& content)
+RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::u16string& content)
 {
     auto spanNode = SpanNode::CreateSpanNode(nodeId);
     CHECK_NULL_RETURN(spanNode, nullptr);
@@ -254,7 +252,7 @@ void SpanModelNG::SetAccessibilityImportance(const std::string& importance)
     spanItem->accessibilityProperty->SetAccessibilityLevel(importance);
 }
 
-void SpanModelNG::InitSpan(UINode* uiNode, const std::string& content)
+void SpanModelNG::InitSpan(UINode* uiNode, const std::u16string& content)
 {
     ACE_UPDATE_NODE_SPAN_PROPERTY(Content, content, uiNode);
 }
@@ -460,12 +458,12 @@ void SpanModelNG::SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBac
     spanNode->SetTextBackgroundStyle(style);
 }
 
-std::string SpanModelNG::GetContent(UINode* uiNode)
+std::u16string SpanModelNG::GetContent(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
-    CHECK_NULL_RETURN(spanNode, "");
+    CHECK_NULL_RETURN(spanNode, u"");
     auto spanItem = spanNode->GetSpanItem();
-    CHECK_NULL_RETURN(spanItem, "");
+    CHECK_NULL_RETURN(spanItem, u"");
     return spanItem->GetSpanContent();
 }
 

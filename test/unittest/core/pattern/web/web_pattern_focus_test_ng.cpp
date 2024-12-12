@@ -283,7 +283,8 @@ public:
         return false;
     }
 
-    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance, float velocity) override
+    std::optional<float> CalcPredictSnapOffset(
+        float delta, float dragDistance, float velocity, SnapDirection snapDirection) override
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;

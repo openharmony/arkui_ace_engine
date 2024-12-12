@@ -88,6 +88,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/modal_ui_extension.h"
+#include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/xcollie/xcollieInterface.h"
@@ -1274,6 +1275,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetIsFormRender(isFormRender_);
     container->SetIsDynamicRender(isDynamicRender_);
+    container->SetUIContentType(uIContentType_);
     container->SetRegisterComponents(registerComponents_);
     container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
@@ -1628,7 +1630,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
 
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window->GetDisplayId());
+    if (!defaultDisplay) {
+        defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    }
     if (defaultDisplay) {
         density = defaultDisplay->GetVirtualPixelRatio();
         if (isSceneBoardWindow && !NearEqual(defaultDensity, 1.0f)) {
@@ -2364,6 +2369,9 @@ bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: OnBackPressed called", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventType(Recorder::EventType::BACK_PRESSED);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     if (container->IsUIExtensionWindow() && !container->WindowIsShow()) {
@@ -2521,6 +2529,9 @@ void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::Ap
 
     auto dialogContainer = Platform::DialogContainer::GetContainer(instanceId_);
     if (dialogContainer) {
+        return;
+    }
+    if (isDynamicRender_ || isFormRender_) {
         return;
     }
 
@@ -2693,7 +2704,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     taskExecutor->PostTask(std::move(changeBrightnessTask), TaskExecutor::TaskType::UI, "ArkUIUpdateBrightness");
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::RESIZE_WITH_ANIMATION);
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         if (container->IsUIExtensionWindow()) {
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);

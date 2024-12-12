@@ -154,11 +154,11 @@ HWTEST_F(RichEditorPatternTestFiveNg, BuilderSpanBindSelectionMenu001, TestSize.
     objText.type = SelectSpanType::TYPESPAN;
     ResultObject objImage;
     objImage.type = SelectSpanType::TYPEIMAGE;
-    objImage.valueString = " ";
+    objImage.valueString = u" ";
     objImage.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
     ResultObject objBuilder;
     objBuilder.type = SelectSpanType::TYPEIMAGE;
-    objBuilder.valueString = " ";
+    objBuilder.valueString = u" ";
     objBuilder.valuePixelMap = nullptr;
     SelectionInfo originalSelection;
     SelectionInfo adjustedSelection;
@@ -331,7 +331,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetUrlSpanShowShadow001, TestSize.Level1)
     richEditorPattern->pManager_ = pManager;
 
     // 6: Create MutableSpanString and set to richEditorPattern
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("click here");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"click here");
     spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 0, 10));
     richEditorPattern->SetStyledString(spanString);
 
@@ -718,7 +718,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString001, TestSiz
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
+    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_U16VALUE2);
     richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
     EXPECT_FALSE(richEditorPattern->isDragSponsor_);
 }
@@ -733,7 +733,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString002, TestSiz
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
+    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_U16VALUE2);
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
@@ -750,7 +750,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString003, TestSiz
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
+    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_U16VALUE2);
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->dragRange_ = { 2, 8 };
@@ -772,7 +772,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, InsertValueToBeforeSpan001, TestSize.Level
     auto nodeId = stack->ClaimNodeId();
     auto spanNodeBefore = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
     string insertValue = PREVIEW_TEXT_VALUE3;
-    spanNodeBefore->GetSpanItem()->content = PREVIEW_TEXT_VALUE2;
+    spanNodeBefore->GetSpanItem()->content = PREVIEW_TEXT_U16VALUE2;
     richEditorPattern->InsertValueToBeforeSpan(spanNodeBefore, insertValue);
     EXPECT_EQ(spanNodeBefore->GetSpanItem()->position, 4);
 }
@@ -790,7 +790,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, InsertValueToBeforeSpan002, TestSize.Level
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNodeBefore = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
-    spanNodeBefore->GetSpanItem()->content = EXCEPT_VALUE;
+    spanNodeBefore->GetSpanItem()->content = EXCEPT_U16VALUE;
     richEditorPattern->InsertValueToBeforeSpan(spanNodeBefore, EXCEPT_VALUE);
     EXPECT_EQ(spanNodeBefore->GetSpanItem()->position, -1);
 }
@@ -891,7 +891,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos001, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_->text_ = "HandleSelectParagraghPos";
+    richEditorPattern->styledString_->text_ = u"HandleSelectParagraghPos";
     richEditorPattern->caretPosition_ = 1;
     EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(true), 0);
 }
@@ -921,7 +921,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos003, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_->text_ = "HandleSelectParagraghPos";
+    richEditorPattern->styledString_->text_ = u"HandleSelectParagraghPos";
     richEditorPattern->caretPosition_ = 1;
     EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(false), 2);
 }
@@ -1302,7 +1302,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, SetCaretPosition001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("SetCaretPosition");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"SetCaretPosition");
     richEditorPattern->caretChangeListener_ = [](int32_t x) {};
     EXPECT_TRUE(richEditorPattern->SetCaretPosition(2, false));
 }
@@ -1354,7 +1354,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, SetSubSpans001, TestSize.Level1)
     spanItem1->position = 0;
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->spans_.push_back(spanItem1);
-    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
     richEditorPattern->SetSubSpans(spanString, 1, 1);
     EXPECT_EQ(spanString->spans_.size(), 0);
 }

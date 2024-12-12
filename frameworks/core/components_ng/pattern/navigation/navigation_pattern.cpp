@@ -656,7 +656,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     CHECK_NULL_VOID(hostNode);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "sync with js stack, id: %{public}s, UINodeId: %{public}d, preStackSize: %{public}d, newStackSize: %{public}d",
-        hostNode->GetCurId().c_str(), hostNode->GetId(), navigationStack_->Size(),
+        hostNode->GetCurId().c_str(), hostNode->GetId(), navigationStack_->PreSize(),
         static_cast<int32_t>(navigationStack_->GetAllPathName().size()));
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
@@ -1252,16 +1252,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
 
     // navDestination pop to navBar
     if (preTopNavDestination) {
+        preTopNavDestination->CleanContent();
         auto parent = preTopNavDestination->GetParent();
         CHECK_NULL_VOID(parent);
-        auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-        auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
-        if (shallowBuilder) {
-            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-        }
-        if (preTopNavDestination->GetContentNode()) {
-            preTopNavDestination->GetContentNode()->Clean(false, true);
-        }
         parent->RemoveChild(preTopNavDestination, true);
         navigationNode->SetNeedSetInvisible(false);
         auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);

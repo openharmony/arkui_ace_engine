@@ -194,7 +194,7 @@ public:
     uint32_t length = 0;
     std::string inspectId;
     std::string description;
-    std::string content;
+    std::u16string content;
     uint32_t unicode = 0;
     SpanItemType spanItemType = SpanItemType::NORMAL;
     std::pair<int32_t, int32_t> interval;
@@ -224,15 +224,16 @@ public:
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
-    virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
+    virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);
-    virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
+    virtual void UpdateTextStyle(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
+        const std::u16string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const;
     std::string GetFont() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
@@ -296,8 +297,8 @@ public:
     {
         return isParentText;
     }
-    std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
-    std::string GetSpanContent();
+    std::u16string GetSpanContent(const std::u16string& rawContent, bool isMarquee = false);
+    std::u16string GetSpanContent();
     uint32_t GetSymbolUnicode();
     std::string SymbolColorToString();
 
@@ -413,7 +414,7 @@ public:
         RequestTextFlushDirty();
     }
 
-    void UpdateContent(const std::string& content)
+    void UpdateContent(const std::u16string& content)
     {
         if (spanItem_->content == content) {
             return;
@@ -487,6 +488,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         spanItem_->ToJsonValue(json, filter);
+    }
+
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        spanItem_->ToTreeJson(json, config);
     }
 
     void RequestTextFlushDirty();

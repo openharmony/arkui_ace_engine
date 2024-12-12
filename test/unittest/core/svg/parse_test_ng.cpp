@@ -1987,4 +1987,17 @@ HWTEST_F(ParseTestNg, ParseNodeTest009, TestSize.Level1)
     svgNode->SetAttr("patterntransform", "testPatterntransform");
     EXPECT_EQ(svgNode->GetBaseAttributes().transform, "testPatterntransform");
 }
+
+/**
+ * @tc.name: ParseNodeTest010
+ * @tc.desc: SvgNode SetStroke
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest010, TestSize.Level1)
+{
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(SvgCircle::Create());
+    EXPECT_NE(svgCircle, nullptr);
+    svgCircle->SetAttr("stroke", "rgb( 10, 0 ,4)");
+    EXPECT_EQ(svgCircle->attributes_.strokeState.color_.GetValue(), Color::FromRGB(10, 0, 4).GetValue());
+}
 } // namespace OHOS::Ace::NG

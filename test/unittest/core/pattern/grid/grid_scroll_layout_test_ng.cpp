@@ -778,7 +778,6 @@ HWTEST_F(GridScrollLayoutTestNg, OnModifyDone001, TestSize.Level1)
     EXPECT_TRUE(paintProperty->GetScrollBarProperty());
     EXPECT_TRUE(frameNode_->GetFocusHub());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetScrollable());
-    EXPECT_TRUE(pattern_->IsNeedInitClickEventRecorder());
 
     /**
      * @tc.steps: step2. Call OnModifyDone
@@ -790,7 +789,6 @@ HWTEST_F(GridScrollLayoutTestNg, OnModifyDone001, TestSize.Level1)
     EXPECT_TRUE(paintProperty->GetScrollBarProperty());
     EXPECT_TRUE(frameNode_->GetFocusHub());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetScrollable());
-    EXPECT_TRUE(pattern_->IsNeedInitClickEventRecorder());
 
     /**
      * @tc.steps: step3. Change MultiSelectable and Call OnModifyDone

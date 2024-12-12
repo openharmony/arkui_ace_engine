@@ -234,6 +234,7 @@ template("ace_core_source_set") {
       "gestures/timeout_gesture.cpp",
 
       # event
+      "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
@@ -272,6 +273,7 @@ template("ace_core_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text
@@ -734,6 +736,7 @@ template("ace_core_ng_source_set") {
       "common/window.cpp",
 
       # event
+      "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
@@ -866,6 +869,7 @@ template("ace_core_ng_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text
