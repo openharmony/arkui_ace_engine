@@ -139,7 +139,7 @@ void ServiceCollaborationMenuAceHelper::CreateEndIcon(uint32_t iconId, const Ref
     iconProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(iconId));
     iconProperty->UpdateSymbolColorList({ richTheme->GetMenuIconColor() });
     iconProperty->UpdateFontSize(iconTheme->GetIconSideLength());
-    iconProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    iconProperty->UpdateAlignment(Alignment::CENTER);
     MarginProperty margin;
     margin.right = CalcLength(static_cast<float>(ENDICON_MARGIN_RIGHT));
     iconProperty->UpdateMargin(margin);
