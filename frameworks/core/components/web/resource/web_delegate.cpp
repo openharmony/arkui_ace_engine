@@ -7444,10 +7444,4 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
     }
 #endif
 }
-
-bool WebDelegate::IsTouchEditable()
-{
-    auto hitType = GetHitTestResult();
-    return (hitType == static_cast<int32_t>(WebHitTestType::EDIT));
-}
 } // namespace OHOS::Ace
