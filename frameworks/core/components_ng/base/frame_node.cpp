@@ -46,6 +46,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
+#include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
 #include "interfaces/inner_api/ace_kit/include/view/pattern.h"
 
 namespace {
@@ -496,6 +497,9 @@ FrameNode::~FrameNode()
         pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
+    if (kitNode_) {
+        kitNode_->Reset();
+    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -2205,8 +2209,8 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
 {
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
-    if (absPattern_) {
-        auto method = absPattern_->CreateNodePaintMethod();
+    if (kitNode_ && kitNode_->GetPattern()) {
+        auto method = kitNode_->GetPattern()->CreateNodePaintMethod();
         auto paintWrapper = MakeRefPtr<PaintWrapper>(
             renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
         paintWrapper->SetKitNodePaintMethod(method);
@@ -4697,9 +4701,9 @@ RefPtr<UINode> FrameNode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
 const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needReset)
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
-        if (absPattern_) {
+        if (kitNode_ && kitNode_->GetPattern()) {
             layoutAlgorithm_ =
-                LayoutAlgorithmWrapper::CreateLayoutAlgorithmWrapper(absPattern_->CreateLayoutAlgorithm());
+                LayoutAlgorithmWrapper::CreateLayoutAlgorithmWrapper(kitNode_->GetPattern()->CreateLayoutAlgorithm());
         } else {
             layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
         }
@@ -6160,8 +6164,8 @@ std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
     return list;
 }
 
-void FrameNode::SetAbsPattern(const RefPtr<Kit::Pattern> absPattern)
+void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
 {
-    absPattern_ = absPattern;
+    kitNode_ = node;
 }
 } // namespace OHOS::Ace::NG

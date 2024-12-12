@@ -20,7 +20,6 @@
 #include <string>
 
 #include "interfaces/inner_api/ace_kit/include/base/ace_type.h"
-#include "interfaces/inner_api/ace_kit/include/base/referenced.h"
 
 namespace OHOS::Ace::NG {
 class LayoutProperty;
@@ -29,6 +28,8 @@ struct LayoutConstraintT;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::Kit {
+
+class Pattern;
 class FrameNode : public AceType {
     DECLARE_ACE_TYPE(FrameNode, AceType);
 
@@ -37,10 +38,12 @@ public:
     virtual ~FrameNode() = default;
 
     virtual void InitializePatternAndContext() = 0;
+    virtual void Reset() = 0;
 
     virtual void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) = 0;
     virtual void Layout() = 0;
     virtual RefPtr<NG::LayoutProperty> GetLayoutProperty() = 0;
+    virtual RefPtr<Pattern> GetPattern() = 0;
 };
 } // namespace OHOS::Ace::Kit
 
