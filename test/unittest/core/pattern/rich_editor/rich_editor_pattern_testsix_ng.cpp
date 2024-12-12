@@ -167,4 +167,96 @@ HWTEST_F(RichEditorPatternTestSixNg, ClickAISpan004, TestSize.Level1)
     richEditorPattern->leftMousePress_ = false;
     EXPECT_FALSE(richEditorPattern->ClickAISpan(textOffset, aiSpan));
 }
+
+/**
+ * @tc.name: GetThumbnailCallback002
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, GetThumbnailCallback002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 10;
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_U16VALUE2;
+    richEditorPattern->spans_.push_back(spanItem);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto newFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto newAddFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    richEditorNode_->children_.push_back(newFrameNode);
+    richEditorNode_->children_.push_back(newAddFrameNode);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_3);
+    auto thumbnailCallback = richEditorPattern->GetThumbnailCallback();
+    Offset point(10, 10);
+    thumbnailCallback(point);
+    EXPECT_FALSE(richEditorPattern->dragNode_->isLayoutDirtyMarked_);
+}
+
+/**
+ * @tc.name: GetThumbnailCallback003
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, GetThumbnailCallback003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    richEditorNode_->GetPattern<TextPattern>()->placeholderIndex_.push_back(1);
+    richEditorNode_->GetPattern<TextPattern>()->placeholderIndex_.push_back(2);
+    richEditorNode_->GetPattern<TextPattern>()->placeholderIndex_.push_back(3);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 10;
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = PREVIEW_TEXT_U16VALUE2;
+    richEditorPattern->spans_.push_back(spanItem);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto newFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto newAddFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PLACEHOLDER_SPAN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    richEditorNode_->children_.push_back(newFrameNode);
+    richEditorNode_->children_.push_back(newAddFrameNode);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_3);
+    richEditorPattern->selectOverlay_->hostTextBase_.Reset();
+    auto thumbnailCallback = richEditorPattern->GetThumbnailCallback();
+    Offset point(10, 10);
+    thumbnailCallback(point);
+    EXPECT_FALSE(richEditorPattern->dragNode_->isLayoutDirtyMarked_);
+}
 } // namespace OHOS::Ace::NG
