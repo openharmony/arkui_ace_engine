@@ -681,6 +681,7 @@ public:
     void FireHoverModeChangeCallback();
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
+    void RecoverHalfFoldOrAvoidStatus();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -741,6 +742,7 @@ private:
     void ResetClipShape();
     void UpdateSheetWhenSheetTypeChanged();
     void GetCurrentScrollHeight();
+    void RecoverAvoidKeyboardStatus();
     void RecoverScrollOrResizeAvoidStatus();
 
     uint32_t keyboardHeight_ = 0;
