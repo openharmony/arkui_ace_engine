@@ -2938,6 +2938,9 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
         auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
         auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
         auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+            continue;
+        }
         RectF responseRegion(round(offset.GetX() + x.value()), round(offset.GetY() + y.value()),
             round(width.value()), round(height.value()));
         responseRegionList.emplace_back(responseRegion);
