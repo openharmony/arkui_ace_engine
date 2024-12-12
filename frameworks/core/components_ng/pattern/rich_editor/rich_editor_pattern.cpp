@@ -4875,11 +4875,11 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     bool isSelector = textSelector_.IsValid();
     if (isSelector) {
         DeleteByRange(record, textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-        CloseSelectOverlay();
         ResetSelection();
     } else if (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) {
         DeleteByRange(record, previewTextRecord_.replacedRange.start, previewTextRecord_.replacedRange.end);
     }
+    CloseSelectOverlay();
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
     IF_TRUE(!caretVisible_ && HasFocus(), StartTwinkling());
