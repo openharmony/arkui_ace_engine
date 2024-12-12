@@ -1242,7 +1242,7 @@ template<>
         case ARK_RENDER_FIT_RESIZE_COVER: dst = RenderFit::RESIZE_COVER; break;
         case ARK_RENDER_FIT_RESIZE_COVER_TOP_LEFT: dst = RenderFit::RESIZE_COVER_TOP_LEFT; break;
         case ARK_RENDER_FIT_RESIZE_COVER_BOTTOM_RIGHT: dst = RenderFit::RESIZE_COVER_BOTTOM_RIGHT; break;
-        default: dst.reset(); // Handle unexpected values by resetting the optional
+        default: LOGE("Unexpected enum value in Ark_RenderFit: %{public}d", src);
     }
 }
 
