@@ -564,6 +564,16 @@ public:
         return false;
     }
 
+    void UpdateHoverModeChangedCallbackId(const std::optional<int32_t>& id)
+    {
+        hoverModeChangedCallbackId_ = id;
+    }
+
+    bool HasHoverModeChangedCallbackId() const
+    {
+        return hoverModeChangedCallbackId_.has_value();
+    }
+
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
@@ -610,8 +620,6 @@ public:
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
 
-    float GetTitleHeight();
-
     // Nestable Scroll
     Axis GetAxis() const override
     {
@@ -624,6 +632,13 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
+    bool IsCurSheetNeedHalfFoldHover();
+    float GetMaxSheetHeightBeforeDragUpdate();
+    float GetSheetHeightBeforeDragUpdate();
+    void FireHoverModeChangeCallback();
+    void InitFoldCreaseRegion();
+    Rect GetFoldScreenRect() const;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -633,6 +648,7 @@ private:
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void RegisterHoverModeChangeCallback();
     void InitScrollProps();
     void InitPageHeight();
     void TranslateTo(float height);
@@ -713,6 +729,7 @@ private:
     float sheetFitContentHeight_ = 0.0f;
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;
+    float bottomOffsetY_ = 0.0f; // offset y with SHEET_BOTTOM_OFFSET, <= 0
     bool isFirstInit_ = true;
     bool isAnimationBreak_ = false;
     bool isAnimationProcess_ = false;
@@ -735,9 +752,11 @@ private:
     std::vector<SheetHeight> preDetents_;
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;
+    std::vector<Rect> currentFoldCreaseRegion_;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    std::optional<int32_t> hoverModeChangedCallbackId_;
 
     bool show_ = true;
     bool isDrag_ = false;
