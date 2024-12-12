@@ -85,6 +85,7 @@
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
+#include "core/components_ng/pattern/shape/polygon_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
@@ -844,7 +845,10 @@ void* createPolygonNode(ArkUI_Int32 nodeId)
 
 void* createPolylineNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRectNode(ArkUI_Int32 nodeId)
