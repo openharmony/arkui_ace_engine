@@ -2906,7 +2906,8 @@ void MotionPathImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<MotionPathOption>(*value) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<MotionPathOption>(*value);
     ViewAbstract::SetMotionPath(frameNode, convValue);
 }
 void ShadowImpl(Ark_NativePointer node,
@@ -3025,8 +3026,10 @@ void GeometryTransition0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetGeometryTransition0(frameNode, convValue);
+    auto id = Converter::Convert<std::string>(*value);
+    bool followWithoutTransition {false};
+    bool doRegisterSharedTransition {false};
+    ViewAbstract::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
 }
 void GeometryTransition1Impl(Ark_NativePointer node,
                              const Ark_String* id,

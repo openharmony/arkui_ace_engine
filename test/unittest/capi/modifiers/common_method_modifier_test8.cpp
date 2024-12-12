@@ -30,31 +30,17 @@ namespace {
     const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = "";
 }
 namespace Converter {
-    // template<>
-    // Array_FractionStop ArkValue(const std::vector<std::pair<float, float>>& fractionStopValue)
-    // {
-    //     Array_FractionStop arr;
-    //     arr.length = fractionStopValue.size();
-    //     arr.array = new Ark_FractionStop[arr.length];
-    //     for (auto i = 0; i < fractionStopValue.size(); ++i) {
-    //         arr.array[i].value0 = ArkValue<Ark_Number>(fractionStopValue[i].first);
-    //         arr.array[i].value1 = ArkValue<Ark_Number>(fractionStopValue[i].second);
-    //     }
-    //     return arr;
-    // }
-    // template<>
-    // void AssignArkValue(Opt_BlendApplyType& dst, const BlendApplyType& src)
-    // {
-    //     Ark_BlendApplyType arkDst;
-    //     switch (src) {
-    //         case BlendApplyType::FAST: arkDst = ARK_BLEND_APPLY_TYPE_FAST; break;
-    //         case BlendApplyType::OFFSCREEN: arkDst = ARK_BLEND_APPLY_TYPE_OFFSCREEN; break;
-    //         default:
-    //             arkDst = ARK_BLEND_APPLY_TYPE_FAST;
-    //     }
-    //     dst = ArkValue<Opt_BlendApplyType>(arkDst);
-    // }
+template<>
+Ark_MotionPathOptions ArkValue(const MotionPathOption& src)
+{
+    Ark_MotionPathOptions dst;
+    dst.path = ArkValue<Ark_String>(src.GetPath());
+    dst.from = ArkValue<Opt_Number>(src.GetBegin());
+    dst.to = ArkValue<Opt_Number>(src.GetEnd());
+    dst.rotatable = ArkValue<Opt_Boolean>(src.GetRotate());
+    return dst;
 }
+} // namespace Converter
 
 class CommonMethodModifierTest8 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
@@ -82,7 +68,22 @@ HWTEST_F(CommonMethodModifierTest8, setMotionPathTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(CommonMethodModifierTest8, DISABLED_setMotionPathTestValidValues, TestSize.Level1)
 {
-    LOGE("The type `Ark_Union_CircleShape_EllipseShape_PathShape_RectShape` contains "
-        "fields of type `Ark_CustomObject`, which are not supported.");
+    ASSERT_NE(modifier_->setMotionPath, nullptr);
+    using OneTestStep = std::tuple<Ark_MotionPathOptions, std::string>;
+    Ark_MotionPathOptions v = {
+        .path = Converter::ArkValue<Ark_String>("path"),
+        .from = Converter::ArkValue<Opt_Number>(1),
+        .to = Converter::ArkValue<Opt_Number>(2),
+        .rotatable = Converter::ArkValue<Opt_Boolean>(true),
+    };
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_MotionPathOptions>(v), ""},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMotionPath(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MOTION_PATH_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
 }
 }
