@@ -854,7 +854,10 @@ void* createPluginComponentNode(ArkUI_Int32 nodeId)
 
 void* createPolygonNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createPolylineNode(ArkUI_Int32 nodeId)

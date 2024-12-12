@@ -3551,9 +3551,28 @@
             ]
         },
         {
+            "name": "Polygon",
+            "disable": [
+                "setPointsTestDefaultValues",
+                "setPointsTestValidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "height",
+                    "default": "0.00vp",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                },
+                {
+                    "name": "width",
+                    "default": "0.00vp",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                },
+            ]
+        },
+        {
             "name": "Polyline",
             "disable": [
-                "setPointsTestDefaultValues", // No value in json
+                "setPointsTestDefaultValues",
                 "setPointsTestValidValues",
             ],
             "attributes": [
