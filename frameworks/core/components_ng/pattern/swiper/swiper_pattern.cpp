@@ -727,7 +727,7 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     }
     std::list<RefPtr<FocusHub>> focusNodes;
     swiperFocusHub->FlushChildrenFocusHub(focusNodes);
-    for (auto iter = focusNodes.begin(); iter != focusNodes.end(); ++iter) {
+    for (auto iter = focusNodes.rbegin(); iter != focusNodes.rend(); ++iter) {
         const auto& node = *iter;
         if (skipCnt > 0 || !node) {
             --skipCnt;
