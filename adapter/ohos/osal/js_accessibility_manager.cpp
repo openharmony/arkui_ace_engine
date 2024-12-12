@@ -393,7 +393,6 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
                node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
         nodeInfo.SetVisible(false);
     }
-
     manager->UpdateNodeChildIds(node);
     for (const auto& child : node->GetChildIds()) {
         nodeInfo.AddChild(child);
@@ -1060,6 +1059,7 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, c
     }
     elementInfo.SetAccessibilityId(elementIdUnwrap);
     elementInfo.SetWindowId(param.windowId);
+    jsAccessibilityManager->UpdateElementInfoInnerWindowId(elementInfo, elementId);
 }
 
 void FillEventInfo(const RefPtr<NG::FrameNode>& node,
@@ -1559,6 +1559,7 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     }
     nodeInfo.SetWindowId(commonProperty.windowId);
+    nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
@@ -1606,6 +1607,7 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     }
     nodeInfo.SetWindowId(commonProperty.windowId);
+    nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
@@ -1709,6 +1711,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetIsActive(node->IsActive());
     SetRectInScreen(node, nodeInfo, commonProperty, scaleX_, scaleY_);
     nodeInfo.SetWindowId(commonProperty.windowId);
+    nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     // is abnormal that pageId equals to 0, use commonProperty.pageId to fix pageId
     if (node->GetPageId()) {
         nodeInfo.SetPageId(node->GetPageId());
@@ -6021,15 +6024,8 @@ std::string JsAccessibilityManager::GetPagePath()
     return frontend->GetPagePath();
 }
 
-namespace {
-
-struct WindowSceneScale {
-    float_t scaleX = 1.0f;
-    float_t scaleY = 1.0f;
-};
-
-bool IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>& node, int32_t& left, int32_t& top,
-    WindowSceneScale& windowSceneScale)
+bool JsAccessibilityManager::IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>& node,
+    NG::WindowSceneInfo& windowSceneInfo)
 {
     CHECK_NULL_RETURN(node, false);
     // update windowScene node commonProperty left, top position and get scale data
@@ -6043,27 +6039,35 @@ bool IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>& node, int32_t& left, i
             continue;
         }
         auto type = parent->GetWindowPatternType();
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-            "windowScene node tag: %{public}s, windowPatternType: %{public}d, nodeId: %{public}" PRId64,
-            parent->GetTag().c_str(), type, parent->GetAccessibilityId());
-        // node with offsets not need to obtain the windowScene position
         auto windowSceneRect = GetFinalRealRect(parent);
-        if (windowSceneRect.Left() != 0 || windowSceneRect.Top() != 0) {
-            return false;
-        }
         auto accessibilityProperty = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty) {
-            accessibilityProperty->GetWindowScenePosition(left, top,
-                windowSceneScale.scaleX, windowSceneScale.scaleY);
+            accessibilityProperty->GetWindowScenePosition(windowSceneInfo);
         }
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "windowScene nodeId: %{public}" PRId64
-            ", left: %{public}d, top: %{public}d, windowSceneScale: [%{public}f, %{public}f]",
-            parent->GetAccessibilityId(), left, top, windowSceneScale.scaleX, windowSceneScale.scaleY);
+            ", left: %{public}d, top: %{public}d, windowSceneScale: [%{public}f, %{public}f], "
+            "innerWindowId:%{public}d, node rect: %{public}s, type: %{public}d",
+            parent->GetAccessibilityId(), windowSceneInfo.left, windowSceneInfo.top,
+            windowSceneInfo.scaleX, windowSceneInfo.scaleY, windowSceneInfo.innerWindowId,
+            windowSceneRect.ToString().c_str(), type);
+        if (windowSceneRect.Left() != 0 || windowSceneRect.Top() != 0) {
+            return false;
+        }
         return true;
     }
     return false;
 }
+
+void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
+    Accessibility::AccessibilityElementInfo& info, const int64_t& elementId)
+{
+    auto node = FindNodeFromPipeline(context_, elementId);
+    if (node) {
+        NG::WindowSceneInfo windowSceneInfo;
+        IsUpdateWindowSceneInfo(node, windowSceneInfo);
+        info.SetInnerWindowId(windowSceneInfo.innerWindowId);
+    }
 }
 
 void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
@@ -6095,15 +6099,14 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
         output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
     }
-    int32_t windowSceneLeft = 0;
-    int32_t windowSceneTop = 0;
-    WindowSceneScale windowSceneScale;
-    if (IsUpdateWindowSceneInfo(node, windowSceneLeft, windowSceneTop, windowSceneScale)) {
-        output.windowLeft += windowSceneLeft;
-        output.windowTop += windowSceneTop;
-        scaleX_ = windowSceneScale.scaleX;
-        scaleY_ = windowSceneScale.scaleY;
+    NG::WindowSceneInfo windowSceneInfo;
+    if (IsUpdateWindowSceneInfo(node, windowSceneInfo)) {
+        output.windowLeft += windowSceneInfo.left;
+        output.windowTop += windowSceneInfo.top;
+        scaleX_ = windowSceneInfo.scaleX;
+        scaleY_ = windowSceneInfo.scaleY;
     }
+    output.innerWindowId = windowSceneInfo.innerWindowId;
     auto page = stageManager->GetLastPageWithTransition();
     if (page != nullptr) {
         output.pageId = page->GetPageId();

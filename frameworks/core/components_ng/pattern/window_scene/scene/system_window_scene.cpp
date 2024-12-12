@@ -140,14 +140,15 @@ void SystemWindowScene::SetWindowScenePosition()
     auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetGetWindowScenePosition([weakSession = wptr(session_)] (
-        int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY) {
+        NG::WindowSceneInfo& windowSceneInfo) {
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         auto windowRect = session->GetSessionGlobalRect();
-        left = windowRect.posX_;
-        top = windowRect.posY_;
-        scaleX = session->GetScaleX();
-        scaleY = session->GetScaleY();
+        windowSceneInfo.left = windowRect.posX_;
+        windowSceneInfo.top = windowRect.posY_;
+        windowSceneInfo.scaleX = session->GetScaleX();
+        windowSceneInfo.scaleY = session->GetScaleY();
+        windowSceneInfo.innerWindowId = session->GetPersistentId();
     });
 }
 
