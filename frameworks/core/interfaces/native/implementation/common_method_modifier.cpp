@@ -3037,9 +3037,32 @@ void GeometryTransition1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(id);
-    //auto convValue = Converter::OptConvert<type>(id); // for enums
-    //CommonMethodModelNG::SetGeometryTransition1(frameNode, convValue);
+    CHECK_EQUAL_VOID(id || options, false);
+    /*
+    struct CJGeometryTransitionOptions {
+        bool follow = false;
+        int32_t hierarchyStrategy;
+    };
+    */
+    /*
+    typedef enum Ark_TransitionHierarchyStrategy {
+        ARK_TRANSITION_HIERARCHY_STRATEGY_NONE = 0,
+        ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE = 1,
+    } Ark_TransitionHierarchyStrategy;
+    */
+    /*
+    typedef struct Ark_GeometryTransitionOptions {
+        Opt_Boolean follow;
+        Opt_TransitionHierarchyStrategy hierarchyStrategy;
+    } Ark_GeometryTransitionOptions;
+    */
+    // CJGeometryTransitionOptions geometryTransitionOptions;
+    auto idValue = id ? Converter::Convert<std::string>(*id) : "";
+    auto arkOptions = options ? Converter::OptConvert<Ark_TransitionHierarchyStrategy>(*options) : std::nullopt;
+    Ark_TransitionHierarchyStrategy transitionHierarchyStrategy;
+    bool followWithoutTransition = Converter::Convert<bool>(arkOptions.value(false));
+    bool doRegisterSharedTransition {false};
+    ViewAbstract::SetGeometryTransition(frameNode, optId.value());
 }
 void StateStylesImpl(Ark_NativePointer node,
                      const Ark_StateStyles* value)
