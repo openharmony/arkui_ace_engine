@@ -1203,7 +1203,7 @@ void SwiperPattern::UpdateLayoutProperties(const RefPtr<SwiperLayoutAlgorithm>& 
 
 float SwiperPattern::AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const
 {
-    if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
+    if (!NeedEnableIgnoreBlankOffset()) {
         return 0.0f;
     }
     if (isStartOverScroll && NonNegative(ignoreBlankOffset_)) {
@@ -1217,7 +1217,7 @@ float SwiperPattern::AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) c
 
 void SwiperPattern::UpdateIgnoreBlankOffsetWithIndex()
 {
-    if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
+    if (!NeedEnableIgnoreBlankOffset()) {
         auto lastIgnoreBlankOffset = ignoreBlankOffset_;
         ignoreBlankOffset_ = 0.0f;
         UpdateIgnoreBlankOffsetInMap(lastIgnoreBlankOffset);
@@ -1239,7 +1239,7 @@ void SwiperPattern::UpdateIgnoreBlankOffsetWithIndex()
 
 void SwiperPattern::UpdateIgnoreBlankOffsetWithDrag(bool overScrollDirection)
 {
-    if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
+    if (!NeedEnableIgnoreBlankOffset()) {
         return;
     }
     float lastIgnoreBlankOffset = ignoreBlankOffset_;
@@ -1247,6 +1247,8 @@ void SwiperPattern::UpdateIgnoreBlankOffsetWithDrag(bool overScrollDirection)
         ignoreBlankOffset_ = -GetPrevMarginWithItemSpace();
     } else if (nextMarginIgnoreBlank_ && !overScrollDirection) {
         ignoreBlankOffset_ = GetNextMarginWithItemSpace();
+    } else {
+        ignoreBlankOffset_ = 0.0f;
     }
 
     UpdateIgnoreBlankOffsetInMap(lastIgnoreBlankOffset);
@@ -2541,9 +2543,10 @@ bool SwiperPattern::SpringOverScroll(float offset)
         springOffset_ += offset;
     } else {
         if (offset > 0) {
-            springOffset_ = itemPosition_.begin()->second.startPos + offset;
+            springOffset_ = itemPosition_.begin()->second.startPos + offset + AdjustIgnoreBlankOverScrollOffSet(true);
         } else {
-            springOffset_ = itemPosition_.rbegin()->second.endPos + offset - visibleSize;
+            springOffset_ =
+                itemPosition_.rbegin()->second.endPos + offset - visibleSize + AdjustIgnoreBlankOverScrollOffSet(false);
         }
         delta = offset - springOffset_;
     }

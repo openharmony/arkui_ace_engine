@@ -1320,4 +1320,76 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
     panEvent->actionUpdate_(info);
     EXPECT_EQ(pattern_->currentIndex_, 1);
 }
+
+/**
+ * @tc.name: MarginIgnoreBlankDragTest001
+ * @tc.desc: Test Swiper IgnoreBlank with drag. When totalcount equal to displaycount, ignoreBlankOffset_ will be 0.f.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, MarginIgnoreBlankDragTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop false, totalcount equal to displaycount.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+    model.SetNextMargin(Dimension(0.f), true);
+    model.SetDisplayCount(4);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+
+    /**
+     * @tc.steps: step2. drag over end.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+
+    info.SetMainDelta(-SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. drag over start.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    info.SetMainDelta(SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankDragTest002
+ * @tc.desc: Test Swiper IgnoreBlank with drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, MarginIgnoreBlankDragTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop false, index = 1.
+     * @tc.expected: ignoreBlankOffset_ will be NEXT_MARGIN.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetNextMargin(Dimension(NEXT_MARGIN), true);
+    model.SetDisplayCount(3);
+    model.SetIndex(1);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, NEXT_MARGIN);
+
+    /**
+     * @tc.steps: step2. drag over start.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+}
 } // namespace OHOS::Ace::NG
