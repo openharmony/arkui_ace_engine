@@ -161,15 +161,22 @@ void MovingPhotoPattern::InitEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (longPressEvent_) {
+        if (isEnableAnalyzer_) {
+            gestureHub->SetLongPressEvent(nullptr);
+            longPressEvent_ = nullptr;
+        } else {
+            gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
+        }
+    }
+    if (!isEnableAnalyzer_) {
+        auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleLongPress(info);
+        };
+        longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
         gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
     }
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPress(info);
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
 
     if (touchEvent_) {
         gestureHub->AddTouchEvent(touchEvent_);
