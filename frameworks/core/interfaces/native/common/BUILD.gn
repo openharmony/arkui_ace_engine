@@ -74,7 +74,6 @@ template("ace_core_interfaces_native") {
 
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
-      defines += [ "PLUGIN_COMPONENT_SUPPORTED" ]
     }
 
     external_deps += [
