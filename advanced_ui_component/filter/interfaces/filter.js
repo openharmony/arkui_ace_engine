@@ -201,13 +201,13 @@ class ListFilterRow extends ViewPU {
             new SynchedPropertyNesedObjectPU(params.backgroundColorRow, this, 'backgroundColorRow');
         this.__isBackgroundHoverRow =
             new SynchedPropertyNesedObjectPU(params.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
+        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(params.isSelectedRow, this, 'isSelectedRow');
         this.filterRow = { name: '', options: [] };
         this.onItemClick = () => {
         };
         this.rowIndex = 0;
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
-        this.__listFiltersSelectedIndex = new ObservedPropertySimplePU(0, this, 'listFiltersSelectedIndex');
         this.accessibilitySelectedText = '';
         this.bundleName = '';
         this.setInitiallyProvidedValue(params);
@@ -219,6 +219,7 @@ class ListFilterRow extends ViewPU {
         this.__fontWeightRow.set(params.fontWeightRow);
         this.__backgroundColorRow.set(params.backgroundColorRow);
         this.__isBackgroundHoverRow.set(params.isBackgroundHoverRow);
+        this.__isSelectedRow.set(params.isSelectedRow);
         if (params.filterRow !== undefined) {
             this.filterRow = params.filterRow;
         }
@@ -234,9 +235,6 @@ class ListFilterRow extends ViewPU {
         if (params.isFollowingSystemFontScale !== undefined) {
             this.isFollowingSystemFontScale = params.isFollowingSystemFontScale;
         }
-        if (params.listFiltersSelectedIndex !== undefined) {
-            this.listFiltersSelectedIndex = params.listFiltersSelectedIndex;
-        }
         if (params.accessibilitySelectedText !== undefined) {
             this.accessibilitySelectedText = params.accessibilitySelectedText;
         }
@@ -250,6 +248,7 @@ class ListFilterRow extends ViewPU {
         this.__fontWeightRow.set(params.fontWeightRow);
         this.__backgroundColorRow.set(params.backgroundColorRow);
         this.__isBackgroundHoverRow.set(params.isBackgroundHoverRow);
+        this.__isSelectedRow.set(params.isSelectedRow);
     }
 
     purgeVariableDependenciesOnElmtId(rmElmtId) {
@@ -257,7 +256,7 @@ class ListFilterRow extends ViewPU {
         this.__fontWeightRow.purgeDependencyOnElmtId(rmElmtId);
         this.__backgroundColorRow.purgeDependencyOnElmtId(rmElmtId);
         this.__isBackgroundHoverRow.purgeDependencyOnElmtId(rmElmtId);
-        this.__listFiltersSelectedIndex.purgeDependencyOnElmtId(rmElmtId);
+        this.__isSelectedRow.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -265,7 +264,7 @@ class ListFilterRow extends ViewPU {
         this.__fontWeightRow.aboutToBeDeleted();
         this.__backgroundColorRow.aboutToBeDeleted();
         this.__isBackgroundHoverRow.aboutToBeDeleted();
-        this.__listFiltersSelectedIndex.aboutToBeDeleted();
+        this.__isSelectedRow.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -286,27 +285,34 @@ class ListFilterRow extends ViewPU {
         return this.__isBackgroundHoverRow.get();
     }
 
-    get listFiltersSelectedIndex() {
-        return this.__listFiltersSelectedIndex.get();
-    }
-
-    set listFiltersSelectedIndex(j20) {
-        this.__listFiltersSelectedIndex.set(j20);
+    get isSelectedRow() {
+        return this.__isSelectedRow.get();
     }
 
     aboutToAppear() {
+        this.initAccessibilityResource();
+        try {
+            let s20 = this.getUIContext();
+            this.isFollowingSystemFontScale = s20.isFollowingSystemFontScale();
+            this.maxAppFontScale = s20.getMaxFontScale();
+        }
+        catch (p20) {
+            let q20 = p20.code;
+            let r20 = p20.message;
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${q20}, message: ${r20}`);
+        }
+    }
+
+    initAccessibilityResource() {
         try {
             this.bundleName = getContext(this)?.abilityInfo?.bundleName;
-            let resourceManager = getContext()?.resourceManager;
-            this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
-            let uiContent = this.getUIContext();
-            this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-            this.maxAppFontScale = uiContent.getMaxFontScale();
-        } catch (err) {
-            let code = err.code;
-            let message = err.message;
-            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause,
-             code: ${code}, message: ${message}`);
+            let o20 = getContext()?.resourceManager;
+            this.accessibilitySelectedText = o20?.getStringByNameSync('filter_accessibility_selected');
+        }
+        catch (l20) {
+            let m20 = l20.code;
+            let n20 = l20.message;
+            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${m20}, message: ${n20}`);
         }
     }
 
@@ -435,13 +441,12 @@ class ListFilterRow extends ViewPU {
                     const itemCreation2 = (elmtId, isInitialRender) => {
                         ListItem.create(deepRenderFunction, true);
                         ListItem.accessibilityText(this.getAccessibilityText(option,
-                            this.listFiltersSelectedIndex === colIndex, FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                            this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_TEXT));
                         ListItem.accessibilityDescription(this.getAccessibilityText(option,
-                            this.listFiltersSelectedIndex === colIndex, FilterAccessibilityType.ACCESSIBILITY_DESC));
+                            this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_DESC));
                         ListItem.height(PERCENT_100);
                         ListItem.onClick(() => {
                             this.onItemClick(colIndex);
-                            this.listFiltersSelectedIndex = colIndex;
                             this.sendAccessibility(option, true);
                         });
                         ListItem.focusable(true);
@@ -641,7 +646,7 @@ class MultiFilterRow extends ViewPU {
         this.__arrowShowStateRow =
             new SynchedPropertyNesedObjectPU(params.arrowShowStateRow, this, 'arrowShowStateRow');
         this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(params.isArrowIconDown, this, 'isArrowIconDown');
-        this.__multiFiltersSelectedIndex = new ObservedPropertySimplePU(0, this, 'multiFiltersSelectedIndex');
+        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(params.isSelectedRow, this, 'isSelectedRow');
         this.__isSendArrowAccessibility = new ObservedPropertySimplePU(false, this, 'isSendArrowAccessibility');
         this.accessibilityExpand = '';
         this.accessibilitySelectedText = '';
@@ -680,6 +685,7 @@ class MultiFilterRow extends ViewPU {
         this.__twoLineModeItemNumRecordRow.set(params.twoLineModeItemNumRecordRow);
         this.__arrowShowStateRow.set(params.arrowShowStateRow);
         this.__isArrowIconDown.set(params.isArrowIconDown);
+        this.__isSelectedRow.set(params.isSelectedRow);
         if (params.filterRow !== undefined) {
             this.filterRow = params.filterRow;
         }
@@ -691,9 +697,6 @@ class MultiFilterRow extends ViewPU {
         }
         if (params.isArrowBgHoverRow !== undefined) {
             this.isArrowBgHoverRow = params.isArrowBgHoverRow;
-        }
-        if (params.multiFiltersSelectedIndex !== undefined) {
-            this.multiFiltersSelectedIndex = params.multiFiltersSelectedIndex;
         }
         if (params.isSendArrowAccessibility !== undefined) {
             this.isSendArrowAccessibility = params.isSendArrowAccessibility;
@@ -745,6 +748,7 @@ class MultiFilterRow extends ViewPU {
         this.__twoLineModeItemNumRecordRow.set(params.twoLineModeItemNumRecordRow);
         this.__arrowShowStateRow.set(params.arrowShowStateRow);
         this.__isArrowIconDown.set(params.isArrowIconDown);
+        this.__isSelectedRow.set(params.isSelectedRow);
     }
 
     purgeVariableDependenciesOnElmtId(rmElmtId) {
@@ -756,9 +760,9 @@ class MultiFilterRow extends ViewPU {
         this.__twoLineModeItemNumRecordRow.purgeDependencyOnElmtId(rmElmtId);
         this.__arrowShowStateRow.purgeDependencyOnElmtId(rmElmtId);
         this.__isArrowIconDown.purgeDependencyOnElmtId(rmElmtId);
+        this.__isSelectedRow.purgeDependencyOnElmtId(rmElmtId);
         this.__arrowBgColorRow.purgeDependencyOnElmtId(rmElmtId);
         this.__isArrowBgHoverRow.purgeDependencyOnElmtId(rmElmtId);
-        this.__multiFiltersSelectedIndex.purgeDependencyOnElmtId(rmElmtId);
         this.__isSendArrowAccessibility.purgeDependencyOnElmtId(rmElmtId);
     }
 
@@ -771,9 +775,9 @@ class MultiFilterRow extends ViewPU {
         this.__twoLineModeItemNumRecordRow.aboutToBeDeleted();
         this.__arrowShowStateRow.aboutToBeDeleted();
         this.__isArrowIconDown.aboutToBeDeleted();
+        this.__isSelectedRow.aboutToBeDeleted();
         this.__arrowBgColorRow.aboutToBeDeleted();
         this.__isArrowBgHoverRow.aboutToBeDeleted();
-        this.__multiFiltersSelectedIndex.aboutToBeDeleted();
         this.__isSendArrowAccessibility.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -811,6 +815,10 @@ class MultiFilterRow extends ViewPU {
         return this.__isArrowIconDown.get();
     }
 
+    get isSelectedRow() {
+        return this.__isSelectedRow.get();
+    }
+
     get arrowBgColorRow() {
         return this.__arrowBgColorRow.get();
     }
@@ -827,14 +835,6 @@ class MultiFilterRow extends ViewPU {
         this.__isArrowBgHoverRow.set(l16);
     }
 
-    get multiFiltersSelectedIndex() {
-        return this.__multiFiltersSelectedIndex.get();
-    }
-
-    set multiFiltersSelectedIndex(k16) {
-        this.__multiFiltersSelectedIndex.set(k16);
-    }
-
     get isSendArrowAccessibility() {
         return this.__isSendArrowAccessibility.get();
     }
@@ -844,22 +844,16 @@ class MultiFilterRow extends ViewPU {
     }
 
     aboutToAppear() {
+        this.initAccessibilityResource();
         try {
-            this.bundleName = getContext(this)?.abilityInfo?.bundleName;
-            let h16 = getContext()?.resourceManager;
-            this.accessibilitySelectedText = h16?.getStringByNameSync('filter_accessibility_selected');
-            this.accessibilityExpand = h16?.getStringByNameSync('filter_accessibility_expand');
-            this.accessibilityCollapse = h16?.getStringByNameSync('filter_accessibility_collapse');
-            this.accessibilityExpanded = h16?.getStringByNameSync('filter_accessibility_expanded');
-            this.accessibilityCollapsed = h16?.getStringByNameSync('filter_accessibility_collapsed');
-            let i16 = this.getUIContext();
-            this.isFollowingSystemFontScale = i16.isFollowingSystemFontScale();
-            this.maxAppFontScale = i16.getMaxFontScale();
+            let q16 = this.getUIContext();
+            this.isFollowingSystemFontScale = q16.isFollowingSystemFontScale();
+            this.maxAppFontScale = q16.getMaxFontScale();
         }
-        catch (e16) {
-            let f16 = e16.code;
-            let g16 = e16.message;
-            hilog.error(ERROR_CODE, 'Ace', `Filter failed to init info, cause, code: ${f16}, message: ${g16}`);
+        catch (n16) {
+            let o16 = n16.code;
+            let p16 = n16.message;
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${o16}, message: ${p16}`);
         }
     }
 
@@ -870,6 +864,23 @@ class MultiFilterRow extends ViewPU {
             return 1;
         }
         return Math.min(systemFontScale, this.maxAppFontScale);
+    }
+
+    initAccessibilityResource() {
+        try {
+            this.bundleName = getContext(this)?.abilityInfo?.bundleName;
+            let k16 = getContext()?.resourceManager;
+            this.accessibilitySelectedText = k16?.getStringByNameSync('filter_accessibility_selected');
+            this.accessibilityExpand = k16?.getStringByNameSync('filter_accessibility_expand');
+            this.accessibilityCollapse = k16?.getStringByNameSync('filter_accessibility_collapse');
+            this.accessibilityExpanded = k16?.getStringByNameSync('filter_accessibility_expanded');
+            this.accessibilityCollapsed = k16?.getStringByNameSync('filter_accessibility_collapsed');
+        }
+        catch (h16) {
+            let i16 = h16.code;
+            let j16 = h16.message;
+            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${i16}, message: ${j16}`);
+        }
     }
 
     calcMultiFilterRowItemNum() {
@@ -1180,12 +1191,11 @@ class MultiFilterRow extends ViewPU {
                             Text.backgroundColor(this.isBackgroundHoverRow[0] ?
                             this.backgroundColorRow[0] : TRANS_COLOR);
                             Text.accessibilityText(this.getAccessibilityText(this.filterRow?.options[0],
-                                this.multiFiltersSelectedIndex === 0, FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                                this.isSelectedRow[0], FilterAccessibilityType.ACCESSIBILITY_TEXT));
                             Text.accessibilityDescription(this.getAccessibilityText(this.filterRow?.options[0],
-                                this.multiFiltersSelectedIndex === 0, FilterAccessibilityType.ACCESSIBILITY_DESC));
+                                this.isSelectedRow[0], FilterAccessibilityType.ACCESSIBILITY_DESC));
                             Text.onClick(() => {
                                 this.onItemClick(0);
-                                this.multiFiltersSelectedIndex = 0;
                                 this.sendAccessibility(this.filterRow?.options[0], true);
                             });
                             Text.id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`);
@@ -1340,16 +1350,15 @@ class MultiFilterRow extends ViewPU {
                                 Text.fontColor(this.colorRow[v12]);
                                 Text.fontWeight(this.fontWeightRow[v12]);
                                 Text.accessibilityText(this.getAccessibilityText(w12,
-                                    this.multiFiltersSelectedIndex === v12,
+                                    this.isSelectedRow[v12],
                                     FilterAccessibilityType.ACCESSIBILITY_TEXT));
                                 Text.accessibilityDescription(this.getAccessibilityText(w12,
-                                    this.multiFiltersSelectedIndex === v12,
+                                    this.isSelectedRow[v12],
                                     FilterAccessibilityType.ACCESSIBILITY_DESC));
                                 Text.backgroundColor(this.isBackgroundHoverRow[v12] ?
                                 this.backgroundColorRow[v12] : TRANS_COLOR);
                                 Text.onClick(() => {
                                     this.onItemClick(v12);
-                                    this.multiFiltersSelectedIndex = v12;
                                     this.sendAccessibility(w12, true);
                                 });
                                 Text.onHover((l13) => {
@@ -1499,6 +1508,7 @@ export class Filter extends ViewPU {
         this.__additionFontWeightArr = new ObservedPropertyObjectPU(null, this, 'additionFontWeightArr');
         this.__additionBackgroundColorArr = new ObservedPropertyObjectPU(null, this, 'additionBackgroundColorArr');
         this.__isAdditionBackgroundHover = new ObservedPropertyObjectPU(null, this, 'isAdditionBackgroundHover');
+        this.__isSelectedArr = new ObservedPropertyObjectPU(null, this, 'isSelectedArr');
         this.__colorRefresh = new ObservedPropertySimplePU(false, this, 'colorRefresh');
         this.__isFloatBarShow = new ObservedPropertySimplePU(false, this, 'isFloatBarShow');
         this.isFloatBarShowWithoutAnimation = false;
@@ -1583,6 +1593,9 @@ export class Filter extends ViewPU {
         }
         if (z11.isAdditionBackgroundHover !== undefined) {
             this.isAdditionBackgroundHover = z11.isAdditionBackgroundHover;
+        }
+        if (z11.isSelectedArr !== undefined) {
+            this.isSelectedArr = z11.isSelectedArr;
         }
         if (z11.colorRefresh !== undefined) {
             this.colorRefresh = z11.colorRefresh;
@@ -1688,6 +1701,7 @@ export class Filter extends ViewPU {
         this.__additionFontWeightArr.purgeDependencyOnElmtId(x11);
         this.__additionBackgroundColorArr.purgeDependencyOnElmtId(x11);
         this.__isAdditionBackgroundHover.purgeDependencyOnElmtId(x11);
+        this.__isSelectedArr.purgeDependencyOnElmtId(x11);
         this.__colorRefresh.purgeDependencyOnElmtId(x11);
         this.__isFloatBarShow.purgeDependencyOnElmtId(x11);
         this.__isFloatShowAllFilter.purgeDependencyOnElmtId(x11);
@@ -1717,6 +1731,7 @@ export class Filter extends ViewPU {
         this.__additionFontWeightArr.aboutToBeDeleted();
         this.__additionBackgroundColorArr.aboutToBeDeleted();
         this.__isAdditionBackgroundHover.aboutToBeDeleted();
+        this.__isSelectedArr.aboutToBeDeleted();
         this.__colorRefresh.aboutToBeDeleted();
         this.__isFloatBarShow.aboutToBeDeleted();
         this.__isFloatShowAllFilter.aboutToBeDeleted();
@@ -1843,6 +1858,14 @@ export class Filter extends ViewPU {
 
     set isAdditionBackgroundHover(j11) {
         this.__isAdditionBackgroundHover.set(j11);
+    }
+
+    get isSelectedArr() {
+        return this.__isSelectedArr.get();
+    }
+
+    set isSelectedArr(o11) {
+        this.__isSelectedArr.set(o11);
     }
 
     get colorRefresh() {
@@ -2076,6 +2099,10 @@ export class Filter extends ViewPU {
                 this.fontWeightArr[rowIndex][colIndex] = FontWeight.Medium;
                 this.fontWeightArr[rowIndex][this.selectedFilters[rowIndex].index] = FontWeight.Regular;
             }
+            if (this.isSelectedArr) {
+                this.isSelectedArr[rowIndex][colIndex] = true;
+                this.isSelectedArr[rowIndex][this.selectedFilters[rowIndex].index] = false;
+            }
             this.colorRefresh = !this.colorRefresh;
             this.selectedFilters[rowIndex].value = selectedFilterValue;
             this.selectedFilters[rowIndex].index = colIndex;
@@ -2134,22 +2161,32 @@ export class Filter extends ViewPU {
         return n9;
     }
 
-    sendFloatAccessibility(i9) {
-        let j9 = ({
+    sendFloatAccessibility(j9) {
+        let k9 = ({
             type: 'announceForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility:
-            this.getFloatAccessibilityText(i9, FilterAccessibilityType.SEND_ACCESSIBILITY),
-        });
-        accessibility.sendAccessibilityEvent(j9);
-        let k9 = ({
-            type: 'requestFocusForAccessibility',
-            bundleName: this.bundleName,
-            triggerAction: 'common',
-            customId: `filterMultiFilterRow_${this.filterId}_0`,
+            textAnnouncedForAccessibility: this.getFloatAccessibilityText(j9, FilterAccessibilityType.SEND_ACCESSIBILITY),
         });
         accessibility.sendAccessibilityEvent(k9);
+        if (this.multiFilters && this.multiFilters.length > 0) {
+            let m9 = ({
+                type: 'requestFocusForAccessibility',
+                bundleName: this.bundleName,
+                triggerAction: 'common',
+                customId: `filterMultiFilterRow_${this.filterId}_0`,
+            });
+            accessibility.sendAccessibilityEvent(m9);
+        }
+        else if (this.additionFilters && this.additionFilters.name) {
+            let l9 = ({
+                type: 'requestFocusForAccessibility',
+                bundleName: this.bundleName,
+                triggerAction: 'common',
+                customId: `filterAdditionFiltersName_${this.filterId}`,
+            });
+            accessibility.sendAccessibilityEvent(l9);
+        }
     }
 
     initParams() {
@@ -2175,6 +2212,7 @@ export class Filter extends ViewPU {
             this.isBackgroundHover = [];
             this.fontWeightArr = [];
             this.isArrowIconDownArr = [];
+            this.isSelectedArr = [];
             this.floatArrowBgColor = {
                 'id': -1,
                 'type': 10001,
@@ -2187,6 +2225,7 @@ export class Filter extends ViewPU {
                 let fontWeightRow = new FontWeightArray();
                 let backgroundColorRow = new ResourceArray();
                 let isBackgroundHoverRow = new BooleanArray();
+                let isSelectedRow = new BooleanArray();
                 for (let index of filter.options.keys()) {
                     if (index === 0) {
                         colorRow.push({
@@ -2197,6 +2236,7 @@ export class Filter extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         fontWeightRow.push(FontWeight.Medium);
+                        isSelectedRow.push(true);
                     } else {
                         colorRow.push({
                             'id': -1,
@@ -2206,6 +2246,7 @@ export class Filter extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         fontWeightRow.push(FontWeight.Regular);
+                        isSelectedRow.push(false);
                     }
                     backgroundColorRow.push({
                         'id': -1,
@@ -2220,6 +2261,7 @@ export class Filter extends ViewPU {
                 this.backgroundColorArr.push(backgroundColorRow);
                 this.isBackgroundHover.push(isBackgroundHoverRow);
                 this.isArrowIconDownArr.push(new ObservedBoolean(true));
+                this.isSelectedArr.push(isSelectedRow);
             }
         }
         if (this.additionFilters && this.additionFilters.options) {
@@ -2287,6 +2329,7 @@ export class Filter extends ViewPU {
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
                                 isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                 filterRow: filter,
                                 onItemClick: (colIndex) => {
                                     this.filterItemClick(rowIndex, colIndex);
@@ -2301,6 +2344,7 @@ export class Filter extends ViewPU {
                                     fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
                                     backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
                                     isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+                                    isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                     filterRow: filter,
                                     onItemClick: (colIndex) => {
                                         this.filterItemClick(rowIndex, colIndex);
@@ -2314,7 +2358,8 @@ export class Filter extends ViewPU {
                                 colorRow: this.colorArr ? this.colorArr[rowIndex] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
-                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : []
+                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                             });
                         }
                     }, { name: 'ListFilterRow' });
@@ -2354,6 +2399,7 @@ export class Filter extends ViewPU {
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
                                 isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                 arrowShowStateRow: this.downArrowShowState ?
                                     this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ?
@@ -2377,6 +2423,7 @@ export class Filter extends ViewPU {
                                     fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
                                     backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
                                     isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+                                    isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                     arrowShowStateRow: this.downArrowShowState ?
                                         this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
                                     twoLineModeItemNumRow: this.twoLineModeItemNum ?
@@ -2399,6 +2446,7 @@ export class Filter extends ViewPU {
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
                                 isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                 arrowShowStateRow: this.downArrowShowState ?
                                     this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ?
@@ -2557,6 +2605,7 @@ export class Filter extends ViewPU {
                                         'moduleName': '__harDefaultModuleName__'
                                     })
                                 });
+                                Text.id(`filterAdditionFiltersName_${this.filterId}`);
                             }, Text);
                             Text.pop();
                             this.observeComponentCreation2((elmtId, isInitialRender) => {

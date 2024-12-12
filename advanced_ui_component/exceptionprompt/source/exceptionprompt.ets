@@ -75,7 +75,7 @@ export struct ExceptionPrompt {
       })
 
       if (this.options.actionText) {
-        Button({ stateEffect: true, type: ButtonType.Normal }) {
+        Button({ stateEffect: false, type: ButtonType.Normal }) {
           Row() {
             Text(this.options.actionText)
               .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -140,7 +140,7 @@ export struct ExceptionPrompt {
       .visibility(this.options.isShown ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .margin({ top: this.options.marginTop })
+    .position({ y: this.options.marginTop })
     .zIndex(ZINDEX_NUM)
   }
 

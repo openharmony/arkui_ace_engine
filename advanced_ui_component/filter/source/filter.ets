@@ -132,7 +132,7 @@ struct ListFilterRow {
   @ObjectLink fontWeightRow: FontWeightArray
   @ObjectLink backgroundColorRow: ResourceArray
   @ObjectLink isBackgroundHoverRow: BooleanArray
-  @State listFiltersSelectedIndex?: number = 0;
+  @ObjectLink isSelectedRow: BooleanArray;
   private accessibilitySelectedText: string = '';
   filterRow: FilterParams = { name: '', options: [] };
   onItemClick: (colIndex: number) => void = () => {}
@@ -142,10 +142,8 @@ struct ListFilterRow {
   bundleName: string = '';
 
   aboutToAppear() {
+    this.initAccessibilityResource();
     try {
-      this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
-      let resourceManager = getContext()?.resourceManager;
-      this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
       let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxAppFontScale = uiContent.getMaxFontScale();
@@ -153,6 +151,18 @@ struct ListFilterRow {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
       hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  private initAccessibilityResource(): void {
+    try {
+      this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
+      let resourceManager = getContext()?.resourceManager;
+      this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${code}, message: ${message}`);
     }
   }
 
@@ -228,13 +238,12 @@ struct ListFilterRow {
                 .focusable(true)
             }
             .accessibilityText(this.getAccessibilityText(option,
-              this.listFiltersSelectedIndex === colIndex, FilterAccessibilityType.ACCESSIBILITY_TEXT))
+              this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_TEXT))
             .accessibilityDescription(this.getAccessibilityText(option,
-              this.listFiltersSelectedIndex === colIndex, FilterAccessibilityType.ACCESSIBILITY_DESC))
+              this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_DESC))
             .height(PERCENT_100)
             .onClick(() => {
               this.onItemClick(colIndex)
-              this.listFiltersSelectedIndex = colIndex;
               this.sendAccessibility(option, true);
             })
             .focusable(true)
@@ -328,11 +337,11 @@ struct MultiFilterRow {
   @ObjectLink twoLineModeItemNumRecordRow: ObservedNumber
   @ObjectLink arrowShowStateRow: ObservedBoolean
   @ObjectLink isArrowIconDown: ObservedBoolean
+  @ObjectLink isSelectedRow: BooleanArray;
   filterRow: FilterParams | null = null
   onItemClick: (colIndex: number) => void = () => {}
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover')
   @State isArrowBgHoverRow: boolean = false
-  @State multiFiltersSelectedIndex?: number = 0;
   @State isSendArrowAccessibility: boolean = false;
   private filterColumnWidth: number = 0
   private lastFilterColumnWidth: number = 0
@@ -348,13 +357,8 @@ struct MultiFilterRow {
   filterId: number = this.getUniqueId();
 
   aboutToAppear() {
+    this.initAccessibilityResource();
     try {
-      let resourceManager = getContext()?.resourceManager;
-      this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
-      this.accessibilityExpand = resourceManager?.getStringByNameSync('filter_accessibility_expand');
-      this.accessibilityCollapse = resourceManager?.getStringByNameSync('filter_accessibility_collapse');
-      this.accessibilityExpanded = resourceManager?.getStringByNameSync('filter_accessibility_expanded');
-      this.accessibilityCollapsed = resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
       let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxAppFontScale = uiContent.getMaxFontScale();
@@ -363,7 +367,6 @@ struct MultiFilterRow {
       let message: string = (err as BusinessError).message;
       hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
-    this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
   }
 
   updateFontScale(): number {
@@ -373,6 +376,22 @@ struct MultiFilterRow {
       return 1;
     }
     return Math.min(systemFontScale, this.maxAppFontScale);
+  }
+
+  private initAccessibilityResource(): void {
+    try {
+      this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
+      let resourceManager = getContext()?.resourceManager;
+      this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
+      this.accessibilityExpand = resourceManager?.getStringByNameSync('filter_accessibility_expand');
+      this.accessibilityCollapse = resourceManager?.getStringByNameSync('filter_accessibility_collapse');
+      this.accessibilityExpanded = resourceManager?.getStringByNameSync('filter_accessibility_expanded');
+      this.accessibilityCollapsed = resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${code}, message: ${message}`);
+    }
   }
 
   private calcMultiFilterRowItemNum() {
@@ -598,12 +617,11 @@ struct MultiFilterRow {
           .fontWeight(this.fontWeightRow[0])
           .backgroundColor(this.isBackgroundHoverRow[0] ? this.backgroundColorRow[0] : TRANS_COLOR)
           .accessibilityText(this.getAccessibilityText(this.filterRow?.options[0],
-            this.multiFiltersSelectedIndex === 0, FilterAccessibilityType.ACCESSIBILITY_TEXT))
+            this.isSelectedRow[0], FilterAccessibilityType.ACCESSIBILITY_TEXT))
           .accessibilityDescription(this.getAccessibilityText(this.filterRow?.options[0],
-            this.multiFiltersSelectedIndex === 0, FilterAccessibilityType.ACCESSIBILITY_DESC))
+            this.isSelectedRow[0], FilterAccessibilityType.ACCESSIBILITY_DESC))
           .onClick(() => {
             this.onItemClick(0);
-            this.multiFiltersSelectedIndex = 0;
             this.sendAccessibility(this.filterRow?.options[0], true);
           })
           .id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`)
@@ -679,14 +697,13 @@ struct MultiFilterRow {
                   .fontColor(this.colorRow[colIndex])
                   .fontWeight(this.fontWeightRow[colIndex])
                   .accessibilityText(this.getAccessibilityText(option,
-                    this.multiFiltersSelectedIndex === colIndex, FilterAccessibilityType.ACCESSIBILITY_TEXT))
+                    this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_TEXT))
                   .accessibilityDescription(this.getAccessibilityText(option,
-                    this.multiFiltersSelectedIndex === colIndex, FilterAccessibilityType.ACCESSIBILITY_DESC))
+                    this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_DESC))
                   .backgroundColor(this.isBackgroundHoverRow[colIndex] ?
                   this.backgroundColorRow[colIndex] : TRANS_COLOR)
                   .onClick(() => {
                     this.onItemClick(colIndex)
-                    this.multiFiltersSelectedIndex = colIndex;
                     this.sendAccessibility(option, true);
                   })
                   .onHover((isHover: boolean) => {
@@ -809,6 +826,7 @@ export struct Filter {
   @State private additionFontWeightArr: Array<FontWeight> | null = null
   @State private additionBackgroundColorArr: Array<Resource> | null = null
   @State private isAdditionBackgroundHover: Array<boolean> | null = null
+  @State private isSelectedArr: Array<BooleanArray> | null = null;
   @State colorRefresh: boolean = false
   @State @Watch('updateFocusForAccessibility') isFloatBarShow: boolean = false;
   isFloatBarShowWithoutAnimation: boolean = false
@@ -847,6 +865,19 @@ export struct Filter {
 
   aboutToAppear() {
     this.initParams();
+    this.initAccessibilityResource();
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  private initAccessibilityResource(): void {
     try {
       this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
       let resourceManager = getContext()?.resourceManager;
@@ -858,17 +889,14 @@ export struct Filter {
       this.accessibilityExpandDesc = resourceManager?.getStringByNameSync('filter_accessibility_expand_desc');
       this.accessibilityExpanded = resourceManager?.getStringByNameSync('filter_accessibility_expanded');
       this.accessibilityCollapsed = resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
-      let uiContent: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
-      this.maxAppFontScale = uiContent.getMaxFontScale();
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${code}, message: ${message}`);
     }
   }
 
-  private updateFocusForAccessibility(): void {
+  updateFocusForAccessibility(): void {
     if (this.isFloatBarShow) {
       let eventInfo: accessibility.EventInfo = ({
         type: 'requestFocusForAccessibility',
@@ -944,6 +972,10 @@ export struct Filter {
         this.fontWeightArr[rowIndex][colIndex] = FontWeight.Medium
         this.fontWeightArr[rowIndex][this.selectedFilters[rowIndex].index] = FontWeight.Regular
       }
+      if (this.isSelectedArr) {
+        this.isSelectedArr[rowIndex][colIndex] = true;
+        this.isSelectedArr[rowIndex][this.selectedFilters[rowIndex].index] = false;
+      }
       this.colorRefresh = !this.colorRefresh
       this.selectedFilters[rowIndex].value = selectedFilterValue
       this.selectedFilters[rowIndex].index = colIndex
@@ -1008,13 +1040,23 @@ export struct Filter {
         FilterAccessibilityType.SEND_ACCESSIBILITY),
     });
     accessibility.sendAccessibilityEvent(eventInfo);
-    let requestFocusEventInfo: accessibility.EventInfo = ({
-      type: 'requestFocusForAccessibility',
-      bundleName: this.bundleName,
-      triggerAction: 'common',
-      customId: `filterMultiFilterRow_${this.filterId}_0`,
-    });
-    accessibility.sendAccessibilityEvent(requestFocusEventInfo);
+    if (this.multiFilters && this.multiFilters.length > 0) {
+      let requestFocusEventInfo: accessibility.EventInfo = ({
+        type: 'requestFocusForAccessibility',
+        bundleName: this.bundleName,
+        triggerAction: 'common',
+        customId: `filterMultiFilterRow_${this.filterId}_0`,
+      });
+      accessibility.sendAccessibilityEvent(requestFocusEventInfo);
+    } else if (this.additionFilters && this.additionFilters.name) {
+      let requestFocusEventInfo: accessibility.EventInfo = ({
+        type: 'requestFocusForAccessibility',
+        bundleName: this.bundleName,
+        triggerAction: 'common',
+        customId: `filterAdditionFiltersName_${this.filterId}`,
+      });
+      accessibility.sendAccessibilityEvent(requestFocusEventInfo);
+    }
   }
 
   private initParams(): void {
@@ -1040,19 +1082,23 @@ export struct Filter {
       this.isBackgroundHover = []
       this.fontWeightArr = []
       this.isArrowIconDownArr = []
+      this.isSelectedArr = [];
       this.floatArrowBgColor = $r('sys.color.ohos_id_color_background')
       for (let filter of this.multiFilters) {
         let colorRow = new ResourceArray()
         let fontWeightRow = new FontWeightArray()
         let backgroundColorRow = new ResourceArray()
         let isBackgroundHoverRow = new BooleanArray()
+        let isSelectedRow = new BooleanArray();
         for (let index of filter.options.keys()) {
           if (index === 0) {
             colorRow.push($r('sys.color.ohos_id_color_text_primary_activated'))
             fontWeightRow.push(FontWeight.Medium)
+            isSelectedRow.push(true);
           } else {
             colorRow.push($r('sys.color.ohos_id_color_text_primary'))
             fontWeightRow.push(FontWeight.Regular)
+            isSelectedRow.push(false);
           }
           backgroundColorRow.push($r('sys.color.ohos_id_color_hover'))
         }
@@ -1061,6 +1107,7 @@ export struct Filter {
         this.backgroundColorArr.push(backgroundColorRow)
         this.isBackgroundHover.push(isBackgroundHoverRow)
         this.isArrowIconDownArr.push(new ObservedBoolean(true))
+        this.isSelectedArr.push(isSelectedRow);
       }
     }
     if (this.additionFilters && this.additionFilters.options) {
@@ -1096,6 +1143,7 @@ export struct Filter {
           fontWeightRow: this.fontWeightArr ? this.fontWeightArr[rowIndex] : [],
           backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[rowIndex] : [],
           isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
+          isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
           filterRow: filter,
           onItemClick: (colIndex: number) => {
             this.filterItemClick(rowIndex, colIndex);
@@ -1128,6 +1176,7 @@ export struct Filter {
           isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
           arrowShowStateRow: this.downArrowShowState ? this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
           twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
+          isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
           twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ? this.twoLineModeItemNumRecord[rowIndex] :
             new ObservedNumber(0),
           isArrowIconDown: this.isArrowIconDownArr ? this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false),
@@ -1211,6 +1260,7 @@ export struct Filter {
                   .fontColor($r('sys.color.ohos_id_color_text_secondary'))
                   .margin({ start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH), end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH) })
                   .padding({ start: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_start')) })
+                  .id(`filterAdditionFiltersName_${this.filterId}`)
                 Row()
                   .width(SEPARATOR_WIDTH)
                   .height(SEPARATOR_HEIGHT)
