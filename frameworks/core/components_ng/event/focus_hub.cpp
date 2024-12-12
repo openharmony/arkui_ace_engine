@@ -1960,7 +1960,11 @@ bool FocusHub::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t ta
         return false;
     }
     if (nodeNeedToFocus->RequestFocusImmediatelyInner()) {
-        lastTabIndexNodeId_ = nodeIdNeedToFocus;
+        auto curFocusHub = Claim(this);
+        while (curFocusHub) {
+            curFocusHub->lastTabIndexNodeId_ = nodeIdNeedToFocus;
+            curFocusHub = curFocusHub->GetParentFocusHub();
+        }
         return true;
     }
     return false;
