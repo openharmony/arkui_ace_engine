@@ -154,6 +154,7 @@ RichEditorPattern::~RichEditorPattern()
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
     CHECK_NULL_VOID(value && styledString_);
+    IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
     CloseSelectOverlay();
     ResetSelection();
     styledString_->RemoveCustomSpan();
@@ -267,14 +268,21 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
     IF_PRESENT(oneStepDragController_, MarkDirtyNode(WeakClaim(RawPtr(imageNode))));
 }
 
-void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue)
+void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue, bool calledByImf)
 {
     CHECK_NULL_VOID(styledString_);
+    IF_TRUE(calledByImf && previewTextRecord_.IsValid(), FinishTextPreviewInner());
     int32_t changeStart = caretPosition_;
     int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
         changeStart = textSelector_.GetTextStart();
         changeLength = textSelector_.GetTextEnd() - changeStart;
+    }
+    auto needReplaceInTextPreview = (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) &&
+                               previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start > 0;
+    if (needReplaceInTextPreview) {
+        changeStart= previewTextRecord_.replacedRange.start;
+        changeLength = previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start;
     }
     bool isPreventChange = false;
     RefPtr<SpanString> insertStyledString = nullptr;
@@ -285,9 +293,11 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     } else {
         isPreventChange = !BeforeStyledStringChange(changeStart, changeLength, insertU16Value);
     }
-    CHECK_NULL_VOID(!isPreventChange);
+    CHECK_NULL_VOID(!isPreventChange || previewTextRecord_.needReplacePreviewText);
     if (changeLength > 0) {
-        DeleteForwardInStyledString(changeLength, false);
+        auto start = needReplaceInTextPreview ? previewTextRecord_.replacedRange.start : caretPosition_;
+        auto isUpdateCaret = !needReplaceInTextPreview;
+        DeleteValueInStyledString(start, changeLength, false, isUpdateCaret);
     }
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
@@ -394,9 +404,11 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
     start = range.startIndex;
     length = range.endIndex - range.startIndex;
     bool isPreventChange = isIME && !BeforeStyledStringChange(start, length, u"");
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "deleteInSS, start=%{public}d, length=%{public}d, isPreventChange=%{public}d",
-        start, length, isPreventChange);
-    CHECK_NULL_VOID(!isPreventChange);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "deleteInSS, start=%{public}d, length=%{public}d, isPreventChange=%{public}d, "
+        "isPreviewTextInputting=%{public}d",
+        start, length, isPreventChange, IsPreviewTextInputting());
+    CHECK_NULL_VOID(!isPreventChange || IsPreviewTextInputting());
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -460,6 +472,8 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
     auto changeEnd = std::clamp(changeStart + length, 0, GetTextContentLength());
     changeValue.SetRangeBefore({ changeStart, changeEnd });
     changeValue.SetReplacementString(replaceMentString);
+    IF_TRUE(!previewTextRecord_.newPreviewContent.empty(),
+        changeValue.SetPreviewText(previewTextRecord_.newPreviewContent));
     return eventHub->FireOnStyledStringWillChange(changeValue);
 }
 
@@ -4360,7 +4374,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .height = std::abs(caretLeftTopPoint.GetY() - caretRightBottomPoint.GetY()) };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
-        .isTextPreviewSupported = !isSpanStringMode_ && isTextPreviewSupported_ };
+        .isTextPreviewSupported = isTextPreviewSupported_ };
     auto start = textSelector_.IsValid() ? textSelector_.GetStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetEnd() : caretPosition_;
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
@@ -4550,7 +4564,6 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "previewText=%{private}s, range=[%{public}d,%{public}d], isSSMode=%{public}d",
         previewTextValue.c_str(), range.start, range.end, isSpanStringMode_);
-    CHECK_NULL_RETURN(!isSpanStringMode_, ERROR_BAD_PARAMETERS);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ERROR_BAD_PARAMETERS);
 
@@ -4612,6 +4625,10 @@ void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t sta
     auto length = end - start;
     CHECK_NULL_VOID(length > 0);
     caretPosition_ = std::clamp(start, 0, GetTextContentLength());
+    if (isSpanStringMode_) {
+        DeleteValueInStyledString(start, length, true, false);
+        return;
+    }
     std::u16string deleteText = DeleteForwardOperation(length);
     if (record && deleteText.length() != 0) {
         record->deleteText = UtfUtils::Str16ToStr8(deleteText);
@@ -4826,7 +4843,7 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
         return;
     }
     if (isSpanStringMode_) {
-        InsertValueInStyledString(insertValue);
+        InsertValueInStyledString(insertValue, calledByImf);
         return;
     }
     OperationRecord record;

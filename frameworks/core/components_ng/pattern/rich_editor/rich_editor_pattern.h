@@ -357,7 +357,7 @@ public:
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
-    void InsertValueInStyledString(const std::string& insertValue);
+    void InsertValueInStyledString(const std::string& insertValue, bool calledByImf = false);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
         const std::u16string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
     RefPtr<FontSpan> CreateFontSpanByTextStyle(

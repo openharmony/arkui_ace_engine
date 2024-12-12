@@ -2798,6 +2798,7 @@ JSRef<JSVal> JSRichEditorStyledStringController::CreateJsOnWillChange(const NG::
     jsSpanString->SetController(spanString);
     onWillChangeObj->SetPropertyObject("range", rangeObj);
     onWillChangeObj->SetPropertyObject("replacementString", replacementStringObj);
+    onWillChangeObj->SetPropertyObject("previewText", JSRef<JSVal>::Make(ToJSValue(changeValue.GetPreviewText())));
     return JSRef<JSVal>::Cast(onWillChangeObj);
 }
 

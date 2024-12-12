@@ -471,6 +471,16 @@ const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() con
     return replacementString_;
 }
 
+void StyledStringChangeValue::SetPreviewText(const std::string& previewText)
+{
+    previewText_ = previewText;
+}
+
+const std::string& StyledStringChangeValue::GetPreviewText() const
+{
+    return previewText_;
+}
+
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
     onReady_ = std::move(func);
