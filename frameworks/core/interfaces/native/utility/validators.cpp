@@ -29,6 +29,12 @@ namespace {
     constexpr float BLOOM_MAX = 1.0f;
 } // namespace
 
+void ClampByRange(std::optional<float>& opt, const float& left, const float& right)
+{
+    if (opt.has_value()) {
+        opt = std::clamp(opt.value(), left, right);
+    }
+}
 void ValidateNonNegative(std::optional<Dimension>& opt)
 {
     if (opt.has_value() && opt.value().IsNegative()) {
