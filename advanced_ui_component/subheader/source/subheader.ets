@@ -420,10 +420,8 @@ export struct SubHeader {
   }
 
   private getRightAreaAccessibilityLevel(): string {
-    if (this.operationItem![0].accessibilityLevel === 'no') {
-      return 'no';
-    } else if (this.operationItem![0].accessibilityLevel === 'auto') {
-      return 'auto';
+    if (this.operationItem![0].accessibilityLevel && this.operationItem![0].accessibilityLevel !== '') {
+      return this.operationItem![0].accessibilityLevel;
     }
     return 'yes';
   }
@@ -1044,10 +1042,8 @@ struct SingleIconStyle {
   }
 
   private getRightIconAccessibilityLevel(): string {
-    if (this.item?.accessibilityLevel === 'yes') {
-      return 'yes';
-    } else if (this.item?.accessibilityLevel === 'no') {
-      return 'no';
+    if (this.item?.accessibilityLevel && this.item?.accessibilityLevel !== '') {
+      return this.item.accessibilityLevel;
     }
     return 'auto';
   }

@@ -672,11 +672,8 @@ export class SubHeader extends ViewPU {
         }
     }
     getRightAreaAccessibilityLevel() {
-        if (this.operationItem[0].accessibilityLevel === 'no') {
-            return 'no';
-        }
-        else if (this.operationItem[0].accessibilityLevel === 'auto') {
-            return 'auto';
+        if (this.operationItem[0].accessibilityLevel && this.operationItem[0].accessibilityLevel !== '') {
+            return this.operationItem[0].accessibilityLevel;
         }
         return 'yes';
     }
@@ -1947,11 +1944,8 @@ class SingleIconStyle extends ViewPU {
         return '';
     }
     getRightIconAccessibilityLevel() {
-        if (this.item?.accessibilityLevel === 'yes') {
-            return 'yes';
-        }
-        else if (this.item?.accessibilityLevel === 'no') {
-            return 'no';
+        if (this.item?.accessibilityLevel && this.item?.accessibilityLevel !== '') {
+            return this.item.accessibilityLevel;
         }
         return 'auto';
     }
