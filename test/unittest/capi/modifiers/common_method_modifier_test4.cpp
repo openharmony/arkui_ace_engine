@@ -95,6 +95,8 @@ const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_NAME = "anchor";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME = "align";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_OBSCURED_NAME = "obscured";
+const auto ATTRIBUTE_ARRAY_DEFAULT_SIZE = 0;
 }
 struct PixelStretchEffect {
     float left = 0.0;
@@ -831,5 +833,60 @@ HWTEST_F(CommonMethodModifierTest4, setAlignRules1TestDefaultValues2, TestSize.L
     resultStr = GetAttrValue<std::string>(resultCenter, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE) <<
         "Default value for attribute 'alignRules.center.align'";
+}
+
+/*
+ * @tc.name: setObscuredTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setObscuredTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
+}
+
+/*
+ * @tc.name: setObscuredTestValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setObscuredTestValues, TestSize.Level1)
+{
+    std::vector<Ark_ObscuredReasons> vecReason = {ARK_OBSCURED_REASONS_PLACEHOLDER, ARK_OBSCURED_REASONS_PLACEHOLDER,
+        ARK_OBSCURED_REASONS_PLACEHOLDER};
+    std::vector<Ark_ObscuredReasons> vecInvalidReason = { static_cast<Ark_ObscuredReasons>(-100)};
+    Converter::ArkArrayHolder<Array_ObscuredReasons> vecHolder(vecReason);
+    Array_ObscuredReasons vecArkReason = vecHolder.ArkValue();
+    modifier_->setObscured(node_, &vecArkReason);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    EXPECT_EQ(jsonArray->GetArraySize(), vecReason.size());
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto itemJson = jsonArray->GetArrayItem(i);
+        auto value = std::to_string(static_cast<int32_t>(vecReason[i]));
+        EXPECT_EQ(itemJson->GetString(), value);
+    }
+}
+
+/*
+ * @tc.name: setObscuredTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setObscuredTestInvalidValues, TestSize.Level1)
+{
+    std::vector<Ark_ObscuredReasons> vecReason = { static_cast<Ark_ObscuredReasons>(-100),
+        static_cast<Ark_ObscuredReasons>(INT_MAX)};
+    Converter::ArkArrayHolder<Array_ObscuredReasons> vecHolder(vecReason);
+    Array_ObscuredReasons vecArkReason = vecHolder.ArkValue();
+    modifier_->setObscured(node_, &vecArkReason);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 }

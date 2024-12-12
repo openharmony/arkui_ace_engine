@@ -125,7 +125,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             auto peer = (*accessor->ctor)();
             CHECK_NULL_VOID(peer);
             arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
-            auto finalyzer = reinterpret_cast<void (*)(UIExtensionProxyPeer *)>(accessor->getFinalizer());
+            auto finalyzer = reinterpret_cast<void (*)(void *)>(accessor->getFinalizer());
             finalyzer(peer);
         };
     UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));

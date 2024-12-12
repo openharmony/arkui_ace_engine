@@ -94,7 +94,7 @@ public:
         AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
     }
 
-    virtual void * CreatePeerInstance() = 0;
+    virtual void *CreatePeerInstance() = 0;
 };
 
 } // namespace OHOS::Ace::NG
