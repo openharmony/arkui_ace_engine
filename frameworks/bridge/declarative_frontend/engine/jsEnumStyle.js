@@ -3547,3 +3547,17 @@ let AxisModel;
   AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
 })(AxisModel || (AxisModel = {}));
+
+var CrownSensitivity;
+(function (CrownSensitivity) {
+  CrownSensitivity[CrownSensitivity["LOW"] = 0] = "LOW";
+  CrownSensitivity[CrownSensitivity["MEDIUM"] = 1] = "MEDIUM";
+  CrownSensitivity[CrownSensitivity["HIGH"] = 2] = "HIGH";
+})(CrownSensitivity || (CrownSensitivity = {}));
+
+var CrownAction;
+(function (CrownAction) {
+  CrownAction[CrownAction["BEGIN"] = 0] = "BEGIN";
+  CrownAction[CrownAction["UPDATE"] = 1] = "UPDATE";
+  CrownAction[CrownAction["END"] = 2] = "END";
+})(CrownAction || (CrownAction = {}));
