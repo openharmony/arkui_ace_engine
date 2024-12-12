@@ -1192,6 +1192,7 @@ template<>
     }
 }
 
+template<>
 Ark_PreDragStatus ArkValue(const PreDragStatus& src)
 {
     Ark_PreDragStatus dst;
