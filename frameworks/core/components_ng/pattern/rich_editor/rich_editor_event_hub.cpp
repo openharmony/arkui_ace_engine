@@ -471,12 +471,12 @@ const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() con
     return replacementString_;
 }
 
-void StyledStringChangeValue::SetPreviewText(std::string previewText)
+void StyledStringChangeValue::SetPreviewText(const std::string& previewText)
 {
     previewText_ = previewText;
 }
 
-std::string StyledStringChangeValue::GetPreviewText() const
+const std::string& StyledStringChangeValue::GetPreviewText() const
 {
     return previewText_;
 }
