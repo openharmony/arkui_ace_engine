@@ -735,7 +735,7 @@ void GridFocus::FireFocus()
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusHub->IsCurrentFocus());
     CHECK_NULL_VOID(focusIndex_.has_value());
-    if (IsInViewport(focusIndex_.value())) {
+    if (IsInViewport(focusIndex_.value(), true)) {
         auto child = host->GetChildByIndex(focusIndex_.value());
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
@@ -769,7 +769,7 @@ bool GridFocus::ScrollToLastFocusIndex(KeyCode keyCode)
     CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
     CHECK_NULL_RETURN(focusIndex_.has_value(), false);
     auto focusIndex = focusIndex_.value();
-    if (!IsInViewport(focusIndex)) {
+    if (!IsInViewport(focusIndex, false)) {
         grid_.StopAnimate();
         needTriggerFocus_ = true;
         
@@ -797,7 +797,7 @@ void GridFocus::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
     grid_.UpdateStartIndex(GetFocusNodeIndex(nextFocus));
 }
 
-bool GridFocus::IsInViewport(int32_t index) const
+bool GridFocus::IsInViewport(int32_t index, bool needCheckCache) const
 {
     auto host = grid_.GetHost();
     CHECK_NULL_RETURN(host, true);
@@ -805,9 +805,9 @@ bool GridFocus::IsInViewport(int32_t index) const
     CHECK_NULL_RETURN(gridLayoutProperty, true);
     int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     bool showCachedItems = gridLayoutProperty->GetShowCachedItemsValue(false);
-    if (!showCachedItems) {
-        return index >= info_.startIndex_ && index <= info_.endIndex_;
+    if (needCheckCache && showCachedItems) {
+        return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
     }
-    return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
+    return index >= info_.startIndex_ && index <= info_.endIndex_;
 }
 } // namespace OHOS::Ace::NG

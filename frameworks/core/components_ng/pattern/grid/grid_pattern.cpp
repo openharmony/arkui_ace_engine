@@ -552,6 +552,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     FireOnReachEnd(onReachEnd);
     OnScrollStop(gridEventHub->GetOnScrollStop());
+    CHECK_NULL_VOID(isConfigScrollable_);
     focusHandler_.ProcessFocusEvent(keyEvent_, indexChanged);
 }
 
