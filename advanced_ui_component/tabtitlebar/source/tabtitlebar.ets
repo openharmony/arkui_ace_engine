@@ -760,7 +760,7 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     if (this.item.value === PUBLIC_MORE) {
-      return this.toStringFormat($r('sys.string.ohos_toolbar_more'));
+      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
     } else if (this.item.accessibilityText) {
       return this.toStringFormat(this.item.accessibilityText);
     } else if (this.item.label) {

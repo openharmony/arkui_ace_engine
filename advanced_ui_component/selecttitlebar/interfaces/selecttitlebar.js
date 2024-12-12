@@ -1110,10 +1110,10 @@ class ImageMenuItem extends ViewPU {
     }
     getAccessibilityReadText() {
         if (this.item.value === PUBLIC_BACK) {
-            return this.toStringFormat({ 'id': -1, 'type': 10003, params: ['sys.string.icon_back'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            return getContext()?.resourceManager?.getStringByNameSync('icon_back');
         }
         else if (this.item.value === PUBLIC_MORE) {
-            return this.toStringFormat({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
         }
         else if (this.item.accessibilityText) {
             return this.toStringFormat(this.item.accessibilityText);
