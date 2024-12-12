@@ -576,7 +576,7 @@ void AccessibilityProperty::SetAccessibilityCustomRole(const std::string& role)
 
 void AccessibilityProperty::ResetAccessibilityCustomRole()
 {
-    accessibilityCustomRole_ = "NULL";
+    accessibilityCustomRole_ = "";
 }
 
 bool AccessibilityProperty::HasAccessibilityCustomRole()
