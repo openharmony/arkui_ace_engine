@@ -490,7 +490,7 @@ class ListFilterRow extends ViewPU {
                         });
                         ViewStackProcessor.visualState();
                         ListItem.backgroundColor(this.isBackgroundHoverRow[colIndex] ?
-                        this.backgroundColorRow[colIndex] : TRANS_COLOR);
+                            this.backgroundColorRow[colIndex] : TRANS_COLOR);
                         ListItem.onHover((isHover) => {
                             Context.animateTo({
                                 curve: FRICTION_CUBIC_BEZIER,
@@ -2401,13 +2401,13 @@ export class Filter extends ViewPU {
                                 isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
                                 isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                 arrowShowStateRow: this.downArrowShowState ?
-                                this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
+                                    this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ?
-                                this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
+                                    this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
                                 twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
-                                this.twoLineModeItemNumRecord[rowIndex] : new ObservedNumber(0),
+                                    this.twoLineModeItemNumRecord[rowIndex] : new ObservedNumber(0),
                                 isArrowIconDown: this.isArrowIconDownArr ?
-                                this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false),
+                                    this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false),
                                 filterRow: filterItem,
                                 onItemClick: (colIndex) => {
                                     this.filterItemClick(rowIndex, colIndex);
@@ -2425,13 +2425,13 @@ export class Filter extends ViewPU {
                                     isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
                                     isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                     arrowShowStateRow: this.downArrowShowState ?
-                                    this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
+                                        this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
                                     twoLineModeItemNumRow: this.twoLineModeItemNum ?
-                                    this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
+                                        this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
                                     twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
-                                    this.twoLineModeItemNumRecord[rowIndex] : new ObservedNumber(0),
+                                        this.twoLineModeItemNumRecord[rowIndex] : new ObservedNumber(0),
                                     isArrowIconDown: this.isArrowIconDownArr ?
-                                    this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false),
+                                        this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false),
                                     filterRow: filterItem,
                                     onItemClick: (colIndex) => {
                                         this.filterItemClick(rowIndex, colIndex);
@@ -2448,13 +2448,13 @@ export class Filter extends ViewPU {
                                 isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[rowIndex] : [],
                                 isSelectedRow: this.isSelectedArr ? this.isSelectedArr[rowIndex] : [],
                                 arrowShowStateRow: this.downArrowShowState ?
-                                this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
+                                    this.downArrowShowState[rowIndex] : new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ?
-                                this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
+                                    this.twoLineModeItemNum[rowIndex] : new ObservedNumber(0),
                                 twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
-                                this.twoLineModeItemNumRecord[rowIndex] : new ObservedNumber(0),
+                                    this.twoLineModeItemNumRecord[rowIndex] : new ObservedNumber(0),
                                 isArrowIconDown: this.isArrowIconDownArr ?
-                                this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false)
+                                    this.isArrowIconDownArr[rowIndex] : new ObservedBoolean(false)
                             });
                         }
                     }, { name: 'MultiFilterRow' });
@@ -2650,8 +2650,8 @@ export class Filter extends ViewPU {
                                         FilterAccessibilityType.ACCESSIBILITY_DESC));
                                     ListItem.height(PERCENT_100);
                                     ListItem.backgroundColor(this.isAdditionBackgroundHover &&
-                                    this.isAdditionBackgroundHover[index] ? this.additionBackgroundColorArr ?
-                                    this.additionBackgroundColorArr[index] : '' : TRANS_COLOR);
+                                        this.isAdditionBackgroundHover[index] ? this.additionBackgroundColorArr ?
+                                        this.additionBackgroundColorArr[index] : '' : TRANS_COLOR);
                                     ListItem.onHover((isHover) => {
                                         Context.animateTo({
                                             curve: FRICTION_CUBIC_BEZIER,
@@ -2762,7 +2762,7 @@ export class Filter extends ViewPU {
                                         Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
                                         Text.fontColor(this.additionColorArr ? this.additionColorArr[index] : '');
                                         Text.fontWeight(this.additionFontWeightArr ?
-                                        this.additionFontWeightArr[index] : '');
+                                            this.additionFontWeightArr[index] : '');
                                         Text.focusable(true);
                                     }, Text);
                                     Text.pop();
