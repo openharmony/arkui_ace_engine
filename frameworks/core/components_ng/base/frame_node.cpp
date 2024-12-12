@@ -4402,6 +4402,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         if (needSyncRsNode) {
             renderContext_->SyncPartialRsProperties();
         }
+    } else {
+        geometryNode_->SetPixelGridRoundOffset(geometryNode_->GetFrameOffset());
+        geometryNode_->SetPixelGridRoundSize(geometryNode_->GetFrameSize());
     }
     config = { .frameSizeChange = frameSizeChange,
         .frameOffsetChange = frameOffsetChange,
