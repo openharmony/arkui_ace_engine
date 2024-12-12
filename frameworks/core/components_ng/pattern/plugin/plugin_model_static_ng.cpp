@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 
+#ifndef ARKUI_CAPI_UNITTEST
+#include "core/components/plugin/plugin_sub_container.h"
+#include "core/components/plugin/resource/plugin_manager_delegate.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 #include "core/components_ng/pattern/plugin/plugin_node.h"
