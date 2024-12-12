@@ -1079,6 +1079,28 @@ DimensionRect Convert(const Ark_Rectangle &src)
 }
 
 template<>
+EffectOption Convert(const Ark_BackgroundEffectOptions& src)
+{
+    EffectOption dst;
+    auto radiusOpt = OptConvert<Dimension>(src.radius);
+    Validator::ValidateNonNegative(radiusOpt);
+    dst.radius = radiusOpt.value_or(dst.radius);
+    auto saturationOpt = Converter::OptConvert<float>(src.saturation);
+    Validator::ValidateNonNegative(saturationOpt);
+    dst.saturation = saturationOpt.value_or(dst.saturation);
+    auto brightnessOpt = Converter::OptConvert<float>(src.brightness);
+    Validator::ValidateNonNegative(brightnessOpt);
+    dst.brightness = brightnessOpt.value_or(dst.brightness);
+    dst.color = OptConvert<Color>(src.color).value_or(dst.color);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
+    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    LOGE("OHOS::Ace::NG::Converter::Convert -> EffectOption::BlurType is not supported");
+    return dst;
+}
+
+template<>
 PaddingProperty Convert(const Ark_Padding& src)
 {
     PaddingProperty padding;
@@ -1123,6 +1145,35 @@ AnimateParam Convert(const Ark_AnimateParam& src)
     option.curve = Converter::OptConvert<RefPtr<Curve>>(src.curve);
     option.frameRateRange = Converter::OptConvert<RefPtr<FrameRateRange>>(src.expectedFrameRateRange);
     return option;
+}
+
+template<>
+BlurOption Convert(const Ark_BlurOptions& src)
+{
+    auto value0 = Converter::Convert<int32_t>(src.grayscale.value0);
+    auto value1 = Converter::Convert<int32_t>(src.grayscale.value1);
+    constexpr int32_t GRAYSCALE_MAX = 127;
+    constexpr int32_t GRAYSCALE_MIN = 0;
+    value0 = (value0 < GRAYSCALE_MIN || value0 > GRAYSCALE_MAX) ? 0 : value0;
+    value1 = (value1 < GRAYSCALE_MIN || value1 > GRAYSCALE_MAX) ? 0 : value1;
+    return BlurOption {
+        .grayscale = { value0, value1 }
+    };
+}
+
+template<>
+BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
+{
+    BlurStyleOption dst;
+    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
+        dst.scale = static_cast<double>(*scaleOpt);
+    }
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
+    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    return dst;
 }
 
 template<>

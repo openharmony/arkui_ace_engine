@@ -496,64 +496,10 @@ uint16_t Convert(const Ark_PixelRoundPolicy& src)
 }
 
 template<>
-BlurOption Convert(const Ark_BlurOptions& src)
-{
-    return BlurOption {
-        .grayscale = {
-            Converter::Convert<float>(src.grayscale.value0),
-            Converter::Convert<float>(src.grayscale.value1)
-        }
-    };
-}
-
-template<>
-void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src)
-{
-    switch (src) {
-        case ARK_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE:
-            dst = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE; break;
-        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE: dst = BlurStyleActivePolicy::ALWAYS_ACTIVE; break;
-        case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE: dst = BlurStyleActivePolicy::ALWAYS_INACTIVE; break;
-        default: LOGE("Unexpected enum value in Ark_BlurStyleActivePolicy: %{public}d", src);
-    }
-}
-
-template<>
-EffectOption Convert(const Ark_BackgroundEffectOptions& src)
-{
-    EffectOption dst;
-    dst.radius = OptConvert<Dimension>(src.radius).value_or(dst.radius);
-    dst.saturation = OptConvert<float>(src.saturation).value_or(dst.saturation);
-    dst.brightness = OptConvert<float>(src.brightness).value_or(dst.brightness);
-    dst.color = OptConvert<Color>(src.color).value_or(dst.color);
-    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
-    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
-    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
-    return dst;
-}
-
-template<>
 float Convert(const Ark_ForegroundEffectOptions& src)
 {
     return Convert<float>(src.radius);
 }
-
-template<>
-BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
-{
-    BlurStyleOption dst;
-    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
-    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
-    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
-        dst.scale = static_cast<double>(*scaleOpt);
-    }
-    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
-    dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
-    return dst;
-}
-
 
 template<>
 BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
@@ -1151,6 +1097,66 @@ template<>
         case ARK_BLEND_APPLY_TYPE_OFFSCREEN: dst = BlendApplyType::OFFSCREEN; break;
         default: dst.reset(); // Handle unexpected values by resetting the optional
     }
+}
+template<>
+void AssignCast(std::optional<Matrix4>& dst, const Ark_CustomObject& src)
+{
+    LOGE("This converter is created for testing purposes only. Custom objects are not supported.");
+    double* row1 = (double*)src.pointers[0];
+    double* row2 = (double*)src.pointers[1];
+    double* row3 = (double*)src.pointers[2];
+    double* row4 = (double*)src.pointers[3];
+    if (!row1 || !row2 || !row3 || !row4) {
+        dst = std::nullopt;
+        return;
+    }
+    if (strcmp(src.kind, "Matrix4") != 0) {
+        dst = std::nullopt;
+        return;
+    }
+    double m11 = row1[0], m12 = row1[1], m13 = row1[2], m14 = row1[3],
+        m21 = row2[0], m22 = row2[1], m23 = row2[2], m24 = row2[3],
+        m31 = row3[0], m32 = row3[1], m33 = row3[2], m34 = row3[3],
+        m41 = row4[0], m42 = row4[1], m43 = row4[2], m44 = row4[3];
+    dst = Matrix4(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44);
+}
+template<>
+ClickEffectLevel Convert(const Ark_ClickEffectLevel& src)
+{
+    switch (src) {
+        case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT:
+            return ClickEffectLevel::LIGHT;
+        case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_MIDDLE:
+            return ClickEffectLevel::MIDDLE;
+        case Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_HEAVY:
+            return ClickEffectLevel::HEAVY;
+        default:
+            return ClickEffectLevel::UNDEFINED;
+    }
+}
+template<>
+void AssignCast(std::optional<ClickEffectLevel>& dst, const Ark_ClickEffectLevel& src)
+{
+    auto arkVal = Convert<ClickEffectLevel>(src);
+    dst = arkVal == ClickEffectLevel::UNDEFINED ? std::nullopt :
+        std::optional<ClickEffectLevel>(arkVal);
+}
+template<>
+void AssignCast(std::optional<DragDropInfo>& dst, const Callback_Any& src)
+{
+    LOGE("ARKOALA: Convert to [DragDropInfo] from [Callback_Any] is not supported\n");
+}
+template<>
+void AssignCast(std::optional<DragDropInfo>& dst, const Ark_DragItemInfo& src)
+{
+    LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
+}
+template<>
+void AssignCast(std::optional<DragDropInfo>& dst, const Ark_String& src)
+{
+    auto vDst = DragDropInfo();
+    vDst.extraInfo = Convert<std::string>(src);
+    dst = vDst;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -2298,9 +2304,8 @@ void TransformImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetTransform(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<Matrix4>(*value) : std::nullopt;
+    ViewAbstract::SetTransformMatrix(frameNode, convValue);
 }
 void OnAppearImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -2639,8 +2644,14 @@ void ClickEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetClickEffect(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<Ark_ClickEffect>(*value) : std::nullopt;
+    if (!convValue.has_value()) {
+        ViewAbstract::SetClickEffectLevel(frameNode, std::nullopt, std::nullopt);
+        return;
+    }
+    const std::optional<ClickEffectLevel>& level = Converter::OptConvert<ClickEffectLevel>(convValue.value().level);
+    const std::optional<float> scaleValue = Converter::OptConvert<float>(convValue.value().scale);
+    ViewAbstract::SetClickEffectLevel(frameNode, level, scaleValue);
 }
 void OnDragStartImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
@@ -2703,6 +2714,8 @@ void AllowDropImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetAllowDrop(frameNode, convValue);
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined"
+        ".CustomObject is not supported.\n");
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -2710,16 +2723,15 @@ void DraggableImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetDraggable(frameNode, convValue);
+    ViewAbstract::SetDraggable(frameNode, convValue);
 }
 void DragPreviewImpl(Ark_NativePointer node,
                      const Ark_Union_CustomBuilder_DragItemInfo_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetDragPreview(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<DragDropInfo>(*value) : std::nullopt;
+    ViewAbstract::SetDragPreview(frameNode, convValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
@@ -2791,9 +2803,8 @@ void MotionPathImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMotionPath(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<MotionPathOption>(*value) : std::nullopt;
+    ViewAbstract::SetMotionPath(frameNode, convValue);
 }
 void ShadowImpl(Ark_NativePointer node,
                 const Ark_Union_ShadowOptions_ShadowStyle* value)
@@ -2891,7 +2902,7 @@ void KeyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetKey(frameNode, convValue);
+    ViewAbstract::SetInspectorId(frameNode, convValue);
 }
 void IdImpl(Ark_NativePointer node,
             const Ark_String* value)

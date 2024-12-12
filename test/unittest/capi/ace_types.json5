@@ -2306,89 +2306,6 @@
             ],
         },
         {
-            "name": "Navigation",
-            "disable": [
-                "setNavigationOptions1TestDefaultValues",
-                "setNavigationOptions1TestValidValues",
-                "setModeTestDefaultValues",
-                "setModeTestModeValidValues",
-                "setModeTestModeInvalidValues",
-                "setBackButtonIconTestDefaultValues",
-                "setBackButtonIconTestBackButtonIconValidValues",
-                "setBackButtonIconTestBackButtonIconInvalidValues",
-                "setHideNavBarTestDefaultValues",
-                "setTitleTestDefaultValues",
-                "setTitleTestValidValues",
-                "setTitleTestTitleValueMainValidValues",
-                "setTitleTestTitleValueMainInvalidValues",
-                "setTitleTestTitleValueSubValidValues",
-                "setTitleTestTitleValueSubInvalidValues",
-                "setTitleTestTitleValueHeightValidValues",
-                "setTitleTestTitleValueHeightInvalidValues",
-                "setTitleTestTitleOptionsBackgroundColorValidValues",
-                "setTitleTestTitleOptionsBackgroundColorInvalidValues",
-                "setTitleTestTitleOptionsBackgroundBlurStyleValidValues",
-                "setTitleTestTitleOptionsBackgroundBlurStyleInvalidValues",
-                "setTitleTestTitleOptionsBarStyleValidValues",
-                "setTitleTestTitleOptionsBarStyleInvalidValues",
-                "setTitleTestTitleOptionsEnableHoverModeValidValues",
-                "setTitleTestTitleOptionsEnableHoverModeInvalidValues",
-                "setSubTitleTestDefaultValues",
-                "setHideTitleBar0TestDefaultValues",
-                "setHideTitleBar1TestDefaultValues",
-                "setHideTitleBar1TestHideTitleBarHideValidValues",
-                "setHideTitleBar1TestHideTitleBarAnimatedValidValues",
-                "setHideBackButtonTestDefaultValues",
-                "setTitleModeTestDefaultValues",
-                "setTitleModeTestTitleModeInvalidValues",
-                "setMenusTestDefaultValues",
-                "setMenusTestValidValues",
-                "setToolBarTestDefaultValues",
-                "setToolBarTestValidValues",
-                "setToolbarConfigurationTestDefaultValues",
-                "setToolbarConfigurationTestValidValues",
-                "setHideToolBar0TestDefaultValues",
-                "setHideToolBar1TestDefaultValues",
-                "setHideToolBar1TestHideToolBarHideValidValues",
-                "setHideToolBar1TestHideToolBarAnimatedValidValues",
-                "setIgnoreLayoutSafeAreaTestDefaultValues",
-                "setIgnoreLayoutSafeAreaTestValidValues",
-                "setSystemBarStyleTestDefaultValues",
-                "setSystemBarStyleTestValidValues",
-                "setRecoverableTestDefaultValues",
-                "setRecoverableTestValidValues",
-                "setRecoverableTestRecoverableInvalidValues",
-
-                // New attr in API 105?
-                "setEnableDragBarTestDefaultValues",
-                "setEnableDragBarTestEnableDragBarValidValues",
-                "setEnableDragBarTestEnableDragBarInvalidValues",
-
-            ],
-            "attributes": [
-                {
-                    "name": "navBarWidth",
-                    "default": "240.00vp",
-                    "fixtures" : ["LengthPositive", "LengthResPositive"]
-                },
-                {
-                    "name": "navBarPosition",
-                    "default": "NavBarPosition.Start",
-                    "type": "Ark_NavBarPosition",
-                },
-                {
-                    "name": "navBarWidthRange",
-                    "default": "240.00vp, 432.00vp",
-                    "fixtures": ["FixtureNavBarWidthRange"]
-                },
-                {
-                    "name": "minContentWidth",
-                    "default": "360.00vp",
-                    "fixtures": ["LengthPositive", "LengthResPositive"]
-                },
-            ]
-        },
-        {
             "name": "CommonMethod",
             "nodeTypes": ["Blank"],
             "disable":[
@@ -3521,6 +3438,25 @@
             "remove": [
                 "setPreDecodeTestDefaultValues",
                 "setPreDecodeTestPreDecodeValidValues"
+            ]
+        },
+        {
+            "name": "Polyline",
+            "disable": [
+                "setPointsTestDefaultValues", // No value in json
+                "setPointsTestValidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "height",
+                    "default": "0.00vp",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                },
+                {
+                    "name": "width",
+                    "default": "0.00vp",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                },
             ]
         },
         {

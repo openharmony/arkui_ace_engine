@@ -29,6 +29,7 @@ using namespace testing::ext;
 using namespace Converter;
 using namespace TypeHelper;
 namespace {
+const auto ATTRIBUTE_TRACK_COLOR_NAME = "trackColor";
 const auto ATTRIBUTE_BLOCK_SIZE_NAME = "blockSize";
 const auto ATTRIBUTE_BLOCK_STYLE_NAME = "blockStyle";
 const auto ATTRIBUTE_SLIDE_RANGE_NAME = "slideRange";
@@ -48,8 +49,14 @@ const auto ATTRIBUTE_REVERSE_NAME = "reverse";
 const auto ATTRIBUTE_REVERSE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_BLOCK_COLOR_NAME = "blockColor";
 const auto ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE = "#FF000000";
-const auto ATTRIBUTE_TRACK_COLOR_NAME = "trackColor";
-const auto ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_TRACK_COLOR_I_ANGLE_NAME = "angle";
+const auto ATTRIBUTE_TRACK_COLOR_I_ANGLE_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TRACK_COLOR_I_DIRECTION_NAME = "direction";
+const auto ATTRIBUTE_TRACK_COLOR_I_DIRECTION_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TRACK_COLOR_I_COLORS_NAME = "colors";
+const auto ATTRIBUTE_TRACK_COLOR_I_COLORS_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TRACK_COLOR_I_REPEATING_NAME = "repeating";
+const auto ATTRIBUTE_TRACK_COLOR_I_REPEATING_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
 const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_MIN_LABEL_NAME = "minLabel";
@@ -830,97 +837,35 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
 HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultTrackColor =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE) << "Default value for attribute 'trackColor'";
+    resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_ANGLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_ANGLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'trackColor.LinearGradient_common.angle'";
+
+    resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_DIRECTION_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_DIRECTION_DEFAULT_VALUE) <<
+        "Default value for attribute 'trackColor.LinearGradient_common.direction'";
+
+    resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_COLORS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_COLORS_DEFAULT_VALUE) <<
+        "Default value for attribute 'trackColor.LinearGradient_common.colors'";
+
+    resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_REPEATING_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_REPEATING_DEFAULT_VALUE) <<
+        "Default value for attribute 'trackColor.LinearGradient_common.repeating'";
 }
 
 /*
- * @tc.name: setTrackColorTestTrackColorValidValues
+ * @tc.name: setTrackColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_LinearGradient_common initValueTrackColor;
-
-    // Initial setup
-    initValueTrackColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-
-    auto checkValue = [this, &initValueTrackColor](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_ResourceColor_LinearGradient_common& value) {
-        Ark_Union_ResourceColor_LinearGradient_common inputValueTrackColor = initValueTrackColor;
-
-        inputValueTrackColor = value;
-        modifier_->setTrackColor(node_, &inputValueTrackColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setTrackColor, attribute: trackColor";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_String>(value)));
-    }
-}
-
-/*
- * @tc.name: setTrackColorTestTrackColorInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorInvalidValues, TestSize.Level1)
-{
-    Ark_Union_ResourceColor_LinearGradient_common initValueTrackColor;
-
-    // Initial setup
-    initValueTrackColor = ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-
-    auto checkValue = [this, &initValueTrackColor](
-                          const std::string& input, const Ark_Union_ResourceColor_LinearGradient_common& value) {
-        Ark_Union_ResourceColor_LinearGradient_common inputValueTrackColor = initValueTrackColor;
-
-        modifier_->setTrackColor(node_, &inputValueTrackColor);
-        inputValueTrackColor = value;
-        modifier_->setTrackColor(node_, &inputValueTrackColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setTrackColor, attribute: trackColor";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_String>(value)));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_Empty>(nullptr));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_ResourceColor_LinearGradient_common, Ark_Empty>(nullptr));
+    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
 
 /*

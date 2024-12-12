@@ -27,6 +27,7 @@ public:
     void SetPoints(const ShapePoints& points) override;
 
     static void SetPoints(FrameNode* frameNode, const ShapePoints& points);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isPolygon);
 };
 
 } // namespace OHOS::Ace::NG
