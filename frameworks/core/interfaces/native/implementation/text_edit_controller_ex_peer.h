@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_CONTENT_CONTROLLER_BASE_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_CONTENT_CONTROLLER_BASE_PEER_IMPL_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_EDIT_CONTROLLER_EX_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_EDIT_CONTROLLER_EX_PEER_IMPL_H
 
-#include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 
-struct TextContentControllerBasePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::TextFieldControllerBase> handler;
+struct TextEditControllerExPeer {
+    OHOS::Ace::RefPtr<OHOS::Ace::RichEditorBaseControllerBase> handler;
 };
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_CONTENT_CONTROLLER_BASE_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_EDIT_CONTROLLER_EX_PEER_IMPL_H
