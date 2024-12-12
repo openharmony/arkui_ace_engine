@@ -16,12 +16,16 @@
 #include "core/components_ng/base/inspector.h"
 
 #include <unistd.h>
-#if defined(WEB_SUPPORTED) && !defined(PREVIEW) && !defined(ACE_UNITTEST)
-#include "core/common/recorder/inspector_tree_collector.h"
+
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#endif
+#include "core/common/recorder/inspector_tree_collector.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 #endif
+
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/render_context.h"
@@ -749,7 +753,7 @@ bool CheckNodeRect(const RefPtr<FrameNode>& node, RectF& rect, bool isVisibleOnl
 
 void GetWebContentIfNeed(const RefPtr<FrameNode>& node, const InspectorTreeParams& funcParams)
 {
-#if defined(WEB_SUPPORTED)
+#if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
     if (node->GetTag() == V2::WEB_ETS_TAG && funcParams.params.enableWeb && !funcParams.params.webContentJs.empty()) {
         auto pattern = node->GetPattern<WebPattern>();
         CHECK_NULL_VOID(pattern);
