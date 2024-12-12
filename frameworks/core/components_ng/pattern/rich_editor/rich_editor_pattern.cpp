@@ -2955,14 +2955,24 @@ void RichEditorPattern::HandleFocusEvent()
     if (host) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_ && !dataDetectorAdapter_->hasClickedMenuOption_) {
-        auto windowMode = GetWindowMode();
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "onFocus, requestKeyboard=%{public}d, windowMode=%{public}d",
-            needToRequestKeyboardOnFocus_, windowMode);
-        bool needShowSoftKeyboard = needToRequestKeyboardOnFocus_ && windowMode != WindowMode::WINDOW_MODE_FLOATING;
-        RequestKeyboard(false, true, needShowSoftKeyboard);
-        HandleOnEditChanged(true);
-    }
+
+    bool clickAIMenu = dataDetectorAdapter_->hasClickedMenuOption_;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "longPress=%{public}d, dragging=%{public}d, clickAIMenu=%{public}d",
+        isLongPress_, isDragging_, clickAIMenu);
+    bool bindKeyboard = !isLongPress_ && !isDragging_ && !clickAIMenu;
+    CHECK_NULL_VOID(bindKeyboard);
+
+    auto windowMode = GetWindowMode();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "requestKeyboard=%{public}d, windowMode=%{public}d, rightButton=%{public}d",
+        needToRequestKeyboardOnFocus_, windowMode, usingMouseRightButton_);
+
+    bool needShowSoftKeyboard = needToRequestKeyboardOnFocus_;
+    needShowSoftKeyboard &= (windowMode != WindowMode::WINDOW_MODE_FLOATING); // do not show kb in floating mode
+    needShowSoftKeyboard &= !usingMouseRightButton_; // do not show kb when mouseRightClick
+
+    RequestKeyboard(false, true, needShowSoftKeyboard);
+    HandleOnEditChanged(true);
+
 }
 
 WindowMode RichEditorPattern::GetWindowMode()
@@ -4884,11 +4894,11 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     bool isSelector = textSelector_.IsValid();
     if (isSelector) {
         DeleteByRange(record, textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-        CloseSelectOverlay();
         ResetSelection();
     } else if (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) {
         DeleteByRange(record, previewTextRecord_.replacedRange.start, previewTextRecord_.replacedRange.end);
     }
+    CloseSelectOverlay();
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
     IF_TRUE(!caretVisible_ && HasFocus(), StartTwinkling());
