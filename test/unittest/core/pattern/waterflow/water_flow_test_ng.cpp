@@ -1696,6 +1696,98 @@ HWTEST_F(WaterFlowTestNg, WaterFlowFooterTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest001
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest002
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = nullptr;
+    model.SetFooterWithFrameNode(std::move(footer));
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest003
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    auto footer2 = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode2;
+    if (footer2) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer2();
+        footerNode2 = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode2);
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest004
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest004, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    auto footer2 = nullptr;
+    model.SetFooterWithFrameNode(std::move(footer2));
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
+
+/**
  * @tc.name: Callback001
  * @tc.desc: Test scroll callback
  * @tc.type: FUNC
