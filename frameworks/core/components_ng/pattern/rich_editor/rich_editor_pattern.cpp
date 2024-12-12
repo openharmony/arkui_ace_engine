@@ -1652,6 +1652,7 @@ void RichEditorPattern::SetCaretPositionWithAffinity(PositionWithAffinity positi
 bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
+    AdjustSelector(correctPos, HandleType::SECOND);
     ResetLastClickOffset();
     caretAffinityPolicy_ = CaretAffinityPolicy::DEFAULT;
     CHECK_NULL_RETURN((pos == correctPos), false);
