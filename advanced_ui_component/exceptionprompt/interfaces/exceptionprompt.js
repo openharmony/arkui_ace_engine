@@ -310,7 +310,7 @@ export class ExceptionPrompt extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.width('100%');
-            Row.margin({ top: this.options.marginTop });
+            Row.position({ y: this.options.marginTop });
             Row.zIndex(ZINDEX_NUM);
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
