@@ -145,7 +145,6 @@ Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
                                  const Ark_TransitionEffect* disappear)
 {
-
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
 
