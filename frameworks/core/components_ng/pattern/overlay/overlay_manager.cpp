@@ -5596,7 +5596,7 @@ void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode);
     columnNode->OnMountToParentDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     if (isDragPixelMap) {
         dragPixmapColumnNodeWeak_ = columnNode;
         hasDragPixelMap_ = true;
@@ -6479,7 +6479,7 @@ void OverlayManager::MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_VOID(rootNode);
     frameNode->MountToParent(rootNode);
     frameNode->OnMountToParentDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     gatherNodeWeak_ = frameNode;
     hasGatherNode_ = true;
     gatherNodeChildrenInfo_ = gatherNodeChildrenInfo;

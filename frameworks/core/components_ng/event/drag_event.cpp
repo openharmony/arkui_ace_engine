@@ -1222,10 +1222,7 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->SetActive(true);
-    auto context = columnNode->GetContext();
-    if (context) {
-        context->FlushUITaskWithSingleDirtyNode(columnNode);
-    }
+    MarkDirtyNode(columnNode);
     if (!isDragPixelMap) {
         FlushSyncGeometryNodeTasks();
     }
@@ -1989,7 +1986,7 @@ RefPtr<FrameNode> DragEventActuator::GetOrCreateGatherNode(const RefPtr<NG::Over
     if (!gatherNode) {
         auto gatherNode = CreateGatherNode(actuator);
         if (gatherNode) {
-            MarkDirtyGatherNode(gatherNode);
+            MarkDirtyNode(gatherNode);
         }
         gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
         actuator->ClearGatherNodeChildrenInfo();
@@ -2104,7 +2101,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     return imageNode;
 }
 
-void DragEventActuator::MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode)
+void DragEventActuator::MarkDirtyNode(const RefPtr<FrameNode>& gatherNode)
 {
     CHECK_NULL_VOID(gatherNode);
     gatherNode->MarkModifyDone();
@@ -2166,7 +2163,7 @@ void DragEventActuator::MountGatherNode(const RefPtr<OverlayManager>& overlayMan
     } else {
         overlayManager->MountGatherNodeToRootNode(gatherNode, gatherNodeChildrenInfo);
     }
-    MarkDirtyGatherNode(gatherNode);
+    MarkDirtyNode(gatherNode);
 }
 
 void DragEventActuator::GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode)
@@ -2533,11 +2530,6 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(const RefPtr<FrameNode>
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    auto context = textNode->GetContext();
-    if (context) {
-        context->FlushUITaskWithSingleDirtyNode(textNode);
-    }
-    FlushSyncGeometryNodeTasks();
     return textNode;
 }
 

@@ -1307,7 +1307,6 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     CHECK_NULL_RETURN(dragNodePipeline, false);
     auto overlayManager = dragNodePipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
-    overlayManager->RemovePixelMap();
     auto isExpandDisplay = DragDropFuncWrapper::IsExpandDisplay(context);
 
     // create text node
@@ -1334,9 +1333,14 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
 
     // update position
     DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
-
+    
+    auto subwindowContext = data.imageNode->GetContext();
+    if (subwindowContext) {
+        subwindowContext->FlushSyncGeometryNodeTasks();
+        subwindowContext->PreLayout(subwindowContext->GetTimeFromExternalTimer(), 0);
+    }
     pipeline->FlushSyncGeometryNodeTasks();
-
+    overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(textNode);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
