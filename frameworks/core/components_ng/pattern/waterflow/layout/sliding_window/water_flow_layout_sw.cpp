@@ -39,7 +39,9 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         info_->isDataValid_ = false;
         return;
     }
-    CheckReset();
+    if (int32_t change = CheckReset(); change > -1) {
+        FillBack(mainLen_, change, itemCnt_ - 1);
+    }
 
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
@@ -180,20 +182,19 @@ bool WaterFlowLayoutSW::ItemHeightChanged() const
     return false;
 }
 
-void WaterFlowLayoutSW::CheckReset()
+int32_t WaterFlowLayoutSW::CheckReset()
 {
     int32_t updateIdx = GetUpdateIdx(wrapper_, info_->footerIndex_);
     if (info_->newStartIndex_ >= 0) {
         info_->UpdateLanesIndex(updateIdx);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
-        return;
+        return -1;
     }
     if (updateIdx > -1) {
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
-            FillBack(mainLen_, std::min(info_->startIndex_, itemCnt_ - 1), itemCnt_ - 1);
-            return;
+            return std::min(info_->startIndex_, itemCnt_ - 1);
         }
         info_->maxHeight_ = 0.0f;
         info_->ClearDataFrom(updateIdx, mainGaps_);
@@ -202,14 +203,18 @@ void WaterFlowLayoutSW::CheckReset()
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
     if (childDirty && ItemHeightChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
-        FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
-        return;
+        return info_->startIndex_;
     }
 
     if (wrapper_->ConstraintChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
-        FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
+        return info_->startIndex_;
     }
+    
+    if (updateIdx <= info_->endIndex_) {
+        return updateIdx;
+    }
+    return -1; // updates beyond current viewport don't need a refill
 }
 
 bool WaterFlowLayoutSW::CheckData() const

@@ -884,4 +884,25 @@ HWTEST_F(WaterFlowTestNg, Delete004, TestSize.Level1)
     EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (96.00, 0.00) - [96.00 x 200.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 2).ToString(), "RectT (192.00, 0.00) - [96.00 x 200.00]");
 }
+
+/**
+ * @tc.name: Delete005
+ * @tc.desc: Delete while scrolling upwareds
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete005, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItems(50);
+    CreateDone();
+
+    UpdateCurrentOffset(-500.0f);
+
+    pattern_->UpdateCurrentOffset(20.0f, SCROLL_FROM_UPDATE);
+    frameNode_->ChildrenUpdatedFrom(22);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 26);
+    EXPECT_EQ(GetChildY(frameNode_, 26), 720.0f);
+}
 } // namespace OHOS::Ace::NG
