@@ -82,13 +82,15 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
         auto move = Converter::OptConvert<TransitionEdge>(effect->move);
         peer->handler = new ChainedMoveEffect(move.value_or(TransitionEdge::TOP));
     } else if (valueText == ASYMMETRIC_TOKEN) {
-       // 'Ark_TransitionEffect' (aka 'Ark_Materialized') to 
-       // 'const RefPtr<OHOS::Ace::NG::ChainedTransitionEffect>'
-        auto app = effect->asymmetric.appear;
-        auto disapp = effect->asymmetric.disappear;
-        auto appearRef = AceType::MakeRefPtr<NG::ChainedTransitionEffect>(app);
-        auto disappearRef = AceType::MakeRefPtr<NG::ChainedTransitionEffect>(disapp);
-        peer->handler = new ChainedAsymmetricEffect(appearRef, disappearRef);
+        CHECK_NULL_RETURN(effect, nullptr);
+        CHECK_NULL_RETURN(effect->asymmetric.appear.ptr, nullptr);
+        auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
+
+        CHECK_NULL_RETURN(effect, nullptr);
+        CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
+        auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
+
+        peer->handler = new ChainedAsymmetricEffect(app->handler, disapp->handler);
     }
     return peer;
 }
@@ -143,8 +145,10 @@ Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
                                  const Ark_TransitionEffect* disappear)
 {
+
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
+
     Ark_String type = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
     Ark_Literal_TransitionEffect_appear_disappear asymm;
     asymm.appear = *appear;
