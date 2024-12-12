@@ -44,6 +44,7 @@
 
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
+#include "ace_engine_types.h"
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
@@ -88,6 +89,20 @@ namespace OHOS::Ace::NG::Converter {
         dst.i32 = src;
     }
 
+    inline void AssignArkValue(Ark_Number& dst, const long& src)
+    {
+        LOGE("Ark_Number doesn`t support long");
+        dst.tag = ARK_TAG_INT32;
+        dst.i32 = static_cast<int32_t>(src);
+    }
+
+    inline void AssignArkValue(Ark_Number& dst, const long long& src)
+    {
+        LOGE("Ark_Number doesn`t support long long");
+        dst.tag = ARK_TAG_INT32;
+        dst.i32 = static_cast<int32_t>(src);
+    }
+
     inline void AssignArkValue(Ark_Number& dst, const uint32_t& src)
     {
         dst.tag = ARK_TAG_INT32;
@@ -125,21 +140,21 @@ namespace OHOS::Ace::NG::Converter {
 
     inline void AssignArkValue(Ark_Length& dst, const int& src)
     {
-        dst.type = ARK_TAG_INT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
     }
 
     inline void AssignArkValue(Ark_Length& dst, const float& src)
     {
-        dst.type = ARK_TAG_FLOAT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
     }
 
     inline void AssignArkValue(Ark_Length& dst, const Dimension& src)
     {
-        dst.type = ARK_TAG_FLOAT32;
+        dst.type = ARK_RUNTIME_NUMBER;
         dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
         dst.unit = static_cast<int32_t>(src.Unit());
     }
@@ -222,6 +237,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
+    void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);

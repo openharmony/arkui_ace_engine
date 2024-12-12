@@ -102,6 +102,14 @@ enum class MessageLevel {
     LOG = 5
 };
 
+enum class RenderExitReason {
+    ABNORMAL_TERMINATION = 0,
+    WAS_KILLED = 1,
+    CRASHED = 2,
+    OOM = 3,
+    EXIT_UNKNOWN = 4
+};
+
 struct Header {
     std::string headerKey;
     std::string headerValue;

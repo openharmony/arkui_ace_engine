@@ -28,11 +28,13 @@
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "base/log/log_wrapper.h"
 
 namespace {
@@ -1214,8 +1216,20 @@ void DrawModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetDrawModifier(frameNode, convValue);
+    if (!frameNode->IsSupportDrawModifier()) {
+        return;
+    }
+    auto convValue = value ? Converter::OptConvert<Ark_DrawModifier>(*value) : std::nullopt;
+    if (!convValue) {
+        return;
+    }
+    auto peer = reinterpret_cast<DrawModifierPeer*>(convValue.value().ptr);
+    CHECK_NULL_VOID(peer);
+    if (!peer->drawModifier) {
+        peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
+    }
+    peer->frameNode = AceType::WeakClaim(frameNode);
+    ViewAbstract::SetDrawModifier(frameNode, peer->drawModifier);
 }
 void ResponseRegionImpl(Ark_NativePointer node,
                         const Ark_Union_Array_Rectangle_Rectangle* value)
@@ -2841,9 +2855,9 @@ void Mask0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMask0(frameNode, convValue);
+    CHECK_NULL_VOID(value && value->ptr);
+    const auto& progressMask = reinterpret_cast<ProgressMaskPeer*>(value->ptr)->GetProperty();
+    ViewAbstract::SetProgressMask(frameNode, progressMask);
 }
 void Mask1Impl(Ark_NativePointer node,
                const Ark_Type_CommonMethod_mask_value* value)
@@ -2851,9 +2865,15 @@ void Mask1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("CommonMethodModifier::Mask1Impl, not implemented due to deprecated");
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMask1(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [node](const Ark_ProgressMask& value) {
+            Mask0Impl(node, &value);
+        },
+        [node](const auto& value) {
+            LOGE("CommonMethodModifier::Mask1Impl is not implemented yet");
+        },
+        []() {}
+    );
 }
 void MaskShapeImpl(Ark_NativePointer node,
                    const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)

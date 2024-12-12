@@ -15,18 +15,22 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
-struct LayoutManagerPeer {};
+#include "layout_manager_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutManagerAccessor {
 void DestroyPeerImpl(LayoutManagerPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return new LayoutManagerPeer();
+    LayoutManagerPeer* peer =  new LayoutManagerPeer();
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,17 +38,29 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Int32 GetLineCountImpl(LayoutManagerPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    CHECK_NULL_RETURN(peer->handler, 0);
+    int32_t count = peer->handler->GetLineCount();
+    return Converter::ArkValue<Ark_Int32>(count);
 }
 Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer,
                                                    const Ark_Number* x,
                                                    const Ark_Number* y)
 {
+    CHECK_NULL_RETURN(peer, nullptr);
+    PositionWithAffinity result = peer->handler->GetGlyphPositionAtCoordinate(
+        Converter::Convert<int32_t>(*x),
+        Converter::Convert<int32_t>(*y)
+    );
+    LOGE("LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl Incorrect return value type.");
     return nullptr;
 }
 Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
                                      const Ark_Number* lineNumber)
 {
+    CHECK_NULL_RETURN(peer, nullptr);
+    TextLineMetrics result = peer->handler->GetLineMetrics(Converter::Convert<int32_t>(*lineNumber));
+    LOGE("LayoutManagerAccessor::GetLineMetricsImpl Incorrect return value type.");
     return nullptr;
 }
 void GetRectsForRangeImpl(LayoutManagerPeer* peer,
@@ -52,6 +68,19 @@ void GetRectsForRangeImpl(LayoutManagerPeer* peer,
                           Ark_RectWidthStyle widthStyle,
                           Ark_RectHeightStyle heightStyle)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(range);
+    auto start = Converter::Convert<int32_t>(range->start.value);
+    auto end = Converter::Convert<int32_t>(range->end.value);
+    auto heightSt = Converter::OptConvert<RectHeightStyle>(heightStyle);
+    auto widthSt = Converter::OptConvert<RectWidthStyle>(widthStyle);
+    std::vector<ParagraphManager::TextBox> rects;
+    rects = peer->handler->GetRectsForRange(
+        start,
+        end,
+        heightSt.value_or(RectHeightStyle::TIGHT),
+        widthSt.value_or(RectWidthStyle::TIGHT));
+    LOGE("LayoutManagerAccessor::GetRectsForRangeImpl No return value specified.");
 }
 } // LayoutManagerAccessor
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()

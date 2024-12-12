@@ -20,18 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/full_screen_exit_handler_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockFullScreenExitHandler : public FullScreenExitHandler {
-public:
-    MOCK_METHOD(void, ExitFullScreen, ());
-};
-} // namespace
 
 class FullScreenExitHandlerAccessorTest : public AccessorTestBase<GENERATED_ArkUIFullScreenExitHandlerAccessor,
     &GENERATED_ArkUIAccessors::getFullScreenExitHandlerAccessor, FullScreenExitHandlerPeer> {

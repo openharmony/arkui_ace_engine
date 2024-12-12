@@ -14,9 +14,18 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "list_scroller_peer_impl.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<Callback_Void>& dst, const Ark_CloseSwipeActionOptions& src)
+{
+    dst = Converter::OptConvert<Callback_Void>(src.onFinish);
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListScrollerAccessor {
@@ -85,7 +94,17 @@ void CloseAllSwipeActionsImpl(ListScrollerPeer* peer,
                               const Opt_CloseSwipeActionOptions* options)
 {
     CHECK_NULL_VOID(peer);
-    LOGE("ListScrollerAccessor::CloseAllSwipeActionsImpl. Callback isn't implemented yet.");
+    auto scrollController = peer->GetController().Upgrade();
+    if (!scrollController) {
+        LOGE("ListScrollerAccessor::CloseAllSwipeActionsImpl. Controller isn't bound to a component.");
+        return;
+    }
+
+    auto funcOpt = options ? Converter::OptConvert<Callback_Void>(*options) : std::nullopt;
+    if (funcOpt.has_value()) {
+        auto func =  [arkCallback = CallbackHelper(funcOpt.value())]() { arkCallback.Invoke(); };
+        scrollController->CloseAllSwipeActions(std::move(func));
+    }
 }
 Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
                                                 const Ark_Number* x,

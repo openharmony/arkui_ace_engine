@@ -16,13 +16,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-
-struct ICurvePeer {};
+#include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ICurveAccessor {
 void DestroyPeerImpl(ICurvePeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
@@ -35,7 +37,17 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Int32 InterpolateImpl(ICurvePeer* peer,
                           const Ark_Number* fraction)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0.0f);
+    CHECK_NULL_RETURN(fraction, 0.0f);
+    float time = Converter::Convert<float>(*fraction);
+    if (time > 1.0f) {
+        time = 1.0f;
+    }
+    if (time < 0.0f) {
+        time = 0.0f;
+    }
+    LOGE("ICurveAccessor::InterpolateImpl - return value can be incorrect");
+    return peer->handler->Move(time);
 }
 } // ICurveAccessor
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()

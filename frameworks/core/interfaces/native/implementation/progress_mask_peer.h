@@ -12,12 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
 
-#include "core/components/web/web_event.h"
+#pragma once
 
-struct JsResultPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Result> result;
+#include "core/components_ng/property/progress_mask_property.h"
+#include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+class ProgressMaskPeerImpl {
+public:
+    ProgressMaskPeerImpl() = default;
+    virtual ~ProgressMaskPeerImpl() = default;
+
+    const RefPtr<ProgressMaskProperty>& GetProperty() const { return property_; }
+
+private:
+    RefPtr<ProgressMaskProperty> property_{Referenced::MakeRefPtr<ProgressMaskProperty>()};
 };
-#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
+} // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct ProgressMaskPeer : public OHOS::Ace::NG::GeneratedModifier::ProgressMaskPeerImpl {};

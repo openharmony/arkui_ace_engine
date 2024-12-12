@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
-struct TextContentControllerBasePeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
 void DestroyPeerImpl(TextContentControllerBasePeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
@@ -34,15 +35,22 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
 {
+    // fix a return value
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    peer->handler->GetCaretPosition();
     return nullptr;
 }
 Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
 {
+    // fix a return value
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    peer->handler->GetTextContentRect();
     return nullptr;
 }
 Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    return Converter::ArkValue<Ark_Int32>(peer->handler->GetTextContentLinesNum());
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()

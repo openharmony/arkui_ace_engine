@@ -260,6 +260,41 @@ public:
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void SetNestedScrollExt(FrameNode* frameNode, const std::optional<NestedScrollOptionsExt>& nestedOpt);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption);
+    static void SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnPageStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnProgressChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnTitleReceive(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnGeolocationHide(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnGeolocationShow(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnCommonDialog(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback, int dialogEventType);
+    static void SetOnConsoleLog(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnErrorReceive(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnHttpErrorReceive(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnDownloadStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetRefreshAccessedHistoryId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnUrlLoadIntercept(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetRenderExitedId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnFileSelectorShow(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetResourceLoadId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnFullScreenExit(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnFullScreenEnter(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetScaleChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnHttpAuthRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnInterceptRequest(
+        FrameNode* frameNode, std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& callback);
+    static void SetPermissionRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

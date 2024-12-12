@@ -17,6 +17,7 @@
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -303,8 +304,13 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
                 params_.emplace_back(resource.params.value.array[i].chars);
             }
         }
-
         themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
+        if (!themeConstants_) {
+            auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+            auto themeManager = context->GetThemeManager();
+            CHECK_NULL_VOID(themeManager);
+            themeConstants_ = themeManager->GetThemeConstants(bundleName_.c_str(), moduleName_.c_str());
+        }
     } else {
         LOGE("ResourceConverter illegal id tag: id.tag = %{public}d", resource.id.tag);
     }
@@ -987,8 +993,8 @@ RefPtr<Curve> Convert(const Ark_Curve& src)
 template<>
 RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
-    LOGE("Convert [Ark_ICurve] to [RefPtr<Curve>] is not supported");
-    return nullptr;
+    auto peer = reinterpret_cast<ICurvePeer*>(src.ptr);
+    return peer ? peer->handler : nullptr;
 }
 
 template<>

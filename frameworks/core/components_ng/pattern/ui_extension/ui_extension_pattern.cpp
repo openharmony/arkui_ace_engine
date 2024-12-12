@@ -158,6 +158,20 @@ UIExtensionPattern::UIExtensionPattern(
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
+void UIExtensionPattern::UpdateSessionWraper(bool isTransferringCaller)
+{
+    isTransferringCaller_ = isTransferringCaller;
+    sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
+        sessionType_, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
+    accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
+}
+
+bool UIExtensionPattern::GetIsTransferringCaller()
+{
+    return isTransferringCaller_;
+}
+
 UIExtensionPattern::~UIExtensionPattern()
 {
     UIEXT_LOGI("The %{public}smodal UIExtension is destroyed.", isModal_ ? "" : "non");

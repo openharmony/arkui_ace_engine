@@ -17,6 +17,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -281,5 +282,22 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestInvalidValues, TestSize.Leve
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Invalid value should not change the blend mode";
     }
+}
+
+HWTEST_F(CommonMethodModifierTest5, setDrawModifierTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(modifier_->setDrawModifier, nullptr);
+    auto peer = DrawModifierPeer();
+    Ark_DrawModifier drawModifier;
+    drawModifier.ptr = &peer;
+    Opt_DrawModifier drawModifierOpt = Converter::ArkValue<Opt_DrawModifier>(
+        std::optional<Ark_DrawModifier>(drawModifier));
+    EXPECT_EQ(peer.drawModifier, nullptr);
+    EXPECT_EQ(peer.frameNode.Upgrade(), nullptr);
+    modifier_->setDrawModifier(node_, &drawModifierOpt);
+    EXPECT_NE(peer.drawModifier, nullptr);
+    EXPECT_EQ(peer.frameNode.Upgrade(), frameNode);
 }
 }

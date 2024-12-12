@@ -12,12 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
+#pragma once
 
-#include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
-struct JsResultPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Result> result;
+struct StyledStringPeer {
+    OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString;
 };
-#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H

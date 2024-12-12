@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_MODIFIER_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_MODIFIER_PEER_IMPL_H
 
-#include "core/components/web/web_event.h"
+#include "core/components_ng/base/frame_node.h"
 
-struct JsResultPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Result> result;
+struct DrawModifierPeer {
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> frameNode;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::DrawModifier> drawModifier;
 };
-#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_JS_RESULT_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DRAW_MODIFIER_PEER_IMPL_H

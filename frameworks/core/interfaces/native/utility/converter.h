@@ -223,6 +223,13 @@ namespace Converter {
     }
 
     template<>
+    inline long Convert(const Ark_Number& src)
+    {
+        LOGE("Ark_Number doesn`t support long type");
+        return static_cast<long>(Convert<int>(src));
+    }
+
+    template<>
     inline float Convert(const Ark_Number& src)
     {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
@@ -506,6 +513,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);
     template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
+    template<> void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src);
+    template<> void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src);
     template<> void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src);
     template<> void AssignCast(std::optional<ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
