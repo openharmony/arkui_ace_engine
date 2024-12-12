@@ -5374,6 +5374,9 @@ int32_t SetScrollEdgeEffect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     if (node->type == ARKUI_NODE_LIST) {
         fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(
             node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setEdgeEffect(
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(
             node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
@@ -5391,6 +5394,8 @@ void ResetScrollEdgeEffect(ArkUI_NodeHandle node)
 
     if (node->type == ARKUI_NODE_LIST) {
         fullImpl->getNodeModifiers()->getListModifier()->resetListEdgeEffect(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetEdgeEffect(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollEdgeEffect(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
