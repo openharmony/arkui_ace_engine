@@ -280,8 +280,8 @@ public:
     void SetReplacementString(const RefPtr<SpanStringBase>& styledString);
     const RefPtr<SpanStringBase> GetReplacementString() const;
 
-    void SetPreviewText(std::string previewText);
-    std::string GetPreviewText() const;
+    void SetPreviewText(const std::string& previewText);
+    const std::string& GetPreviewText() const;
 
 private:
     TextRange rangeBefore_;
