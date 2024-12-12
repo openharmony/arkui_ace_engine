@@ -439,6 +439,9 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
         // not click hide menu if needn't hide after touch
         return;
     }
+    if (info.GetTouches().empty()) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = info.GetTouches().front().GetLocalLocation();
