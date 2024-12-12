@@ -2396,6 +2396,8 @@
                 "setDragPreviewTestDragPreviewDragItemInfoExtraInfoValidValues",
             ],
             "remove":[
+                "setObscuredTestDefaultValues",
+                "setObscuredTestValidValues",
                 "setFocusScopeId0TestDefaultValues",
                 "setFocusScopeId0TestFocusScopeIdIdValidValues",
                 "setFocusScopeId0TestFocusScopeIdIsGroupValidValues",
@@ -3004,13 +3006,8 @@
                 "setAccessibilityDescription1TestValidValues",
                 "setAccessibilityLevelTestDefaultValues",
                 "setAccessibilityLevelTestAccessibilityLevelValidValues",
-                "setObscuredTestDefaultValues",
-                "setObscuredTestValidValues",
                 "setReuseIdTestDefaultValues",
                 "setReuseIdTestReuseIdValidValues",
-                "setRenderFitTestDefaultValues",
-                "setRenderFitTestRenderFitValidValues",
-                "setRenderFitTestRenderFitInvalidValues",
                 "setBackgroundBrightnessTestDefaultValues",
                 "setBackgroundBrightnessTestBackgroundBrightnessRateValidValues",
                 "setBackgroundBrightnessTestBackgroundBrightnessLightUpDegreeValidValues",
@@ -3049,6 +3046,10 @@
                             "default": "",
                         },
                     ]
+                },
+                {
+                    "name": "renderFit",
+                    "default": "RenderFit.TOP_LEFT",
                 },
                 {
                     "name": "tabIndex",

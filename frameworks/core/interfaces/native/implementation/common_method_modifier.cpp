@@ -1158,6 +1158,40 @@ void AssignCast(std::optional<DragDropInfo>& dst, const Ark_String& src)
     vDst.extraInfo = Convert<std::string>(src);
     dst = vDst;
 }
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::ObscuredReasons>& dst, const Ark_ObscuredReasons& src)
+{
+    switch (src) {
+        case ARK_OBSCURED_REASONS_PLACEHOLDER: dst = ObscuredReasons::PLACEHOLDER; break;
+        default: LOGE("Unexpected enum value in Ark_ObscuredReasons: %{public}d", src);
+    }
+}
+
+template<>
+    void AssignCast(std::optional<RenderFit>& dst, const Ark_RenderFit& src)
+{
+    switch (src) {
+        case ARK_RENDER_FIT_CENTER: dst = RenderFit::CENTER; break;
+        case ARK_RENDER_FIT_TOP: dst = RenderFit::TOP; break;
+        case ARK_RENDER_FIT_BOTTOM: dst = RenderFit::BOTTOM; break;
+        case ARK_RENDER_FIT_LEFT: dst = RenderFit::LEFT; break;
+        case ARK_RENDER_FIT_RIGHT: dst = RenderFit::RIGHT; break;
+        case ARK_RENDER_FIT_TOP_LEFT: dst = RenderFit::TOP_LEFT; break;
+        case ARK_RENDER_FIT_TOP_RIGHT: dst = RenderFit::TOP_RIGHT; break;
+        case ARK_RENDER_FIT_BOTTOM_LEFT: dst = RenderFit::BOTTOM_LEFT; break;
+        case ARK_RENDER_FIT_BOTTOM_RIGHT: dst = RenderFit::BOTTOM_RIGHT; break;
+        case ARK_RENDER_FIT_RESIZE_FILL: dst = RenderFit::RESIZE_FILL; break;
+        case ARK_RENDER_FIT_RESIZE_CONTAIN: dst = RenderFit::RESIZE_CONTAIN; break;
+        case ARK_RENDER_FIT_RESIZE_CONTAIN_TOP_LEFT: dst = RenderFit::RESIZE_CONTAIN_TOP_LEFT; break;
+        case ARK_RENDER_FIT_RESIZE_CONTAIN_BOTTOM_RIGHT: dst = RenderFit::RESIZE_CONTAIN_BOTTOM_RIGHT; break;
+        case ARK_RENDER_FIT_RESIZE_COVER: dst = RenderFit::RESIZE_COVER; break;
+        case ARK_RENDER_FIT_RESIZE_COVER_TOP_LEFT: dst = RenderFit::RESIZE_COVER_TOP_LEFT; break;
+        case ARK_RENDER_FIT_RESIZE_COVER_BOTTOM_RIGHT: dst = RenderFit::RESIZE_COVER_BOTTOM_RIGHT; break;
+        default: LOGE("Unexpected enum value in Ark_RenderFit: %{public}d", src);
+    }
+}
+
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -3101,8 +3135,14 @@ void ObscuredImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetObscured(frameNode, convValue);
+    auto convValue = Converter::Convert<std::vector<std::optional<ObscuredReasons>>>(*value);
+    auto vec = std::vector<ObscuredReasons>();
+    for (auto reason : convValue) {
+        if (reason.has_value()) {
+            vec.emplace_back(reason.value());
+        }
+    }
+    ViewAbstract::SetObscured(frameNode, vec);
 }
 void ReuseIdImpl(Ark_NativePointer node,
                  const Ark_String* value)
@@ -3110,17 +3150,17 @@ void ReuseIdImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
+    //auto convValue = Converter::Convert<std::string>(*value);
     //CommonMethodModelNG::SetReuseId(frameNode, convValue);
+    LOGE("ARKOALA CommonMethod::ReuseIdImpl: Method not implemented in ViewAbstract!");
 }
 void RenderFitImpl(Ark_NativePointer node,
                    Ark_RenderFit value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetRenderFit(frameNode, convValue);
+    auto convValue = Converter::OptConvert<RenderFit>(value); // for enums
+    ViewAbstract::SetRenderFit(frameNode, convValue);
 }
 void GestureModifierImpl(Ark_NativePointer node,
                          const Ark_GestureModifier* value)

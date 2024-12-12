@@ -102,6 +102,8 @@ const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME = "align";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_DRAG_PREVIEW_I_EXTRA_INFO_NAME = "extraInfo";
 const auto ATTRIBUTE_DRAG_PREVIEW_I_EXTRA_INFO_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_RENDER_FIT_NAME = "renderFit";
+const auto ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE = "RenderFit.TOP_LEFT";
 } // namespace TestConst::CommonMethod
 
 class CommonMethodModifierTest

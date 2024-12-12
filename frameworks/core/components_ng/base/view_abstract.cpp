@@ -3255,9 +3255,13 @@ void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
-void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
+void ViewAbstract::SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit, frameNode);
+    if (renderFit.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, RenderFit, frameNode);
+    }
 }
 
 void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType)
