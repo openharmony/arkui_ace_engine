@@ -482,7 +482,10 @@ void FfiOHOSAceFrameworkTextSetEllipsisMode(int32_t ellipsisMode)
 
 void FfiOHOSAceFrameworkTextOnCopy(void (*callback)(const char* value))
 {
-    auto onCopy = [lambda = CJLambda::Create(callback)](const std::string& value) -> void { lambda(value.c_str()); };
+    auto onCopy = [lambda = CJLambda::Create(callback)](const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     TextModel::GetInstance()->SetOnCopy(std::move(onCopy));
 }
 

@@ -182,7 +182,7 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textForDisplay_ = "test";
+    richEditorPattern->textForDisplay_ = u"test";
     richEditorPattern->InitSelection(Offset(0, 0));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
@@ -198,7 +198,7 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textForDisplay_ = "test";
+    richEditorPattern->textForDisplay_ = u"test";
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.front()->position = 3;
     richEditorPattern->InitSelection(Offset(0, 0));
@@ -361,7 +361,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection002, TestSize.Level1)
     EXPECT_EQ(richEditorSelection2.selection[0], 15);
     EXPECT_EQ(richEditorSelection2.selection[1], 30);
     auto resultObject = richEditorSelection2.resultObjects.front();
-    EXPECT_EQ(resultObject.valueString, INIT_VALUE_3);
+    EXPECT_EQ(StringUtils::Str16ToStr8(resultObject.valueString), INIT_VALUE_3);
     EXPECT_EQ(resultObject.offsetInSpan[0], 15);
     EXPECT_EQ(resultObject.offsetInSpan[1], 30);
 }

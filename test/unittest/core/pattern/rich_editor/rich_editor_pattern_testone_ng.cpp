@@ -241,8 +241,8 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertStyledStringByPaste001, TestSize.Leve
     AddSpan("test");
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
     richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
-    std::string data = "abc";
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+    std::u16string data = u"abc";
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(data);
     richEditorPattern->InsertStyledStringByPaste(spanString);
 
@@ -589,7 +589,7 @@ HWTEST_F(RichEditorPatternTestOneNg, MouseDoubleClickParagraphEnd001, TestSize.L
     ASSERT_NE(richEditorPattern, nullptr);
 
     AddSpan("TEST123");
-    std::string content = "TEST123";
+    std::u16string content = u"TEST123";
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
 
@@ -644,11 +644,11 @@ HWTEST_F(RichEditorPatternTestOneNg, GetTextContentLength001, TestSize.Level1)
     richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->GetTextContentLength();
 
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->GetTextContentLength();
 
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->isSpanStringMode_ = false;
     int32_t res = richEditorPattern->GetTextContentLength();
     EXPECT_EQ(res, 0);

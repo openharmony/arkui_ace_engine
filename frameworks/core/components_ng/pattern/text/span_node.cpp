@@ -20,6 +20,8 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -82,7 +84,7 @@ std::string SpanItem::GetFont() const
 
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->PutFixedAttr("content", content.c_str(), filter, FIXED_ATTR_CONTENT);
+    json->PutFixedAttr("content", UtfUtils::Str16ToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
@@ -215,7 +217,8 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 void SpanNode::DumpInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
-    dumpLog.AddDesc(std::string("Content: ").append("\"").append(spanItem_->content).append("\""));
+    dumpLog.AddDesc(
+        std::string("Content: ").append("\"").append(UtfUtils::Str16ToStr8(spanItem_->content)).append("\""));
     auto textStyle = spanItem_->GetTextStyle();
     if (!textStyle) {
         return;
@@ -345,12 +348,11 @@ void SpanItem::UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextSty
     }
 }
 
-void SpanItem::UpdateTextStyleForAISpan(const std::string& spanContent, const RefPtr<Paragraph>& builder,
+void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const RefPtr<Paragraph>& builder,
     const TextStyle& textStyle, const TextStyle& aiSpanStyle)
 {
-    auto wSpanContent = StringUtils::ToWstring(spanContent);
-    int32_t wSpanContentLength = static_cast<int32_t>(wSpanContent.length());
-    int32_t spanStart = position - wSpanContentLength;
+    int32_t spanContentLength = static_cast<int32_t>(spanContent.length());
+    int32_t spanStart = position - spanContentLength;
     if (needRemoveNewLine) {
         spanStart -= 1;
     }
@@ -369,16 +371,13 @@ void SpanItem::UpdateTextStyleForAISpan(const std::string& spanContent, const Re
         }
         int32_t contentStart = preEnd - spanStart;
         if (preEnd < aiSpanStartInSpan) {
-            auto beforeContent =
-                StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd));
-            UpdateTextStyle(
-                beforeContent, builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
+            UpdateTextStyle(spanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd),
+                builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
             contentStart = contentStart + aiSpanStartInSpan - preEnd;
         }
-        auto displayContent = StringUtils::ToWstring(aiSpan.content)
+        auto displayContent = StringUtils::Str8ToStr16(aiSpan.content)
             .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanStyle,
-            selectedStart - contentStart, selectedEnd - contentStart);
+        UpdateTextStyle(displayContent, builder, aiSpanStyle, selectedStart - contentStart, selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
             return;
@@ -388,8 +387,8 @@ void SpanItem::UpdateTextStyleForAISpan(const std::string& spanContent, const Re
     }
     if (preEnd < position) {
         int32_t contentStart = preEnd - spanStart;
-        auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
-        UpdateTextStyle(afterContent, builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
+        UpdateTextStyle(spanContent.substr(preEnd - spanStart, position - preEnd),
+            builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
     }
 }
 
@@ -427,8 +426,8 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
     }
 }
 
-void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle,
-    const int32_t selStart, const int32_t selEnd)
+void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Paragraph>& builder,
+    const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd)
 {
     if (!IsDragging()) {
         UpdateContentTextStyle(content, builder, textStyle);
@@ -438,11 +437,9 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
             builder->PopStyle();
             return;
         }
-        auto displayContent = StringUtils::Str8ToStr16(content);
-        auto contentLength = static_cast<int32_t>(displayContent.length());
+        auto contentLength = static_cast<int32_t>(content.length());
         if (selStart > 0) {
-            auto beforeSelectedText = displayContent.substr(0, selStart);
-            UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
+            UpdateContentTextStyle(content.substr(0, selStart), builder, textStyle);
         }
         auto finalSelStart = selStart;
         if (finalSelStart < 0) {
@@ -462,45 +459,45 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
             selectedTextStyle.SetTextColor(color);
             Color textDecorationColor = selectedTextStyle.GetTextDecorationColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextDecorationColor(textDecorationColor);
-            auto selectedText = displayContent.substr(finalSelStart, finalSelEnd - finalSelStart);
-            UpdateContentTextStyle(StringUtils::Str16ToStr8(selectedText), builder, selectedTextStyle);
+            UpdateContentTextStyle(content.substr(finalSelStart, finalSelEnd - finalSelStart), builder,
+                selectedTextStyle);
         }
 
         if (finalSelEnd < contentLength) {
-            auto afterSelectedText = displayContent.substr(finalSelEnd);
-            UpdateContentTextStyle(StringUtils::Str16ToStr8(afterSelectedText), builder, textStyle);
+            UpdateContentTextStyle(content.substr(finalSelEnd), builder, textStyle);
         }
     }
 }
 
 void SpanItem::UpdateContentTextStyle(
-    const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
+    const std::u16string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle)
 {
     builder->PushStyle(textStyle);
     if (!content.empty()) {
         auto displayText = content;
         auto textCase = textStyle.GetTextCase();
         StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
-        builder->AddText(StringUtils::Str8ToStr16(displayText));
+        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
+        builder->AddText(displayText);
     }
     builder->PopStyle();
 }
 
-std::string SpanItem::GetSpanContent(const std::string& rawContent, bool isMarquee)
+std::u16string SpanItem::GetSpanContent(const std::u16string& rawContent, bool isMarquee)
 {
-    std::string data;
+    std::u16string data;
     if (needRemoveNewLine && !rawContent.empty()) {
         data = rawContent.substr(0, static_cast<int32_t>(rawContent.length()) - 1);
     } else {
         data = rawContent;
     }
     if (isMarquee) {
-        std::replace(data.begin(), data.end(), '\n', ' ');
+        std::replace(data.begin(), data.end(), u'\n', u' ');
     }
     return data;
 }
 
-std::string SpanItem::GetSpanContent()
+std::u16string SpanItem::GetSpanContent()
 {
     return content;
 }
@@ -644,7 +641,7 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, content);
+    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
     EncodeFontStyleTlv(buff);
     EncodeTextLineStyleTlv(buff);
     if (backgroundStyle.has_value()) {
@@ -714,7 +711,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     int32_t start = TLVUtil::ReadInt32(buff, cursor);
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
-    sameSpan->content = TLVUtil::ReadString(buff, cursor);
+    sameSpan->content = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
     sameSpan->backgroundStyle = TextBackgroundStyle();
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
@@ -809,14 +806,14 @@ bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
         TLVUtil::WriteInt32(buff, interval.first);
         TLVUtil::WriteInt32(buff, interval.second);
-        TLVUtil::WriteString(buff, content);
+        TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
         return true;
     }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, content);
+    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
     if (options.offset.has_value()) {
         TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_OFFSET_TAG);
         TLVUtil::WriteInt32(buff, options.offset.value());
@@ -856,7 +853,7 @@ RefPtr<ImageSpanItem> ImageSpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32
     int32_t start = TLVUtil::ReadInt32(buff, cursor);
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
-    sameSpan->content = TLVUtil::ReadString(buff, cursor);
+    sameSpan->content = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
@@ -1048,7 +1045,7 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
         if (options.image.has_value()) {
-            resultObject.valueString = options.image.value();
+            resultObject.valueString = UtfUtils::Str8ToStr16(options.image.value());
         }
         if (options.imagePixelMap.has_value()) {
             resultObject.valuePixelMap = options.imagePixelMap.value();
@@ -1071,7 +1068,7 @@ ResultObject CustomSpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
-        resultObject.valueString = " ";
+        resultObject.valueString = u" ";
         resultObject.isInit = true;
     }
     return resultObject;
@@ -1100,7 +1097,7 @@ bool SpanItem::UpdateSpanTextColor(Color color)
 
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 {
-    auto contentLen = StringUtils::ToWstring(content).length();
+    auto contentLen = content.length();
     start = position - contentLen;
     end = position;
 }
@@ -1151,7 +1148,7 @@ void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
 
 void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    json->Put("Content", std::string(spanItem_->content).c_str());
+    json->Put("Content", UtfUtils::Str16ToStr8(spanItem_->content).c_str());
     auto textStyle = spanItem_->GetTextStyle();
     if (!textStyle) {
         return;

@@ -412,7 +412,7 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
-void TextModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
+void TextModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1021,9 +1021,8 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
         for (const auto& item : value->items) {
             auto spanItem = SpanModelNG::CreateSpanItem(item);
             if (spanItem) {
-                auto wSpanContent = StringUtils::ToWstring(spanItem->content);
                 auto intervalStart = position;
-                position += static_cast<int32_t>(wSpanContent.length());
+                position += static_cast<int32_t>(spanItem->content.length());
                 auto intervalEnd = position;
                 spanItem->interval = { intervalStart, intervalEnd };
                 spanItem->position = position;
@@ -1053,7 +1052,7 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
     textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
-void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextEventHub>();

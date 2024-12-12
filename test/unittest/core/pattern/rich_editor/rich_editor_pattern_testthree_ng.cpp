@@ -394,7 +394,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, ClearContent001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     auto placeholderSpanItem = placeholderSpanNode->GetSpanItem();
     ASSERT_NE(placeholderSpanItem, nullptr);
-    placeholderSpanItem->content = " ";
+    placeholderSpanItem->content = u" ";
     placeholderSpanNode->MountToParent(richEditorNode_);
     richEditorPattern->ClearContent(placeholderSpanNode);
     EXPECT_TRUE(placeholderSpanItem->content.empty());

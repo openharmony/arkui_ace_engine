@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_search_ffi.h"
+
 #include <optional>
 #include <string>
 

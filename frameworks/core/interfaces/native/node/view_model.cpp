@@ -99,7 +99,7 @@ void* createSymbolNode(ArkUI_Int32 nodeId)
 
 void* createSpanNode(ArkUI_Int32 nodeId)
 {
-    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, "");
+    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, u"");
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
     return AceType::RawPtr(spanNode);
