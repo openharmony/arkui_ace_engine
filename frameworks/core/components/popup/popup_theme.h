@@ -80,8 +80,8 @@ public:
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
-            auto popupBorderRadius = pattern->GetAttr<Dimension>("popup_border_radius", BORDER_RADIUS_POPUP);
-            theme->radius_ = Radius(popupBorderRadius, popupBorderRadius);
+            auto popupBorderRadius = pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, BORDER_RADIUS_POPUP);
+            theme->radius_ = Radius(popupBorderRadius);
             theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
