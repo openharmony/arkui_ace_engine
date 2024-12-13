@@ -90,10 +90,10 @@ private:
     std::string GerPackagePathByBms(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info,
         const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const;
 
-    #ifndef ARKUI_CAPI_UNITTEST
+#ifndef ARKUI_CAPI_UNITTEST
     RefPtr<PluginSubContainer> pluginSubContainer_;
     RefPtr<PluginManagerDelegate> pluginManagerBridge_;
-    #endif
+#endif
 
     std::string data_;
     RequestPluginInfo pluginInfo_;
