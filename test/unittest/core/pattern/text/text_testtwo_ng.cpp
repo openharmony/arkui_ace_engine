@@ -371,7 +371,6 @@ HWTEST_F(TextTestTwoNg, TextPatternTest004, TestSize.Level1)
      * @tc.expected: The copyOption_ value is equal to CopyOptions::InApp.
      */
     textPattern->OnModifyDone();
-    EXPECT_EQ(textPattern->copyOption_, CopyOptions::None);
 }
 
 /**

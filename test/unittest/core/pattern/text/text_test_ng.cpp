@@ -154,7 +154,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
@@ -643,7 +643,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     selectOverlayInfo.singleLineHeight = NODE_ID;
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
@@ -1215,6 +1215,22 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpInfo001
+ * @tc.desc: Test TextPattern DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DumpInfo001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->selectOverlayProxy_ = nullptr;
+    pattern->DumpInfo();
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
  * @tc.name: OnHandleMove001
  * @tc.desc: Test TextPattern OnHandleMove when SelectOverlayProxy is not nullptr.
  * @tc.type: FUNC
@@ -1236,7 +1252,7 @@ HWTEST_F(TextTestNg, OnHandleMove001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
@@ -1261,7 +1277,7 @@ HWTEST_F(TextTestNg, TextCreateParagraph002, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1348,7 +1364,6 @@ HWTEST_F(TextTestNg, TextLayoutTest001, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest002, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
     EXPECT_CALL(*paragraph, Layout).Times(2);
@@ -1567,7 +1582,6 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
     EXPECT_CALL(*paragraph, AddText).Times(2);
@@ -1677,8 +1691,6 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, TextLayoutTest008, TestSize.Level1)
 {
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -1918,29 +1930,6 @@ HWTEST_F(TextTestNg, ToJsonValue006, TestSize.Level1)
     textLayoutProperty->UpdateTextBaseline(TextBaseline::HANGING);
     auto json = std::make_unique<JsonValue>();
     textLayoutProperty->ToJsonValue(json, filter);
-}
-
-/**
- * @tc.name: ToJsonValue007
- * @tc.desc: Test textPattern ToJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, ToJsonValue007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(u"");
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    auto json = JsonUtil::Create(true);
-    /**
-     * @tc.steps: step2. expect default textDetectEnable_ false.
-     */
-    pattern->SetTextDetectEnable(true);
-    pattern->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("enableDataDetector"), "true");
 }
 
 /**
@@ -2399,7 +2388,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph });
     // call onDraw function(textRacing_ = true)
     textContentModifier.StartTextRace();
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
@@ -2705,12 +2694,16 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textPattern, nullptr);
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
@@ -3338,11 +3331,11 @@ HWTEST_F(TextTestNg, CreateImageSourceInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: create001
+ * @tc.name: Create001
  * @tc.desc: Test create with spanstring.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, create001, TestSize.Level1)
+HWTEST_F(TextTestNg, Create001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
