@@ -290,7 +290,7 @@ constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_MARGIN = 10.0f;
-constexpr float TOOLTIP_DELAY_MS = 1000;
+constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
@@ -5306,16 +5306,23 @@ void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF&
     auto textHeight = textGeometryNode->GetMarginFrameSize().Height();
 
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    auto offsetX = offset.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
-    auto offsetY = offset.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = AceType::DynamicCast<FrameNode>(overlayManager->GetRootNode().Upgrade());
+    CHECK_NULL_VOID(rootNode);
+    auto root = rootNode->GetTransformRectRelativeToWindow();
+
+    auto offsetX = offset.GetX() - root.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
+    auto offsetY = offset.GetY() - root.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
+
     ScopedLayout scope(pipeline.GetRawPtr());
-    if (GreatNotEqual(offsetX + textWidth, pipeline->GetCurrentRootWidth())) {
-        offsetX = pipeline->GetCurrentRootWidth() - textWidth;
+    if (GreatNotEqual(offsetX + textWidth, root.Width())) {
+        offsetX = root.Width() - textWidth;
     }
-    if (GreatNotEqual(offsetY + textHeight, pipeline->GetCurrentRootHeight())) {
-        offsetY = pipeline->GetCurrentRootHeight() - textHeight;
+    if (GreatNotEqual(offsetY + textHeight, root.Height())) {
+        offsetY = root.Height() - textHeight;
     }
     tooltipOffset.SetX(offsetX);
     tooltipOffset.SetY(offsetY);
