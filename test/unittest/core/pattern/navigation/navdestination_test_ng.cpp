@@ -726,7 +726,6 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
 }
 
 /**
-<<<<<<< HEAD
  * @tc.name: SetTitlebarOptions001
  * @tc.desc: Test SetTitlebarOptions function.
  * @tc.type: FUNC

@@ -289,7 +289,7 @@ ArkUINativeModuleValue NavDestinationBridge::ResetMenus(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getNavDestinationModifier()->resetHideTitleBar(nativeNode);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetMenus(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
