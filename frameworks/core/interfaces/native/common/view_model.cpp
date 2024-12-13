@@ -115,6 +115,10 @@
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #endif // WEB_SUPPORTED
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_model.h"
+#endif // WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/extension_companion_node.h"
 #include "core/pipeline/base/element_register.h"
@@ -881,7 +885,13 @@ void* createRichTextNode(ArkUI_Int32 nodeId)
 
 void* createRootSceneNode(ArkUI_Int32 nodeId)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto rootSceneNode = RootSceneModel::CreateRootSceneNode(nodeId);
+    rootSceneNode->IncRefCount();
+    return AceType::RawPtr(rootSceneNode);
+#else
     return nullptr;
+#endif // WINDOW_SCENE_SUPPORTED
 }
 
 void* createSaveButtonNode(ArkUI_Int32 nodeId)
@@ -894,7 +904,14 @@ void* createSaveButtonNode(ArkUI_Int32 nodeId)
 
 void* createScreenNode(ArkUI_Int32 nodeId)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNode = ScreenModel::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif // WINDOW_SCENE_SUPPORTED
 }
 
 void* createScrollBarNode(ArkUI_Int32 nodeId)
