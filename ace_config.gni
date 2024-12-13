@@ -324,3 +324,8 @@ if (ace_engine_feature_enable_nav_split_mode) {
 if (ace_engine_feature_wearable) {
   ace_common_defines += [ "ARKUI_WEARABLE" ]
 }
+
+if (ohos_indep_compiler_enable) {
+  indep_compile_includes =
+      [ "//binarys/third_party/icu/innerapis/shared_icuuc/includes" ]
+}

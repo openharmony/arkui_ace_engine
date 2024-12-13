@@ -213,8 +213,3 @@ cflags_cc = [
   "-Wno-thread-safety-attributes",
   "-Wno-thread-safety-analysis",
 ]
-
-if (ohos_indep_compiler_enable) {
-  indep_compile_includes =
-      [ "//binarys/third_party/icu/innerapis/shared_icuuc/includes" ]
-}
