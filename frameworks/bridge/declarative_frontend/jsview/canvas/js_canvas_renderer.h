@@ -203,6 +203,8 @@ protected:
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
+    int32_t apiVersion_ = 0;
+
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
     JSRef<JSObject> createGradientObj(const std::shared_ptr<Gradient>& gradient);
