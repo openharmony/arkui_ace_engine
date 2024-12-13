@@ -109,6 +109,13 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 }
 
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
     auto currentContainer = Container::Current();
