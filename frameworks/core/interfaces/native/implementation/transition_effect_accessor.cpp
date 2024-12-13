@@ -59,8 +59,7 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
         RotateOptions rotate(x, y, z, angle.value_or(0),
             centerX.value_or(emptyDimension),
             centerY.value_or(emptyDimension),
-            centerZ.value_or(emptyDimension),
-            perspective);
+            centerZ.value_or(emptyDimension), perspective);
         peer->handler = new ChainedRotateEffect(rotate);
     } else if (valueText == SCALE_TOKEN) {
         auto x = Converter::Convert<float>(effect->scale.x.value);
