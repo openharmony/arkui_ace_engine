@@ -16,7 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
-#include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
+#include "core/interfaces/native/implementation/text_edit_controller_ex_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -27,63 +27,46 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-constexpr int32_t LINES_NUM = 1;
-class MockTextContentControllerBase : public TextFieldControllerBase {
+constexpr int32_t OFFSET = 1;
+
+class MockTextEditControllerExPeer : public TextEditControllerExPeer {
 public:
-    MockTextContentControllerBase() = default;
-    ~MockTextContentControllerBase() override = default;
-
-    int32_t GetTextContentLinesNum() override
-    {
-        return LINES_NUM;
-    }
-
-    Rect GetTextContentRect() override
-    {
-        return Rect(0, 0, 1, 1);
-    }
-
-    NG::OffsetF GetCaretPosition() override
-    {
-        return NG::OffsetF(1, 1);
-    }
+    MockTextEditControllerExPeer() = default;
+    ~MockTextEditControllerExPeer() override = default;
+    MOCK_METHOD(bool, IsEditing, ());
+    MOCK_METHOD(int32_t, GetCaretOffset, ());
+    MOCK_METHOD(PreviewTextInfo, GetPreviewText, ());
+    MOCK_METHOD(void, StopEditing, ());
+    MOCK_METHOD(bool, SetCaretOffset, (int32_t));
+    // these methods are tested in TextBaseControllerAccessor test
+    // just added to avoid abstract class allocation
+    MOCK_METHOD(void, CloseSelectionMenu, ());
+    MOCK_METHOD(OHOS::Ace::WeakPtr<OHOS::Ace::NG::LayoutInfoInterface>, GetLayoutInfoInterface, ());
+    MOCK_METHOD(void, SetSelection, (int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<OHOS::Ace::SelectionOptions>& options, bool isForward));
 };
 } // namespace
 
-class TextContentControllerBaseAccessorTest : public AccessorTestBase<GENERATED_ArkUITextContentControllerBaseAccessor,
-    &GENERATED_ArkUIAccessors::getTextContentControllerBaseAccessor, TextContentControllerBasePeer> {
+class TextEditControllerExAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextEditControllerExAccessor,
+    &GENERATED_ArkUIAccessors::getTextEditControllerExAccessor, MockTextEditControllerExPeer> {
 public:
-    void SetUp(void) override
+    void* CreatePeerInstance() override
     {
-        AccessorTestBase::SetUp();
-        mockTextContentControllerBase_ = new MockTextContentControllerBase();
-        mockTextContentControllerBaseKeeper_ = AceType::Claim(mockTextContentControllerBase_);
-        ASSERT_NE(mockTextContentControllerBaseKeeper_, nullptr);
-        ASSERT_NE(peer_, nullptr);
-        peer_->handler = mockTextContentControllerBaseKeeper_;
-        ASSERT_NE(mockTextContentControllerBase_, nullptr);
+        return new MockTextEditControllerExPeer();
     }
-
-    void TearDown() override
-    {
-        mockTextContentControllerBaseKeeper_ = nullptr;
-        mockTextContentControllerBase_ = nullptr;
-    }
-
-    MockTextContentControllerBase *mockTextContentControllerBase_ = nullptr;
-    RefPtr<MockTextContentControllerBase> mockTextContentControllerBaseKeeper_ = nullptr;
 };
 
 /**
- * @tc.name: GetTextContentLinesNumTest
+ * @tc.name: IsEditingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, GetTextContentLinesNumTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, IsEditingTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getTextContentLineCount, nullptr);
-    auto checkValue = accessor_->getTextContentLineCount(peer_);
-    EXPECT_EQ(checkValue, LINES_NUM);
+    ASSERT_NE(accessor_->isEditing, nullptr);
+    EXPECT_CALL(*peer_, IsEditing()).Times(1).WillOnce(Return(true));
+    auto checkValue = accessor_->isEditing(peer_);
+    EXPECT_TRUE(checkValue);
 }
 
 /**
@@ -91,23 +74,51 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetTextContentLinesNumTest, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetCaretOffsetTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, GetCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
+    EXPECT_CALL(*peer_, GetCaretOffset()).Times(1).WillOnce(Return(OFFSET));
     auto checkValue = accessor_->getCaretOffset(peer_);
-    EXPECT_EQ(checkValue, nullptr); // fix after updating return value
+    EXPECT_EQ(checkValue, OFFSET);
 }
 
 /**
- * @tc.name: GetTextContentRectTest
+ * @tc.name: SetCaretOffsetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetTextContentRectTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, SetCaretOffsetTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getTextContentRect, nullptr);
-    auto checkValue = accessor_->getTextContentRect(peer_);
-    EXPECT_EQ(checkValue, nullptr); // fix after updating return value
+    ASSERT_NE(accessor_->setCaretOffset, nullptr);
+    auto offset = Converter::ArkValue<Ark_Number>(OFFSET);
+    EXPECT_CALL(*peer_, SetCaretOffset(OFFSET)).Times(1).WillOnce(Return(true));
+    auto checkValue = accessor_->setCaretOffset(peer_, &offset);
+    EXPECT_TRUE(checkValue);
 }
 
+/**
+ * @tc.name: StopEditingTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextEditControllerExAccessorTest, StopEditingTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->stopEditing, nullptr);
+    EXPECT_CALL(*peer_, StopEditing()).Times(1);
+    accessor_->stopEditing(peer_);
+}
+
+/**
+ * @tc.name: GetPreviewTextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextEditControllerExAccessorTest, DISABLED_GetPreviewTextTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPreviewText, nullptr);
+    PreviewTextInfo previewText = {.offset = OFFSET, .value = "info"};
+    EXPECT_CALL(*peer_, GetPreviewText()).Times(1).WillOnce(Return(previewText));
+    accessor_->getPreviewText(peer_); // fix after updating a return value
+    // check a return value
+}
 } // namespace OHOS::Ace::NG

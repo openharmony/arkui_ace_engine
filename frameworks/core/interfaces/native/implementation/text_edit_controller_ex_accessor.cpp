@@ -22,13 +22,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
 void DestroyPeerImpl(TextEditControllerExPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TextEditControllerExPeer();
+    LOGE("TextEditControllerExPeer is an abstract class.");
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,31 +35,31 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_Boolean>(false));
-    return Converter::ArkValue<Ark_Boolean>(peer->handler->IsEditing());
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Boolean>(false));
+    return Converter::ArkValue<Ark_Boolean>(peer->IsEditing());
 }
 void StopEditingImpl(TextEditControllerExPeer* peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->StopEditing();
+    CHECK_NULL_VOID(peer);
+    peer->StopEditing();
 }
 Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer,
                                const Ark_Number* offset)
 {
-    CHECK_NULL_RETURN(peer && peer->handler && offset, Converter::ArkValue<Ark_Boolean>(false));
+    CHECK_NULL_RETURN(peer && offset, Converter::ArkValue<Ark_Boolean>(false));
     auto offsetConv = Converter::Convert<int32_t>(*offset);
-    return Converter::ArkValue<Ark_Boolean>(peer->handler->SetCaretOffset(offsetConv));
+    return Converter::ArkValue<Ark_Boolean>(peer->SetCaretOffset(offsetConv));
 }
 Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_Int32>(0));
-    return Converter::ArkValue<Ark_Int32>(peer->handler->GetCaretOffset());
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
+    return Converter::ArkValue<Ark_Int32>(peer->GetCaretOffset());
 }
 Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
 {
     // fix a return value
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->GetPreviewTextInfo();
+    CHECK_NULL_RETURN(peer, 0);
+    peer->GetPreviewText();
     return 0;
 }
 } // TextEditControllerExAccessor

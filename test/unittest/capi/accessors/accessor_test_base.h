@@ -30,6 +30,11 @@ class AccessorTestBaseParent : public testing::Test {
 public:
     static void SetUpTestCase()
     {
+        fullAPI_ = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL, GENERATED_ARKUI_FULL_API_VERSION)
+        );
+        accessors_ = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
+        accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
         MockPipelineContext::SetUp();
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         ASSERT_NE(accessor_, nullptr);
@@ -58,15 +63,11 @@ public:
     }
 
 protected:
-    inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
-        = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL, GENERATED_ARKUI_FULL_API_VERSION)
-        );
-    inline static const GENERATED_ArkUIAccessors *accessors_
-        = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
+    inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_;
+    inline static const GENERATED_ArkUIAccessors *accessors_;
 
 public:
-    inline static const AccessorType *accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
+    inline static const AccessorType *accessor_;
     inline static void (*finalyzer_)(PeerType *) = nullptr;
     PeerType *peer_ = nullptr;
 };

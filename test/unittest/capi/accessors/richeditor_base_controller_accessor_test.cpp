@@ -75,6 +75,8 @@ public:
     MOCK_METHOD(void, StopEditing, ());
     MOCK_METHOD(void, SetSelection, (int32_t, int32_t, const std::optional<SelectionOptions>&, bool));
     MOCK_METHOD(void, SetTypingStyle, (std::optional<struct UpdateSpanStyle>, std::optional<TextStyle>));
+    MOCK_METHOD(const PreviewTextInfo, GetPreviewTextInfo, (), (const));
+    MOCK_METHOD(WeakPtr<LayoutInfoInterface>, GetLayoutInfoInterface, ());
 };
 } // namespace
 
@@ -212,6 +214,35 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setTypingStyleTest, TestSize.Leve
     EXPECT_CALL(*mockRichEditorController_, SetTypingStyle(spanStyle, textStyle)).Times(1);
     auto value = Converter::ArkValue<Ark_RichEditorTextStyle>(*textStyle);
     accessor_->setTypingStyle(peer_, &value);
+}
+
+/**
+ * @tc.name: GetPreviewTextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseControllerAccessorTest, DISABLED_GetPreviewTextTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPreviewText, nullptr);
+    PreviewTextInfo previewText = {.offset = 1, .value = "info"};
+    EXPECT_CALL(*mockRichEditorController_, GetPreviewTextInfo()).Times(1).WillOnce(Return(previewText));
+    accessor_->getPreviewText(peer_); // fix after updating a return value
+    // check a return value
+}
+
+/**
+ * @tc.name: GetLayoutManagerTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getLayoutManager, nullptr);
+    auto layoutInfo = OHOS::Ace::NG::LayoutInfoInterface();
+    EXPECT_CALL(*mockRichEditorController_,
+        GetLayoutInfoInterface()).Times(1).WillOnce(Return(layoutInfo.GetLayoutInfoInterface()));
+    Ark_NativePointer manager = accessor_->getLayoutManager(peer_);
+    ASSERT_NE(manager, nullptr);
 }
 
 } // namespace OHOS::Ace::NG
