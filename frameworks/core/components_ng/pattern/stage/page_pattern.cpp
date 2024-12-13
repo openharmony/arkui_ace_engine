@@ -875,6 +875,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
         CHECK_NULL_VOID(layoutProperty);
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_NONE };
         layoutProperty->UpdateSafeAreaExpandOpts(opts);
+        inPage->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();
