@@ -32,6 +32,9 @@ enum ResID {
     STRING_RES_NO_EMPTY_0_ID,
     STRING_RES_NO_EMPTY_1_ID,
     STRING_EMPTY_RES_UNDEFINED_0_ID,
+    URI_STRING_RES_NO_EMPTY_0_ID,
+    URI_STRING_RES_NO_EMPTY_1_ID,
+    IMAGE_URI_STRING_RES_NO_EMPTY_0_ID,
     FONT_FAMILY_RESOURCE_0_ID,
     FONT_FAMILY_RESOURCE_1_ID,
     FONT_FAMILY_RESOURCE_2_ID,
@@ -126,6 +129,9 @@ inline constexpr auto STRING_RES_2_STR = "STRING_RES_2_STR";
 inline constexpr auto STRING_RES_NO_EMPTY_0_STR = "STRING_RES_NO_EMPTY_0_STR";
 inline constexpr auto STRING_RES_NO_EMPTY_1_STR = "STRING_RES_NO_EMPTY_1_STR";
 inline constexpr auto STRING_EMPTY_RES_UNDEFINED_0_STR = "STRING_EMPTY_RES_UNDEFINED_0_STR";
+inline constexpr auto URI_STRING_RES_NO_EMPTY_0_STR = "URI_STRING_RES_NO_EMPTY_0_STR";
+inline constexpr auto URI_STRING_RES_NO_EMPTY_1_STR = "URI_STRING_RES_NO_EMPTY_1_STR";
+inline constexpr auto IMAGE_URI_STRING_RES_NO_EMPTY_0_STR = "IMAGE_URI_STRING_RES_NO_EMPTY_0_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_0_STR = "FONT_FAMILY_RESOURCE_0_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_1_STR = "FONT_FAMILY_RESOURCE_1_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_2_STR = "FONT_FAMILY_RESOURCE_2_STR";
@@ -236,6 +242,19 @@ extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixture
 // Fixture 'StringEmptyResUndefined' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStringEmptyResUndefinedValidValues;
 
+// Fixture 'UriString' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureUriStringValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureUriStringInvalidValues;
+
+// Fixture 'UriStringResNoEmpty' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureUriStringResNoEmptyValidValues;
+
+// Fixture 'ImageUriString' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureImageUriStringValidValues;
+
+// Fixture 'ImageUriStringResNoEmpty' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureImageUriStringResNoEmptyValidValues;
+
 // Fixture 'FontFamilyResource' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFontFamilyResourceValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureFontFamilyResourceInvalidValues;
@@ -314,6 +333,10 @@ extern std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableF
 // Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues;
+
+// Fixture 'LengthPositivel' for type 'Ark_Length'
+extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositivelValidValues;
+extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositivelInvalidValues;
 
 // Fixture 'LengthPosNonPct' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPosNonPctValidValues;

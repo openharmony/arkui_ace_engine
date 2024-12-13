@@ -116,6 +116,39 @@
                 ["\"\"", "undefined"]
             ]
         },
+         {
+            "name": "UriString",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"abc\"", "file://abc"],
+                ["\"xyz\"", "file://xyz"]
+            ],
+            "invalidValues": ["\"\""]
+        },
+        {
+            "name": "UriStringResNoEmpty",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"abc\"", "file://abc"],
+                ["\"xyz\"", "file://xyz"]
+            ]
+        },
+        {
+            "name": "ImageUriString",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"abc\"", "file://abc "]
+            ]
+        },
+        {
+            "name": "ImageUriStringResNoEmpty",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"abc\"", "file://abc "]
+            ]
+        },
         {
             "name": "FontFamilyResource",
             "type": "Ark_Resource",
@@ -427,6 +460,19 @@
                 ["1.23_px", "1.23px"],
             ],
             "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "0.5_pct", "0.0_pct", "-0.8_pct"],
+        },
+        {
+            "name": "LengthPositivel",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.000000"],
+                ["1.23_vp", "1.230000"],
+                ["123.0_fp", "123.000000"],
+                ["1.23_fp", "1.230000"],
+                ["123.0_px", "123.000000"],
+                ["1.23_px", "1.230000"],
+            ],
+            "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "0.0_pct", "-0.8_pct"],
         },
         {
             "name": "LengthPosNonPct",
@@ -1305,6 +1351,69 @@
                     "name": "baselineOffset",
                     "default": "0.00px",
                 }
+            ]
+        },
+        {
+            "name": "Component3D",
+            "disable": [
+                "setComponent3DOptionsTestDefaultValues",
+                "setComponent3DOptionsTestSceneOptionsSceneValidValues",
+                "setComponent3DOptionsTestSceneOptionsSceneInvalidValues",
+                "setComponent3DOptionsTestSceneOptionsModelTypeValidValues",
+                "setComponent3DOptionsTestSceneOptionsModelTypeInvalidValues",
+                "setEnvironmentTestEnvironmentInvalidValues",
+                "setShaderTestShaderInvalidValues",
+                "setShaderImageTextureTestShaderImageTextureInvalidValues",
+                "setShaderInputBufferTestDefaultValues",
+                "setShaderInputBufferTestValidValues",
+                "setCustomRenderTestCustomRenderUriValidValues",
+                "setCustomRenderTestCustomRenderUriInvalidValues",
+                "setCustomRenderTestCustomRenderSelfRenderUpdateValidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "environment",
+                    "default": "",
+                    "fixtures": ["UriString", "UriStringResNoEmpty"],
+                },
+                {
+                    "name": "customRender",
+                       "attributes": [
+                        {
+                            "name": "uri",
+                            "default": "",
+                            "fixtures": ["UriString", "UriStringResNoEmpty"],
+                        },
+                        {
+                            "name": "selfRenderUpdate",
+                            "default": "",
+                        },
+                    ],
+                },
+                {
+                    "name": "shader",
+                    "default": "",
+                    "fixtures": ["UriString", "UriStringResNoEmpty"],
+                },
+                {
+                    "name": "shaderImageTexture",
+                    "default": "",
+                    "fixtures": ["ImageUriString", "ImageUriStringResNoEmpty"],
+                },
+                {
+                    "name": "shaderInputBuffer",
+                    "default": "",
+                },
+                {
+                    "name": "renderWidth",
+                    "default": "1.000000",
+                    "fixtures": ["LengthPositivel"],
+                },
+                {
+                    "name": "renderHeight",
+                    "default": "1.000000",
+                    "fixtures": ["LengthPositivel"],
+                },
             ]
         },
 	    {

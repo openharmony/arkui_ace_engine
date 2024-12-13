@@ -733,6 +733,16 @@ std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInva
     { "INT_MAX", static_cast<Ark_MixedMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_ModelType, std::string>> testFixtureEnumModelTypeValidValues = {
+    { "ARK_MODEL_TYPE_TEXTURE", ARK_MODEL_TYPE_TEXTURE, "ModelType.TEXTURE" },
+    { "ARK_MODEL_TYPE_SURFACE", ARK_MODEL_TYPE_SURFACE, "ModelType.SURFACE" },
+};
+
+std::vector<std::tuple<std::string, Ark_ModelType>> testFixtureEnumModelTypeInvalidValues = {
+    { "-1", static_cast<Ark_ModelType>(-1) },
+    { "INT_MAX", static_cast<Ark_ModelType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_NavBarPosition, std::string>> testFixtureEnumNavBarPositionValidValues = {
     { "ARK_NAV_BAR_POSITION_START", ARK_NAV_BAR_POSITION_START, "NavBarPosition.Start" },
     { "ARK_NAV_BAR_POSITION_END", ARK_NAV_BAR_POSITION_END, "NavBarPosition.End" },
