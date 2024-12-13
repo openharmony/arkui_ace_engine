@@ -166,11 +166,6 @@ public:
         return layoutProperty->GetSpaceValue(Dimension()).ToString();
     }
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void SetFlexMeasureResult(FlexMeasureResult measureResult)
     {
         measureResult_ = measureResult;

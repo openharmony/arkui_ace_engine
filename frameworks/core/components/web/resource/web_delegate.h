@@ -63,6 +63,8 @@ typedef struct WindowsSurfaceInfoTag {
     EGLSurface surface;
 } WindowsSurfaceInfo;
 
+typedef NWeb::NativeArkWebOnJavaScriptProxyCallback NativeMethodCallback;
+
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -1088,6 +1090,13 @@ public:
 
     void SetTransformHint(uint32_t rotation);
 
+    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
+
+    void RegisterNativeArkJSFunction(const std::string& objName,
+        const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh);
+
+    void UnRegisterNativeArkJSFunction(const std::string& objName);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1109,7 +1118,6 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
     void LoadUrl(const std::string& url, const std::map<std::string, std::string>& httpHeaders);
-    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
     void Refresh();

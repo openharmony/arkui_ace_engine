@@ -300,6 +300,8 @@ public:
         return result;
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+
     void SetLocalLocation(const Offset& localLocation)
     {
         localLocation_ = localLocation;
@@ -372,11 +374,6 @@ public:
     }
 
 protected:
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;

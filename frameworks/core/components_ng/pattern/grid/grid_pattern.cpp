@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -155,9 +156,6 @@ void GridPattern::OnModifyDone()
     }
     SetAccessibilityAction();
     Register2DragDropManager();
-    if (IsNeedInitClickEventRecorder()) {
-        Pattern::InitClickEventRecorder();
-    }
     auto overlayNode = host->GetOverlayNode();
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
@@ -256,6 +254,7 @@ bool GridPattern::IsItemSelected(const GestureEvent& info)
 
 void GridPattern::FireOnScrollStart()
 {
+    ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);

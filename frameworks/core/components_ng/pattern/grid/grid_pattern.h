@@ -231,11 +231,6 @@ public:
     Rect GetItemRect(int32_t index) const override;
     int32_t GetItemIndex(double x, double y) const override;
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     const std::list<GridPreloadItem>& GetPreloadItemList() const
     {
         return preloadItemList_;

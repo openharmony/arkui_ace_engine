@@ -177,9 +177,10 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage005, TestSize.Level1)
     NavigatorEventHub navigatorEventHub;
     navigatorEventHub.SetType(NavigatorType::PUSH);
     // Make IsComponentRecordEnable return false.
-    Recorder::EventRecorder::Get().componentEnable_ = false;
-    Recorder::EventSwitch eventSwitch;
-    eventSwitch.componentEnable = false;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
+    std::vector<bool> eventSwitch;
+    eventSwitch[index] = false;
     Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
     navigatorEventHub.NavigatePage();
 
@@ -196,9 +197,10 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage006, TestSize.Level1)
     NavigatorEventHub navigatorEventHub;
     navigatorEventHub.SetType(NavigatorType::PUSH);
     // Make IsComponentRecordEnable return true.
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventSwitch eventSwitch;
-    eventSwitch.componentEnable = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
+    std::vector<bool> eventSwitch;
+    eventSwitch[index] = true;
     Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
     // Make host NULL.
     navigatorEventHub.AttachHost(nullptr);
@@ -218,9 +220,10 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage007, TestSize.Level1)
     NavigatorEventHub navigatorEventHub;
     navigatorEventHub.SetType(NavigatorType::PUSH);
     // Make IsComponentRecordEnable return true.
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventSwitch eventSwitch;
-    eventSwitch.componentEnable = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
+    std::vector<bool> eventSwitch;
+    eventSwitch[index] = true;
     Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
     // Make host not NULL.
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());

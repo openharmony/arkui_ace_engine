@@ -63,6 +63,12 @@ public:
         json->PutExtAttr("address", propAddress_.value_or("").c_str(), filter);
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        LayoutProperty::ToTreeJson(json, config);
+        json->Put(TreeKey::CONTENT, UtfUtils::Str16ToStr8(propContent_.value_or(u"")).c_str());
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Address, std::string, PROPERTY_UPDATE_NORMAL);
 

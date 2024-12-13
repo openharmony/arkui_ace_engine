@@ -375,6 +375,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
