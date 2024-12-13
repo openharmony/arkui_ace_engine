@@ -2258,8 +2258,13 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
     if (!keyEvent.numLock && item != g_numPadFunctionMap.end()) {
         code = item->second;
     }
-    return delegate_->WebOnKeyEvent(static_cast<int32_t>(code),
-        static_cast<int32_t>(keyEvent.action), pressedCodes);
+    std::shared_ptr<NWebKeyboardEventImpl> keyboardEvent =
+        std::make_shared<NWebKeyboardEventImpl>(static_cast<int32_t>(keyEvent.code),
+                                                static_cast<int32_t>(keyEvent.action),
+                                                keyEvent.unicode,
+                                                keyEvent.enableCapsLock,
+                                                pressedCodes);
+    return delegate_->SendKeyboardEvent(keyboardEvent);
 }
 
 void WebPattern::KeyboardReDispatch(
