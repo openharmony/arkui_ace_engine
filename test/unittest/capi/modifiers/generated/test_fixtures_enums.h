@@ -144,6 +144,8 @@ extern std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixt
 extern std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ModelType, std::string>> testFixtureEnumModelTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_ModelType>> testFixtureEnumModelTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>>
     testFixtureEnumNestedScrollModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_NestedScrollMode>> testFixtureEnumNestedScrollModeInvalidValues;

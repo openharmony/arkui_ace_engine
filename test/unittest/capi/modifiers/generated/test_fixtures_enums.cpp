@@ -722,6 +722,16 @@ std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInva
     { "INT_MAX", static_cast<Ark_MixedMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_ModelType, std::string>> testFixtureEnumModelTypeValidValues = {
+    { "ARK_MODEL_TYPE_TEXTURE", ARK_MODEL_TYPE_TEXTURE, "ModelType.TEXTURE" },
+    { "ARK_MODEL_TYPE_SURFACE", ARK_MODEL_TYPE_SURFACE, "ModelType.SURFACE" },
+};
+
+std::vector<std::tuple<std::string, Ark_ModelType>> testFixtureEnumModelTypeInvalidValues = {
+    { "-1", static_cast<Ark_ModelType>(-1) },
+    { "INT_MAX", static_cast<Ark_ModelType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>> testFixtureEnumNestedScrollModeValidValues = {
     { "ARK_NESTED_SCROLL_MODE_SELF_ONLY", ARK_NESTED_SCROLL_MODE_SELF_ONLY, "NestedScrollMode.SELF_ONLY" },
     { "ARK_NESTED_SCROLL_MODE_SELF_FIRST", ARK_NESTED_SCROLL_MODE_SELF_FIRST, "NestedScrollMode.SELF_FIRST" },
