@@ -914,8 +914,25 @@ bool ListPattern::StartSnapAnimation(
 {
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
-    CHECK_NULL_RETURN(!(lastSnapTargetIndex_ < 0 && snapDirection != SnapDirection::NONE && AnimateRunning()), false);
     auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
+    CHECK_NULL_RETURN(scrollSnapAlign != ScrollSnapAlign::NONE, false);
+    if (lastSnapTargetIndex_ < 0 && snapDirection != SnapDirection::NONE && AnimateRunning()) {
+        return false;
+    }
+    if (snapDirection != SnapDirection::NONE) {
+        return ScrollToSnapIndex(snapDirection, scrollSnapAlign);
+    }
+    if (!IsScrolling()) {
+        snapTrigOnScrollStart_ = true;
+    }
+    predictSnapOffset_ = snapDelta;
+    scrollSnapVelocity_ = animationVelocity;
+    MarkDirtyNodeSelf();
+    return true;
+}
+
+bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign scrollSnapAlign)
+{
     ScrollAlign align = ScrollAlign::NONE;
     auto anchorIndex = startIndex_;
     switch (scrollSnapAlign) {
@@ -923,6 +940,7 @@ bool ListPattern::StartSnapAnimation(
             return false;
         case ScrollSnapAlign::START:
             align = ScrollAlign::START;
+            anchorIndex = GetStartIndexExcludeStartOffset();
             break;
         case ScrollSnapAlign::CENTER:
             align = ScrollAlign::CENTER;
@@ -930,35 +948,62 @@ bool ListPattern::StartSnapAnimation(
             break;
         case ScrollSnapAlign::END:
             align = ScrollAlign::END;
-            anchorIndex = endIndex_;
+            anchorIndex = GetEndIndexExcludeEndOffset();
             break;
-    }
-    if (!IsScrolling()) {
-        snapTrigOnScrollStart_ = true;
     }
     if (snapDirection == SnapDirection::FORWARD) {
         if (lastSnapTargetIndex_ < 0) {
-            lastSnapTargetIndex_ = anchorIndex - 1;
+            if (align == ScrollAlign::START) {
+                auto isAligned = NearEqual(itemPosition_[anchorIndex].startPos, contentStartOffset_);
+                lastSnapTargetIndex_ = isAligned ? anchorIndex - 1 : anchorIndex;
+            } else if (align == ScrollAlign::END) {
+                lastSnapTargetIndex_ = anchorIndex - 1;
+            } else {
+                auto item = itemPosition_[anchorIndex];
+                auto itemCenterPos = (item.startPos + item.endPos) / 2;
+                lastSnapTargetIndex_ =
+                    GreatOrEqual(itemCenterPos, contentMainSize_ / 2) ? anchorIndex - 1 : anchorIndex;
+            }
         } else {
             lastSnapTargetIndex_--;
         }
-        lastSnapTargetIndex_ = lastSnapTargetIndex_ < 0 ? 0 : lastSnapTargetIndex_;
-        ScrollToIndex(lastSnapTargetIndex_, true, align);
-        return true;
     } else if (snapDirection == SnapDirection::BACKWARD) {
         if (lastSnapTargetIndex_ < 0) {
-            lastSnapTargetIndex_ = anchorIndex + 1;
+            if (align == ScrollAlign::START) {
+                lastSnapTargetIndex_ = anchorIndex + 1;
+            } else if (align == ScrollAlign::END) {
+                auto isAligned = NearEqual(itemPosition_[anchorIndex].endPos, contentMainSize_ - contentEndOffset_);
+                lastSnapTargetIndex_ = isAligned ? anchorIndex + 1 : anchorIndex;
+            } else {
+                auto item = itemPosition_[anchorIndex];
+                auto itemCenterPos = (item.startPos + item.endPos) / 2;
+                lastSnapTargetIndex_ = LessOrEqual(itemCenterPos, contentMainSize_ / 2) ? anchorIndex + 1 : anchorIndex;
+            }
         } else {
             lastSnapTargetIndex_++;
         }
-        lastSnapTargetIndex_ = lastSnapTargetIndex_ > maxListItemIndex_ ? maxListItemIndex_ : lastSnapTargetIndex_;
-        ScrollToIndex(lastSnapTargetIndex_, true, align);
-        return true;
     }
-    predictSnapOffset_ = snapDelta;
-    scrollSnapVelocity_ = animationVelocity;
-    MarkDirtyNodeSelf();
+    ScrollToIndex(lastSnapTargetIndex_, true, align);
     return true;
+}
+
+int32_t ListPattern::GetEndIndexExcludeEndOffset()
+{
+    auto endPos = contentMainSize_ - contentEndOffset_;
+    auto iter = itemPosition_.rbegin();
+    while (iter != itemPosition_.rend() && GreatOrEqual(iter->second.startPos, endPos)) {
+        iter++;
+    }
+    return iter->first;
+}
+
+int32_t ListPattern::GetStartIndexExcludeStartOffset()
+{
+    auto iter = itemPosition_.begin();
+    while (iter != itemPosition_.end() && LessOrEqual(iter->second.endPos, contentStartOffset_)) {
+        iter++;
+    }
+    return iter->first;
 }
 
 void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)

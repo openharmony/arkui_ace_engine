@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include <cstdint>
 
 #include "base/log/dump_log.h"
 
@@ -182,7 +181,6 @@ bool ScrollPattern::ScrollSnapTrigger()
         return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
-        std::cout <<"ScrollSnapTrigger do StartSnapAnimation"<< std::endl;
         if (StartSnapAnimation(0.f, 0.f, 0.f, 0.f)) {
             FireOnScrollStart();
             return true;
