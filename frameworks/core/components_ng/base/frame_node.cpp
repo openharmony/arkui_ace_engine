@@ -3762,7 +3762,7 @@ RefPtr<FrameNode> FrameNode::FindChildByPositionWithoutChildTransform(float x, f
         }
 
         auto globalFrameRect = geometryNode->GetFrameRect();
-        auto childOffset = child->GetGeometryNode()->GetFrameOffset();
+        auto childOffset = geometryNode->GetFrameOffset();
         childOffset += parentOffset;
         globalFrameRect.SetOffset(childOffset);
 
