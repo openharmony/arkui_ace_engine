@@ -2199,7 +2199,7 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
-    
+
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
         return JSRef<JSVal>::Cast(obj);
@@ -2213,7 +2213,7 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
             TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
             break;
         }
-        
+
         void *data = nullptr;
         napi_value buffer = nullptr;
         napi_value item = nullptr;
@@ -5121,7 +5121,8 @@ void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetMetaViewport(enabled);
 }
 
-void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
+void JSWeb::ParseScriptItems(
+    const JSCallbackInfo& args, ScriptItems& scriptItems, ScriptItemsByOrder& scriptItemsByOrder)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
@@ -5153,6 +5154,7 @@ void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItem
         }
         if (scriptItems.find(script) == scriptItems.end()) {
             scriptItems.insert(std::make_pair(script, scriptRules));
+            scriptItemsByOrder.emplace_back(script);
         }
     }
 }
@@ -5160,15 +5162,26 @@ void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItem
 void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
-    ParseScriptItems(args, scriptItems);
-    WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    } else {
+        WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+    }
 }
 
 void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
-    ParseScriptItems(args, scriptItems);
-    WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+    } else {
+        WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+    }
 }
 
 void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)

@@ -969,6 +969,10 @@ public:
     void JavaScriptOnDocumentStart();
     void JavaScriptOnDocumentEnd();
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
+    void JavaScriptOnDocumentStartByOrder();
+    void JavaScriptOnDocumentEndByOrder();
+    void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
@@ -1286,6 +1290,8 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;

@@ -1059,6 +1059,13 @@ bool WebDelegate::ShouldVirtualKeyboardOverlay()
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type) {}
 void WebDelegate::JavaScriptOnDocumentStart() {}
 void WebDelegate::JavaScriptOnDocumentEnd() {}
+
+void WebDelegate::SetJavaScriptItemsByOrder(
+    const ScriptItems& scriptItems,
+    const ScriptItemType& type,
+    const ScriptItemsByOrder& scriptItemsByOrder) {}
+void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
+void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
 {
