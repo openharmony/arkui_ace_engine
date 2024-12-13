@@ -1286,7 +1286,6 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
-    bool result = false;
     const static std::set<MouseAction> validAction = {
         MouseAction::PRESS,
         MouseAction::RELEASE,
@@ -1298,12 +1297,9 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         return false;
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        result = DispatchMouseEventInGreatOrEqualAPI13(event);
-    } else {
-        result = DispatchMouseEventInLessAPI13(event);
+        return DispatchMouseEventInGreatOrEqualAPI13(event);
     }
-    mouseStyleManager_->VsyncMouseFormat();
-    return result;
+    return DispatchMouseEventInLessAPI13(event);
 }
 
 bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event)
@@ -1629,7 +1625,6 @@ EventManager::EventManager()
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
-    mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();

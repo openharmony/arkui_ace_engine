@@ -17,7 +17,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -663,8 +662,7 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
-    bool isBypass, MouseStyleChangeReason reason)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
 {
     return true;
 }
