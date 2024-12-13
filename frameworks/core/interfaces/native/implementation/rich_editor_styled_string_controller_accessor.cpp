@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Materialized& dst, const std::string& src)
@@ -29,9 +30,11 @@ void AssignArkValue(Ark_Materialized& dst, const std::string& src)
 void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
 {
     auto str = src.GetReplacementString();
-    auto replacementString = reinterpret_cast<MutableSpanString*>(str.GetRawPtr());
+    auto replacementString = AceType::DynamicCast<SpanString>(str);
     if (replacementString) {
-        dst.replacementString = Converter::ArkValue<Ark_StyledString>(replacementString->GetString());
+        StyledStringPeer *peer = new StyledStringPeer();
+        peer->spanString = replacementString;
+        dst.replacementString = Converter::ArkValue<Ark_StyledString>(*peer);
     }
     dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
     dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);
@@ -66,9 +69,8 @@ void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
     CHECK_NULL_VOID(styledString->ptr);
     auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    RefPtr<SpanStringBase> spanString;
-    spanString = *reinterpret_cast<RefPtr<SpanStringBase>*>(styledString->ptr);
-    peerImpl->SetStyledString(spanString);
+    auto styledStringPeer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
+    peerImpl->SetStyledString(styledStringPeer->spanString);
 }
 Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
 {

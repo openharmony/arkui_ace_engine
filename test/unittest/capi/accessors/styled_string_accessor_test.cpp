@@ -570,4 +570,103 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorExtSpan, 
 {
     // not implement
 }
+
+/**
+ * @tc.name:styledStringEquals
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringEquals, TestSize.Level1)
+{
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
+    ASSERT_NE(accessor_, nullptr);
+    Ark_StyledString styledString = Converter::ArkValue<Ark_StyledString>(*peer_);
+    EXPECT_TRUE(accessor_->equals(peer_, &styledString));
+}
+
+/**
+ * @tc.name:styledStringLength
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringLength, TestSize.Level1)
+{
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
+    ASSERT_NE(accessor_, nullptr);
+
+    auto length = StringUtils::ToWstring(STRING_TEST_VALUE).length();
+    EXPECT_EQ(peer_->spanString->GetLength(), length);
+    EXPECT_EQ(accessor_->getLength(peer_), length);
+}
+
+/**
+ * @tc.name:DISABLED_styledStringGetString
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringGetString, TestSize.Level1)
+{
+    // not implement
+}
+
+/**
+ * @tc.name:DISABLED_styledStringStyles
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringStyles, TestSize.Level1)
+{
+    // not implement
+}
+
+/**
+ * @tc.name:DISABLED_styledStringSubStyledString
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringSubStyledString, TestSize.Level1)
+{
+}
+
+/**
+ * @tc.name:DISABLED_styledStringFromHtml
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringFromHtml, TestSize.Level1)
+{
+    // not implement
+}
+
+/**
+ * @tc.name:DISABLED_styledStringToHtml
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringToHtml, TestSize.Level1)
+{
+    // not implement
+}
+
+/**
+ * @tc.name:DISABLED_styledStringMarshalling
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling, TestSize.Level1)
+{
+    // not implement
+}
+
+/**
+ * @tc.name:DISABLED_styledStringUnmarshalling
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringUnmarshalling, TestSize.Level1)
+{
+    // not implement
+}
 } // namespace OHOS::Ace::NG
