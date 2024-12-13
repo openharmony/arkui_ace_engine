@@ -211,6 +211,12 @@ namespace Converter {
     }
 
     template<>
+    inline std::string Convert(const Ark_Buffer& src)
+    {
+        return (src.data != nullptr) ? std::string(static_cast<char*>(src.data), src.length) : "";
+    }
+
+    template<>
     inline Ark_CharPtr Convert(const Ark_String& src)
     {
         return src.chars;

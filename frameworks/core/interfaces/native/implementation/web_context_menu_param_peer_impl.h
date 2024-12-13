@@ -12,12 +12,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEB_CONTEXT_MENU_PARAM_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEB_CONTEXT_MENU_PARAM_PEER_IMPL_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_CONTEXT_MENU_PARAM_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_CONTEXT_MENU_PARAM_PEER_IMPL_H
 
 #include "core/components/web/web_event.h"
 
 struct WebContextMenuParamPeer {
     OHOS::Ace::RefPtr<OHOS::Ace::WebContextMenuParam> handler;
+
+    int32_t GetPreviewWidth()
+    {
+        UpdatePreviewSize();
+        return previewWidth_;
+    }
+
+    int32_t GetPreviewHeight()
+    {
+        UpdatePreviewSize();
+        return previewHeight_;
+    }
+
+private:
+    int32_t previewWidth_ = -1;
+    int32_t previewHeight_ = -1;
+
+    void UpdatePreviewSize()
+    {
+        if (previewWidth_ >= 0 && previewHeight_ >= 0) {
+            return;
+        }
+        if (handler) {
+            int32_t x = 0;
+            int32_t y = 0;
+            handler->GetImageRect(x, y, previewWidth_, previewHeight_);
+        }
+    }
 };
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_WEB_CONTEXT_MENU_PARAM_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_CONTEXT_MENU_PARAM_PEER_IMPL_H
