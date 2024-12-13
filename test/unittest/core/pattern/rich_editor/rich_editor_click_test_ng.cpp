@@ -455,6 +455,27 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHover001
+ * @tc.desc: test on hover
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, OnHover001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto host = richEditorPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto id = host->GetId();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    richEditorPattern->OnHover(true);
+    EXPECT_EQ(pipeline->mouseStyleNodeId_.value(), id);
+    richEditorPattern->OnHover(false);
+    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
+}
+
+/**
  * @tc.name: MouseRightFocus001
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
