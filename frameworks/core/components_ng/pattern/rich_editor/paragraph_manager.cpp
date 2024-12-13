@@ -299,6 +299,19 @@ std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
     return resultTextBoxes;
 }
 
+void ParagraphManager::GetPaintRegion(RectF& boundsRect, float x, float y) const
+{
+    if (paragraphs_.empty()) {
+        return;
+    }
+    for (const auto& info : paragraphs_) {
+        CHECK_NULL_VOID(info.paragraph);
+        auto rect = info.paragraph->GetPaintRegion(x, y);
+        boundsRect = boundsRect.CombineRectT(rect);
+        y += info.paragraph->GetHeight();
+    }
+}
+
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     std::vector<RectF> res;

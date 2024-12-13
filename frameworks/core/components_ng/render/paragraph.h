@@ -270,6 +270,7 @@ public:
 #endif
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
+    virtual RectF GetPaintRegion(float x, float y) = 0;
     virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;
     virtual void UpdateColor(size_t from, size_t to, const Color& color) = 0;
     virtual void TxtGetRectsForRange(int32_t start, int32_t end,
