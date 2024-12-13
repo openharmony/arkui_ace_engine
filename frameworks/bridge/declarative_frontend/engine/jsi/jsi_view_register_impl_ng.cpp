@@ -631,6 +631,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
+#ifndef CROSS_PLATFORM
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
@@ -647,6 +648,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #ifdef WEB_SUPPORTED
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
+#endif
 #endif
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
