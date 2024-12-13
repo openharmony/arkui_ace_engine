@@ -25,7 +25,7 @@ void DestroyPeerImpl(TextContentControllerBasePeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-TextContentControllerBasePeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextContentControllerBasePeer();
 }
@@ -38,14 +38,14 @@ Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
     // fix a return value
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     peer->handler->GetCaretPosition();
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
 {
     // fix a return value
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     peer->handler->GetTextContentRect();
-    return 0;
+    return nullptr;
 }
 Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
 {

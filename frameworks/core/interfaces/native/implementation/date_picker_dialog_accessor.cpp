@@ -24,7 +24,7 @@ namespace DatePickerDialogAccessor {
 void DestroyPeerImpl(DatePickerDialogPeer* peer)
 {
 }
-DatePickerDialogPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new DatePickerDialogPeer();
 }

@@ -36,8 +36,6 @@ extern std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEn
 extern std::vector<std::tuple<std::string, Ark_Axis>> testFixtureEnumAxisInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureEnumBarStateValidValues;
 extern std::vector<std::tuple<std::string, Ark_BarState>> testFixtureEnumBarStateInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_BarStyle, std::string>> testFixtureEnumBarStyleValidValues;
-extern std::vector<std::tuple<std::string, Ark_BarStyle>> testFixtureEnumBarStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BlendApplyType, std::string>> testFixtureEnumBlendApplyTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_BlendApplyType>> testFixtureEnumBlendApplyTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BlendMode, std::string>> testFixtureEnumBlendModeValidValues;
@@ -148,13 +146,6 @@ extern std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixt
 extern std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ModelType, std::string>> testFixtureEnumModelTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ModelType>> testFixtureEnumModelTypeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_NavBarPosition, std::string>> testFixtureEnumNavBarPositionValidValues;
-extern std::vector<std::tuple<std::string, Ark_NavBarPosition>> testFixtureEnumNavBarPositionInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_NavigationMode, std::string>> testFixtureEnumNavigationModeValidValues;
-extern std::vector<std::tuple<std::string, Ark_NavigationMode>> testFixtureEnumNavigationModeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_NavigationTitleMode, std::string>>
-    testFixtureEnumNavigationTitleModeValidValues;
-extern std::vector<std::tuple<std::string, Ark_NavigationTitleMode>> testFixtureEnumNavigationTitleModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>>
     testFixtureEnumNestedScrollModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_NestedScrollMode>> testFixtureEnumNestedScrollModeInvalidValues;
@@ -225,8 +216,6 @@ extern std::vector<std::tuple<std::string, Ark_TextInputStyle, std::string>> tes
 extern std::vector<std::tuple<std::string, Ark_TextInputStyle>> testFixtureEnumTextInputStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TextOverflow, std::string>> testFixtureEnumTextOverflowValidValues;
 extern std::vector<std::tuple<std::string, Ark_TextOverflow>> testFixtureEnumTextOverflowInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_TitleHeight, std::string>> testFixtureEnumTitleHeightValidValues;
-extern std::vector<std::tuple<std::string, Ark_TitleHeight>> testFixtureEnumTitleHeightInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TransitionHierarchyStrategy, std::string>>
     testFixtureEnumTransitionHierarchyStrategyValidValues;
 extern std::vector<std::tuple<std::string, Ark_TransitionHierarchyStrategy>>

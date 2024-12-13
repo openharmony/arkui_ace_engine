@@ -37,7 +37,7 @@ public:
         AccessorTestCtorBase::SetUp();
         peer_->handler = new LayoutInfoInterface();
     }
-    LayoutManagerPeer* CreatePeerInstance() override
+    void* CreatePeerInstance() override
     {
         return accessor_->ctor();
     }

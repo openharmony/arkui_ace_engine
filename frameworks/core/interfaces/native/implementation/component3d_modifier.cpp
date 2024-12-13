@@ -23,9 +23,17 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Component3DModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+#ifdef MODEL_COMPONENT_SUPPORTED
+    auto frameNode = ModelViewNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
+    return nullptr;
+#endif // MODEL_COMPONENT_SUPPORTED
 }
 } // Component3DModifier
 namespace Component3DInterfaceModifier {

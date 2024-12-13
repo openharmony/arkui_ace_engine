@@ -26,7 +26,7 @@ void DestroyPeerImpl(CanvasGradientPeer* peer)
         delete peer;
     }
 }
-CanvasGradientPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new CanvasGradientPeer();
 }

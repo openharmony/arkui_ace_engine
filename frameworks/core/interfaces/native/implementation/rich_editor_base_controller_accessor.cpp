@@ -82,7 +82,7 @@ void DestroyPeerImpl(RichEditorBaseControllerPeer* peer)
         delete peer;
     }
 }
-RichEditorBaseControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new RichEditorBaseControllerPeer();
 }
@@ -153,12 +153,12 @@ void StopEditingImpl(RichEditorBaseControllerPeer* peer)
 Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
 {
     LOGW("RichEditorBaseControllerAccessor:: GetLayoutManagerImpl is not implemented");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
 {
     LOGW("RichEditorBaseControllerAccessor:: GetPreviewTextImpl is not implemented");
-    return 0;
+    return nullptr;
 }
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()

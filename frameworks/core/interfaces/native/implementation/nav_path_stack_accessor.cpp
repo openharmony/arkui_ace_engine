@@ -86,7 +86,7 @@ void DestroyPeerImpl(NavPathStackPeer* peer)
         delete peer;
     }
 }
-NavPathStackPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new NavPathStackPeer();
 }

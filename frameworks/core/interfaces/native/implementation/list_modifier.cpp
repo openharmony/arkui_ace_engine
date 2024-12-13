@@ -127,9 +127,13 @@ namespace OHOS::Ace::NG::Converter {
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = ListModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ListModifier
 namespace ListInterfaceModifier {
@@ -201,7 +205,7 @@ void ContentEndOffsetImpl(Ark_NativePointer node,
     ListModelNG::SetContentEndOffset(frameNode, Converter::Convert<float>(*value));
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_ListDividerOptions_Null* value)
+                 const Opt_ListDividerOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

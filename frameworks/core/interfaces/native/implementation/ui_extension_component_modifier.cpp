@@ -73,9 +73,10 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionComponentModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
@@ -124,14 +125,14 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             auto peer = (*accessor->ctor)();
             CHECK_NULL_VOID(peer);
             arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
-            auto finalyzer = reinterpret_cast<void (*)(UIExtensionProxyPeer *)>(accessor->getFinalizer());
+            auto finalyzer = reinterpret_cast<void (*)(void *)>(accessor->getFinalizer());
             finalyzer(peer);
         };
     UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   const Ark_CustomObject* value)
+                   const Ark_ReceiveCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -170,7 +171,7 @@ void OnResultImpl(Ark_NativePointer node,
             arkWant.entities = Converter::ArkValue<Opt_Array_String>(stringArrayValues);
             auto moduleName = want.GetModuleName();
             arkWant.moduleName = Converter::ArkValue<Opt_String>(moduleName);
-            
+
             Ark_Literal_Number_code_Want_want parameter;
             parameter.code = Converter::ArkValue<Ark_Number>(code);
             parameter.want = Converter::ArkValue<Opt_Want>(arkWant);

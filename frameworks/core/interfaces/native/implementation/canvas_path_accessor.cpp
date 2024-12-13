@@ -26,7 +26,7 @@ void DestroyPeerImpl(CanvasPathPeer* peer)
         delete peer;
     }
 }
-CanvasPathPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new CanvasPathPeer();
 }

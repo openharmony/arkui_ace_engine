@@ -25,9 +25,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
-using Ark_Type_TextPickerOptions_range =
-    Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent;
-
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -1762,12 +1759,11 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMultiCascade, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_STROKE_WIDTH_TEST_PLAN) {
         options.strokeWidth = length;
-        unionOptions.value0 = options;
+        auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
@@ -1790,14 +1786,13 @@ HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
     Opt_ResourceColor resColor;
 
     for (const auto &[color, expected] : COLOR_TRANSPARENT_TEST_PLAN) {
         resColor.value = color;
         options.color = resColor;
-        unionOptions.value0 = options;
+        auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
@@ -1820,12 +1815,11 @@ HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_MARGIN_TEST_PLAN) {
         options.startMargin = length;
-        unionOptions.value0 = options;
+        auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
@@ -1848,12 +1842,11 @@ HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_MARGIN_TEST_PLAN) {
         options.endMargin = length;
-        unionOptions.value0 = options;
+        auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
@@ -1876,10 +1869,7 @@ HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerUndefined, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Null unionOptions = {
-        .selector = 1,
-        .value1 = Ark_Undefined()
-    };
+    auto unionOptions = Converter::ArkValue<Opt_DividerOptions>();
     modifier_->setDivider(node_, &unionOptions);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);

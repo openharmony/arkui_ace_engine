@@ -49,7 +49,7 @@ void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
         delete peerImpl;
     }
 }
-RichEditorStyledStringControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = new RichEditorStyledStringControllerPeerImpl();
     return reinterpret_cast<RichEditorStyledStringControllerPeer *>(peerImpl);
@@ -76,14 +76,14 @@ Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer
     auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     LOGW("RichEditorStyledString Accessor:: GetStyledStringImpl is not implemented");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
 {
     auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     LOGW("RichEditorStyledString Accessor:: GetSelectionImpl is not implemented");
-    return 0;
+    return nullptr;
 }
 void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
                           const Ark_StyledStringChangedListener* listener)
@@ -109,7 +109,7 @@ void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
         const StyledStringChangeValue& value) {
         auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
         arkCallback.Invoke(changeValue.range, changeValue.range);
-        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temprorary and will be fixed");
+        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temporary and will be fixed");
     };
     peerImpl->SetOnDidChange(std::move(onDidChange));
 }

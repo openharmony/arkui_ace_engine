@@ -34,7 +34,7 @@ const std::string g_message = "message";
 class TransitionEffectAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITransitionEffectAccessor,
     &GENERATED_ArkUIAccessors::getTransitionEffectAccessor, TransitionEffectPeer> {
 public:
-    TransitionEffectPeer* CreatePeerInstance() override
+    void *CreatePeerInstance() override
     {
         Ark_String arkType = Converter::ArkValue<Ark_String>(g_message);
         Ark_TransitionEffects* arkEffects = new(Ark_TransitionEffects);

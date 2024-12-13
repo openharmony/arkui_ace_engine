@@ -806,7 +806,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent& src)
+                   const Ark_Type_TextPickerOptions_range& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -915,7 +915,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute& src)
+                   const Ark_Type_SliderBlockStyle_shape& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1053,7 +1053,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ResourceColor_LinearGradient& src)
+                   const Ark_Union_ResourceColor_LinearGradient_common& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1281,7 +1281,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Resource_LinearGradient& src)
+                   const Ark_Union_String_Resource_LinearGradient_common& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1439,21 +1439,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Null& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ImageBitmap_PixelMap& src)
 {
     switch (src.selector) {
@@ -1485,37 +1470,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_DividerStyle_Null& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_NestedScrollOptions_NestedScrollOptionsExt& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_DividerOptions_Null& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1644,21 +1599,6 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Opt_DividerOptions_Null& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -1822,28 +1762,14 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Type_NavigationAttribute_title_value& src)
+                   const Ark_Type_NavDestinationAttribute_title_value& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Object_CustomBuilder& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -1859,41 +1785,6 @@ void AssignUnionTo(std::optional<T>& dst,
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_PixelMap_Resource_SymbolGlyphModifier& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Type_NavDestinationAttribute_title_value& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
-        case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -1974,21 +1865,6 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ListDividerOptions_Null& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -2109,21 +1985,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ContentClipMode_RectShape& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Type_GaugeAttribute_colors_colors& src)
 {
     switch (src.selector) {
@@ -2140,7 +2001,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ColumnSplitDividerStyle_Null& src)
+                   const Ark_Union_ResourceColor_LinearGradient_data_panel& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ContentClipMode_RectShape& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2331,37 +2207,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Array_UniformDataType_Null& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_CustomBuilder_DragItemInfo& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ClickEffect_Null& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2965,7 +2811,7 @@ ASSIGN_OPT(Opt_FontStyle)
 ASSIGN_OPT(Opt_Union_String_Resource)
 ASSIGN_OPT(Opt_Union_FontWeight_Number_String)
 ASSIGN_OPT(Opt_ResourceStr)
-ASSIGN_OPT(Opt_CustomObject)
+ASSIGN_OPT(Opt_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_GridRowSizeOption)
 ASSIGN_OPT(Opt_TextBackgroundStyle)
 ASSIGN_OPT(Opt_Union_Number_LeadingMarginPlaceholder)
@@ -2988,6 +2834,7 @@ ASSIGN_OPT(Opt_Union_ShadowOptions_Array_ShadowOptions)
 ASSIGN_OPT(Opt_DecorationStyleInterface)
 ASSIGN_OPT(Opt_Union_Length_Number)
 ASSIGN_OPT(Opt_Callback_PopInfo_Void)
+ASSIGN_OPT(Opt_CustomObject)
 ASSIGN_OPT(Opt_ShadowStyle)
 ASSIGN_OPT(Opt_EdgeStyles)
 ASSIGN_OPT(Opt_LocalizedEdgeColors)
@@ -3004,6 +2851,7 @@ ASSIGN_OPT(Opt_TextHeightAdaptivePolicy)
 ASSIGN_OPT(Opt_Union_Number_ResourceStr)
 ASSIGN_OPT(Opt_TabBarSymbol)
 ASSIGN_OPT(Opt_Union_Padding_Dimension)
+ASSIGN_OPT(Opt_ComponentContent)
 ASSIGN_OPT(Opt_Tuple_Number_Number)
 ASSIGN_OPT(Opt_LineBreakStrategy)
 ASSIGN_OPT(Opt_Union_Dimension_LeadingMarginPlaceholder)
@@ -3023,6 +2871,9 @@ ASSIGN_OPT(Opt_Callback_DismissPopupAction_Void)
 ASSIGN_OPT(Opt_Literal_ResourceColor_color)
 ASSIGN_OPT(Opt_OutlineStyle)
 ASSIGN_OPT(Opt_Map_String_CustomObject)
+ASSIGN_OPT(Opt_Callback_NavigationTransitionProxy_Void)
+ASSIGN_OPT(Opt_Callback_Boolean_Void)
+ASSIGN_OPT(Opt_NavDestinationMode)
 ASSIGN_OPT(Opt_BackgroundColorStyle)
 ASSIGN_OPT(Opt_UserDataSpan)
 ASSIGN_OPT(Opt_CustomSpan)
@@ -3073,6 +2924,7 @@ ASSIGN_OPT(Opt_Rectangle)
 ASSIGN_OPT(Opt_Offset)
 ASSIGN_OPT(Opt_DialogAlignment)
 ASSIGN_OPT(Opt_AlertDialogButtonBaseOptions)
+ASSIGN_OPT(Opt_ColorMetrics)
 ASSIGN_OPT(Opt_Union_String_PixelMap_Resource)
 ASSIGN_OPT(Opt_ImageAnalyzerController)
 ASSIGN_OPT(Opt_Array_ImageAnalyzerType)
@@ -3084,6 +2936,7 @@ ASSIGN_OPT(Opt_EventTarget)
 ASSIGN_OPT(Opt_Map_String_String)
 ASSIGN_OPT(Opt_NestedScrollMode)
 ASSIGN_OPT(Opt_WebResourceRequest)
+ASSIGN_OPT(Opt_WebviewController)
 ASSIGN_OPT(Opt_WebController)
 ASSIGN_OPT(Opt_PlaybackSpeed)
 ASSIGN_OPT(Opt_TabBarIconStyle)
@@ -3103,7 +2956,6 @@ ASSIGN_OPT(Opt_RectAttribute)
 ASSIGN_OPT(Opt_PathAttribute)
 ASSIGN_OPT(Opt_EllipseAttribute)
 ASSIGN_OPT(Opt_CircleAttribute)
-ASSIGN_OPT(Opt_DividerOptions)
 ASSIGN_OPT(Opt_CancelButtonStyle)
 ASSIGN_OPT(Opt_IconOptions)
 ASSIGN_OPT(Opt_Array_Length)
@@ -3115,16 +2967,16 @@ ASSIGN_OPT(Opt_Union_Number_String_Array_Any)
 ASSIGN_OPT(Opt_ProgressStatus)
 ASSIGN_OPT(Opt_Union_String_Number_Resource)
 ASSIGN_OPT(Opt_Union_TitleHeight_Length)
-ASSIGN_OPT(Opt_NavDestinationMode)
-ASSIGN_OPT(Opt_Callback_NavigationTransitionProxy_Void)
-ASSIGN_OPT(Opt_Callback_Boolean_Void)
 ASSIGN_OPT(Opt_SwipeActionItem)
 ASSIGN_OPT(Opt_BreakpointsReference)
 ASSIGN_OPT(Opt_GridRowColumnOption)
 ASSIGN_OPT(Opt_GutterOption)
 ASSIGN_OPT(Opt_GridColColumnOption)
-ASSIGN_OPT(Opt_LinearGradient)
+ASSIGN_OPT(Opt_LinearGradient_common)
+ASSIGN_OPT(Opt_Scene)
+ASSIGN_OPT(Opt_DrawingCanvas)
 ASSIGN_OPT(Opt_Size)
+ASSIGN_OPT(Opt_FrameNode)
 ASSIGN_OPT(Opt_Union_String_Number_CanvasGradient_CanvasPattern)
 ASSIGN_OPT(Opt_Array_CalendarDay)
 ASSIGN_OPT(Opt_BadgePosition)
@@ -3152,7 +3004,12 @@ ASSIGN_OPT(Opt_EdgeOutlineStyles)
 ASSIGN_OPT(Opt_OutlineRadiuses)
 ASSIGN_OPT(Opt_EdgeOutlineWidths)
 ASSIGN_OPT(Opt_ThemeColorMode)
+ASSIGN_OPT(Opt_CustomTheme)
+ASSIGN_OPT(Opt_RestrictedWorker)
 ASSIGN_OPT(Opt_Want)
+ASSIGN_OPT(Opt_StyledString)
+ASSIGN_OPT(Opt_NavigationAnimatedTransition)
+ASSIGN_OPT(Opt_NavContentInfo)
 ASSIGN_OPT(Opt_StyledStringValue)
 ASSIGN_OPT(Opt_StyledStringKey)
 ASSIGN_OPT(Opt_Union_Margin_Dimension)
@@ -3161,6 +3018,7 @@ ASSIGN_OPT(Opt_Array_Header)
 ASSIGN_OPT(Opt_Callback_String_Void)
 ASSIGN_OPT(Opt_Buffer)
 ASSIGN_OPT(Opt_WebCaptureMode)
+ASSIGN_OPT(Opt_DateTimeOptions)
 ASSIGN_OPT(Opt_Callback_TimePickerResult_Void)
 ASSIGN_OPT(Opt_PickerTextStyle)
 ASSIGN_OPT(Opt_PickerDialogButtonStyle)
@@ -3169,11 +3027,10 @@ ASSIGN_OPT(Opt_Date)
 ASSIGN_OPT(Opt_Union_Number_Array_Number)
 ASSIGN_OPT(Opt_Union_String_Array_String)
 ASSIGN_OPT(Opt_Callback_TextPickerResult_Void)
-ASSIGN_OPT(Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent)
+ASSIGN_OPT(Opt_Type_TextPickerOptions_range)
 ASSIGN_OPT(Opt_TextMenuItemId)
 ASSIGN_OPT(Opt_Axis)
 ASSIGN_OPT(Opt_Union_ScrollAnimationOptions_Boolean)
-ASSIGN_OPT(Opt_StyledString)
 ASSIGN_OPT(Opt_TextRange)
 ASSIGN_OPT(Opt_OnDidChangeCallback)
 ASSIGN_OPT(Opt_Callback_StyledStringChangeValue_Boolean)
@@ -3211,6 +3068,7 @@ ASSIGN_OPT(Opt_ActionSheetButtonOptions)
 ASSIGN_OPT(Opt_OnLinearIndicatorChangeCallback)
 ASSIGN_OPT(Opt_LinearIndicatorStyle)
 ASSIGN_OPT(Opt_DpiFollowStrategy)
+ASSIGN_OPT(Opt_Map_String_ComponentContent)
 ASSIGN_OPT(Opt_WaterFlowLayoutMode)
 ASSIGN_OPT(Opt_WaterFlowSections)
 ASSIGN_OPT(Opt_Scroller)
@@ -3259,6 +3117,7 @@ ASSIGN_OPT(Opt_VideoController)
 ASSIGN_OPT(Opt_Union_Number_String_PlaybackSpeed)
 ASSIGN_OPT(Opt_ToggleType)
 ASSIGN_OPT(Opt_TextTimerController)
+ASSIGN_OPT(Opt_DividerOptions)
 ASSIGN_OPT(Opt_UnderlineColor)
 ASSIGN_OPT(Opt_TextContentStyle)
 ASSIGN_OPT(Opt_TextInputStyle)
@@ -3281,7 +3140,7 @@ ASSIGN_OPT(Opt_SwiperAutoFill)
 ASSIGN_OPT(Opt_ArrowStyle)
 ASSIGN_OPT(Opt_Callback_SwiperContentTransitionProxy_Void)
 ASSIGN_OPT(Opt_Alignment)
-ASSIGN_OPT(Opt_Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute)
+ASSIGN_OPT(Opt_Type_SliderBlockStyle_shape)
 ASSIGN_OPT(Opt_SliderBlockType)
 ASSIGN_OPT(Opt_SliderStyle)
 ASSIGN_OPT(Opt_OptionWidthMode)
@@ -3327,21 +3186,19 @@ ASSIGN_OPT(Opt_PasteDescription)
 ASSIGN_OPT(Opt_PasteIconStyle)
 ASSIGN_OPT(Opt_PanelHeight)
 ASSIGN_OPT(Opt_NavigationType)
-ASSIGN_OPT(Opt_Array_ToolbarItem)
-ASSIGN_OPT(Opt_NavigationCustomTitle)
-ASSIGN_OPT(Opt_NavigationCommonTitle)
-ASSIGN_OPT(Opt_NavContentInfo)
-ASSIGN_OPT(Opt_NavigationAnimatedTransition)
-ASSIGN_OPT(Opt_Array_NavigationMenuItem)
 ASSIGN_OPT(Opt_BarStyle)
 ASSIGN_OPT(Opt_ToolbarItemStatus)
+ASSIGN_OPT(Opt_Array_ToolbarItem)
 ASSIGN_OPT(Opt_TextModifier)
 ASSIGN_OPT(Opt_NavDestinationCustomTitle)
 ASSIGN_OPT(Opt_NavDestinationCommonTitle)
+ASSIGN_OPT(Opt_SystemBarStyle)
+ASSIGN_OPT(Opt_Array_NavigationMenuItem)
 ASSIGN_OPT(Opt_Union_ResourceStr_CustomBuilder)
 ASSIGN_OPT(Opt_MenuItemOptions)
 ASSIGN_OPT(Opt_DividerStyleOptions)
 ASSIGN_OPT(Opt_ASTCResource)
+ASSIGN_OPT(Opt_DrawableDescriptor)
 ASSIGN_OPT(Opt_LocationDescription)
 ASSIGN_OPT(Opt_LocationIconStyle)
 ASSIGN_OPT(Opt_LocalizedEdges)
@@ -3356,6 +3213,7 @@ ASSIGN_OPT(Opt_ListItemStyle)
 ASSIGN_OPT(Opt_LengthConstrain)
 ASSIGN_OPT(Opt_ListItemGroupArea)
 ASSIGN_OPT(Opt_ChainEdgeEffect)
+ASSIGN_OPT(Opt_DrawingColorFilter)
 ASSIGN_OPT(Opt_ColorFilter)
 ASSIGN_OPT(Opt_Union_String_Resource_PixelMap)
 ASSIGN_OPT(Opt_ImageContent)
@@ -3369,12 +3227,12 @@ ASSIGN_OPT(Opt_GridItemStyle)
 ASSIGN_OPT(Opt_GridItemAlignment)
 ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number_Number_Number)
 ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number)
-ASSIGN_OPT(Opt_ContentClipMode)
-ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient)
-ASSIGN_OPT(Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number)
+ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient_common)
+ASSIGN_OPT(Opt_Array_Tuple_Union_ResourceColor_LinearGradient_common_Number)
 ASSIGN_OPT(Opt_FormShape)
 ASSIGN_OPT(Opt_FormRenderingMode)
 ASSIGN_OPT(Opt_FormDimension)
+ASSIGN_OPT(Opt_WindowStatusType)
 ASSIGN_OPT(Opt_AppRotation)
 ASSIGN_OPT(Opt_FoldStatus)
 ASSIGN_OPT(Opt_FlexSpaceOptions)
@@ -3382,10 +3240,13 @@ ASSIGN_OPT(Opt_FlexAlign)
 ASSIGN_OPT(Opt_ItemAlign)
 ASSIGN_OPT(Opt_FlexWrap)
 ASSIGN_OPT(Opt_FlexDirection)
-ASSIGN_OPT(Opt_Array_Union_ResourceColor_LinearGradient)
+ASSIGN_OPT(Opt_LinearGradient_data_panel)
+ASSIGN_OPT(Opt_Array_Union_ResourceColor_LinearGradient_data_panel)
 ASSIGN_OPT(Opt_DataPanelType)
 ASSIGN_OPT(Opt_ModelType)
 ASSIGN_OPT(Opt_Union_ResourceStr_Scene)
+ASSIGN_OPT(Opt_RectShape)
+ASSIGN_OPT(Opt_ContentClipMode)
 ASSIGN_OPT(Opt_ColumnSplitDividerStyle)
 ASSIGN_OPT(Opt_IlluminatedType)
 ASSIGN_OPT(Opt_LightSource)
@@ -3403,6 +3264,7 @@ ASSIGN_OPT(Opt_FrictionMotion)
 ASSIGN_OPT(Opt_SpringMotion)
 ASSIGN_OPT(Opt_FunctionKey)
 ASSIGN_OPT(Opt_SheetKeyboardAvoidMode)
+ASSIGN_OPT(Opt_UIContext)
 ASSIGN_OPT(Opt_Callback_SheetType_Void)
 ASSIGN_OPT(Opt_ScrollSizeMode)
 ASSIGN_OPT(Opt_SheetMode)
@@ -3422,9 +3284,11 @@ ASSIGN_OPT(Opt_Array_MenuElement)
 ASSIGN_OPT(Opt_CustomPopupOptions)
 ASSIGN_OPT(Opt_PopupOptions)
 ASSIGN_OPT(Opt_TransitionHierarchyStrategy)
+ASSIGN_OPT(Opt_Blender)
 ASSIGN_OPT(Opt_BlendMode)
 ASSIGN_OPT(Opt_OverlayOffset)
 ASSIGN_OPT(Opt_Union_Boolean_Number)
+ASSIGN_OPT(Opt_ImageModifier)
 ASSIGN_OPT(Opt_Union_DragPreviewMode_Array_DragPreviewMode)
 ASSIGN_OPT(Opt_SharedTransitionEffectType)
 ASSIGN_OPT(Opt_MotionPathOptions)
@@ -3434,6 +3298,9 @@ ASSIGN_OPT(Opt_BlurOptions)
 ASSIGN_OPT(Opt_AdaptiveColor)
 ASSIGN_OPT(Opt_BlurStyleActivePolicy)
 ASSIGN_OPT(Opt_GestureControl_GestureType)
+ASSIGN_OPT(Opt_PathShape)
+ASSIGN_OPT(Opt_EllipseShape)
+ASSIGN_OPT(Opt_CircleShape)
 ASSIGN_OPT(Opt_ProgressMask)
 ASSIGN_OPT(Opt_Tuple_Length_Length)
 ASSIGN_OPT(Opt_DragItemInfo)
@@ -3449,6 +3316,7 @@ ASSIGN_OPT(Opt_LocalizedPosition)
 ASSIGN_OPT(Opt_InvertOptions)
 ASSIGN_OPT(Opt_MotionBlurAnchor)
 ASSIGN_OPT(Opt_TransitionOptions)
+ASSIGN_OPT(Opt_IntentionCode)
 ASSIGN_OPT(Opt_KeySource)
 ASSIGN_OPT(Opt_KeyType)
 ASSIGN_OPT(Opt_MouseAction)
@@ -3459,12 +3327,13 @@ ASSIGN_OPT(Opt_Union_OutlineRadiuses_Dimension)
 ASSIGN_OPT(Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors)
 ASSIGN_OPT(Opt_Union_EdgeOutlineWidths_Dimension)
 ASSIGN_OPT(Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths)
-ASSIGN_OPT(Opt_Union_String_Resource_LinearGradient)
+ASSIGN_OPT(Opt_Union_String_Resource_LinearGradient_common)
 ASSIGN_OPT(Opt_RepeatMode)
 ASSIGN_OPT(Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths)
 ASSIGN_OPT(Opt_Union_EdgeStyles_BorderStyle)
 ASSIGN_OPT(Opt_Union_BorderRadiuses_Length_LocalizedBorderRadiuses)
 ASSIGN_OPT(Opt_Union_EdgeWidths_Length_LocalizedEdgeWidths)
+ASSIGN_OPT(Opt_DrawingLattice)
 ASSIGN_OPT(Opt_ImageSize)
 ASSIGN_OPT(Opt_PixelRoundCalcPolicy)
 ASSIGN_OPT(Opt_TouchTestStrategy)
@@ -3473,41 +3342,46 @@ ASSIGN_OPT(Opt_Array_Rectangle)
 ASSIGN_OPT(Opt_DrawModifier)
 ASSIGN_OPT(Opt_WithThemeOptions)
 ASSIGN_OPT(Opt_WithThemeInterface)
+ASSIGN_OPT(Opt_Type_NavigationAttribute_customNavContentTransition_delegate)
 ASSIGN_OPT(Opt_SliderTriggerChangeCallback)
 ASSIGN_OPT(Opt_ScrollOnScrollCallback)
 ASSIGN_OPT(Opt_RouteType)
 ASSIGN_OPT(Opt_PageTransitionCallback)
-ASSIGN_OPT(Opt_OnWillScrollCallback)
 ASSIGN_OPT(Opt_OnScrollCallback)
 ASSIGN_OPT(Opt_IsolatedOptions)
 ASSIGN_OPT(Opt_IsolatedComponentInterface)
 ASSIGN_OPT(Opt_HoverCallback)
-ASSIGN_OPT(Opt_Callback_Any_Number_Void)
-ASSIGN_OPT(Opt_Callback_Any_Number_String)
-ASSIGN_OPT(Opt_ButtonTriggerClickCallback)
 ASSIGN_OPT(Opt_WithThemeAttribute)
 ASSIGN_OPT(Opt_Callback_WithThemeAttribute_Void)
+ASSIGN_OPT(Opt_Callback_WebResourceResponse_Void)
 ASSIGN_OPT(Opt_Callback_WebKeyboardOptions_Void)
-ASSIGN_OPT(Opt_Callback_Opt_NavigationAnimatedTransition_Void)
+ASSIGN_OPT(Opt_Callback_Union_CustomBuilder_DragItemInfo_Void)
+ASSIGN_OPT(Opt_Callback_Tuple_Number_Number_Void)
+ASSIGN_OPT(Opt_Callback_Tuple_Number_Number_Number_Number_Void)
+ASSIGN_OPT(Opt_Callback_TouchResult_Void)
+ASSIGN_OPT(Opt_Callback_String_Unknown_Void)
 ASSIGN_OPT(Opt_Callback_Opt_TabContentAnimatedTransition_Void)
-ASSIGN_OPT(Opt_Callback_GestureRecognizer_Void)
-ASSIGN_OPT(Opt_Callback_OffsetResult_Void)
-ASSIGN_OPT(Opt_ScrollResult)
-ASSIGN_OPT(Opt_Callback_ScrollResult_Void)
+ASSIGN_OPT(Opt_Callback_Opt_StyledString_Opt_Array_String_Void)
+ASSIGN_OPT(Opt_Callback_Opt_NavigationAnimatedTransition_Void)
+ASSIGN_OPT(Opt_Callback_Opt_Array_String_Void)
 ASSIGN_OPT(Opt_Callback_OnScrollFrameBeginHandlerResult_Void)
-ASSIGN_OPT(Opt_Callback_Array_String_Void)
+ASSIGN_OPT(Opt_Callback_OffsetResult_Void)
+ASSIGN_OPT(Opt_NavigationTransitionProxy)
+ASSIGN_OPT(Opt_NavigationTitleMode)
+ASSIGN_OPT(Opt_Callback_NavigationTitleMode_Void)
+ASSIGN_OPT(Opt_Callback_NavigationMode_Void)
+ASSIGN_OPT(Opt_Callback_Literal_Number_offsetRemain_Void)
 ASSIGN_OPT(Opt_IsolatedComponentAttribute)
 ASSIGN_OPT(Opt_Callback_IsolatedComponentAttribute_Void)
 ASSIGN_OPT(Opt_Callback_HitTestMode_Void)
-ASSIGN_OPT(Opt_Callback_WebResourceResponse_Void)
-ASSIGN_OPT(Opt_Callback_Tuple_Number_Number_Number_Number_Void)
-ASSIGN_OPT(Opt_Callback_Tuple_Number_Number_Void)
-ASSIGN_OPT(Opt_Callback_Literal_Number_offsetRemain_Void)
+ASSIGN_OPT(Opt_Callback_GestureRecognizer_Void)
+ASSIGN_OPT(Opt_Callback_GestureJudgeResult_Void)
 ASSIGN_OPT(Opt_Callback_ComputedBarAttribute_Void)
 ASSIGN_OPT(Opt_Callback_Callback_Any_Void)
-ASSIGN_OPT(Opt_Callback_GestureJudgeResult_Void)
-ASSIGN_OPT(Opt_Callback_Union_CustomBuilder_DragItemInfo_Void)
-ASSIGN_OPT(Opt_Callback_TouchResult_Void)
+ASSIGN_OPT(Opt_Callback_Array_String_Void)
+ASSIGN_OPT(Opt_Callback_Any_Number_Void)
+ASSIGN_OPT(Opt_Callback_Any_Number_String)
+ASSIGN_OPT(Opt_ButtonTriggerClickCallback)
 ASSIGN_OPT(Opt_LinearIndicatorStartOptions)
 ASSIGN_OPT(Opt_CustomSpanDrawInfo)
 ASSIGN_OPT(Opt_CustomSpanMeasureInfo)
@@ -3553,6 +3427,8 @@ ASSIGN_OPT(Opt_GestureEvent)
 ASSIGN_OPT(Opt_RichEditorTextSpanOptions)
 ASSIGN_OPT(Opt_SelectionOptions)
 ASSIGN_OPT(Opt_PatternLockChallengeResult)
+ASSIGN_OPT(Opt_NavigationMode)
+ASSIGN_OPT(Opt_NavigationOperation)
 ASSIGN_OPT(Opt_Union_NavDestinationContext_NavBar)
 ASSIGN_OPT(Opt_NavigationInterception)
 ASSIGN_OPT(Opt_NavigationOptions)
@@ -3564,9 +3440,10 @@ ASSIGN_OPT(Opt_CustomDialogControllerOptions)
 ASSIGN_OPT(Opt_IPropertySubscriber)
 ASSIGN_OPT(Opt_UIGestureEvent)
 ASSIGN_OPT(Opt_TransitionEffects)
+ASSIGN_OPT(Opt_DrawContext)
+ASSIGN_OPT(Opt_LengthMetricsUnit)
 ASSIGN_OPT(Opt_RenderingContextSettings)
 ASSIGN_OPT(Opt_ImageData)
-ASSIGN_OPT(Opt_Union_String_Null)
 ASSIGN_OPT(Opt_Union_ImageBitmap_PixelMap)
 ASSIGN_OPT(Opt_Matrix2D)
 ASSIGN_OPT(Opt_Path2D)
@@ -3579,12 +3456,12 @@ ASSIGN_OPT(Opt_ActionSheetOptions)
 ASSIGN_OPT(Opt_LinearIndicatorController)
 ASSIGN_OPT(Opt_Literal_Number_code_Want_want)
 ASSIGN_OPT(Opt_Callback_Literal_Number_code_Want_want_Void)
+ASSIGN_OPT(Opt_ReceiveCallback)
 ASSIGN_OPT(Opt_UIExtensionProxy)
 ASSIGN_OPT(Opt_Callback_UIExtensionProxy_Void)
 ASSIGN_OPT(Opt_UIExtensionOptions)
 ASSIGN_OPT(Opt_WaterFlowOptions)
 ASSIGN_OPT(Opt_WindowAnimationTarget)
-ASSIGN_OPT(Opt_Union_DividerStyle_Null)
 ASSIGN_OPT(Opt_SideBarPosition)
 ASSIGN_OPT(Opt_ButtonStyle)
 ASSIGN_OPT(Opt_SideBarContainerType)
@@ -3734,7 +3611,6 @@ ASSIGN_OPT(Opt_ToggleOptions)
 ASSIGN_OPT(Opt_TimePickerResult)
 ASSIGN_OPT(Opt_TimePickerOptions)
 ASSIGN_OPT(Opt_TextTimerOptions)
-ASSIGN_OPT(Opt_Union_DividerOptions_Null)
 ASSIGN_OPT(Opt_TextPickerScrollStopCallback)
 ASSIGN_OPT(Opt_Type_TextPickerAttribute_onChange_callback)
 ASSIGN_OPT(Opt_Callback_String_Number_Void)
@@ -3803,7 +3679,6 @@ ASSIGN_OPT(Opt_Callback_Number_SliderChangeMode_Void)
 ASSIGN_OPT(Opt_SliderOptions)
 ASSIGN_OPT(Opt_ViewportRect)
 ASSIGN_OPT(Opt_MenuAlignType)
-ASSIGN_OPT(Opt_Union_Opt_DividerOptions_Null)
 ASSIGN_OPT(Opt_Union_Dimension_OptionWidthMode)
 ASSIGN_OPT(Opt_ArrowPosition)
 ASSIGN_OPT(Opt_Callback_Number_String_Void)
@@ -3905,30 +3780,18 @@ ASSIGN_OPT(Opt_Callback_Number_Number_PanelMode_Void)
 ASSIGN_OPT(Opt_Union_Dimension_PanelHeight)
 ASSIGN_OPT(Opt_PanelType)
 ASSIGN_OPT(Opt_PanelMode)
+ASSIGN_OPT(Opt_SlideEffect)
 ASSIGN_OPT(Opt_NodeController)
 ASSIGN_OPT(Opt_Literal_String_target_NavigationType_type)
-ASSIGN_OPT(Opt_Array_LayoutSafeAreaEdge)
-ASSIGN_OPT(Opt_Array_LayoutSafeAreaType)
-ASSIGN_OPT(Opt_Union_Array_ToolbarItem_CustomBuilder)
-ASSIGN_OPT(Opt_Type_NavigationAttribute_title_value)
-ASSIGN_OPT(Opt_NavigationTransitionProxy)
-ASSIGN_OPT(Opt_NavigationOperation)
-ASSIGN_OPT(Opt_Type_NavigationAttribute_customNavContentTransition_delegate)
-ASSIGN_OPT(Opt_Callback_String_Unknown_Void)
-ASSIGN_OPT(Opt_Callback_NavigationMode_Void)
-ASSIGN_OPT(Opt_Callback_NavigationTitleMode_Void)
-ASSIGN_OPT(Opt_Union_Object_CustomBuilder)
-ASSIGN_OPT(Opt_Union_Array_NavigationMenuItem_CustomBuilder)
-ASSIGN_OPT(Opt_NavigationTitleMode)
-ASSIGN_OPT(Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier)
-ASSIGN_OPT(Opt_NavigationMode)
-ASSIGN_OPT(Opt_NavBarPosition)
 ASSIGN_OPT(Opt_NavRouteMode)
 ASSIGN_OPT(Opt_RouteInfo)
 ASSIGN_OPT(Opt_LayoutSafeAreaEdge)
+ASSIGN_OPT(Opt_Array_LayoutSafeAreaEdge)
 ASSIGN_OPT(Opt_LayoutSafeAreaType)
+ASSIGN_OPT(Opt_Array_LayoutSafeAreaType)
 ASSIGN_OPT(Opt_NavigationToolbarOptions)
 ASSIGN_OPT(Opt_ToolbarItem)
+ASSIGN_OPT(Opt_Union_Array_ToolbarItem_CustomBuilder)
 ASSIGN_OPT(Opt_NavigationTitleOptions)
 ASSIGN_OPT(Opt_Type_NavDestinationAttribute_title_value)
 ASSIGN_OPT(Opt_NestedScrollInfo)
@@ -3938,6 +3801,7 @@ ASSIGN_OPT(Opt_NavigationSystemTransitionType)
 ASSIGN_OPT(Opt_PopInfo)
 ASSIGN_OPT(Opt_Callback_NavDestinationContext_Void)
 ASSIGN_OPT(Opt_NavigationMenuItem)
+ASSIGN_OPT(Opt_Union_Array_NavigationMenuItem_CustomBuilder)
 ASSIGN_OPT(Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Callback_Boolean)
 ASSIGN_OPT(Opt_MenuItemGroupOptions)
@@ -3952,7 +3816,6 @@ ASSIGN_OPT(Opt_Callback_ClickEvent_LocationButtonOnClickResult_Void)
 ASSIGN_OPT(Opt_LocationButtonOptions)
 ASSIGN_OPT(Opt_Union_Position_Edges_LocalizedEdges)
 ASSIGN_OPT(Opt_SecurityComponentLayoutDirection)
-ASSIGN_OPT(Opt_Union_ListDividerOptions_Null)
 ASSIGN_OPT(Opt_ListItemGroupOptions)
 ASSIGN_OPT(Opt_SwipeActionState)
 ASSIGN_OPT(Opt_SwipeActionOptions)
@@ -3978,6 +3841,7 @@ ASSIGN_OPT(Opt_Union_ResourceStr_PixelMap)
 ASSIGN_OPT(Opt_ImageFrameInfo)
 ASSIGN_OPT(Opt_Array_ImageFrameInfo)
 ASSIGN_OPT(Opt_ImageRotateOrientation)
+ASSIGN_OPT(Opt_ResolutionQuality)
 ASSIGN_OPT(Opt_ImageAnalyzerConfig)
 ASSIGN_OPT(Opt_ImageError)
 ASSIGN_OPT(Opt_ImageErrorCallback)
@@ -4009,16 +3873,9 @@ ASSIGN_OPT(Opt_ComputedBarAttribute)
 ASSIGN_OPT(Opt_Callback_Number_Number_ComputedBarAttribute)
 ASSIGN_OPT(Opt_Tuple_Number_Number_Number_Number)
 ASSIGN_OPT(Opt_GridLayoutOptions)
-ASSIGN_OPT(Opt_FadingEdgeOptions)
-ASSIGN_OPT(Opt_EdgeEffectOptions)
-ASSIGN_OPT(Opt_Union_ContentClipMode_RectShape)
-ASSIGN_OPT(Opt_OffsetResult)
-ASSIGN_OPT(Opt_ScrollSource)
-ASSIGN_OPT(Opt_ScrollState)
-ASSIGN_OPT(Opt_Callback_Number_ScrollState_Void)
 ASSIGN_OPT(Opt_GaugeIndicatorOptions)
 ASSIGN_OPT(Opt_GaugeShadowOptions)
-ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_Number)
+ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_common_Number)
 ASSIGN_OPT(Opt_Type_GaugeAttribute_colors_colors)
 ASSIGN_OPT(Opt_GaugeOptions)
 ASSIGN_OPT(Opt_FormLinkOptions)
@@ -4041,10 +3898,17 @@ ASSIGN_OPT(Opt_EmbeddedType)
 ASSIGN_OPT(Opt_EllipseOptions)
 ASSIGN_OPT(Opt_DatePickerResult)
 ASSIGN_OPT(Opt_DatePickerOptions)
+ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient_data_panel)
 ASSIGN_OPT(Opt_DataPanelShadowOptions)
 ASSIGN_OPT(Opt_DataPanelOptions)
 ASSIGN_OPT(Opt_SceneOptions)
-ASSIGN_OPT(Opt_Union_ColumnSplitDividerStyle_Null)
+ASSIGN_OPT(Opt_FadingEdgeOptions)
+ASSIGN_OPT(Opt_EdgeEffectOptions)
+ASSIGN_OPT(Opt_Union_ContentClipMode_RectShape)
+ASSIGN_OPT(Opt_OffsetResult)
+ASSIGN_OPT(Opt_ScrollSource)
+ASSIGN_OPT(Opt_ScrollState)
+ASSIGN_OPT(Opt_Callback_Number_ScrollState_Void)
 ASSIGN_OPT(Opt_PointLightStyle)
 ASSIGN_OPT(Opt_ColumnOptions)
 ASSIGN_OPT(Opt_CircleOptions)
@@ -4151,12 +4015,12 @@ ASSIGN_OPT(Opt_Type_CommonMethod_linearGradient_value)
 ASSIGN_OPT(Opt_PreDragStatus)
 ASSIGN_OPT(Opt_Callback_PreDragStatus_Void)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo_String)
-ASSIGN_OPT(Opt_Union_Array_UniformDataType_Null)
+ASSIGN_OPT(Opt_UniformDataType)
+ASSIGN_OPT(Opt_Array_UniformDataType)
 ASSIGN_OPT(Opt_Callback_DragEvent_String_Void)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo)
 ASSIGN_OPT(Opt_DragEvent)
 ASSIGN_OPT(Opt_Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo)
-ASSIGN_OPT(Opt_Union_ClickEffect_Null)
 ASSIGN_OPT(Opt_LocalizedAlignRuleOptions)
 ASSIGN_OPT(Opt_AlignRuleOption)
 ASSIGN_OPT(Opt_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs)
@@ -4190,6 +4054,8 @@ ASSIGN_OPT(Opt_OutlineOptions)
 ASSIGN_OPT(Opt_Tuple_ResourceColor_Number)
 ASSIGN_OPT(Opt_BorderImageOption)
 ASSIGN_OPT(Opt_BorderOptions)
+ASSIGN_OPT(Opt_Filter)
+ASSIGN_OPT(Opt_VisualEffect)
 ASSIGN_OPT(Opt_ForegroundEffectOptions)
 ASSIGN_OPT(Opt_ResizableOptions)
 ASSIGN_OPT(Opt_BackgroundEffectOptions)
@@ -4207,8 +4073,6 @@ ASSIGN_OPT(Opt_Callback_Array_TouchTestInfo_TouchResult)
 ASSIGN_OPT(Opt_HitTestMode)
 ASSIGN_OPT(Opt_ConstraintSizeOptions)
 ASSIGN_OPT(Opt_Union_Array_Rectangle_Rectangle)
-ASSIGN_OPT(Opt_Callback_Opt_StyledString_Opt_Array_String_Void)
-ASSIGN_OPT(Opt_Callback_Opt_Array_String_Void)
 #undef ASSIGN_OPT
 }
 

@@ -24,7 +24,7 @@ namespace CalendarPickerDialogAccessor {
 void DestroyPeerImpl(CalendarPickerDialogPeer* peer)
 {
 }
-CalendarPickerDialogPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new CalendarPickerDialogPeer();
 }

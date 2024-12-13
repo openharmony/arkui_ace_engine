@@ -65,11 +65,21 @@ const auto ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_DEFAULT_VALUE = "32
 class ScrollableCommonMethodModifierTest
     : public ModifierTestBase<GENERATED_ArkUIScrollableCommonMethodModifier,
           &GENERATED_ArkUINodeModifiers::getScrollableCommonMethodModifier, GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD>,
-      public testing::WithParamInterface<GENERATED_Ark_NodeType> {
+      public testing::WithParamInterface<int> {
 public:
-    virtual Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType)
+    void* CreateNodeImpl() override
     {
-        return ModifierTestBase::CreateNode(GetParam());
+        typedef void* (*ConstructFunc)(Ark_Int32, Ark_Int32);
+        const ConstructFunc constructors[] = {
+            nodeModifiers_->getGridModifier()->construct,
+            nodeModifiers_->getListModifier()->construct,
+            nodeModifiers_->getScrollModifier()->construct,
+            nodeModifiers_->getWaterFlowModifier()->construct,
+        };
+        if (GetParam() < std::size(constructors)) {
+            return constructors[GetParam()](GetId(), 0);
+        }
+        return nullptr;
     }
 
     static void SetUpTestCase()
@@ -86,8 +96,7 @@ public:
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(Tests, ScrollableCommonMethodModifierTest,
-    testing::Values(GENERATED_ARKUI_GRID, GENERATED_ARKUI_LIST, GENERATED_ARKUI_SCROLL, GENERATED_ARKUI_WATER_FLOW));
+INSTANTIATE_TEST_SUITE_P(Tests, ScrollableCommonMethodModifierTest, testing::Range(0, 4));
 
 /*
  * @tc.name: setScrollBarTestDefaultValues

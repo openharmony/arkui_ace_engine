@@ -802,7 +802,7 @@ Font Convert(const Ark_Font& src)
 }
 
 template<>
-Gradient Convert(const Ark_LinearGradient& value)
+Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -1379,7 +1379,7 @@ ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
         info.fontFamily = fontfamiliesOpt->families;
     }
     info.fontWeight = OptConvert<FontWeight>(src.fontWeight);
-    
+
     info.backgroundColor = OptConvert<Color>(src.backgroundColor);
     info.borderRadius = OptConvert<BorderRadiusProperty>(src.borderRadius);
     if (auto isPrimary = OptConvert<bool>(src.primary); isPrimary) {

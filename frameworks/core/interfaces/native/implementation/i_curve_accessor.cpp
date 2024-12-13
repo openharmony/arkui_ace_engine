@@ -26,7 +26,7 @@ void DestroyPeerImpl(ICurvePeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-ICurvePeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ICurvePeer();
 }

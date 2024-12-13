@@ -24,7 +24,7 @@ namespace TabContentTransitionProxyAccessor {
 void DestroyPeerImpl(TabContentTransitionProxyPeer* peer)
 {
 }
-TabContentTransitionProxyPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TabContentTransitionProxyPeer();
 }

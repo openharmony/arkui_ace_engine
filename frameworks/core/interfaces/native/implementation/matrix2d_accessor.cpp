@@ -27,7 +27,7 @@ void DestroyPeerImpl(Matrix2DPeer* peer)
         delete peer;
     }
 }
-Matrix2DPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new Matrix2DPeer();
 }
@@ -61,14 +61,14 @@ Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
                                const Opt_Matrix2D* other)
 {
     LOGE("ARKOALA Matrix2DAccessor::MultiplyImpl is not implemented as deprecated.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer,
                               const Opt_Number* rx,
                               const Opt_Number* ry)
 {
     LOGE("ARKOALA Matrix2DAccessor::Rotate0Impl is not implemented as deprecated.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
                               const Ark_Number* degree,
@@ -76,7 +76,7 @@ Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
                               const Opt_Number* ry)
 {
     LOGE("ARKOALA Matrix2DAccessor::Rotate1Impl is not implemented as deprecated.");
-    return 0;
+    return nullptr;
 }
 Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
                                 const Opt_Number* tx,

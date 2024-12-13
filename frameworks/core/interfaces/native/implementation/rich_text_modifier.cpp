@@ -24,9 +24,17 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichTextModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+#ifdef WEB_SUPPORTED
+    auto frameNode = RichTextModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
 }
 } // RichTextModifier
 namespace RichTextInterfaceModifier {

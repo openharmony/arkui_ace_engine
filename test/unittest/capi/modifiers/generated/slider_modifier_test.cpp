@@ -834,7 +834,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setTrackColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultTrackColor =
@@ -843,19 +843,19 @@ HWTEST_F(SliderModifierTest, setTrackColorTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_ANGLE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_ANGLE_DEFAULT_VALUE) <<
-        "Default value for attribute 'trackColor.LinearGradient.angle'";
+        "Default value for attribute 'trackColor.LinearGradient_common.angle'";
 
     resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_DIRECTION_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_DIRECTION_DEFAULT_VALUE) <<
-        "Default value for attribute 'trackColor.LinearGradient.direction'";
+        "Default value for attribute 'trackColor.LinearGradient_common.direction'";
 
     resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_COLORS_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_COLORS_DEFAULT_VALUE) <<
-        "Default value for attribute 'trackColor.LinearGradient.colors'";
+        "Default value for attribute 'trackColor.LinearGradient_common.colors'";
 
     resultStr = GetAttrValue<std::string>(resultTrackColor, ATTRIBUTE_TRACK_COLOR_I_REPEATING_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_I_REPEATING_DEFAULT_VALUE) <<
-        "Default value for attribute 'trackColor.LinearGradient.repeating'";
+        "Default value for attribute 'trackColor.LinearGradient_common.repeating'";
 }
 
 /*

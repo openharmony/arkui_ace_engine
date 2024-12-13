@@ -18,53 +18,59 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace AbilityComponentModifier {
+namespace CommonTransitionModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
     return nullptr;
 }
-} // AbilityComponentModifier
-namespace AbilityComponentInterfaceModifier {
-void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
-                                    const Ark_Literal_Want_want* value)
+void SlideImpl(Ark_NativePointer node,
+               Ark_SlideEffect value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CommonTransitionModelNG::SetSlide(frameNode, convValue);
+}
+void TranslateImpl(Ark_NativePointer node,
+                   const Ark_TranslateOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AbilityComponentModelNG::SetSetAbilityComponentOptions(frameNode, convValue);
+    //CommonTransitionModelNG::SetTranslate(frameNode, convValue);
 }
-} // AbilityComponentInterfaceModifier
-namespace AbilityComponentAttributeModifier {
-void OnConnectImpl(Ark_NativePointer node,
-                   const Callback_Void* value)
+void ScaleImpl(Ark_NativePointer node,
+               const Ark_ScaleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AbilityComponentModelNG::SetOnConnect(frameNode, convValue);
+    //CommonTransitionModelNG::SetScale(frameNode, convValue);
 }
-void OnDisconnectImpl(Ark_NativePointer node,
-                      const Callback_Void* value)
+void OpacityImpl(Ark_NativePointer node,
+                 const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AbilityComponentModelNG::SetOnDisconnect(frameNode, convValue);
+    //CommonTransitionModelNG::SetOpacity(frameNode, convValue);
 }
-} // AbilityComponentAttributeModifier
-const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier()
+} // CommonTransitionModifier
+const GENERATED_ArkUICommonTransitionModifier* GetCommonTransitionModifier()
 {
-    static const GENERATED_ArkUIAbilityComponentModifier ArkUIAbilityComponentModifierImpl {
-        AbilityComponentModifier::ConstructImpl,
-        AbilityComponentInterfaceModifier::SetAbilityComponentOptionsImpl,
-        AbilityComponentAttributeModifier::OnConnectImpl,
-        AbilityComponentAttributeModifier::OnDisconnectImpl,
+    static const GENERATED_ArkUICommonTransitionModifier ArkUICommonTransitionModifierImpl {
+        CommonTransitionModifier::ConstructImpl,
+        CommonTransitionModifier::SlideImpl,
+        CommonTransitionModifier::TranslateImpl,
+        CommonTransitionModifier::ScaleImpl,
+        CommonTransitionModifier::OpacityImpl,
     };
-    return &ArkUIAbilityComponentModifierImpl;
+    return &ArkUICommonTransitionModifierImpl;
 }
 
 }

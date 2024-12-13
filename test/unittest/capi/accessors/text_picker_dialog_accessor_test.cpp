@@ -23,9 +23,6 @@
 #include "test/unittest/capi/stubs/mock_text_picker_dialog_view.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
-using Ark_Type_TextPickerOptions_range =
-    Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent;
-
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -207,7 +204,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorDialogPropertiesC
 HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCommonTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
-    
+
     Ark_TextPickerDialogOptions arkOptions;
     arkOptions.defaultPickerItemHeight = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(
         Converter::ArkValue<Ark_Number>(TEST_SIZE));
@@ -241,13 +238,13 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCommon
 HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataRangeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
-    
+
     Ark_TextPickerDialogOptions arkOptions;
     Converter::ArkArrayHolder<Array_TextPickerRangeContent> holder(rangeVector);
     Array_TextPickerRangeContent holderValue = holder.ArkValue();
     arkOptions.range = Converter::ArkUnion<Ark_Type_TextPickerOptions_range, Array_TextPickerRangeContent>(
         holderValue);
-    
+
     arkOptions.value = Converter::ArkUnion<Opt_Union_String_Array_String, Ark_String>(
         Converter::ArkValue<Ark_String>(TEST_VALUE_STR)
     );
@@ -282,7 +279,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
     Array_TextCascadePickerRangeContent cascadeHolderValue = cascadeHolder.ArkValue();
     arkOptions.range = Converter::ArkUnion<Ark_Type_TextPickerOptions_range, Array_TextCascadePickerRangeContent>(
         cascadeHolderValue);
-    
+
     arkOptions.value = Converter::ArkUnion<Opt_Union_String_Array_String, Ark_String>(
         Converter::ArkValue<Ark_String>(TEST_VALUE_STR)
     );
@@ -335,7 +332,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
 
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> arkHolder(array);
     Array_TextCascadePickerRangeContent holderValue = arkHolder.ArkValue();
-    
+
     arkOptions.range =
         Converter::ArkUnion<Ark_Type_TextPickerOptions_range, Array_TextCascadePickerRangeContent>(holderValue);
 
@@ -392,7 +389,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
 
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> arkHolder(array);
     Array_TextCascadePickerRangeContent holderValue = arkHolder.ArkValue();
-    
+
     arkOptions.range =
         Converter::ArkUnion<Ark_Type_TextPickerOptions_range, Array_TextCascadePickerRangeContent>(holderValue);
 
@@ -434,7 +431,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorButtonInfosTest, 
     ASSERT_NE(accessor_->show, nullptr);
 
     Ark_TextPickerDialogOptions arkOptions;
-    
+
     Ark_PickerDialogButtonStyle buttonStyle = {
         .fontSize = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(TEST_SIZE)),
         .fontColor = Converter::ArkValue<Opt_ResourceColor>(
@@ -512,7 +509,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTes
 
     Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
     accessor_->show(&options);
-    
+
     MockTextPickerDialogView::FireAcceptEvent(strValue);
 }
 
@@ -551,7 +548,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTes
 
     Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
     accessor_->show(&options);
-    
+
     MockTextPickerDialogView::FireAcceptEvent(strValue);
 }
 
@@ -584,7 +581,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTes
 
     Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
     accessor_->show(&options);
-    
+
     MockTextPickerDialogView::FireChangeEvent(strValue);
 }
 
@@ -623,7 +620,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTes
 
     Opt_TextPickerDialogOptions options = Converter::ArkValue<Opt_TextPickerDialogOptions>(arkOptions);
     accessor_->show(&options);
-    
+
     MockTextPickerDialogView::FireAcceptEvent(strValue);
 }
 } // namespace OHOS::Ace

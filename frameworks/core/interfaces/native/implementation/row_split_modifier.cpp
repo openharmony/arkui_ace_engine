@@ -21,9 +21,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowSplitModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::ROW_SPLIT);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // RowSplitModifier
 namespace RowSplitInterfaceModifier {

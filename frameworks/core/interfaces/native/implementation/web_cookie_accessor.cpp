@@ -18,8 +18,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct WebCookiePeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
 void DestroyPeerImpl(WebCookiePeer* peer)
@@ -29,7 +27,7 @@ void DestroyPeerImpl(WebCookiePeer* peer)
         peerImpl->DecRefCount();
     }
 }
-WebCookiePeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<WebCookiePeerImpl>();
     peerImpl->IncRefCount();

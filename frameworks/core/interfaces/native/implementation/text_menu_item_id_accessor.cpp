@@ -28,7 +28,7 @@ void DestroyPeerImpl(TextMenuItemIdPeer* peer)
     peer->id = std::nullopt;
     delete peer;
 }
-TextMenuItemIdPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextMenuItemIdPeer();
 }
@@ -38,7 +38,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer OfImpl(const Ark_ResourceStr* id)
 {
-    auto peer = CtorImpl();
+    auto peer = static_cast<TextMenuItemIdPeer *>(CtorImpl());
     peer->id = Converter::OptConvert<std::string>(*id);
     return reinterpret_cast<Ark_NativePointer>(peer);
 }
@@ -46,7 +46,7 @@ Ark_Boolean EqualsImpl(TextMenuItemIdPeer* peer,
                        const Ark_TextMenuItemId* id)
 {
     CHECK_NULL_RETURN(peer && id && id->ptr, false);
-    auto peer2 = reinterpret_cast<TextMenuItemIdPeer*>(id->ptr);
+    auto peer2 = static_cast<TextMenuItemIdPeer*>(id->ptr);
     CHECK_NULL_RETURN(peer->id && peer2->id, false);
     return Converter::ArkValue<Ark_Boolean>(peer->id.value() == peer2->id.value());
 }

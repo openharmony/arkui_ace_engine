@@ -27,7 +27,7 @@ void DestroyPeerImpl(LayoutManagerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-LayoutManagerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     LayoutManagerPeer* peer =  new LayoutManagerPeer();
     return peer;

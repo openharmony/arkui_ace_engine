@@ -14,34 +14,29 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace FlowItemModifier {
+namespace ComponentRootModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = CommonViewModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    frameNode->IncRefCount();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
+    return AceType::RawPtr(frameNode);
 }
-} // FlowItemModifier
-namespace FlowItemInterfaceModifier {
-void SetFlowItemOptionsImpl(Ark_NativePointer node)
+} // ComponentRootModifier
+const GENERATED_ArkUIComponentRootModifier* GetComponentRootModifier()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //FlowItemModelNG::SetSetFlowItemOptions(frameNode, convValue);
-}
-} // FlowItemInterfaceModifier
-const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()
-{
-    static const GENERATED_ArkUIFlowItemModifier ArkUIFlowItemModifierImpl {
-        FlowItemModifier::ConstructImpl,
-        FlowItemInterfaceModifier::SetFlowItemOptionsImpl,
+    static const GENERATED_ArkUIComponentRootModifier ArkUIComponentRootModifierImpl {
+        ComponentRootModifier::ConstructImpl,
     };
-    return &ArkUIFlowItemModifierImpl;
+    return &ArkUIComponentRootModifierImpl;
 }
 
 }

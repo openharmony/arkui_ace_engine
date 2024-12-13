@@ -18,30 +18,30 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace FlowItemModifier {
+namespace RootModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    RefPtr<PipelineBase> pipeline;
+    pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, nullptr);
+    auto stageNode = stageManager->GetStageNode();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
+    return AceType::RawPtr(stageNode);
 }
-} // FlowItemModifier
-namespace FlowItemInterfaceModifier {
-void SetFlowItemOptionsImpl(Ark_NativePointer node)
+} // RootModifier
+const GENERATED_ArkUIRootModifier* GetRootModifier()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //FlowItemModelNG::SetSetFlowItemOptions(frameNode, convValue);
-}
-} // FlowItemInterfaceModifier
-const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()
-{
-    static const GENERATED_ArkUIFlowItemModifier ArkUIFlowItemModifierImpl {
-        FlowItemModifier::ConstructImpl,
-        FlowItemInterfaceModifier::SetFlowItemOptionsImpl,
+    static const GENERATED_ArkUIRootModifier ArkUIRootModifierImpl {
+        RootModifier::ConstructImpl,
     };
-    return &ArkUIFlowItemModifierImpl;
+    return &ArkUIRootModifierImpl;
 }
 
 }

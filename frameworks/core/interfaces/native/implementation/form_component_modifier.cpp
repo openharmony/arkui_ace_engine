@@ -85,9 +85,17 @@ void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src)
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FormComponentModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+#ifdef FORM_SUPPORTED
+    auto frameNode = FormModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
+    return nullptr;
+#endif
 }
 } // FormComponentModifier
 namespace FormComponentInterfaceModifier {

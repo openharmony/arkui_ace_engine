@@ -34,7 +34,7 @@ int g_lineNumber = 354;
 class ConsoleMessageAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIConsoleMessageAccessor,
     &GENERATED_ArkUIAccessors::getConsoleMessageAccessor, ConsoleMessagePeer> {
 public:
-    ConsoleMessagePeer* CreatePeerInstance() override
+    void *CreatePeerInstance() override
     {
         Ark_String arkMessage = Converter::ArkValue<Ark_String>(g_message);
         Ark_String arkSourceId = Converter::ArkValue<Ark_String>(g_sourceId);

@@ -34,7 +34,7 @@ void DestroyPeerImpl(TextPickerDialogPeer* peer)
         delete peer;
     }
 }
-TextPickerDialogPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextPickerDialogPeer();
 }
@@ -173,7 +173,7 @@ void CreateRangeWithSelection(const Ark_TextPickerDialogOptions options, TextPic
         if (rangeVector && (static_cast<int32_t>(rangeVector->second.size()) > 0)) {
             auto range = rangeVector->second;
             settingData.rangeVector = range;
-            
+
             auto selectedIndex = static_cast<int32_t>(selectedIndexes.size()) > 0 ? selectedIndexes.at(0) : 0;
             if (selectedIndex >= static_cast<int32_t>(range.size()) || selectedIndex < 0) {
                 selectedIndex = 0;
@@ -201,7 +201,7 @@ TextPickerSettingData BuildPickerSettingData(const Ark_TextPickerDialogOptions o
     if (canLoop) {
         settingData.canLoop = canLoop.value();
     }
-    
+
     auto disappearTextStyle = Converter::OptConvert<PickerTextStyle>(options.disappearTextStyle);
     if (disappearTextStyle) {
         settingData.properties.disappearTextStyle_ = disappearTextStyle.value();
@@ -283,7 +283,7 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
     if (options->tag == ARK_TAG_UNDEFINED) { return; }
     auto arkOptionsOpt =  Converter::OptConvert<Ark_TextPickerDialogOptions>(options->value);
     if (!arkOptionsOpt.has_value()) { return; }
-    
+
     Ark_TextPickerDialogOptions arkOptions = arkOptionsOpt.value();
     DialogProperties dialogProps = BuildDialogProperties(arkOptions);
     TextPickerSettingData settingData = BuildPickerSettingData(arkOptions);

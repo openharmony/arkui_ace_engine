@@ -57,7 +57,7 @@ HWTEST_F(TextMenuItemIdAccessorTest, compareTest, TestSize.Level1)
 {
     EXPECT_EQ(peer_->id, std::nullopt);
     const Ark_TextMenuItemId obj { .ptr = peer_ };
-    auto peer = accessor_->ctor();
+    auto peer = static_cast<TextMenuItemIdPeer *>(accessor_->ctor());
     auto result = Converter::Convert<bool>(accessor_->equals(peer, &obj));
     EXPECT_FALSE(result);
     finalyzer_(peer);

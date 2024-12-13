@@ -1048,4 +1048,9 @@ void* createIndicatorComponentNode(ArkUI_Int32 nodeId)
 {
     return nullptr;
 }
+
+void* createCommonTransitionNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG::ViewModel

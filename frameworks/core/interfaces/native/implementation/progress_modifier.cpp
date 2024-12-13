@@ -170,9 +170,13 @@ void AssignCast(std::optional<ProgressStatus>& dst, const Ark_ProgressStatus& sr
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ProgressModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = ProgressModelNG::CreateFrameNode(id, 0, 100, NG::ProgressType::LINEAR);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ProgressModifier
 namespace ProgressInterfaceModifier {
@@ -199,7 +203,7 @@ void ValueImpl(Ark_NativePointer node,
     ProgressModelNG::SetValue(frameNode, convValue);
 }
 void ColorImpl(Ark_NativePointer node,
-               const Ark_Union_ResourceColor_LinearGradient* value)
+               const Ark_Union_ResourceColor_LinearGradient_common* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -223,7 +227,7 @@ void ColorImpl(Ark_NativePointer node,
             ProgressModelNG::SetGradientColor(frameNode, gradientOpt);
             ProgressModelNG::SetColor(frameNode, colorOpt);
         },
-        [frameNode](const Ark_LinearGradient& linearGradient) {
+        [frameNode](const Ark_LinearGradient_common& linearGradient) {
             ProgressModelNG::SetGradientColor(frameNode, Converter::Convert<Gradient>(linearGradient));
         },
         []() {}

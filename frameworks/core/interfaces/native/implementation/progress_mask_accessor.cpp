@@ -56,7 +56,7 @@ void DestroyPeerImpl(ProgressMaskPeer* peer)
 {
     delete peer;
 }
-ProgressMaskPeer* CtorImpl(const Ark_Number* value,
+Ark_NativePointer CtorImpl(const Ark_Number* value,
                            const Ark_Number* total,
                            const Ark_ResourceColor* color)
 {

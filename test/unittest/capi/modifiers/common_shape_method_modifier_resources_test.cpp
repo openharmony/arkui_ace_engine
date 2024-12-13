@@ -59,6 +59,11 @@ class CommonShapeMethodModifierResourcesTest : public ModifierTestBase<GENERATED
     GENERATED_ARKUI_CIRCLE // test common shape methods on frameNode for Circle component
     > {
 public:
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getCircleModifier()->construct(GetId(), 0);
+    }
+
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();

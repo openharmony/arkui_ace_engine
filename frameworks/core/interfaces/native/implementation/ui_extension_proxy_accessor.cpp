@@ -24,7 +24,7 @@ namespace UIExtensionProxyAccessor {
 void DestroyPeerImpl(UIExtensionProxyPeer* peer)
 {
 }
-UIExtensionProxyPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new UIExtensionProxyPeer();
 }

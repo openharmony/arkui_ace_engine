@@ -109,11 +109,18 @@ const auto ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE = "RenderFit.TOP_LEFT";
 class CommonMethodModifierTest
     : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
           &GENERATED_ArkUINodeModifiers::getCommonMethodModifier, GENERATED_ARKUI_COMMON_METHOD>,
-      public testing::WithParamInterface<GENERATED_Ark_NodeType> {
+      public testing::WithParamInterface<int> {
 public:
-    virtual Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType)
+    void* CreateNodeImpl() override
     {
-        return ModifierTestBase::CreateNode(GetParam());
+        typedef void* (*ConstructFunc)(Ark_Int32, Ark_Int32);
+        const ConstructFunc constructors[] = {
+            nodeModifiers_->getBlankModifier()->construct,
+        };
+        if (GetParam() < std::size(constructors)) {
+            return constructors[GetParam()](GetId(), 0);
+        }
+        return nullptr;
     }
 
     static void SetUpTestCase()

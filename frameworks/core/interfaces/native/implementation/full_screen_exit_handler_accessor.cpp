@@ -26,7 +26,7 @@ void DestroyPeerImpl(FullScreenExitHandlerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-FullScreenExitHandlerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new FullScreenExitHandlerPeer();
 }

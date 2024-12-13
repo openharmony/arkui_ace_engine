@@ -24,7 +24,7 @@ namespace ControllerHandlerAccessor {
 void DestroyPeerImpl(ControllerHandlerPeer* peer)
 {
 }
-ControllerHandlerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ControllerHandlerPeer();
 }
@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetWebControllerImpl(ControllerHandlerPeer* peer,
-                          const Ark_CustomObject* controller)
+                          const Ark_WebviewController* controller)
 {
 }
 } // ControllerHandlerAccessor

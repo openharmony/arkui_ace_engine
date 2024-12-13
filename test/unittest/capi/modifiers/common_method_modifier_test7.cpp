@@ -78,6 +78,11 @@ class CommonMethodModifierTest7 : public ModifierTestBase<GENERATED_ArkUICommonM
 public:
     RefPtr<RenderContext> render_;
 
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
+
     RefPtr<GestureEventHub> GetGestureEventHub()
     {
         if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
@@ -185,7 +190,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEnterTest, TestSize.Level1)
         checkEvent = std::nullopt;
         modifier_->setOnDragEnter(node_, &callBackValue);
         EXPECT_FALSE(checkEvent.has_value());
-        
+
         RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         dragEventPtr->SetDragBehavior(dragBehavior);
         dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
@@ -246,7 +251,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragMoveTest, TestSize.Level1)
         checkEvent = std::nullopt;
         modifier_->setOnDragMove(node_, &callBackValue);
         EXPECT_FALSE(checkEvent.has_value());
-        
+
         RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         dragEventPtr->SetDragBehavior(dragBehavior);
         dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
@@ -307,7 +312,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragLeaveTest, TestSize.Level1)
         checkEvent = std::nullopt;
         modifier_->setOnDragLeave(node_, &callBackValue);
         EXPECT_FALSE(checkEvent.has_value());
-        
+
         RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         dragEventPtr->SetDragBehavior(dragBehavior);
         dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
@@ -368,7 +373,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDropTest, TestSize.Level1)
         checkEvent = std::nullopt;
         modifier_->setOnDrop(node_, &callBackValue);
         EXPECT_FALSE(checkEvent.has_value());
-        
+
         RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         dragEventPtr->SetDragBehavior(dragBehavior);
         dragEventPtr->UseCustomAnimation(useCustomDropAnimation);
@@ -428,7 +433,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEndTest, TestSize.Level1)
         checkEvent = std::nullopt;
         modifier_->setOnDragEnd(node_, &callBackValue);
         EXPECT_FALSE(checkEvent.has_value());
-        
+
         RefPtr<OHOS::Ace::DragEvent> dragEventPtr = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         dragEventPtr->SetDragBehavior(dragBehavior);
         dragEventPtr->UseCustomAnimation(useCustomDropAnimation);

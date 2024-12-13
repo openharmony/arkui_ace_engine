@@ -34,8 +34,8 @@ void DestroyPeerImpl(TransitionEffectPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-TransitionEffectPeer* CtorImpl(const Ark_String* type,
-                               const Ark_TransitionEffects* effect)
+Ark_NativePointer CtorImpl(const Ark_String* type,
+                           const Ark_TransitionEffects* effect)
 {
     auto valueText = Converter::Convert<std::string>(*type);
     TransitionEffectPeer* peer = new TransitionEffectPeer();

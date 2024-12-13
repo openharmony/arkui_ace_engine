@@ -27,7 +27,7 @@ void DestroyPeerImpl(DrawModifierPeer* peer)
     peer->drawModifier = nullptr;
     delete peer;
 }
-DrawModifierPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peer = new DrawModifierPeer();
     peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
@@ -38,17 +38,17 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void DrawBehindImpl(DrawModifierPeer* peer,
-                    const Ark_CustomObject* drawContext)
+                    const Ark_DrawContext* drawContext)
 {
     LOGE("DrawModifierAccessor::DrawBehindImpl - is not implemented");
 }
 void DrawContentImpl(DrawModifierPeer* peer,
-                     const Ark_CustomObject* drawContext)
+                     const Ark_DrawContext* drawContext)
 {
     LOGE("DrawModifierAccessor::DrawContentImpl - is not implemented");
 }
 void DrawFrontImpl(DrawModifierPeer* peer,
-                   const Ark_CustomObject* drawContext)
+                   const Ark_DrawContext* drawContext)
 {
     LOGE("DrawModifierAccessor::DrawFrontImpl - is not implemented");
 }

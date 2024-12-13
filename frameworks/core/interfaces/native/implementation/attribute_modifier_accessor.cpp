@@ -24,7 +24,7 @@ namespace AttributeModifierAccessor {
 void DestroyPeerImpl(AttributeModifierPeer* peer)
 {
 }
-AttributeModifierPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new AttributeModifierPeer();
 }

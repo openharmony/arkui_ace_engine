@@ -26,7 +26,7 @@ void DestroyPeerImpl(JsResultPeer* peer)
     peer->result = nullptr;
     delete peer;
 }
-JsResultPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new JsResultPeer();
 }

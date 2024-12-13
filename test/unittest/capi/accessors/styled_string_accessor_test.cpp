@@ -250,7 +250,7 @@ public:
         AccessorTestCtorBase::SetUp();
     }
 
-    StyledStringPeer* CreatePeerInstance() override
+    void* CreatePeerInstance() override
     {
         auto value = settings.Union();
         auto styles = settings.Styles();
@@ -265,11 +265,11 @@ using StyledStringAccessorUnionNullTest = StyledStringAccessorTest<StyledStringU
 using StyledStringAccessorUnionStringTest = StyledStringAccessorTest<StyledStringUnionString>;
 
 /**
- * @tc.name: peerSuccessed
- * @tc.desc: peer successed
+ * @tc.name: peerSucceeded
+ * @tc.desc: peer succeeded
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionNullTest, peerSuccessed, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionNullTest, peerSucceeded, TestSize.Level1)
 {
     ASSERT_NE(peer_, nullptr);
 }
@@ -571,4 +571,3 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorExtSpan, 
     // not implement
 }
 } // namespace OHOS::Ace::NG
-

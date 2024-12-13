@@ -41,9 +41,14 @@ namespace {
     const auto ATTRIBUTE_KEY_DEFAULT_VALUE = "";
 }
 struct ClickEffect {
-    ClickEffectLevel level;
+    Ark_ClickEffectLevel level;
     float scale = 0.0f;
 };
+void AssignArkValue(Ark_ClickEffect& dst, const ClickEffect& value)
+{
+    dst.level = Converter::ArkValue<Ark_ClickEffectLevel>(value.level);
+    dst.scale = Converter::ArkValue<Opt_Number>(value.scale);
+}
 struct MotionPathOptionTest {
     std::string path = "";
     std::optional<float> from = 0.0f;
@@ -83,28 +88,6 @@ namespace Converter {
         return dst;
     }
     template<>
-    Ark_ClickEffectLevel ArkValue(const ClickEffectLevel& src)
-    {
-        switch (src) {
-            case ClickEffectLevel::LIGHT:
-                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT;
-            case ClickEffectLevel::MIDDLE:
-                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_MIDDLE;
-            case ClickEffectLevel::HEAVY:
-                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_HEAVY;
-            default:
-                return Ark_ClickEffectLevel::ARK_CLICK_EFFECT_LEVEL_LIGHT;
-        }
-    }
-    template<>
-    Ark_ClickEffect ArkValue(const ClickEffect& value)
-    {
-        return {
-            .level = Converter::ArkValue<Ark_ClickEffectLevel>(value.level),
-            .scale = Converter::ArkValue<Opt_Number>(value.scale)
-        };
-    }
-    template<>
     Ark_MotionPathOptions ArkValue(const MotionPathOptionTest& src)
     {
         Ark_MotionPathOptions dst;
@@ -121,6 +104,11 @@ class CommonMethodModifierTest6 : public ModifierTestBase<GENERATED_ArkUICommonM
     > {
 public:
     RefPtr<RenderContext> render_;
+
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
 };
 
 //////////// Transform
@@ -222,16 +210,13 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestDefaultValues, TestSize.Le
 HWTEST_F(CommonMethodModifierTest6, setClickEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setClickEffect, nullptr);
-    using OneTestStep = std::tuple<Ark_Union_ClickEffect_Null, std::string>;
+    using OneTestStep = std::tuple<Opt_ClickEffect, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
-            Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::LIGHT, .scale = 0.5f}))),
+        {Converter::ArkValue<Opt_ClickEffect>(ClickEffect({.level = ARK_CLICK_EFFECT_LEVEL_LIGHT, .scale = 0.5f})),
             "{\"level\":\"0\",\"scale\":\"0.500000\"}"},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
-            Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::MIDDLE, .scale = 1.5f}))),
+        {Converter::ArkValue<Opt_ClickEffect>(ClickEffect({.level = ARK_CLICK_EFFECT_LEVEL_MIDDLE, .scale = 1.5f})),
             "{\"level\":\"1\",\"scale\":\"1.500000\"}"},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
-            Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::HEAVY, .scale = 2.5f}))),
+        {Converter::ArkValue<Opt_ClickEffect>(ClickEffect({.level = ARK_CLICK_EFFECT_LEVEL_HEAVY, .scale = 2.5f})),
             "{\"level\":\"2\",\"scale\":\"2.500000\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
@@ -250,14 +235,13 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestValidValues, TestSize.Leve
 HWTEST_F(CommonMethodModifierTest6, setClickEffectTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setClickEffect, nullptr);
-    using OneTestStep = std::tuple<Ark_Union_ClickEffect_Null, std::string>;
+    using OneTestStep = std::tuple<Opt_ClickEffect, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_Undefined>(Ark_Undefined()), ""},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
-            Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::UNDEFINED, .scale = 1.5f}))),
+        {Converter::ArkValue<Opt_ClickEffect>(), ""},
+        {Converter::ArkValue<Opt_ClickEffect>(ClickEffect({.level = static_cast<Ark_ClickEffectLevel>(-1),
+            .scale = 1.5f})),
             "{\"level\":\"0\",\"scale\":\"1.500000\"}"},
-        {Converter::ArkUnion<Ark_Union_ClickEffect_Null, Ark_ClickEffect>(
-            Converter::ArkValue<Ark_ClickEffect>(ClickEffect({.level = ClickEffectLevel::HEAVY, .scale = -2.5f}))),
+        {Converter::ArkValue<Opt_ClickEffect>(ClickEffect({.level = ARK_CLICK_EFFECT_LEVEL_HEAVY, .scale = -2.5f})),
             "{\"level\":\"2\",\"scale\":\"-2.500000\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {

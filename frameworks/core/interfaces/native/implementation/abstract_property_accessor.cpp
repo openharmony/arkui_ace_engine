@@ -24,7 +24,7 @@ namespace AbstractPropertyAccessor {
 void DestroyPeerImpl(AbstractPropertyPeer* peer)
 {
 }
-AbstractPropertyPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new AbstractPropertyPeer();
 }

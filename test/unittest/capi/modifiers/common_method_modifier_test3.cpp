@@ -58,6 +58,11 @@ class CommonMethodModifierTest3 : public ModifierTestBase<GENERATED_ArkUICommonM
     > {
 public:
     RefPtr<RenderContext> render_;
+
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
 };
 
 /*
@@ -386,7 +391,7 @@ struct AutoProgressMaskPeer {
         const GENERATED_ArkUIFullNodeAPI* fullAPI,
         const Ark_Number* value, const Ark_Number* total, const Ark_ResourceColor* color
     ) : accessor(fullAPI->getAccessors()->getProgressMaskAccessor()),
-        ptr(accessor->ctor(value, total, color))
+        ptr(static_cast<ProgressMaskPeer *>(accessor->ctor(value, total, color)))
     {}
 
     ~AutoProgressMaskPeer() { accessor->destroyPeer(ptr); }

@@ -30,10 +30,6 @@ using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
 }
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor();
-}
-
 namespace OHOS::Ace::NG::Converter {
 template<>
 SwiperParameters Convert(const Ark_IndicatorStyle& src)
@@ -232,9 +228,13 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = SwiperModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // SwiperModifier
 namespace SwiperInterfaceModifier {
@@ -515,9 +515,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
 
     transitionInfo.transition =
         [arkCallback = CallbackHelper(value->transition)](const RefPtr<SwiperContentTransitionProxy>& proxy) {
-        auto accessor = GetSwiperContentTransitionProxyAccessor();
-        CHECK_NULL_VOID(accessor && accessor->ctor);
-        auto peer = (*accessor->ctor)();
+        auto peer = new SwiperContentTransitionProxyPeer();
         CHECK_NULL_VOID(peer);
         peer->SetHandler(proxy);
 

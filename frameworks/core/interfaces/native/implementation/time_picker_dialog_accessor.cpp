@@ -34,7 +34,7 @@ void DestroyPeerImpl(TimePickerDialogPeer* peer)
         delete peer;
     }
 }
-TimePickerDialogPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TimePickerDialogPeer();
 }
@@ -172,7 +172,7 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
         };
         dialogEvent["changeId"] = onChangeFunc;
     }
-    
+
     std::map<std::string, DialogGestureEvent> dialogCancelEvent;
     auto cancelCallbackOpt = Converter::OptConvert<Callback_Void>(arkOptions.onCancel);
     if (cancelCallbackOpt) {

@@ -24,7 +24,7 @@ namespace ActionSheetAccessor {
 void DestroyPeerImpl(ActionSheetPeer* peer)
 {
 }
-ActionSheetPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ActionSheetPeer();
 }

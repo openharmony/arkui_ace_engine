@@ -24,7 +24,7 @@ namespace StyledStringControllerAccessor {
 void DestroyPeerImpl(StyledStringControllerPeer* peer)
 {
 }
-StyledStringControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new StyledStringControllerPeer();
 }
@@ -38,7 +38,7 @@ void SetStyledStringImpl(StyledStringControllerPeer* peer,
 }
 Ark_NativePointer GetStyledStringImpl(StyledStringControllerPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // StyledStringControllerAccessor
 const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor()

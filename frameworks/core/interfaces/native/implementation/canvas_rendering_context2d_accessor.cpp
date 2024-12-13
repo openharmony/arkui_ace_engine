@@ -69,7 +69,7 @@ void DestroyPeerImpl(CanvasRenderingContext2DPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-CanvasRenderingContext2DPeer* CtorImpl(const Opt_RenderingContextSettings* settings)
+Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
 {
     CHECK_NULL_RETURN(settings, nullptr);
 
