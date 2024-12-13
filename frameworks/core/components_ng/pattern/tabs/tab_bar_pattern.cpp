@@ -721,10 +721,28 @@ void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleTouchEvent(info.GetTouches().front());
+        for (auto touchInfo : info.GetTouches()) {
+            auto touchType = touchInfo.GetTouchType();
+            if ((!pattern->touchingIndex_.has_value() && pattern->InsideTabBarRegion(touchInfo)) ||
+                touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleTouchEvent(touchInfo);
+            }
+        }
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+bool TabBarPattern::InsideTabBarRegion(const TouchLocationInfo& locationInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto hotRegion = geometryNode->GetFrameRect();
+    auto touchPoint = PointF(static_cast<float>(locationInfo.GetLocalLocation().GetX()),
+        static_cast<float>(locationInfo.GetLocalLocation().GetY()));
+    return hotRegion.IsInRegion(touchPoint);
 }
 
 void TabBarPattern::InitHoverEvent()
@@ -1132,7 +1150,7 @@ void TabBarPattern::OnModifyDone()
         auto defaultBlurStyle = static_cast<BlurStyle>(theme->GetBottomTabBackgroundBlurStyle());
         if (defaultBlurStyle != BlurStyle::NO_MATERIAL &&
             !tabBarPaintProperty->GetTabBarBlurStyleOption().has_value()) {
-            BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
+            BlurStyleOption styleOption;
             styleOption.blurStyle = defaultBlurStyle;
             tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
         }
