@@ -21,20 +21,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockSslSelectCertResult : public SslSelectCertResult {
-public:
-    MOCK_METHOD(void, HandleConfirm, (const std::string&, const std::string&));
-    MOCK_METHOD(void, HandleCancel, ());
-    MOCK_METHOD(void, HandleIgnore, ());
-};
-} // namespace
 
 class ClientAuthenticationHandlerAccessorTest : public AccessorTestBase<
     GENERATED_ArkUIClientAuthenticationHandlerAccessor,

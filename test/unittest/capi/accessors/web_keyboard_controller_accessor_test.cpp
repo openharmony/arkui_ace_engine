@@ -20,22 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockWebCustomKeyboardHandler : public WebCustomKeyboardHandler {
-public:
-    MOCK_METHOD(void, InsertText, (const std::string &text));
-    MOCK_METHOD(void, DeleteForward, (int32_t));
-    MOCK_METHOD(void, DeleteBackward, (int32_t));
-    MOCK_METHOD(void, SendFunctionKey, (int32_t));
-    MOCK_METHOD(void, Close, ());
-};
-} // namespace
 
 class WebKeyboardControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUIWebKeyboardControllerAccessor,
     &GENERATED_ArkUIAccessors::getWebKeyboardControllerAccessor, WebKeyboardControllerPeer> {

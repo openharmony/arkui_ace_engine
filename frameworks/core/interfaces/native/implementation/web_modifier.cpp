@@ -231,6 +231,38 @@ void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src)
             LOGE("Unexpected enum value in RenderExitReason: %{public}d", src);
     }
 }
+
+void AssignArkValue(Ark_KeyType& dst, const KeyAction& src)
+{
+    switch (src) {
+        case KeyAction::DOWN: dst = Ark_KeyType::ARK_KEY_TYPE_DOWN; break;
+        case KeyAction::UP: dst = Ark_KeyType::ARK_KEY_TYPE_UP; break;
+        default: dst = static_cast<Ark_KeyType>(-1);
+            LOGE("Unexpected enum value in KeyAction: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_KeySource& dst, const SourceType& src)
+{
+    switch (src) {
+        case SourceType::NONE: dst = Ark_KeySource::ARK_KEY_SOURCE_UNKNOWN; break;
+        case SourceType::KEYBOARD: dst = Ark_KeySource::ARK_KEY_SOURCE_KEYBOARD; break;
+        default: dst = static_cast<Ark_KeySource>(-1);
+            LOGE("Unexpected enum value in SourceType: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_SslError& dst, const SslError& src)
+{
+    switch (src) {
+        case SslError::INVALID: dst = Ark_SslError::ARK_SSL_ERROR_INVALID; break;
+        case SslError::HOST_MISMATCH: dst = Ark_SslError::ARK_SSL_ERROR_HOST_MISMATCH; break;
+        case SslError::DATE_INVALID: dst = Ark_SslError::ARK_SSL_ERROR_DATE_INVALID; break;
+        case SslError::UNTRUSTED: dst = Ark_SslError::ARK_SSL_ERROR_UNTRUSTED; break;
+        default: dst = static_cast<Ark_SslError>(-1);
+            LOGE("Unexpected enum value in SslError: %{public}d", src);
+    }
+}
 #endif // WEB_SUPPORTED
 } // namespace OHOS::Ace::NG::Converter
 
@@ -915,29 +947,47 @@ void OnPermissionRequestImpl(Ark_NativePointer node,
 void OnScreenCaptureRequestImpl(Ark_NativePointer node,
                                 const Callback_OnScreenCaptureRequestEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnScreenCaptureRequest(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onScreenCaptureRequest = [value, weakNode, instanceId](const BaseEventInfo* info) {
+        g_onScreenCaptureRequest(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetScreenCaptureRequestEventId(frameNode, onScreenCaptureRequest);
+#endif // WEB_SUPPORTED
 }
 void OnContextMenuShowImpl(Ark_NativePointer node,
                            const Callback_OnContextMenuShowEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnContextMenuShow(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onContextMenuShow = [value, weakNode, instanceId](const BaseEventInfo* info) -> bool {
+        return g_onContextMenuShow(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetOnContextMenuShow(frameNode, onContextMenuShow);
+#endif // WEB_SUPPORTED
 }
 void OnContextMenuHideImpl(Ark_NativePointer node,
                            const OnContextMenuHideCallback* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnContextMenuHide(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onContextMenuHide = [value, weakNode, instanceId](const BaseEventInfo* info) {
+        g_onContextMenuHide(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetOnContextMenuHide(frameNode, onContextMenuHide);
+#endif // WEB_SUPPORTED
 }
 void MediaPlayGestureAccessImpl(Ark_NativePointer node,
                                 Ark_Boolean value)
@@ -952,65 +1002,108 @@ void MediaPlayGestureAccessImpl(Ark_NativePointer node,
 void OnSearchResultReceiveImpl(Ark_NativePointer node,
                                const Callback_OnSearchResultReceiveEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnSearchResultReceive(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onSearchResultReceive = [value, weakNode, instanceId](const BaseEventInfo* info) {
+        g_onSearchResultReceive(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetSearchResultReceiveEventId(frameNode, onSearchResultReceive);
+#endif // WEB_SUPPORTED
 }
 void OnScrollImpl(Ark_NativePointer node,
                   const Callback_OnScrollEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnScroll(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onScroll = [value, weakNode, instanceId](const BaseEventInfo* info) {
+        g_onScroll(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetScrollId(frameNode, onScroll);
+#endif // WEB_SUPPORTED
 }
 void OnSslErrorEventReceiveImpl(Ark_NativePointer node,
                                 const Callback_OnSslErrorEventReceiveEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnSslErrorEventReceive(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onSslErrorEventReceive = [value, weakNode, instanceId](const BaseEventInfo* info) -> bool {
+        return g_onSslErrorEventReceive(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetOnSslErrorRequest(frameNode, onSslErrorEventReceive);
+#endif // WEB_SUPPORTED
 }
 void OnSslErrorEventImpl(Ark_NativePointer node,
                          const OnSslErrorEventCallback* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnSslErrorEvent(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onSslErrorEvent = [value, weakNode, instanceId]
+        (const BaseEventInfo* info) -> bool {
+        return g_onSslErrorEvent(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetOnAllSslErrorRequest(frameNode, onSslErrorEvent);
+#endif // WEB_SUPPORTED
 }
 void OnClientAuthenticationRequestImpl(Ark_NativePointer node,
                                        const Callback_OnClientAuthenticationEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnClientAuthenticationRequest(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onClientAuthenticationRequest = [value, weakNode, instanceId](const BaseEventInfo* info) -> bool {
+        return g_onClientAuthenticationRequest(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetOnSslSelectCertRequest(frameNode, onClientAuthenticationRequest);
+#endif // WEB_SUPPORTED
 }
 void OnWindowNewImpl(Ark_NativePointer node,
                      const Callback_OnWindowNewEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnWindowNew(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onWindowNew = [value, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
+        g_onWindowNew(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetWindowNewEvent(frameNode, onWindowNew);
+#endif // WEB_SUPPORTED
 }
 void OnWindowExitImpl(Ark_NativePointer node,
                       const Callback_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnWindowExit(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onWindowExit = [value, weakNode, instanceId](const BaseEventInfo* info) {
+        g_onWindowExit(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetWindowExitEventId(frameNode, onWindowExit);
+#endif // WEB_SUPPORTED
 }
 void MultiWindowAccessImpl(Ark_NativePointer node,
                            Ark_Boolean value)
@@ -1025,11 +1118,16 @@ void MultiWindowAccessImpl(Ark_NativePointer node,
 void OnInterceptKeyEventImpl(Ark_NativePointer node,
                              const Callback_KeyEvent_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnInterceptKeyEvent(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onInterceptKeyEvent = [value, weakNode](KeyEventInfo& keyEventInfo) -> bool {
+        return g_onInterceptKeyEvent(value, weakNode, keyEventInfo);
+    };
+    WebModelNG::SetOnInterceptKeyEventCallback(frameNode, onInterceptKeyEvent);
+#endif // WEB_SUPPORTED
 }
 void WebStandardFontImpl(Ark_NativePointer node,
                          const Ark_String* value)
@@ -1196,38 +1294,62 @@ void VerticalScrollBarAccessImpl(Ark_NativePointer node,
 void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
                                 const Callback_OnTouchIconUrlReceivedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnTouchIconUrlReceived(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onTouchIconUrlReceived = [value, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
+        g_onTouchIconUrlReceived(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetTouchIconUrlId(frameNode, onTouchIconUrlReceived);
+#endif // WEB_SUPPORTED
 }
 void OnFaviconReceivedImpl(Ark_NativePointer node,
                            const Callback_OnFaviconReceivedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnFaviconReceived(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onFaviconReceived = [value, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
+        g_onFaviconReceived(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetFaviconReceivedId(frameNode, onFaviconReceived);
+#endif // WEB_SUPPORTED
 }
 void OnPageVisibleImpl(Ark_NativePointer node,
                        const Callback_OnPageVisibleEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnPageVisible(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPageVisible = [value, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
+        g_onPageVisible(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetPageVisibleId(frameNode, std::move(onPageVisible));
+#endif // WEB_SUPPORTED
 }
 void OnDataResubmittedImpl(Ark_NativePointer node,
                            const Callback_OnDataResubmittedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetOnDataResubmitted(frameNode, convValue);
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onDataResubmitted = [value, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
+        g_onDataResubmitted(value, weakNode, instanceId, info);
+    };
+    WebModelNG::SetOnDataResubmitted(frameNode, onDataResubmitted);
+#endif // WEB_SUPPORTED
 }
 void PinchSmoothImpl(Ark_NativePointer node,
                      Ark_Boolean value)

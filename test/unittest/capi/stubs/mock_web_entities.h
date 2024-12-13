@@ -67,6 +67,77 @@ public:
     MOCK_METHOD(void, Grant, (std::vector<std::string>&), (const));
 };
 
+class MockWebScreenCaptureRequest : public WebScreenCaptureRequest {
+public:
+    MOCK_METHOD(void, Deny, (), (const));
+    MOCK_METHOD(void, SetCaptureMode, (int32_t));
+    MOCK_METHOD(std::string, GetOrigin, (), (const));
+    MOCK_METHOD(void, SetSourceId, (int32_t));
+    MOCK_METHOD(void, Grant, (), (const));
+};
+
+class MockWebContextMenuParam : public WebContextMenuParam {
+public:
+    MOCK_METHOD(int32_t, GetXCoord, (), (const));
+    MOCK_METHOD(int32_t, GetYCoord, (), (const));
+    MOCK_METHOD(std::string, GetLinkUrl, (), (const));
+    MOCK_METHOD(std::string, GetUnfilteredLinkUrl, (), (const));
+    MOCK_METHOD(std::string, GetSourceUrl, (), (const));
+    MOCK_METHOD(bool, HasImageContents, (), (const));
+    MOCK_METHOD(bool, IsEditable, (), (const));
+    MOCK_METHOD(int, GetEditStateFlags, (), (const));
+    MOCK_METHOD(int, GetSourceType, (), (const));
+    MOCK_METHOD(int, GetMediaType, (), (const));
+    MOCK_METHOD(int, GetInputFieldType, (), (const));
+    MOCK_METHOD(std::string, GetSelectionText, (), (const));
+};
+
+class MockContextMenuResult : public ContextMenuResult {
+public:
+    MOCK_METHOD(void, Cancel, (), (const));
+    MOCK_METHOD(void, CopyImage, (), (const));
+    MOCK_METHOD(void, Copy, (), (const));
+    MOCK_METHOD(void, Paste, (), (const));
+    MOCK_METHOD(void, Cut, (), (const));
+    MOCK_METHOD(void, SelectAll, (), (const));
+};
+
+class MockSslErrorResult : public SslErrorResult {
+public:
+    MOCK_METHOD(void, HandleCancel, ());
+    MOCK_METHOD(void, HandleConfirm, ());
+};
+
+class MockDataResubmitted : public DataResubmitted {
+public:
+    MOCK_METHOD(void, Resend, ());
+    MOCK_METHOD(void, Cancel, ());
+};
+
+class MockWebCustomKeyboardHandler : public WebCustomKeyboardHandler {
+public:
+    MOCK_METHOD(void, InsertText, (const std::string &text));
+    MOCK_METHOD(void, DeleteForward, (int32_t));
+    MOCK_METHOD(void, DeleteBackward, (int32_t));
+    MOCK_METHOD(void, SendFunctionKey, (int32_t));
+    MOCK_METHOD(void, Close, ());
+};
+
+class MockWebWindowNewHandler : public WebWindowNewHandler {
+public:
+    MOCK_METHOD(void, SetWebController, (int32_t));
+    MOCK_METHOD(bool, IsFrist, (), (const));
+    MOCK_METHOD(int32_t, GetId, (), (const));
+    MOCK_METHOD(int32_t, GetParentNWebId, (), (const));
+};
+
+class MockSslSelectCertResult : public SslSelectCertResult {
+public:
+    MOCK_METHOD(void, HandleConfirm, (const std::string&, const std::string&));
+    MOCK_METHOD(void, HandleCancel, ());
+    MOCK_METHOD(void, HandleIgnore, ());
+};
+
 } // namespace OHOS::Ace
 
 #endif // CAPI_STUBS_MOCK_WEB_ENTITIES_H

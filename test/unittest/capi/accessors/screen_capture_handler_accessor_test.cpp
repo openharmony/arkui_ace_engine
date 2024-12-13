@@ -20,22 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockWebScreenCaptureRequest : public WebScreenCaptureRequest {
-public:
-    MOCK_METHOD(void, Deny, (), (const));
-    MOCK_METHOD(void, SetCaptureMode, (int32_t));
-    MOCK_METHOD(std::string, GetOrigin, (), (const));
-    MOCK_METHOD(void, SetSourceId, (int32_t));
-    MOCK_METHOD(void, Grant, (), (const));
-};
-} // namespace
 
 class ScreenCaptureHandlerAccessorTest : public AccessorTestBase<GENERATED_ArkUIScreenCaptureHandlerAccessor,
     &GENERATED_ArkUIAccessors::getScreenCaptureHandlerAccessor, ScreenCaptureHandlerPeer> {

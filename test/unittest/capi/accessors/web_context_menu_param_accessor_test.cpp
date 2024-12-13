@@ -20,29 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockWebContextMenuParam : public WebContextMenuParam {
-public:
-    MOCK_METHOD(int32_t, GetXCoord, (), (const));
-    MOCK_METHOD(int32_t, GetYCoord, (), (const));
-    MOCK_METHOD(std::string, GetLinkUrl, (), (const));
-    MOCK_METHOD(std::string, GetUnfilteredLinkUrl, (), (const));
-    MOCK_METHOD(std::string, GetSourceUrl, (), (const));
-    MOCK_METHOD(bool, HasImageContents, (), (const));
-    MOCK_METHOD(bool, IsEditable, (), (const));
-    MOCK_METHOD(int, GetEditStateFlags, (), (const));
-    MOCK_METHOD(int, GetSourceType, (), (const));
-    MOCK_METHOD(int, GetMediaType, (), (const));
-    MOCK_METHOD(int, GetInputFieldType, (), (const));
-    MOCK_METHOD(std::string, GetSelectionText, (), (const));
-};
-} // namespace
 
 class WebContextMenuParamAccessorTest : public AccessorTestBase<GENERATED_ArkUIWebContextMenuParamAccessor,
     &GENERATED_ArkUIAccessors::getWebContextMenuParamAccessor, WebContextMenuParamPeer> {

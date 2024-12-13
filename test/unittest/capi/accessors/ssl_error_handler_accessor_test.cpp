@@ -21,19 +21,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockSslErrorResult : public SslErrorResult {
-public:
-    MOCK_METHOD(void, HandleCancel, ());
-    MOCK_METHOD(void, HandleConfirm, ());
-};
-} // namespace
 
 class SslErrorHandlerAccessorTest : public AccessorTestBase<GENERATED_ArkUISslErrorHandlerAccessor,
     &GENERATED_ArkUIAccessors::getSslErrorHandlerAccessor, SslErrorHandlerPeer> {

@@ -110,6 +110,13 @@ enum class RenderExitReason {
     EXIT_UNKNOWN = 4
 };
 
+enum class SslError {
+    INVALID = 0,
+    HOST_MISMATCH = 1,
+    DATE_INVALID = 2,
+    UNTRUSTED = 3,
+};
+
 struct Header {
     std::string headerKey;
     std::string headerValue;
