@@ -14,10 +14,9 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-
-#include "test/mock/core/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -477,7 +476,7 @@ HWTEST_F(GridCacheLayoutTestNg, Cache004, TestSize.Level1)
     EXPECT_FALSE(GetItem(24, true));
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     auto item = GetItem(24, true);
-    ASSERT_TRUE(item); 
+    ASSERT_TRUE(item);
     auto ctx = AceType::DynamicCast<MockRenderContext>(item->GetRenderContext());
     FlushUITasks();
     EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 400.00) - [80.00 x 50.00]");
