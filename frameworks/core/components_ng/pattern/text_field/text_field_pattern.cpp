@@ -1920,7 +1920,15 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         }
     } else {
         UpdateContentScroller(touchOffset);
-        selectController_->UpdateCaretInfoByOffset(touchOffset, false);
+        auto touchCaretX = std::clamp(
+            touchOffset.GetX(), static_cast<double>(contentRect_.Left()), static_cast<double>(contentRect_.Right()));
+        // 1/4 line height.
+        auto yOffset = PreferredLineHeight() * 0.25f;
+        auto touchCaretY = std::clamp(touchOffset.GetY(), static_cast<double>(contentRect_.Top()) + yOffset,
+            static_cast<double>(contentRect_.Bottom()) - yOffset);
+        selectController_->UpdateCaretInfoByOffset(
+            !contentScroller_.isScrolling ? Offset(touchCaretX, touchCaretY) : touchOffset,
+            !contentScroller_.isScrolling);
         if (magnifierController_ && HasText()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
