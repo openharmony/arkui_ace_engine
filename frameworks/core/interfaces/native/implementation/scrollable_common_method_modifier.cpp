@@ -28,16 +28,10 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-struct FadingEdgeOptions {
-    std::optional<Dimension> fadingEdgeLength;
-};
-
 template<>
-FadingEdgeOptions Convert(const Ark_FadingEdgeOptions& src)
+void AssignCast(std::optional<Dimension>& dst, const Ark_FadingEdgeOptions& src)
 {
-    FadingEdgeOptions options;
-    options.fadingEdgeLength = OptConvert<Dimension>(src.fadingEdgeLength);
-    return options;
+    dst = OptConvert<Dimension>(src.fadingEdgeLength);
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -213,13 +207,9 @@ void FadingEdgeImpl(Ark_NativePointer node,
         fadingEdge = Converter::OptConvert<bool>(*enabled);
     }
 
-    std::optional<Converter::FadingEdgeOptions> convOptions;
-    if (options) {
-        convOptions = Converter::OptConvert<Converter::FadingEdgeOptions>(*options);
-    }
     std::optional<Dimension> fadingEdgeLength;
-    if (convOptions) {
-        fadingEdgeLength = convOptions->fadingEdgeLength;
+    if (options) {
+        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
     }
     Validator::ValidateNonNegative(fadingEdgeLength);
 
