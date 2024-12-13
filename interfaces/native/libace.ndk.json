@@ -2453,15 +2453,7 @@
     },
     {
         "first_introduced": "14",
-        "name": "OH_ArkUI_KeyEvent_GetDeviceId"
-    },
-    {
-        "first_introduced": "14",
-        "name": "OH_ArkUI_KeyEvent_GetMetaKey"
-    },
-    {
-        "first_introduced": "14",
-        "name": "OH_ArkUI_KeyEvent_GetTimestamp"
+        "name": "OH_ArkUI_UIInputEvent_GetDeviceId"
     },
     {
         "first_introduced": "14",
@@ -2469,7 +2461,7 @@
     },
     {
         "first_introduced": "14",
-        "name": "OH_ArkUI_KeyEvent_GetModifierKeyState"
+        "name": "OH_ArkUI_UIInputEvent_GetPressedKeys"
     },
     {
         "first_introduced": "14",
@@ -2482,5 +2474,13 @@
     {
         "first_introduced": "14",
         "name": "OH_ArkUI_KeyEvent_SetConsumed"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_GetAxisValue"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
     }
 ]

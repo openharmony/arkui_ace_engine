@@ -463,11 +463,14 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContextWithCheck());
     }
-    TriggerVisibleAreaChangeCallback(0, true);
-    CleanVisibleAreaUserCallback();
-    CleanVisibleAreaInnerCallback();
     if (eventHub_) {
         eventHub_->ClearOnAreaChangedInnerCallbacks();
+        if (eventHub_->HasVisibleAreaCallback(true) || eventHub_->HasVisibleAreaCallback(false)) {
+            SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::FRAMENODE_DESTROY);
+            TriggerVisibleAreaChangeCallback(0, true);
+            CleanVisibleAreaUserCallback();
+            CleanVisibleAreaInnerCallback();
+        }
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
@@ -593,15 +596,16 @@ bool FrameNode::IsSupportDrawModifier()
     return pattern_->IsSupportDrawModifier();
 }
 
-void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
+void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive)
 {
     CHECK_NULL_VOID(node);
-    auto task = [weak = AceType::WeakClaim(AceType::RawPtr(node))]() {
+    auto task = [weak = AceType::WeakClaim(AceType::RawPtr(node)), needRemainActive]() {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->ProcessOffscreenTask();
         node->MarkModifyDone();
         node->UpdateLayoutPropertyFlag();
+        bool isActive = node->IsActive();
         node->SetActive();
         node->isLayoutDirtyMarked_ = true;
         auto pipeline = node->GetContext();
@@ -628,7 +632,11 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushModifier();
         pipeline->FlushMessages();
-        node->SetActive(false);
+        if (needRemainActive) {
+            node->SetActive(isActive);
+        } else {
+            node->SetActive(false);
+        }
     };
     auto pipeline = node->GetContext();
     if (pipeline && pipeline->IsLayouting()) {
@@ -663,8 +671,12 @@ void FrameNode::InitializePatternAndContext()
 
 void FrameNode::DumpSafeAreaInfo()
 {
-    if (layoutProperty_->GetSafeAreaExpandOpts()) {
-        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()->ToString());
+    auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
+    if (opts) {
+        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()
+                                           ->ToString()
+                                           .append(",hostPageId: ")
+                                           .append(std::to_string(GetPageId()).c_str()));
     }
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
@@ -681,7 +693,7 @@ void FrameNode::DumpSafeAreaInfo()
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
-                                       .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                                       .append(std::to_string(manager->IsIgnoreSafeArea()))
                                        .append(std::string(", isNeedAvoidWindow: ").c_str())
                                        .append(std::to_string(manager->IsNeedAvoidWindow()))
                                        .append(std::string(", isFullScreen: ").c_str())
@@ -782,6 +794,11 @@ void FrameNode::DumpCommonInfo()
     if (NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
+    }
+    if (GetTag() == V2::ROOT_ETS_TAG) {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
     }
     DumpAlignRulesInfo();
     DumpDragInfo();
@@ -951,27 +968,20 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
         if (parentRect != defaultValue) {
             json->Put("ParentSelfAdjust", parentRect.ToString().c_str());
         }
-        CHECK_EQUAL_VOID(GetTag(), V2::PAGE_ETS_TAG);
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(manager);
-        if (!manager->IsIgnoreAsfeArea()) {
-            json->Put("IgnoreSafeArea", manager->IsIgnoreAsfeArea());
-        }
-        if (!manager->IsNeedAvoidWindow()) {
-            json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
-        }
-        if (!manager->IsFullScreen()) {
-            json->Put("IsFullScreen", manager->IsFullScreen());
-        }
-        if (!manager->KeyboardSafeAreaEnabled()) {
-            json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
-        }
-        if (!pipeline->GetUseCutout()) {
-            json->Put("IsUseCutout", pipeline->GetUseCutout());
-        }
     }
+    CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->KeyboardSafeAreaEnabled()) {
+        json->Put("KeyboardInset: ", manager->GetKeyboardInset().ToString().c_str());
+    }
+    json->Put("IgnoreSafeArea", manager->IsIgnoreSafeArea());
+    json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
+    json->Put("IsFullScreen", manager->IsFullScreen());
+    json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
+    json->Put("IsUseCutout", pipeline->GetUseCutout());
 }
 
 void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
@@ -1155,6 +1165,33 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
 }
 
+void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    if (layoutProperty_) {
+        layoutProperty_->ToTreeJson(json, config);
+    } else {
+        LayoutProperty lp;
+        lp.ToTreeJson(json, config);
+    }
+    if (paintProperty_) {
+        paintProperty_->ToTreeJson(json, config);
+    }
+    if (pattern_) {
+        pattern_->ToTreeJson(json, config);
+    }
+    auto id = propInspectorId_.value_or("");
+    if (!id.empty()) {
+        json->Put(TreeKey::ID, id.c_str());
+    }
+    if (!config.contentOnly) {
+        auto eventHub = GetOrCreateGestureEventHub();
+        if (eventHub) {
+            json->Put(TreeKey::CLICKABLE, eventHub->IsClickable());
+            json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
+        }
+    }
+}
+
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     if (renderContext_) {
@@ -1249,7 +1286,7 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
@@ -1260,38 +1297,41 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         FireColorNDKCallback();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (configurationChange.dpiUpdate) {
         pattern_->OnDpiConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (configurationChange.fontUpdate) {
         pattern_->OnFontConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.iconUpdate) {
         pattern_->OnIconConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.skinUpdate) {
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.fontScaleUpdate) {
         pattern_->OnFontScaleConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     FireFontNDKCallback(configurationChange);
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void FrameNode::MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag)
@@ -1656,13 +1696,28 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
-    bool isFrameDisappear = !context->GetOnShow() || !AllowVisibleAreaCheck() || !IsVisible();
+    auto isOnShow = context->GetOnShow();
+    auto isOnMainTree = AllowVisibleAreaCheck();
+    auto isSelfVisible = IsVisible();
+    if (!isSelfVisible) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::SELF_INVISIBLE);
+    }
+    if (!isOnMainTree) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::IS_NOT_ON_MAINTREE);
+    }
+    if (!isOnShow) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::BACKGROUND);
+    }
+    bool isFrameDisappear = !isOnShow || !isOnMainTree || !isSelfVisible;
     if (isFrameDisappear) {
         cachedIsFrameDisappear_ = { timestamp, true };
         return true;
     }
-
-    return IsFrameAncestorDisappear(timestamp);
+    auto result = IsFrameAncestorDisappear(timestamp);
+    if (result) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::ANCESTOR_INVISIBLE);
+    }
+    return result;
 }
 
 bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
@@ -1722,8 +1777,8 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
         }
         return;
     }
-    bool logFlag = IsDebugInspectorId();
-    auto visibleResult = GetCacheVisibleRect(timestamp, logFlag);
+    auto visibleResult = GetCacheVisibleRect(timestamp, IsDebugInspectorId());
+    SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
     if (hasInnerCallback) {
         if (isCalculateInnerVisibleRectClip_) {
             ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
@@ -1809,6 +1864,11 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
 
     auto callback = visibleAreaUserCallback.callback;
     if (isHandled && callback) {
+        if (GetTag() == V2::WEB_ETS_TAG) {
+            TAG_LOGI(AceLogTag::ACE_UIEVENT, "exp=%{public}d ratio=%{public}s %{public}d-%{public}s reason=%{public}d",
+                isVisible, std::to_string(currentVisibleRatio).c_str(), GetId(),
+                std::to_string(GetAccessibilityId()).c_str(), static_cast<int32_t>(visibleAreaChangeTriggerReason_));
+        }
         callback(isVisible, currentVisibleRatio);
     }
 }
@@ -2620,9 +2680,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
     auto paintRect = cacheMatrixInfo.paintRectWithTransform;
     if (!isActive_) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is "
-            SEC_PLD(%{public}s) ".",
-            GetTag().c_str(), SEC_PARAM(paintRect.ToString().c_str()));
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
+            GetTag().c_str(), paintRect.ToString().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     if (!eventHub_->IsEnabled()) {
@@ -2648,7 +2707,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is " SEC_PLD(%{public}s) " in %{public}s, depth: %{public}d",
             SEC_PARAM(parentRevertPoint.ToString().c_str()), GetTag().c_str(), GetDepth());
-        for (const auto& rect : responseRegionList) {
+        for ([[maybe_unused]] const auto& rect : responseRegionList) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: responseRegionList is " SEC_PLD(%{public}s)
                 ", point is " SEC_PLD(%{public}s),
                 SEC_PARAM(rect.ToString().c_str()), SEC_PARAM(parentRevertPoint.ToString().c_str()));
@@ -4188,6 +4247,7 @@ void FrameNode::Layout()
         AddNodeFlexLayouts();
         AddNodeLayoutTime(time);
     } else {
+        ACE_SCOPED_TRACE("SkipLayout [%s][self:%d]", GetTag().c_str(), GetId());
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
@@ -5768,13 +5828,6 @@ void FrameNode::ChildrenUpdatedFrom(int32_t index)
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
-void FrameNode::OnForegroundColorUpdate(const Color& value)
-{
-    auto pattern = GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->OnForegroundColorUpdate(value);
-}
-
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
 {
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
@@ -5857,7 +5910,7 @@ void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
-    json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreAsfeArea()).c_str());
+    json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreSafeArea()).c_str());
     json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
     json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
     json->Put("isKeyboardAvoidMode", std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())).c_str());

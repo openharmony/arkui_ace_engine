@@ -202,11 +202,7 @@ private:
     {
         UINode::OnDetachFromMainTree(recursive, context);
         if (builder_) {
-            std::unordered_map<std::string, LazyForEachCacheChild> tempExpiringItem;
-            tempExpiringItem.reserve(builder_->GetCachedUINodeMap().size());
-            for (const auto& [key, child] : builder_->GetCachedUINodeMap()) {
-                tempExpiringItem.try_emplace(key, child);
-            }
+            auto tempExpiringItem = builder_->GetCachedUINodeMap();
             for (const auto& [key, child] : tempExpiringItem) {
                 if (child.second != nullptr) {
                     child.second->DetachFromMainTree(recursive);

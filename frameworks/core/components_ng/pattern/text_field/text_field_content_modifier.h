@@ -76,7 +76,6 @@ private:
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
     void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
-    void ProcessErrorParagraph(DrawingContext& context, float errorMargin);
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
 

@@ -73,8 +73,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
             continue;
         }
         spanItem->SetNeedRemoveNewLine(false);
-        auto wContent = StringUtils::ToWstring(spanItem->content);
-        if (wContent.back() == L'\n') {
+        if (spanItem->content.back() == u'\n') {
             if (std::next(it) == spans.end()) {
                 break;
             }
@@ -197,7 +196,8 @@ void TextLayoutAlgorithm::CheckNeedReCreateParagraph(
         textPattern->IsDragging() || textLayoutProperty->GetAdaptMaxFontSize().has_value() ||
         textLayoutProperty->GetAdaptMinFontSize().has_value() ||
         textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST) !=
-            TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+            TextHeightAdaptivePolicy::MAX_LINES_FIRST ||
+        textLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL) == EllipsisMode::MIDDLE;
 }
 
 void TextLayoutAlgorithm::ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty)
@@ -216,8 +216,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
-    auto textForAI = pattern->GetTextForAI();
-    auto wTextForAI = UtfUtils::Str8ToStr16(textForAI);
+    auto wTextForAI = pattern->GetTextForAI();
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     int32_t preEnd = 0;
     DragSpanPosition dragSpanPosition;
@@ -385,6 +384,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
         auto& style = textStyles[i];
         paragraph->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
+        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(splitStr.data()), splitStr.length(), 0);
         paragraph->AddText(splitStr);
         paragraph->PopStyle();
     }
@@ -501,7 +501,7 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textSt
         if (suitCount % HUNDRED == 0) {
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_RETURN(host, {});
-            TAG_LOGI(AceLogTag::ACE_TEXT,
+            TAG_LOGW(AceLogTag::ACE_TEXT,
                 "suit layout:%{public}d, [id:%{public}d, suitSize:%{public}f, minFontSize:%{public}f, "
                 "stepSize:%{public}f]",
                 suitCount, host->GetId(), suitableSize, minFontSize, stepSize);
@@ -692,7 +692,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
         if (adaptCount % HUNDRED == 0) {
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_RETURN(host, {});
-            TAG_LOGI(AceLogTag::ACE_TEXT,
+            TAG_LOGW(AceLogTag::ACE_TEXT,
                 "AdaptLayout:%{public}d, [id:%{public}d, height:%{public}f, constraint:%{public}s, "
                 "maxlines:%{public}d]",
                 adaptCount, host->GetId(), height, contentConstraint.ToString().c_str(), maxLines);

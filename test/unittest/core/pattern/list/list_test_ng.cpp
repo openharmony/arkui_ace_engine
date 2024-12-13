@@ -19,12 +19,14 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -69,7 +71,6 @@ void ListTestNg::TearDownTestSuite()
 void ListTestNg::SetUp()
 {
     MockAnimationManager::GetInstance().Reset();
-    MockAnimationManager::GetInstance().SetTicks(TICK);
 }
 
 void ListTestNg::TearDown()
@@ -359,6 +360,10 @@ RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
 
 AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
+    if (!MockAnimationManager::GetInstance().AllFinished()) {
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
+    }
     Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
     if (AceType::InstanceOf<ListItemPattern>(frameNode->GetPattern())) {
         auto pattern = frameNode->GetPattern<ListItemPattern>();
@@ -372,19 +377,11 @@ AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float e
     return IsEqual(-(pattern->GetTotalOffset()), expectOffset);
 }
 
-AssertionResult ListTestNg::TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset)
-{
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    return Position(frameNode, expectOffset);
-}
-
-AssertionResult ListTestNg::TickByVelocityPosition(
-    const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
+AssertionResult ListTestNg::VelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
 {
     MockAnimationManager::GetInstance().TickByVelocity(velocity);
     FlushUITasks();
-    return Position(frameNode, expectOffset);
+    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
 }
 
 AssertionResult ListTestNg::Position(float expectOffset)
@@ -392,36 +389,101 @@ AssertionResult ListTestNg::Position(float expectOffset)
     return Position(frameNode_, expectOffset);
 }
 
-AssertionResult ListTestNg::TickPosition(float expectOffset)
+AssertionResult ListTestNg::VelocityPosition(float velocity, float expectOffset)
 {
-    return TickPosition(frameNode_, expectOffset);
+    return VelocityPosition(frameNode_, velocity, expectOffset);
 }
 
-AssertionResult ListTestNg::TickByVelocityPosition(float velocity, float expectOffset)
+void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
-    return TickByVelocityPosition(frameNode_, velocity, expectOffset);
-}
-
-AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
-{
-    return ScrollToIndex(index, smooth, align, std::nullopt, expectOffset);
-}
-
-AssertionResult ListTestNg::ScrollToIndex(
-    int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset, float expectOffset)
-{
-    MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->ScrollToIndex(index, smooth, align, extraOffset);
     FlushUITasks();
-    return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
 }
 
-AssertionResult ListTestNg::JumpToItemInGroup(
-    int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset)
+void ListTestNg::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
-    MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->JumpToItemInGroup(index, indexInGroup, smooth, align);
     FlushUITasks();
-    return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
+}
+
+class ListItemMockLazy : public Framework::MockLazyForEachBuilder {
+public:
+    ListItemMockLazy(int32_t itemCnt, float itemMainSize) : itemCnt_(itemCnt), itemMainSize_(itemMainSize) {}
+
+protected:
+    int32_t OnGetTotalCount() override
+    {
+        return itemCnt_;
+    }
+
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+    {
+        ListItemModelNG itemModel;
+        itemModel.Create();
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(itemMainSize_));
+        ViewAbstract::SetFocusable(true);
+        auto node = ViewStackProcessor::GetInstance()->Finish();
+        return { std::to_string(index), node };
+    }
+
+private:
+    int32_t itemCnt_ = 0;
+    float itemMainSize_ = 100.0f;
+};
+
+void ListTestNg::CreateItemsInLazyForEach(
+    int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove)
+{
+    RefPtr<LazyForEachActuator> mockLazy = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockLazy);
+    lazyForEachModelNG.OnMove(std::move(onMove));
+}
+
+class ListItemGroupMockLazy : public Framework::MockLazyForEachBuilder {
+public:
+    explicit ListItemGroupMockLazy(int32_t itemGroupCnt) : itemGroupCnt_(itemGroupCnt) {}
+
+protected:
+    int32_t OnGetTotalCount() override
+    {
+        return itemGroupCnt_;
+    }
+
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+    {
+        auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+        ListItemGroupModelNG groupModel;
+        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        listItemGroup->SetParent(weakList);
+        for (int32_t index = 0; index < 2; ++index) {
+            ListItemModelNG itemModel;
+            itemModel.Create();
+            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+            ViewAbstract::SetFocusable(true);
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        auto groupNode = ViewStackProcessor::GetInstance()->Finish();
+        return { std::to_string(index), groupNode };
+    }
+
+private:
+    int32_t itemGroupCnt_ = 0;
+};
+
+void ListTestNg::CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove)
+{
+    RefPtr<LazyForEachActuator> mockLazy = AceType::MakeRefPtr<ListItemGroupMockLazy>(itemNumber);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockLazy);
+    lazyForEachModelNG.OnMove(std::move(onMove));
 }
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,7 @@
  */
 
 #include "core/common/event_dump.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -53,23 +54,34 @@ TouchPointSnapshot::TouchPointSnapshot(const TouchEvent& event)
     type = event.type;
     timestamp = GetCurrentTimestamp();
     isInjected = event.isInjected;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    downFingerIds = eventManager->GetDownFingerIds();
 }
 
 void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
 {
+    std::string downFingerIdStr = "";
+    for (const auto& iter : downFingerIds) {
+        downFingerIdStr += std::to_string(iter.first) + " ";
+    }
     std::stringstream oss;
 #ifdef IS_RELEASE_VERSION
     oss << "id: " << id << ", "
         << "type: " << GestureSnapshot::TransTouchType(type) << ", "
         << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
-        << "isInjected: " << isInjected;
+        << "isInjected: " << isInjected << ", "
+        << "downFingerIds: " << downFingerIdStr;
 #else
     oss << "id: " << id << ", "
         << "point: " << point.ToString() << ", "
         << "screenPoint: " << screenPoint.ToString() << ", "
         << "type: " << GestureSnapshot::TransTouchType(type) << ", "
         << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
-        << "isInjected: " << isInjected;
+        << "isInjected: " << isInjected << ", "
+        << "downFingerIds: " << downFingerIdStr;
 #endif
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
@@ -251,11 +263,16 @@ void FrameNodeSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
 
 void TouchPointSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
 {
+    std::string downFingerIdStr = "";
+    for (const auto& iter : downFingerIds) {
+        downFingerIdStr += std::to_string(iter.first) + " ";
+    }
     json->Put("point", point.ToString().c_str());
     json->Put("screenPoint", screenPoint.ToString().c_str());
     json->Put("type", GestureSnapshot::TransTouchType(type).c_str());
     json->Put("timestamp", ConvertTimestampToStr(timestamp).c_str());
     json->Put("isInjected", isInjected);
+    json->Put("downFingerIds", downFingerIdStr.c_str());
 }
 
 void EventTreeRecord::BuildTouchPoints(

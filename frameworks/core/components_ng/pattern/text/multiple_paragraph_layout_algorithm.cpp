@@ -251,7 +251,11 @@ void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
 {
     auto renderContext = frameNode->GetRenderContext();
-    if (renderContext && renderContext->HasForegroundColorStrategy()) {
+    if (renderContext->HasForegroundColor()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != textStyle.GetTextColor().GetValue()) {
+            textStyle.SetTextColor(Color::FOREGROUND);
+        }
+    } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
     }
 }
@@ -395,6 +399,20 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         };
 }
 
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(const std::u16string& content,
+    LayoutWrapper* layoutWrapper)
+{
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+
+    auto direction = textLayoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
+        return direction;
+    }
+
+    return GetTextDirectionByContent(content);
+}
+
 TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::u16string& content)
 {
     bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -411,21 +429,15 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const 
     return textDirection;
 }
 
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
-{
-    return GetTextDirectionByContent(UtfUtils::Str8ToStr16(content));
-}
-
 bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF& contentConstraint)
 {
-    ACE_TEXT_SCOPED_TRACE("ParagraphReLayout");
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
     CHECK_NULL_RETURN(paragraphManager_, false);
     auto paragraphs = paragraphManager_->GetParagraphs();
-    float paragraphNewWidth =
-        std::min(std::min(paragraphManager_->GetTextWidthIncludeIndent(), paragraphManager_->GetMaxWidth()),
-            GetMaxMeasureSize(contentConstraint).Width());
+    auto maxWidth = paragraphManager_->GetMaxWidth();
+    auto indentWidth = paragraphManager_->GetTextWidthIncludeIndent();
+    float paragraphNewWidth = std::min(std::min(indentWidth, maxWidth), GetMaxMeasureSize(contentConstraint).Width());
     paragraphNewWidth =
         std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
     if (!contentConstraint.selfIdealSize.Width()) {
@@ -434,6 +446,8 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
             CHECK_NULL_RETURN(paragraph, false);
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
                 OTHER_DURATION();
+                ACE_TEXT_SCOPED_TRACE("ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f][Constraint:%s]",
+                    paragraphNewWidth, paragraph->GetMaxWidth(), indentWidth, contentConstraint.ToString().c_str());
                 paragraph->Layout(std::ceil(paragraphNewWidth));
             }
         }
@@ -578,13 +592,13 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
     spanTextLength += SYMBOL_SPAN_LENGTH;
     child->length = SYMBOL_SPAN_LENGTH;
     child->position = spanTextLength;
-    child->content = "  ";
+    child->content = u"  ";
 }
 
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    child->length = StringUtils::ToWstring(child->content).length();
+    child->length = child->content.length();
     spanTextLength += static_cast<int32_t>(child->length);
     child->position = spanTextLength;
     child->UpdateParagraph(frameNode, paragraph, InheritParentTextStyle(), PlaceholderStyle(), isMarquee_);
@@ -625,7 +639,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     }
     currentParagraphPlaceholderCount_++;
     imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
-    imageSpanItem->content = " ";
+    imageSpanItem->content = u" ";
     spanTextLength += 1;
     imageSpanItem->position = spanTextLength;
     imageSpanItem->length = 1;
@@ -652,7 +666,7 @@ void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<Placehol
         placeholderSpanItem->UpdateParagraph(frameNode, paragraph, InheritParentTextStyle(), placeholderStyle);
     currentParagraphPlaceholderCount_++;
     placeholderSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
-    placeholderSpanItem->content = " ";
+    placeholderSpanItem->content = u" ";
     spanTextLength += 1;
     placeholderSpanItem->length = 1;
     placeholderSpanItem->position = spanTextLength;
@@ -692,7 +706,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
         customSpanItem->UpdateParagraph(nullptr, paragraph, InheritParentTextStyle(), placeholderStyle);
     currentParagraphPlaceholderCount_++;
     customSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
-    customSpanItem->content = " ";
+    customSpanItem->content = u" ";
     spanTextLength += 1;
     customSpanItem->length = 1;
     customSpanItem->position = spanTextLength;

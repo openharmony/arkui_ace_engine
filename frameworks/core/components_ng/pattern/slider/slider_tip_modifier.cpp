@@ -42,7 +42,6 @@ constexpr int32_t BUBBLE_DISPLAY_SIZE_CHANGE_TIMER = 250;
 constexpr int32_t BUBBLE_DISPLAY_OPACITY_CHANGE_TIMER = 150;
 constexpr int32_t BUBBLE_DISAPPEAR_SIZE_CHANGE_TIMER = 250;
 constexpr int32_t BUBBLE_DISAPPEAR_OPACITY_CHANGE_TIMER = 250;
-constexpr int32_t BUBBLE_DISAPPEAR_DELAY_TIMER = 2000;
 constexpr Dimension BUBBLE_VERTICAL_WIDTH = 62.0_vp;
 constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
@@ -85,6 +84,11 @@ SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> 
 }
 
 SliderTipModifier::~SliderTipModifier() {}
+
+void SliderTipModifier::UpdateThemeParams(const RefPtr<SliderTheme>& theme)
+{
+    tipDelayTime_ = theme->GetTipDelayTime();
+}
 
 void SliderTipModifier::PaintTip(DrawingContext& context)
 {
@@ -438,7 +442,7 @@ void SliderTipModifier::SetTipFlag(bool flag)
     taskId_++;
     if (flag) {
         SetBubbleDisplayAnimation();
-    } else {
+    } else if (tipDelayTime_ > 0) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
@@ -455,7 +459,9 @@ void SliderTipModifier::SetTipFlag(bool flag)
                 CHECK_NULL_VOID(pipeline);
                 pipeline->RequestFrame();
             },
-            TaskExecutor::TaskType::UI, BUBBLE_DISAPPEAR_DELAY_TIMER, "ArkUISliderSetBubbleDisappearAnimation");
+            TaskExecutor::TaskType::UI, tipDelayTime_, "ArkUISliderSetBubbleDisappearAnimation");
+    } else {
+        SetBubbleDisappearAnimation();
     }
     tipFlag_->Set(flag);
 }
@@ -474,7 +480,9 @@ void SliderTipModifier::BuildParagraph()
         textFontSize_ = SUITABLEAGING_LEVEL_2_TEXT_FONT_SIZE;
     }
     fontStyle->UpdateFontSize(textFontSize_);
-    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipeline->GetTheme<TextTheme>());
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, theme);
     auto content = content_->Get();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && fontManager->IsUseAppCustomFont()) {

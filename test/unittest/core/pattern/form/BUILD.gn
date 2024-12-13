@@ -20,6 +20,7 @@ ace_unittest("form_test_ng") {
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/accessibility_session_adapter_form.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
@@ -59,6 +60,7 @@ ace_unittest("form_node_test") {
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/accessibility_session_adapter_form.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
@@ -98,6 +100,7 @@ ace_unittest("form_pattern_test") {
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/accessibility_session_adapter_form.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",

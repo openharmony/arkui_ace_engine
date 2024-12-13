@@ -143,7 +143,9 @@ JSRef<JSObject> JSCanvasRenderer::createGradientObj(const std::shared_ptr<Gradie
     JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
     pasteObj->SetProperty("__type", "gradient");
     auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
-    pasteData->SetGradient(gradient);
+    if (pasteData) {
+        pasteData->SetGradient(gradient);
+    }
     return pasteObj;
 }
 

@@ -55,6 +55,18 @@ public:
         return sheetDismissId_;
     }
 
+    void SetFocusSheetId(const std::optional<int32_t>& id)
+    {
+        sheetFocusId_ = id;
+    }
+
+    std::optional<int32_t> GetFocusSheetId() const
+    {
+        return sheetFocusId_;
+    }
+
+    void RemoveSheetByESC();
+
     void DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType);
 
 private:
@@ -73,6 +85,7 @@ private:
     };
 
     int32_t sheetDismissId_ = 0;
+    std::optional<int32_t> sheetFocusId_;
     std::map<SheetContentKey, RefPtr<OverlayManager>> overlayManagerMap_;
     // Value:  The uniqueId of the FrameNode to which BindSheet is attached
     std::map<SheetContentKey, int32_t> targetIdMap_;

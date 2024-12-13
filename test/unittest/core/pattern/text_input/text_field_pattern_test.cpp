@@ -2165,6 +2165,19 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     Offset offset4(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
     pattern->ChangeMouseState(offset4, frameId, true);
+
+    // test rtl
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    pattern->frameRect_ = RectF(0, 0, 0, 0);
+    pattern->ChangeMouseState(offset1, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset2, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset3, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 50);
+    pattern->ChangeMouseState(offset4, frameId, true);
 }
 
 /**
@@ -2656,5 +2669,37 @@ HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Leve
     autoFillType = AceAutoFillType::ACE_NEW_PASSWORD;
     pattern->SetAutoFillTriggeredStateByType(autoFillType);
     EXPECT_EQ(stateHolder->IsAutoFillNewPasswordTriggered(), true);
+}
+
+/**
+ * @tc.name: TextFieldShiftMultipleSelection001
+ * @tc.desc: test text_field_pattern.cpp shift multiple selection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->frameRect_ = RectF(0, 0, 10, 50);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern->HandleKeyEvent(keyEvent);
+    pattern->UpdateShiftFlag(keyEvent);
+
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    Offset offset(5.0, 10.0);
+    info.SetGlobalLocation(offset);
+    pattern->HandleMouseEvent(info);
+    pattern->UpdateCaretByClick(offset);
+
+    EXPECT_EQ(pattern->IsSelected(), false);
 }
 } // namespace OHOS::Ace::NG

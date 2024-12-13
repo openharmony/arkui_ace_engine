@@ -168,6 +168,11 @@ public:
         return refereeNG_;
     }
 
+    RefPtr<MouseStyleManager> GetMouseStyleManager() const
+    {
+        return mouseStyleManager_;
+    }
+
     bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
@@ -230,6 +235,16 @@ public:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
+    const std::unordered_map<size_t, TouchTestResult>& GetAxisTouchTestResults() const
+    {
+        return axisTouchTestResults_;
+    }
+
+    void SetAxisTouchTestResults(std::unordered_map<size_t, TouchTestResult>& axisTouchTestResults)
+    {
+        axisTouchTestResults_ = axisTouchTestResults;
+    }
+
     void SetInnerFlag(bool value)
     {
         innerEventWin_ = value;
@@ -266,6 +281,11 @@ public:
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
 
+    inline const std::unordered_map<int32_t, int32_t>& GetDownFingerIds() const
+    {
+        return downFingerIds_;
+    }
+
     inline const std::unordered_map<int32_t, TouchEvent>& GetIdToTouchPoint() const
     {
         return idToTouchPoints_;
@@ -287,6 +307,8 @@ public:
     }
 
     TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
+
+    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
@@ -313,7 +335,6 @@ private:
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
-    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
     void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, bool sendOnTouch = true);
     void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch = true);
@@ -361,6 +382,7 @@ private:
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
+    RefPtr<MouseStyleManager> mouseStyleManager_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;

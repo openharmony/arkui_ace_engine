@@ -809,7 +809,7 @@ void JSText::SetOnCopy(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(args));
+    JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(args));
     TextModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 

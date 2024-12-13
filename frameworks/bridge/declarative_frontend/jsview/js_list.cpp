@@ -61,8 +61,8 @@ ListModel* ListModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-const std::vector<V2::ScrollSnapAlign> SCROLL_SNAP_ALIGN = { V2::ScrollSnapAlign::NONE, V2::ScrollSnapAlign::START,
-    V2::ScrollSnapAlign::CENTER, V2::ScrollSnapAlign::END };
+const std::vector<ScrollSnapAlign> SCROLL_SNAP_ALIGN = { ScrollSnapAlign::NONE, ScrollSnapAlign::START,
+    ScrollSnapAlign::CENTER, ScrollSnapAlign::END };
 
 namespace {
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
@@ -253,7 +253,7 @@ void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
 {
     double defaultSize = 0.0f;
     if (!ParseJsDouble(childrenSizeObj->GetProperty("childDefaultSize"), defaultSize) || !NonNegative(defaultSize)) {
-        LOGW("JSList input parameter defaultSize check failed.");
+        TAG_LOGW(AceLogTag::ACE_LIST, "JSList input parameter defaultSize check failed.");
         return;
     }
     auto listChildrenMainSize = ListModel::GetInstance()->GetOrCreateListChildrenMainSize();
@@ -373,7 +373,7 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         auto minLengthParam = jsObj->GetProperty("minLength");
         auto maxLengthParam = jsObj->GetProperty("maxLength");
         if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
-            LOGW("minLength and maxLength are not both set");
+            TAG_LOGW(AceLogTag::ACE_LIST, "minLength and maxLength are not both set");
             return;
         }
         CalcDimension minLengthValue;
@@ -410,11 +410,11 @@ void JSList::SetContentEndOffset(const JSCallbackInfo& info)
 
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
 {
-    V2::ScrollSnapAlign param;
+    ScrollSnapAlign param;
     if (scrollSnapAlign < 0 || scrollSnapAlign >= static_cast<int32_t>(SCROLL_SNAP_ALIGN.size())) {
-        param = V2::ScrollSnapAlign::NONE;
+        param = ScrollSnapAlign::NONE;
     } else {
-        param = V2::ScrollSnapAlign(scrollSnapAlign);
+        param = ScrollSnapAlign(scrollSnapAlign);
     }
     ListModel::GetInstance()->SetScrollSnapAlign(param);
 }

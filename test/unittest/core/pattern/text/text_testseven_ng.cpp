@@ -58,7 +58,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> selectSpanItems;
     auto span0 = AceType::MakeRefPtr<SpanItem>();
     span0->interval = { 0, 7 };
-    span0->content = "012345";
+    span0->content = u"012345";
     selectSpanItems.emplace_back(span0);
     selectSpanItems.emplace_back(span0);
     pattern->spans_ = selectSpanItems;
@@ -88,7 +88,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> selectSpanItems;
     auto span0 = AceType::MakeRefPtr<SpanItem>();
     span0->interval = { 0, 7 };
-    span0->content = "0123456789";
+    span0->content = u"0123456789";
     span0->position = 7;
     span0->placeholderIndex = -1;
     selectSpanItems.emplace_back(span0);
@@ -116,7 +116,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
-    pattern->textForDisplay_ = "123456789";
+    pattern->textForDisplay_ = u"123456789";
     auto textLayoutProperty = frameNode->GetLayoutPropertyPtr<TextLayoutProperty>();
     textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
     frameNode->layoutProperty_ = textLayoutProperty;
@@ -132,9 +132,9 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
  */
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString004, TestSize.Level1)
 {
-    auto spanStr = AceType::MakeRefPtr<SpanString>("123456789");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"123456789");
     auto span0 = AceType::MakeRefPtr<SpanItem>();
-    span0->content = "123456789";
+    span0->content = u"123456789";
     std::list<RefPtr<NG::SpanItem>> spansEn;
     spansEn.emplace_back(span0);
     spanStr->spans_ = spansEn;
@@ -194,7 +194,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), "123456789");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, "123456789");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "123456789");
     EXPECT_EQ((*it)->interval.first, 0);
     EXPECT_EQ((*it)->interval.second, 9);
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(1));
@@ -236,7 +236,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString006, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     auto span0 = AceType::MakeRefPtr<SpanItem>();
-    span0->content = "123456789";
+    span0->content = u"123456789";
     span0->position = 9;
     span0->length = 9;
     std::list<RefPtr<NG::SpanItem>> spansEn;
@@ -260,7 +260,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString006, TestSize.Level1)
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
 {
     auto span0 = AceType::MakeRefPtr<SpanItem>();
-    span0->content = "123456789";
+    span0->content = u"123456789";
     span0->interval.first = 0;
     span0->interval.second = 9;
     std::vector<Shadow> shadow;
@@ -293,7 +293,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     span0->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
     span0->textLineStyle->UpdateEllipsisMode(EllipsisMode::MIDDLE);
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = "123456789";
+    span1->content = u"123456789";
     span1->interval.first = 0;
     span1->interval.second = 9;
 
@@ -312,7 +312,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), "123456789");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, "123456789");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "123456789");
     EXPECT_EQ((*it)->interval.first, 0);
     EXPECT_EQ((*it)->interval.second, 9);
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(1));
@@ -351,7 +351,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
 {
     auto span0 = AceType::MakeRefPtr<ImageSpanItem>();
-    span0->content = " ";
+    span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
     ImageSpanOptions options;
@@ -362,7 +362,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
     span0->options = options;
 
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = " ";
+    span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
 
@@ -381,7 +381,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), " ");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, " ");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), " ");
     if ((*it)->spanItemType == SpanItemType::IMAGE) {
         auto spanDe = AceType::DynamicCast<ImageSpanItem>(*it);
         EXPECT_EQ(spanDe->options.image, "iamge");
@@ -423,12 +423,12 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     frameNode->renderContext_ = renderContext;
 
     auto span0 = AceType::MakeRefPtr<ImageSpanItem>();
-    span0->content = " ";
+    span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
     span0->imageNodeId = 1;
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = " ";
+    span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
 
@@ -447,7 +447,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), " ");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, " ");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), " ");
     if ((*it)->spanItemType == SpanItemType::IMAGE) {
         auto spanDe = AceType::DynamicCast<ImageSpanItem>(*it);
         EXPECT_EQ(spanDe->options.image, "iamge");
@@ -473,12 +473,12 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
 
     auto span0 = AceType::MakeRefPtr<ImageSpanItem>();
-    span0->content = " ";
+    span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
     span0->imageNodeId = 1;
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = " ";
+    span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
 
@@ -497,12 +497,12 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), " ");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, " ");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), " ");
     if ((*it)->spanItemType == SpanItemType::NORMAL) {
         auto spanDe = AceType::DynamicCast<SpanItem>(*it);
         EXPECT_EQ(spanDe->interval.first, 0);
         EXPECT_EQ(spanDe->interval.second, 1);
-        EXPECT_EQ(spanDe->content, " ");
+        EXPECT_EQ(StringUtils::Str16ToStr8(spanDe->content), " ");
     }
 }
 } // namespace OHOS::Ace::NG

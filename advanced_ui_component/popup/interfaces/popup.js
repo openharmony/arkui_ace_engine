@@ -618,7 +618,7 @@ export class g1 extends ViewPU {
         s1 -= (this.theme.l1.padding.bottom.value -
             (this.theme.button.h1.bottom.value / 2));
         if (Math.floor(this.textHeight) > Math.floor(s1 + 1)) {
-            return this.textHeight;
+            return s1;
         }
         else {
             s1 = undefined;
@@ -648,6 +648,7 @@ export class g1 extends ViewPU {
         }
         catch (error) {
             console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+            this.messageMaxWeight = 400;
             return p1 = { maxWidth: 400, maxHeight: 480 };
         }
         if (px2vp(q1.width) > 400) {
@@ -917,6 +918,14 @@ export class g1 extends ViewPU {
                         Column.layoutWeight(this.getLayoutWeight());
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Flex.create();
+                        Flex.height(0);
+                        Flex.onAreaChange((m, rect) => {
+                            this.titleHeight = rect.height;
+                        });
+                    }, Flex);
+                    Flex.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
                         Row.direction(this.popupDirection);
                         Row.alignItems(VerticalAlign.Top);
@@ -939,7 +948,7 @@ export class g1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((i1, rect) => {
+                        Text.onAreaChange((j, rect) => {
                             this.textHeight = rect.height;
                         });
                     }, Text);
@@ -994,7 +1003,7 @@ export class g1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((h1, rect) => {
+                        Flex.onAreaChange((i, rect) => {
                             this.buttonHeight = rect.height;
                         });
                     }, Flex);

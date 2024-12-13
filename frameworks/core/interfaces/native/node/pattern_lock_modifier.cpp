@@ -195,6 +195,34 @@ void ResetPatternLockEnableWaveEffect(ArkUINodeHandle node)
     PatternLockModelNG::SetEnableWaveEffect(frameNode, true);
 }
 
+void SetPatternLockEnableForeground(ArkUINodeHandle node, uint32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetEnableForeground(frameNode, static_cast<bool>(value));
+}
+
+void ResetPatternLockEnableForeground(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetEnableForeground(frameNode, false);
+}
+
+void SetPatternLockSkipUnselectedPoint(ArkUINodeHandle node, uint32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetSkipUnselectedPoint(frameNode, static_cast<bool>(value));
+}
+
+void ResetPatternLockSkipUnselectedPoint(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetSkipUnselectedPoint(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIPatternLockModifier* GetPatternLockModifier()
 {
@@ -206,7 +234,8 @@ const ArkUIPatternLockModifier* GetPatternLockModifier()
         SetPatternLockRegularColor, ResetPatternLockRegularColor, SetPatternLockPathColor,
         ResetPatternLockPathColor, SetPatternLockActiveCircleColor, ResetPatternLockActiveCircleColor,
         SetPatternLockActiveCircleRadius, ResetPatternLockActiveCircleRadius, SetPatternLockEnableWaveEffect,
-        ResetPatternLockEnableWaveEffect
+        ResetPatternLockEnableWaveEffect, SetPatternLockEnableForeground, ResetPatternLockEnableForeground,
+        SetPatternLockSkipUnselectedPoint, ResetPatternLockSkipUnselectedPoint
     };
     return &modifier;
 }
@@ -221,7 +250,8 @@ const CJUIPatternLockModifier* GetCJUIPatternLockModifier()
         SetPatternLockRegularColor, ResetPatternLockRegularColor, SetPatternLockPathColor,
         ResetPatternLockPathColor, SetPatternLockActiveCircleColor, ResetPatternLockActiveCircleColor,
         SetPatternLockActiveCircleRadius, ResetPatternLockActiveCircleRadius, SetPatternLockEnableWaveEffect,
-        ResetPatternLockEnableWaveEffect
+        ResetPatternLockEnableWaveEffect, SetPatternLockEnableForeground, ResetPatternLockEnableForeground,
+        SetPatternLockSkipUnselectedPoint, ResetPatternLockSkipUnselectedPoint
     };
     return &modifier;
 }

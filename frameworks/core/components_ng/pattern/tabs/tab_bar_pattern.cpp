@@ -654,7 +654,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->Initialize(host->GetContextRefPtr());
+    scrollable->Initialize(host);
     scrollable->SetMaxFlingVelocity(MAX_FLING_VELOCITY);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -929,6 +929,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         }
         focusIndicator_ -= 1;
         PaintFocusState();
+        FocusCurrentOffset();
         return true;
     }
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
@@ -943,6 +944,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         }
         focusIndicator_ += 1;
         PaintFocusState();
+        FocusCurrentOffset();
         return true;
     }
     return OnKeyEventWithoutClick(host, event);
@@ -1016,6 +1018,38 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         jumpIndex_ = index;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void TabBarPattern::FocusCurrentOffset()
+{
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
+    auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto childCount = tabBarNode->TotalChildCount() - MASK_COUNT;
+    auto geometryNode = tabBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto mainSize = geometryNode->GetPaddingSize().MainSize(axis);
+
+    if (barMode == TabBarMode::SCROLLABLE && !visibleItemPosition_.empty()) {
+        auto visibleItemStartIndex = visibleItemPosition_.begin()->first;
+        auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
+        auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
+        auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
+        if (focusIndicator_ == visibleItemStartIndex) {
+            focusIndicator_ == 0 ? UpdateCurrentOffset(scrollMargin_ - visibleItemStartPos) :
+                UpdateCurrentOffset(-visibleItemStartPos);
+        } else if (focusIndicator_ == visibleItemEndIndex) {
+            focusIndicator_ == childCount - 1 ? UpdateCurrentOffset(mainSize - scrollMargin_ - visibleItemEndPos) :
+                UpdateCurrentOffset(mainSize - visibleItemEndPos);
+        } else if ((focusIndicator_ >= 0  && focusIndicator_ < visibleItemStartIndex) ||
+            (focusIndicator_ <= childCount - 1 && focusIndicator_ > visibleItemEndIndex)) {
+            focusIndex_ = focusIndicator_;
+            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
 }
 
 void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -1298,6 +1332,9 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (targetIndex_) {
         TriggerTranslateAnimation(indicator_, targetIndex_.value());
         targetIndex_.reset();
+    }
+    if (focusIndex_) {
+        focusIndex_.reset();
     }
     indicator_ = layoutProperty->GetIndicatorValue(0);
 

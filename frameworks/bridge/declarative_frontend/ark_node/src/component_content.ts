@@ -47,10 +47,10 @@ class ComponentContent extends Content {
   public recycle(): void {
     this.builderNode_.recycle();
   }
-  public onReuseWithBindObject(param?: Object):void{
+  public onReuseWithBindObject(param?: Object): void {
     this.builderNode_.onReuseWithBindObject(param);
-  } 
-  public onRecycleWithBindObject():void{
+  }
+  public onRecycleWithBindObject(): void {
     this.builderNode_.onRecycleWithBindObject();
   }
   public dispose(): void {

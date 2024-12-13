@@ -47,41 +47,6 @@ HWTEST_F(TextFieldPatternTestFour, UltralimitShake001, TestSize.Level0)
 }
 
 /**
- * @tc.name: UpdateCounterMargin001
- * @tc.desc: test testInput text UpdateCounterMargin
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestFour, UpdateCounterMargin001, TestSize.Level0)
-{
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateMaxLines(0);
-    layoutProperty->UpdateShowCounter(true);
-    layoutProperty->UpdateMaxLength(1024);
-    layoutProperty->UpdateShowUnderline(true);
-
-    layoutProperty->UpdateSetCounter(0);
-    pattern->UpdateCounterMargin();
-
-    layoutProperty->UpdateShowHighlightBorder(false);
-    pattern->UpdateCounterMargin();
-
-    layoutProperty->UpdateSetCounter(1);
-    pattern->UpdateCounterMargin();
-
-    MarginProperty mp;
-    mp.SetEdges(CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f));
-    layoutProperty->UpdateMargin(mp);
-    pattern->UpdateCounterMargin();
-}
-
-/**
  * @tc.name: CleanCounterNode001
  * @tc.desc: test testInput text CleanCounterNode
  * @tc.type: FUNC
@@ -445,9 +410,9 @@ HWTEST_F(TextFieldPatternTestFour, PerformAction001, TestSize.Level0)
     auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     pattern->focusIndex_ = FocuseIndex::TEXT;
-    Recorder::EventSwitch es;
-    es.componentEnable = true;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(es);
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     pattern->PerformAction(TextInputAction::DONE);
     eventHub->SetOnSubmit([](int32_t, NG::TextFieldCommonEvent& event) {
         event.SetKeepEditable(false);
@@ -483,9 +448,9 @@ HWTEST_F(TextFieldPatternTestFour, RecordSubmitEvent001, TestSize.Level0)
     ASSERT_NE(layoutProperty, nullptr);
     auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    Recorder::EventSwitch es;
-    es.componentEnable = true;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(es);
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     pattern->RecordSubmitEvent();
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
     pattern->RecordSubmitEvent();

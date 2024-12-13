@@ -311,7 +311,7 @@ HWTEST_F(GridIrregularFillerTest, Fill001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo9());
-    CreateGridItems(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateGridItems(10, ITEM_MAIN_SIZE, NULL_VALUE, GridItemStyle::NONE);
     CreateDone();
 
     GridLayoutInfo info;
@@ -339,7 +339,7 @@ HWTEST_F(GridIrregularFillerTest, Fill002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo11());
-    CreateGridItems(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateGridItems(10, ITEM_MAIN_SIZE, NULL_VALUE, GridItemStyle::NONE);
     CreateDone();
 
     GridLayoutInfo info;
@@ -375,9 +375,11 @@ HWTEST_F(GridIrregularFillerTest, Fill002, TestSize.Level1)
 HWTEST_F(GridIrregularFillerTest, Fill003, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
+    ViewAbstract::SetWidth(CalcLength(480.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo5());
-    CreateFixedItems(11);
+    CreateGridItems(11, 120.0f, 200.0f);
     CreateDone();
 
     GridLayoutInfo info;
@@ -416,8 +418,10 @@ HWTEST_F(GridIrregularFillerTest, Fill003, TestSize.Level1)
 HWTEST_F(GridIrregularFillerTest, Fill004, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
+    ViewAbstract::SetWidth(CalcLength(480.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
     model.SetLayoutOptions(GetOptionDemo2());
-    CreateFixedItems(8);
+    CreateGridItems(8, 120.0f, 200.0f);
     model.SetColumnsTemplate("1fr 1fr 1fr");
     CreateDone();
 
@@ -452,8 +456,10 @@ HWTEST_F(GridIrregularFillerTest, Fill004, TestSize.Level1)
 HWTEST_F(GridIrregularFillerTest, Fill005, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
+    ViewAbstract::SetWidth(CalcLength(480.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
     model.SetLayoutOptions(GetOptionDemo10());
-    CreateFixedItems(8);
+    CreateGridItems(8, 120.0f, 200.0f);
     model.SetColumnsTemplate("1fr 1fr 1fr");
     CreateDone();
 
@@ -521,7 +527,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureBackward001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo8());
-    CreateGridItems(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
+    CreateGridItems(10, ITEM_MAIN_SIZE, NULL_VALUE, GridItemStyle::NONE);
     CreateDone();
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));

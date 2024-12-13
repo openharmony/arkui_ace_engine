@@ -36,229 +36,78 @@ public:
     CustomNodeBase() = default;
     ~CustomNodeBase() override;
 
-    void FireOnAppear()
-    {
-        if (appearFunc_) {
-            appearFunc_();
-        }
-        executeFireOnAppear_ = true;
-    }
-
-    void FireOnDisappear()
-    {
-        if (destroyFunc_) {
-            destroyFunc_();
-        }
-    }
-
-    void FireDidBuild()
-    {
-        if (didBuildFunc_) {
-            didBuildFunc_();
-        }
-    }
-
-    virtual void SetRenderFunction(const RenderFunction& renderFunction) {}
-
-    void SetAppearFunction(std::function<void()>&& appearFunc)
-    {
-        appearFunc_ = std::move(appearFunc);
-    }
-
-    void SetDidBuildFunction(std::function<void()>&& didBuildFunc)
-    {
-        didBuildFunc_ = std::move(didBuildFunc);
-    }
-
-    void SetUpdateFunction(std::function<void()>&& updateFunc)
-    {
-        updateFunc_ = std::move(updateFunc);
-    }
-
-    void SetDestroyFunction(std::function<void()>&& destroyFunc)
-    {
-        destroyFunc_ = std::move(destroyFunc);
-    }
-
-    void SetReloadFunction(std::function<void(bool)>&& reloadFunc)
-    {
-        reloadFunc_ = std::move(reloadFunc);
-    }
-
-    void FireReloadFunction(bool deep)
-    {
-        if (reloadFunc_) {
-            reloadFunc_(deep);
-        }
-    }
-
+    virtual void SetRenderFunction(const RenderFunction& renderFunction) {};
     virtual void SetCompleteReloadFunc(RenderFunction&& func) = 0;
 
-    void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc)
-    {
-        pageTransitionFunc_ = std::move(pageTransitionFunc);
-    }
+    // called for Component Info
+    void SetJSViewName(std::string&& name);
+    std::string& GetJSViewName();
 
-    void CallPageTransitionFunction() const
-    {
-        if (pageTransitionFunc_) {
-            pageTransitionFunc_();
-        }
-    }
+    void SetIsV2(bool isV2);
+    bool GetIsV2();
 
-    void SetForceUpdateNodeFunc(std::function<void(int32_t)>&& forceNodeUpdateFunc)
-    {
-        forceNodeUpdateFunc_ = std::move(forceNodeUpdateFunc);
-    }
+    void SetThisFunc(std::function<void*()>&& getThisFunc);
+    void* FireThisFunc();
 
-    void FireNodeUpdateFunc(ElementIdType id)
-    {
-        if (forceNodeUpdateFunc_) {
-            forceNodeUpdateFunc_(id);
-        } else {
-            LOGE("fail to find node update func to execute %{public}d node update", id);
-        }
-    }
+    // called for Component life Cycle
+    void Reset();
+    void SetAppearFunction(std::function<void()>&& appearFunc);
+    void FireOnAppear();
+    bool CheckFireOnAppear();
 
-    void SetHasNodeUpdateFunc(std::function<bool(int32_t)>&& hasNodeUpdateFunc)
-    {
-        hasNodeUpdateFunc_ = std::move(hasNodeUpdateFunc);
-    }
+    void SetDidBuildFunction(std::function<void()>&& didBuildFunc);
+    void FireDidBuild();
 
-    bool FireHasNodeUpdateFunc(ElementIdType id)
-    {
-        return hasNodeUpdateFunc_ && hasNodeUpdateFunc_(id);
-    }
+    void SetDestroyFunction(std::function<void()>&& destroyFunc);
+    void FireOnDisappear();
 
+    // called for Component update
+    void SetUpdateFunction(std::function<void()>&& updateFunc);
+    void SetForceUpdateNodeFunc(std::function<void(int32_t)>&& forceNodeUpdateFunc);
+    void FireNodeUpdateFunc(ElementIdType id);
+
+    void SetHasNodeUpdateFunc(std::function<bool(int32_t)>&& hasNodeUpdateFunc);
+    bool FireHasNodeUpdateFunc(ElementIdType id);
+
+    void SetReloadFunction(std::function<void(bool)>&& reloadFunc);
+    void FireReloadFunction(bool deep);
+
+    void Update();  // called by pipeline in js thread of update.
+    void MarkNeedUpdate();   // called by view in js thread
+
+    // called for Component reuse
+    void ResetRecycle();
+    void SetOnRecycleFunc(std::function<void()>&& func);
     void FireRecycleSelf();
 
-    void SetRecycleFunction(std::function<void(RefPtr<CustomNodeBase>)>&& recycleCustomNode)
-    {
-        recycleCustomNodeFunc_ = std::move(recycleCustomNode);
-    }
-
-    void SetRecycleRenderFunc(std::function<void()>&& func)
-    {
-        recycleRenderFunc_ = std::move(func);
-    }
-
-    void FireRecycleRenderFunc();
-
-    bool HasRecycleRenderFunc()
-    {
-        return recycleRenderFunc_ != nullptr;
-    }
-
-    void ResetRecycle()
-    {
-        recycleRenderFunc_ = nullptr;
-    }
-
-    void SetSetActiveFunc(std::function<void(bool)>&& func)
-    {
-        setActiveFunc_ = std::move(func);
-    }
-
-    void SetOnDumpInfoFunc(std::function<void(const std::vector<std::string>&)>&& func);
-
-    void FireSetActiveFunc(bool active)
-    {
-        if (setActiveFunc_) {
-            setActiveFunc_(active);
-        }
-    }
-
-    void FireOnDumpInfoFunc(const std::vector<std::string>& params)
-    {
-        if (onDumpInfoFunc_) {
-            onDumpInfoFunc_(params);
-        }
-    }
-
-    void Reset()
-    {
-        updateFunc_ = nullptr;
-        appearFunc_ = nullptr;
-        destroyFunc_ = nullptr;
-        didBuildFunc_ = nullptr;
-    }
-
-    // called by view in js thread
-    void MarkNeedUpdate();
-
-    // called by pipeline in js thread of update.
-    void Update();
-
-    void SetJSViewName(std::string&& name)
-    {
-        jsViewName_ = name;
-    }
-
-    std::string& GetJSViewName()
-    {
-        return jsViewName_;
-    }
-
-    void SetExtraInfo(const ExtraInfo extraInfo)
-    {
-        extraInfo_ = std::move(extraInfo);
-    }
-
-    bool GetIsV2()
-    {
-        return isV2_;
-    }
-
-    void SetIsV2(bool isV2)
-    {
-        isV2_ = isV2;
-    }
-
-    const ExtraInfo& GetExtraInfo() const
-    {
-        return extraInfo_;
-    }
-
-    bool HasExtraInfo() {
-        if (!extraInfo_.page.empty()) {
-            return true;
-        }
-        return false;
-    }
-
-    void SetThisFunc(std::function<void*()>&& getThisFunc)
-    {
-        getThisFunc_ = std::move(getThisFunc);
-    }
-
-    void* FireThisFunc()
-    {
-        if (getThisFunc_) {
-            return getThisFunc_();
-        }
-        return nullptr;
-    }
-
-    void SetOnDumpInspectorFunc(std::function<std::string()>&& func);
-
-    std::string FireOnDumpInspectorFunc()
-    {
-        if (onDumpInspectorFunc_) {
-            return onDumpInspectorFunc_();
-        }
-        return "";
-    }
-
-    bool CheckFireOnAppear()
-    {
-        return executeFireOnAppear_;
-    }
-
-    // used By BuilderNode
-    void SetOnRecycleFunc(std::function<void()>&& func);
+    void SetRecycleFunction(std::function<void(RefPtr<CustomNodeBase>)>&& recycleCustomNode);
     void FireOnRecycleFunc();
+
+    void SetRecycleRenderFunc(std::function<void()>&& func);
+    void FireRecycleRenderFunc();
+    bool HasRecycleRenderFunc();
+
     void SetOnReuseFunc(std::function<void(void*)>&& func);
     void FireOnReuseFunc(void* params);
+
+    // called for Component freezing
+    void SetSetActiveFunc(std::function<void(bool)>&& func);
+    void FireSetActiveFunc(bool active);
+
+    // called for DFX
+    void SetExtraInfo(const ExtraInfo extraInfo);
+    const ExtraInfo& GetExtraInfo() const;
+    bool HasExtraInfo();
+
+    void SetOnDumpInfoFunc(std::function<void(const std::vector<std::string>&)>&& func);
+    void FireOnDumpInfoFunc(const std::vector<std::string>& params);
+
+    void SetOnDumpInspectorFunc(std::function<std::string()>&& func);
+    std::string FireOnDumpInspectorFunc();
+
+    // called for PageTransition animation
+    void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc);
+    void CallPageTransitionFunction() const;
         
 protected:
     std::string jsViewName_;

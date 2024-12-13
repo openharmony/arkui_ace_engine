@@ -79,9 +79,11 @@ void SelectContentOverlayPattern::CancelHiddenHandleTask()
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     UpdateHandleHotZone();
-    host->GetOrCreateGestureEventHub()->SetHitTestMode(info_->hitTestMode);
-    host->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent_);
-    host->GetOrCreateGestureEventHub()->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->SetHitTestMode(info_->hitTestMode);
+    gestureEventHub->AddClickEvent(clickEvent_);
+    gestureEventHub->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -183,7 +185,9 @@ bool SelectContentOverlayPattern::UpdateHandleHotZoneWithPoint()
     if (IsCustomMenu()) {
         AddMenuResponseRegion(responseRegion);
     }
-    host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, false);
+    gestureEventHub->SetResponseRegion(responseRegion);
     return true;
 }
 
@@ -195,7 +199,9 @@ void SelectContentOverlayPattern::UpdateHandleHotRegion(RectF& hotRegion, const 
     DimensionRect newRegion = ConvertToHotRect(hotRegion);
     std::vector<DimensionRect> responseRegion;
     responseRegion.emplace_back(newRegion);
-    host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->SetResponseRegion(responseRegion);
 }
 
 DimensionRect SelectContentOverlayPattern::ConvertToHotRect(const RectF& rect)

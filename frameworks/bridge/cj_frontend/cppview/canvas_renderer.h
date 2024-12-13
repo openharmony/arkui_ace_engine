@@ -67,7 +67,11 @@ public:
     void SetShadowOffsetY(double offsetY);
     void SetImageSmoothingEnabled(bool enabled);
     void SetImageSmoothingQuality(const std::string& quality);
-
+    void RestoreLayer();
+    void SaveLayer();
+    void SetFilter(const std::string& value);
+    double GetWidth();
+    double GetHeight();
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
     void ClearRect(const Rect& rect);

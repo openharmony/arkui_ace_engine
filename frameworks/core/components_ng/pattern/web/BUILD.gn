@@ -45,6 +45,8 @@ build_component_ng("web_pattern_ng") {
       "ability_runtime:app_manager",
       "app_file_service:fileuri_native",
       "c_utils:utils",
+      "graphic_2d:EGL",
+      "graphic_2d:GLESv3",
       "graphic_2d:librender_service_client",
       "imf:inputmethod_client",
       "init:libbegetutil",
