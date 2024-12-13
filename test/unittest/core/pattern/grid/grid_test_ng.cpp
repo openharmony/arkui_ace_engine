@@ -305,7 +305,7 @@ protected:
     {
         GridItemModelNG itemModel;
         itemModel.Create(GridItemStyle::NONE);
-        ViewAbstract::SetWidth(CalcLength(FILL_VALUE));
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
         ViewAbstract::SetFocusable(true);
         auto node = ViewStackProcessor::GetInstance()->Finish();

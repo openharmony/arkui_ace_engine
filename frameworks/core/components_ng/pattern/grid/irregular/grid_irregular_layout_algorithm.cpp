@@ -444,10 +444,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
             }
             offset += OffsetF { padding.left.value_or(0.0f), 0.0f };
             child->GetGeometryNode()->SetMarginFrameOffset(offset + alignPos);
-            if (isCache) {
-                continue;
-            }
-            if (child->CheckNeedForceMeasureAndLayout()) {
+            if (!isCache && child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
