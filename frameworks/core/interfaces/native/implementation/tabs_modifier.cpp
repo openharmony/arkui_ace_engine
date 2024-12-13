@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/implementation/tab_content_transition_proxy_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -103,6 +104,10 @@ TabsOptions Convert(const Ark_TabsOptions& src)
         .controllerOpt = OptConvert<GeneratedModifier::TabsControllerPeerImpl *>(src.controller),
     };
 }
+}
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor();
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -370,7 +375,22 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCustomAnimation = [frameNode](int32_t from, int32_t to) {
+
+    auto accessor = GetTabContentTransitionProxyAccessor();
+    CHECK_NULL_VOID(accessor && accessor->ctor);
+    auto peer = (*accessor->ctor)();
+    CHECK_NULL_VOID(peer);
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::TabContentTransitionProxyPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImplPtr);
+
+    RefPtr<TabContentTransitionProxy> internalController;
+    internalController = new TabContentTransitionProxy();
+    CHECK_NULL_VOID(internalController);
+    peerImplPtr->AddTargetController(internalController);
+
+    auto onCustomAnimation = [frameNode, peerImplPtr](int32_t from, int32_t to) {
+        peerImplPtr->SetFrom(from);
+        peerImplPtr->SetTo(to);
         GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->customContentTransition(frameNode->GetId(),
             Converter::ArkValue<Ark_Number>(from), Converter::ArkValue<Ark_Number>(to));
         TabContentAnimatedTransition result;
