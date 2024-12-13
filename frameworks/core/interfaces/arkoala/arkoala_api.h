@@ -3006,6 +3006,8 @@ struct ArkUINavDestinationModifier {
     void (*resetMenus)(ArkUINodeHandle node);
     void (*setMenuItemAction)(ArkUINodeHandle node, void* action, ArkUI_Uint32 index);
     void (*setMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
+    void (*setNavDestinationSystemTransition)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetNavDestinationSystemTransition)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {

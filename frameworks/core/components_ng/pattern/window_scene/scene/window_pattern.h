@@ -96,6 +96,8 @@ protected:
 private:
     void UpdateSnapshotWindowProperty();
     bool CheckAndAddStartingWindowAboveLocked();
+    void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
+        Color &color, ImageSourceInfo &sourceInfo);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
 

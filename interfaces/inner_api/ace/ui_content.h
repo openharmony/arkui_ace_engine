@@ -306,6 +306,23 @@ public:
         return false;
     }
 
+    virtual void EnableContainerModalGesture(bool isEnable) {};
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
+
     virtual void SubscribeContainerModalButtonsRectChange(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) {}
 

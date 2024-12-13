@@ -1211,6 +1211,11 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
    // cross platform is not support now;
 }
 
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
+{
+   // cross platform is not support now;
+}
+
 void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
 {
     // cross platform is not support now;

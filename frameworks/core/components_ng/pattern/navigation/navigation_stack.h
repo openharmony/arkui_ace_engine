@@ -153,7 +153,7 @@ public:
     virtual void Clear();
     virtual void UpdateReplaceValue(int32_t replaceValue) const;
     virtual int32_t GetReplaceValue() const;
-    virtual RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode);
+    virtual bool CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node);
     virtual bool GetDisableAnimation() const
     {
@@ -180,7 +180,6 @@ public:
 
     virtual void OnAttachToParent(RefPtr<NavigationStack> parent) {}
     virtual void OnDetachFromParent() {}
-    virtual void ClearPreBuildNodeList() {}
 
     virtual std::vector<std::string> DumpStackInfo() const;
 
@@ -196,6 +195,14 @@ public:
     {
         navigationNode_ = navigationNode;
     }
+
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    void SetLastNavPathList(const NavPathList& navPathList)
+    {
+        lastNavPathList_ = navPathList;
+    }
+    bool isLastListContains(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+#endif
 
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
     virtual void RecoveryNavigationStack() {}
@@ -229,6 +236,10 @@ protected:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    // backup NavPathList before push or pop
+    NavPathList lastNavPathList_;
+#endif
     // recovery NavPathList
     NavPathList recoveryList_;
     NavPathList cacheNodes_;

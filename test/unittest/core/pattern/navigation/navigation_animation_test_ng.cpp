@@ -452,4 +452,168 @@ HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
     navDestinationNode->ReleaseTextNodeList();
     ASSERT_EQ(navDestinationNode->textNodeList_.size(), 0);
 }
+
+/**
+ * @tc.name: BackButtonOpacityAnimation
+ * @tc.desc: Test NavDestinationGroupNode::BackButtonAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, OpacityAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBar = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navDestinationNode->titleBarNode_ = titleBar;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    ASSERT_NE(titleBarNode->GetBackButton(), nullptr);
+    navDestinationNode->BackButtonAnimation(false);
+    navDestinationNode->BackButtonAnimation(true);
+}
+
+/**
+ * @tc.name: TitleOpacityAnimation
+ * @tc.desc: Test NavDestinationGroupNode::TitleOpacityAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, OpacityAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBar = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navDestinationNode->titleBarNode_ = titleBar;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    navDestinationNode->TitleOpacityAnimation(false);
+    navDestinationNode->TitleOpacityAnimation(true);
+}
+
+/**
+ * @tc.name: IsNeedContentTransition
+ * @tc.desc: Test NavDestinationGroupNode::IsNeedContentTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, IsNeedContentTransition001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 66, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::DEFAULT);
+    bool ret = navDestinationNode->IsNeedContentTransition();
+    ASSERT_EQ(ret, true);
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
+    ret = navDestinationNode->IsNeedContentTransition();
+    ASSERT_EQ(ret, true);
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
+    ret = navDestinationNode->IsNeedContentTransition();
+    ASSERT_EQ(ret, true);
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::NONE);
+    ret = navDestinationNode->IsNeedContentTransition();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TransitionContentInValid
+ * @tc.desc: Test NavDestinationGroupNode::TransitionContentInValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, TransitionContentInValid001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 66, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::NONE);
+    bool ret = navDestinationNode->TransitionContentInValid();
+    ASSERT_EQ(ret, true);
+
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
+    ret = navDestinationNode->TransitionContentInValid();
+    ASSERT_EQ(ret, false);
+
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
+    ret = navDestinationNode->TransitionContentInValid();
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsNeedTitleTransition
+ * @tc.desc: Test NavDestinationGroupNode::IsNeedTitleTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, IsNeedTitleTransition001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 66, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::DEFAULT);
+    bool ret = navDestinationNode->IsNeedTitleTransition();
+    ASSERT_EQ(ret, true);
+
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::TITLE);
+    ret = navDestinationNode->IsNeedTitleTransition();
+    ASSERT_EQ(ret, true);
+
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::TITLE);
+    ret = navDestinationNode->IsNeedTitleTransition();
+    ASSERT_EQ(ret, false);
+
+    navDestinationNode->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navDestinationNode->SetSystemTransitionType(NavigationSystemTransitionType::NONE);
+    ret = navDestinationNode->IsNeedTitleTransition();
+    ASSERT_EQ(ret, false);
+}
 }; // namespace OHOS::Ace::NG

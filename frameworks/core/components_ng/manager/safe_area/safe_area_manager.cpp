@@ -166,14 +166,21 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
     return true;
 }
 
-bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
+bool SafeAreaManager::SetKeyBoardAvoidMode(KeyBoardAvoidMode value)
 {
-    if (keyboardSafeAreaEnabled_ == value) {
+    if (keyboardAvoidMode_ == value) {
         return false;
     }
-    keyboardSafeAreaEnabled_ = value;
-    LOGI("SafeAreaManager::SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
+    keyboardAvoidMode_ = value;
+    keyboardSafeAreaEnabled_ = keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE
+        || keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET;
+    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardAvoidMode_);
     return true;
+}
+
+KeyBoardAvoidMode SafeAreaManager::GetKeyBoardAvoidMode()
+{
+    return keyboardAvoidMode_;
 }
 
 bool SafeAreaManager::SetIsAtomicService(bool value)
@@ -223,6 +230,36 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+}
+
+PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
+{
+    if (!withoutProcess) {
+#ifdef PREVIEW
+        if (ignoreSafeArea_) {
+            return {};
+        }
+#else
+        if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
+            return {};
+        }
+#endif
+    }
+    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    PaddingPropertyF result;
+    if (combinedSafeArea.left_.IsValid()) {
+        result.left = combinedSafeArea.left_.Length();
+    }
+    if (combinedSafeArea.top_.IsValid()) {
+        result.top = combinedSafeArea.top_.Length();
+    }
+    if (combinedSafeArea.right_.IsValid()) {
+        result.right = combinedSafeArea.right_.Length();
+    }
+    if (combinedSafeArea.bottom_.IsValid()) {
+        result.bottom = combinedSafeArea.bottom_.Length();
+    }
+    return result;
 }
 
 float SafeAreaManager::GetKeyboardOffset() const

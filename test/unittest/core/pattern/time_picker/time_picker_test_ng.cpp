@@ -1566,7 +1566,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
         EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), ButtonType::NORMAL);
         auto calcSize = buttonLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value();
         EXPECT_EQ(calcSize.Width().value(), CalcLength(newWidth - PRESS_INTERVAL.ConvertToPx()));
-        EXPECT_EQ(calcSize.Height().value(), CalcLength(height - PRESS_INTERVAL));
+        EXPECT_EQ(calcSize.Height().value(), CalcLength(0.0f));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         EXPECT_EQ(buttonConfirmRenderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
     }

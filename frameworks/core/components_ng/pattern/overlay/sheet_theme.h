@@ -23,6 +23,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SHEET_BLANK_MINI_HEIGHT = 8.0_vp;
+constexpr Dimension SHEET_HOVERMODE_UP_HEIGHT = 40.0_vp;
+constexpr Dimension SHEET_HOVERMODE_DOWN_HEIGHT = 28.0_vp;
 constexpr Dimension SHEET_BLANK_FLOATING_STATUS_BAR = 32.0_vp;
 constexpr Dimension SHEET_SPLIT_AI_BAR = 24.0_vp;
 constexpr Dimension SHEET_SPLIT_STATUS_BAR = 24.0_vp;

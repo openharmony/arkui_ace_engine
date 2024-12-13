@@ -13,20 +13,26 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class BasicPrefetcher implements IPrefetcher {
-  private readonly prefetcher = new Prefetcher(new PrefetchRangeEvaluator(), new DefaultTimeProvider());
+  private readonly fetchingDriver: FetchingDriver;
 
   constructor(ds?: IDataSourcePrefetching) {
-    if (ds) {
-      this.prefetcher.setDataSource(ds);
-    }
+    const itemsOnScreen = new ItemsOnScreenProvider();
+    const fetchedRegistry = new FetchedRegistry();
+    const fetchingRegistry = new FetchingRegistry();
+    const prefetchRangeRatio = new PrefetchRangeRatio(itemsOnScreen, fetchedRegistry, fetchingRegistry);
+    const prefetchCount = new PrefetchCount(itemsOnScreen, prefetchRangeRatio);
+    const evaluator = new FetchingRangeEvaluator(itemsOnScreen, prefetchCount, prefetchRangeRatio, fetchedRegistry);
+    this.fetchingDriver = new FetchingDriver(fetchedRegistry, fetchingRegistry, evaluator, new DefaultTimeProvider());
+    this.fetchingDriver.setDataSource(ds);
   }
 
   setDataSource(ds: IDataSourcePrefetching): void {
-    this.prefetcher.setDataSource(ds);
+    this.fetchingDriver.setDataSource(ds);
   }
 
   visibleAreaChanged(minVisible: number, maxVisible: number): void {
-    this.prefetcher.visibleAreaChanged(minVisible, maxVisible);
+    this.fetchingDriver.visibleAreaChanged(minVisible, maxVisible);
   }
 }

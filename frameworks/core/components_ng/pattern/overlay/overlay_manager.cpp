@@ -1204,7 +1204,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
 
-    if (wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+    if (wrapperPattern->IsHide()) {
         return;
     }
 
@@ -4380,7 +4380,8 @@ void OverlayManager::PlaySheetTransition(
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = 0.0f;
-        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+        auto sheetType = sheetPattern->GetSheetType();
+        if (sheetType == SheetType::SHEET_POPUP || sheetPattern->IsCurSheetNeedHalfFoldHover()) {
             offset = sheetPattern->GetSheetOffset();
         } else {
             offset = sheetMaxHeight - sheetHeight_;

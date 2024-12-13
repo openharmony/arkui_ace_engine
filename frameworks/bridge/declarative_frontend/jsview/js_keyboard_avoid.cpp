@@ -21,7 +21,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
-const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE };
+const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE,
+    KeyBoardAvoidMode::OFFSET_WITH_CARET, KeyBoardAvoidMode::RESIZE_WITH_CARET };
 
 void JSKeyboardAvoid::SetKeyboardAvoidMode(const JSCallbackInfo& info)
 {
@@ -31,27 +32,35 @@ void JSKeyboardAvoid::SetKeyboardAvoidMode(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsNumber()) {
-        pipeline->SetEnableKeyBoardAvoidMode(false);
+        pipeline->SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
         return;
     }
     auto index = info[0]->ToNumber<int32_t>();
     if (index < 0 || index >= static_cast<int32_t>(KEYBOARD_AVOID_MODES.size())) {
         return;
     }
-    if (KEYBOARD_AVOID_MODES[index] == KeyBoardAvoidMode::RESIZE) {
-        pipeline->SetEnableKeyBoardAvoidMode(true);
-    } else {
-        pipeline->SetEnableKeyBoardAvoidMode(false);
-    }
+    pipeline->SetEnableKeyBoardAvoidMode(KEYBOARD_AVOID_MODES[index]);
 }
 
 void JSKeyboardAvoid::GetKeyboardAvoidMode(const JSCallbackInfo& info)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto mode = pipeline->GetEnableKeyBoardAvoidMode();
     auto obj = "KeyBoardAvoidMode.OFFSET";
-    if (pipeline->IsEnableKeyBoardAvoidMode()) {
-        obj =  "KeyBoardAvoidMode.RESIZE";
+    switch (mode) {
+        case KeyBoardAvoidMode::OFFSET_WITH_CARET:
+            obj = "KeyBoardAvoidMode.OFFSET_WITH_CARET";
+            break;
+        case KeyBoardAvoidMode::RESIZE:
+            obj = "KeyBoardAvoidMode.RESIZE";
+            break;
+        case KeyBoardAvoidMode::RESIZE_WITH_CARET:
+            obj = "KeyBoardAvoidMode.RESIZE_WITH_CARET";
+            break;
+        case KeyBoardAvoidMode::OFFSET:
+        default:
+            break;
     }
     auto returnValue = JSVal(ToJSValue(obj));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);

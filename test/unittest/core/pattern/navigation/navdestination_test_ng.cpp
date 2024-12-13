@@ -726,6 +726,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
 }
 
 /**
+<<<<<<< HEAD
  * @tc.name: SetTitlebarOptions001
  * @tc.desc: Test SetTitlebarOptions function.
  * @tc.type: FUNC
@@ -817,5 +818,26 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
 
     EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
     EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
+}
+
+/*
+ * @tc.name: SetSystemTransitionType001
+ * @tc.desc: Test SetTitlebarOptions function with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetSystemTransitionType001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    navDestinationModelNG.SetSystemTransitionType(NavigationSystemTransitionType::DEFAULT);
+    EXPECT_EQ(navDestinationGroupNode->GetSystemTransitionType(), NavigationSystemTransitionType::DEFAULT);
+
+    navDestinationModelNG.SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
+    EXPECT_EQ(navDestinationGroupNode->GetSystemTransitionType(), NavigationSystemTransitionType::CONTENT);
 }
 } // namespace OHOS::Ace::NG

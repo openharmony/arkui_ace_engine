@@ -144,6 +144,12 @@ public:
     static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);
+    static void SetSafeAreaPadding(const CalcLength& value);
+    static void SetSafeAreaPadding(const PaddingProperty& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void ResetSafeAreaPadding();
+    static void ResetSafeAreaPadding(FrameNode* frameNode);
     static void SetMargin(const CalcLength &value);
     static void SetMargin(const PaddingProperty &value);
     static void SetBorderRadius(const BorderRadiusProperty &value);
