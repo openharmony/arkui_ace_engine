@@ -280,22 +280,23 @@ RefPtr<OverlayManager> SheetManager::GetOverlayFromPage(int32_t rootNodeId, Root
     return nullptr;
 }
 
-void SheetManager::RemoveSheetByESC()
+bool SheetManager::RemoveSheetByESC()
 {
     if (!sheetFocusId_.has_value()) {
         TAG_LOGE(AceLogTag::ACE_SHEET, "focus sheet id is null, can't respond to esc");
-        return;
+        return false;
     }
     auto sheetNode = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetFocusId_.value());
-    CHECK_NULL_VOID(sheetNode);
+    CHECK_NULL_RETURN(sheetNode, false);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
+    CHECK_NULL_RETURN(sheetPattern, false);
     if (sheetPattern->GetAnimationProcess()) {
         TAG_LOGW(AceLogTag::ACE_SHEET, "sheet is closing by esc");
-        return;
+        return false;
     }
     auto overlayManager = sheetPattern->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->RemoveModalInOverlay();
+    CHECK_NULL_RETURN(overlayManager, false);
+    TAG_LOGI(AceLogTag::ACE_SHEET, "sheet will colse by esc, id is : %{public}d", sheetFocusId_.value());
+    return overlayManager->RemoveModalInOverlay();
 }
 } // namespace OHOS::Ace::NG

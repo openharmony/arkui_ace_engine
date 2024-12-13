@@ -18,6 +18,7 @@
 #include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -557,7 +558,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
             return overlayManager->RemoveOverlayInSubwindow();
         } else {
-            return overlayManager->RemoveOverlay(false);
+            return overlayManager->RemoveOverlay(false) || SheetManager::GetInstance().RemoveSheetByESC();
         }
     }
     return false;
