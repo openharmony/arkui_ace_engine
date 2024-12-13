@@ -131,6 +131,7 @@ const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
 const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
+constexpr int32_t MAX_FILL_CONTENT_SIZE = 5;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
 const std::string PREVIEW_STYLE_NORMAL = "normal";
@@ -348,6 +349,9 @@ void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
     auto barRegionSize = mainSize;
     double estimatedHeight = inlineMeasureItem_.inlineContentRectHeight;
+    if (NearZero(estimatedHeight) || NearZero(estimatedHeight - mainSize)) {
+        return;
+    }
     double activeSize = barRegionSize * mainSize / estimatedHeight - scrollBar->GetOutBoundary();
     auto offsetScale = 0.0f;
     if (NearEqual(mainSize, estimatedHeight)) {
@@ -614,7 +618,7 @@ void TextFieldPattern::SetAccessibilityClearAction()
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                        (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && HasText());
     textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
 }
 
@@ -740,7 +744,6 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 #endif
 }
 
-// return: true if text rect offset will NOT be further changed by caret position
 void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
 {
     auto focusHub = GetFocusHub();
@@ -1103,6 +1106,9 @@ void TextFieldPattern::CursorMove(CaretMoveIntent direction)
             CursorMoveEnd();
             break;
         }
+        default: {
+            TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Unsupported operation of CursorMove for text field");
+        }
     }
 }
 
@@ -1406,7 +1412,7 @@ void TextFieldPattern::HandleOnUndoAction()
         redoOperationRecords_.erase(redoOperationRecords_.begin());
     }
     redoOperationRecords_.push_back(value);
-    auto textEditingValue = operationRecords_.back(); // record应该包含光标、select状态、文本
+    auto textEditingValue = operationRecords_.back(); // each record includes text and caret
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->MoveCaretToContentRect(textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
     auto tmpHost = GetHost();
@@ -1677,7 +1683,9 @@ void TextFieldPattern::StripNextLine(std::wstring& data)
         }
         dataPtr++;
     }
-    CHECK_NULL_VOID(dataChanged);
+    if (!dataChanged) {
+        return;
+    }
     data = result;
 }
 
@@ -1913,7 +1921,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
     } else {
         UpdateContentScroller(touchOffset);
         selectController_->UpdateCaretInfoByOffset(touchOffset, false);
-        if (magnifierController_ && IsOperation()) {
+        if (magnifierController_ && HasText()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
         StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
@@ -2345,6 +2353,8 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(selectOverlay_);
+    CHECK_NULL_VOID(multipleClickRecognizer_);
     if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) || !focusHub->IsFocusable()) {
         return;
     }
@@ -2370,10 +2380,11 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
     lastClickTimeStamp_ = info.GetTimeStamp();
     multipleClickRecognizer_->Start(info);
+    // register click event
     if (multipleClickRecognizer_->IsTripleClick()) {
-        HandleTripleClickEvent(info);  // triple click event
+        HandleTripleClickEvent(info);
     } else if (multipleClickRecognizer_->IsDoubleClick()) {
-        HandleDoubleClickEvent(info); // 注册手势事件
+        HandleDoubleClickEvent(info);
     } else {
         HandleSingleClickEvent(info, firstGetFocus);
     }
@@ -2403,6 +2414,7 @@ bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
 bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
 {
     if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        CHECK_NULL_RETURN(selectOverlay_, false);
         // click selected area to switch show/hide state
         selectOverlay_->ToggleMenu();
         return true;
@@ -3377,7 +3389,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto end = selectController_->GetEndIndex();
     CloseSelectOverlay();
     longPressFingerNum_ = info.GetFingerList().size();
-    if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
+    if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     StartGestureSelection(start, end, localOffset);
@@ -7306,7 +7318,7 @@ bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue
             if (strKey.empty()) {
                 continue;
             }
-            if (map.size() < 5) {
+            if (map.size() < MAX_FILL_CONTENT_SIZE) {
                 map.insert(std::pair<std::string, std::variant<std::string, bool, int32_t> >(strKey, strVal));
             } else {
                 TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
@@ -8691,7 +8703,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset)
 {
-    if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
+    if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
         contentScroller_.updateMagniferEpsilon = 0.0f - contentScroller_.updateMagniferEpsilon;
         magnifierController_->SetLocalOffset(
             { localOffset.GetX(), localOffset.GetY() + contentScroller_.updateMagniferEpsilon });

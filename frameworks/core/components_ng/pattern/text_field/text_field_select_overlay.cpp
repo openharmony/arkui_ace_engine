@@ -170,39 +170,36 @@ std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetFirstHandleInfo()
     if (IsSingleHandle()) {
         return std::nullopt;
     }
-    auto handleRect = GetFirstHandleLocalPaintRect();
+    auto handleRect = GetHandleLocalPaintRect(DragHandleIndex::FIRST);
     return GetHandleInfo(handleRect);
 }
 
 std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetSecondHandleInfo()
 {
-    auto handleRect = GetSecondHandleLocalPaintRect();
+    auto handleRect = GetHandleLocalPaintRect(DragHandleIndex::SECOND);
     return GetHandleInfo(handleRect);
 }
 
-RectF TextFieldSelectOverlay::GetFirstHandleLocalPaintRect()
+RectF TextFieldSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, RectF());
     auto controller = pattern->GetTextSelectController();
     CHECK_NULL_RETURN(controller, RectF());
-    return controller->GetFirstHandleRect();
-}
-
-RectF TextFieldSelectOverlay::GetSecondHandleLocalPaintRect()
-{
-    auto pattern = GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, RectF());
-    auto controller = pattern->GetTextSelectController();
-    CHECK_NULL_RETURN(controller, RectF());
-    if (IsSingleHandle()) {
-        return controller->GetCaretInfo().originalRect;
+    if (dragHandleIndex == DragHandleIndex::FIRST) {
+        return controller->GetFirstHandleRect();
+    } else if (dragHandleIndex == DragHandleIndex::SECOND) {
+        if (IsSingleHandle()) {
+            return controller->GetCaretInfo().originalRect;
+        }
+        auto handleRect = controller->GetSecondHandleRect();
+        auto contentHeight = pattern->GetTextContentRect().Height();
+        auto handleHeight = std::min(handleRect.Height(), contentHeight);
+        handleRect.SetHeight(handleHeight);
+        return handleRect;
+    } else { // DragHandleIndex::NONE
+        return RectF();
     }
-    auto handleRect = controller->GetSecondHandleRect();
-    auto contentHeight = pattern->GetTextContentRect().Height();
-    auto handleHeight = std::min(handleRect.Height(), contentHeight);
-    handleRect.SetHeight(handleHeight);
-    return handleRect;
 }
 
 std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetHandleInfo(const RectF& handlePaintRect)
@@ -273,7 +270,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto hasText = pattern->IsOperation();
+    auto hasText = pattern->HasText();
     if ((dirtyFlag & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
         menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
         return;
@@ -320,9 +317,7 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasMaxLines()) {
         uint32_t maxLine = layoutProperty->GetMaxLinesValue(Infinity<uint32_t>());
-        if (1 == maxLine) {
-            overlayInfo.isSingleLine = true;
-        }
+        overlayInfo.isSingleLine = (maxLine == 1);
     }
     if (!textFieldPattern->IsTextArea()) {
         overlayInfo.checkHandleReverse = [](const RectF& first, const RectF& second) {
@@ -361,8 +356,10 @@ std::string TextFieldSelectOverlay::GetSelectedText()
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, "");
-    auto start = pattern->GetTextSelectController()->GetStartIndex();
-    auto end = pattern->GetTextSelectController()->GetEndIndex();
+    auto textSelectController = pattern->GetTextSelectController();
+    CHECK_NULL_RETURN(textSelectController, "");
+    auto start = textSelectController->GetStartIndex();
+    auto end = textSelectController->GetEndIndex();
     return UtfUtils::Str16ToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
 }
 
@@ -456,7 +453,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsOperation());
+    CHECK_NULL_VOID(pattern->HasText());
     auto localOffset = handleRect.GetOffset();
     localOffset.SetY(localOffset.GetY() + handleRect.Height() / 2.0f);
     if (IsOverlayMode()) {
@@ -617,7 +614,7 @@ void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
         manager->SetIsHandleLineShow(false);
-        if (!pattern->IsOperation()) {
+        if (!pattern->HasText()) {
             pattern->StartTwinkling();
         }
     }
