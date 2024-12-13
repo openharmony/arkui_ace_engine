@@ -2459,6 +2459,9 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     // set pipelineContext nullptr
     MockPipelineContext::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
+    PropertyChangeFlag flag = 0;
+    textContentModifier.UpdateFontSizeMeasureFlag(flag);
+    EXPECT_EQ(flag & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     MockPipelineContext::SetUp();
     // set textDecorationAnimatable_ true
