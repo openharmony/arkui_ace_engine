@@ -172,6 +172,11 @@ public:
         tabBarParam_.SetBuilder(move(builder));
     }
 
+    void SetTabBarWithContent(const RefPtr<NG::UINode>& content)
+    {
+        tabBarParam_.SetContent(content);
+    }
+
     const TabBarSymbol& GetSymbol()
     {
         return symbol_;
