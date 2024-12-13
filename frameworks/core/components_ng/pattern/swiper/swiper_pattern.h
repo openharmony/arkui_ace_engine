@@ -985,6 +985,10 @@ private:
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
     void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
+    bool NeedEnableIgnoreBlankOffset() const
+    {
+        return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
+    }
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
