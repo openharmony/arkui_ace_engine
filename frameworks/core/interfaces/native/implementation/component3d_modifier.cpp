@@ -32,7 +32,7 @@ namespace Component3DInterfaceModifier {
 void SetComponent3DOptionsImpl(Ark_NativePointer node,
                                const Opt_SceneOptions* sceneOptions)
 {
-     LOGE("ARKOALA Component3dModifier.SetComponent3DOptionsImpl not implemented -> custom object");
+    LOGE("ARKOALA Component3dModifier.SetComponent3DOptionsImpl not implemented -> custom object");
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = sceneOptions ? Converter::OptConvert<type>(*sceneOptions) : std::nullopt;
