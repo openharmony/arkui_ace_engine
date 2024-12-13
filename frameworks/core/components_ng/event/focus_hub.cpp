@@ -1240,7 +1240,7 @@ void FocusHub::ScrollToLastFocusIndex() const
 void FocusHub::OnFocus()
 {
     if (focusType_ == FocusType::NODE) {
-        OnFocusNode();
+        OnFocusNode(false);
     } else if (focusType_ == FocusType::SCOPE) {
         OnFocusScope();
     }
@@ -1261,8 +1261,11 @@ void FocusHub::OnBlur()
     }
 }
 
-void FocusHub::OnFocusNode()
+void FocusHub::OnFocusNode(bool currentHasFocused)
 {
+    if (currentHasFocused) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " focus",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     if (onFocusInternal_) {
@@ -1375,9 +1378,7 @@ bool FocusHub::IsLeafFocusScope()
 void FocusHub::OnFocusScope(bool currentHasFocused)
 {
     if (IsLeafFocusScope()) {
-        if (!currentHasFocused) {
-            OnFocusNode();
-        }
+        OnFocusNode(currentHasFocused);
         return;
     }
 
@@ -1392,7 +1393,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Node(%{public}s/%{public}d) has no focusable child.", GetFrameName().c_str(),
             GetFrameId());
         lastWeakFocusNode_ = nullptr;
-        OnFocusNode();
+        OnFocusNode(currentHasFocused);
         auto focusManager = GetFocusManager();
         CHECK_NULL_VOID(focusManager);
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::NO_FOCUSABLE_CHILD);
@@ -1402,9 +1403,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if ((focusDepend_ == FocusDependence::AUTO || focusDepend_ == FocusDependence::CHILD) && isAnyChildFocusable) {
         auto itFocusNode = itLastFocusNode;
         if (RequestFocusByPriorityInScope()) {
-            if (!currentHasFocused) {
-                OnFocusNode();
-            }
+            OnFocusNode(currentHasFocused);
             return;
         }
         do {
@@ -1417,9 +1416,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
             }
             lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*itLastFocusNode));
             if ((*itLastFocusNode)->RequestFocusImmediatelyInner()) {
-                if (!currentHasFocused) {
-                    OnFocusNode();
-                }
+                OnFocusNode(currentHasFocused);
                 return;
             }
         } while ((++itLastFocusNode) != itFocusNode);
