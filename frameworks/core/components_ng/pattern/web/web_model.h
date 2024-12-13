@@ -197,6 +197,7 @@ public:
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnabledHapticFeedback(bool isEnabled) {}
+    virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

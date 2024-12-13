@@ -2011,6 +2011,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
     JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
+    JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -5565,6 +5566,11 @@ void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnabledHapticFeedback(isEnabled);
+}
+
+void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
 }
 
 } // namespace OHOS::Ace::Framework

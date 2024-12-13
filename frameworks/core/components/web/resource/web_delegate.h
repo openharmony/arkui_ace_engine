@@ -788,6 +788,7 @@ public:
     void UpdateTextAutosizing(bool isTextAutosizing);
     void UpdateMetaViewport(bool isMetaViewportEnabled);
     void UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay);
+    void UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -1308,6 +1309,7 @@ private:
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
     bool isEnableHardwareComposition_ = false;
+    bool enableFollowSystemFontWeight_ = false;
 #endif
 };
 
