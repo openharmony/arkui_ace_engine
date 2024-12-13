@@ -359,6 +359,12 @@ bool IsFaultInjectEnabled()
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
 }
 
+double ReadScrollableDistance()
+{
+    auto ret = system::GetParameter("persist.scrollable.distance", "");
+    return StringUtils::StringToDouble(ret);
+}
+
 std::pair<float, float> GetPercent()
 {
     std::vector<double> result;
@@ -446,7 +452,7 @@ float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThre
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
-double SystemProperties::scrollableDistance_ = GetScrollableDistance();
+double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -594,7 +600,6 @@ void SystemProperties::InitDeviceInfo(
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
-    scrollableDistance_ = GetScrollableDistance();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -935,8 +940,7 @@ double SystemProperties::GetSrollableFriction()
 
 double SystemProperties::GetScrollableDistance()
 {
-    auto ret = system::GetParameter("persist.scrollable.distance", "");
-    return StringUtils::StringToDouble(ret);
+    return scrollableDistance_;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()
