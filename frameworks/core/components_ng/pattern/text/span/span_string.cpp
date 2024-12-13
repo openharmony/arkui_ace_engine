@@ -958,29 +958,37 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
 
 RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
-    int32_t cursor = 0;
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>("");
-    spanStr->ClearSpans();
+    SpanString* spanString = spanStr.GetRawPtr();
+    DecodeTlvExt(buff, spanString);
+    return spanStr;
+}
+
+void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString)
+{
+    CHECK_NULL_VOID(spanString);
+    spanString->ClearSpans();
+    int32_t cursor = 0;
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         switch (tag) {
             case TLV_SPAN_STRING_CONTENT: {
                 auto str = TLVUtil::ReadString(buff, cursor);
-                spanStr->SetString(str);
+                spanString->SetString(str);
                 break;
             }
             case TLV_SPAN_STRING_SPANS: {
-                DecodeSpanItemList(buff, cursor, spanStr);
+                DecodeSpanItemListExt(buff, cursor, spanString);
                 break;
             }
             default:
                 break;
         }
     }
-    return spanStr;
 }
 
-void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
+void SpanString::DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& cursor, SpanString* spanStr)
 {
+    CHECK_NULL_VOID(spanStr);
     int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
     for (auto i = 0; i < spanLength; i++) {
         auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
@@ -993,6 +1001,12 @@ void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor,
         }
     }
     spanStr->UpdateSpansMap();
+}
+
+void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
+{
+    CHECK_NULL_VOID(spanStr);
+    DecodeSpanItemListExt(buff, cursor, spanStr.GetRawPtr());
 }
 
 void SpanString::UpdateSpansMap()

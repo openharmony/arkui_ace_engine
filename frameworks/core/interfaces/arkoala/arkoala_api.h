@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
 
+#include <cstdint>
+#include <stddef.h>
+
 /*
  * ATTENTION. Keep this file self contained.
  * Make sure it has all necessary type declarations.
@@ -675,6 +678,12 @@ struct ArkUIMenuDividerOptions {
     ArkUIDimensionType startMargin;
     ArkUIDimensionType endMargin;
 };
+
+struct ArkUI_StyledString_Descriptor {
+    void* spanString;
+    ArkUI_CharPtr html;
+};
+
 
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
@@ -5061,6 +5070,16 @@ struct ArkUIExtendedNodeAPI {
     void (*showCrash)(ArkUI_CharPtr message);
 };
 
+struct ArkUIStyledStringAPI {
+    ArkUI_StyledString_Descriptor* (*createArkUIStyledStringDescriptor)();
+    void (*destroyArkUIStyledStringDescriptor)(ArkUI_StyledString_Descriptor* str);
+    ArkUI_Int32 (*unmarshallStyledStringDescriptor)(
+        uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* str);
+    ArkUI_Int32 (*marshallStyledStringDescriptor)(
+        uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* str, size_t* resultSize);
+    ArkUI_CharPtr (*convertToHtml)(ArkUI_StyledString_Descriptor* str);
+};
+
 typedef enum {
     ON_ATTACH_TO_NODE = 1,
     ON_DETACH_FROM_NODE = 2,
@@ -5130,6 +5149,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIExtendedNodeAPI* (*getExtendedAPI)();
     const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
     const ArkUIDragAdapterAPI* (*getDragAdapterAPI)();
+    const ArkUIStyledStringAPI* (*getStyledStringAPI)();
 };
 
 struct ArkUIAnyAPI {
