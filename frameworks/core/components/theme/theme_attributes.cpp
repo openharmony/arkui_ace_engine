@@ -84,6 +84,7 @@ const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
 const char THEME_PATTERN_CONTAINER_MODAL[] = "container_modal_pattern";
 const char THEME_PATTERN_SCROLLABLE[] = "scrollable_pattern";
+const char THEME_PATTERN_APP[] = "app_theme_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
