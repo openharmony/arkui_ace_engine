@@ -338,6 +338,23 @@ void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src)
     }
 }
 
+void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src)
+{
+    switch (src) {
+        case ScrollSource::DRAG: dst = ARK_SCROLL_SOURCE_DRAG; break;
+        case ScrollSource::FLING: dst = ARK_SCROLL_SOURCE_FLING; break;
+        case ScrollSource::EDGE_EFFECT: dst = ARK_SCROLL_SOURCE_EDGE_EFFECT; break;
+        case ScrollSource::OTHER_USER_INPUT: dst = ARK_SCROLL_SOURCE_OTHER_USER_INPUT; break;
+        case ScrollSource::SCROLL_BAR: dst = ARK_SCROLL_SOURCE_SCROLL_BAR; break;
+        case ScrollSource::SCROLL_BAR_FLING: dst = ARK_SCROLL_SOURCE_SCROLL_BAR_FLING; break;
+        case ScrollSource::SCROLLER: dst = ARK_SCROLL_SOURCE_SCROLLER; break;
+        case ScrollSource::SCROLLER_ANIMATION: dst = ARK_SCROLL_SOURCE_SCROLLER_ANIMATION; break;
+        default:
+            dst = static_cast<Ark_ScrollSource>(-1);
+            LOGE("Unexpected enum value in ScrollSource: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
 {
     switch (src) {
