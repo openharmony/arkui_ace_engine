@@ -1967,7 +1967,7 @@ void ScrollablePattern::ProcessSpringEffect(float velocity, bool needRestart)
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
     auto isOutOfBoundary = OutBoundaryCallback();
     if (!isOutOfBoundary && !GetCanOverScroll()) {
-        OnScrollEnd();
+        OnScrollEndRecursiveInner(velocity);
         return;
     }
     CHECK_NULL_VOID(scrollableEvent_);
@@ -2351,7 +2351,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
             ProcessSpringEffect(velocity, true);
             return true;
         }
-        OnScrollEnd();
+        OnScrollEndRecursiveInner(velocity);
         return false;
     }
     if (parent && InstanceOf<ScrollablePattern>(parent)) {
