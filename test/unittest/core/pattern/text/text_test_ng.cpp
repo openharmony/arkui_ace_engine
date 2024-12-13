@@ -562,6 +562,22 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnModifyDone003
+ * @tc.desc: Test paragraph is not cleared by OnModifyDone .
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnModifyDone003, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ASSERT_NE(pattern->pManager_, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->pManager_->GetParagraphs().size(), 1);
+}
+
+/**
  * @tc.name: OnDirtyLayoutWrapperSwap001
  * @tc.desc: Test TextPattern OnDirtyLayoutWrapperSwap when skipMeasure is true.
  * @tc.type: FUNC
@@ -2532,8 +2548,35 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     auto frameNode = layoutWrapper->GetHostNode();
     auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle;
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
-    SetContentModifier(textContentModifier);
+    textStyle.SetFontSize(Dimension(DIMENSION, DimensionUnit::FP));
+    textStyle.SetTextColor(Color::RED);
+    textStyle.SetAdaptMaxFontSize(Dimension(DIMENSION, DimensionUnit::FP));
+    textStyle.SetAdaptMinFontSize(Dimension(DIMENSION, DimensionUnit::FP));
+    textStyle.SetFontWeight(FontWeight::BOLD);
+    Shadow textShadow;
+    textShadow.SetBlurRadius(0.0);
+    textShadow.SetColor(Color::BLUE);
+    textShadow.SetOffsetX(DIMENSION);
+    textShadow.SetOffsetY(DIMENSION);
+    vector<Shadow> textShadows { textShadow };
+    textStyle.SetTextShadows(textShadows);
+    textStyle.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    textStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+    textStyle.SetTextDecorationColor(Color::BLUE);
+    textStyle.SetBaselineOffset(Dimension(DIMENSION, DimensionUnit::FP));
+    textStyle.SetLineHeight(Dimension(DIMENSION, DimensionUnit::FP));
+
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)), textPattern);
+
+    EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), DIMENSION);
+    EXPECT_EQ(Color(textContentModifier.animatableTextColor_->Get().GetValue()), Color::RED);
+    EXPECT_EQ(textContentModifier.adaptMaxFontSizeFloat_->Get(), DIMENSION);
+    EXPECT_EQ(textContentModifier.fontWeightFloat_->Get(), TEXT_FONT_WEIGHT);
+
+    EXPECT_EQ(textContentModifier.contentOffset_->Get().GetX(), TEXT_CONTENT_OFFSET);
+    EXPECT_EQ(textContentModifier.contentOffset_->Get().GetY(), TEXT_CONTENT_OFFSET);
+    EXPECT_EQ(textContentModifier.contentSize_->Get().Height(), TEXT_CONTENT_SIZE);
+    EXPECT_EQ(textContentModifier.contentSize_->Get().Width(), TEXT_CONTENT_SIZE);
 }
 
 /**
@@ -2548,6 +2591,10 @@ HWTEST_F(TextTestNg, TextContentModifier005, TestSize.Level1)
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
+    textFrameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(textFrameNode->geometryNode_, nullptr);
+    textFrameNode->geometryNode_->SetContentOffset(OffsetF(TEXT_CONTENT_OFFSET, TEXT_CONTENT_OFFSET));
+    textFrameNode->geometryNode_->SetContentSize(SizeF(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
@@ -3277,11 +3324,11 @@ HWTEST_F(TextTestNg, UpdateSelectOverlayOrCreate001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnSelectAll
+ * @tc.name: HandleOnSelectAll001
  * @tc.desc: Test TextPattern HandleOnSelectAll
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, OnModifyDone003, TestSize.Level1)
+HWTEST_F(TextTestNg, HandleOnSelectAll001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textPattern.
@@ -3922,5 +3969,91 @@ HWTEST_F(TextTestNg, TextPattern019, TestSize.Level1)
     frameNode->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
     frameNode->ProcessFrameNodeChangeFlag();
     EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
+}
+
+/**
+ * @tc.name: TextPattern020
+ * @tc.desc: Test TextPattern AddImageToSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textNode and ImageSpanNode.
+     */
+    auto [frameNode, pattern] = Init();
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+
+    /**
+     * @tc.steps: step2. AddImageToSpanItem.
+     */
+    pattern->AddImageToSpanItem(imageSpanNode);
+    EXPECT_EQ(pattern->spans_.size(), 1);
+    auto span1 = AceType::DynamicCast<ImageSpanItem>(pattern->spans_.back());
+    ASSERT_NE(span1, nullptr);
+
+    /**
+     * @tc.steps: step3. mark framnode changed.
+     */
+    EXPECT_EQ(pattern->spans_.back(), imageSpanNode->GetSpanItem());
+}
+
+/**
+ * @tc.name: SetFontSize001
+ * @tc.desc: Test TextContentModifier SetFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextContentModifier.
+     */
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetFontScale(TEXT_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. SetFontSize.
+     */
+    textContentModifier->SetFontSize(Dimension(DIMENSION, DimensionUnit::FP), TextStyle(), false);
+
+    /**
+     * @tc.steps: step3. mark framnode changed.
+     */
+    EXPECT_EQ(textContentModifier->fontSize_.value(), Dimension(FONT_SIZE, DimensionUnit::PX));
+
+    pipeline->SetFontScale(1.0f);
+}
+
+/**
+ * @tc.name: TextContentModifierSetFontSize001
+ * @tc.desc: Test TextContentModifier construct
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifierSetFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextContentModifier.
+     */
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetFontScale(TEXT_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. SetFontSize.
+     */
+    textContentModifier->SetFontSize(Dimension(DIMENSION, DimensionUnit::FP), TextStyle(), false);
+
+    /**
+     * @tc.steps: step3. mark framnode changed.
+     */
+    EXPECT_EQ(textContentModifier->fontSize_.value(), Dimension(25.0, DimensionUnit::PX));
+
+    pipeline->SetFontScale(1.0f);
 }
 } // namespace OHOS::Ace::NG
