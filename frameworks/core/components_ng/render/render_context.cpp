@@ -41,7 +41,7 @@ void RenderContext::RequestNextFrame() const
         requestFrame_();
         auto node = GetHost();
         CHECK_NULL_VOID(node);
-        if (node->GetInspectorId().has_value()) {
+        if (node->GetInspectorId().has_value() || node->HasNDKDrawCompletedCallback()) {
             auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));

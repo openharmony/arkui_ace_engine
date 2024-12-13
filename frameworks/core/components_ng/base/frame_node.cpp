@@ -1304,6 +1304,24 @@ void FrameNode::FireColorNDKCallback()
     }
 }
 
+void FrameNode::FireDrawCompletedNDKCallback()
+{
+    std::shared_lock<std::shared_mutex> lock(drawCompletedCallbackMutex_);
+    if (ndkDrawCompletedCallback_) {
+        auto cb = ndkDrawCompletedCallback_;
+        cb();
+    }
+}
+
+void FrameNode::FireLayoutNDKCallback()
+{
+    std::shared_lock<std::shared_mutex> lock(layoutCallbackMutex_);
+    if (ndkLayoutCallback_) {
+        auto cb = ndkLayoutCallback_;
+        cb();
+    }
+}
+
 void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)
 {
     std::shared_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
@@ -1397,10 +1415,13 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+    if ((config.skipMeasure == false) && (config.skipLayout == false)) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        FireLayoutNDKCallback();
+        if (GetInspectorId().has_value()) {
+            pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        }
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
@@ -1959,7 +1980,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         wrapper->FlushRender();
         paintProperty->CleanDirty();
 
-        if (self->GetInspectorId()) {
+        if (self->GetInspectorId() || self->HasNDKDrawCompletedCallback()) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
@@ -4344,10 +4365,13 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
+    if (!config.skipMeasure && !config.skipLayout) {
         auto pipeline = GetContext();
         CHECK_NULL_RETURN(pipeline, false);
-        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        if (GetInspectorId()) {
+            pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        }
+        FireLayoutNDKCallback();
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
     needRerender =

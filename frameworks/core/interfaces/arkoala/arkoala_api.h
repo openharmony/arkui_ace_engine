@@ -4931,6 +4931,10 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*getNodeTag)(ArkUINodeHandle node);
     void (*getActiveChildrenInfo)(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size);
     void (*getCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, char** value);
+    ArkUI_Int32 (*setDrawCompleteCallback)(ArkUINodeHandle node, void* userData, void* onDraw);
+    ArkUI_Int32 (*resetDrawCompleteCallback)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setLayoutCallback)(ArkUINodeHandle node, void* userData, void* onDraw);
+    ArkUI_Int32 (*resetLayoutCallback)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {

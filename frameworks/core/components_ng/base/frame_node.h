@@ -548,9 +548,28 @@ public:
         std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
         ndkFontUpdateCallback_ = callback;
     }
-
+    
+    void SetNDKDrawCompletedCallback(const std::function<void()>&& callback)
+    {
+        std::unique_lock<std::shared_mutex> lock(drawCompletedCallbackMutex_);
+        ndkDrawCompletedCallback_ = callback;
+    }
+    
+    void SetNDKLayoutCallback(const std::function<void()>&& callback)
+    {
+        std::unique_lock<std::shared_mutex> lock(layoutCallbackMutex_);
+        ndkLayoutCallback_ = callback;
+    }
+    
+    bool HasNDKDrawCompletedCallback()
+    {
+        return !!ndkDrawCompletedCallback_;
+    }
+    
     void FireColorNDKCallback();
     void FireFontNDKCallback(const ConfigurationChange& configurationChange);
+    void FireDrawCompletedNDKCallback();
+    void FireLayoutNDKCallback();
 
     bool MarkRemoving() override;
 
@@ -1317,6 +1336,8 @@ private:
     std::function<void()> colorModeUpdateCallback_;
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
+    std::function<void()> ndkDrawCompletedCallback_;
+    std::function<void()> ndkLayoutCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -1440,6 +1461,8 @@ private:
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
+    mutable std::shared_mutex drawCompletedCallbackMutex_;
+    mutable std::shared_mutex layoutCallbackMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG
