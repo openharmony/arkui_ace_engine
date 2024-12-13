@@ -116,7 +116,7 @@ public:
         formLinkInfos_ = infos;
     }
 
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
 
     bool IsJsCard() const
     {

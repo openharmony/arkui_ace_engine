@@ -1252,15 +1252,18 @@ void FormPattern::InitFormManagerDelegate()
     context->SetSizeChangeByRotateCallback(callback);
 }
 
-void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
+void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto rect = host->GetTransformRectRelativeToWindow();
-    top = rect.Top();
-    left = rect.Left();
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    parentRectInfo.top = static_cast<int32_t>(rect.Top());
+    parentRectInfo.left = static_cast<int32_t>(rect.Left());
+    parentRectInfo.scaleX = finalScale.x;
+    parentRectInfo.scaleY = finalScale.y;
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", top: %{public}d, left: %{public}d",
-        host->GetAccessibilityId(), top, left);
+        host->GetAccessibilityId(), parentRectInfo.top, parentRectInfo.left);
 }
 
 void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
@@ -2182,17 +2185,17 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
-        [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
+        [weak = WeakClaim(this), instanceID](AccessibilityParentRectInfo& parentRectInfo) {
             ContainerScope scope(instanceID);
             auto context = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostSyncTask([weak, instanceID, &top, &left] {
+            uiTaskExecutor.PostSyncTask([weak, instanceID, &parentRectInfo] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
-                form->GetRectRelativeToWindow(top, left);
+                form->GetRectRelativeToWindow(parentRectInfo);
                 }, "ArkUIFormGetRectRelativeToWindow");
         });
 
