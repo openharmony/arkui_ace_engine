@@ -930,6 +930,7 @@ void SwiperPattern::CheckAndFireCustomAnimation()
         itemPositionInAnimation_[index] = item.second;
     }
     FireSwiperCustomAnimationEvent();
+    FireContentDidScrollEvent();
     itemPositionInAnimation_.clear();
 }
 
@@ -1022,7 +1023,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
 
         if (SupportSwiperCustomAnimation() && prevFrameAnimationRunning_) {
-            indexsInAnimation_.insert(jumpIndex_.value());
+            for (const auto& item : itemPosition_) {
+                auto index = GetLoopIndex(item.first);
+                indexsInAnimation_.insert(index);
+            }
         }
 
         jumpIndex_.reset();
@@ -3816,7 +3820,7 @@ void SwiperPattern::CreateSpringProperty()
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
     UpdateIgnoreBlankOffsetWithDrag(IsOutOfStart());
-    if (springAnimationIsRunning_ || propertyAnimationIsRunning_) {
+    if (RunningTranslateAnimation()) {
         return;
     }
     auto host = GetHost();
