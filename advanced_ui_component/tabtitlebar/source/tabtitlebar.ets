@@ -19,25 +19,20 @@ import window from '@ohos.window'
 import common from '@ohos.app.ability.common'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
-import { SymbolGlyphModifier } from '@kit.ArkUI'
 
 export interface TabTitleBarMenuItem {
   value: ResourceStr;
-  symbolValue?: IconResource;
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
 }
 
-export type IconResource = SymbolGlyphModifier;
-
 export interface TabTitleBarTabItem {
   title: ResourceStr;
   icon?: ResourceStr;
-  symbolIcon?: IconResource;
 }
 
-const PUBLIC_MORE = $r('sys.symbol.dot_grid_2x2')
+const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
 const TEXT_EDITABLE_DIALOG = '18.3fp'
 const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
@@ -47,7 +42,7 @@ const MIN_DIALOG = '216vp'
 export struct TabTitleBar {
   tabItems: Array<TabTitleBarTabItem> = [];
   menuItems: Array<TabTitleBarMenuItem> = [];
-  @BuilderParam swiperContent: () => void;
+  @BuilderParam swiperContent: () => void
 
   @State tabWidth: number = 0
   @State currentIndex: number = 0
@@ -109,7 +104,7 @@ export struct TabTitleBar {
     tabOffset += TabContentItem.marginFirst
 
     this.tabItems.forEach((tabItem, index) => {
-      if (tabItem.icon !== undefined || tabItem.symbolIcon !== undefined) {
+      if (tabItem.icon !== undefined) {
         if (Math.abs(this.imageWidths[index]) > TabContentItem.imageHotZoneWidth) {
           tabOffset += this.imageWidths[index]
         } else {
@@ -218,7 +213,6 @@ struct CollapsibleMenuSection {
   index: number = 0;
   item: TabTitleBarMenuItem = {
     value: PUBLIC_MORE,
-    symbolValue: new SymbolGlyphModifier(PUBLIC_MORE),
     label: $r('sys.string.ohos_toolbar_more'),
   } as TabTitleBarMenuItem;
   longPressTime: number = 500;
@@ -283,7 +277,7 @@ struct CollapsibleMenuSection {
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + index + 1
+          this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
   }
@@ -307,15 +301,16 @@ struct CollapsibleMenuSection {
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
             (item: TabTitleBarMenuItem, index: number) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
 
           Row() {
-            SymbolGlyph(PUBLIC_MORE)
-              .fontSize(TabContentItem.symbolSize)
-              .draggable(false)
-              .fontColor([$r('sys.color.icon_primary')])
+            Image(PUBLIC_MORE)
+              .width(ImageMenuItem.imageSize)
+              .height(ImageMenuItem.imageSize)
               .focusable(true)
+              .draggable(false)
+              .fillColor($r('sys.color.icon_primary'))
           }
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
@@ -430,7 +425,6 @@ struct TabContentItem {
   @State imageHeight: number = 24
 
   static readonly imageSize = 24
-  static readonly symbolSize = '24vp'
   static readonly imageHotZoneWidth = 48
   static readonly imageMagnificationFactor = 1.4
   static readonly buttonBorderRadius = 8
@@ -473,7 +467,7 @@ struct TabContentItem {
     Stack() {
       Row() {
         Column() {
-          if (this.item.icon === undefined && this.item.symbolIcon === undefined) {
+          if (this.item.icon === undefined) {
             Text(this.item.title)
               .fontSize(this.index === this.currentIndex
                 ? $r('sys.float.ohos_id_text_size_headline7')
@@ -515,53 +509,37 @@ struct TabContentItem {
               .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
           } else {
             Row() {
-              if (this.item.symbolIcon) {
-                SymbolGlyph()
-                  .fontColor([$r('sys.color.icon_primary')])
-                  .attributeModifier(this.item.symbolIcon)
-                  .fontSize(TabContentItem.symbolSize)
-                  .width(this.getImageLayoutWidth())
-                  .height(TabContentItem.imageSize)
-                  .scale({
-                    x: this.getImageScaleFactor(),
-                    y: this.getImageScaleFactor()
-                  })
-                  .animation({ duration: 300 })
-                  .hitTestBehavior(HitTestMode.None)
-                  .focusable(true)
-              } else {
-                Image(this.item.icon)
-                  .alt(this.item.title)
-                  .width(this.getImageLayoutWidth())
-                  .height(TabContentItem.imageSize)
-                  .objectFit(ImageFit.Fill)
-                  .scale({
-                    x: this.getImageScaleFactor(),
-                    y: this.getImageScaleFactor()
-                  })
-                  .animation({ duration: 300 })
-                  .hitTestBehavior(HitTestMode.None)
-                  .focusable(true)
-                  .onComplete((event) => {
-                    if (!this.onImageComplete) {
-                      return
-                    }
-                    this.imageWidth = px2vp(event?.width);
-                    this.imageHeight = px2vp(event?.height);
-                    this.onImageComplete(px2vp(event?.componentWidth) +
+              Image(this.item.icon)
+                .alt(this.item.title)
+                .width(this.getImageLayoutWidth())
+                .height(TabContentItem.imageSize)
+                .objectFit(ImageFit.Fill)
+                .scale({
+                  x: this.getImageScaleFactor(),
+                  y: this.getImageScaleFactor()
+                })
+                .animation({ duration: 300 })
+                .hitTestBehavior(HitTestMode.None)
+                .focusable(true)
+                .onComplete((event) => {
+                  if (!this.onImageComplete) {
+                    return
+                  }
+                  this.imageWidth = px2vp(event?.width);
+                  this.imageHeight = px2vp(event?.height);
+                  this.onImageComplete(px2vp(event?.componentWidth) +
                     TabContentItem.paddingLeft + TabContentItem.paddingRight);
-                  })
-                  .onError((event) => {
-                    if (!this.onImageComplete) {
-                      return
-                    }
-                    this.onImageComplete(px2vp(event.componentWidth) +
+                })
+                .onError((event) => {
+                  if (!this.onImageComplete) {
+                    return
+                  }
+                  this.onImageComplete(px2vp(event.componentWidth) +
                     TabContentItem.paddingLeft + TabContentItem.paddingRight)
-                  })
-              }
+                })
             }
             .width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
-            TabContentItem.paddingLeft + TabContentItem.paddingRight)
+              TabContentItem.paddingLeft + TabContentItem.paddingRight)
             .constraintSize({
               minWidth: TabContentItem.imageHotZoneWidth,
               minHeight: TabContentItem.imageHotZoneWidth
@@ -664,22 +642,12 @@ struct ImageMenuItem {
 
   build() {
     Row() {
-      if (this.item.symbolValue) {
-        SymbolGlyph()
-          .fontColor([$r('sys.color.font_primary')])
-          .attributeModifier(this.item.symbolValue)
-          .fontSize(TabContentItem.symbolSize)
-          .draggable(false)
-          .focusable(this.item?.isEnabled)
-          .key(ImageMenuItem.focusablePrefix + this.index)
-      } else {
-        Image(this.item.value)
-          .width(ImageMenuItem.imageSize)
-          .height(ImageMenuItem.imageSize)
-          .focusable(this.item.isEnabled)
-          .key(ImageMenuItem.focusablePrefix + this.index)
-          .draggable(false)
-      }
+      Image(this.item.value)
+        .width(ImageMenuItem.imageSize)
+        .height(ImageMenuItem.imageSize)
+        .focusable(this.item.isEnabled)
+        .key(ImageMenuItem.focusablePrefix + this.index)
+        .draggable(false)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
@@ -773,27 +741,14 @@ struct TabTitleBarDialog {
   build() {
     if (this.tabTitleBarDialog) {
       Column() {
-        if (this.tabTitleDialog.symbolValue) {
-          SymbolGlyph()
-            .fontColor([$r('sys.color.font_primary')])
-            .attributeModifier(this.tabTitleDialog.symbolValue)
-            .fontSize(IMAGE_SIZE)
-            .draggable(false)
-            .focusable(this.tabTitleDialog?.isEnabled)
-            .margin({
-              top: $r('sys.float.padding_level24'),
-              bottom: $r('sys.float.padding_level8'),
-            })
-        } else if (this.tabTitleDialog.value) {
-          Image(this.tabTitleDialog.value)
-            .width(IMAGE_SIZE)
-            .height(IMAGE_SIZE)
-            .margin({
-              top: $r('sys.float.padding_level24'),
-              bottom: $r('sys.float.padding_level8'),
-            })
-            .fillColor($r('sys.color.icon_primary'))
-        }
+        Image(this.tabTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .margin({
+            top: $r('sys.float.padding_level24'),
+            bottom: $r('sys.float.padding_level8'),
+          })
+          .fillColor($r('sys.color.icon_primary'))
         Column() {
           Text(this.tabTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
@@ -817,19 +772,10 @@ struct TabTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        if (this.tabTitleDialog.symbolValue) {
-          SymbolGlyph()
-            .fontColor([$r('sys.color.font_primary')])
-            .attributeModifier(this.tabTitleDialog.symbolValue)
-            .fontSize(IMAGE_SIZE)
-            .draggable(false)
-            .focusable(this.tabTitleDialog?.isEnabled)
-        } else {
-          Image(this.tabTitleDialog.value)
-            .width(IMAGE_SIZE)
-            .height(IMAGE_SIZE)
-            .fillColor($r('sys.color.icon_primary'))
-        }
+        Image(this.tabTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor($r('sys.color.icon_primary'))
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
