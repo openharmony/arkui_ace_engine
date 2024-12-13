@@ -6919,7 +6919,6 @@ void TextFieldPattern::SetAccessibilityAction()
     accessibilityProperty->SetAccessibilityGroup(true);
     SetAccessibilityActionOverlayAndSelection();
     SetAccessibilityActionGetAndSetCaretPosition();
-    SetAccessibilityScrollAction();
     SetAccessibilityMoveTextAction();
     SetAccessibilityErrotText();
 }
@@ -7022,50 +7021,6 @@ void TextFieldPattern::SetAccessibilityMoveTextAction()
                                      : pattern->selectController_->GetCaretIndex() - range;
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         pattern->SetCaretPosition(caretPosition);
-    });
-}
-
-void TextFieldPattern::SetAccessibilityScrollAction()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
-        const auto& pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->IsScrollable()) {
-            auto frameNode = pattern->GetHost();
-            CHECK_NULL_VOID(frameNode);
-            auto offset = pattern->GetTextContentRect().Height();
-            float scrollDistance =
-                pattern->GetTextRect().Height() - (std::abs((pattern->GetTextRect().GetY() - offset)));
-            if (offset > scrollDistance) {
-                pattern->OnTextAreaScroll(-scrollDistance);
-                // AccessibilityEventType::SCROLL_END
-                return;
-            }
-            pattern->OnTextAreaScroll(-offset);
-            // AccessibilityEventType::SCROLL_END
-        }
-    });
-
-    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
-        const auto& pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->IsScrollable()) {
-            auto frameNode = pattern->GetHost();
-            CHECK_NULL_VOID(frameNode);
-            auto offset = pattern->GetTextContentRect().Height();
-            float scrollDistance = std::abs(pattern->GetTextRect().GetY() - pattern->GetTextContentRect().GetY());
-            if (offset > scrollDistance) {
-                pattern->OnTextAreaScroll(scrollDistance);
-                // AccessibilityEventType::SCROLL_END
-                return;
-            }
-            pattern->OnTextAreaScroll(offset);
-            // AccessibilityEventType::SCROLL_END
-        }
     });
 }
 
