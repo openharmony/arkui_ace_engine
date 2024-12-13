@@ -471,7 +471,7 @@ int32_t SessionWrapperImpl::GetSessionId() const
     return session_ ? session_->GetPersistentId() : 0;
 }
 
-int32_t SessionWrapperImpl::GetInstanceIdFromHost()
+int32_t SessionWrapperImpl::GetInstanceIdFromHost() const
 {
     auto pattern = hostPattern_.Upgrade();
     if (pattern == nullptr) {
