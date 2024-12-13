@@ -254,6 +254,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
     bool GetClipHandleViewPort(RectF& rect);
+    bool CalculateClippedRect(RectF& rect);
     void MarkOverlayDirty();
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void UpdateHandleColor();
