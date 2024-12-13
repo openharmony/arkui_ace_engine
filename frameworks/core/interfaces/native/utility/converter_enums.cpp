@@ -1317,12 +1317,50 @@ void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& 
 }
 
 template<>
+void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src)
+{
+    switch (src) {
+        case ARK_DIALOG_ALIGNMENT_TOP: dst = DialogAlignment::TOP; break;
+        case ARK_DIALOG_ALIGNMENT_CENTER: dst = DialogAlignment::CENTER; break;
+        case ARK_DIALOG_ALIGNMENT_BOTTOM: dst = DialogAlignment::BOTTOM; break;
+        case ARK_DIALOG_ALIGNMENT_DEFAULT: dst = DialogAlignment::DEFAULT; break;
+        case ARK_DIALOG_ALIGNMENT_TOP_START: dst = DialogAlignment::TOP_START; break;
+        case ARK_DIALOG_ALIGNMENT_TOP_END: dst = DialogAlignment::TOP_END; break;
+        case ARK_DIALOG_ALIGNMENT_CENTER_START: dst = DialogAlignment::CENTER_START; break;
+        case ARK_DIALOG_ALIGNMENT_CENTER_END: dst = DialogAlignment::CENTER_END; break;
+        case ARK_DIALOG_ALIGNMENT_BOTTOM_START: dst = DialogAlignment::BOTTOM_START; break;
+        case ARK_DIALOG_ALIGNMENT_BOTTOM_END: dst = DialogAlignment::BOTTOM_END; break;
+        default: LOGE("Unexpected enum value in Ark_DialogAlignment: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src)
 {
     switch (src) {
         case ARK_RECT_WIDTH_STYLE_TIGHT: dst = RectWidthStyle::TIGHT; break;
         case ARK_RECT_WIDTH_STYLE_MAX: dst = RectWidthStyle::MAX; break;
         default: LOGE("Unexpected enum value in Ark_RectWidthStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src)
+{
+    switch (src) {
+        case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE: dst = TimePickerFormat::HOUR_MINUTE; break;
+        case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE_SECOND: dst = TimePickerFormat::HOUR_MINUTE_SECOND; break;
+        default: LOGE("Unexpected enum value in Ark_TimePickerFormat: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src)
+{
+    switch (src) {
+        case ARK_HOVER_MODE_AREA_TYPE_TOP_SCREEN: dst = HoverModeAreaType::TOP_SCREEN; break;
+        case ARK_HOVER_MODE_AREA_TYPE_BOTTOM_SCREEN: dst = HoverModeAreaType::BOTTOM_SCREEN; break;
+        default: LOGE("Unexpected enum value in Ark_HoverModeAreaType: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
