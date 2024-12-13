@@ -1388,6 +1388,27 @@ HWTEST_F(TextTestFiveNg, OnAncestorNodeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleMarkInfoChange001
+ * @tc.desc: test base_text_select_overlay.cpp OnHandleMarkInfoChange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    SelectOverlayDirtyFlag flag = UPDATE_HANDLE_COLOR_FLAG;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->handlerColor, std::nullopt);
+}
+
+/**
  * @tc.name: GetSpanParagraphStyle001
  * @tc.desc: test multiple_paragraph_layout_algorithm.cpp GetSpanParagraphStyle function
  * @tc.type: FUNC

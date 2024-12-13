@@ -2036,6 +2036,7 @@ void TextPattern::OnModifyDone()
         }
     }
     bool enabledCache = eventHub->IsEnabled();
+    selectOverlay_->UpdateHandleColor();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

@@ -958,6 +958,32 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
 }
 
+void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCaretColor(frameNode, Color(color));
+}
+
+ArkUI_Uint32 GetTextCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    return TextModelNG::GetCaretColor(frameNode).GetValue();
+}
+
+void ResetTextCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto caretColor = static_cast<int32_t>(theme->GetCaretColor().GetValue());
+    TextModelNG::SetCaretColor(frameNode, Color(caretColor));
+}
+
 void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1190,6 +1216,7 @@ const ArkUITextModifier* GetTextModifier()
         GetTextDataDetectorConfig, ResetTextDataDetectorConfig, SetTextLineSpacing, GetTextLineSpacing,
         ResetTextLineSpacing, SetTextSelectedBackgroundColor, GetTextSelectedBackgroundColor,
         ResetTextSelectedBackgroundColor, SetLineBreakStrategy, ResetLineBreakStrategy, GetTextLineBreakStrategy,
+        SetTextCaretColor, GetTextCaretColor, ResetTextCaretColor,
         SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
         SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,
         ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
