@@ -22,6 +22,8 @@ ohos_source_set("capi-ut-stubs") {
     "capi-ut-stubs.cpp",
     "mock_form_pattern.cpp",
     "mock_pointer_event.cpp",
+    "mock_text_picker_dialog_view.cpp",
+    "mock_time_picker_dialog_view.cpp",
     "mock_web_pattern.cpp",
     "mock_window_scene.cpp",
   ]

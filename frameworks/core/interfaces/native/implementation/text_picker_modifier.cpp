@@ -26,9 +26,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 namespace OHOS::Ace::NG {
-using PickerRangeType = std::variant<
-    std::pair<bool, std::vector<NG::RangeContent>>,
-    std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>;
 
 struct TextPickerOptions {
     std::vector<NG::RangeContent> range;
@@ -187,97 +184,6 @@ void ValidateSingleTextPickerOptions(TextPickerOptions& options)
 }
 
 namespace OHOS::Ace::NG::Converter {
-    template<>
-    PickerRangeType Convert(const Array_String& src)
-    {
-        std::pair<bool, std::vector<NG::RangeContent>> dst;
-        std::vector<std::string> tmp;
-        tmp = Converter::Convert<std::vector<std::string>>(src);
-        for (const auto& str : tmp) {
-            NG::RangeContent content;
-            content.icon_ = "";
-            content.text_ = str;
-            dst.second.push_back(content);
-        }
-        dst.first = false;
-        return dst;
-    }
-
-    template<>
-    PickerRangeType Convert(const Array_Array_String& src)
-    {
-        std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
-        std::vector<std::vector<std::string>> tmp;
-        auto tmpVector = Converter::Convert<std::vector<std::vector<std::string>>>(src);
-        for (const auto& strVector : tmpVector) {
-            NG::TextCascadePickerOptions value;
-            for (const auto& str : strVector) {
-                value.rangeResult.push_back(str);
-            }
-            dst.second.push_back(value);
-        }
-        dst.first = false;
-        return dst;
-    }
-
-    template<>
-    PickerRangeType Convert(const Ark_Resource& src)
-    {
-        std::pair<bool, std::vector<NG::RangeContent>> dst;
-        auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
-        if (tmp) {
-            for (const auto& str : tmp.value()) {
-                NG::RangeContent content;
-                content.icon_ = "";
-                content.text_ = str;
-                dst.second.push_back(content);
-            }
-        }
-        dst.first = false;
-        return dst;
-    }
-
-    template<>
-    NG::RangeContent Convert(const Ark_TextPickerRangeContent& src)
-    {
-        NG::RangeContent dst;
-        auto iconOpt = Converter::OptConvert<std::string>(src.icon);
-        auto textOpt = Converter::OptConvert<std::string>(src.text);
-        dst.icon_ = iconOpt.value_or("");
-        dst.text_ = textOpt.value_or("");
-        return dst;
-    }
-
-    template<>
-    PickerRangeType Convert(const Array_TextPickerRangeContent& src)
-    {
-        std::pair<bool, std::vector<NG::RangeContent>> dst;
-        dst.second = Converter::Convert<std::vector<NG::RangeContent>>(src);
-        dst.first = true;
-        return dst;
-    }
-
-    template<>
-    NG::TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src)
-    {
-        NG::TextCascadePickerOptions dst;
-        auto textOpt = Converter::OptConvert<std::string>(src.text);
-        dst.rangeResult.push_back(textOpt.value_or(""));
-        auto optionsOpt = Converter::OptConvert<std::vector<NG::TextCascadePickerOptions>>(src.children);
-        std::vector<TextCascadePickerOptions> empty;
-        dst.children = optionsOpt.value_or(empty);
-        return dst;
-    }
-
-    template<>
-    PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
-    {
-        std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
-        dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);
-        dst.first = true;
-        return dst;
-    }
-
     uint32_t CalculateKind(bool fromRangeContent, const std::vector<NG::RangeContent>& range)
     {
         uint32_t kind = 0;
