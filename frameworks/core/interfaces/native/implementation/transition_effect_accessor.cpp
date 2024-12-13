@@ -80,9 +80,10 @@ TransitionEffectPeer* CtorImpl(const Ark_String* type,
         CHECK_NULL_RETURN(effect, nullptr);
         CHECK_NULL_RETURN(effect->asymmetric.appear.ptr, nullptr);
         auto app = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.appear.ptr);
-        CHECK_NULL_RETURN(effect, nullptr);
+        CHECK_NULL_RETURN(app, nullptr);
         CHECK_NULL_RETURN(effect->asymmetric.disappear.ptr, nullptr);
         auto disapp = reinterpret_cast<TransitionEffectPeer*>(effect->asymmetric.disappear.ptr);
+        CHECK_NULL_RETURN(disapp, nullptr);
         peer->handler = new ChainedAsymmetricEffect(app->handler, disapp->handler);
     }
     return peer;
