@@ -333,6 +333,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
+    listContentModifier_->SetIsNeedDividerAnimation(isNeedDividerAnimation_);
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
