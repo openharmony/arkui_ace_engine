@@ -350,6 +350,13 @@ struct ArkUISizeType {
     ArkUI_CharPtr string;
 };
 
+struct ArkUIPaddingType {
+    struct ArkUISizeType top;
+    struct ArkUISizeType end;
+    struct ArkUISizeType bottom;
+    struct ArkUISizeType start;
+};
+
 struct ArkUITextShadowStruct {
     ArkUI_Float32 radius;
     ArkUI_Uint32 type;
@@ -1728,6 +1735,9 @@ struct ArkUICommonModifier {
     void (*setMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetMargin)(ArkUINodeHandle node);
+    void (*setSafeAreaPadding)(
+        ArkUINodeHandle node, const struct ArkUIPaddingType* safeAreaPadding, ArkUI_Bool isLengthMetrics);
+    void (*resetSafeAreaPadding)(ArkUINodeHandle node);
     void (*setMarkAnchor)(
         ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit);
     void (*resetMarkAnchor)(ArkUINodeHandle node);

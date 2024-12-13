@@ -2412,6 +2412,56 @@ void ResetPadding(ArkUINodeHandle node)
     ViewAbstract::SetPadding(frameNode, paddings);
 }
 
+void SetSafeAreaPadding(
+    ArkUINodeHandle node, const struct ArkUIPaddingType* safeAreaPadding, ArkUI_Bool isLengthMetrics)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength endDimen;
+    CalcLength bottomDimen;
+    CalcLength startDimen;
+    if (safeAreaPadding->top.string != nullptr) {
+        topDimen = CalcLength(safeAreaPadding->top.string);
+    } else {
+        topDimen = CalcLength(safeAreaPadding->top.value, static_cast<DimensionUnit>(safeAreaPadding->top.unit));
+    }
+    if (safeAreaPadding->end.string != nullptr) {
+        endDimen = CalcLength(safeAreaPadding->end.string);
+    } else {
+        endDimen = CalcLength(safeAreaPadding->end.value, static_cast<DimensionUnit>(safeAreaPadding->end.unit));
+    }
+    if (safeAreaPadding->bottom.string != nullptr) {
+        bottomDimen = CalcLength(safeAreaPadding->bottom.string);
+    } else {
+        bottomDimen =
+            CalcLength(safeAreaPadding->bottom.value, static_cast<DimensionUnit>(safeAreaPadding->bottom.unit));
+    }
+    if (safeAreaPadding->start.string != nullptr) {
+        startDimen = CalcLength(safeAreaPadding->start.string);
+    } else {
+        startDimen = CalcLength(safeAreaPadding->start.value, static_cast<DimensionUnit>(safeAreaPadding->start.unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    if (isLengthMetrics) {
+        paddings.end = std::optional<CalcLength>(endDimen);
+        paddings.start = std::optional<CalcLength>(startDimen);
+    } else {
+        paddings.right = std::optional<CalcLength>(endDimen);
+        paddings.left = std::optional<CalcLength>(startDimen);
+    }
+    ViewAbstract::SetSafeAreaPadding(frameNode, paddings);
+}
+
+void ResetSafeAreaPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetSafeAreaPadding(frameNode);
+}
+
 /**
  * @param values value value
  * values[0] : left, values[1] : top, values[2] : right, values[3] : bottom
@@ -6278,7 +6328,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
         ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
         ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
+        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin,
+        SetSafeAreaPadding, ResetSafeAreaPadding, SetMarkAnchor, ResetMarkAnchor,
         SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
         SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
         ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
