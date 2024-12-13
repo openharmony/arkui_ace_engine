@@ -6927,7 +6927,7 @@ void RichEditorPattern::ProcessResultObject(RefPtr<PasteDataMix> pasteData, cons
         if (result.valuePixelMap) {
             clipboard_->AddPixelMapRecord(pasteData, result.valuePixelMap);
         } else {
-            clipboard_->AddImageRecord(pasteData, UtfUtils::Str16ToStr8(result.valueString));
+            clipboard_->AddImageRecord(pasteData, result.valueString);
         }
 #else
         if (result.valuePixelMap) {
