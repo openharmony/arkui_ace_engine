@@ -141,11 +141,17 @@ HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->asymmetric, nullptr);
     auto app = new(Ark_TransitionEffect);
-    app->ptr = new(TransitionEffectPeer);
+    auto appPeer = new(TransitionEffectPeer);
+    app->ptr = appPeer;
     auto disapp = new(Ark_TransitionEffect);
-    disapp->ptr = new(TransitionEffectPeer);
+    auto disappPeer = new(TransitionEffectPeer);
+    disapp->ptr = disappPeer;
     auto peer = accessor_->asymmetric(app, disapp);
     ASSERT_NE(peer, nullptr);
+    delete disappPeer;
+    delete disapp;
+    delete appPeer;
+    delete app;
 }
 
 /**
