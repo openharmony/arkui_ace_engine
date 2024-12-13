@@ -54,6 +54,7 @@ public:
     static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetMuted(FrameNode* frameNode, bool muted);
+    static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
 private:
     void AddDragFrameNodeToManager() const;
 };
