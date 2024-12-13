@@ -1015,6 +1015,7 @@ public:
     ~GestureEventResult() = default;
 
     virtual void SetGestureEventResult(bool result) = 0;
+    virtual void SetGestureEventResult(bool result, bool stopPropagation) = 0;
 };
 
 class NativeEmbeadTouchInfo : public BaseEventInfo {
