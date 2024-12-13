@@ -166,7 +166,7 @@ void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
     UpdateSections(args, sections, waterFlowSections);
 }
 
-void SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject, RefPtr<NG::UINode>& refPtrUINode)
+RefPtr<NG::UINode> SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject)
 {
     JSRef<JSVal> builderNodeParam = footerJsObject->GetProperty("builderNode_");
     if (builderNodeParam->IsObject()) {
@@ -176,19 +176,21 @@ void SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject, RefPtr<NG::U
             const auto* vm = nodePtr->GetEcmaVM();
             auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
             auto* myUINode = reinterpret_cast<NG::UINode*>(node);
-            CHECK_NULL_VOID(myUINode);
-            refPtrUINode = AceType::Claim(myUINode);
-            return;
+            if (!myUINode) {
+                return nullptr;
+            }
+            auto refPtrUINode = AceType::Claim(myUINode);
+            return refPtrUINode;
         }
     }
+    return nullptr;
 }
 
 void JSWaterFlow::UpdateWaterFlowFooter(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
 {
     JSRef<JSObject> footerJsObject = JSRef<JSObject>::Cast(args); // 4 is the index of footerContent
     if (footerJsObject->HasProperty("builderNode_")) {
-        RefPtr<NG::UINode> refPtrUINode = nullptr;
-        SetWaterFlowBuilderNode(footerJsObject, refPtrUINode);
+        RefPtr<NG::UINode> refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);
         NG::WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, refPtrUINode);
     }
 }
@@ -238,7 +240,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
             auto footerContentObject = obj->GetProperty("footerContent");
             if (footerContentObject->IsObject()) {
                 auto footerJsObject = JSRef<JSObject>::Cast(footerContentObject);
-                SetWaterFlowBuilderNode(footerJsObject, refPtrUINode);
+                refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);
             }
             WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrUINode);
             return;
