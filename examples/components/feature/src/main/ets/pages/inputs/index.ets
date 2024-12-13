@@ -38,7 +38,7 @@ export function InputsDestination(name: string, route: Route) {
     TextAreaBootcamp({ title: route.label })
   } else if (name === 'inputs/richeditor') {
     RichEditorBootcamp({ title: route.label })
-  } esle if (name === 'inputs/search') {
-    SearchBootcamp({title: route.label})
+  } else if (name === 'inputs/search') {
+    SearchBootcamp({ title: route.label })
   }
 }

@@ -49,6 +49,8 @@ export struct SearchBootcamp {
     Column() {
       Text('onSubmit1:' + this.submitValue).fontSize(18).margin(15)
       Search({ value: $$this.changeValue, placeholder: 'Type to search...' })
+        .searchButton('SEARCH', { autoDisable: useEnabled(this.enableAutoDisable, this.autoDisable) })
+        .enterKeyType(EnterKeyType.Go)
         .textAlign(TextAlign.Center)
         .width('95%')
         .height(40)
@@ -64,6 +66,30 @@ export struct SearchBootcamp {
   }
   @Builder
   Parameters() {
+    Scroll() {
+      Column({ space: 8 }) {
+        RadioBlock({
+          title: '开启置灰效果',
+          isEnabled: this.enableAutoDisable,
+          value: this.autoDisable,
+          dataSource: [
+            { label: '开启', value: true },
+            { label: '关闭', value: false }
+          ]
+        })
+        RadioBlock({
+          title: '设置文本',
+          isEnabled: this.enablechangeValue,
+          value: this.changeValue,
+          dataSource: [
+            { label: 'aa', value: 'aa' },
+            { label: '空格', value: ' ' },
+            { label: '无文本', value: '' }
+          ]
+        })
+      }
+    }
+
   }
 }
 
