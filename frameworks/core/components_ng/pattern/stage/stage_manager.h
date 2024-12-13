@@ -120,6 +120,8 @@ protected:
     std::string GetSrcPageInfo(const RefPtr<FrameNode>& srcPage);
     void UpdatePageNeedRemove(const RefPtr<UINode>& pageNode);
     bool CheckPageInTransition(const RefPtr<UINode>& pageNode);
+    void ExpandSafeArea(const RefPtr<UINode>& frameNode);
+    void StopPageTransition(bool needTransition);
 
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -128,6 +130,7 @@ protected:
     RefPtr<StagePattern> stagePattern_;
     WeakPtr<FrameNode> destPageNode_;
     WeakPtr<FrameNode> srcPageNode_;
+    WeakPtr<FrameNode> animationSrcPage_;
     int32_t animationId_ = -1;
     bool stageInTrasition_ = false;
 #if defined(ENABLE_SPLIT_MODE)
