@@ -1689,7 +1689,6 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityMoveTextAction();
-    void SetAccessibilityScrollAction();
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();

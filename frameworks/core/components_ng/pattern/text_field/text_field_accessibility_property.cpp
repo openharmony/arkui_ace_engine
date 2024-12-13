@@ -178,14 +178,6 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
         AddSupportAction(AceAction::ACTION_COPY);
         AddSupportAction(AceAction::ACTION_CUT);
     }
-    if (IsScrollable() && textFieldPattern->IsTextArea()) {
-        if (!textFieldPattern->IsAtTop()) {
-            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-        }
-        if (!textFieldPattern->IsAtBottom()) {
-            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
-        }
-    }
 
     AddSupportAction(AceAction::ACTION_PASTE);
     AddSupportAction(AceAction::ACTION_SET_SELECTION);
