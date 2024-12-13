@@ -17,7 +17,7 @@
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebControllerAccessor {
@@ -81,7 +81,10 @@ void RunJavaScriptImpl(WebControllerPeer* peer,
     std::function<void(std::string)> callback = nullptr;
     auto arkFun = Converter::OptConvert<Callback_String_Void>(options->callback);
     if (arkFun) {
-        LOGE("WebControllerAccessor::RunJavaScriptImpl callback supporting is not implemented yet");
+        callback = [arkCallback = CallbackHelper(arkFun.value())](std::string result) {
+            Ark_String breakpoints = Converter::ArkValue<Ark_String>(result);
+            arkCallback.Invoke(breakpoints);
+        };
     }
     peerImpl->GetController()->ExecuteTypeScript(script, std::move(callback));
 }
