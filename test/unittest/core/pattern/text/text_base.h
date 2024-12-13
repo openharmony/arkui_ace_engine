@@ -89,6 +89,8 @@ constexpr float CONTEXT_LARGE_WIDTH_VALUE = 10000.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 10.0f;
 constexpr float BASE_LINE_OFFSET_VALUE = 1.0;
 constexpr float BASE_LINE_OFFSET = 20.f;
+constexpr float TEXT_FONT_SCALE = 2.5f;
+constexpr float TEXT_FONT_WEIGHT = 6.0f;
 constexpr double RECT_X_VALUE = 1.0;
 constexpr double RECT_SECOND_X_VALUE = 2.0;
 constexpr double RECT_Y_VALUE = 1.0;
@@ -98,6 +100,7 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
+constexpr double FONT_SIZE = 25.0;
 const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
@@ -153,6 +156,7 @@ constexpr float TEXT_RECT_WIDTH = 10.0f;
 constexpr float TEXT_RECT_TOP_ONE = 10.0f;
 constexpr float TEXT_RECT_TOP_TWO = 20.0f;
 constexpr float TEXT_CONTENT_SIZE = 50.0f;
+constexpr float TEXT_CONTENT_OFFSET = 2.25f;
 const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
     "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
     "\"HarmonyOS Sans\"}";
