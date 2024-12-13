@@ -9566,13 +9566,13 @@ class ViewV2 extends PUV2ViewBase {
             .forEach((varName) => {
             const prop = Reflect.get(meta, varName);
             if ('deco' in prop) {
-                retVal += ` ${prop['deco']}`; // main decorator
+                retVal += ` ${prop.deco}`; // main decorator
             }
             if ('deco2' in prop) {
-                retVal += ` ${prop['deco2']}`; // sub decorator like @Once
+                retVal += ` ${prop.deco2}`; // sub decorator like @Once
             }
             if ('aliasName' in prop) {
-                retVal += `(${prop['aliasName']})`; // aliasName for provider & consumer
+                retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
             }
             retVal += ` varName: ${varName}`;
             let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];
