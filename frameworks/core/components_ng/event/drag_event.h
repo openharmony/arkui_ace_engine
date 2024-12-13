@@ -292,6 +292,7 @@ public:
 
     void TryTriggerThumbnailCallback();
 
+    bool CheckIfNeedGetThumbnailPixelMap(const RefPtr<FrameNode>& frameNode);
     void GetThumbnailPixelMap(bool isSync);
     void GetThumbnailPixelMapForCustomNode();
     void GetThumbnailPixelMapForCustomNodeSync();
@@ -353,6 +354,7 @@ private:
     float distance_ = 0.0f;
     float preScaleValue_ = 1.0f;
     bool isRedragStart_ = false;
+    int32_t lastTouchFingerId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG
