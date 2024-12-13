@@ -681,6 +681,8 @@ public:
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
+    std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
