@@ -27,6 +27,14 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<Dimension>& dst, const Ark_FadingEdgeOptions& src)
+{
+    dst = OptConvert<Dimension>(src.fadingEdgeLength);
+}
+} // namespace OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableCommonMethodModifier {
 Ark_NativePointer ConstructImpl()
@@ -193,9 +201,19 @@ void FadingEdgeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(enabled);
-    //auto convValue = Converter::OptConvert<type>(enabled); // for enums
-    //ScrollableCommonMethodModelNG::SetFadingEdge(frameNode, convValue);
+
+    std::optional<bool> fadingEdge;
+    if (enabled) {
+        fadingEdge = Converter::OptConvert<bool>(*enabled);
+    }
+
+    std::optional<Dimension> fadingEdgeLength;
+    if (options) {
+        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
+    }
+    Validator::ValidateNonNegative(fadingEdgeLength);
+
+    ScrollableModelNG::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
 }
 } // ScrollableCommonMethodModifier
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier()

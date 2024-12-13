@@ -3663,6 +3663,21 @@
                     ]
                 },
                 {
+                    "name": "fadingEdge",
+                    "arguments": ["^fadingEdge", "^fadingEdgeOption",],
+                    "default": "false",
+                },
+                {
+                    "name": "fadingEdgeOption",
+                    "attributes": [
+                        {
+                            "name": "fadingEdgeLength",
+                            "default": "32.00vp",
+                            "fixtures": ["LengthMetricsNonNeg"],
+                        }
+                    ]
+                },
+                {
                     "name": "friction",
                     "default": "0.75",
                     "fixtures": ["ScrollableFrictionNum", "ScrollableFrictionRes"],
@@ -3683,10 +3698,6 @@
                 "setEdgeEffectTestEdgeEffectEdgeEffectValidValues",
                 "setEdgeEffectTestEdgeEffectEdgeEffectInvalidValues",
                 "setEdgeEffectTestEdgeEffectOptionsAlwaysEnabledValidValues",
-
-                // Modifier not implemented yet
-                "setFadingEdgeTestDefaultValues",
-                "setFadingEdgeTestValidValues",
 
                 // Nodes have different default values
                 "setScrollBarTestDefaultValues",
