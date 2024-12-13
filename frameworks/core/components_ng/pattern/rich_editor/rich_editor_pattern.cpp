@@ -6911,8 +6911,8 @@ void RichEditorPattern::ProcessResultObject(RefPtr<PasteDataMix> pasteData, cons
     CHECK_NULL_VOID(pasteData);
     auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
     if (result.type == SelectSpanType::TYPESPAN) {
-        auto data = UtfUtils::Str16ToStr8(GetSelectedSpanText(result.valueString,
-            result.offsetInSpan[RichEditorSpanRange::RANGESTART], result.offsetInSpan[RichEditorSpanRange::RANGEEND]));
+        auto data = GetSelectedSpanText(StringUtils::ToWstring(result.valueString),
+            result.offsetInSpan[RichEditorSpanRange::RANGESTART], result.offsetInSpan[RichEditorSpanRange::RANGEEND]);
 #ifdef PREVIEW
         clipboard_->SetData(data, CopyOptions::Distributed);
 #else
@@ -6933,7 +6933,7 @@ void RichEditorPattern::ProcessResultObject(RefPtr<PasteDataMix> pasteData, cons
         if (result.valuePixelMap) {
             multiTypeRecordImpl->SetPixelMap(result.valuePixelMap);
         } else {
-            multiTypeRecordImpl->SetUri(UtfUtils::Str16ToStr8(result.valueString));
+            multiTypeRecordImpl->SetUri(result.valueString);
         }
         EncodeTlvDataByResultObject(result, multiTypeRecordImpl->GetSpanStringBuffer());
         clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
