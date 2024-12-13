@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -31,11 +31,12 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
+
 const hilog = requireNapi('hilog');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi('resourceManager');
 const accessibility = requireNapi('accessibility');
-const Prompt = requireNapi('prompt');
+const BusinessError = requireNapi('BusinessError');
 
 const u = 24;
 const a1 = 24;
@@ -158,6 +159,12 @@ var b3;
     x18[x18['ARROW_DOWN_WHITE'] = 2] = 'ARROW_DOWN_WHITE';
     x18[x18['ARROW_RIGHT_WHITE'] = 3] = 'ARROW_RIGHT_WHITE';
 })(b3 || (b3 = {}));
+var q17;
+(function (l21) {
+    l21[l21['TEXT'] = 0] = 'TEXT';
+    l21[l21['PLACE'] = 1] = 'PLACE';
+    l21[l21['LIFT'] = 2] = 'LIFT';
+})(q17 || (q17 = {}));
 
 class c3 {
     constructor() {
@@ -703,8 +710,8 @@ export class TreeView extends ViewPU {
         this.addProvidedVar('treeViewTheme', this.u7, false);
         this.n16 = new ObservedPropertySimplePU(true, this, 'clickButtonFlag');
         this.addProvidedVar('clickButtonFlag', this.n16, false);
-        this.o16 = new ObservedPropertySimplePU(true, this, 'clickNodeFlag');
-        this.addProvidedVar('clickNodeFlag', this.o16, false);
+        this.r16 = new ObservedPropertySimplePU(q17.TEXT, this, 'accessibilityNodeType');
+        this.addProvidedVar('accessibilityNodeType', this.r16, false);
         this.listTreeViewMenu = this.NullBuilder;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -817,8 +824,8 @@ export class TreeView extends ViewPU {
         if (params.clickButtonFlag !== undefined) {
             this.clickButtonFlag = params.clickButtonFlag;
         }
-        if (params.clickNodeFlag !== undefined) {
-            this.clickNodeFlag = params.clickNodeFlag;
+        if (params.accessibilityNodeType !== undefined) {
+            this.accessibilityNodeType = params.accessibilityNodeType;
         }
         if (params.listTreeViewMenu !== undefined) {
             this.listTreeViewMenu = params.listTreeViewMenu;
@@ -867,7 +874,7 @@ export class TreeView extends ViewPU {
         this.m16.purgeDependencyOnElmtId(rmElmtId);
         this.u7.purgeDependencyOnElmtId(rmElmtId);
         this.n16.purgeDependencyOnElmtId(rmElmtId);
-        this.o16.purgeDependencyOnElmtId(rmElmtId);
+        this.r16.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -882,7 +889,7 @@ export class TreeView extends ViewPU {
         this.m16.aboutToBeDeleted();
         this.u7.aboutToBeDeleted();
         this.n16.aboutToBeDeleted();
-        this.o16.aboutToBeDeleted();
+        this.r16.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -975,12 +982,12 @@ export class TreeView extends ViewPU {
         this.n16.set(newValue);
     }
 
-    get clickNodeFlag() {
-        return this.o16.get();
+    get accessibilityNodeType() {
+        return this.r16.get();
     }
 
-    set clickNodeFlag(newValue) {
-        this.o16.set(newValue);
+    set accessibilityNodeType(newValue) {
+        this.r16.set(newValue);
     }
 
     NullBuilder(parent = null) {
@@ -1007,7 +1014,7 @@ export class TreeView extends ViewPU {
             this.item = this.treeController.v7().w7;
         }
         let w17 = this.getUIContext();
-        this.followingSystemFontScale = w17.isFollowingSystemFontScale();;
+        this.followingSystemFontScale = w17.isFollowingSystemFontScale();
         this.maxAppFontScale = w17.getMaxFontScale();
     }
 
@@ -1089,6 +1096,7 @@ export class TreeView extends ViewPU {
     draggingPopup(item, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
+            Row.id(`treeView_node_lift${item.e6()}`);
             Row.constraintSize({
                 minWidth: this.listNodeDataSource.x7().y7.minWidth,
                 maxWidth: this.listNodeDataSource.x7().y7.maxWidth,
@@ -1276,7 +1284,7 @@ export class TreeView extends ViewPU {
                 this.listNodeDataSource.z8();
             });
             List.onDrop((event, extraParams) => {
-                this.clickNodeFlag = false;
+                this.accessibilityNodeType = q17.PLACE;
                 this.listNodeDataSource.y8();
                 let m16 = n1;
                 this.listNodeDataSource.v8(m16);
@@ -1391,7 +1399,7 @@ export class TreeView extends ViewPU {
                 });
                 accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                     setTimeout(() => {
-                        this.clickNodeFlag = true;
+                        this.accessibilityNodeType = q17.TEXT;
                     }, j17);
                     console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(eventInfo)}`);
                 });
@@ -1412,6 +1420,7 @@ export class TreeView extends ViewPU {
                         });
                         ListItem.align(Alignment.Start);
                         ListItem.onDragStart((event, extraParams) => {
+                            this.accessibilityNodeType = q17.LIFT;
                             if (this.listNodeDataSource.a9() || this.listNodeDataSource.l8() || this.isMultiPress) {
                                 hilog.error(j16, i16, 'drag error, a item has been dragged');
                                 return;
@@ -1441,18 +1450,29 @@ export class TreeView extends ViewPU {
                                 f16.t6()?.primaryTitle;
                             let secondaryTitle = f16.t6()?.secondaryTitle === undefined ? '' :
                                 f16.t6()?.secondaryTitle;
-                            let title = `${primaryTitle}, ${secondaryTitle}`;
-                            Prompt.showToast({
-                                message: this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
-                                    title)
-                            });
+                            let h21 = this.listNodeDataSource.s16(primaryTitle);
+                            let i21 = this.listNodeDataSource.s16(secondaryTitle);
+                            let title = `${h21}, ${i21}`;
+                            this.listNodeDataSource.q16(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
+                                title));
                             let b21 = [];
-                            for (let c21 = 0; c21 < this.listNodeDataSource.w7.length; c21++) {
-                                if (this.listNodeDataSource.w7[c21].f6() === -1) {
-                                    b21.push(this.listNodeDataSource.w7[c21].e6());
+                            for (let p3 = 0; p3 < this.listNodeDataSource.w7.length; p3++) {
+                                if (this.listNodeDataSource.w7[p3].f6() === -1) {
+                                    b21.push(this.listNodeDataSource.w7[p3].e6());
                                 }
                             }
                             this.allParentNode = b21;
+                            let eventInfo = ({
+                                type: 'requestFocusForAccessibility',
+                                bundleName: getContext()?.abilityInfo?.bundleName,
+                                triggerAction: 'common',
+                                customId: `treeView_node_lift${g16}`
+                            });
+                            accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                                setTimeout(() => {
+                                    this.accessibilityNodeType = q17.TEXT;
+                                }, j17);
+                            });
                             return {
                                 builder: () => {
                                     this.draggingPopup.call(this, f16);
@@ -1504,7 +1524,7 @@ export class TreeView extends ViewPU {
                                         index: this.listNodeDataSource.findIndex(u15.e6()),
                                         listTreeViewMenu: this.listTreeViewMenu,
                                     }, undefined, elmtId, () => {
-                                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1145, x9: 13 });
+                                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1153, x9: 13 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -1619,7 +1639,7 @@ export class TreeController {
             if (nodeParam.primaryTitle !== undefined &&
                 !this.listNodeDataSource.i10(nodeParam.primaryTitle.toString())) {
                 throw new Error('ListTreeNode[addNode]: ' +
-                    'The directory name cannot contain the following characters\ /: *? " < > | or exceeds the maximum length.');
+                    'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
                 return this;
             }
             if (nodeParam.primaryTitle === null && nodeParam.icon === null) {
@@ -2596,46 +2616,50 @@ class h3 extends g3 {
     }
 
     g16(j5) {
-        let k5 = [];
+        let k3 = [];
         while (j5 !== -1) {
             if (j5 === undefined) {
-                return;
+                return '';
             }
             let m5 = this.f10(j5);
             let l5 = this.v10.get(m5);
             if (l5 === undefined || m5 === undefined) {
-                return;
+                return '';
             }
-            let primaryTitle = this.a15(l5).t6().primaryTitle === undefined
-                ? '' : this.a15(l5).t6().primaryTitle;
-            let secondaryTitle = this.a15(l5).t6().secondaryTitle === undefined
-                ? '' : this.a15(l5).t6().secondaryTitle;
-            k5.unshift(`${primaryTitle}${secondaryTitle}`);
+            let primaryTitle = this.a15(l5).t6()?.primaryTitle === undefined
+                ? '' : this.a15(l5).t6()?.primaryTitle;
+            let secondaryTitle = this.a15(l5).t6()?.secondaryTitle === undefined
+                ? '' : this.a15(l5).t6()?.secondaryTitle;
+            let f21 = this.s16(primaryTitle);
+            let g21 = this.s16(secondaryTitle);
+            k3.unshift(`${f21}, ${g21}`);
             j5 = l5.currentNodeId;
         }
-        return k5.join(',');
+        return k3.join(',');
     }
 
     p16(w20) {
-        let x20 = [];
+        let k1 = [];
         while (w20 !== -1) {
             if (w20 === undefined) {
                 return;
             }
             let y20 = this.f10(w20);
-            let z20 = this.findIndex(y20);
+            let p1 = this.findIndex(y20);
             let a21 = this.v10.get(y20);
             if (a21 === undefined || y20 === undefined) {
                 return;
             }
-            let primaryTitle = this.getData(z20)?.t6().primaryTitle === undefined
-                ? '' : this.getData(z20)?.t6().primaryTitle;
-            let secondaryTitle = this.getData(z20)?.t6().secondaryTitle === undefined
-                ? '' : this.getData(z20)?.t6().secondaryTitle;
-            x20.unshift(`${primaryTitle}${secondaryTitle}`);
+            let primaryTitle = this.getData(p1)?.t6()?.primaryTitle === undefined
+                ? '' : this.getData(p1)?.t6()?.primaryTitle;
+            let secondaryTitle = this.getData(p1)?.t6()?.secondaryTitle === undefined
+                ? '' : this.getData(p1)?.t6()?.secondaryTitle;
+            let z20 = this.s16(primaryTitle);
+            let c21 = this.s16(secondaryTitle);
+            k1.unshift(`${z20}, ${c21}`);
             w20 = a21.currentNodeId;
         }
-        return x20.join(',');
+        return k1.join(',');
     }
 
     h16(q20, r20) {
@@ -2644,32 +2668,55 @@ class h3 extends g3 {
             return;
         }
         let parentId = this.f10(r20);
-        let s20 = this.findIndex(r20);
-        let f5 = this.findIndex(parentId);
         let h5 = q20.indexOf(r20) + 2;
         let t20 = this.b10(parentId);
         let u20 = t20.map(item => item.itemId);
         let i5 = u20.indexOf(r20) + 2;
         if (parentId === -1 && this.j9(r20) === z2.COLLAPSE ||
             parentId === -1 && this.j9(r20) === undefined) {
-            Prompt.showToast({
-                message: this.getStringByName('treeview_accessibility_move_node_parent', h5)
-            });
+            this.q16(this.getStringByName('treeview_accessibility_move_node_parent', h5));
         } else if (this.j9(r20) === z2.EXPAND) {
-            Prompt.showToast({
-                message: this.getStringByName('treeview_accessibility_move_node_child', this.g16(r20), 1)
-            });
+            this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.g16(r20), 1));
         } else if (parentId !== -1) {
-            Prompt.showToast({
-                message: this.getStringByName('treeview_accessibility_move_node_child', this.g16(r20), i5)
-            });
+            this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.g16(r20), i5));
         }
     }
 
     getStringByName(resName, ...args) {
-        let resourceManager = getContext()?.resourceManager;
-        let result = resourceManager?.getStringByNameSync(resName, ...args);
-        return result;
+        if (resName) {
+            try {
+                return getContext()?.resourceManager.getStringByNameSync(resName, ...args);
+            } catch (error) {
+                console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+            }
+        }
+        return '';
+    }
+
+    q16(textAnnouncedForAccessibility) {
+        let eventInfo = ({
+            type: 'announceForAccessibility',
+            bundleName: getContext()?.abilityInfo?.bundleName,
+            triggerAction: 'common',
+            textAnnouncedForAccessibility: textAnnouncedForAccessibility
+        });
+        accessibility.sendAccessibilityEvent(eventInfo);
+    }
+
+    s16(resource) {
+        let x20 = '';
+        try {
+            if (typeof resource === 'string') {
+                x20 = resource;
+            } else {
+                x20 = getContext()?.resourceManager?.getStringSync(resource?.id);
+            }
+        } catch (error) {
+            let code = error.code;
+            let message = error.message;
+            hilog.error(0x3900, 'Ace', `treeView getAccessibleTitleText error, code: ${code}, message: ${message}`);
+        }
+        return x20;
     }
 
     r8(flag, index, k11, l20) {
@@ -3508,7 +3555,7 @@ class h3 extends g3 {
     }
 
     i10(title) {
-        if (new RegExp('/[\\\/:*?" < > |]/').test(title)){
+        if (new RegExp('/[\\\/:*?"<>|]/').test(title)) {
             return false;
         }
         if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_CN_LENGTH) ||
@@ -3634,7 +3681,7 @@ export class i3 extends ViewPU {
         this.s7 = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
         this.u7 = this.initializeConsume('treeViewTheme', 'treeViewTheme');
         this.n16 = this.initializeConsume('clickButtonFlag', 'clickButtonFlag');
-        this.o16 = this.initializeConsume('clickNodeFlag', 'clickNodeFlag');
+        this.r16 = this.initializeConsume('accessibilityNodeType', 'accessibilityNodeType');
         this.listTreeViewMenu = undefined;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -3784,7 +3831,7 @@ export class i3 extends ViewPU {
         this.s7.purgeDependencyOnElmtId(rmElmtId);
         this.u7.purgeDependencyOnElmtId(rmElmtId);
         this.n16.purgeDependencyOnElmtId(rmElmtId);
-        this.o16.purgeDependencyOnElmtId(rmElmtId);
+        this.r16.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -3798,7 +3845,7 @@ export class i3 extends ViewPU {
         this.s7.aboutToBeDeleted();
         this.u7.aboutToBeDeleted();
         this.n16.aboutToBeDeleted();
-        this.o16.aboutToBeDeleted();
+        this.r16.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -3879,12 +3926,12 @@ export class i3 extends ViewPU {
         this.n16.set(newValue);
     }
 
-    get clickNodeFlag() {
-        return this.o16.get();
+    get accessibilityNodeType() {
+        return this.r16.get();
     }
 
-    set clickNodeFlag(newValue) {
-        this.o16.set(newValue);
+    set accessibilityNodeType(newValue) {
+        this.r16.set(newValue);
     }
 
     aboutToAppear() {
@@ -3892,7 +3939,7 @@ export class i3 extends ViewPU {
             this.item.j4 = this.item.k6().v3?.source;
         }
         let j7 = this.getUIContext();
-        this.followingSystemFontScale = j7.isFollowingSystemFontScale();;
+        this.followingSystemFontScale = j7.isFollowingSystemFontScale();
         this.maxAppFontScale = j7.getMaxFontScale();
     }
 
@@ -3927,7 +3974,7 @@ export class i3 extends ViewPU {
     }
 
     checkInvalidPattern(title) {
-        return new RegExp('/[\\\/:*?" < > |]/').test(title);
+        return new RegExp('/[\\\/:*?"<>|]/').test(title);
     }
 
     checkIsAllCN(title) {
@@ -3940,11 +3987,13 @@ export class i3 extends ViewPU {
             return '';
         }
         let c20 = this.listNodeDataSource.a15(b20);
-        let primaryTitle = c20?.t6()?.primaryTitle?.toString() === undefined
-            ? '' : c20?.t6()?.primaryTitle?.toString();
+        let primaryTitle = c20?.t6()?.primaryTitle === undefined
+            ? '' : c20?.t6()?.primaryTitle;
         let secondaryTitle = c20?.t6()?.secondaryTitle?.toString() === undefined
             ? '' : c20?.t6()?.secondaryTitle?.toString();
-        let title = `${primaryTitle},${secondaryTitle}`;
+        let s17 = this.listNodeDataSource.s16(primaryTitle);
+        let j19 = this.listNodeDataSource.s16(secondaryTitle);
+        let title = `${s17}, ${j19}`;
         let parentId = this.listNodeDataSource.f10(currentNodeId);
         let d20 = [];
         let e20 = 0;
@@ -3955,7 +4004,7 @@ export class i3 extends ViewPU {
         if (i20 === undefined) {
             return '';
         }
-        if (this.clickNodeFlag === false) {
+        if (this.accessibilityNodeType === q17.PLACE) {
             if (this.listNodeDataSource.f10(currentNodeId) === -1) {
                 for (let k20 = 0; k20 < this.listNodeDataSource.w7.length; k20++) {
                     if (this.listNodeDataSource.w7[k20].f6() === -1) {
@@ -3967,16 +4016,18 @@ export class i3 extends ViewPU {
             } else {
                 return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_child', i20, h20);
             }
+        } else if (this.accessibilityNodeType === q17.LIFT) {
+            return title;
         } else {
             return title;
         }
     }
 
     getAccessibilityDescription() {
-        if (this.clickNodeFlag === false) {
-            return '';
-        } else {
+        if (this.accessibilityNodeType === q17.TEXT) {
             return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
+        } else {
+            return '';
         }
     }
 
@@ -3995,7 +4046,7 @@ export class i3 extends ViewPU {
         if (this.clickButtonFlag === false) {
             return '';
         } else {
-            return '单指双击即可执行';
+            return this.listNodeDataSource.getStringByName('treeview_accessibility_implement_node');
         }
     }
 
@@ -4150,11 +4201,9 @@ export class i3 extends ViewPU {
                                 this.item.k6().w3?.j8(true);
                                 let a7 = { currentNodeId: z6 };
                                 this.appEventBus.emit(TreeListenType.NODE_CLICK, a7);
-                                Prompt.showToast({
-                                    message: this.item.s6()
-                                        ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
-                                        `${this.getAccessibilityReadText(this.item.e6())}`) : ''
-                                });
+                                this.listNodeDataSource.q16(this.item.s6()
+                                    ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+                                    `${this.getAccessibilityReadText(this.item.e6())}`) : '');
                             }
                             if (this.listNodeDataSource.u9() !== -1 && this.index !== this.listNodeDataSource.u9()) {
                                 this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
