@@ -19,6 +19,7 @@
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "want.h"
 #endif //WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -76,7 +77,13 @@ namespace UIExtensionComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif //WINDOW_SCENE_SUPPORTED
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
@@ -121,12 +128,12 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     auto onRemoteReady =
         [arkCallback = CallbackHelper(*value)](const RefPtr<UIExtensionProxy>& proxy) {
             auto accessor = GetUIExtensionProxyAccessor();
-            CHECK_NULL_VOID(accessor && accessor->ctor);
-            auto peer = (*accessor->ctor)();
+            CHECK_NULL_VOID(accessor);
+            auto peer = accessor->ctor();
             CHECK_NULL_VOID(peer);
+            auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
+            uiExtensionProxyPeerPtr->SetProxy(proxy);
             arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
-            auto finalyzer = reinterpret_cast<void (*)(void *)>(accessor->getFinalizer());
-            finalyzer(peer);
         };
     UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
