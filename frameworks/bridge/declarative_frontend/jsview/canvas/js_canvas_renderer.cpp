@@ -109,6 +109,7 @@ JSCanvasRenderer::JSCanvasRenderer()
 {
     SetInstanceId(Container::CurrentIdSafely());
     density_ = PipelineBase::GetCurrentDensity();
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
         // The default value of the font size in canvas is 14px.
@@ -982,6 +983,9 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
 {
     double limit = 0.0;
     if (info.GetDoubleArg(0, limit)) {
+        if (limit == 0 && apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+            return;
+        }
         renderingContext2DModel_->SetMiterLimit(limit);
     }
 }
