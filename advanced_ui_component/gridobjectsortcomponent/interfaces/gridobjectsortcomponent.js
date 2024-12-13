@@ -54,6 +54,7 @@ const j1 = 56;
 const l1 = 1;
 const m1 = 1;
 const n1 = 2;
+const m4 = 1.15;
 const o1 = 12;
 const q1 = 1;
 const s1 = 1;
@@ -805,9 +806,9 @@ export class GridObjectSortComponent extends ViewPU {
     getAdaptiveSymbolFontSize() {
         let fontScale = this.fontSizeScale;
         if (!this.isFollowingSystemFontScale || fontScale === undefined) {
-            fontScale = 1;
+            fontScale = m1;
         }
-        fontScale = Math.min(1.15, fontScale);
+        fontScale = Math.min(m4, fontScale);
         fontScale = Math.max(fontScale, m1);
         return (fontScale * l4).toString() + 'vp';
     }
@@ -1253,7 +1254,7 @@ export class GridObjectSortComponent extends ViewPU {
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (url == undefined) {
+                        if (url === undefined) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
@@ -1373,7 +1374,7 @@ export class GridObjectSortComponent extends ViewPU {
                     let componentCall = new ComposeTitleBar(this, {
                         title: this.options.normalTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         menuItems: this.menuItems,
-                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 831, c2: 5 });
+                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 832, c2: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1407,7 +1408,7 @@ export class GridObjectSortComponent extends ViewPU {
                             this.saveClick = true;
                             this.onSaveEdit();
                         }
-                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 836, c2: 5 });
+                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 837, c2: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1467,7 +1468,7 @@ export class GridObjectSortComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (select.url == undefined) {
+                        if (select.url === undefined) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
@@ -2160,7 +2161,7 @@ export class GridObjectSortComponent extends ViewPU {
                         secondaryTitle: this.options.showAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 1440, c2: 11 });
+                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 1441, c2: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2205,7 +2206,7 @@ export class GridObjectSortComponent extends ViewPU {
                         secondaryTitle: this.options.addAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 1449, c2: 11 });
+                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/GridObjectSortComponent.ets", line: 1450, c2: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {

@@ -45,6 +45,7 @@ const SUBTITLE_HEIGHT = 56;
 const TEXT_MAX_LINES = 1;
 const MIN_FONT_SCALE = 1;
 const MAX_FONT_SCALE = 2;
+const MIN_SYMBOL_FONT_SCALE = 1.15;
 const DEFAULT_TEXT_SIZE = 12;
 const DEFAULT_FONT_SIZE_SCALE = 1;
 const DEFAULT_FONT_WEIGHT_SCALE = 1;
@@ -76,7 +77,6 @@ export interface GridObjectSortComponentOptions {
   showAreaTitle?: ResourceStr;
   addAreaTitle?: ResourceStr;
 }
-
 
 export enum GridObjectSortComponentType {
   IMAGE_TEXT = 'image_text',
@@ -230,13 +230,14 @@ export struct GridObjectSortComponent {
       this.firstIn = false;
     }, 500);
   }
-// get adaptive for symbol font size
+
+  // get adaptive for symbol font size
   getAdaptiveSymbolFontSize(): string {
-    let fontScale = this.fontSizeScale
+    let fontScale : number | undefined = this.fontSizeScale;
     if (!this.isFollowingSystemFontScale || fontScale === undefined) {
-      fontScale = 1;
+      fontScale = MIN_FONT_SCALE;
     }
-    fontScale = Math.min(1.15, fontScale);
+    fontScale = Math.min(MIN_SYMBOL_FONT_SCALE, fontScale);
     fontScale = Math.max(fontScale, MIN_FONT_SCALE);
     return (fontScale * SYMBOL_SIZE_12FP).toString() + 'vp';
   }
@@ -247,7 +248,7 @@ export struct GridObjectSortComponent {
       return SYMBOL_DEFAULT;
     }
     if (typeof imageSize === 'number') {
-      return (imageSize as number).toString()+'vp';
+      return (imageSize as number).toString() + 'vp';
     }
     return imageSize as Resource;
   }
@@ -438,16 +439,16 @@ export struct GridObjectSortComponent {
     this.selectedIndex = currentIndex;
     this.calcGridHeight();
     animateTo({curve: REMOVE_ADD_SPRING, onFinish: () => {
-        this.scaleIcon = 1;
-        this.selected.splice(currentIndex, 1);
-        this.unSelected.unshift(content);
-        this.calcGridHeight();
-        this.editGridDataLength = this.editGridDataLength - 1;
-        this.editItemMoveX = 0;
-        this.editItemMoveY = 0;
-        this.arraySelectIsChange = 2;
-        this.clickRemoveBtn = false;
-      }
+      this.scaleIcon = 1;
+      this.selected.splice(currentIndex, 1);
+      this.unSelected.unshift(content);
+      this.calcGridHeight();
+      this.editGridDataLength = this.editGridDataLength - 1;
+      this.editItemMoveX = 0;
+      this.editItemMoveY = 0;
+      this.arraySelectIsChange = 2;
+      this.clickRemoveBtn = false;
+    }
     }, () => {
       let addItemGridPosition = this.getAddItemGridPosition();
       this.editItemMoveX = addItemGridPosition.x;
@@ -737,24 +738,24 @@ export struct GridObjectSortComponent {
     Stack({ alignContent: Alignment.Center }) {
       if (this.imageText) {
         Column() {
-          if (url == undefined) {
+          if (url === undefined) {
             SymbolGlyph()
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
-              .width((this.options.imageSize || SYMBOL_DEFAULT))
+              .width(this.options.imageSize || SYMBOL_DEFAULT)
               .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
-              .width((this.options.imageSize || SYMBOL_DEFAULT))
+              .width(this.options.imageSize || SYMBOL_DEFAULT)
               .attributeModifier(url)
               .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
           } else {
             Image(url)
               .draggable(false)
               .height(this.options.imageSize || IMAGE_DEFAULT)
-              .width((this.options.imageSize || IMAGE_DEFAULT))
+              .width(this.options.imageSize || IMAGE_DEFAULT)
           }
           Text(text)
             .textAlign(TextAlign.Center)
@@ -858,7 +859,7 @@ export struct GridObjectSortComponent {
             .attributeModifier(select.symbolStyle)
             .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
         } else {
-          if (select.url == undefined) {
+          if (select.url === undefined) {
             SymbolGlyph()
               .draggable(false)
               .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
@@ -908,20 +909,20 @@ export struct GridObjectSortComponent {
             this.clickAddBtn = true;
             this.calcGridHeight();
             animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-                if (!this.selected.some(val => val.id === select.id)) {
-                  this.arrayUnSelectIsChange = 2;
-                  this.scaleIcon = 1;
-                  this.selected.push(select);
-                  this.unSelected.splice(index, 1);
-                  this.calcGridHeight();
-                  this.addItemMoveX = 0;
-                  this.addItemMoveY = 0;
-                  if (!this.gridComState) {
-                    this.onSaveEdit();
-                  }
-                  this.clickAddBtn = false;
+              if (!this.selected.some(val => val.id === select.id)) {
+                this.arrayUnSelectIsChange = 2;
+                this.scaleIcon = 1;
+                this.selected.push(select);
+                this.unSelected.splice(index, 1);
+                this.calcGridHeight();
+                this.addItemMoveX = 0;
+                this.addItemMoveY = 0;
+                if (!this.gridComState) {
+                  this.onSaveEdit();
                 }
+                this.clickAddBtn = false;
               }
+            }
             }, () => {
               this.addItemMoveX = endPosition.x;
               this.addItemMoveY = endPosition.y;
