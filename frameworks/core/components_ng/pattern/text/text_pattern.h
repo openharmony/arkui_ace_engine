@@ -259,7 +259,7 @@ public:
         if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
         }
     }
     void ModifyAISpanStyle(TextStyle& aiSpanStyle)
