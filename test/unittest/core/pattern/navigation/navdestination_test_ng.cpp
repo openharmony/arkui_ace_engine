@@ -52,6 +52,7 @@ constexpr float TITLE_FRAME_WIDTH = 60.0f;
 constexpr float TITLE_FRAME_HEIGHT = 30.0f;
 constexpr float SUBTITLE_FRAME_WIDTH = 60.0f;
 constexpr float SUBTITLE_FRAME_HEIGHT = 20.0f;
+const CalcDimension DEFAULT_PADDING = 24.0_vp;
 
 struct UIComponents {
     RefPtr<LayoutWrapperNode> layoutWrapper = nullptr;
@@ -725,6 +726,100 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
 }
 
 /**
+ * @tc.name: SetTitlebarOptions001
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetTitlebarOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModel", true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
+    opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
+    opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
+
+    navDestinationModelNG.SetTitlebarOptions(std::move(opt));
+
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.bgOptions.color.has_value());
+    EXPECT_EQ(options.bgOptions.color.value(), Color(0xff0000ff));
+
+    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::NO_MATERIAL);
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
+
+    EXPECT_TRUE(options.brOptions.paddingStart.has_value());
+    EXPECT_EQ(options.brOptions.paddingStart.value(), DEFAULT_PADDING);
+    
+    EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
+    EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
+}
+
+/**
+ * @tc.name: SetTitlebarOptions002
+ * @tc.desc: Test SetTitlebarOptions function with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModel", true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(Color(0xff00ff00));
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::REGULAR);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
+    opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
+    
+    NavDestinationModelNG::SetTitlebarOptions(&(*frameNode), std::move(opt));
+
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.bgOptions.color.has_value());
+    EXPECT_EQ(options.bgOptions.color.value(), Color(0xff00ff00));
+
+    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::REGULAR);
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STANDARD);
+
+    EXPECT_TRUE(options.brOptions.paddingStart.has_value());
+    EXPECT_EQ(options.brOptions.paddingStart.value(), DEFAULT_PADDING);
+
+    EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
+    EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
+}
+
+/*
  * @tc.name: SetSystemTransitionType001
  * @tc.desc: Test SetTitlebarOptions function with specific node.
  * @tc.type: FUNC

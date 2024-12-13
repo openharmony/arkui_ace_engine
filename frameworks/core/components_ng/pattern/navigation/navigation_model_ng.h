@@ -92,6 +92,10 @@ public:
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
         bool ignoreMainTitle = false);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
+    static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
+    static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
+    static void SetMenuItemSymbol(FrameNode* frameNode,
+        std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

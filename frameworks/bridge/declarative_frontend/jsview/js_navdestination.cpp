@@ -82,11 +82,13 @@ bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
     JSRef<JSVal> title = jsObj->GetProperty("main");
-    bool hasSub = subtitle->IsString();
-    bool hasMain = title->IsString();
+    std::string mainTitle;
+    std::string subTitle;
+    bool hasSub = JSViewAbstract::ParseJsString(subtitle, subTitle);
+    bool hasMain = JSViewAbstract::ParseJsString(title, mainTitle);
     if (hasSub || hasMain) {
         return NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(
-            hasSub, hasMain, subtitle->ToString(), title->ToString());
+            hasSub, hasMain, subTitle, mainTitle);
     }
     return false;
 }

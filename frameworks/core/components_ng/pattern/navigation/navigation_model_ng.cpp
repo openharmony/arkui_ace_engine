@@ -1598,4 +1598,61 @@ void NavigationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationTitle
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
 }
+
+void NavigationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    // if previous menu is custom, just remove it and create new menu, otherwise update old menu
+    if (navBarNode->GetPrevMenuIsCustom().value_or(false)) {
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (navBarNode->GetMenu()) {
+            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+        }
+    }
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetTitleBarMenuItems(menuItems);
+    navBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navBarPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navBarNode->UpdatePrevMenuIsCustom(false);
+}
+
+void NavigationModelNG::SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index)
+{
+    CHECK_NULL_VOID(action);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    auto menuItems = navBarPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).action = action;
+        navBarPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavigationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index)
+{
+    CHECK_NULL_VOID(symbol);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    auto menuItems = navBarPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).iconSymbol = symbol;
+        navBarPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
 } // namespace OHOS::Ace::NG
