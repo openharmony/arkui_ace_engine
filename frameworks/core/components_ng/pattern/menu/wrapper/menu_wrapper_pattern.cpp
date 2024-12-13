@@ -73,7 +73,10 @@ RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
         CHECK_NULL_RETURN(frameNode, RectF());
         auto geometryNode = frameNode->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, RectF());
-        innerMenuNode = GetMenuChild(frameNode);
+        auto menuPattern = frameNode->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, RectF());
+        auto subMenuNode = menuPattern->GetShowedSubMenu();
+        innerMenuNode = subMenuNode ? subMenuNode : menuPattern->GetFirstInnerMenu();
         if (!innerMenuNode) {
             innerMenuNode = child;
         }

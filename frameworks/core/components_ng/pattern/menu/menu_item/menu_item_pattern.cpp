@@ -299,6 +299,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
@@ -306,11 +308,10 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
         auto frameNode = GetSubMenu(customNode);
         CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
+        menuPattern->SetShowedSubMenu(frameNode);
         return;
     }
 
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
     menuPattern->FocusViewHide();
     HideSubMenu();
     isSubMenuShowed_ = true;
