@@ -290,6 +290,8 @@ public:
     {
         return type_;
     }
+    
+    void CheckIsNeedForceExitWindow(bool result);
 
     void ResetPageTransitionEffect();
 

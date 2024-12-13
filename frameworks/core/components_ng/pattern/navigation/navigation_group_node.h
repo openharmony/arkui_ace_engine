@@ -144,6 +144,8 @@ public:
     }
 
     bool CheckCanHandleBack(bool& isEntry);
+    
+    void CheckIsNeedForceExitWindow(bool result);
 
     void OnInspectorIdUpdate(const std::string& id) override;
 

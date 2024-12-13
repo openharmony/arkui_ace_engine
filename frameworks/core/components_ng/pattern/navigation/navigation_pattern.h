@@ -427,6 +427,7 @@ public:
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
 
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
+    RefPtr<NavigationPattern> GetParentNavigationPattern();
     void RestoreJsStackIfNeeded();
 
     RefPtr<FrameNode> GetNavBasePageNode() const
@@ -514,7 +515,6 @@ private:
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     void RefreshNavDestination();
-    RefPtr<NavigationPattern> GetParentNavigationPattern();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar);
     void NotifyNavDestinationSwitch(const RefPtr<NavDestinationContext>& from,
         const RefPtr<NavDestinationContext>& to, NavigationOperation operation);
