@@ -187,13 +187,12 @@ public:
 
     bool IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode);
     void StartDragTaskForWeb(const GestureEvent& info);
-    void StartLongPressActionForWeb(bool isFloatImage = true);
+    void StartLongPressActionForWeb();
     void CancelDragForWeb();
     void ResetDragActionForWeb() {
         if (isReceivedLongPress_) {
             isReceivedLongPress_ = false;
         }
-        isFloatImage_ = true;
     }
 
     void SetIsNotInPreviewState(bool isNotInPreviewState)
@@ -243,8 +242,9 @@ public:
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
     static RefPtr<FrameNode> CreateImageNode(
         const RefPtr<FrameNode>& frameNode, GatherNodeChildInfo& gatherNodeChildInfo);
-    static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
+    static void MarkDirtyNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
+    static void InitGatherNodesPosition(const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
         const RefPtr<FrameNode>& gatherNode, const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
@@ -335,7 +335,6 @@ private:
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
-    bool isFloatImage_ = true;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     std::vector<DimensionRect> responseRegion_;

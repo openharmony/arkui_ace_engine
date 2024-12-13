@@ -164,11 +164,11 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         BorderRadiusProperty radius;
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
-    }
-    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-    if (shadowTheme) {
-        auto colorMode = SystemProperties::GetColorMode();
-        renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            auto colorMode = SystemProperties::GetColorMode();
+            renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
+        }
     }
     UpdateBackgroundStyle(renderContext, dialogProperties);
 }
@@ -232,25 +232,26 @@ void CalendarDialogView::SetTitleIdealSize(
     }
 }
 
-void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode,
-    RefPtr<FrameNode>& leftDayArrowNode, RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode)
+void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode, RefPtr<FrameNode>& leftDayArrowNode,
+    RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode, RefPtr<CalendarTheme> theme)
 {
+    CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(leftYearArrowNode);
     auto leftYearProperty = leftYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(leftYearProperty);
-    leftYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_year"));
+    leftYearProperty->SetAccessibilityText(theme->GetCalendarTheme().preYear);
     CHECK_NULL_VOID(leftDayArrowNode);
     auto leftDayProperty = leftDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(leftDayProperty);
-    leftDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_month"));
+    leftDayProperty->SetAccessibilityText(theme->GetCalendarTheme().preMonth);
     CHECK_NULL_VOID(rightDayArrowNode);
     auto rightDayProperty = rightDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(rightDayProperty);
-    rightDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_month"));
+    rightDayProperty->SetAccessibilityText(theme->GetCalendarTheme().nextMonth);
     CHECK_NULL_VOID(rightYearArrowNode);
     auto rightYearProperty = rightYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(rightYearProperty);
-    rightYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_year"));
+    rightYearProperty->SetAccessibilityText(theme->GetCalendarTheme().nextYear);
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
@@ -313,7 +314,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     auto rightYearArrowNode =
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
-    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode);
+    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode, theme);
     return titleRow;
 }
 

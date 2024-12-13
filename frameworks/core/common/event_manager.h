@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/event_dump.h"
+#include "core/common/key_event_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
@@ -29,6 +30,7 @@
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/pointer_event.h"
+#include "core/event/non_pointer_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
@@ -66,8 +68,8 @@ struct MarkProcessedEventInfo {
     int64_t lastLogTimeStamp = 0;
 };
 
-class EventManager : public virtual AceType {
-    DECLARE_ACE_TYPE(EventManager, AceType);
+class EventManager : virtual public NG::KeyEventManager {
+    DECLARE_ACE_TYPE(EventManager, KeyEventManager);
 
 public:
     EventManager();
@@ -91,6 +93,7 @@ public:
 
     bool HasDifferentDirectionGesture();
 
+    bool OnNonPointerEvent(const NonPointerEvent& event);
     bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
     bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
     bool PostEventDispatchTouchEvent(const TouchEvent& point);
@@ -98,24 +101,10 @@ public:
     void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
     void PostEventFlushTouchEventEnd(const TouchEvent& touchEvent);
 
-    // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
-    // platform will handle it.
-    bool DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
-    bool DispatchTabIndexEvent(
-        const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& mainNode);
-
-    // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
-    // platform will handle it.
-    bool DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode);
-    bool DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView);
-
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.
     static bool DispatchRotationEvent(
         const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode);
-
-    // If current focus node is Web, will skip some events processing.
-    static bool IsSkipEventNode(const RefPtr<NG::FrameNode>& focusNode);
 
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
@@ -149,7 +138,7 @@ public:
     {
         instanceId_ = instanceId;
     }
-    int32_t GetInstanceId()
+    int32_t GetInstanceId() override
     {
         return instanceId_;
     }
@@ -179,6 +168,11 @@ public:
         return refereeNG_;
     }
 
+    RefPtr<MouseStyleManager> GetMouseStyleManager() const
+    {
+        return mouseStyleManager_;
+    }
+
     bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
@@ -193,32 +187,6 @@ public:
         const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp);
 
     MouseEvent GetMouseLatestPoint(const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp);
-
-
-    bool DispatchKeyboardShortcut(const KeyEvent& event);
-
-    void AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node);
-
-    void DelKeyboardShortcutNode(int32_t nodeId);
-
-    void AddKeyboardShortcutKeys(uint8_t keys, std::vector<KeyCode>& leftKeyCode, std::vector<KeyCode>& rightKeyCode,
-        std::vector<uint8_t>& permutation);
-
-    bool IsKeyInPressed(KeyCode tarCode) const
-    {
-        return std::any_of(pressedKeyCodes_.begin(), pressedKeyCodes_.end(),
-            [tarCode](const KeyCode& code) { return code == tarCode; });
-    }
-    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
-    {
-        pressedKeyCodes_ = pressedKeyCodes;
-    }
-
-    bool IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys);
-
-    bool IsSystemKeyboardShortcut(const KeyEvent& event);
-
-    uint8_t GetKeyboardShortcutKeys(const std::vector<ModifierKey>& keys);
 
     void DoMouseActionRelease();
 
@@ -267,6 +235,16 @@ public:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
+    const std::unordered_map<size_t, TouchTestResult>& GetAxisTouchTestResults() const
+    {
+        return axisTouchTestResults_;
+    }
+
+    void SetAxisTouchTestResults(std::unordered_map<size_t, TouchTestResult>& axisTouchTestResults)
+    {
+        axisTouchTestResults_ = axisTouchTestResults;
+    }
+
     void SetInnerFlag(bool value)
     {
         innerEventWin_ = value;
@@ -275,14 +253,6 @@ public:
     bool GetInnerFlag() const
     {
         return innerEventWin_;
-    }
-
-    void SetIsKeyConsumed(bool value)
-    {
-        // Once consumed, isKeyConsumed_ keeps true
-        if (!isKeyConsumed_ && value) {
-            isKeyConsumed_ = true;
-        }
     }
 
     int64_t GetLastTouchEventEndTimestamp()
@@ -311,6 +281,11 @@ public:
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
 
+    inline const std::unordered_map<int32_t, int32_t>& GetDownFingerIds() const
+    {
+        return downFingerIds_;
+    }
+
     inline const std::unordered_map<int32_t, TouchEvent>& GetIdToTouchPoint() const
     {
         return idToTouchPoints_;
@@ -332,6 +307,8 @@ public:
     }
 
     TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
+
+    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
@@ -358,7 +335,6 @@ private:
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
-    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
     void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, bool sendOnTouch = true);
     void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch = true);
@@ -403,12 +379,10 @@ private:
     bool inSelectedRect_ = false;
     bool isDragging_ = false;
     bool isLastMoveBeforeUp_ = false;
-    bool isKeyConsumed_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
-    std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
-    std::vector<KeyCode> pressedKeyCodes_;
+    RefPtr<MouseStyleManager> mouseStyleManager_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;

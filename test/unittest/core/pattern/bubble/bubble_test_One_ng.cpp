@@ -238,6 +238,8 @@ HWTEST_F(BubbleTestOneNg, AdjustPosition001, TestSize.Level1)
     layoutAlgorithm->placement_ = static_cast<Placement>(testCase);
     layoutAlgorithm->AdjustPosition(tesPos, 1.0f, 1.0f, 1.0f);
     EXPECT_EQ(layoutAlgorithm->showArrow_, true);
+    layoutAlgorithm->AdjustPosition(tesPos, 1.0f, 1.0f, 100.0f);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, true);
 }
 
 /**
@@ -992,6 +994,11 @@ HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect003, TestSize.Level1)
     tstRect.SetHeight(0.0f);
     tstRuslt = layoutAlgorithm->CheckPositionInPlacementRect(tstRect, tstPosition, childSize);
     ASSERT_NE(tstRuslt, true);
+    tstPosition.SetY(0.01f);
+    childSize = {100.0f, 100.0f};
+    tstRect.SetRect(0.0f, 0.0f, 1000.0f, 1000.0f);
+    tstRuslt = layoutAlgorithm->CheckPositionInPlacementRect(tstRect, tstPosition, childSize);
+    EXPECT_TRUE(tstRuslt);
 }
 
 /**

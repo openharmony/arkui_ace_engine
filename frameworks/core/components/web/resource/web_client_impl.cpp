@@ -1304,4 +1304,12 @@ void WebClientImpl::OnAccessibilityEvent(int64_t accessibilityId, int32_t eventT
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
 }
+
+bool WebClientImpl::IsCurrentFocus()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->IsCurrentFocus();
+}
 } // namespace OHOS::Ace

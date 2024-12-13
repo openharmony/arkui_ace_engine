@@ -92,8 +92,6 @@ class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
-using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
-    SerializedGesture& serializedGesture)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -187,10 +185,6 @@ public:
     virtual void OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
     virtual void HandlePenHoverOut(const TouchEvent& point) {}
-
-    // Called by container when key event received.
-    // if return false, then this event needs platform to handle it.
-    virtual bool OnKeyEvent(const KeyEvent& event) = 0;
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
@@ -1143,12 +1137,6 @@ public:
 
     virtual void SetupSubRootElement() = 0;
 
-    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
-
-    void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
-
-    void RemoveEtsCardTouchEventCallback(int32_t ponitId);
-
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
     void SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
@@ -1425,6 +1413,7 @@ public:
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();
     void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
+    void FireUIExtensionEventInner(uint32_t eventId);
 
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
@@ -1454,6 +1443,7 @@ public:
     void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
 
     void FireAccessibilityEvents();
+    void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1571,8 +1561,6 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
-    std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
-
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;

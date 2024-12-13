@@ -428,6 +428,9 @@ void RenderRating::Initialize()
     touchDetector_->SetOnTouchDown([weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto rating = weak.Upgrade();
         if (rating) {
+            if (info.GetTouches().empty()) {
+                return;
+            }
             auto localPosition = info.GetTouches().front().GetLocalLocation();
             rating->HandlePressDown(localPosition);
         }

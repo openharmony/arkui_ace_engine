@@ -36,7 +36,10 @@ public:
 
     AceTextCategory GetTextInputType() const override;
 
-    bool IsEditable() const override;
+    bool IsEditable() const override
+    {
+        return true;
+    }
 
     bool IsMultiLine() const override;
 
@@ -57,7 +60,10 @@ public:
         errorText_ = errorText;
     }
 
-    std::string GetErrorText() const override;
+    std::string GetErrorText() const override
+    {
+        return errorText_;
+    }
 
     bool GetContentInvalid() const override;
 

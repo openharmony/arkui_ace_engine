@@ -141,6 +141,10 @@ public:
     {
         return -1;
     }
+    virtual int32_t SetParameter(const std::string& key, int64_t value)
+    {
+        return -1;
+    }
 
 protected:
 

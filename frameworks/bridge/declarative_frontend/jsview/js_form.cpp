@@ -80,10 +80,10 @@ void JSForm::Create(const JSCallbackInfo& info)
             return;
         }
         formInfo.id = inputFormId;
-    } else if (id->IsNumber()) {
+    }
+    if (id->IsNumber()) {
         formInfo.id = id->ToNumber<int64_t>();
     }
-    LOGI("JSForm Create, info.id: %{public}" PRId64, formInfo.id);
     formInfo.cardName = name->ToString();
     formInfo.bundleName = bundle->ToString();
     formInfo.abilityName = ability->ToString();

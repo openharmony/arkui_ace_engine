@@ -850,7 +850,7 @@ void ViewAbstract::DisableOnKeyEvent()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnKey();
+    focusHub->ClearOnKeyCallback();
 }
 
 void ViewAbstract::DisableOnHover()
@@ -915,14 +915,28 @@ void ViewAbstract::DisableOnFocus()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnFocus();
+    focusHub->ClearOnFocusCallback();
 }
 
 void ViewAbstract::DisableOnBlur()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnBlur();
+    focusHub->ClearOnBlurCallback();
+}
+
+void ViewAbstract::DisableOnFocusAxisEvent()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnFocusAxisCallback();
+}
+
+void ViewAbstract::DisableOnFocusAxisEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnFocusAxisCallback();
 }
 
 void ViewAbstract::DisableOnClick(FrameNode* frameNode)
@@ -991,7 +1005,7 @@ void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnKey();
+    focusHub->ClearOnKeyCallback();
 }
 
 void ViewAbstract::DisableOnHover(FrameNode* frameNode)
@@ -1048,14 +1062,14 @@ void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnFocus();
+    focusHub->ClearOnFocusCallback();
 }
 
 void ViewAbstract::DisableOnBlur(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnBlur();
+    focusHub->ClearOnBlurCallback();
 }
 
 void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
@@ -1349,6 +1363,20 @@ void ViewAbstract::SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTes
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
+void ViewAbstract::SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisCallback));
+}
+
+void ViewAbstract::SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisCallback));
 }
 
 void ViewAbstract::AddDragFrameNodeToManager()

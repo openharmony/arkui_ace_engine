@@ -128,10 +128,11 @@ class FrameNode {
     return this.nodePtr_;
   }
   getValidNodePtr(): NodePtr {
-    if (this.nodePtr_) {
-      return this.nodePtr_;
-    } else {
+    const node = this.getNodePtr();
+    if (node === null) {
       throw Error('The FrameNode has been disposed!');
+    } else {
+      return node;
     }
   }
   dispose(): void {

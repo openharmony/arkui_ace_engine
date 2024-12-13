@@ -45,8 +45,30 @@ void TestNG::TearDownTestSuite()
     MockAnimationManager::Enable(false);
 }
 
+void TestNG::FlushUITasks()
+{
+    rootNode_->SetActive();
+    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    MockPipelineContext::GetCurrent()->FlushUITasks();
+}
+
 RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)
 {
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        if (frameNode) {
+            frameNode->SetActive();
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            MockPipelineContext::GetCurrent()->FlushUITasks();
+            return frameNode->CreatePaintWrapper();
+        }
+        if (rootNode_) {
+            rootNode_->SetActive();
+            rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            MockPipelineContext::GetCurrent()->FlushUITasks();
+            return rootNode_->CreatePaintWrapper();
+        }
+        return nullptr;
+    }
     if (markDirty) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -72,7 +94,7 @@ void TestNG::FlushExpandSafeAreaTask()
     safeAreaManager->ExpandSafeArea();
 }
 
-RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
+void TestNG::CreateDone()
 {
     auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
     while (elementsStack.size() > 1) {
@@ -80,11 +102,9 @@ RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto rootNode = AceType::DynamicCast<FrameNode>(element);
+    rootNode_ = AceType::DynamicCast<FrameNode>(element);
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    auto layoutNode = frameNode ? frameNode : rootNode;
-    layoutNode->MarkModifyDone();
-    return FlushLayoutTask(layoutNode);
+    FlushUITasks();
 }
 
 void TestNG::CreateLayoutTask(const RefPtr<FrameNode>& frameNode)
@@ -177,7 +197,6 @@ void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, cons
 
 void TestNG::DragStart(const RefPtr<FrameNode>& frameNode, Offset startOffset)
 {
-    rootNode_ = FindRootNode(frameNode);
     dragNode_ = FindScrollableNode(frameNode);
     GestureEvent gesture;
     dragInfo_ = gesture;
@@ -204,8 +223,7 @@ void TestNG::DragUpdate(float delta)
     dragInfo_.SetGlobalLocation(Offset(0, delta));
     dragInfo_.SetLocalLocation(Offset(0, delta));
     scrollable->HandleDragUpdate(dragInfo_);
-    FlushLayoutTask(rootNode_);
-    FlushLayoutTask(dragNode_);
+    FlushUITasks();
 }
 
 void TestNG::DragEnd(float velocityDelta)
@@ -221,9 +239,7 @@ void TestNG::DragEnd(float velocityDelta)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(dragInfo_);
     scrollable->isDragging_ = false;
-    FlushLayoutTask(rootNode_);
-    FlushLayoutTask(dragNode_);
-    rootNode_ = nullptr;
+    FlushUITasks();
     dragNode_ = nullptr;
 }
 
@@ -232,18 +248,6 @@ void TestNG::DragAction(const RefPtr<FrameNode>& frameNode, Offset startOffset, 
     DragStart(frameNode, startOffset);
     DragUpdate(dragDelta);
     DragEnd(velocityDelta);
-}
-
-RefPtr<FrameNode> TestNG::FindRootNode(const RefPtr<FrameNode>& frameNode)
-{
-    auto rootNode = frameNode;
-    while (rootNode && !rootNode->IsRootNode()) {
-        if (!rootNode->GetParent()) {
-            break;
-        }
-        rootNode = AceType::DynamicCast<FrameNode>(rootNode->GetParent());
-    }
-    return rootNode;
 }
 
 RefPtr<FrameNode> TestNG::FindScrollableNode(const RefPtr<FrameNode>& frameNode)

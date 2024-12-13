@@ -61,7 +61,7 @@ public:
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
     float GetContentHeight() const override;
-    float EstimateContentHeight() const;
+    float EstimateTotalHeight() const override;
     bool IsAllCrossReachEnd(float mainSize) const;
 
     /**

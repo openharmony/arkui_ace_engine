@@ -44,6 +44,7 @@ public:
         CHECK_NULL_VOID(checkboxGroupModifier_);
         CHECK_NULL_VOID(paintWrapper);
         auto paintProperty = DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         float strokePaintSize = size.Width();

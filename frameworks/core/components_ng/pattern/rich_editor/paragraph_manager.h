@@ -95,6 +95,7 @@ public:
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     std::pair<size_t, size_t> GetEllipsisTextRange();
     TextLineMetrics GetLineMetrics(size_t lineNumber);
+    bool IsIndexAtParagraphEnd(int32_t index);
 
 private:
     struct SelectData {

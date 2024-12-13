@@ -19,6 +19,11 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
@@ -27,6 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TICK = 2;
 constexpr float CONTENT_MAIN_SIZE = 1000.f;
+constexpr float LIST_HEIGHT = 400.f;
 constexpr float SWIPER_HEIGHT = 400.f;
 constexpr int32_t TEXT_NUMBER = 5;
 constexpr float TOP_CONTENT_HEIGHT = 200.f;
@@ -41,6 +47,7 @@ public:
     ScrollModelNG CreateNestScroll();
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
     void CreateNestedSwiper();
+    ListModelNG CreateNestedList();
     AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset);
     AssertionResult TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset);
     AssertionResult TickByVelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset);
@@ -51,6 +58,8 @@ public:
     RefPtr<ScrollPattern> nestPattern_;
     RefPtr<FrameNode> swiperNode_;
     RefPtr<SwiperPattern> swiperPattern_;
+    RefPtr<FrameNode> listNode_;
+    RefPtr<ListPattern> listPattern_;
 };
 
 void RefreshNestedTestNg::SetUpTestSuite()
@@ -113,6 +122,23 @@ void RefreshNestedTestNg::CreateNestedSwiper()
         CreateText();
     }
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+ListModelNG RefreshNestedTestNg::CreateNestedList()
+{
+    ListModelNG listModel;
+    listModel.Create();
+    listModel.SetEdgeEffect(EdgeEffect::NONE, true);
+    ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+        ListItemModelNG itemModel;
+        itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+        ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+        ViewStackProcessor::GetInstance()->Pop();
+    listNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    listPattern_ = listNode_->GetPattern<ListPattern>();
+    ViewStackProcessor::GetInstance()->Pop();
+    return listModel;
 }
 
 AssertionResult RefreshNestedTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
@@ -341,7 +367,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshPatternHandleScroll003, TestSize.Level1)
     RefreshModelNG model;
     model.Create();
     GetRefresh();
-    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Finish();
 
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     pattern_->scrollOffset_ = 5.f;
@@ -706,5 +732,186 @@ HWTEST_F(RefreshNestedTestNg, ScrollRefreshNest002, TestSize.Level1)
      */
     DragAction(nestNode_, Offset(), TRIGGER_REFRESH_DISTANCE, 0);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+}
+
+/**
+ * @tc.name: RefreshListNested001
+ * @tc.desc: In Refresh-List scene, update NestedScrollMode while dragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshListNested001, TestSize.Level1)
+{
+    CreateRefresh();
+    ListModelNG listModel = CreateNestedList();
+    CreateDone();
+    EXPECT_EQ(listPattern_->nestedScroll_.forward, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(listPattern_->nestedScroll_.backward, NestedScrollMode::SELF_ONLY);
+    DragStart(listNode_, Offset(0, 0));
+    EXPECT_EQ(listPattern_->nestedScroll_.forward, NestedScrollMode::PARENT_FIRST);
+    EXPECT_EQ(listPattern_->nestedScroll_.backward, NestedScrollMode::SELF_FIRST);
+    listPattern_->SetNestedScroll(NestedScrollOptions {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    });
+    EXPECT_EQ(listPattern_->nestedScroll_.forward, NestedScrollMode::PARENT_FIRST);
+    EXPECT_EQ(listPattern_->nestedScroll_.backward, NestedScrollMode::SELF_FIRST);
+    listPattern_->SetNestedScroll(NestedScrollOptions {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::PARENT_FIRST,
+    });
+    EXPECT_EQ(listPattern_->nestedScroll_.forward, NestedScrollMode::SELF_FIRST);
+    EXPECT_EQ(listPattern_->nestedScroll_.backward, NestedScrollMode::PARENT_FIRST);
+}
+
+/**
+ * @tc.name: RefreshListNested002
+ * @tc.desc: In Refresh-List scene, drag end after slide up greater than TRIGGER_REFRESH_DISTANCE in REFRESH status
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshListNested002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create refresh-list scene
+     */
+    RefreshModelNG refreshModel = CreateRefresh();
+    refreshModel.SetPullDownRatio(1.0f);
+    CreateNestedList();
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. pull down, the delta is TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: refreshStatus_ is REFRESH
+     */
+    DragStart(listNode_, Offset(0, 0));
+    DragUpdate(TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
+
+    /**
+     * @tc.steps: step3. drag end
+     * @tc.expected: refreshStatus_ is REFRESH
+     */
+    DragEnd(0);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+
+    /**
+     * @tc.steps: step4. slide up, the delta is TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: refreshStatus_ is REFRESH, and scrollOffset is 0
+     */
+    DragStart(listNode_, Offset(0, TRIGGER_REFRESH_WITH_TEXT_DISTANCE));
+    DragUpdate(-TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step5. continue to slide up, list is over edge
+     * @tc.expected: refreshStatus_ is REFRESH, and scrollOffset is 0
+     */
+    DragUpdate(-TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. drag end, trigger refresh's OnScrollEndRecursive and HandleDragEnd
+     * @tc.expected: refreshStatus_ is DONE
+     */
+    DragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+}
+
+/**
+ * @tc.name: RefreshListNested003
+ * @tc.desc: In Refresh-List scene, add custom node on DragUpdate status
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshListNested003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create refresh-list scene
+     */
+    RefreshModelNG refreshModel = CreateRefresh();
+    refreshModel.SetPullDownRatio(1.0f);
+    refreshModel.SetLoadingText("loadingText");
+    CreateNestedList();
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. pull down, the delta is TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: list's translation is TRIGGER_REFRESH_DISTANCE
+     */
+    DragStart(listNode_, Offset(0, 0));
+    DragUpdate(TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(listNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step3. add custom node
+     * @tc.expected: refreshStatus_ is REFRESH
+     */
+    pattern_->AddCustomBuilderNode(CreateCustomNode());
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(listNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE);
+}
+
+/**
+ * @tc.name: RefreshListListNested001
+ * @tc.desc: In Refresh-List-List scene, EdgeEffect is NONE and backward mode is SELF_FIRST
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create refresh-list-list scene
+     */
+    RefreshModelNG refreshModel = CreateRefresh();
+    std::optional<float> pullDownRatio = 1.0f;
+    refreshModel.SetPullDownRatio(pullDownRatio);
+        ListModelNG listModel;
+        listModel.Create();
+        listModel.SetEdgeEffect(EdgeEffect::NONE, false);
+        listModel.SetNestedScroll(NestedScrollOptions {
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        });
+        ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+            ListItemModelNG itemModel;
+            itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+            ViewAbstract::SetHeight(CalcLength(450));
+                ListModelNG listModelTwo;
+                listModelTwo.Create();
+                listModelTwo.SetEdgeEffect(EdgeEffect::NONE, false);
+                listModelTwo.SetNestedScroll(NestedScrollOptions {
+                    .forward = NestedScrollMode::PARENT_FIRST,
+                    .backward = NestedScrollMode::SELF_FIRST,
+                });
+                ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+                ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT / 2));
+                    ListItemModelNG itemModelTwo;
+                    itemModelTwo.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+                    ViewAbstract::SetHeight(CalcLength(225));
+                    ViewStackProcessor::GetInstance()->Pop();
+                ViewStackProcessor::GetInstance()->Pop();
+            ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. get second list node
+     */
+    auto firstListNode = GetChildFrameNode(frameNode_, 1);
+    auto firstItemNode = GetChildFrameNode(firstListNode, 0);
+    auto secondListNode = GetChildFrameNode(firstItemNode, 0);
+
+    /**
+     * @tc.steps: step3. scroll second list to trigger refresh
+     * @tc.expected: drag offset is equal with refresh's refresh offset
+     */
+    DragStart(secondListNode, Offset(0, 0));
+    DragUpdate(10);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->scrollOffset_, 10);
 }
 } // namespace OHOS::Ace::NG

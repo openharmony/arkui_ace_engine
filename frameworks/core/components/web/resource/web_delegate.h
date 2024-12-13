@@ -63,6 +63,8 @@ typedef struct WindowsSurfaceInfoTag {
     EGLSurface surface;
 } WindowsSurfaceInfo;
 
+typedef NWeb::NativeArkWebOnJavaScriptProxyCallback NativeMethodCallback;
+
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -953,6 +955,7 @@ public:
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
+    bool IsCurrentFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -1020,6 +1023,7 @@ public:
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void ScaleGestureChange(double scale, double centerX, double centerY);
+    void ScaleGestureChangeV2(int type, double scale, double originScale, double centerX, double centerY);
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();
@@ -1088,6 +1092,13 @@ public:
 
     void SetTransformHint(uint32_t rotation);
 
+    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
+
+    void RegisterNativeArkJSFunction(const std::string& objName,
+        const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh);
+
+    void UnRegisterNativeArkJSFunction(const std::string& objName);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1109,7 +1120,6 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
     void LoadUrl(const std::string& url, const std::map<std::string, std::string>& httpHeaders);
-    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
     void Refresh();

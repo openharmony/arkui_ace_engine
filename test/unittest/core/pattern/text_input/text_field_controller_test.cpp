@@ -14,6 +14,7 @@
  */
 
 #include "text_input_base.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -89,7 +90,7 @@ HWTEST_F(TextAdjustObject, AdjustWordCursorAndSelect01, TestSize.Level1)
      * @tc.steps: step2. assign text as default text
      */
     pos = 1;
-    pattern_->contentController_->SetTextValue(DEFAULT_TEXT);
+    pattern_->contentController_->SetTextValue(DEFAULT_TEXT_U16);
     content = pattern_->contentController_->GetTextValue();
     mockDataDetectorMgr.AdjustCursorPosition(
         pos, content, pattern_->selectController_->lastAiPosTimeStamp_, pattern_->lastClickTimeStamp_);
@@ -262,7 +263,7 @@ HWTEST_F(TextFieldControllerTest, TextFieldFilter001, TestSize.Level1)
      * @tc.steps: step2. assign filter as lowercase filter
      */
     layoutProperty_->UpdateInputFilter(LOWERCASE_FILTER);
-    pattern_->InsertValue("X");
+    pattern_->InsertValue(u"X");
     EXPECT_EQ(pattern_->GetInputFilter(), LOWERCASE_FILTER);
 }
 
@@ -282,7 +283,7 @@ HWTEST_F(TextFieldControllerTest, TextFieldFilter002, TestSize.Level1)
      * @tc.steps: step2. assign filter as number filter
      */
     layoutProperty_->UpdateInputFilter(NUMBER_FILTER);
-    auto numStr = "1";
+    auto numStr = u"1";
     pattern_->InsertValue(numStr);
     EXPECT_EQ(pattern_->GetInputFilter(), NUMBER_FILTER);
 }
@@ -429,21 +430,21 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText001, TestSize.Level1)
      */
     GetFocus();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TWELVE);
-    std::string inputPartOne = "tes";
-    std::string inputPartTwo = "t";
-    std::string input = inputPartOne + inputPartTwo;
-    auto outputOne = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(input).length()));
-    auto res = pattern_->CreateDisplayText(input, 3, true, true);
+    std::u16string inputPartOne = u"tes";
+    std::u16string inputPartTwo = u"t";
+    std::u16string input = inputPartOne + inputPartTwo;
+    auto outputOne = StringUtils::Str16ToStr8(pattern_->CreateObscuredText(static_cast<int32_t>(input.length())));
+    auto res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, true));
     EXPECT_EQ(outputOne, res);
 
     /**
      * @tc.steps: step3. call CreateDisplayText with showPasswordDirectly is false
      * tc.expected: step3. Check the CreateDisplayText return.
      */
-    auto outputTwo = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(inputPartOne).length()));
-    outputTwo += StringUtils::Str8ToStr16(inputPartTwo);
-    res = pattern_->CreateDisplayText(input, 3, true, false);
-    EXPECT_EQ(outputTwo, res);
+    auto outputTwo = pattern_->CreateObscuredText(static_cast<int32_t>(inputPartOne.length()));
+    outputTwo += inputPartTwo;
+    res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, false));
+    EXPECT_EQ(StringUtils::Str16ToStr8(outputTwo), res);
 }
 
 /**
@@ -456,17 +457,17 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText002, TestSize.Level1)
     SystemProperties::debugEnabled_ = true;
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    std::string inputPart2 = "t";
+    std::u16string inputPart2 = u"t";
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_THIRTEEN);
-    std::string inputPart1 = "tes";
-    std::string input = inputPart1 + inputPart2;
-    auto output1 = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(input).length()));
-    auto res = pattern_->CreateDisplayText(input, 3, true, true);
+    std::u16string inputPart1 = u"tes";
+    std::u16string input = inputPart1 + inputPart2;
+    auto output1 = StringUtils::Str16ToStr8(pattern_->CreateObscuredText(static_cast<int32_t>(input.length())));
+    auto res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, true));
     EXPECT_EQ(output1, res);
-    auto output2 = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(inputPart1).length()));
-    output2 += StringUtils::Str8ToStr16(inputPart2);
-    res = pattern_->CreateDisplayText(input, 3, true, false);
-    EXPECT_EQ(output2, res);
+    auto output2 = pattern_->CreateObscuredText(static_cast<int32_t>(inputPart1.length()));
+    output2 += inputPart2;
+    res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, false));
+    EXPECT_EQ(StringUtils::Str16ToStr8(output2), res);
 }
 
 /**
@@ -528,14 +529,14 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     /**
      * @tc.steps: Initialize insert text and expected values
      */
-    std::vector<std::string> insertValues = {
-        "openharmony123_ *+%$",
-        "openharmony123456*+&@huawei.com",
-        "openharmony (new)#15612932075*.com",
-        "open_harmony@@harmony.com*+$helloworld",
-        "open_harmony123 password*+#",
-        "openharmony123456*+&@huawei.com",
-        "o达瓦大屋顶pen_harmony456顶顶顶 password*+#得到",
+    std::vector<std::u16string> insertValues = {
+        u"openharmony123_ *+%$",
+        u"openharmony123456*+&@huawei.com",
+        u"openharmony (new)#15612932075*.com",
+        u"open_harmony@@harmony.com*+$helloworld",
+        u"open_harmony123 password*+#",
+        u"openharmony123456*+&@huawei.com",
+        u"o达瓦大屋顶pen_harmony456顶顶顶 password*+#得到",
     };
     std::vector<TestItem<TextInputType, std::string>> testItems;
     testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
@@ -573,7 +574,7 @@ HWTEST_F(TextFieldControllerTest, ContentController002, TestSize.Level1)
     /**
      * @tc.steps: Initialize text and filter patterns
      */
-    std::string text = "CabcdefgABhCDEFG0123a456A789";
+    std::u16string text = u"CabcdefgABhCDEFG0123a456A789";
     std::vector<TestItem<std::string, std::string>> testItems;
     testItems.emplace_back("", "CabcdefgABhCDEFG0123a456A789", "None");
     testItems.emplace_back("[0-9]", "0123456789", "Input filter [0-9]");
@@ -607,19 +608,19 @@ HWTEST_F(TextFieldControllerTest, ContentController003, TestSize.Level1)
     /**
      * @tc.expected: Check if text is selected based on corresponding left and right coordinates
      */
-    auto selectedValue = pattern_->contentController_->GetSelectedValue(1, 4);
+    auto selectedValue = StringUtils::Str16ToStr8(pattern_->contentController_->GetSelectedValue(1, 4));
     EXPECT_EQ(selectedValue.compare("bcd"), 0) << "Text is " + selectedValue;
 
     /**
      * @tc.expected: Check if text is selected based on preceding coordinates
      */
-    auto beforeSelectedValue = pattern_->contentController_->GetValueBeforeIndex(3);
+    auto beforeSelectedValue = StringUtils::Str16ToStr8(pattern_->contentController_->GetValueBeforeIndex(3));
     EXPECT_EQ(beforeSelectedValue.compare("abc"), 0) << "Text is " + beforeSelectedValue;
 
     /**
      * @tc.expected: Check if text is selected based on trailing coordinates
      */
-    auto afterSelectedValue = pattern_->contentController_->GetValueAfterIndex(3);
+    auto afterSelectedValue = StringUtils::Str16ToStr8(pattern_->contentController_->GetValueAfterIndex(3));
     EXPECT_EQ(afterSelectedValue.compare("defghijklmnopqrstuvwxyz"), 0) << "Text is " + afterSelectedValue;
 }
 
@@ -645,7 +646,7 @@ HWTEST_F(TextFieldControllerTest, ContentController004, TestSize.Level1)
      * @tc.expected: when the text point more then one, FilterWithDecimal return true,
      * @tc.expected: and the value update only one point
      */
-    std::string text = "3.1.4.";
+    std::u16string text = u"3.1.4.";
     pattern_->contentController_->InsertValue(0, text);
     EXPECT_TRUE(pattern_->contentController_->FilterWithDecimal(text));
     EXPECT_EQ(pattern_->GetTextValue(), "3.14");
@@ -672,7 +673,7 @@ HWTEST_F(TextFieldControllerTest, ContentController005, TestSize.Level1)
     /**
      * @tc.expected: when the text have one point, FilterWithDecimal return false
      */
-    std::string text = "3.14";
+    std::u16string text = u"3.14";
     pattern_->contentController_->InsertValue(0, text);
     EXPECT_FALSE(pattern_->contentController_->FilterWithDecimal(text));
     EXPECT_EQ(pattern_->GetTextValue(), "3.14");
@@ -728,7 +729,7 @@ HWTEST_F(TextFieldControllerTest, TextFieldControllerTest003, TestSize.Level1)
     /**
      * @tc.steps: Initialize textarea node.
      */
-    auto frameNode = TextFieldModelNG::CreateFrameNode(-1, "", "", true);
+    auto frameNode = TextFieldModelNG::CreateFrameNode(-1, u"", u"", true);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
 
@@ -752,7 +753,7 @@ HWTEST_F(TextFieldControllerTest, FontFeature003, TestSize.Level1)
      * @tc.steps: step1. Initialize text input.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -776,7 +777,7 @@ HWTEST_F(TextFieldControllerTest, FontFeature004, TestSize.Level1)
      * @tc.steps: step1. Initialize text input.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);

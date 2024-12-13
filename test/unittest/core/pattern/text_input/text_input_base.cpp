@@ -14,6 +14,7 @@
  */
 
 #include "text_input_base.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 void TextInputBases::SetUpTestSuite()
@@ -77,7 +78,7 @@ void TextInputBases::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(placeHolder, text);
+    textFieldModelNG.CreateTextInput(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }

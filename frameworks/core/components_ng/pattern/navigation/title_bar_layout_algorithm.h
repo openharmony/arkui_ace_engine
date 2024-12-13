@@ -100,14 +100,13 @@ private:
     float GetTitleWidth(const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
 
-    float WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>& titleBarNode, float width);
+    float WidthAfterAvoidMenuBarAndContainerModal(const RefPtr<TitleBarNode>& titleBarNode, float width);
 
     void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
-    void ShowBackButtonLayout(LayoutWrapper* layoutWrapper,
-        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
-        RefPtr<GeometryNode>& geometryNode, const RefPtr<LayoutWrapper>& backButtonWrapper);
+    void ShowBackButtonLayout(LayoutWrapper* layoutWrapper, RefPtr<GeometryNode>& geometryNode,
+        const RefPtr<LayoutWrapper>& backButtonWrapper, float titleBarHeight);
 
     void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
@@ -155,7 +154,9 @@ private:
     float doubleLineTitleBarHeight_ = 0.0f;
     float navTitleSpaceVertical_ = 0.0f;
     float paddingLeft_ = 0.0f;
+    float paddingLeftForBackButton_ = 0.0f;
     float paddingRight_ = 0.0f;
+    float paddingRightForMenu_ = 0.0f;
     float navBackIconWidth_ = 0.0f;
     float navButtonPadding_ = 0.0f;
     float navHorizontalMargin_ = 0.0f;

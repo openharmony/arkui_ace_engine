@@ -527,21 +527,21 @@ void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const OnCr
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
-
-void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
+void RichEditorModelNG::SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
+    const SelectMenuParam& menuParam)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+    richEditorPattern->SetPreviewMenuParam(spanType, buildFunc, menuParam);
 }
 
-void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
+void RichEditorModelNG::SetPreviewMenuParam(FrameNode* frameNode, TextSpanType spanType,
     std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
 {
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+    richEditorPattern->SetPreviewMenuParam(spanType, buildFunc, menuParam);
 }
 
 void RichEditorModelNG::SetBarState(DisplayMode mode)

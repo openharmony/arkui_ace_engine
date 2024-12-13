@@ -70,6 +70,11 @@ public:
         targetIndex_ = targetIndex;
     }
 
+    void SetFocusIndex(std::optional<int32_t> focusIndex)
+    {
+        focusIndex_ = focusIndex;
+    }
+
     void SetVisibleItemPosition(std::map<int32_t, ItemInfo> visibleItemPosition)
     {
         visibleItemPosition_ = visibleItemPosition;
@@ -96,6 +101,7 @@ private:
     void MeasureVisibleItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureTargetIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureJumpIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
+    void MeasureFocusIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureWithOffset(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void AdjustPosition(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint,
         int32_t startIndex, int32_t endIndex, float startPos, float endPos);
@@ -137,6 +143,7 @@ private:
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     std::optional<float> maxHeight_;
     std::optional<float> defaultHeight_;
     bool isBarAdaptiveHeight_ = false;

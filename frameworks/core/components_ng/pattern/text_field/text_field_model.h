@@ -260,11 +260,9 @@ public:
     virtual ~TextFieldModel() = default;
 
     virtual RefPtr<TextFieldControllerBase> CreateTextInput(
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) = 0;
-
+        const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value) = 0;
     virtual RefPtr<TextFieldControllerBase> CreateTextArea(
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) = 0;
-
+        const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value) = 0;
     virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
@@ -286,20 +284,21 @@ public:
     virtual void SetWordBreak(Ace::WordBreak value) {};
     virtual void SetFontStyle(FontStyle value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
-    virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) = 0;
+    virtual void SetInputFilter(const std::string& value,
+        const std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetInputStyle(InputStyle value) = 0;
     virtual void SetShowPasswordIcon(bool value) = 0;
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) = 0;
+    virtual void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
-    virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
-    virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
-    virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
-    virtual void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnCut(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnPaste(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
@@ -313,7 +312,7 @@ public:
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
     virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
     virtual void SetShowUnit(std::function<void()>&& unitAction) {};
-    virtual void SetShowError(const std::string& errorText, bool visible) {};
+    virtual void SetShowError(const std::u16string& errorText, bool visible) {};
     virtual void SetBarState(DisplayMode value) {};
     virtual void SetMaxViewLines(uint32_t value) {};
     virtual void SetNormalMaxViewLines(uint32_t value) {};
@@ -322,7 +321,7 @@ public:
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
     virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
-    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;

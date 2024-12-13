@@ -501,11 +501,9 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     }
     HandleDragEndAnimation();
     int32_t to = GetIndex();
-    if (fromIndex_ != to) {
-        auto forEach = forEachNode_.Upgrade();
-        CHECK_NULL_VOID(forEach);
-        forEach->FireOnMove(fromIndex_, to);
-    }
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+    forEach->FireOnMove(fromIndex_, to);
     dragState_ = ListItemDragState::IDLE;
 }
 

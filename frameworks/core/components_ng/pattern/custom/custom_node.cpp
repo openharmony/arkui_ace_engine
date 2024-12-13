@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "base/log/ace_performance_monitor.h"
+#include "base/log/dump_log.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -205,5 +206,57 @@ std::unique_ptr<JsonValue> CustomNode::GetStateInspectorInfo()
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI State Inspector dump info %{public}s", res.c_str());
     auto json = JsonUtil::ParseJsonString(res);
     return json;
+}
+
+void CustomNode::DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo)
+{
+    DumpLog::GetInstance().AddDesc("ComponentName: " + componentInfo->GetValue("ComponentName")->ToString());
+    DumpLog::GetInstance().AddDesc("isV2: " + componentInfo->GetValue("isV2")->ToString());
+    DumpLog::GetInstance().AddDesc("isFreezeAllowed: " + \
+                                    componentInfo->GetValue("isCompFreezeAllowed_")->ToString());
+    DumpLog::GetInstance().AddDesc("isViewActive: " + componentInfo->GetValue("isViewActive_")->ToString());
+}
+
+void CustomNode::DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo)
+{
+    int size = decoratorInfo->GetArraySize();
+
+    DumpLog::GetInstance().AddDesc("-----start print decoratorInfo");
+    for (int i = 0; i < size; i++) {
+        auto decoratorItem = decoratorInfo->GetArrayItem(i);
+        DumpLog::GetInstance().AddDesc("decorator:" + decoratorItem->GetValue("decorator")->ToString() + \
+                                       " propertyName:" + decoratorItem->GetValue("propertyName")->ToString() + \
+                                       " value:" + decoratorItem->GetValue("value")->ToString());
+        DumpLog::GetInstance().AddDesc("stateVariable id: " + decoratorItem->GetValue("id")->ToString());
+        DumpLog::GetInstance().AddDesc("inRenderingElementId: " + \
+                                        decoratorItem->GetValue("inRenderingElementId")->ToString());
+        DumpLog::GetInstance().AddDesc("dependentElementIds: " + \
+                                        decoratorItem->GetValue("dependentElementIds")->ToString());
+        if (i < size - 1) {
+            DumpLog::GetInstance().AddDesc("------------------------------");
+        }
+    }
+    DumpLog::GetInstance().AddDesc("-----end print decoratorInfo");
+}
+
+void CustomNode::DumpInfo()
+{
+    std::string ret = FireOnDumpInspectorFunc();
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI DumpInfo %{public}s", ret.c_str());
+    if (ret != "") {
+        auto json = JsonUtil::ParseJsonString(ret);
+        if (json != nullptr || !json->IsValid()) {
+            TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "ParseJsonString failed");
+            return;
+        }
+        auto componentInfo = json->GetValue("viewInfo");
+        if (componentInfo != nullptr) {
+            DumpComponentInfo(componentInfo);
+        }
+        auto decoratorInfo = json->GetValue("observedPropertiesInfo");
+        if (decoratorInfo != nullptr) {
+            DumpComponentInfo(decoratorInfo);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

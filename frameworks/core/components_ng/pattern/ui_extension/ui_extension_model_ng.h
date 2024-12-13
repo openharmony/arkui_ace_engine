@@ -40,8 +40,6 @@ public:
         bool transferringCaller = false, bool densityDpi = true) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
-    // for dynamic component
-    void Create() override;
     void Create(const UIExtensionConfig& config) override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
@@ -68,6 +66,8 @@ public:
 
 private:
     void CreateSecurityUIExtension(const UIExtensionConfig& config);
+    void CreateDynamicComponent(const UIExtensionConfig& config);
+    void CreateIsolatedComponent(const UIExtensionConfig& config);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H

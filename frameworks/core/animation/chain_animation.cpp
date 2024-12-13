@@ -86,7 +86,7 @@ void ChainAnimation::SetDelta(float delta, float overOffset)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto timestamp = context->GetTimeFromExternalTimer();
+    auto timestamp = context->GetVsyncTime();
     double duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
     float factor = (1 - conductivity_) * intensity_;
     if (edgeEffect_ == ChainEdgeEffect::STRETCH) {
@@ -115,7 +115,7 @@ void ChainAnimation::TickAnimation()
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto timestamp = context->GetTimeFromExternalTimer();
+    auto timestamp = context->GetVsyncTime();
     auto duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
     auto finish = true;
     for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
@@ -149,7 +149,7 @@ float ChainAnimation::GetValuePredict(int32_t index, float delta)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, 0);
-    auto timestamp = context->GetTimeFromExternalTimer();
+    auto timestamp = context->GetVsyncTime();
     double duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
     float value = 0.0f;
     float factor = (1 - conductivity_) * intensity_;

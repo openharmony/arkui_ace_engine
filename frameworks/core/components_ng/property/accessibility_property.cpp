@@ -271,7 +271,8 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node))) {
+    if (hitSelf && shouldSearchSelf
+        && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node) || HitAccessibilityHoverPriority(node))) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -336,6 +337,14 @@ bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
+}
+
+bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->IsAccessibilityHoverPriority();
 }
 
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
@@ -888,16 +897,12 @@ void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositi
         getWindowScenePositionImpl_ = getWindowScenePositionImpl;
     }
 
-void AccessibilityProperty::GetWindowScenePosition(int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY)
+void AccessibilityProperty::GetWindowScenePosition(WindowSceneInfo& windowSceneInfo)
 {
     if (getWindowScenePositionImpl_ == nullptr) {
-        left = 0;
-        top = 0;
-        scaleX = 1.0f;
-        scaleY = 1.0f;
         return;
     }
-    getWindowScenePositionImpl_(left, top, scaleX, scaleY);
+    getWindowScenePositionImpl_(windowSceneInfo);
 }
 
 void AccessibilityProperty::SetOnAccessibilityFocusCallback(
@@ -1018,4 +1023,16 @@ bool AccessibilityProperty::ActActionCopy()
     }
     return false;
 }
+
+bool AccessibilityProperty::IsAccessibilityHoverPriority() const
+{
+    return accessibilityHoverPriority_;
+}
+
+void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
+{
+    // true means node consume barrierfree hover event prior to brothers
+    accessibilityHoverPriority_ = hoverPriority;
+}
+
 } // namespace OHOS::Ace::NG

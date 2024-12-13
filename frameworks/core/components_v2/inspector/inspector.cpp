@@ -271,7 +271,7 @@ bool Inspector::SendKeyEvent(const RefPtr<PipelineContext>& context, const JsKey
     keyEvent.SetTimeStamp(event.timeStamp);
     keyEvent.sourceType = static_cast<SourceType>(event.sourceDevice);
     return context->GetTaskExecutor()->PostTask(
-        [context, keyEvent]() { context->OnKeyEvent(keyEvent); },
+        [context, keyEvent]() { context->OnNonPointerEvent(keyEvent); },
         TaskExecutor::TaskType::UI, "ArkUIInspectorSendKeyEvent");
 }
 } // namespace OHOS::Ace::V2

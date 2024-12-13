@@ -91,7 +91,6 @@ void TextClockPatternTestNG::SetUpTestSuite()
     textStyle.SetFontWeight(FontWeight::W800);
     textTheme->textStyle_ = textStyle;
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
 
 void TextClockPatternTestNG::TearDownTestSuite()

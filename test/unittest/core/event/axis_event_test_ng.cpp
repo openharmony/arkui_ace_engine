@@ -26,11 +26,15 @@
 #define protected public
  
 #include "frameworks/core/event/axis_event.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
  
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double DEFAULT_AXIS_ONE = 100.0;
+constexpr double DEFAULT_AXIS_NEGATIVE_ONE = -100.0;
+constexpr Dimension DEFAULT_AXIS_MOUSE_SCALE = LINE_HEIGHT_DESKTOP / MOUSE_WHEEL_DEGREES;
 static std::map<AxisAction, std::string> AxisAction2String = {
     { AxisAction::NONE, "AxisAction::NONE" },
     { AxisAction::BEGIN, "AxisAction::BEGIN" },
@@ -55,12 +59,24 @@ struct AxisEventCheckerTestCase {
         return out.str();
     }
 };
+
+struct AxisEventCalculateOffsetTestCase {
+    double verticalAxis = 0.0;
+    double horizontalAxis = 0.0;
+    bool isShiftKeyPressed = false;
+    bool hasDifferentDirectionGesture = false;
+    SourceTool sourceTool = SourceTool::MOUSE;
+    double exceptOffsetX = 0.0;
+    double exceptOffsetY = 0.0;
+};
 } // namespace
  
 class AxisEventTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
 };
  
 void AxisEventTestNg::SetUpTestSuite()
@@ -73,6 +89,16 @@ void AxisEventTestNg::TearDownTestSuite()
 {
     // do nothing
     GTEST_LOG_(INFO) << "AxisEventTestNg TearDownTestSuite";
+}
+
+void AxisEventTestNg::SetUp()
+{
+    MockPipelineContext::SetUp();
+}
+
+void AxisEventTestNg::TearDown()
+{
+    MockPipelineContext::TearDown();
 }
  
 const static std::vector<AxisEventCheckerTestCase> axisEventCheckerTestCases = {
@@ -94,7 +120,20 @@ const static std::vector<AxisEventCheckerTestCase> axisEventCheckerTestCases = {
     { AxisAction::UPDATE, AxisAction::END, true, AxisAction::UPDATE, AxisAction::NONE },
     { AxisAction::UPDATE, AxisAction::CANCEL, true, AxisAction::UPDATE, AxisAction::NONE },
 };
- 
+
+const static std::vector<AxisEventCalculateOffsetTestCase> AxisEventCalculateOffsetTestCases = {
+    { DEFAULT_AXIS_ONE, DEFAULT_AXIS_NEGATIVE_ONE, false, false, SourceTool::MOUSE, DEFAULT_AXIS_NEGATIVE_ONE,
+        DEFAULT_AXIS_NEGATIVE_ONE },
+    { DEFAULT_AXIS_ONE, DEFAULT_AXIS_NEGATIVE_ONE, false, true, SourceTool::MOUSE, DEFAULT_AXIS_ONE,
+        DEFAULT_AXIS_NEGATIVE_ONE },
+    { DEFAULT_AXIS_ONE, DEFAULT_AXIS_NEGATIVE_ONE, true, false, SourceTool::MOUSE, DEFAULT_AXIS_NEGATIVE_ONE,
+        DEFAULT_AXIS_ONE },
+    { DEFAULT_AXIS_ONE, DEFAULT_AXIS_NEGATIVE_ONE, true, true, SourceTool::MOUSE, DEFAULT_AXIS_NEGATIVE_ONE,
+        DEFAULT_AXIS_ONE },
+    { DEFAULT_AXIS_ONE, DEFAULT_AXIS_NEGATIVE_ONE, false, false, SourceTool::TOUCHPAD, DEFAULT_AXIS_ONE,
+        DEFAULT_AXIS_NEGATIVE_ONE },
+};
+
 /**
  * @tc.name: AxisEventChecker001
  * @tc.desc: Create AxisEventChecker and execute its functions.
@@ -170,5 +209,37 @@ HWTEST_F(AxisEventTestNg, AxisEventChecker002, TestSize.Level1)
         }
     }
 }
- 
+
+/**
+ * @tc.name: AxisEventConvertToOffsetTest001
+ * @tc.desc: Create AxisEvent and output current offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(AxisEventTestNg, AxisEventConvertToOffsetTest001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->dipScale_ = 1.0f;
+    for (auto& testCase : AxisEventCalculateOffsetTestCases) {
+        /**
+         * @tc.steps: step1. Create AxisEvent and set info.
+         */
+        AxisEvent axisEvent;
+        axisEvent.verticalAxis = testCase.verticalAxis;
+        axisEvent.horizontalAxis = testCase.horizontalAxis;
+        axisEvent.sourceTool = testCase.sourceTool;
+
+        /**
+         * @tc.steps: step2. Get Offset
+         * @tc.expected: offset is equal to testCase offset.
+         */
+        auto offset = axisEvent.ConvertToOffset(testCase.isShiftKeyPressed, testCase.hasDifferentDirectionGesture);
+        double mouseScale = 1.0f;
+        if (testCase.sourceTool == SourceTool::MOUSE) {
+            mouseScale = DEFAULT_AXIS_MOUSE_SCALE.ConvertToPx();
+        }
+        EXPECT_EQ(offset.GetX(), testCase.exceptOffsetX * mouseScale);
+        EXPECT_EQ(offset.GetY(), testCase.exceptOffsetY * mouseScale);
+    }
+}
 } // namespace OHOS::Ace::NG

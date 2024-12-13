@@ -97,7 +97,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
     bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
@@ -108,14 +108,10 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
         [gatherNodeCenter, gatherNodeChildrenInfo, calcResult]() mutable {
             for (const auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
-                CHECK_NULL_VOID(imageNode);
-                auto imageContext = imageNode->GetRenderContext();
-                CHECK_NULL_VOID(imageContext);
                 auto curPos = child.offset + OffsetF(child.halfWidth, child.halfHeight);
                 auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, calcResult);
-                imageContext->UpdatePosition(OffsetT<Dimension>(
-                    Dimension(child.offset.GetX() + offset.GetX()),
-                    Dimension(child.offset.GetY() + offset.GetY())));
+                offset += child.offset;
+                DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, offset);
             }
         });
 }
@@ -159,6 +155,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();
+    actuator->InitGatherNodesPosition(gatherNodeChildrenInfo);
     pipeline->FlushSyncGeometryNodeTasks();
     manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);

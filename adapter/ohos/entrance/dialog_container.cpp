@@ -110,7 +110,7 @@ void DialogContainer::InitializeKeyEventCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); },
+            [context, event, &result]() { result = context->OnNonPointerEvent(event); },
             TaskExecutor::TaskType::UI, "ArkUIDialogKeyEvent");
         return result;
     };

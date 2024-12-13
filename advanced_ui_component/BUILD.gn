@@ -13,9 +13,6 @@
 
 group("advanced_ui_component") {
   deps = [
-    "atomicservicenavigation/interfaces:atomicservicenavigation",
-    "atomicservicetabs/interfaces:atomicservicetabs",
-    "atomicserviceweb/interfaces:atomicserviceweb",
     "chip/interfaces:chip",
     "chipgroup/interfaces:chipgroup",
     "composelistitem/interfaces:composelistitem",
@@ -30,8 +27,6 @@ group("advanced_ui_component") {
     "formmenu/interfaces:formmenu",
     "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
-    "innerfullscreenlaunchcomponent/interfaces:innerfullscreenlaunchcomponent",
-    "interstitialdialogaction/interfaces:interstitialdialogaction",
     "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
     "popup/interfaces:popup",

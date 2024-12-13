@@ -19,6 +19,15 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<FocusManager> GetCurrentFocusManager()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto focusManager = context->GetFocusManager();
+    return focusManager;
+}
+}
 
 FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
 {
@@ -369,25 +378,15 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
     }
     if (!isSwitchingWindow_) {
         auto lastHub = currentFocus_.Upgrade();
-#ifdef IS_RELEASE_VERSION
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitch end, %{public}s onBlur, "
-            "%{public}s onFocus, "
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitch end, %{public}s/" SEC_PLD(%{public}d) " onBlur, "
+            "%{public}s/" SEC_PLD(%{public}d) " onFocus, "
             "start: %{public}d, end: %{public}d, update: %{public}d",
             lastHub ? lastHub->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(lastHub ? lastHub->GetFrameId() : -1),
             switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(switchingFocus_ ? switchingFocus_->GetFrameId() : -1),
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
-#else
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitch end, %{public}s/%{public}d onBlur, "
-            "%{public}s/%{public}d onFocus, "
-            "start: %{public}d, end: %{public}d, update: %{public}d",
-            lastHub ? lastHub->GetFrameName().c_str() : "NULL",
-            lastHub ? lastHub->GetFrameId() : -1,
-            switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
-            switchingFocus_ ? switchingFocus_->GetFrameId() : -1,
-            startReason_.value_or(SwitchingStartReason::DEFAULT),
-            reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
-#endif
         if (switchingFocus_ &&
             startReason_.value_or(SwitchingStartReason::DEFAULT) != SwitchingStartReason::LOST_FOCUS_TO_VIEW_ROOT) {
             switchingFocus_->ClearLastFocusNode();
@@ -410,27 +409,16 @@ void FocusManager::WindowFocusMoveEnd()
     isSwitchingWindow_ = false;
     if (!isSwitchingFocus_.value_or(true)) {
         auto lastHub = currentFocus_.Upgrade();
-#ifdef IS_RELEASE_VERSION
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "WinFocusMove end, %{public}s onBlur, "
-            "%{public}s onFocus, "
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "WinFocusMove end, %{public}s/" SEC_PLD(%{public}d) " onBlur, "
+            "%{public}s/" SEC_PLD(%{public}d) " onFocus, "
             "start: %{public}d, end: %{public}d, update: %{public}d",
             lastHub ? lastHub->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(lastHub ? lastHub->GetFrameId() : -1),
             switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(switchingFocus_ ? switchingFocus_->GetFrameId() : -1),
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             endReason_.value_or(SwitchingEndReason::DEFAULT),
             updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
-#else
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "WinFocusMove end, %{public}s/%{public}d onBlur, "
-            "%{public}s/%{public}d onFocus, "
-            "start: %{public}d, end: %{public}d, update: %{public}d",
-            lastHub ? lastHub->GetFrameName().c_str() : "NULL",
-            lastHub ? lastHub->GetFrameId() : -1,
-            switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
-            switchingFocus_ ? switchingFocus_->GetFrameId() : -1,
-            startReason_.value_or(SwitchingStartReason::DEFAULT),
-            endReason_.value_or(SwitchingEndReason::DEFAULT),
-            updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
-#endif
         ReportFocusSwitching();
         PaintFocusState();
     }
@@ -439,7 +427,6 @@ void FocusManager::WindowFocusMoveEnd()
 void FocusManager::FocusGuard::CreateFocusGuard(const RefPtr<FocusHub>& focusHub,
     const RefPtr<FocusManager>& focusManager, SwitchingStartReason reason)
 {
-    CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusManager);
     if (focusManager->isSwitchingFocus_.value_or(false)) {
         return;
@@ -452,14 +439,12 @@ FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub,
     SwitchingStartReason reason)
 {
     RefPtr<FocusHub> hub = focusHub;
-    if (!focusHub ||!focusHub->GetFocusManager()) {
+    if (!hub || !hub->GetFocusManager()) {
         auto curFocusView = FocusView::GetCurrentFocusView();
-        CHECK_NULL_VOID(curFocusView);
-        auto curFocusViewHub = curFocusView->GetFocusHub();
-        CHECK_NULL_VOID(curFocusViewHub);
-        hub = curFocusViewHub;
+        hub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     }
-    auto mng = hub->GetFocusManager();
+
+    auto mng = hub ? hub->GetFocusManager() : GetCurrentFocusManager();
     CreateFocusGuard(hub, mng, reason);
 }
 

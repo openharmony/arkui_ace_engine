@@ -22,9 +22,15 @@ std::string MenuItemAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto menuItemLayoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
-    CHECK_NULL_RETURN(menuItemLayoutProperty, "");
-    return menuItemLayoutProperty->GetContentValue("");
+    if (isOption_) {
+        auto optionPattern = frameNode->GetPattern<MenuItemPattern>();
+        CHECK_NULL_RETURN(optionPattern, "");
+        return optionPattern->GetText();
+    } else {
+        auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, "");
+        return layoutProperty->GetContentValue("");
+    }
 }
 
 bool MenuItemAccessibilityProperty::IsSelected() const
