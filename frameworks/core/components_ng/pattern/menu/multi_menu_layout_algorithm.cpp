@@ -258,12 +258,11 @@ void MultiMenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(
 float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
-    auto node = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(node);
-    auto pattern = node->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(pattern);
-
     float maxWidth = 0.0f;
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(node, maxWidth);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(pattern, maxWidth);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childConstraint = ResetLayoutConstraintMinWidth(child, layoutConstraint);
         if (pattern->IsEmbedded() && (childConstraint.minSize.Width() > childConstraint.maxSize.Width())) {
