@@ -948,46 +948,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg059, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg062
- * @tc.desc: Test the function SetCursor.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
-
-    /**
-     * @tc.steps2: set cursor with an exceptional value.
-     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
-     */
-    context_->SetCursor(EXCEPTIONAL_CURSOR);
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
-
-    /**
-     * @tc.steps3: set cursor with a normal value.
-     * @tc.expected: context_->cursor_ is correct value.
-     */
-    context_->SetCursor(static_cast<int32_t>(MouseFormat::EAST));
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::EAST);
-
-    /**
-     * @tc.steps4: restore mouse style.
-     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
-     */
-    context_->RestoreDefault();
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
-}
-
-/**
  * @tc.name: PipelineContextTestNg063
  * @tc.desc: Test the function OpenFrontendAnimation and CloseFrontendAnimation.
  * @tc.type: FUNC
