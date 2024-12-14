@@ -297,6 +297,9 @@ public:
 
     // initial drag gesture event
     void InitPanEvent();
+    void InitOnkeyEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
 
     void HandleDragStart();
 
@@ -315,6 +318,8 @@ public:
     void ModifyFireSheetTransition(float dragVelocity = 0.0f);
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
+
+    void SetSheetAnimationOption(AnimationOption& option) const;
 
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
@@ -443,6 +448,8 @@ public:
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
+
+    void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
     void BubbleStyleSheetTransition(bool isTransitionIn);
 
@@ -674,6 +681,7 @@ public:
     void FireHoverModeChangeCallback();
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
+    void RecoverHalfFoldOrAvoidStatus();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -734,6 +742,8 @@ private:
     void ResetClipShape();
     void UpdateSheetWhenSheetTypeChanged();
     void GetCurrentScrollHeight();
+    void RecoverAvoidKeyboardStatus();
+    void RecoverScrollOrResizeAvoidStatus();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;

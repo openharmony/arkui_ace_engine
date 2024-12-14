@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
@@ -49,12 +50,24 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
     CHECK_NULL_VOID(renderCtx);
     auto borderRadius = renderCtx->GetBorderRadius();
 
-    BorderRadiusArray radiusXY = {
-        PointF(borderRadius->radiusTopLeft->ConvertToPx(), borderRadius->radiusTopLeft->ConvertToPx()),
-        PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
-        PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
-        PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx())
-    };
+    BorderRadiusArray radiusXY = BorderRadiusArray();
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto paintRectWidth = renderCtx->GetPaintRectWithoutTransform().Width();
+        radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth),
+                         borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth)),
+            PointF(borderRadius->radiusTopRight->ConvertToPxWithSize(paintRectWidth),
+                borderRadius->radiusTopRight->ConvertToPxWithSize(paintRectWidth)),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPxWithSize(paintRectWidth),
+                borderRadius->radiusBottomLeft->ConvertToPxWithSize(paintRectWidth)),
+            PointF(borderRadius->radiusBottomRight->ConvertToPxWithSize(paintRectWidth),
+                borderRadius->radiusBottomRight->ConvertToPxWithSize(paintRectWidth)) };
+    } else {
+        radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(), borderRadius->radiusTopLeft->ConvertToPx()),
+            PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
+            PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
+    }
 
     // adjust image radius to match border (concentric round rects)
     auto width = renderCtx->GetBorderWidth();

@@ -140,8 +140,12 @@ SessionWrapperImpl::~SessionWrapperImpl() {}
 void SessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     int32_t callSessionId = GetSessionId();
+    if (!taskExecutor_) {
+        LOGE("Get taskExecutor_ is nullptr, the sessionid = %{public}d", callSessionId);
+        return;
+    }
+    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]
         (OHOS::Rosen::WSError errcode) {
         if (errcode == OHOS::Rosen::WSError::WS_OK) {
@@ -413,7 +417,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     SessionViewportConfig sessionViewportConfig;
     sessionViewportConfig.isDensityFollowHost_ = pattern->GetDensityDpi();
     sessionViewportConfig.density_ = context->GetCurrentDensity();
-    sessionViewportConfig.displayId_ = container->GetDisplayId();
+    sessionViewportConfig.displayId_ = container->GetCurrentDisplayId();
     sessionViewportConfig.orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation());
     sessionViewportConfig.transform_ = context->GetTransformHint();
     pattern->SetSessionViewportConfig(sessionViewportConfig);
@@ -467,7 +471,7 @@ int32_t SessionWrapperImpl::GetSessionId() const
     return session_ ? session_->GetPersistentId() : 0;
 }
 
-int32_t SessionWrapperImpl::GetInstanceIdFromHost()
+int32_t SessionWrapperImpl::GetInstanceIdFromHost() const
 {
     auto pattern = hostPattern_.Upgrade();
     if (pattern == nullptr) {

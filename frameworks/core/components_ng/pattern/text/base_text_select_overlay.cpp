@@ -59,8 +59,8 @@ void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, boo
     SetIsShowHandleLine(!request.hideHandleLine);
     latestReqeust_ = request;
     if (!SelectOverlayIsOn() && enableHandleLevel_) {
-        auto firstLocalRect = GetFirstHandleLocalPaintRect();
-        auto secondLocalRect = GetSecondHandleLocalPaintRect();
+        auto firstLocalRect = GetHandleLocalPaintRect(DragHandleIndex::FIRST);
+        auto secondLocalRect = GetHandleLocalPaintRect(DragHandleIndex::SECOND);
         CalcHandleLevelMode(firstLocalRect, secondLocalRect);
     }
     if (enableHandleLevel_) {
@@ -736,12 +736,7 @@ void BaseTextSelectOverlay::SetHandleLevelMode(HandleLevelMode mode)
     handleLevelMode_ = mode;
 }
 
-RectF BaseTextSelectOverlay::GetFirstHandleLocalPaintRect()
-{
-    return RectF();
-}
-
-RectF BaseTextSelectOverlay::GetSecondHandleLocalPaintRect()
+RectF BaseTextSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex)
 {
     return RectF();
 }
@@ -1168,6 +1163,18 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
         return false;
     }
     contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
+    CHECK_NULL_RETURN(CalculateClippedRect(contentRect), false);
+    if (!contentRect.IsEmpty()) {
+        UpdateClipHandleViewPort(contentRect);
+    }
+    rect = contentRect;
+    return true;
+}
+
+bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
         RectF parentContentRect;
@@ -1188,10 +1195,6 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
     contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
-    if (Positive(contentRect.Width()) && Positive(contentRect.Height())) {
-        UpdateClipHandleViewPort(contentRect);
-    }
-    rect = contentRect;
     return true;
 }
 

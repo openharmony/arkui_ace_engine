@@ -19,7 +19,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/dump_log.h"
-#include "core/event/non_pointer_axis_event.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/non_pointer_event.h"
 
 namespace OHOS::Ace::Platform {
@@ -124,7 +124,7 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     }
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_JOYSTICK) {
-        view->ProcessNonPointerAxisEvent(pointerEvent);
+        view->ProcessFocusAxisEvent(pointerEvent);
     }
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
@@ -427,11 +427,11 @@ bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     return nonPointerEventCallback_(event);
 }
 
-bool AceViewOhos::ProcessNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(nonPointerEventCallback_, false);
-    NG::NonPointerAxisEvent event;
-    ConvertNonPointerAxisEvent(pointerEvent, event);
+    NG::FocusAxisEvent event;
+    ConvertFocusAxisEvent(pointerEvent, event);
     return nonPointerEventCallback_(event);
 }
 

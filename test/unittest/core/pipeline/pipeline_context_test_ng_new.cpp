@@ -26,6 +26,29 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace NG {
+namespace {
+struct TouchTimeTestCase {
+    uint64_t vsyncTime;
+    uint64_t compensationValue;
+    std::vector<uint64_t> touchEventTimes;
+    uint32_t targetTouchEventSize;
+    uint32_t originTouchEventSize;
+};
+
+const std::vector<TouchTimeTestCase> COLLECT_TOUCH_EVENTS_TESTCASES = {
+    { AFTER_VSYNC_TIME, BEFORE_VSYNC_TIME, { BEFORE_VSYNC_TIME, DEFAULT_VSYNC_TIME }, 2, 0 },
+    { DEFAULT_VSYNC_TIME, 0, { BEFORE_VSYNC_TIME, DEFAULT_VSYNC_TIME }, 2, 0 },
+    { DEFAULT_VSYNC_TIME, 0, { DEFAULT_VSYNC_TIME, AFTER_VSYNC_TIME }, 1, 1 },
+    { DEFAULT_VSYNC_TIME, 0, { AFTER_VSYNC_TIME, AFTER_VSYNC_TIME }, 0, 2 },
+};
+
+const std::vector<TouchTimeTestCase> FLUSH_TOUCH_EVENTS_TESTCASES = {
+    { DEFAULT_VSYNC_TIME, 0, {}, 0, 0 },
+    { DEFAULT_VSYNC_TIME, 0, { BEFORE_VSYNC_TIME }, 0, 1 },
+    { DEFAULT_VSYNC_TIME, 0, { BEFORE_VSYNC_TIME, BEFORE_VSYNC_TIME }, 0, 2 },
+    { DEFAULT_VSYNC_TIME, 0, { DEFAULT_VSYNC_TIME, AFTER_VSYNC_TIME }, 1, 2 },
+};
+} // namespace
 /**
  * @tc.name: PipelineContextTestNg036
  * @tc.desc: Test RequestFocus.
@@ -2004,6 +2027,138 @@ HWTEST_F(PipelineContextTestNg, DragEvent01, TestSize.Level1)
         history, current, nanoTimeStamp);
     EXPECT_EQ(305, resampledPointerEvent.x);
     EXPECT_EQ(405, resampledPointerEvent.y);
+}
+
+/**
+ * @tc.name: PipelineCancelDragIfRightBtnPressedTest001
+ * @tc.desc: Test CancelDragIfRightBtnPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineCancelDragIfRightBtnPressedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto manager = context_->GetDragDropManager();
+    ASSERT_NE(manager, nullptr);
+    MouseEvent event;
+
+    /**
+     * @tc.steps2: test function with mouse event button is None.
+     * @tc.expected: dragDropManager's dragCancel flag is false.
+     */
+    manager->SetIsDragCancel(true);
+    context_->CancelDragIfRightBtnPressed(event);
+    EXPECT_FALSE(manager->isDragCancel_);
+
+    /**
+     * @tc.steps3: test function with mouse event button is Right Button.
+     * @tc.expected: dragDropManager's dragCancel flag is true.
+     */
+    event.button = MouseButton::RIGHT_BUTTON;
+    event.action = MouseAction::PRESS;
+    context_->CancelDragIfRightBtnPressed(event);
+    EXPECT_TRUE(manager->isDragCancel_);
+
+    /**
+     * @tc.steps4: test function without dragDropManager_.
+     * @tc.expected: dragDropManager's dragCancel flag is true.
+     */
+    context_->dragDropManager_ = nullptr;
+    context_->CancelDragIfRightBtnPressed(event);
+    EXPECT_TRUE(manager->isDragCancel_);
+}
+
+/**
+ * @tc.name: PipelineOnDragEvent001
+ * @tc.desc: Test reset drag frameNode with pull in.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineOnDragEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto manager = context_->GetDragDropManager();
+    ASSERT_NE(manager, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", -1, AceType::MakeRefPtr<Pattern>(), false);
+    manager->preTargetFrameNode_ = frameNode;
+
+    DragPointerEvent dragEvent;
+    DragEventAction action = DragEventAction::DRAG_EVENT_START;
+    context_->OnDragEvent(dragEvent, action);
+    EXPECT_NE(manager->preTargetFrameNode_, frameNode);
+}
+
+/**
+ * @tc.name: PipelineFlushTouchEvents001
+ * @tc.desc: Test the function CollectTouchEventsBeforeVsync.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    for (auto& testCase : COLLECT_TOUCH_EVENTS_TESTCASES) {
+        context_->touchEvents_.clear();
+        context_->vsyncTime_ = testCase.vsyncTime;
+        context_->compensationValue_ = testCase.compensationValue;
+        for (auto& touchTimes : testCase.touchEventTimes) {
+            TouchEvent event;
+            event.time = TimeStamp(std::chrono::nanoseconds(touchTimes));
+            context_->touchEvents_.emplace_back(event);
+        }
+        std::list<TouchEvent> touchEvents;
+        context_->CollectTouchEventsBeforeVsync(touchEvents);
+        EXPECT_EQ(touchEvents.size(), testCase.targetTouchEventSize);
+        EXPECT_EQ(context_->touchEvents_.size(), testCase.originTouchEventSize);
+    }
+}
+
+/**
+ * @tc.name: PipelineFlushTouchEvents002
+ * @tc.desc: Test the function FlushTouchEvents with normal touchEvents.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->eventManager_, nullptr);
+    context_->SetupRootElement();
+    context_->vsyncTime_ = AFTER_VSYNC_TIME;
+    context_->eventManager_->idToTouchPoints_.clear();
+
+    for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
+        context_->resampleTimeStamp_ = testCase.vsyncTime;
+        context_->compensationValue_ = testCase.compensationValue;
+        context_->touchEvents_.clear();
+        context_->historyPointsById_.clear();
+        for (auto& touchTimes : testCase.touchEventTimes) {
+            TouchEvent event;
+            event.type = TouchType::MOVE;
+            event.time = TimeStamp(std::chrono::nanoseconds(touchTimes));
+            context_->touchEvents_.emplace_back(event);
+        }
+        context_->FlushTouchEvents();
+        EXPECT_EQ(context_->historyPointsById_.size(), testCase.targetTouchEventSize);
+        auto idToTouchPoint = context_->eventManager_->GetIdToTouchPoint();
+        EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
+    }
 }
 } // namespace NG
 } // namespace OHOS::Ace

@@ -24,6 +24,7 @@ ArkUINativeModuleValue ScrollableBridge::SetContentClip(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto* node = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
@@ -47,6 +48,7 @@ ArkUINativeModuleValue ScrollableBridge::ResetContentClip(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto* node = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetContentClip(node);
     return panda::JSValueRef::Undefined(vm);
@@ -60,6 +62,7 @@ ArkUINativeModuleValue ScrollableBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> arg_effect = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> arg_edgeEffectOptions = runtimeCallInfo->GetCallArgRef(2);
 
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     EdgeEffect effect = EdgeEffect::NONE;
     if (!arg_effect->IsUndefined() && !arg_effect->IsNull()) {
@@ -84,6 +87,7 @@ ArkUINativeModuleValue ScrollableBridge::ResetEdgeEffect(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetEdgeEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -96,6 +100,7 @@ ArkUINativeModuleValue ScrollableBridge::SetFadingEdge(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> fadingEdgeArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> fadingEdgeLengthArg = runtimeCallInfo->GetCallArgRef(2);
+    CHECK_NULL_RETURN(frameNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     CalcDimension fadingEdgeLength = Dimension(32.0f, DimensionUnit::VP); // default value
     if (fadingEdgeArg->IsUndefined() || fadingEdgeArg->IsNull()) {
@@ -117,6 +122,7 @@ ArkUINativeModuleValue ScrollableBridge::ResetFadingEdge(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetFadingEdge(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -128,6 +134,7 @@ ArkUINativeModuleValue ScrollableBridge::SetOnReachStart(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getScrollableModifier()->resetOnReachStartCallBack(nativeNode);
@@ -153,6 +160,7 @@ ArkUINativeModuleValue ScrollableBridge::ResetOnReachStart(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetOnReachStartCallBack(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -164,6 +172,7 @@ ArkUINativeModuleValue ScrollableBridge::SetOnReachEnd(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getScrollableModifier()->resetOnReachEndCallBack(nativeNode);
@@ -189,6 +198,7 @@ ArkUINativeModuleValue ScrollableBridge::ResetOnReachEnd(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetOnReachEndCallBack(nativeNode);
     return panda::JSValueRef::Undefined(vm);

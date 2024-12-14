@@ -32,6 +32,10 @@ public:
     static RefPtr<FrameNode> BuildGestureRow(RefPtr<FrameNode>& containerNode);
     static bool GetContainerModalComponentRect(PipelineContext *pipelineContext,
         RectF& floatContainerModal, RectF& floatButtons);
+    static void SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
+        uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode);
+    static int32_t AddButtonsRectChangeListener(PipelineContext* context, ButtonsRectChangeListener&& listener);
+    static void RemoveButtonsRectChangeListener(PipelineContext* context, int32_t id);
 
 protected:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);

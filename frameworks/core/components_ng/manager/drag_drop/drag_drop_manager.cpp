@@ -856,6 +856,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     if (IsUIExtensionComponent(dragFrameNode)) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
+        NotifyDragFrameNode(point, DragEventType::DROP);
         return;
     }
 

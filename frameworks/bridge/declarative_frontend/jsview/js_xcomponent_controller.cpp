@@ -155,6 +155,7 @@ void JSXComponentController::GetSurfaceId(const JSCallbackInfo& args)
         auto surfaceId = xcomponentController_->GetSurfaceId();
         auto returnValue = JSVal(ToJSValue(surfaceId));
         auto returnPtr = JSRef<JSVal>::Make(returnValue);
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Controller GetSurfaceId:%{public}s", surfaceId.c_str());
         args.SetReturnValue(returnPtr);
     }
 }

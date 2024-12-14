@@ -67,8 +67,10 @@ bool JSSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     value = paramObject->GetProperty("buttonType");
     if (value->IsNumber()) {
         bg = value->ToNumber<int32_t>();
-        if ((bg < static_cast<int32_t>(ButtonType::NORMAL)) ||
-            (bg > static_cast<int32_t>(ButtonType::CIRCLE))) {
+        if ((bg != static_cast<int32_t>(ButtonType::NORMAL)) &&
+            (bg != static_cast<int32_t>(ButtonType::CIRCLE)) &&
+            (bg != static_cast<int32_t>(ButtonType::CAPSULE)) &&
+            (bg != static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE))) {
             return false;
         }
     } else {

@@ -74,9 +74,8 @@ void ScrollBarPattern::OnModifyDone()
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SetScrollBar(DisplayMode::ON);
     }
-    if (!panRecognizer_) {
-        InitPanRecognizer();
-    }
+    // After changing the axis direction, modify the direction of the pan gesture.
+    InitPanRecognizer();
     if (!clickRecognizer_) {
         InitClickEvent();
     }

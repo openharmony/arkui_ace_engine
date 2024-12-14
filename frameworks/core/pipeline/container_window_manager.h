@@ -209,9 +209,11 @@ public:
         }
     }
 
-    void WindowPerformBack()
+    void WindowPerformBack() const
     {
-        windowPerformBackCallback_();
+        if (windowPerformBackCallback_) {
+            windowPerformBackCallback_();
+        }
     }
 
     bool GetWindowStartMoveFlag() const

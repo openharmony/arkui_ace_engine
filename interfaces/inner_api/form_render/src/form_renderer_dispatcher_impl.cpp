@@ -211,13 +211,13 @@ void FormRendererDispatcherImpl::OnAccessibilityChildTreeRegister(
         }
         HILOG_INFO("OnAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
         uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
-        uiContent->SetAccessibilityGetParentRectHandler([formRenderer](int32_t &top, int32_t &left) {
+        uiContent->SetAccessibilityGetParentRectHandler([formRenderer](AccessibilityParentRectInfo &parentRectInfo) {
             auto formRendererPtr = formRenderer.lock();
             if (!formRendererPtr) {
                 HILOG_ERROR("formRenderer is nullptr");
                 return;
             }
-            formRendererPtr->GetRectRelativeToWindow(top, left);
+            formRendererPtr->GetRectRelativeToWindow(parentRectInfo);
         });
     });
 }

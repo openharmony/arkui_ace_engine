@@ -349,7 +349,7 @@ void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
                               : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
     swiper.mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")
                                : DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:false");
-    swiper.usePropertyAnimation_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
+    swiper.propertyAnimationIsRunning_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
                                  : DumpLog::GetInstance().AddDesc("usePropertyAnimation:false");
     swiper.isUserFinish_ ? DumpLog::GetInstance().AddDesc("isUserFinish:true")
                          : DumpLog::GetInstance().AddDesc("isUserFinish:false");

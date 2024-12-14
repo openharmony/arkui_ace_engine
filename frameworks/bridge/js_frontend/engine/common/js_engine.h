@@ -23,6 +23,7 @@
 #include <unordered_map>
 
 #include "base/utils/macros.h"
+#include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
@@ -319,6 +320,10 @@ public:
     virtual void SetLocalStorage(int32_t instanceId, NativeReference* storage) {}
 
     virtual void SetContext(int32_t instanceId, NativeReference* context) {}
+
+    virtual std::shared_ptr<Framework::JsValue> GetJsContext() { return nullptr; }
+
+    virtual void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext) {}
 
     virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}
 

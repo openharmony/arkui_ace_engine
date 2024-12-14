@@ -105,8 +105,8 @@ const int CURRENT_VALUE2 = 10;
 const int MIDDLE_OF_COUNTS = 2;
 const int SHOW_COUNT = 7;
 const int DEFAULT_INDEX = -1;
-const std::string AM = "上午";
-const std::string PM = "下午";
+const std::string AM = "AM ";
+const std::string PM = "PM ";
 const std::string COLON = ":";
 const std::string ZERO = "0";
 const std::string TIME_AMPM = "01";
@@ -4970,6 +4970,26 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest004
     Dimension fontSizeValue(10.0);
     Dimension result = TimePickerDialogView::AdjustFontSizeScale(fontSizeValue, fontScale);
     EXPECT_NE(result, fontSizeValue * fontScale);
+}
+
+/**
+ * @tc.name: TimePickerModelNGBackgroundColor001
+ * @tc.desc: Test TimePickerPatternTestNg SetBackgroundColor and getTimepickerBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGBackgroundColor001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+
+    auto theme = context->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TimePickerModelNG::SetBackgroundColor(frameNode, Color::RED);
+    EXPECT_EQ(TimePickerModelNG::getTimepickerBackgroundColor(frameNode), Color::RED.GetValue());
 }
 
 } // namespace OHOS::Ace::NG

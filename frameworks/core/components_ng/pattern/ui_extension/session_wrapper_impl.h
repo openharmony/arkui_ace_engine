@@ -102,7 +102,7 @@ public:
     uint32_t GetReasonDump() const override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     WindowSizeChangeReason GetSizeChangeReason() const override;
-    int32_t GetInstanceIdFromHost();
+    int32_t GetInstanceIdFromHost() const;
 
 private:
     void InitAllCallback();

@@ -380,7 +380,7 @@ HWTEST_F(TextTestFiveNg, GetSpansInfoInStyledString001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty(TEXT_FOR_AI);
+    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty(U16TEXT_FOR_AI);
     ASSERT_NE(textSpanNode, nullptr);
     textPattern->AddChildSpanItem(textSpanNode);
     ImageSpanNodeProperty firstProperty { .imageSrc = std::make_optional("image") };
@@ -404,7 +404,7 @@ HWTEST_F(TextTestFiveNg, GetSpansInfo001, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
-    auto spanString = AceType::MakeRefPtr<SpanString>(TEXT_CONTENT);
+    auto spanString = AceType::MakeRefPtr<SpanString>(TEXT_U16CONTENT);
     ASSERT_NE(spanString, nullptr);
     textPattern->SetStyledString(spanString);
 
@@ -439,28 +439,28 @@ HWTEST_F(TextTestFiveNg, GetSelectedText001, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
-    auto textSpanNode1 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    auto textSpanNode1 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE_W);
     ASSERT_NE(textSpanNode1, nullptr);
     textPattern->AddChildSpanItem(textSpanNode1);
-    auto textSpanNode2 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    auto textSpanNode2 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE_W);
     ASSERT_NE(textSpanNode2, nullptr);
     textSpanNode2->UpdateContent(1);
     textPattern->AddChildSpanItem(textSpanNode2);
-    auto textSpanNode3 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    auto textSpanNode3 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE_W);
     ASSERT_NE(textSpanNode3, nullptr);
     textSpanNode3->UpdateContent(1);
     textSpanNode3->spanItem_->position = 1;
     textPattern->AddChildSpanItem(textSpanNode3);
-    auto textSpanNode4 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    auto textSpanNode4 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE_W);
     ASSERT_NE(textSpanNode4, nullptr);
     textSpanNode4->spanItem_->placeholderIndex = 0;
     textPattern->AddChildSpanItem(textSpanNode4);
-    auto textSpanNode5 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    auto textSpanNode5 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE_W);
     ASSERT_NE(textSpanNode5, nullptr);
     textSpanNode5->spanItem_->position = 1;
     textSpanNode5->spanItem_->placeholderIndex = 0;
     textPattern->AddChildSpanItem(textSpanNode5);
-    auto textSpanNode6 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    auto textSpanNode6 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE_W);
     ASSERT_NE(textSpanNode6, nullptr);
     textSpanNode6->spanItem_->position = 1;
     textPattern->AddChildSpanItem(textSpanNode6);
@@ -738,7 +738,7 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
 
-    std::string content = "Hello World";
+    std::u16string content = u"Hello World";
     auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     ASSERT_NE(layoutWrapper, nullptr);
 
@@ -1829,7 +1829,7 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
      * @tc.steps: step1. Initialize spanNode and paragraph.
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->SetTextDetectEnable(true);
@@ -1854,7 +1854,7 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
      * @tc.steps: step3. call UpdateTextStyle
      * @tc.expected: cover branch content is empty.
      */
-    std::string spanContent;
+    std::u16string spanContent;
     EXPECT_TRUE(spanNode->spanItem_->IsDragging());
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
@@ -1862,7 +1862,7 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
      * @tc.steps: step4. call UpdateTextStyle
      * @tc.expected: cover branch selStart > 0, selEnd < contentLength.
      */
-    spanContent = CREATE_VALUE;
+    spanContent = CREATE_VALUE_W;
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
     /**
@@ -2041,7 +2041,7 @@ HWTEST_F(TextTestFiveNg, GetSpanResultObject001, TestSize.Level1)
     spanItem->SetImageSpanOptions(options2);
     obj = spanItem->GetSpanResultObject(0, 10);
     EXPECT_TRUE(obj.isInit);
-    EXPECT_EQ(obj.valueString, image);
+    EXPECT_EQ(StringUtils::Str16ToStr8(obj.valueString), image);
     EXPECT_EQ(obj.valuePixelMap, pixelMap.value());
 }
 
@@ -2233,7 +2233,7 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     textPattern->copyOption_ = CopyOptions::InApp;
     textPattern->textSelector_.Update(0, 3);
-    textPattern->textForDisplay_ = TEXT_CONTENT;
+    textPattern->textForDisplay_ = TEXT_U16CONTENT;
 
     func = textPattern->GetThumbnailCallback();
     ASSERT_NE(func, nullptr);
@@ -2884,5 +2884,33 @@ HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
     EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), true);
     pattern->UnRegisterAfterLayoutCallback();
     EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), false);
+}
+
+/**
+ * @tc.name: TextShiftMultipleSelection001
+ * @tc.desc: test text_pattern.cpp shift multiple selection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern->HandleKeyEvent(keyEvent);
+    pattern->UpdateShiftFlag(keyEvent);
+
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    Offset offset(0.0, 0.0);
+    info.SetGlobalLocation(offset);
+    pattern->HandleMouseEvent(info);
+    pattern->ResetSelection();
+
+    EXPECT_EQ(pattern->IsSelected(), false);
 }
 } // namespace OHOS::Ace::NG

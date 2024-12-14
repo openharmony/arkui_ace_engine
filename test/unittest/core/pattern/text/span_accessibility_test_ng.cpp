@@ -71,7 +71,7 @@ HWTEST_F(SpanAccessibilityTestNg, GetSubComponentInfos001, TestSize.Level1)
      */
     std::list<RefPtr<SpanItem>> spanItems;
     auto spanItem1 = AceType::MakeRefPtr<SpanItem>();
-    spanItem1->content = "test";
+    spanItem1->content = u"test";
     ConstructSpanItemOnClick(spanItem1);
     spanItems.emplace_back(spanItem1);
 
@@ -123,7 +123,7 @@ HWTEST_F(SpanAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level1)
     std::vector<RefPtr<SpanBase>> spanBases;
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("01234567891");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"01234567891");
     spanString->BindWithSpans(spanBases);
     pattern->SetSpanItemChildren(spanString->GetSpanItems());
 
@@ -220,7 +220,7 @@ HWTEST_F(SpanAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
      */
     std::list<RefPtr<SpanItem>> spanItems;
     auto spanItem1 = AceType::MakeRefPtr<SpanItem>();
-    spanItem1->content = "test click";
+    spanItem1->content = u"test click";
     ConstructSpanItemOnClick(spanItem1);
     spanItems.emplace_back(spanItem1);
 
@@ -341,7 +341,7 @@ HWTEST_F(SpanAccessibilityTestNg, SetAccessibilityText001, TestSize.Level1)
      * @tc.steps: step1. create span node
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
 
     /**
      * @tc.steps: step2. get span node
@@ -379,7 +379,7 @@ HWTEST_F(SpanAccessibilityTestNg, SetAccessibilityDescription001, TestSize.Level
      * @tc.steps: step1. create span node
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
 
     /**
      * @tc.steps: step2. get span node
@@ -417,7 +417,7 @@ HWTEST_F(SpanAccessibilityTestNg, SetAccessibilityLevel001, TestSize.Level1)
      * @tc.steps: step1. create span node
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
 
     /**
      * @tc.steps: step2. get span node

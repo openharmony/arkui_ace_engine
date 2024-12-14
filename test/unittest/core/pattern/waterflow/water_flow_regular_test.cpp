@@ -676,6 +676,112 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LazyForEachJump001
+ * @tc.desc: Test jump function after changing dataSource in lazyforeach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyForEachJump001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(10);
+    CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    AddItemInLazyForEach(1);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    AddItemInLazyForEach(6);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 600.0f);
+    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+
+    AddItemInLazyForEach(17);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
+    pattern_->ScrollToIndex(17, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 17);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 24);
+    EXPECT_EQ(GetChildY(frameNode_, 17), 0.0f);
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+
+    AddItemInLazyForEach(99);
+    FlushUITasks();
+    pattern_->ScrollToIndex(99, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 92);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 99);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 100);
+}
+
+/**
+ * @tc.name: LazyForEachJump002
+ * @tc.desc: Test jump function after changing dataSource in lazyforeach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(10);
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 2);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+
+    DeleteItemInLazyForEach(58);
+    mockLazy->SetTotalCount(99);
+    FlushUITasks();
+    pattern_->ScrollToIndex(58, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 58);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 99);
+
+    DeleteItemInLazyForEach(63);
+    mockLazy->SetTotalCount(98);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 58);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
+    EXPECT_EQ(GetChildY(frameNode_, 58), 0.0f);
+    pattern_->ScrollToIndex(60, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 60);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 67);
+    EXPECT_TRUE(GetItem(58, true)->IsOnMainTree());
+
+    DeleteItemInLazyForEach(52);
+    mockLazy->SetTotalCount(97);
+    FlushUITasks();
+    pattern_->ScrollToIndex(49, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 49);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 56);
+
+    DeleteItemInLazyForEach(0);
+    mockLazy->SetTotalCount(96);
+    FlushUITasks();
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 96);
+}
+
+/**
  * @tc.name: ScrollToEdge009
  * @tc.desc: scrollEdge to bottom from top and trigger reach end
  * @tc.type: FUNC
@@ -711,5 +817,92 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge009, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isReachEndCalled);
     EXPECT_LE(pattern_->layoutInfo_->Offset(), -14200.0f);
+}
+
+/**
+ * @tc.name: Delete002
+ * @tc.desc: Test layout when deleting a flowItem and changing the height of a flowItem meanwhile.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(43);
+    CreateDone();
+
+    UpdateCurrentOffset(-4000.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 42);
+    EXPECT_EQ(GetChildRect(frameNode_, 35).Bottom(), 400.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 35).Height(), 200.0f);
+
+    // delete the last item and change height of the 35th item.
+    frameNode_->RemoveChildAtIndex(42);
+    frameNode_->ChildrenUpdatedFrom(42);
+    auto child = GetChildFrameNode(frameNode_, 35);
+    child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
+    child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    FlushLayoutTask(frameNode_);
+
+    // both operations can take effect.
+    EXPECT_EQ(GetChildHeight(frameNode_, 35), 300.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 35).Bottom(), 500.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 41);
+}
+
+/**
+ * @tc.name: Delete004
+ * @tc.desc: In less-than one line scene, test layout when delete the last item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete004, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(4);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 3);
+    EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (0.00, 0.00) - [96.00 x 100.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (96.00, 0.00) - [96.00 x 200.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 2).ToString(), "RectT (192.00, 0.00) - [96.00 x 100.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (288.00, 0.00) - [96.00 x 200.00]");
+
+    // delete the last item.
+    frameNode_->RemoveChildAtIndex(2);
+    frameNode_->ChildrenUpdatedFrom(2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 2);
+    EXPECT_EQ(GetChildRect(frameNode_, 0).ToString(), "RectT (0.00, 0.00) - [96.00 x 100.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (96.00, 0.00) - [96.00 x 200.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 2).ToString(), "RectT (192.00, 0.00) - [96.00 x 200.00]");
+}
+
+/**
+ * @tc.name: Delete005
+ * @tc.desc: Delete while scrolling upwareds
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete005, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItems(50);
+    CreateDone();
+
+    UpdateCurrentOffset(-500.0f);
+
+    pattern_->UpdateCurrentOffset(20.0f, SCROLL_FROM_UPDATE);
+    frameNode_->ChildrenUpdatedFrom(22);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 26);
+    EXPECT_EQ(GetChildY(frameNode_, 26), 720.0f);
 }
 } // namespace OHOS::Ace::NG

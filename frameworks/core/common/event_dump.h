@@ -54,6 +54,7 @@ struct TouchPointSnapshot {
     TouchType type = TouchType::UNKNOWN;
     int64_t timestamp = 0;
     bool isInjected = false;
+    std::unordered_map<int32_t, int32_t> downFingerIds;
 };
 
 struct EventTree {
