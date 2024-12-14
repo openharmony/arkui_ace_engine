@@ -448,6 +448,16 @@ void TextFieldModelNG::SetFontFamily(const std::vector<std::string>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 
+void TextFieldModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, value);
+}
+
+void TextFieldModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value);
+}
+
 void TextFieldModelNG::SetInputFilter(const std::string& value,
     const std::function<void(const std::u16string&)>&& func)
 {

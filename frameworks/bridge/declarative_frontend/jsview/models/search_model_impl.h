@@ -52,6 +52,8 @@ public:
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override {}
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
