@@ -398,6 +398,24 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     return children_;
 }
 
+void RepeatVirtualScrollNode::OnRecycle()
+{
+    for (auto& [key, child]: caches_.GetAllNodes()) {
+        if (caches_.IsInL1Cache(key) && child.item) {
+            child.item->OnRecycle();
+        }
+    }
+}
+
+void RepeatVirtualScrollNode::OnReuse()
+{
+    for (auto& [key, child]: caches_.GetAllNodes()) {
+        if (caches_.IsInL1Cache(key) && child.item) {
+            child.item->OnReuse();
+        }
+    }
+}
+
 void RepeatVirtualScrollNode::UpdateChildrenFreezeState(bool isFreeze)
 {
     const auto& allChildren = caches_.GetAllNodes();
