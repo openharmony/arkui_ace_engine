@@ -246,6 +246,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isInitialized_ = true;
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
+    snapTrigByScrollBar_ = false;
     return true;
 }
 
@@ -914,9 +915,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
-bool ListPattern::StartSnapAnimation(
-    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance, SnapDirection snapDirection)
+bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
 {
+    auto snapDirection = snapAnimationOptions.snapDirection;
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
     auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
@@ -930,8 +931,9 @@ bool ListPattern::StartSnapAnimation(
     if (!IsScrolling()) {
         snapTrigOnScrollStart_ = true;
     }
-    predictSnapOffset_ = snapDelta;
-    scrollSnapVelocity_ = animationVelocity;
+    predictSnapOffset_ = snapAnimationOptions.snapDelta;
+    scrollSnapVelocity_ = snapAnimationOptions.animationVelocity;
+    snapTrigByScrollBar_ = snapAnimationOptions.fromScrollBar;
     MarkDirtyNodeSelf();
     return true;
 }
@@ -1014,7 +1016,7 @@ int32_t ListPattern::GetStartIndexExcludeStartOffset()
 void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
 {
     CHECK_NULL_VOID(scrollable_);
-    scrollable_->StartListSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
+    scrollable_->StartListSnapAnimation(scrollSnapDelta, scrollSnapVelocity, snapTrigByScrollBar_);
 }
 
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)

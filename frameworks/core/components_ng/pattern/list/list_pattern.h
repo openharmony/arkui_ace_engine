@@ -276,8 +276,7 @@ public:
         predictSnapOffset_ = predictSnapOffset;
     }
 
-    bool StartSnapAnimation(float snapDelta, float animationVelocity, float predictVelocity = 0.f,
-        float dragDistance = 0.f, SnapDirection snapDirection = SnapDirection::NONE) override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
 
     bool ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign scrollSnapAlign);
 
@@ -468,6 +467,7 @@ private:
     bool smooth_ = false;
     float scrollSnapVelocity_ = 0.0f;
     bool snapTrigOnScrollStart_ = false;
+    bool snapTrigByScrollBar_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
