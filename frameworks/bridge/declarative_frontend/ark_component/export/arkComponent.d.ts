@@ -770,6 +770,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     selectionMenuHidden(value: boolean): TextAreaAttribute;
     maxLines(value: number): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
+    ellipsisMode(value: EllipsisMode): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -819,6 +820,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     barState(value: BarState): TextInputAttribute;
     maxLines(value: number): TextInputAttribute;
     customKeyboard(event: () => void): TextInputAttribute;
+    ellipsisMode(value: EllipsisMode): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

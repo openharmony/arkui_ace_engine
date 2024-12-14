@@ -88,6 +88,7 @@ const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE, TextOverflow::DEFAULT };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -1955,4 +1956,16 @@ void JSTextField::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSTextField::SetEllipsisMode(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextFieldModel::GetInstance()->SetEllipsisMode(EllipsisMode::TAIL);
+        return;
+    }
+    uint32_t index = args->ToNumber<uint32_t>();
+    if (index < ELLIPSIS_MODALS.size()) {
+        TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
+    }
+}
 } // namespace OHOS::Ace::Framework

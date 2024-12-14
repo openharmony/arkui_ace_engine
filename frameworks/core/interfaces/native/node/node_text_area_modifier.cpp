@@ -46,12 +46,14 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
+constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
@@ -1684,6 +1686,23 @@ void ResetTextAreaEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetEllipsisMode(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODALS.size()) {
+        ellipsisMode = ELLIPSIS_MODE_TAIL;
+    }
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ellipsisMode]);
+}
+
+void ResetEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ELLIPSIS_MODE_TAIL]);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1727,8 +1746,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
         GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions, SetTextAreaWidth,
         ResetTextAreaWidth, SetTextAreaEnableHapticFeedback, ResetTextAreaEnableHapticFeedback,
-        SetTextAreaAutoCapitalizationMode, ResetTextAreaAutoCapitalizationMode,
-        GetTextAreaLetterSpacing, GetTextAreaEnablePreviewText };
+        SetTextAreaAutoCapitalizationMode, ResetTextAreaAutoCapitalizationMode, GetTextAreaLetterSpacing,
+        GetTextAreaEnablePreviewText, SetEllipsisMode, ResetEllipsisMode };
     return &modifier;
 }
 
