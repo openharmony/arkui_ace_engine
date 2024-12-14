@@ -216,10 +216,6 @@ void RefreshPattern::InitProgressNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
     progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
@@ -234,9 +230,13 @@ void RefreshPattern::InitProgressNode()
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
-    progressPaintProperty->UpdateColor(theme->GetProgressColor());
     host->AddChild(progressChild_, 0);
     progressChild_->MarkDirtyNode();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+    progressPaintProperty->UpdateColor(theme->GetProgressColor());
 }
 
 void RefreshPattern::UpdateLoadingTextOpacity(float opacity)
@@ -326,6 +326,7 @@ void RefreshPattern::InitChildNode()
     if (!progressChild_) {
         InitProgressNode();
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            CHECK_NULL_VOID(progressChild_);
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
             progressContext->UpdateOpacity(0.0f);
@@ -333,6 +334,7 @@ void RefreshPattern::InitChildNode()
             UpdateLoadingProgress();
         }
     }
+    CHECK_NULL_VOID(progressChild_);
     auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(progressAccessibilityProperty);
     progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
@@ -641,7 +643,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         FireChangeEvent("false");
     }
     FireStateChange(static_cast<int>(refreshStatus_));
-    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
+    TAG_LOGI(AceLogTag::ACE_REFRESH, "Refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()
@@ -1036,6 +1038,7 @@ void RefreshPattern::LoadingProgressExit()
 
 void RefreshPattern::UpdateLoadingProgress()
 {
+    CHECK_NULL_VOID(progressChild_);
     float loadingProgressOffset =
         std::clamp(scrollOffset_, triggerLoadingDistance_, static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
     UpdateLoadingMarginTop(loadingProgressOffset);
