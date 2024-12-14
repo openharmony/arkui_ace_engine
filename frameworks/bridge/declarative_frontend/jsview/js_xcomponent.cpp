@@ -294,7 +294,7 @@ void* JSXComponent::Create(const XComponentParams& params)
             xcPattern->XComponentSizeInit();
             xcPattern->SetXcomponentInit(true);
         },
-        TaskExecutor::TaskType::JS, "ArkUIXComponentCreate");
+        TaskExecutor::TaskType::JS, "ArkUIXComponentCreate", PriorityType::VIP);
 
     return jsXComponent;
 }

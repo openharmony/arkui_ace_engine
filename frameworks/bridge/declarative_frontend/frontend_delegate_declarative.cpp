@@ -2340,7 +2340,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
         callback();
         return;
     }
-    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)

@@ -917,7 +917,7 @@ void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::OnLayoutCompleted(const std::string& componentId)

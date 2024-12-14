@@ -1321,7 +1321,7 @@ void FrontendDelegateImpl::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
