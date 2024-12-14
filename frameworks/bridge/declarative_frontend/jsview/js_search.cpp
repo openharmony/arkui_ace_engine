@@ -150,6 +150,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("maxFontScale", &JSSearch::SetMaxFontScale);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("halfLeading", &JSSearch::SetHalfLeading);
     JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
@@ -1355,6 +1356,16 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     SearchModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSSearch::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    bool halfLeading = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    SearchModel::GetInstance()->SetHalfLeading(halfLeading);
 }
 
 void JSSearch::EditMenuOptions(const JSCallbackInfo& info)
