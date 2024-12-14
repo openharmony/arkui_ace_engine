@@ -585,6 +585,9 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
     }
     for (size_t i = updateCount; i < paramCount; i++) {
         auto optionNode = MenuView::CreateSelectOption(params.at(i), i);
+        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        optionPattern->SetIsSelectOption(true);
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
             props->UpdateNeedDivider(false);
