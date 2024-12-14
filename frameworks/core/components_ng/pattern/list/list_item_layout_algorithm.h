@@ -106,6 +106,11 @@ public:
         return curOffsetSwipeChanged_;
     }
 
+    void SetIsFromComponentContent(bool isFromComponentContent)
+    {
+        isFromComponentContent_ = isFromComponentContent;
+    }
+
     void SetHasEndDeleteArea(bool hasEndDeleteArea)
     {
         hasEndDeleteArea_ = hasEndDeleteArea;
@@ -128,6 +133,7 @@ private:
     bool hasStartDeleteArea_ = false;
     bool hasEndDeleteArea_ = false;
     bool curOffsetSwipeChanged_ = false;
+    bool isFromComponentContent_ = false;
     Axis axis_ = Axis::VERTICAL;
 };
 } // namespace OHOS::Ace::NG

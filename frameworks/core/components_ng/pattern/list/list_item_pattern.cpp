@@ -107,6 +107,7 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetEndNodeSize(endNodeSize_);
     layoutAlgorithm->SetCurOffset(curOffset_);
     layoutAlgorithm->SetCurOffsetSwipeChanged(curOffsetSwipeChanged_);
+    layoutAlgorithm->SetIsFromComponentContent(isFromComponentContent_);
     layoutAlgorithm->SetHasStartDeleteArea(hasStartDeleteArea_);
     layoutAlgorithm->SetHasEndDeleteArea(hasEndDeleteArea_);
     return layoutAlgorithm;
@@ -135,7 +136,7 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     return false;
 }
 
-void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
+void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode, bool isFromComponentContent)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -153,6 +154,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
             host->ReplaceChild(host->GetChildAtIndex(startNodeIndex_), startNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
+        isFromComponentContent_ = isFromComponentContent;
     } else if (HasStartNode()) {
         if (NonNegative(curOffset_)) {
             curOffset_ = 0.0f;
@@ -170,7 +172,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
     }
 }
 
-void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
+void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode, bool isFromComponentContent)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -188,6 +190,7 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             host->ReplaceChild(host->GetChildAtIndex(endNodeIndex_), endNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
+        isFromComponentContent_ = isFromComponentContent;
     } else if (HasEndNode()) {
         if (NonPositive(curOffset_)) {
             curOffset_ = 0.0f;
