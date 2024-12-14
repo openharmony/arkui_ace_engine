@@ -8780,6 +8780,7 @@ void RichEditorPattern::HandleOnDragStatusCallback(
 
 void RichEditorPattern::HandleOnCameraInput()
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnCameraInput");
 #if defined(ENABLE_STANDARD_INPUT)
     if (richEditTextChangeListener_ == nullptr) {
         richEditTextChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
@@ -8793,6 +8794,7 @@ void RichEditorPattern::HandleOnCameraInput()
     if (imeShown_) {
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
     } else {
+        HandleOnEditChanged(true);
         auto optionalTextConfig = GetMiscTextConfig();
         CHECK_NULL_VOID(optionalTextConfig.has_value());
         MiscServices::TextConfig textConfig = optionalTextConfig.value();
