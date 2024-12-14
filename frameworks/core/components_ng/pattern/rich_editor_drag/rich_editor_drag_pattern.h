@@ -75,6 +75,7 @@ public:
     }
 
 protected:
+    void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes) override;
     std::shared_ptr<RichEditorDragInfo> info_;
 
 private:
