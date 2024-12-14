@@ -1724,6 +1724,8 @@ frameworks/core/accessibility/js_inspector/inspect_toolbar_item.h
 frameworks/core/accessibility/js_inspector/inspect_video.cpp @arkuilayout
 frameworks/core/accessibility/js_inspector/inspect_video.h @arkuilayout
 frameworks/core/animation/ @arkui_superman
+frameworks/core/animation/chain_animation.cpp @arkuiscroll
+frameworks/core/animation/chain_animation.h @arkuiscroll
 frameworks/core/animation/test/ @arkui_superman
 frameworks/core/BUILD.gn @arkui_architecture
 frameworks/core/common/ace_application_info.cpp @arkuiframework
