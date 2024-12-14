@@ -1372,7 +1372,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus004, TestSize.Level1)
      * @tc.expected: Rest status
      */
     model.SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::HORIZONTAL));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 }
 

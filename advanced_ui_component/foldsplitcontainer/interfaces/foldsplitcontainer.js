@@ -113,6 +113,7 @@ export class FoldSplitContainer extends ViewPU {
     this.__extraOpacity = new ObservedPropertySimplePU(1, this, 'extraOpacity');
     this.windowStatusType = window.WindowStatusType.UNDEFINED;
     this.foldStatus = display.FoldStatus.FOLD_STATUS_UNKNOWN;
+    this.rotation = 0;
     this.windowInstance = undefined;
     this.containerSize = { width: 0, height: 0 };
     this.containerGlobalPosition = { x: 0, y: 0 };
@@ -280,7 +281,12 @@ export class FoldSplitContainer extends ViewPU {
     this.listener.on('change', (m4) => {
       this.isSmallScreen = m4.matches;
     });
-    this.foldStatus = display.getFoldStatus();
+    try {
+      this.foldStatus = display.getFoldStatus();
+    } catch (exception) {
+      Logger.error('Failed getFoldStatus. code:%{public}d, message:%{public}s',
+        exception.code, exception.message);
+    }
     display.on('foldStatusChange', (j4) => {
       if (this.foldStatus !== j4) {
         this.foldStatus = j4;
@@ -306,9 +312,14 @@ export class FoldSplitContainer extends ViewPU {
       }
       this.windowInstance = f4;
       this.updatePreferredOrientation();
-      this.windowInstance.on('windowStatusChange', (i4) => {
-        this.windowStatusType = i4;
-      });
+      try {
+        this.windowInstance.on('windowStatusChange', (i4) => {
+          this.windowStatusType = i4;
+        });
+      } catch (exception) {
+        Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
+          exception.code, exception.message);
+      }
     });
   }
   aboutToDisappear() {
@@ -316,7 +327,12 @@ export class FoldSplitContainer extends ViewPU {
       this.listener.off('change');
       this.listener = undefined;
     }
-    display.off('foldStatusChange');
+    try {
+      display.off('foldStatusChange');
+    } catch (exception) {
+      Logger.error('Failed display.off foldStatusChange. code:%{public}d, message:%{public}s',
+        exception.code, exception.message);
+    }
     if (this.windowInstance) {
       this.windowInstance.off('windowStatusChange');
     }
@@ -403,10 +419,16 @@ export class FoldSplitContainer extends ViewPU {
   }
   dispatchHoverStatusChange(b4) {
     if (this.onHoverStatusChange) {
+      try {
+        this.rotation = display.getDefaultDisplaySync().rotation;
+      } catch (exception) {
+        Logger.error('Failed display.getDefaultDisplaySync(). code:%{public}d, message:%{public}s',
+          exception.code, exception.message);
+      }
       this.onHoverStatusChange({
         foldStatus: this.foldStatus,
         isHoverMode: b4,
-        appRotation: display.getDefaultDisplaySync().rotation,
+        appRotation: this.rotation,
         windowStatusType: this.windowStatusType,
       });
     }
@@ -659,7 +681,12 @@ export class FoldSplitContainer extends ViewPU {
     return { left: d, top: e, width: f, height: g };
   }
   isPortraitOrientation() {
-    const a = display.getDefaultDisplaySync();
+    try {
+      const a = display.getDefaultDisplaySync();      
+    } catch (exception) {
+      Logger.error('Failed getDefaultDisplaySync. code:%{public}d, message:%{public}s',
+        exception.code, exception.message);
+    }
     switch (a.orientation) {
       case display.Orientation.PORTRAIT:
       case display.Orientation.PORTRAIT_INVERTED:

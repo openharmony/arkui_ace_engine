@@ -90,6 +90,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     PipelineContext::aliveInstanceSet_.emplace(instanceId);
 #endif
     window_->OnHide();
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -100,6 +103,16 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     PipelineContext::aliveInstanceSet_.emplace(instanceId);
 #endif
     window_->OnHide();
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
@@ -1144,6 +1157,16 @@ void PipelineContext::SetupRootElement()
     AddOnAreaChangeNode(rootNode_->GetId());
 }
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask([weak = WeakClaim(this), callback]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->focusOnNodeCallback_ = callback;
+        }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
+}
+
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -1394,6 +1417,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 break;
             }
             PostKeyboardAvoidTask();
+            break;
+        }
+        case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
+            SetRootRect(width, height, 0.0);
+            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -1816,19 +1844,16 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
 void PipelineContext::OriginalAvoidanceLogic(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    auto func = [this, keyboardHeight]() mutable {
+    auto func = [this, keyboardHeight, id = instanceId_]() mutable {
+        ContainerScope scope(id);
         safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         if (keyboardHeight > 0) {
             // add height of navigation bar
             keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
         }
-        float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float height = 0.0f;
-        if (manager) {
-            height = manager->GetHeight();
-            positionY = static_cast<float>(manager->GetClickPosition().GetY());
-        }
+        float positionY = manager ? static_cast<float>(manager->GetClickPosition().GetY()) : 0.0f;
+        float height = manager ? manager->GetHeight() : 0.0f;
         SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
         float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
@@ -3428,16 +3453,16 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (!windowId) {
         windowId = static_cast<int32_t>(GetFocusWindowId());
     }
-    int32_t currentStyle = 0;
-    mouseStyle->GetPointerStyle(windowId, currentStyle);
-    if (currentStyle != 0 && static_cast<int32_t>(format) == 0) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle "
-            "[%{public}d,%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
-            nodeId, mouseStyleNodeId_.value_or(-1), static_cast<int32_t>(format), currentStyle, windowId, isByPass);
-    }
     if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
+    int32_t currentStyle = static_cast<int32_t>(format);
+    if (lastMouseStyle_ != 0 && currentStyle == 0) {
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle "
+            "[%{public}d,%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
+            nodeId, mouseStyleNodeId_.value_or(-1), currentStyle, lastMouseStyle_, windowId, isByPass);
+    }
+    lastMouseStyle_ = currentStyle;
     return mouseStyle->ChangePointerStyle(windowId, format);
 }
 
@@ -3530,13 +3555,11 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             axisEventChecker_.GetPreAction());
     }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
     auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
     if (event.action != AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
-#endif
 
     auto dragManager = GetDragDropManager();
     if (dragManager && !dragManager->IsDragged()) {
@@ -3549,6 +3572,15 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             // If received rotate event, no need to touchtest.
             if (!event.isRotationEvent) {
                 eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
+                if (formEventMgr) {
+                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
+                }
+                auto formGestureMgr =  this->GetFormGestureManager();
+                if (formGestureMgr) {
+                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
+                        etsSerializedGesture, eventManager_);
+                }
             }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
@@ -3561,19 +3593,25 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         eventManager_->AxisTest(scaleEvent, node);
         eventManager_->DispatchAxisEventNG(scaleEvent);
     }
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
-#endif
-
+    if (scaleEvent.action == AxisAction::BEGIN) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
+        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
+    } else if (scaleEvent.verticalAxis == 0 && scaleEvent.horizontalAxis == 0) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis End");
+        ResSchedReport::GetInstance().ResSchedDataReport("axis_off");
+    } else {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
+        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
+    }
     auto mouseEvent = ConvertAxisToMouse(event);
     OnMouseMoveEventForAxisEvent(mouseEvent, node);
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
     if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
         formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
+        formEventMgr->RemoveEtsCardTouchEventCallback(event.id);
     }
-#endif
 }
 
 void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
@@ -3948,9 +3986,7 @@ void PipelineContext::Destroy()
     auto formEventMgr = this->GetFormEventManager();
     if (formEventMgr) {
         formEventMgr->ClearEtsCardTouchEventCallback();
-#ifdef FORM_MOUSE_AXIS_SUPPORT
         formEventMgr->ClearEtsCardAxisEventCallback();
-#endif
     }
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
@@ -4730,21 +4766,6 @@ void PipelineContext::SetContainerModalTitleHeight(int32_t height)
     containerPattern->SetContainerModalTitleHeight(height);
 }
 
-void PipelineContext::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-    uint32_t closeButtonRightMargin, int32_t isDarkMode)
-{
-    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("Set container button style failed, Window modal is not container.");
-        return;
-    }
-    CHECK_NULL_VOID(rootNode_);
-    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
-    CHECK_NULL_VOID(containerNode);
-    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
-    CHECK_NULL_VOID(containerPattern);
-    containerPattern->SetContainerButtonStyle(buttonsize, spacingBetweenButtons, closeButtonRightMargin, isDarkMode);
-}
-
 int32_t PipelineContext::GetContainerModalTitleHeight()
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
@@ -5312,5 +5333,19 @@ ScopedLayout::~ScopedLayout()
     }
     // set layout flag back
     pipeline_->SetIsLayouting(isLayouting_);
+}
+
+std::string PipelineContext::GetBundleName()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
 }
 } // namespace OHOS::Ace::NG

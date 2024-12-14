@@ -111,6 +111,7 @@ ohos_unittest("image_file_cache_test_ng") {
   module_out_path = image_test_output_path
 
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
     "$ace_root/frameworks/core/image/image_file_cache.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",

@@ -210,6 +210,16 @@ public:
     bool IsNeedTitleTransition();
 
     std::string ToDumpString();
+
+    void SetNeedForceMeasure(bool need)
+    {
+        needForceMeasure_ = need;
+    }
+    bool NeedForceMeasure() const
+    {
+        return needForceMeasure_;
+    }
+
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -227,6 +237,7 @@ private:
     bool needRemoveInPush_ = false;
     std::list<WeakPtr<UINode>> textNodeList_;
     NavigationSystemTransitionType systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
+    bool needForceMeasure_ = false;
 };
 
 } // namespace OHOS::Ace::NG

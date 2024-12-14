@@ -40,6 +40,16 @@ public:
     {
         return MakeRefPtr<LinearLayoutAlgorithm>();
     }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return { false, true, ScopeType::OTHERS };
+    }
 };
 } // namespace OHOS::Ace::NG
 

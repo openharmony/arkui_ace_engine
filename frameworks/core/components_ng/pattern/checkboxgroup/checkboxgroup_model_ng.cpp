@@ -22,12 +22,13 @@ namespace OHOS::Ace::NG {
 void CheckBoxGroupModelNG::Create(const std::optional<std::string>& groupName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CHECKBOXGROUP_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CHECKBOXGROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-
+    CHECK_NULL_VOID(frameNode);
+    stack->Push(frameNode);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());

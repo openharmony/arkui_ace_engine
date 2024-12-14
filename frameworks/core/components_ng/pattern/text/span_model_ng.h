@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SpanModelNG : public SpanModel {
 public:
-    void Create(const std::string& content) override;
+    void Create(const std::u16string& content) override;
     void SetFont(const Font& value) override;
     void ResetFont() override;
     void SetFontSize(const Dimension& value) override;
@@ -53,8 +53,8 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
 
-    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
-    static void InitSpan(UINode* uiNode, const std::string& content);
+    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::u16string& content);
+    static void InitSpan(UINode* uiNode, const std::u16string& content);
     static void SetFontWeight(UINode* uiNode, FontWeight value);
     static void ResetFontWeight(UINode* uiNode);
     static void SetTextCase(UINode* uiNode, TextCase value);
@@ -80,7 +80,7 @@ public:
     static void SetBaselineOffset(UINode* uiNode, const Dimension& value);
     static void SetFont(UINode* uiNode, const Font& value);
     static void ResetFont(UINode* uiNode);
-    static std::string GetContent(UINode* uiNode);
+    static std::u16string GetContent(UINode* uiNode);
     static Ace::TextDecoration GetTextDecoration(UINode* uiNode);
     static Color GetTextDecorationColor(UINode* uiNode);
     static Ace::TextDecorationStyle GetTextDecorationStyle(UINode* uiNode);

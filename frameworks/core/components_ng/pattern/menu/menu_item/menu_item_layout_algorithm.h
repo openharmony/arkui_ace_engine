@@ -56,6 +56,7 @@ private:
         const RefPtr<LayoutProperty>& props, const std::optional<LayoutConstraintF>& layoutConstraint);
     void LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     void LayoutOption(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
+    float MeasureExpandableHeight(LayoutConstraintF& childConstraint, LayoutWrapper* layoutWrapper);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;

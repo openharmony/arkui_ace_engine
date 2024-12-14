@@ -21,6 +21,7 @@ import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
+import { GaugeBootcamp } from './GaugeBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -33,6 +34,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
     { name: 'chip', label: '操作块/Chip' }
+    { name: 'gauge', label: '数据量规图/gauge' },
   ]
 };
 
@@ -52,6 +54,8 @@ export function DisplaysDestination(name: string, route: Route) {
     TextSpanUrlBootcamp({ title: route.label })
   } else if (name === 'displays/chip'){
     ChipBootcamp({ title: route.label })
+  } else if (name === 'displays/gauge') {
+    GaugeBootcamp({ title: route.label })
   }
 }
 

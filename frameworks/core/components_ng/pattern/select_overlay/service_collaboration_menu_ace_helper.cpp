@@ -107,6 +107,10 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
     textProperty->UpdateFontSize(textTheme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(richTheme->GetMenuTitleColor());
+    textProperty->UpdateMaxLines(HEADER_TEXT_MAX_LINE);
+    textProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
     textProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(HEADER_MIN_WIDTH)), CalcLength(static_cast<float>(HEADER_MIN_HEIGHT))));
     auto textRenderContext = textNode->GetRenderContext();
@@ -139,10 +143,7 @@ void ServiceCollaborationMenuAceHelper::CreateEndIcon(uint32_t iconId, const Ref
     iconProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(iconId));
     iconProperty->UpdateSymbolColorList({ richTheme->GetMenuIconColor() });
     iconProperty->UpdateFontSize(iconTheme->GetIconSideLength());
-    iconProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    MarginProperty margin;
-    margin.right = CalcLength(static_cast<float>(ENDICON_MARGIN_RIGHT));
-    iconProperty->UpdateMargin(margin);
+    iconProperty->UpdateAlignment(Alignment::CENTER);
     iconNode->MountToParent(parent);
     iconNode->MarkModifyDone();
 }
@@ -191,14 +192,14 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
-    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
-    menuItemPattern->onClickEventSet_ = true;
     auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItemPattern);
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemPattern>());
     CHECK_NULL_RETURN(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    menuItemPattern->onClickEventSet_ = true;
     auto menuItemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_RETURN(menuItemProperty, nullptr);
-    menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f), .top = CalcLength(0.0f) });
+    menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f) });
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBorderRadius(BorderRadiusProperty(menuTheme->GetMenuDefaultInnerRadius()));
@@ -207,34 +208,31 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(row, nullptr);
     auto rowProperty = row->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
-    BorderWidthProperty borderWidth;
-    borderWidth.topDimen = Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::PX);
-    BorderWidthProperty width;
-    width.UpdateWithCheck(borderWidth);
-    rowProperty->UpdateBorderWidth(width);
-    auto rowContext = row->GetRenderContext();
-    CHECK_NULL_RETURN(rowContext, nullptr);
-    rowContext->UpdateBorderWidth(width);
-    BorderColorProperty borderColorProperty;
-    borderColorProperty.SetColor(Color::GRAY);
-    rowContext->UpdateBorderColor(borderColorProperty);
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(rightRow, nullptr);
+    auto rightRowProperty = rightRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(rightRowProperty, nullptr);
+    rightRowProperty->UpdatePadding({ .right = CalcLength(22.0f) });
+    auto paintProperty = menuItemNode->GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    paintProperty->UpdateStrokeWidth(Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::PX));
+    paintProperty->UpdateStartMargin(Dimension(12.0f, DimensionUnit::VP));
+    paintProperty->UpdateEndMargin(Dimension(12.0f, DimensionUnit::VP));
+    paintProperty->UpdateDividerColor(Color::GRAY);
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH), DimensionUnit::VP),
         CalcLength(static_cast<float>(MENUITEM_HEIGHT), DimensionUnit::VP)));
-    PaddingProperty rowpadding { .right = CalcLength(static_cast<float>(PANDDING_ZERO)) };
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        rowpadding.top = CalcLength(menuTheme->GetMenuItemVerticalPadding().ConvertToPx());
-    }
-    rowProperty->UpdatePadding(rowpadding);
-    MarginProperty margin;
-    margin.bottom = CalcLength(static_cast<float>(ROW_PADDING));
-    rowProperty->UpdateMargin(margin);
     CreateText(value, row, color, true, needEndIcon);
-    if (needEndIcon) {
-        CreateEndIcon(iconId, row);
-    }
     row->MountToParent(menuItemNode);
     row->MarkModifyDone();
+    if (needEndIcon) {
+        CreateEndIcon(iconId, rightRow);
+        rightRow->MountToParent(menuItemNode);
+        rightRow->MarkModifyDone();
+    }
+    menuItemNode->MarkModifyDone();
+    menuItemNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return menuItemNode;
 }
 uint32_t ServiceCollaborationMenuAceHelper::GetSymbolId(const std::string& abilityType)

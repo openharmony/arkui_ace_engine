@@ -60,7 +60,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
-#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
@@ -89,6 +88,8 @@ constexpr float CONTEXT_LARGE_WIDTH_VALUE = 10000.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 10.0f;
 constexpr float BASE_LINE_OFFSET_VALUE = 1.0;
 constexpr float BASE_LINE_OFFSET = 20.f;
+constexpr float TEXT_FONT_SCALE = 2.5f;
+constexpr float TEXT_FONT_WEIGHT = 6.0f;
 constexpr double RECT_X_VALUE = 1.0;
 constexpr double RECT_SECOND_X_VALUE = 2.0;
 constexpr double RECT_Y_VALUE = 1.0;
@@ -98,7 +99,9 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
+constexpr double FONT_SIZE = 25.0;
 const std::string TEXT_CONTENT = "text";
+const std::u16string TEXT_U16CONTENT = u"text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
 constexpr int32_t MAX_LINES = 500;
@@ -153,6 +156,7 @@ constexpr float TEXT_RECT_WIDTH = 10.0f;
 constexpr float TEXT_RECT_TOP_ONE = 10.0f;
 constexpr float TEXT_RECT_TOP_TWO = 20.0f;
 constexpr float TEXT_CONTENT_SIZE = 50.0f;
+constexpr float TEXT_CONTENT_OFFSET = 2.25f;
 const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
     "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
     "\"HarmonyOS Sans\"}";
@@ -162,8 +166,11 @@ const Ace::WordBreak TEXT_WORD_BREAK = Ace::WordBreak::BREAK_ALL;
 const Ace::LineBreakStrategy TEXT_LINE_BREAK_STRATEGY = Ace::LineBreakStrategy::GREEDY;
 const std::string TEXT_FOR_AI_SINGLE = "phone: 18888888888";
 const std::string TEXT_FOR_AI = "phone: 12345678900,url: www.baidu.com";
+const std::u16string U16TEXT_FOR_AI = u"phone: 12345678900,url: www.baidu.com";
 const std::string SPAN_PHONE = "12345678900";
+const std::u16string SPAN_PHONE_U16 = u"12345678900";
 const std::string SPAN_URL = "www.baidu.com";
+const std::u16string SPAN_URL_U16 = u"www.baidu.com";
 constexpr int32_t AI_SPAN_START = 7;
 constexpr int32_t AI_SPAN_END = 18;
 constexpr int32_t AI_SPAN_START_II = 24;
@@ -174,6 +181,10 @@ const std::string MULTIPLE_SPAN1 = "Span1";
 const std::string MULTIPLE_SPAN2 = "Span2\n";
 const std::string MULTIPLE_SPAN3 = "Span3\n";
 const std::string MULTIPLE_SPAN4 = "Span4";
+const std::u16string MULTIPLE_SPAN1_U16 = u"Span1";
+const std::u16string MULTIPLE_SPAN2_U16 = u"Span2\n";
+const std::u16string MULTIPLE_SPAN3_U16 = u"Span3\n";
+const std::u16string MULTIPLE_SPAN4_U16 = u"Span4";
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 constexpr uint32_t CODE1 = 6;
@@ -219,7 +230,7 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    RefPtr<SpanNode> CreateSpanNodeWithSetDefaultProperty(const std::string& content);
+    RefPtr<SpanNode> CreateSpanNodeWithSetDefaultProperty(const std::u16string& content);
     RefPtr<ImageSpanNode> CreateImageSpanNode(const ImageSpanNodeProperty& property);
 
 protected:

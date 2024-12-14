@@ -339,7 +339,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest040, TestSize.Level1)
     MouseEvent event;
     event.action = MouseAction::MOVE;
     bool retFlag = eventManager->DispatchMouseEvent(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -520,7 +520,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest045, TestSize.Level1)
     eventManager->postEventTouchTestResults_[1] = hitTestResult;
 
     eventManager->PostEventFlushTouchEventEnd(event);
-    ASSERT_TRUE(panHorizontal1->isFlushTouchEventsEnd_);
+    EXPECT_TRUE(panHorizontal1->isFlushTouchEventsEnd_);
 }
 
 /**
@@ -561,7 +561,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest046, TestSize.Level1)
     hitTestResult.emplace_back(clickRecognizer);
 
     eventManager->LogTouchTestResultRecognizers(hitTestResult, 1);
-    ASSERT_FALSE(panHorizontal1->isFlushTouchEventsEnd_);
+    EXPECT_FALSE(panHorizontal1->isFlushTouchEventsEnd_);
 }
 
 /**
@@ -596,7 +596,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest047, TestSize.Level1)
 
     eventManager->DispatchMouseHoverAnimation(event);
     auto hoverNodeCur = eventManager->mouseHoverNode_.Upgrade();
-    ASSERT_EQ(hoverNodeCur, nullptr);
+    EXPECT_EQ(hoverNodeCur, nullptr);
 }
 
 /**
@@ -627,7 +627,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest048, TestSize.Level1)
     eventManager->touchTestResults_.emplace(event.id, hitTestResult);
     bool isMousePressAtSelectedNode = false;
     eventManager->GetTouchTestIds(event, touchTestIds, isMousePressAtSelectedNode, 1);
-    ASSERT_FALSE(isMousePressAtSelectedNode);
+    EXPECT_FALSE(isMousePressAtSelectedNode);
 }
 
 /**
@@ -654,7 +654,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest049, TestSize.Level1)
     hitTestResult.emplace_back(panHorizontal1);
     eventManager->touchTestResults_[2] = hitTestResult;
     eventManager->FlushTouchEventsBegin(touchEvents);
-    ASSERT_TRUE(eventManager->touchTestResults_.count(2) == 1);
+    EXPECT_TRUE(eventManager->touchTestResults_.count(2) == 1);
 }
 
 /**
@@ -677,10 +677,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest050, TestSize.Level1)
 
     bool isMousePressAtSelectedNode = false;
     eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID);
-    ASSERT_TRUE(isMousePressAtSelectedNode);
+    EXPECT_TRUE(isMousePressAtSelectedNode);
     isMousePressAtSelectedNode = false;
     eventManager->CheckMouseTestResults(isMousePressAtSelectedNode, NODEID + 1);
-    ASSERT_FALSE(isMousePressAtSelectedNode);
+    EXPECT_FALSE(isMousePressAtSelectedNode);
 }
 
 /**
@@ -711,7 +711,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest051, TestSize.Level1)
 
     event.action = MouseAction::NONE;
     eventManager->MouseTest(event, renderNode);
-    ASSERT_TRUE(eventManager->mouseHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->mouseHoverTestResults_.empty());
 }
 
 /**
@@ -733,11 +733,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest052, TestSize.Level1)
     std::list<WeakPtr<RenderNode>> mouseHoverTestList = {renderNode};
     MouseEvent event;
     event.action = MouseAction::WINDOW_LEAVE;
-    ASSERT_FALSE(eventManager->DispatchMouseEvent(event));
+    EXPECT_FALSE(eventManager->DispatchMouseEvent(event));
 
     eventManager->mouseHoverTestResults_ = mouseHoverTestList;
     event.action = MouseAction::MOVE;
-    ASSERT_TRUE(eventManager->DispatchMouseEvent(event));
+    EXPECT_TRUE(eventManager->DispatchMouseEvent(event));
 }
 
 /**
@@ -787,7 +787,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest054, TestSize.Level1)
     std::list<RefPtr<TouchEventTarget>> testResult = {AceType::MakeRefPtr<MockTouchEventTarget>(),
         mouseEventTarget, hoverEventTarget};
     eventManager->UpdateHoverNode(event, testResult);
-    ASSERT_FALSE((eventManager->currMouseTestResults_).empty());
+    EXPECT_FALSE((eventManager->currMouseTestResults_).empty());
 }
 
 /**
@@ -806,7 +806,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest055, TestSize.Level1)
 
     KeyEvent event;
     event.action = KeyAction::UP;
-    ASSERT_FALSE(eventManager->DispatchKeyboardShortcut(event));
+    EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
 
     event.action = KeyAction::DOWN;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
@@ -820,7 +820,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest055, TestSize.Level1)
 
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode = {nullptr, frameNode, frameNode2, frameNode3};
     eventManager->keyboardShortcutNode_ = keyboardShortcutNode;
-    ASSERT_FALSE(eventManager->DispatchKeyboardShortcut(event));
+    EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
 }
 
 /**
@@ -841,7 +841,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest056, TestSize.Level1)
     eventManager->keyboardShortcutNode_ = keyboardShortcutNode;
 
     eventManager->DelKeyboardShortcutNode(2);
-    ASSERT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
 }
 
 /**
@@ -867,7 +867,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest057, TestSize.Level1)
     eventManager->AddGestureSnapshot(1, 1, mouseEventTarget, EventTreeType::TOUCH);
     
     eventManager->AddGestureSnapshot(1, 1, nullptr, EventTreeType::TOUCH);
-    ASSERT_TRUE(eventManager->eventTree_.eventTreeList.empty());
+    EXPECT_TRUE(eventManager->eventTree_.eventTreeList.empty());
 }
 
 /**
@@ -894,7 +894,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest058, TestSize.Level1)
     touchTestResults.emplace_back(panHorizontal1);
     touchTestResults.emplace_back(panHorizontal2);
     eventManager->SetHittedFrameNode(touchTestResults);
-    ASSERT_TRUE(eventManager->eventTree_.eventTreeList.empty());
+    EXPECT_TRUE(eventManager->eventTree_.eventTreeList.empty());
 }
 
 /**
@@ -913,7 +913,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest059, TestSize.Level1)
     std::set<WeakPtr<FrameNode>> hittedFrameNode;
     eventManager->hittedFrameNode_ = hittedFrameNode;
     eventManager->CleanGestureEventHub();
-    ASSERT_TRUE(eventManager->hittedFrameNode_.empty());
+    EXPECT_TRUE(eventManager->hittedFrameNode_.empty());
 
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
@@ -924,7 +924,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest059, TestSize.Level1)
     hittedFrameNode.insert(nullptr);
     eventManager->hittedFrameNode_ = hittedFrameNode;
     eventManager->CleanGestureEventHub();
-    ASSERT_TRUE(eventManager->hittedFrameNode_.empty());
+    EXPECT_TRUE(eventManager->hittedFrameNode_.empty());
 }
 
 /**
@@ -944,22 +944,22 @@ HWTEST_F(EventManagerTestNg, EventManagerTest060, TestSize.Level1)
     bool logImmediately = true;
 
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
-    ASSERT_TRUE(eventManager->lastReceivedEvent_.eventId == -1);
+    EXPECT_TRUE(eventManager->lastReceivedEvent_.eventId == -1);
 
     logImmediately = false;
     eventManager->lastReceivedEvent_.lastLogTimeStamp = 0;
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
-    ASSERT_TRUE(eventManager->lastReceivedEvent_.eventId == 1);
+    EXPECT_TRUE(eventManager->lastReceivedEvent_.eventId == 1);
 
     auto currentTime = GetSysTimestamp();
     auto lastLogTimeStamp = currentTime - 1000 * 1000000 - 1000;
     eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp;
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
-    ASSERT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp > currentTime);
+    EXPECT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp > currentTime);
     
     eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
-    ASSERT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp == lastLogTimeStamp + 20000);
+    EXPECT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp == lastLogTimeStamp + 20000);
 }
 
 /**
@@ -983,18 +983,18 @@ HWTEST_F(EventManagerTestNg, EventManagerTest061, TestSize.Level1)
     logImmediately = false;
     eventManager->lastConsumedEvent_.lastLogTimeStamp = 0;
     eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
-    ASSERT_TRUE(eventManager->lastConsumedEvent_.eventId == 1);
+    EXPECT_TRUE(eventManager->lastConsumedEvent_.eventId == 1);
 
     auto currentTime = GetSysTimestamp();
     auto lastLogTimeStamp = currentTime - 1000 * 1000000 - 1000;
     eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp;
     eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
-    ASSERT_TRUE(eventManager->lastConsumedEvent_.lastLogTimeStamp > currentTime);
+    EXPECT_TRUE(eventManager->lastConsumedEvent_.lastLogTimeStamp > currentTime);
     
     eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
     eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
     eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
-    ASSERT_TRUE(eventManager->lastConsumedEvent_.lastLogTimeStamp == lastLogTimeStamp + 20000);
+    EXPECT_TRUE(eventManager->lastConsumedEvent_.lastLogTimeStamp == lastLogTimeStamp + 20000);
 }
 
 /**
@@ -1022,7 +1022,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest062, TestSize.Level1)
     responseLinkRecognizers.emplace_back(panHorizontal1);
 
     eventManager->SetResponseLinkRecognizers(result, responseLinkRecognizers);
-    ASSERT_TRUE(responseLinkRecognizers.size() == 1);
+    EXPECT_TRUE(responseLinkRecognizers.size() == 1);
 }
 
 /**
@@ -1098,7 +1098,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest064, TestSize.Level1)
     panHorizontal->AttachFrameNode(pageNode);
     resultList.emplace_back(panHorizontal);
     eventManager->LogTouchTestResultRecognizers(resultList, 1);
-    ASSERT_FALSE(panHorizontal->isFlushTouchEventsEnd_);
+    EXPECT_FALSE(panHorizontal->isFlushTouchEventsEnd_);
 }
 
 /**
@@ -1177,8 +1177,8 @@ HWTEST_F(EventManagerTestNg, EventManagerTest066, TestSize.Level1)
     eventManager->touchTestResults_.insert({event.id, hitTestResult});
     bool isMousePressAtSelectedNode = false;
     eventManager->GetTouchTestIds(event, touchTestIds, isMousePressAtSelectedNode, 1);
-    ASSERT_FALSE(isMousePressAtSelectedNode);
-    ASSERT_FALSE(touchTestIds.empty());
+    EXPECT_FALSE(isMousePressAtSelectedNode);
+    EXPECT_FALSE(touchTestIds.empty());
 }
 
 /**
@@ -1432,11 +1432,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest076, TestSize.Level1)
     auto referee = eventManager->GetGestureReferee();
     ASSERT_NE(referee, nullptr);
     int32_t touchId = 10;
-    ASSERT_NE(referee->queryStateFunc_, nullptr);
+    EXPECT_NE(referee->queryStateFunc_, nullptr);
     referee->queryStateFunc_(touchId);
     auto gestureRefereeNg = eventManager->GetGestureRefereeNG(AceType::MakeRefPtr<ClickRecognizer>());
     ASSERT_NE(gestureRefereeNg, nullptr);
-    ASSERT_NE(gestureRefereeNg->queryStateFunc_, nullptr);
+    EXPECT_NE(gestureRefereeNg->queryStateFunc_, nullptr);
     gestureRefereeNg->queryStateFunc_(touchId);
 }
 
@@ -1589,9 +1589,9 @@ HWTEST_F(EventManagerTestNg, EventManagerAccessibilityHoverTest001, TestSize.Lev
     event.type = TouchType::HOVER_EXIT;
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
     eventManager->curAccessibilityHoverResults_.push_back(hoverEventTarget);
-    ASSERT_FALSE(eventManager->curAccessibilityHoverResults_.empty());
+    EXPECT_FALSE(eventManager->curAccessibilityHoverResults_.empty());
     eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
+    EXPECT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
 
     /**
      * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_ENTER
@@ -1599,9 +1599,9 @@ HWTEST_F(EventManagerTestNg, EventManagerAccessibilityHoverTest001, TestSize.Lev
      */
     event.type = TouchType::HOVER_ENTER;
     eventManager->lastAccessibilityHoverResults_.push_back(hoverEventTarget);
-    ASSERT_FALSE(eventManager->lastAccessibilityHoverResults_.empty());
+    EXPECT_FALSE(eventManager->lastAccessibilityHoverResults_.empty());
     eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
+    EXPECT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
 
     /**
      * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
@@ -1610,8 +1610,8 @@ HWTEST_F(EventManagerTestNg, EventManagerAccessibilityHoverTest001, TestSize.Lev
     event.type = TouchType::HOVER_MOVE;
     eventManager->lastAccessibilityHoverResults_.push_back(hoverEventTarget);
     eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
-    ASSERT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
+    EXPECT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
+    EXPECT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
 }
 
 /**
@@ -1683,11 +1683,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest084, TestSize.Level1)
     referee->gestureScopes_.clear();
     referee->gestureScopes_.insert(std::make_pair(touchId, scope));
     auto gestureScope = referee->GetGestureScope();
-    ASSERT_NE(referee->queryStateFunc_, nullptr);
+    EXPECT_NE(referee->queryStateFunc_, nullptr);
     referee->queryStateFunc_(touchId);
     auto gestureRefereeNg = eventManager->GetGestureRefereeNG(AceType::MakeRefPtr<ClickRecognizer>());
     ASSERT_NE(gestureRefereeNg, nullptr);
-    ASSERT_NE(gestureRefereeNg->queryStateFunc_, nullptr);
+    EXPECT_NE(gestureRefereeNg->queryStateFunc_, nullptr);
     gestureRefereeNg->queryStateFunc_(touchId);
 }
 
@@ -1805,5 +1805,54 @@ HWTEST_F(EventManagerTestNg, EventManagerTest088, TestSize.Level1)
     eventManager->touchTestResults_[1000] = std::move(hitTestResult);
     eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
     EXPECT_EQ(touchPoint.isFalsified, false);
+}
+
+/**
+ * @tc.name: CleanRecognizersForDragBeginTest001
+ * @tc.desc: Test CleanRecognizersForDragBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRecognizersForDragBeginTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->downFingerIds_.clear();
+    eventManager->touchTestResults_.clear();
+
+    /**
+     * @tc.steps: step2. Call CleanRecognizersForDragBegin.
+     * @tc.expected: downFingerIds_ erase id.
+     */
+    TouchEvent event;
+    event.id = 100;
+    event.type = TouchType::CANCEL;
+    eventManager->downFingerIds_[event.id] = event.id;
+    eventManager->CleanRecognizersForDragBegin(event);
+    EXPECT_EQ(eventManager->downFingerIds_.size(), 0);
+
+    /**
+     * @tc.steps: step3. Call CleanRecognizersForDragBegin.
+     * @tc.expected: pan recognizer actionCancel called.
+     */
+    TouchTestResult resultList;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::ALL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panRecognizer, nullptr);
+    panRecognizer->refereeState_ = RefereeState::SUCCEED;
+    panRecognizer->fingersId_.insert(event.id);
+    panRecognizer->currentFingers_ = 1;
+    bool unknownPropertyValue = false;
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() { unknownPropertyValue = true; };
+    panRecognizer->SetOnActionCancel(actionCancel);
+    resultList.emplace_back(panRecognizer);
+    eventManager->touchTestResults_.emplace(event.id, resultList);
+    eventManager->downFingerIds_[event.id] = event.id;
+    eventManager->CleanRecognizersForDragBegin(event);
+    EXPECT_EQ(eventManager->downFingerIds_.size(), 0);
+    EXPECT_TRUE(unknownPropertyValue);
 }
 } // namespace OHOS::Ace::NG

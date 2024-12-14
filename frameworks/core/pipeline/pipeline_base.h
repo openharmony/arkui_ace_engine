@@ -384,9 +384,6 @@ public:
 
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
-    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-        uint32_t closeButtonRightMargin, int32_t colorMode){};
-
     virtual void EnableContainerModalGesture(bool isEnable) {}
 
     virtual bool GetContainerFloatingTitleVisible()
@@ -1416,6 +1413,7 @@ public:
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();
     void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
+    void FireUIExtensionEventInner(uint32_t eventId);
 
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
@@ -1445,6 +1443,7 @@ public:
     void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
 
     void FireAccessibilityEvents();
+    void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
 
 protected:
     virtual bool MaybeRelease() override;

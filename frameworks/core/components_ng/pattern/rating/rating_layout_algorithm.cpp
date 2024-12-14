@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -25,7 +26,11 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            host->GetGeometryNode()->ResetContent();
+        } else {
+            host->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     // case 1: rating component is set with valid size, return contentConstraint.selfIdealSize as component size
@@ -71,7 +76,11 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
 
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            host->GetGeometryNode()->ResetContent();
+        } else {
+            host->GetGeometryNode()->Reset();
+        }
         return;
     }
     // if layout size has not decided yet, resize target can not be calculated

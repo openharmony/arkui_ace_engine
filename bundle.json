@@ -2,7 +2,7 @@
     "name": "@ohos/ace_engine",
     "description": "ArkUI Cross-Platform Engine for UI layout measure and paint",
     "version": "3.1",
-    "license": "Apache 2.0",
+    "license": "Apache-2.0",
     "publishAs": "code-segment",
     "segment": {
         "destPath": "foundation/arkui/ace_engine"
@@ -30,7 +30,6 @@
             "ace_engine_feature_asbng_path",
             "ace_engine_feature_sched_model",
             "ace_engine_feature_wearable",
-            "ace_engine_feature_enable_form_mouse_axis_support",
             "ace_engine_feature_enable_gpu"
         ],
         "adapted_system_type": [

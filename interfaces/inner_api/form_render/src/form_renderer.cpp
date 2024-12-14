@@ -499,13 +499,13 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     uiContent_->Foreground();
 }
 
-void FormRenderer::GetRectRelativeToWindow(int32_t &top, int32_t &left) const
+void FormRenderer::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const
 {
     if (!formRendererDelegate_) {
         HILOG_ERROR("form renderer delegate is null!");
         return;
     }
-    formRendererDelegate_->OnGetRectRelativeToWindow(top, left);
+    formRendererDelegate_->OnGetRectRelativeToWindow(parentRectInfo);
 }
 
 void FormRenderer::RecycleForm(std::string& statusData)

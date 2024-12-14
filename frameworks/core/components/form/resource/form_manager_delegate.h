@@ -52,7 +52,7 @@ public:
     using OnFormUpdateCallback =
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormLinkInfoUpdateCallback = std::function<void(const std::vector<std::string>&)>;
-    using OnGetRectRelativeToWindowCallback = std::function<void(int32_t&, int32_t&)>;
+    using OnGetRectRelativeToWindowCallback = std::function<void(AccessibilityParentRectInfo& parentRectInfo)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
     using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
@@ -121,7 +121,7 @@ public:
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
-    void OnGetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,

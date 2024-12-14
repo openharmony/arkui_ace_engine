@@ -4656,16 +4656,16 @@ typedef enum {
     NODE_SWIPER_INDICATOR_INTERACTIVE,
 
     /**
-    * @brief Sets the page flipping mode using the mouse wheel.
-    *
-    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32: page flipping mode using the mouse wheel. The parameter type is {@link ArkUI_PageFlipMode}. \n
-    * \n
-    * Format of the return value {@link ArkUI_PageFlipMode}:\n
-    * .value[0].i32: page flipping mode using the mouse wheel. \n
-    *
-    * @since 14
-    */
+     * @brief Sets the page flipping mode using the mouse wheel.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: page flipping mode using the mouse wheel. The parameter type is {@link ArkUI_PageFlipMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_PageFlipMode}:\n
+     * .value[0].i32: page flipping mode using the mouse wheel. \n
+     *
+     * @since 14
+     */
     NODE_SWIPER_PAGE_FLIP_MODE,
 
     /**
@@ -5506,6 +5506,16 @@ typedef enum {
      * @since 14
      */
     NODE_ON_KEY_PRE_IME = 22,
+    /**
+     * @brief Defines the event triggered when the bound component receives a focus axis event after gaining focus.
+     *
+     * The event callback is triggered by interactions with a joystick and a focused component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     * 
+     * @since 15
+     */
+    NODE_ON_FOCUS_AXIS = 23,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
@@ -7534,7 +7544,7 @@ int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* 
 ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node);
 
 /**
- * @brief Retrieve all active child nodes of a node.
+ * @brief Retrieve all active child nodes of a node. Span and ImageSpan will not be counted in the children.
  *
  * @param head Pass in the node that needs to be obtained.
  * @param handle The structure corresponding to the sub node information of the head node.

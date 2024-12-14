@@ -370,6 +370,8 @@ void TabBarLayoutAlgorithm::MeasureVisibleItems(LayoutWrapper* layoutWrapper, La
         if (GreatNotEqual(visibleChildrenMainSize_, scrollMargin_ * TWO)) {
             jumpIndex_.reset();
         }
+    } else if (focusIndex_) {
+        MeasureFocusIndex(layoutWrapper, childLayoutConstraint);
     } else {
         MeasureWithOffset(layoutWrapper, childLayoutConstraint);
     }
@@ -422,6 +424,20 @@ void TabBarLayoutAlgorithm::MeasureJumpIndex(LayoutWrapper* layoutWrapper, Layou
     LayoutBackward(layoutWrapper, childLayoutConstraint, startIndex, startPos);
 
     AdjustPosition(layoutWrapper, childLayoutConstraint, startIndex, endIndex, startPos, endPos);
+}
+
+void TabBarLayoutAlgorithm::MeasureFocusIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
+{
+    MeasureItem(layoutWrapper, childLayoutConstraint, focusIndex_.value());
+    currentDelta_ = focusIndex_.value() < visibleItemPosition_.begin()->first ?
+        visibleItemLength_[focusIndex_.value()] : -visibleItemLength_[focusIndex_.value()];
+    if (focusIndex_.value() == 0) {
+        currentDelta_ += scrollMargin_;
+    } else if (focusIndex_.value() == childCount_ - 1) {
+        currentDelta_ -= scrollMargin_;
+    }
+    visibleChildrenMainSize_ = scrollMargin_ * TWO;
+    MeasureWithOffset(layoutWrapper, childLayoutConstraint);
 }
 
 void TabBarLayoutAlgorithm::MeasureWithOffset(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
@@ -549,17 +565,17 @@ void TabBarLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper, LayoutCons
         if (iconWrapper->GetHostNode()->GetTag() == V2::SYMBOL_ETS_TAG) {
             auto symbolLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(iconWrapper->GetLayoutProperty());
             CHECK_NULL_VOID(symbolLayoutProperty);
-            symbolLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {} });
+            symbolLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {}, {}, {} });
         } else {
             auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(iconWrapper->GetLayoutProperty());
             CHECK_NULL_VOID(imageLayoutProperty);
-            imageLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {} });
+            imageLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {}, {}, {} });
         }
         auto textWrapper = childWrapper->GetOrCreateChildByIndex(1);
         CHECK_NULL_VOID(textWrapper);
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {} });
+        textLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {}, {}, {} });
     }
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
         axis_ == Axis::HORIZONTAL) {
@@ -604,9 +620,9 @@ void TabBarLayoutAlgorithm::SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper,
     CHECK_NULL_VOID(textLayoutProperty);
     if (NeedAdaptForAging(host)) {
         textLayoutProperty->UpdateMargin({ CalcLength(tabTheme->GetSubTabBarLeftRightMargin()),
-            CalcLength(tabTheme->GetSubTabBarLeftRightMargin()), {}, {} });
+            CalcLength(tabTheme->GetSubTabBarLeftRightMargin()), {}, {}, {}, {} });
     } else {
-        textLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {} });
+        textLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {}, {}, {} });
     }
 }
 
@@ -884,26 +900,26 @@ void TabBarLayoutAlgorithm::UpdateChildMarginProperty(
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateMargin(
-        { CalcLength(Dimension(leftMargin)), CalcLength(Dimension(rightMargin)), {}, {} });
+        { CalcLength(Dimension(leftMargin)), CalcLength(Dimension(rightMargin)), {}, {}, {}, {} });
     auto iconWrapper = childWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(iconWrapper);
     if (iconWrapper->GetHostNode()->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(iconWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateMargin(
-            { CalcLength(Dimension(leftMargin)), CalcLength(Dimension(rightMargin)), {}, {} });
+            { CalcLength(Dimension(leftMargin)), CalcLength(Dimension(rightMargin)), {}, {}, {}, {} });
         if (linearLayoutProperty->GetFlexDirection().value_or(FlexDirection::COLUMN) == FlexDirection::ROW) {
-            symbolLayoutProperty->UpdateMargin({ CalcLength(Dimension(leftMargin)), {}, {}, {} });
-            textLayoutProperty->UpdateMargin({ {}, CalcLength(Dimension(rightMargin)), {}, {} });
+            symbolLayoutProperty->UpdateMargin({ CalcLength(Dimension(leftMargin)), {}, {}, {}, {}, {} });
+            textLayoutProperty->UpdateMargin({ {}, CalcLength(Dimension(rightMargin)), {}, {}, {}, {} });
         }
     } else {
         auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(iconWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateMargin(
-            { CalcLength(Dimension(leftMargin)), CalcLength(Dimension(rightMargin)), {}, {} });
+            { CalcLength(Dimension(leftMargin)), CalcLength(Dimension(rightMargin)), {}, {}, {}, {} });
         if (linearLayoutProperty->GetFlexDirection().value_or(FlexDirection::COLUMN) == FlexDirection::ROW) {
-            imageLayoutProperty->UpdateMargin({ CalcLength(Dimension(leftMargin)), {}, {}, {} });
-            textLayoutProperty->UpdateMargin({ {}, CalcLength(Dimension(rightMargin)), {}, {} });
+            imageLayoutProperty->UpdateMargin({ CalcLength(Dimension(leftMargin)), {}, {}, {}, {}, {} });
+            textLayoutProperty->UpdateMargin({ {}, CalcLength(Dimension(rightMargin)), {}, {}, {}, {} });
         }
     }
 }
@@ -1081,13 +1097,13 @@ void TabBarLayoutAlgorithm::UpdateHorizontalPadding(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(layoutProperty);
 
     layoutProperty->UpdatePadding(
-        { CalcLength(Dimension(horizontalPadding)), CalcLength(Dimension(horizontalPadding)), {}, {} });
+        { CalcLength(Dimension(horizontalPadding)), CalcLength(Dimension(horizontalPadding)), {}, {}, {}, {} });
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto hostLayoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(hostLayoutProperty);
     hostLayoutProperty->UpdatePadding(
-        { CalcLength(Dimension(horizontalPadding)), CalcLength(Dimension(horizontalPadding)), {}, {} });
+        { CalcLength(Dimension(horizontalPadding)), CalcLength(Dimension(horizontalPadding)), {}, {}, {}, {} });
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->UpdatePaddingWithBorder({ horizontalPadding, horizontalPadding, 0.0f, 0.0f });

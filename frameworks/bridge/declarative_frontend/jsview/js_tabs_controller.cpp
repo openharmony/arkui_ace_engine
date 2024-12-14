@@ -129,6 +129,7 @@ void JSTabsController::ChangeIndex(int32_t index)
         if (updateCubicCurveCallback != nullptr) {
             updateCubicCurveCallback();
         }
+        TAG_LOGI(AceLogTag::ACE_TABS, "changeIndex %{public}d", index);
         tabsController->SwipeTo(index);
     }
 

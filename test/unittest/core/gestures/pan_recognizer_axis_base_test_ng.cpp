@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
 #include "test/unittest/core/gestures/pan_recognizer_test_utils.h"
+#include "test/unittest/core/gestures/recognizer_test_utils.h"
 
 #include "core/event/ace_events.h"
 
@@ -27,9 +28,9 @@ struct AxisInputInfo {
     PointF startPoint;
     SourceTool sourceTool;
     PanQuadrantDirection direction;
-    PanDistanceComparationResult compare;
+    ComparationResult compare;
     AxisInputInfo(
-        PointF startPoint, SourceTool sourceTool, PanQuadrantDirection direction, PanDistanceComparationResult compare)
+        PointF startPoint, SourceTool sourceTool, PanQuadrantDirection direction, ComparationResult compare)
         : startPoint(startPoint), sourceTool(sourceTool), direction(direction), compare(compare)
     {}
 };
@@ -49,146 +50,143 @@ struct PanAxisTestCase {
 const std::vector<PanAxisTestCase> AXIS_TEST_CASES = {
     PanAxisTestCase(2, 10.0f, { PanDirection::ALL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 0
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
-            PanDistanceComparationResult::LESS),
+            ComparationResult::LESS),
         RefereeState::DETECTING), // case 1
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::LESS),
+            ComparationResult::LESS),
         RefereeState::DETECTING), // case 2
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_FOUR,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::DETECTING), // case 3
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 4
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::EQUAL),
+            ComparationResult::EQUAL),
         RefereeState::SUCCEED), // case 5
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_FOUR,
-            PanDistanceComparationResult::EQUAL),
+            ComparationResult::EQUAL),
         RefereeState::DETECTING), // case 6
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::LESS),
+            ComparationResult::LESS),
         RefereeState::DETECTING), // case 7
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 8
     PanAxisTestCase(1, 10.0f, { PanDirection::VERTICAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::EQUAL),
+            ComparationResult::EQUAL),
         RefereeState::SUCCEED), // case 9
     PanAxisTestCase(1, 10.0f, { PanDirection::HORIZONTAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 10
     PanAxisTestCase(1, 10.0f, { PanDirection::HORIZONTAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::DETECTING), // case 11
     PanAxisTestCase(1, 10.0f, { PanDirection::HORIZONTAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 12
     PanAxisTestCase(1, 10.0f, { PanDirection::HORIZONTAL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 13
     PanAxisTestCase(1, 10.0f, { PanDirection::ALL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 14
     PanAxisTestCase(1, 10.0f, { PanDirection::ALL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 15
     PanAxisTestCase(1, 10.0f, { PanDirection::ALL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_FOUR,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::DETECTING), // case 16
     PanAxisTestCase(1, 10.0f, { PanDirection::ALL },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 17
     PanAxisTestCase(1, 10.0f, { PanDirection::LEFT },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 18
     PanAxisTestCase(1, 10.0f, { PanDirection::LEFT },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_FOUR,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 19
     PanAxisTestCase(1, 10.0f, { PanDirection::LEFT },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 20
     PanAxisTestCase(1, 10.0f, { PanDirection::RIGHT },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 21
     PanAxisTestCase(1, 10.0f, { PanDirection::RIGHT },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_FOUR,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 22
     PanAxisTestCase(1, 10.0f, { PanDirection::RIGHT },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 23
     PanAxisTestCase(1, 10.0f, { PanDirection::UP },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 24
     PanAxisTestCase(1, 10.0f, { PanDirection::UP },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 25
     PanAxisTestCase(1, 10.0f, { PanDirection::UP },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 26
     PanAxisTestCase(1, 10.0f, { PanDirection::UP },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 27
     PanAxisTestCase(1, 10.0f, { PanDirection::DOWN },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 28
     PanAxisTestCase(1, 10.0f, { PanDirection::DOWN },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 29
     PanAxisTestCase(1, 10.0f, { PanDirection::DOWN },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 30
     PanAxisTestCase(1, 10.0f, { PanDirection::DOWN },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_SIX,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::SUCCEED), // case 31
     PanAxisTestCase(1, 10.0f, { PanDirection::NONE },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::TOUCHPAD, PanQuadrantDirection::LINE_ZERO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 32
     PanAxisTestCase(1, 10.0f, { PanDirection::NONE },
         AxisInputInfo(PointF { 100.0f, 100.0f }, SourceTool::MOUSE, PanQuadrantDirection::LINE_TWO,
-            PanDistanceComparationResult::GREAT),
+            ComparationResult::GREAT),
         RefereeState::FAIL), // case 33
 };
 
 namespace {
-
-constexpr float MOUSE_RATIO = 1.4f;
-
 void CalculateAxisValue(
     float distance, PanQuadrantDirection direction, SourceTool sourceTool, float& horizontalAxis, float& verticalAxis)
 {
@@ -219,12 +217,12 @@ void CalculateAxisValue(
 void CreateAxisEvents(const AxisInputInfo& info, float distance, std::vector<AxisEvent>& moveEvents)
 {
     switch (info.compare) {
-        case PanDistanceComparationResult::LESS:
+        case ComparationResult::LESS:
             distance /= 2;
             break;
-        case PanDistanceComparationResult::EQUAL:
+        case ComparationResult::EQUAL:
             break;
-        case PanDistanceComparationResult::GREAT:
+        case ComparationResult::GREAT:
             distance *= 2;
             break;
         default:

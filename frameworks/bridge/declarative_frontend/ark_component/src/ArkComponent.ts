@@ -2094,6 +2094,21 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
   }
 }
 
+declare type FocusAxisEventCallback = (event: FocusAxisEvent) => void;
+class OnFocusAxisEventModifier extends ModifierWithKey<FocusAxisEventCallback> {
+  constructor(value: FocusAxisEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onFocusAxisEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyEvent(node);
+    } else {
+      getUINativeModule().common.setOnKeyEvent(node, this.value);
+    }
+  }
+}
+
 class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   constructor(value: MotionPathOptions) {
     super(value);
@@ -2262,7 +2277,7 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class tabStopModifier extends ModifierWithKey<boolean> {
+class TabStopModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -3881,6 +3896,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onFocusAxisEvent(event: (event?: FocusAxisEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
+    return this;
+  }
+
   focusable(value: boolean): this {
     if (typeof value === 'boolean') {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
@@ -3892,9 +3912,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   tabStop(value: boolean): this {
     if (typeof value === 'boolean') {
-      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, value);
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, value);
     } else {
-      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, undefined);
     }
     return this;
   }

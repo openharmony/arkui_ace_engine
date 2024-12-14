@@ -746,6 +746,12 @@ void VideoPattern::UpdateLooping()
     }
 }
 
+void VideoPattern::SetSurfaceBackgroundColor(Color color)
+{
+    CHECK_NULL_VOID(renderContextForMediaPlayer_);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(color);
+}
+
 void VideoPattern::UpdateSpeed()
 {
     if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {

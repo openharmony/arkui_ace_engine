@@ -245,7 +245,11 @@ void NavigationModelNG::Create()
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
 }
 
 bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
@@ -674,6 +678,14 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
 void NavigationModelNG::SetSubtitle(const std::string& subtitle)
 {
     ParseCommonTitle(true, false, subtitle, "", true);
+}
+
+void NavigationModelNG::SetEnableModeChangeAnimation(bool isEnable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableModeChangeAnimation, isEnable, navigationGroupNode);
 }
 
 void NavigationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
@@ -1182,6 +1194,13 @@ void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
     SetHideNavBarInner(navigationGroupNode, hideNavBar);
 }
 
+void NavigationModelNG::SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableModeChangeAnimation, isEnable, navigationGroupNode);
+}
+
 void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1562,8 +1581,11 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
     SetNavigationStack(AceType::RawPtr(navigationGroupNode));
 
     return navigationGroupNode;

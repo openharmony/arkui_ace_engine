@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "core/components_ng/pattern/gesture/gesture_model.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::NG {
 class CommonBridge {
@@ -373,6 +374,9 @@ public:
     static ArkUINativeModuleValue GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Local<panda::ObjectRef> CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info);
+    static ArkUINativeModuleValue SetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 
