@@ -18,7 +18,6 @@ import { LengthMetrics } from '@ohos.arkui.node';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 
 export enum IconType {
   BADGE = 1,
@@ -138,7 +137,7 @@ class Util {
     if (!Util.isResourceType(resourceStr)) {
       return false;
     }
-    let resource = resourceStr as Resource;
+    let resource: Resource = resourceStr as Resource;
     return resource.type === RESOURCE_TYPE_SYMBOL;
   }
 
@@ -196,6 +195,7 @@ struct ContentItemStruct {
           .attributeModifier(this.symbolStyle)
           .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
           .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(false)
           .draggable(false)
@@ -204,7 +204,7 @@ struct ContentItemStruct {
         if (Util.isSymbolResource(this.icon)) {
           SymbolGlyph(this.icon as Resource)
             .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
-            .effectStrategy(SymbolEffectStrategy.NONE)
+            .fontColor([$r('sys.color.ohos_id_color_secondary')])
             .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
             .focusable(false)
             .draggable(false)
@@ -420,13 +420,14 @@ struct OperateItemStruct {
           .attributeModifier(param.icon?.symbolStyle)
           .fontSize(OPERATEITEM_ICONLIKE_SIZE)
           .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
           .draggable(false)
       } else {
         if (Util.isSymbolResource(param.icon?.value)) {
           SymbolGlyph(param.icon?.value as Resource)
             .fontSize(OPERATEITEM_ICONLIKE_SIZE)
-            .effectStrategy(SymbolEffectStrategy.NONE)
+            .fontColor([$r('sys.color.ohos_id_color_primary')])
             .focusable(true)
             .draggable(false)
         } else {
@@ -469,7 +470,6 @@ struct OperateItemStruct {
     if (Util.isSymbolResource(this.image)) {
       SymbolGlyph(this.image as Resource)
         .fontSize(OPERATEITEM_IMAGE_SIZE)
-        .effectStrategy(SymbolEffectStrategy.NONE)
         .draggable(false)
         .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     } else {
@@ -487,6 +487,7 @@ struct OperateItemStruct {
       .attributeModifier(this.symbolStyle)
       .fontSize(OPERATEITEM_IMAGE_SIZE)
       .effectStrategy(SymbolEffectStrategy.NONE)
+      .symbolEffect(new SymbolEffect(), false)
       .draggable(false)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
   }
@@ -509,13 +510,14 @@ struct OperateItemStruct {
           .attributeModifier(this.arrow?.symbolStyle)
           .fontSize(OPERATEITEM_ARROW_WIDTH)
           .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
           .draggable(false)
       } else {
         if (Util.isSymbolResource(this.arrow?.value)) {
           SymbolGlyph(this.arrow?.value as Resource)
             .fontSize(OPERATEITEM_ARROW_WIDTH)
-            .effectStrategy(SymbolEffectStrategy.NONE)
+            .fontColor([$r('sys.color.ohos_id_color_fourth')])
             .focusable(true)
             .draggable(false)
         } else {
@@ -665,13 +667,14 @@ struct OperateItemStruct {
               .attributeModifier(this.arrow?.symbolStyle)
               .fontSize(OPERATEITEM_ARROW_WIDTH)
               .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
               .draggable(false)
           } else {
             if (Util.isSymbolResource(this.arrow?.value)) {
               SymbolGlyph(this.arrow?.value as Resource)
                 .fontSize(OPERATEITEM_ARROW_WIDTH)
-                .effectStrategy(SymbolEffectStrategy.NONE)
+                .fontColor([$r('sys.color.ohos_id_color_fourth')])
                 .focusable(false)
                 .draggable(false)
             } else {
@@ -704,13 +707,14 @@ struct OperateItemStruct {
               .attributeModifier(this.arrow?.symbolStyle)
               .fontSize(OPERATEITEM_ARROW_WIDTH)
               .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
               .draggable(false)
           } else {
             if (Util.isSymbolResource(this.arrow?.value)) {
               SymbolGlyph(this.arrow?.value as Resource)
                 .fontSize(OPERATEITEM_ARROW_WIDTH)
-                .effectStrategy(SymbolEffectStrategy.NONE)
+                .fontColor([$r('sys.color.ohos_id_color_fourth')])
                 .focusable(false)
                 .draggable(false)
             } else {

@@ -1,47 +1,47 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const hilog = requireNapi('hilog');
 export var IconType;
 (function (IconType) {
-    IconType[IconType["BADGE"] = 1] = "BADGE";
-    IconType[IconType["NORMAL_ICON"] = 2] = "NORMAL_ICON";
-    IconType[IconType["SYSTEM_ICON"] = 3] = "SYSTEM_ICON";
-    IconType[IconType["HEAD_SCULPTURE"] = 4] = "HEAD_SCULPTURE";
-    IconType[IconType["APP_ICON"] = 5] = "APP_ICON";
-    IconType[IconType["PREVIEW"] = 6] = "PREVIEW";
-    IconType[IconType["LONGITUDINAL"] = 7] = "LONGITUDINAL";
-    IconType[IconType["VERTICAL"] = 8] = "VERTICAL";
+    IconType[IconType['BADGE'] = 1] = 'BADGE';
+    IconType[IconType['NORMAL_ICON'] = 2] = 'NORMAL_ICON';
+    IconType[IconType['SYSTEM_ICON'] = 3] = 'SYSTEM_ICON';
+    IconType[IconType['HEAD_SCULPTURE'] = 4] = 'HEAD_SCULPTURE';
+    IconType[IconType['APP_ICON'] = 5] = 'APP_ICON';
+    IconType[IconType['PREVIEW'] = 6] = 'PREVIEW';
+    IconType[IconType['LONGITUDINAL'] = 7] = 'LONGITUDINAL';
+    IconType[IconType['VERTICAL'] = 8] = 'VERTICAL';
 })(IconType || (IconType = {}));
 var u;
-(function (p1) {
-    p1[p1["LEVEL1"] = 1.75] = "LEVEL1";
-    p1[p1["LEVEL2"] = 2] = "LEVEL2";
-    p1[p1["LEVEL3"] = 3.2] = "LEVEL3";
+(function (o) {
+    o[o['LEVEL1'] = 1.75] = 'LEVEL1';
+    o[o['LEVEL2'] = 2] = 'LEVEL2';
+    o[o['LEVEL3'] = 3.2] = 'LEVEL3';
 })(u || (u = {}));
 var a1;
-(function (k1) {
-    k1[k1["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
-    k1[k1["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
-    k1[k1["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
-    k1[k1["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
-    k1[k1["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
+(function (m) {
+    m[m['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
+    m[m['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
+    m[m['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
+    m[m['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
+    m[m['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
 })(a1 || (a1 = {}));
 const c1 = 1;
 const d1 = 2;
@@ -113,30 +113,30 @@ class Util {
 class z2 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.e3 = new SynchedPropertySimpleOneWayPU(params.iconStyle, this, "iconStyle");
-        this.f3 = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
-        this.j5 = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, "symbolStyle");
-        this.h3 = new SynchedPropertyObjectOneWayPU(params.primaryText, this, "primaryText");
-        this.i3 = new SynchedPropertyObjectOneWayPU(params.secondaryText, this, "secondaryText");
-        this.j3 = new SynchedPropertyObjectOneWayPU(params.description, this, "description");
-        this.l3 = new ObservedPropertySimplePU(z1, this, "itemRowSpace");
-        this.m3 = new SynchedPropertySimpleOneWayPU(params.leftWidth, this, "leftWidth");
-        this.n3 = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColor");
-        this.q3 = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
-        this.r3 = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColor");
-        this.s3 = new SynchedPropertySimpleOneWayPU(params.fontSizeScale, this, "fontSizeScale");
-        this.t3 = new SynchedPropertySimpleOneWayPU(params.parentDirection, this, "parentDirection");
-        this.u3 = new SynchedPropertySimpleOneWayPU(params.itemDirection, this, "itemDirection");
+        this.e3 = new SynchedPropertySimpleOneWayPU(params.iconStyle, this, 'iconStyle');
+        this.f3 = new SynchedPropertyObjectOneWayPU(params.icon, this, 'icon');
+        this.j5 = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, 'symbolStyle');
+        this.h3 = new SynchedPropertyObjectOneWayPU(params.primaryText, this, 'primaryText');
+        this.i3 = new SynchedPropertyObjectOneWayPU(params.secondaryText, this, 'secondaryText');
+        this.j3 = new SynchedPropertyObjectOneWayPU(params.description, this, 'description');
+        this.l3 = new ObservedPropertySimplePU(z1, this, 'itemRowSpace');
+        this.m3 = new SynchedPropertySimpleOneWayPU(params.leftWidth, this, 'leftWidth');
+        this.n3 = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'primaryTextColor');
+        this.q3 = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'secondaryTextColor');
+        this.r3 = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'descriptionColor');
+        this.s3 = new SynchedPropertySimpleOneWayPU(params.fontSizeScale, this, 'fontSizeScale');
+        this.t3 = new SynchedPropertySimpleOneWayPU(params.parentDirection, this, 'parentDirection');
+        this.u3 = new SynchedPropertySimpleOneWayPU(params.itemDirection, this, 'itemDirection');
         this.setInitiallyProvidedValue(params);
-        this.declareWatch("iconStyle", this.onPropChange);
-        this.declareWatch("icon", this.onPropChange);
-        this.declareWatch("symbolStyle", this.onPropChange);
-        this.declareWatch("primaryText", this.onPropChange);
-        this.declareWatch("secondaryText", this.onPropChange);
-        this.declareWatch("description", this.onPropChange);
+        this.declareWatch('iconStyle', this.onPropChange);
+        this.declareWatch('icon', this.onPropChange);
+        this.declareWatch('symbolStyle', this.onPropChange);
+        this.declareWatch('primaryText', this.onPropChange);
+        this.declareWatch('secondaryText', this.onPropChange);
+        this.declareWatch('description', this.onPropChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -334,7 +334,8 @@ class z2 extends ViewPU {
                                     SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
                                     SymbolGlyph.fontSize(w2.get(this.iconStyle));
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
-                                    SymbolGlyph.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                                    SymbolGlyph.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                     SymbolGlyph.focusable(false);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.flexShrink(0);
@@ -350,8 +351,8 @@ class z2 extends ViewPU {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.icon);
                                                 SymbolGlyph.fontSize(w2.get(this.iconStyle));
-                                                SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
-                                                SymbolGlyph.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                SymbolGlyph.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                 SymbolGlyph.focusable(false);
                                                 SymbolGlyph.draggable(false);
                                                 SymbolGlyph.flexShrink(0);
@@ -369,10 +370,10 @@ class z2 extends ViewPU {
                                                             Image.objectFit(ImageFit.Contain);
                                                             Image.width(w2.get(this.iconStyle));
                                                             Image.height(w2.get(this.iconStyle));
-                                                            Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                             Image.focusable(false);
                                                             Image.draggable(false);
-                                                            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                             Image.flexShrink(0);
                                                         }, Image);
                                                     });
@@ -388,10 +389,10 @@ class z2 extends ViewPU {
                                                                 minHeight: b2,
                                                                 maxHeight: w2.get(this.iconStyle)
                                                             });
-                                                            Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                             Image.focusable(false);
                                                             Image.draggable(false);
-                                                            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                             Image.flexShrink(0);
                                                         }, Image);
                                                     });
@@ -431,7 +432,7 @@ class z2 extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.primaryText);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColor));
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fontWeight(FontWeight.Medium);
@@ -445,7 +446,7 @@ class z2 extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.secondaryText);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
@@ -465,7 +466,7 @@ class z2 extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.description);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColor));
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
@@ -489,7 +490,7 @@ class z2 extends ViewPU {
     }
     getItemSpace() {
         if (this.isColumnDirection()) {
-            return LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            return LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
         }
         return LengthMetrics.vp(this.itemRowSpace);
     }
@@ -523,45 +524,45 @@ class a3 {
 class b3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.v3 = new SynchedPropertyObjectOneWayPU(params.arrow, this, "arrow");
-        this.f3 = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
-        this.w3 = new SynchedPropertyObjectOneWayPU(params.subIcon, this, "subIcon");
-        this.x3 = new SynchedPropertyObjectOneWayPU(params.button, this, "button");
-        this.y3 = new SynchedPropertyObjectOneWayPU(params.switch, this, "switch");
-        this.z3 = new SynchedPropertyObjectOneWayPU(params.checkBox, this, "checkBox");
-        this.a4 = new SynchedPropertyObjectOneWayPU(params.radio, this, "radio");
-        this.b4 = new SynchedPropertyObjectOneWayPU(params.image, this, "image");
-        this.j5 = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, "symbolStyle");
-        this.d4 = new SynchedPropertyObjectOneWayPU(params.text, this, "text");
-        this.e4 = new ObservedPropertySimplePU(false, this, "switchState");
-        this.f4 = new ObservedPropertySimplePU(false, this, "radioState");
-        this.g4 = new ObservedPropertySimplePU(false, this, "checkBoxState");
-        this.h4 = new SynchedPropertySimpleOneWayPU(params.rightWidth, this, "rightWidth");
-        this.q3 = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
-        this.i4 = new ObservedPropertyObjectPU('#0d000000', this, "hoveringColor");
-        this.j4 = new ObservedPropertyObjectPU('#1a0a59f7', this, "activedColor");
-        this.l4 = new SynchedPropertySimpleTwoWayPU(params.parentCanFocus, this, "parentCanFocus");
-        this.m4 = new SynchedPropertySimpleTwoWayPU(params.parentCanTouch, this, "parentCanTouch");
-        this.n4 = new SynchedPropertySimpleTwoWayPU(params.parentIsHover, this, "parentIsHover");
-        this.o4 = new SynchedPropertySimpleTwoWayPU(params.parentCanHover, this, "parentCanHover");
-        this.q4 = new SynchedPropertySimpleTwoWayPU(params.parentIsActive, this, "parentIsActive");
-        this.r4 = new SynchedPropertyObjectTwoWayPU(params.parentFrontColor, this, "parentFrontColor");
-        this.t3 = new SynchedPropertySimpleTwoWayPU(params.parentDirection, this, "parentDirection");
-        this.s4 = new ObservedPropertySimplePU(c2, this, "rowSpace");
+        this.v3 = new SynchedPropertyObjectOneWayPU(params.arrow, this, 'arrow');
+        this.f3 = new SynchedPropertyObjectOneWayPU(params.icon, this, 'icon');
+        this.w3 = new SynchedPropertyObjectOneWayPU(params.subIcon, this, 'subIcon');
+        this.x3 = new SynchedPropertyObjectOneWayPU(params.button, this, 'button');
+        this.y3 = new SynchedPropertyObjectOneWayPU(params.switch, this, 'switch');
+        this.z3 = new SynchedPropertyObjectOneWayPU(params.checkBox, this, 'checkBox');
+        this.a4 = new SynchedPropertyObjectOneWayPU(params.radio, this, 'radio');
+        this.b4 = new SynchedPropertyObjectOneWayPU(params.image, this, 'image');
+        this.j5 = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, 'symbolStyle');
+        this.d4 = new SynchedPropertyObjectOneWayPU(params.text, this, 'text');
+        this.e4 = new ObservedPropertySimplePU(false, this, 'switchState');
+        this.f4 = new ObservedPropertySimplePU(false, this, 'radioState');
+        this.g4 = new ObservedPropertySimplePU(false, this, 'checkBoxState');
+        this.h4 = new SynchedPropertySimpleOneWayPU(params.rightWidth, this, 'rightWidth');
+        this.q3 = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'secondaryTextColor');
+        this.i4 = new ObservedPropertyObjectPU('#0d000000', this, 'hoveringColor');
+        this.j4 = new ObservedPropertyObjectPU('#1a0a59f7', this, 'activedColor');
+        this.l4 = new SynchedPropertySimpleTwoWayPU(params.parentCanFocus, this, 'parentCanFocus');
+        this.m4 = new SynchedPropertySimpleTwoWayPU(params.parentCanTouch, this, 'parentCanTouch');
+        this.n4 = new SynchedPropertySimpleTwoWayPU(params.parentIsHover, this, 'parentIsHover');
+        this.o4 = new SynchedPropertySimpleTwoWayPU(params.parentCanHover, this, 'parentCanHover');
+        this.q4 = new SynchedPropertySimpleTwoWayPU(params.parentIsActive, this, 'parentIsActive');
+        this.r4 = new SynchedPropertyObjectTwoWayPU(params.parentFrontColor, this, 'parentFrontColor');
+        this.t3 = new SynchedPropertySimpleTwoWayPU(params.parentDirection, this, 'parentDirection');
+        this.s4 = new ObservedPropertySimplePU(c2, this, 'rowSpace');
         this.setInitiallyProvidedValue(params);
-        this.declareWatch("arrow", this.onPropChange);
-        this.declareWatch("icon", this.onPropChange);
-        this.declareWatch("subIcon", this.onPropChange);
-        this.declareWatch("button", this.onPropChange);
-        this.declareWatch("switch", this.onPropChange);
-        this.declareWatch("checkBox", this.onPropChange);
-        this.declareWatch("radio", this.onPropChange);
-        this.declareWatch("image", this.onPropChange);
-        this.declareWatch("symbolStyle", this.onPropChange);
-        this.declareWatch("text", this.onPropChange);
+        this.declareWatch('arrow', this.onPropChange);
+        this.declareWatch('icon', this.onPropChange);
+        this.declareWatch('subIcon', this.onPropChange);
+        this.declareWatch('button', this.onPropChange);
+        this.declareWatch('switch', this.onPropChange);
+        this.declareWatch('checkBox', this.onPropChange);
+        this.declareWatch('radio', this.onPropChange);
+        this.declareWatch('image', this.onPropChange);
+        this.declareWatch('symbolStyle', this.onPropChange);
+        this.declareWatch('text', this.onPropChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -871,12 +872,12 @@ class b3 extends ViewPU {
             Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(g1) });
             Button.hitTestBehavior(HitTestMode.Block);
-            Button.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Button.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_activated_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Button.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_activated_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.constraintSize({
                 minHeight: s1
             });
-            Button.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.labelStyle({
                 maxLines: c1
             });
@@ -919,7 +920,7 @@ class b3 extends ViewPU {
             Button.backgroundColor(Color.Transparent);
             Button.height(h2);
             Button.width(h2);
-            Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
@@ -948,6 +949,7 @@ class b3 extends ViewPU {
                         SymbolGlyph.attributeModifier.bind(this)(param.icon?.symbolStyle);
                         SymbolGlyph.fontSize(e2);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                         SymbolGlyph.focusable(true);
                         SymbolGlyph.draggable(false);
                     }, SymbolGlyph);
@@ -962,7 +964,7 @@ class b3 extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create(param.icon?.value);
                                     SymbolGlyph.fontSize(e2);
-                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -975,7 +977,7 @@ class b3 extends ViewPU {
                                     Image.height(e2);
                                     Image.width(e2);
                                     Image.focusable(true);
-                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                     Image.draggable(false);
                                 }, Image);
                             });
@@ -996,7 +998,6 @@ class b3 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create(this.image);
                         SymbolGlyph.fontSize(i2);
-                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.margin({ end: LengthMetrics.vp(g1) });
                     }, SymbolGlyph);
@@ -1022,6 +1023,7 @@ class b3 extends ViewPU {
             SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
             SymbolGlyph.fontSize(i2);
             SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+            SymbolGlyph.symbolEffect(new SymbolEffect(), false);
             SymbolGlyph.draggable(false);
             SymbolGlyph.margin({ end: LengthMetrics.vp(g1) });
         }, SymbolGlyph);
@@ -1030,7 +1032,7 @@ class b3 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.text);
             Text.margin({ end: LengthMetrics.vp(g1) });
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
             Text.draggable(false);
             Text.flexShrink(1);
@@ -1077,6 +1079,7 @@ class b3 extends ViewPU {
                         SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
                         SymbolGlyph.fontSize(g2);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                         SymbolGlyph.focusable(true);
                         SymbolGlyph.draggable(false);
                     }, SymbolGlyph);
@@ -1091,7 +1094,7 @@ class b3 extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create(this.arrow?.value);
                                     SymbolGlyph.fontSize(g2);
-                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -1104,7 +1107,7 @@ class b3 extends ViewPU {
                                     Image.height(e2);
                                     Image.width(g2);
                                     Image.focusable(true);
-                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                     Image.draggable(false);
                                     Image.matchTextDirection(true);
                                 }, Image);
@@ -1221,7 +1224,7 @@ class b3 extends ViewPU {
             });
             Button.backgroundColor(Color.Transparent);
             Button.constraintSize({ minHeight: n1 });
-            Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
@@ -1264,7 +1267,7 @@ class b3 extends ViewPU {
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.text);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
@@ -1282,6 +1285,7 @@ class b3 extends ViewPU {
                                     SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
                                     SymbolGlyph.fontSize(g2);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.focusable(false);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -1296,7 +1300,7 @@ class b3 extends ViewPU {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.arrow?.value);
                                                 SymbolGlyph.fontSize(g2);
-                                                SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.focusable(false);
                                                 SymbolGlyph.draggable(false);
                                             }, SymbolGlyph);
@@ -1308,7 +1312,7 @@ class b3 extends ViewPU {
                                                 Image.create(this.arrow?.value);
                                                 Image.height(e2);
                                                 Image.width(g2);
-                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                 Image.focusable(false);
                                                 Image.draggable(false);
                                                 Image.matchTextDirection(true);
@@ -1335,7 +1339,7 @@ class b3 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.text);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
@@ -1353,6 +1357,7 @@ class b3 extends ViewPU {
                                     SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
                                     SymbolGlyph.fontSize(g2);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.focusable(false);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -1367,7 +1372,7 @@ class b3 extends ViewPU {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.arrow?.value);
                                                 SymbolGlyph.fontSize(g2);
-                                                SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.focusable(false);
                                                 SymbolGlyph.draggable(false);
                                             }, SymbolGlyph);
@@ -1379,7 +1384,7 @@ class b3 extends ViewPU {
                                                 Image.create(this.arrow?.value);
                                                 Image.height(e2);
                                                 Image.width(g2);
-                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                 Image.focusable(false);
                                                 Image.draggable(false);
                                                 Image.matchTextDirection(true);
@@ -1400,15 +1405,15 @@ class b3 extends ViewPU {
         Button.pop();
     }
     getFlexOptions() {
-        let d3 = { alignItems: ItemAlign.Center };
+        let j = { alignItems: ItemAlign.Center };
         if (this.parentDirection === FlexDirection.Column) {
-            d3.justifyContent = FlexAlign.SpaceBetween;
+            j.justifyContent = FlexAlign.SpaceBetween;
         }
         else {
-            d3.space = { main: LengthMetrics.vp(this.rowSpace) };
-            d3.justifyContent = FlexAlign.End;
+            j.space = { main: LengthMetrics.vp(this.rowSpace) };
+            j.justifyContent = FlexAlign.End;
         }
-        return d3;
+        return j;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1435,7 +1440,7 @@ class b3 extends ViewPU {
             else if (this.icon != null && this.text != null) {
                 this.ifElseBranchUpdateFunction(3, () => {
                     this.createText.bind(this)();
-                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
+                    this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon', { icon: () => (this['__icon'] ? this['__icon'] : this['icon']) }));
                 });
             }
             else if (this.arrow != null && this.text == null) {
@@ -1470,12 +1475,12 @@ class b3 extends ViewPU {
             }
             else if (this.icon != null) {
                 this.ifElseBranchUpdateFunction(10, () => {
-                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
+                    this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon', { icon: () => (this['__icon'] ? this['__icon'] : this['icon']) }));
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.subIcon != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__subIcon"] ? this["__subIcon"] : this["subIcon"]) }));
+                                this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon', { icon: () => (this['__subIcon'] ? this['__subIcon'] : this['subIcon']) }));
                             });
                         }
                         else {
@@ -1501,28 +1506,28 @@ class b3 extends ViewPU {
 export class ComposeListItem extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.t4 = new SynchedPropertyObjectOneWayPU(params.contentItem, this, "contentItem");
-        this.u4 = new SynchedPropertyObjectOneWayPU(params.operateItem, this, "operateItem");
-        this.v4 = new ObservedPropertyObjectPU(Color.Transparent.toString(), this, "frontColor");
-        this.w4 = new ObservedPropertySimplePU(0, this, "borderSize");
-        this.x4 = new ObservedPropertySimplePU(false, this, "canFocus");
-        this.y4 = new ObservedPropertySimplePU(true, this, "canTouch");
-        this.z4 = new ObservedPropertySimplePU(true, this, "canHover");
-        this.a5 = new ObservedPropertySimplePU(true, this, "isHover");
-        this.b5 = new ObservedPropertySimplePU(a1.FIRST_HEIGHT, this, "itemHeight");
-        this.c5 = new ObservedPropertySimplePU(false, this, "isActive");
-        this.i4 = new ObservedPropertyObjectPU('#0d000000', this, "hoveringColor");
-        this.d5 = new ObservedPropertyObjectPU('#1a000000', this, "touchDownColor");
-        this.j4 = new ObservedPropertyObjectPU('#1a0a59f7', this, "activedColor");
-        this.e5 = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "focusOutlineColor");
-        this.s3 = new ObservedPropertySimplePU(1, this, "fontSizeScale");
-        this.f5 = new ObservedPropertySimplePU(FlexDirection.Row, this, "containerDirection");
-        this.g5 = new ObservedPropertySimplePU(FlexDirection.Row, this, "contentItemDirection");
-        this.h5 = new ObservedPropertyObjectPU(undefined, this, "containerPadding");
-        this.i5 = new ObservedPropertySimplePU(0, this, "textArrowLeftSafeOffset");
+        this.t4 = new SynchedPropertyObjectOneWayPU(params.contentItem, this, 'contentItem');
+        this.u4 = new SynchedPropertyObjectOneWayPU(params.operateItem, this, 'operateItem');
+        this.v4 = new ObservedPropertyObjectPU(Color.Transparent.toString(), this, 'frontColor');
+        this.w4 = new ObservedPropertySimplePU(0, this, 'borderSize');
+        this.x4 = new ObservedPropertySimplePU(false, this, 'canFocus');
+        this.y4 = new ObservedPropertySimplePU(true, this, 'canTouch');
+        this.z4 = new ObservedPropertySimplePU(true, this, 'canHover');
+        this.a5 = new ObservedPropertySimplePU(true, this, 'isHover');
+        this.b5 = new ObservedPropertySimplePU(a1.FIRST_HEIGHT, this, 'itemHeight');
+        this.c5 = new ObservedPropertySimplePU(false, this, 'isActive');
+        this.i4 = new ObservedPropertyObjectPU('#0d000000', this, 'hoveringColor');
+        this.d5 = new ObservedPropertyObjectPU('#1a000000', this, 'touchDownColor');
+        this.j4 = new ObservedPropertyObjectPU('#1a0a59f7', this, 'activedColor');
+        this.e5 = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'focusOutlineColor');
+        this.s3 = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
+        this.f5 = new ObservedPropertySimplePU(FlexDirection.Row, this, 'containerDirection');
+        this.g5 = new ObservedPropertySimplePU(FlexDirection.Row, this, 'contentItemDirection');
+        this.h5 = new ObservedPropertyObjectPU(undefined, this, 'containerPadding');
+        this.i5 = new ObservedPropertySimplePU(0, this, 'textArrowLeftSafeOffset');
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
         this.callbackId = undefined;
@@ -1534,9 +1539,9 @@ export class ComposeListItem extends ViewPU {
             }
         };
         this.setInitiallyProvidedValue(params);
-        this.declareWatch("contentItem", this.onPropChange);
-        this.declareWatch("operateItem", this.onPropChange);
-        this.declareWatch("fontSizeScale", this.onFontSizeScaleChange);
+        this.declareWatch('contentItem', this.onPropChange);
+        this.declareWatch('operateItem', this.onPropChange);
+        this.declareWatch('fontSizeScale', this.onFontSizeScaleChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -1821,9 +1826,9 @@ export class ComposeListItem extends ViewPU {
         try {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
         }
-        catch (c3) {
-            let code = c3.code;
-            let message = c3.message;
+        catch (i) {
+            let code = i.code;
+            let message = i.message;
             hilog.error(0x3900, 'Ace', `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
         }
     }
@@ -1908,20 +1913,20 @@ export class ComposeListItem extends ViewPU {
         this.contentItemDirection = this.decideContentItemDirection();
         if (this.fontSizeScale >= u.LEVEL3) {
             this.containerPadding = {
-                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             };
         }
         else if (this.fontSizeScale >= u.LEVEL2) {
             this.containerPadding = {
-                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             };
         }
         else if (this.fontSizeScale >= u.LEVEL1) {
             this.containerPadding = {
-                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             };
         }
         else {
@@ -1943,7 +1948,7 @@ export class ComposeListItem extends ViewPU {
     }
     getMainSpace() {
         if (this.containerDirection === FlexDirection.Column) {
-            return LengthMetrics.resource(this.isSingleLine() ? { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            return LengthMetrics.resource(this.isSingleLine() ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
         }
         return LengthMetrics.vp(0);
     }
@@ -1984,7 +1989,7 @@ export class ComposeListItem extends ViewPU {
                 minHeight: this.itemHeight
             });
             Flex.focusable(true);
-            Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Flex.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Flex.backgroundColor(ObservedObject.GetRawObject(this.frontColor));
             Flex.onFocus(() => {
                 this.canFocus = true;
@@ -1999,21 +2004,21 @@ export class ComposeListItem extends ViewPU {
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
             });
-            ViewStackProcessor.visualState("focused");
+            ViewStackProcessor.visualState('pressed');
+            Flex.backgroundColor(ObservedObject.GetRawObject(this.touchDownColor));
+            ViewStackProcessor.visualState('normal');
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                width: d1,
+                color: Color.Transparent
+            });
+            ViewStackProcessor.visualState('focused');
+            Flex.border({
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: d1,
                 color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
-            ViewStackProcessor.visualState("normal");
-            Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                width: d1,
-                color: Color.Transparent
-            });
-            ViewStackProcessor.visualState("pressed");
-            Flex.backgroundColor(ObservedObject.GetRawObject(this.touchDownColor));
             ViewStackProcessor.visualState();
             Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
         }, Flex);
@@ -2024,7 +2029,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new z2(this, {}, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 1047, d3: 11 });
+                                let componentCall = new z2(this, {}, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1051, d3: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -2034,7 +2039,7 @@ export class ComposeListItem extends ViewPU {
                             else {
                                 this.updateStateVarsOfChildByElmtId(elmtId, {});
                             }
-                        }, { name: "ContentItemStruct" });
+                        }, { name: 'ContentItemStruct' });
                     }
                 });
             }
@@ -2061,7 +2066,7 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 1050, d3: 11 });
+                                }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1054, d3: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2091,7 +2096,7 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection
                                 });
                             }
-                        }, { name: "ContentItemStruct" });
+                        }, { name: 'ContentItemStruct' });
                     }
                 });
             }
@@ -2138,7 +2143,7 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.z4,
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.f5,
-                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 1063, d3: 11 });
+                                }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1067, d3: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2179,7 +2184,7 @@ export class ComposeListItem extends ViewPU {
                                     rightWidth: this.calculatedRightWidth()
                                 });
                             }
-                        }, { name: "OperateItemStruct" });
+                        }, { name: 'OperateItemStruct' });
                     }
                     __Common__.pop();
                 });
