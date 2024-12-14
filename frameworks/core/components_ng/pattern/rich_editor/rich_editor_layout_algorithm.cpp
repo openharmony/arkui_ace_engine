@@ -53,7 +53,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
         spans_.push_back(std::move(spans));
     }
     AppendNewLineSpan();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{private}s", SpansToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
 }
 
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
@@ -305,5 +305,22 @@ RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetParagraphStyleSpanItem(const std:
     }
     return *spanGroup.begin();
 }
+
+std::string RichEditorLayoutAlgorithm::SpansToString()
+{
+    std::stringstream ss;
+    for (const auto& list : spans_) {
+        ss << "[";
+        for_each(list.begin(), list.end(), [&ss](const RefPtr<SpanItem>& item) {
+#ifndef IS_RELEASE_VERSION
+            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << ")";
+#endif
+            ss << "[" << item->rangeStart << ":" << item->position << "],";
+        });
+        ss << "], ";
+    }
+    return ss.str();
+}
+
 
 } // namespace OHOS::Ace::NG
