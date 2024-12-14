@@ -1168,7 +1168,7 @@ void ViewAbstract::SetOnBlur(OnBlurFunc&& onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
-void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
+void ViewAbstract::SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -3861,7 +3861,7 @@ void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFu
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
-void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback)
+void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
