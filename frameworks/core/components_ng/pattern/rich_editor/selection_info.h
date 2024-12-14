@@ -71,6 +71,7 @@ struct SpanPosition {
 struct SymbolSpanStyle {
     double fontSize = 0.0;
     double lineHeight = 0.0;
+    bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
     std::string symbolColor;
@@ -125,6 +126,7 @@ struct TextStyleResult {
     std::string fontColor;
     double fontSize = 0.0;
     double lineHeight = 0.0;
+    bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
     int32_t fontStyle = 0;

@@ -117,6 +117,8 @@ public:
         struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent = true);
     void ParseJsFontFeatureTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
         struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsHalfLeadingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
+        struct UpdateSpanStyle& updateSpanStyle);
     void GetTypingStyle(const JSCallbackInfo& info);
     void CloseSelectionMenu();
     void IsEditing(const JSCallbackInfo& args);

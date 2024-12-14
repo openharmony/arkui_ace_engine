@@ -81,6 +81,7 @@ struct UpdateSpanStyle {
         updateFontFeature.reset();
 
         updateLineHeight.reset();
+        updateHalfLeading.reset();
         updateLetterSpacing.reset();
 
         updateImageWidth.reset();
@@ -110,6 +111,7 @@ struct UpdateSpanStyle {
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
+    std::optional<bool> updateHalfLeading = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
