@@ -73,6 +73,11 @@ public:
         isScenceBoardWindow_ = isScenceBoardWindow;
     }
 
+    ResourceConfiguration GetResourceConfiguration() const override
+    {
+        return ResourceConfiguration();
+    }
+
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(int32_t, GetInstanceId, (), (const, override));
