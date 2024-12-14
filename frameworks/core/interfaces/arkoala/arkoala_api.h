@@ -3470,6 +3470,7 @@ struct ArkUITextAreaModifier {
     ArkUI_Bool (*getTextAreaEnablePreviewText)(ArkUINodeHandle node);
     void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
     void (*resetEllipsisMode)(ArkUINodeHandle node);
+    void (*setTextAreaBorderDash)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
 };
 
 struct ArkUITextInputModifier {

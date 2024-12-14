@@ -5212,6 +5212,40 @@ function valueToArkBorder(value){
       }
     }
   }
+  if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashGap) &&
+    (value === null || value === void 0 ? void 0 : value.dashGap) !== null) {
+    if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) ||
+      isObject(value.dashGap) && isNumber(value.dashGap.value)) {
+      borderValue.arkDashGap.left = value.dashGap;
+      borderValue.arkDashGap.right = value.dashGap;
+      borderValue.arkDashGap.top = value.dashGap;
+      borderValue.arkDashGap.bottom = value.dashGap;
+    } else {
+      borderValue.arkDashGap.left = value.dashGap.left;
+      borderValue.arkDashGap.right = value.dashGap.right;
+      borderValue.arkDashGap.top = value.dashGap.top;
+      borderValue.arkDashGap.bottom = value.dashGap.bottom;
+      borderValue.arkDashGap.start = value.dashGap.start;
+      borderValue.arkDashGap.end = value.dashGap.end;
+    }
+  }
+  if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashWidth) &&
+    (value === null || value === void 0 ? void 0 : value.dashWidth) !== null) {
+    if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) ||
+      isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
+      borderValue.arkDashWidth.left = value.dashWidth;
+      borderValue.arkDashWidth.right = value.dashWidth;
+      borderValue.arkDashWidth.top = value.dashWidth;
+      borderValue.arkDashWidth.bottom = value.dashWidth;
+    } else {
+      borderValue.arkDashWidth.left = value.dashWidth.left;
+      borderValue.arkDashWidth.right = value.dashWidth.right;
+      borderValue.arkDashWidth.top = value.dashWidth.top;
+      borderValue.arkDashWidth.bottom = value.dashWidth.bottom;
+      borderValue.arkDashWidth.start = value.dashWidth.start;
+      borderValue.arkDashWidth.end = value.dashWidth.end;
+    }
+  }
   return borderValue;
 }
 
@@ -13079,7 +13113,10 @@ class TextAreaBorderModifier extends ModifierWithKey {
         this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
         this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
-        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
+        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left,
+        this.value.arkDashGap.left, this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
+        this.value.arkDashGap.start, this.value.arkDashGap.end, this.value.arkDashWidth.start, this.value.arkDashWidth.end);
     }
   }
   checkObjectDiff() {
@@ -14812,7 +14849,10 @@ class TextInputBorderModifier extends ModifierWithKey {
         this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
         this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
-        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
+        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left,
+        this.value.arkDashGap.left, this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
+        this.value.arkDashGap.start, this.value.arkDashGap.end, this.value.arkDashWidth.start, this.value.arkDashWidth.end);
     }
   }
   checkObjectDiff() {
@@ -16152,12 +16192,16 @@ class ArkBorderDashGap {
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
   isEqual(another) {
     return (this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom);
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end);
   }
 }
 class ArkBorderDashWidth {
@@ -16166,12 +16210,16 @@ class ArkBorderDashWidth {
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
   isEqual(another) {
     return (this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom);
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end);
   }
 }
 class ArkBorder {
