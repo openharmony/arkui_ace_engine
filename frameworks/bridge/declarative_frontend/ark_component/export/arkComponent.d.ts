@@ -440,6 +440,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
     barState(value: BarState): RichEditorAttribute;
+    maxLength(value: number): RichEditorAttribute;
+    maxLines(value: number): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

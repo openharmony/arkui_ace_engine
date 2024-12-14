@@ -320,6 +320,20 @@ public:
         return timestamp_;
     }
 
+    void SetMaxLength(std::optional<int32_t> maxLength)
+    {
+        if (!maxLength) {
+            DeleteToMaxLength(maxLength);
+        }
+        maxLength_ = maxLength;
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "maxLength: [%{public}d]", maxLength_.value_or(INT_MAX));
+    }
+
+    int32_t GetMaxLength()
+    {
+        return maxLength_.value_or(INT_MAX);
+    }
+
     void UpdateSpanPosition()
     {
         uint32_t spanTextLength = 0;
@@ -567,6 +581,8 @@ public:
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
+    void DeleteToMaxLength(std::optional<int32_t> length);
+    std::u16string DeleteContentRichEditor(int32_t length);
 
     void ResetIsMousePressed()
     {
@@ -1280,6 +1296,8 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
+    void ProcessInsertValueMore(std::string text, OperationRecord record,
+        OperationType operationType, RichEditorChangeValue changeValue);
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
         bool calledbyImf = false);
     void FinishTextPreviewInner(bool deletePreviewText = true);
@@ -1445,6 +1463,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
+    std::optional<int32_t> maxLength_ = std::nullopt;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
 };
 } // namespace OHOS::Ace::NG

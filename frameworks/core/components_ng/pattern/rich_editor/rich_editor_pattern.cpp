@@ -822,6 +822,10 @@ void RichEditorPattern::AddSpanHoverEvent(
 int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index,
     bool updateCaret)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
@@ -934,6 +938,10 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX) - 1) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
     CHECK_NULL_RETURN(customNode, 0);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0);
@@ -995,6 +1003,11 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
 
 int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, int32_t index)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
+    options.value = options.value.substr(0, maxLength_.value_or(INT_MAX) - GetTextContentLength());
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{private}s", options.ToString().c_str());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
     AdjustAddPosition(options);
@@ -1113,6 +1126,10 @@ void RichEditorPattern::UpdateTextBackgroundStyle(
 
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX) - 1) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
 
@@ -4114,7 +4131,9 @@ void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& s
         if (imageSpanItem) {
             auto options = imageSpanItem->options;
             options.offset = caretPosition_;
-            AddImageSpan(options, true, caretPosition_, true);
+            if (GetTextContentLength() < maxLength_.value_or(INT_MAX)) {
+                AddImageSpan(options, true, caretPosition_, true);
+            }
         } else {
             auto options = GetTextSpanOptions(spanItem);
             AddTextSpan(options, true, caretPosition_);
@@ -4900,6 +4919,19 @@ void RichEditorPattern::InsertValueByOperationType(const std::string& insertValu
     ProcessInsertValue(insertValue, operationType, true);
 }
 
+void RichEditorPattern::ProcessInsertValueMore(
+    std::string text, OperationRecord record, OperationType operationType, RichEditorChangeValue changeValue)
+{
+    ClearRedoOperationRecords();
+    InsertValueOperation(text, &record, operationType);
+    record.afterCaretPosition = caretPosition_;
+    if (isDragSponsor_) {
+        record.deleteCaretPostion = dragRange_.first;
+    }
+    AddOperationRecord(record);
+    AfterContentChange(changeValue);
+}
+
 // operationType: when type is IME, it controls whether to perform ime callbacks
 // calledByImf: true means real input; false means preview input
 void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, OperationType operationType,
@@ -4933,7 +4965,15 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
     if (calledByImf && previewTextRecord_.IsValid()) {
         FinishTextPreviewInner();
     }
-    bool allowImeInput = isIME ? BeforeIMEInsertValue(insertValue) : true;
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return;
+    }
+    std::string text = insertValue;
+    if (insertValue.length() != 1) {
+        text = text.substr(0, maxLength_.value_or(INT_MAX) - GetTextContentLength());
+    }
+    bool allowImeInput = isIME ? BeforeIMEInsertValue(text) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, needReplacePreviewText=%{public}d",
         allowContentChange, allowImeInput, previewTextRecord_.needReplacePreviewText);
     CHECK_NULL_VOID((allowContentChange && allowImeInput) || previewTextRecord_.needReplacePreviewText);
@@ -4942,14 +4982,7 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
         NotifyImfFinishTextPreview();
         return;
     }
-    ClearRedoOperationRecords();
-    InsertValueOperation(insertValue, &record, operationType);
-    record.afterCaretPosition = caretPosition_;
-    if (isDragSponsor_) {
-        record.deleteCaretPostion = dragRange_.first;
-    }
-    AddOperationRecord(record);
-    AfterContentChange(changeValue);
+    ProcessInsertValueMore(text, record, operationType, changeValue);
 }
 
 void RichEditorPattern::InsertValueOperation(const std::string& insertValue, OperationRecord* const record,
@@ -5099,6 +5132,10 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
 void RichEditorPattern::CreateTextSpanNode(
     RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return;
+    }
     std::u16string insertU16Value = UtfUtils::Str8ToStr16(insertValue);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5106,7 +5143,11 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
-    spanNode->UpdateContent(insertU16Value);
+    if (insertValue.length() == 1) {
+        spanNode->UpdateContent(insertU16Value);
+    } else {
+        spanNode->UpdateContent(insertU16Value.substr(0, maxLength_.value_or(INT_MAX) - GetTextContentLength()));
+    }
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         spanItem->useThemeFontColor = typingStyle_->useThemeFontColor;
         spanItem->useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
@@ -5430,6 +5471,48 @@ std::u16string RichEditorPattern::DeleteForwardOperation(int32_t length)
         }
     }
     return deleteText;
+}
+
+std::u16string RichEditorPattern::DeleteContentRichEditor(int32_t length)
+{
+    std::u16string textContent;
+    GetContentBySpans(textContent);
+
+    auto start = std::clamp(GetTextContentLength() - length, 0, static_cast<int32_t>(textContent.length()));
+    std::u16string deleteText =
+        textContent.substr(static_cast<uint32_t>(start), static_cast<uint32_t>(GetTextContentLength() - start));
+    RichEditorDeleteValue info;
+    info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
+    if (GetTextContentLength() == 0) {
+        info.SetLength(0);
+        ResetFirstNodeStyle();
+        DoDeleteActions(0, 0, info);
+        return deleteText;
+    }
+    info.SetOffset(GetTextContentLength() - length);
+    info.SetLength(length);
+    int32_t currentPosition = std::clamp((GetTextContentLength() - length), 0, static_cast<int32_t>(GetTextContentLength()));
+    if (!spans_.empty()) {
+        CalcDeleteValueObj(currentPosition, length, info);
+        bool doDelete = DoDeleteActions(currentPosition, length, info);
+        if (!doDelete) {
+            return u"";
+        }
+    }
+    auto host = GetHost();
+    if (host && host->GetChildren().empty()) {
+        textForDisplay_.clear();
+    }
+    RequestKeyboardToEdit();
+    return deleteText;
+}
+
+void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
+{
+    if (length.value_or(INT_MAX) >= GetTextContentLength()) {
+        return;
+    }
+    DeleteContentRichEditor(GetTextContentLength() - length.value_or(INT_MAX));
 }
 
 bool RichEditorPattern::OnBackPressed()
