@@ -40,6 +40,7 @@
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "js_third_provider_interaction_operation.h"
 #include "nlohmann/json.hpp"
+#include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -1454,7 +1455,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
-    const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node, AccessibilityElementInfo& nodeInfo, int32_t treeId)
+    const std::shared_ptr<NG::TransitionalNodeInfo>& node, AccessibilityElementInfo& nodeInfo, int32_t treeId)
 {
     CHECK_NULL_VOID(node);
     nodeInfo.SetContent(node->GetContent());
@@ -1739,7 +1740,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
-    const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node, const CommonProperty& commonProperty,
+    const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::WebPattern>& webPattern)
 {
     if (node->GetParentId() == -1) {
@@ -4789,7 +4790,7 @@ void GetChildrenFromWebNode(
 {
     std::list<int64_t> webNodeChildren;
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        auto node = webPattern->GetAccessibilityNodeById(nodeId);
+        auto node = webPattern->GetTransitionalNodeById(nodeId);
         CHECK_NULL_VOID(node);
     for (auto& childId : node->GetChildIds()) {
             webNodeChildren.emplace_back(childId);
@@ -4862,7 +4863,7 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityIdNG(int64_t ele
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
 
     CHECK_NULL_VOID(webPattern);
-    auto node = webPattern->GetAccessibilityNodeById(elementId);
+    auto node = webPattern->GetTransitionalNodeById(elementId);
     CHECK_NULL_VOID(node);
     UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
     nodeInfo.SetAccessibilityVisible(webPattern->GetAccessibilityVisible(elementId));
@@ -5033,7 +5034,7 @@ void JsAccessibilityManager::UpdateWebCacheInfo(std::list<AccessibilityElementIn
         AccessibilityElementInfo nodeInfo;
 
         GetChildrenFromWebNode(parent, children, ngPipeline, webPattern);
-        auto node = webPattern->GetAccessibilityNodeById(parent);
+        auto node = webPattern->GetTransitionalNodeById(parent);
         if (node) {
             UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
             infos.push_back(nodeInfo);
@@ -6284,7 +6285,7 @@ void JsAccessibilityManager::GetWebCursorPosition(const int64_t elementId, const
     AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern)
 {
     CHECK_NULL_VOID(webPattern);
-    auto node = webPattern->GetAccessibilityNodeById(elementId);
+    auto node = webPattern->GetTransitionalNodeById(elementId);
     CHECK_NULL_VOID(node);
 
     callback.SetCursorPositionResult(node->GetSelectionStart(), requestId);
