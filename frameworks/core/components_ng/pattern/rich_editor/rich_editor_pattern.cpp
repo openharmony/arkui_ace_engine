@@ -325,6 +325,10 @@ RefPtr<SpanString> RichEditorPattern::CreateStyledStringByTextStyle(
         auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>(textStyle.GetLineHeight(), 0, length);
         styledString->AddSpan(lineHeightSpan);
     }
+    if (updateSpanStyle.updateHalfLeading.has_value()) {
+        auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(textStyle.GetHalfLeading(), 0, length);
+        styledString->AddSpan(halfLeadingSpan);
+    }
     if (updateSpanStyle.updateLetterSpacing.has_value()) {
         auto letterSpacingSpan = AceType::MakeRefPtr<LetterSpacingSpan>(textStyle.GetLetterSpacing(), 0, length);
         styledString->AddSpan(letterSpacingSpan);
@@ -1096,6 +1100,7 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
     spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
     spanNode->UpdateTextShadow(textStyle.GetTextShadows());
+    spanNode->UpdateHalfLeading(textStyle.GetHalfLeading());
     spanNode->UpdateLineHeight(textStyle.GetLineHeight());
     spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
     spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
@@ -1490,6 +1495,7 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationStyle);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextCase);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineHeight);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, HalfLeading);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LetterSpacing);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFeature);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow);
@@ -1808,6 +1814,9 @@ void RichEditorPattern::UpdateTextStyle(
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
+    }
+    if (updateSpanStyle.updateHalfLeading.has_value()) {
+        spanNode->UpdateHalfLeading(textStyle.GetHalfLeading());
     }
     if (updateSpanStyle.updateLetterSpacing.has_value()) {
         spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
@@ -3783,6 +3792,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
     }
     if (spanItem->textLineStyle) {
         textStyle.lineHeight = spanItem->textLineStyle->GetLineHeight().value_or(Dimension()).ConvertToFp();
+        textStyle.halfLeading = spanItem->textLineStyle->GetHalfLeading().value_or(false);
         textStyle.lineSpacing = spanItem->textLineStyle->GetLineSpacing().value_or(Dimension()).ConvertToFp();
         textStyle.textAlign = static_cast<int32_t>(spanItem->textLineStyle->GetTextAlign().value_or(TextAlign::START));
         auto lm = spanItem->textLineStyle->GetLeadingMargin();
@@ -9540,11 +9550,13 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     retInfo.SetFontStyle(textStyle.GetFontStyle());
     TextStyleResult textStyleResult;
     textStyleResult.lineHeight = textStyle.GetLineHeight().ConvertToVp();
+    textStyleResult.halfLeading = textStyle.GetHalfLeading();
     textStyleResult.letterSpacing = textStyle.GetLetterSpacing().ConvertToVp();
     textStyleResult.textShadows = textStyle.GetTextShadows();
     textStyleResult.textBackgroundStyle = textStyle.GetTextBackgroundStyle();
     retInfo.SetTextStyle(textStyleResult);
     retInfo.SetLineHeight(textStyle.GetLineHeight().ConvertToVp());
+    retInfo.SetHalfLeading(textStyle.GetHalfLeading());
     retInfo.SetLetterspacing(textStyle.GetLetterSpacing().ConvertToVp());
     retInfo.SetFontFeature(textStyle.GetFontFeatures());
     std::string fontFamilyValue;

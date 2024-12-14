@@ -171,6 +171,16 @@ double RichEditorAbstractSpanResult::GetLineHeight() const
     return lineHeight_;
 }
 
+void RichEditorAbstractSpanResult::SetHalfLeading(bool halfLeading)
+{
+    halfLeading_ = halfLeading;
+}
+
+bool RichEditorAbstractSpanResult::GetHalfLeading() const
+{
+    return halfLeading_;
+}
+
 void RichEditorAbstractSpanResult::SetLetterspacing(double letterSpacing)
 {
     letterSpacing_ = letterSpacing;
