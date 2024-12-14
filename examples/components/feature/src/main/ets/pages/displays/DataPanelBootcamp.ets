@@ -22,16 +22,16 @@ export struct DataPanelBootcamp{
   @State enableTrackBackgroundColor: boolean = false;
   @State enableStrokeWidth: boolean = false;
   @State enableValueColors: boolean = false;
-  @State enableTrackShadowRadius: boolean = false;
-  @State enableTrackShadowOffsetX: boolean = false;
-  @State enableTrackShadowOffsetY: boolean = false;
+  @State enableDataPanelShadowOptionsMultiShadowOptionsRadius: boolean = false;
+  @State enableDataPanelShadowOptionsMultiShadowOptionsOffsetX: boolean = false;
+  @State enableDataPanelShadowOptionsMultiShadowOptionsOffsetY: boolean = false;
   @State enableTrackShadowColors: boolean = false;
   @State closeEffectDataPane: boolean = false;
   @State trackBackgroundColorDataPane: string = '#08182431';
   @State strokeWidthDataPane: number = 24;
-  @State trackShadowRadiusDataPane: number = 20;
-  @State trackShadowOffsetXDataPane: number = 5;
-  @State trackShadowOffsetYDataPane: number = 5;
+  @State dataPanelShadowOptionsMultiShadowOptionsRadius: number = 20;
+  @State dataPanelShadowOptionsMultiShadowOptionsOffsetX: number = 5;
+  @State dataPanelShadowOptionsMultiShadowOptionsOffsetY: number = 5;
   public color1: LinearGradient = new LinearGradient(
     [{ color: '#65EEC9A3', offset: 0 }, { color: '#FFEF629F', offset: 1 }]);
   public color2: LinearGradient = new LinearGradient(
@@ -76,14 +76,18 @@ export struct DataPanelBootcamp{
           DataPanel({ values: [40, 25, 10, 5], max: 100, type: DataPanelType.Circle })
             .width(168).height(168)
             .closeEffect(useEnabled(this.enableCloseEffect,this.closeEffectDataPane))
-            .trackBackgroundColor(useEnabled(this.enableTrackBackgroundColor,this.trackBackgroundColorDataPane))
+            .trackBackgroundColor(useEnabled(this.enableTrackBackgroundColor,
+              this.trackBackgroundColorDataPane))
             .strokeWidth(useEnabled(this.enableStrokeWidth,this.strokeWidthDataPane))
             .valueColors(useEnabled(this.enableValueColors,this.valueColorsDataPane))
             .trackShadow({
-              radius: useEnabled(this.enableTrackShadowRadius,this.trackShadowRadiusDataPane),
+              radius: useEnabled(this.enableDataPanelShadowOptionsMultiShadowOptionsRadius,
+                this.dataPanelShadowOptionsMultiShadowOptionsRadius),
               colors: useEnabled(this.enableTrackShadowColors,this.trackShadowColorsDataPane),
-              offsetX: useEnabled(this.enableTrackShadowOffsetX,this.trackShadowOffsetXDataPane),
-              offsetY: useEnabled(this.enableTrackShadowOffsetY,this.trackShadowOffsetYDataPane)
+              offsetX: useEnabled(this.enableDataPanelShadowOptionsMultiShadowOptionsOffsetX,
+                this.dataPanelShadowOptionsMultiShadowOptionsOffsetX),
+              offsetY: useEnabled(this.enableDataPanelShadowOptionsMultiShadowOptionsOffsetY,
+                this.dataPanelShadowOptionsMultiShadowOptionsOffsetY)
             })
 
           Column() {
@@ -110,10 +114,13 @@ export struct DataPanelBootcamp{
           .strokeWidth(useEnabled(this.enableStrokeWidth,this.strokeWidthDataPane))
           .valueColors(useEnabled(this.enableValueColors,this.valueColorsDataPane))
           .trackShadow({
-            radius: useEnabled(this.enableTrackShadowRadius,this.trackShadowRadiusDataPane),
+            radius: useEnabled(this.enableDataPanelShadowOptionsMultiShadowOptionsRadius,
+              this.dataPanelShadowOptionsMultiShadowOptionsRadius),
             colors: useEnabled(this.enableTrackShadowColors,this.trackShadowColorsDataPane),
-            offsetX: useEnabled(this.enableTrackShadowOffsetX,this.trackShadowOffsetXDataPane),
-            offsetY: useEnabled(this.enableTrackShadowOffsetY,this.trackShadowOffsetYDataPane)
+            offsetX: useEnabled(this.enableDataPanelShadowOptionsMultiShadowOptionsOffsetX,
+              this.dataPanelShadowOptionsMultiShadowOptionsOffsetX),
+            offsetY: useEnabled(this.enableDataPanelShadowOptionsMultiShadowOptionsOffsetY,
+              this.dataPanelShadowOptionsMultiShadowOptionsOffsetY)
           })
       }.margin({ bottom: 40 })
       .width('100%')
@@ -157,23 +164,23 @@ export struct DataPanelBootcamp{
           color: $valueColorsDataPane,
         })
         SliderBlock({
-          title: 'radius',
-          isEnabled: $enableTrackShadowRadius,
-          value: $trackShadowRadiusDataPane,
+          title: 'dataPanelShadowOptions.MultiShadowOptions.Radius',
+          isEnabled: $enableDataPanelShadowOptionsMultiShadowOptionsRadius,
+          value: $dataPanelShadowOptionsMultiShadowOptionsRadius,
           min: 0,
           max: 100
         })
         SliderBlock({
-          title: 'offsetX',
-          isEnabled: $enableTrackShadowOffsetX,
-          value: $trackShadowOffsetXDataPane,
+          title: 'dataPanelShadowOptions.MultiShadowOptions.OffsetX',
+          isEnabled: $enableDataPanelShadowOptionsMultiShadowOptionsOffsetX,
+          value: $dataPanelShadowOptionsMultiShadowOptionsOffsetX,
           min: 0,
           max: 100
         })
         SliderBlock({
-          title: 'offsetY',
-          isEnabled: $enableTrackShadowOffsetY,
-          value: $trackShadowOffsetYDataPane,
+          title: 'dataPanelShadowOptions.MultiShadowOptions.OffsetY',
+          isEnabled: $enableDataPanelShadowOptionsMultiShadowOptionsOffsetY,
+          value: $dataPanelShadowOptionsMultiShadowOptionsOffsetY,
           min: 0,
           max: 100
         })
