@@ -41,6 +41,8 @@ std::atomic<bool> SystemProperties::layoutTraceEnable_(false);
 std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::measureDebugTraceEnable_ = false;
+bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;

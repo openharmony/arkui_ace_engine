@@ -4095,6 +4095,15 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE(
+            "Measure[%s][self:%d][parent:%d][key:%s][frameRect:%s][parentConstraint:%s][calcConstraint:%s]",
+            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
+            parentConstraint.has_value() ? parentConstraint.value().ToString().c_str() : "NA",
+            layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()
+                                                       : "NA");
+    }
     ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
@@ -4109,6 +4118,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetFrameSize(SizeF());
         geometryNode_->UpdateMargin(MarginPropertyF());
         isLayoutDirtyMarked_ = false;
+        ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d] reason: VisibleType::GONE", GetTag().c_str(), GetId());
         ACE_LAYOUT_TRACE_END()
         return;
     }
@@ -4119,6 +4129,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (layoutAlgorithm_->SkipMeasure()) {
         isLayoutDirtyMarked_ = false;
         ACE_LAYOUT_TRACE_END()
+        ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d] reason: SkipMeasure", GetTag().c_str(), GetId());
         return;
     }
 
@@ -4148,7 +4159,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
-            ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d]", GetTag().c_str(), GetId());
+            ACE_SCOPED_TRACE(
+                "SkipMeasure [%s][self:%d] reason:ConstraintNotChanged and no force-flag", GetTag().c_str(), GetId());
             layoutAlgorithm_->SetSkipMeasure();
             ACE_LAYOUT_TRACE_END()
             return;
@@ -4195,6 +4207,12 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("MeasureFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s][contentSize:%s]",
+            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
+            GetGeometryNode()->GetContentSize().ToString().c_str());
+    }
     ACE_LAYOUT_TRACE_END()
 }
 
@@ -4203,6 +4221,11 @@ void FrameNode::Layout()
 {
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(), GetId(),
+            GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            GetGeometryNode()->GetFrameRect().ToString().c_str());
+    }
     if (layoutProperty_->GetLayoutRect()) {
         GetGeometryNode()->SetFrameOffset(layoutProperty_->GetLayoutRect().value().GetOffset());
     }
@@ -4252,6 +4275,11 @@ void FrameNode::Layout()
     } else {
         ACE_SCOPED_TRACE("SkipLayout [%s][self:%d]", GetTag().c_str(), GetId());
         GetLayoutAlgorithm()->SetSkipLayout();
+    }
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("LayoutFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(),
+            GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            GetGeometryNode()->GetFrameRect().ToString().c_str());
     }
 
     auto pipeline = GetContext();
@@ -4371,10 +4399,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
     if (!isActive_ && !hasTransition) {
         layoutAlgorithm_.Reset();
+        ACE_SCOPED_TRACE("OnLayoutFinish[%s][self:%d] !isActive && !hasTransition", GetTag().c_str(), GetId());
         return false;
     }
     if (needSkipSyncGeometryNode_ && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
         layoutAlgorithm_.Reset();
+        ACE_SCOPED_TRACE("OnLayoutFinish[%s][self:%d] needSkipSyncGeometryNode", GetTag().c_str(), GetId());
         return false;
     }
     // update layout size.
@@ -4445,9 +4475,13 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
     if (SystemProperties::GetSyncDebugTraceEnabled()) {
-        ACE_LAYOUT_TRACE_BEGIN("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
-            GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+        ACE_LAYOUT_TRACE_BEGIN("SyncGeometryNode[%s][self:%d][parent:%d][key:%s][paintRect:%s][needSyncRsNode:%d]",
+            GetTag().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
         ACE_LAYOUT_TRACE_END()
+    }
+    if (!needSyncRsNode) {
+        ACE_SCOPED_TRACE("SyncGeometryNode[%s][self:%d] don't needSyncRsNode", GetTag().c_str(), GetId());
     }
 
     // update border.

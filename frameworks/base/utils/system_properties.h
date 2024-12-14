@@ -379,6 +379,16 @@ public:
 
     static bool GetDebugEnabled();
 
+    static bool GetMeasureDebugTraceEnabled()
+    {
+        return measureDebugTraceEnable_;
+    }
+
+    static bool GetSafeAreaDebugTraceEnabled()
+    {
+        return safeAreaDebugTraceEnable_;
+    }
+
     static bool GetLayoutDetectEnabled();
 
     static bool GetGpuUploadEnabled()
@@ -621,6 +631,8 @@ private:
     static bool buildTraceEnable_;
     static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
+    static bool measureDebugTraceEnable_;
+    static bool safeAreaDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
     static bool syntaxTraceEnable_;
