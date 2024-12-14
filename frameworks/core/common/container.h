@@ -598,6 +598,8 @@ public:
         return false;
     }
 
+    virtual ResourceConfiguration GetResourceConfiguration() const = 0;
+
 private:
     static bool IsIdAvailable(int32_t id);
 
