@@ -1018,15 +1018,17 @@ void SpanString::UpdateSpansMap()
         }
         auto start = spanItem->interval.first;
         auto end = spanItem->interval.second;
-        std::list<RefPtr<SpanBase>> spanBases = {
-            ToFontSpan(spanItem, start, end),
-            ToDecorationSpan(spanItem, start, end),
-            ToBaselineOffsetSpan(spanItem, start, end),
-            ToLetterSpacingSpan(spanItem, start, end),
-            ToGestureSpan(spanItem, start, end),
-            ToImageSpan(spanItem),
-            ToParagraphStyleSpan(spanItem, start, end),
-            ToLineHeightSpan(spanItem, start, end) };
+        std::list<RefPtr<SpanBase>> spanBases;
+        if (spanItem->spanItemType == NG::SpanItemType::IMAGE) {
+            spanBases = { ToImageSpan(spanItem, start, end) };
+        } else if (spanItem->spanItemType == NG::SpanItemType::NORMAL)
+            spanBases = { ToFontSpan(spanItem, start, end),
+                ToDecorationSpan(spanItem, start, end),
+                ToBaselineOffsetSpan(spanItem, start, end),
+                ToLetterSpacingSpan(spanItem, start, end),
+                ToGestureSpan(spanItem, start, end),
+                ToParagraphStyleSpan(spanItem, start, end),
+                ToLineHeightSpan(spanItem, start, end) };
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
                 continue;
@@ -1105,11 +1107,11 @@ RefPtr<TextShadowSpan> SpanString::ToTextShadowSpan(
     return AceType::MakeRefPtr<TextShadowSpan>(textShadow, start, end);
 }
 
-RefPtr<ImageSpan> SpanString::ToImageSpan(const RefPtr<NG::SpanItem>& spanItem)
+RefPtr<ImageSpan> SpanString::ToImageSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
     auto imageItem = DynamicCast<NG::ImageSpanItem>(spanItem);
-    CHECK_NULL_RETURN(imageItem, nullptr);
-    return AceType::MakeRefPtr<ImageSpan>(imageItem->options);
+    CHECK_NULL_RETURN(imageItem && start + 1 == end, nullptr);
+    return AceType::MakeRefPtr<ImageSpan>(imageItem->options, start);
 }
 
 RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(

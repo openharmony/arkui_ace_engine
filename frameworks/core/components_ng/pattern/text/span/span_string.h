@@ -72,7 +72,7 @@ public:
     RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(
         const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
-    RefPtr<ImageSpan> ToImageSpan(const RefPtr<NG::SpanItem>& spanItem);
+    RefPtr<ImageSpan> ToImageSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<GestureSpan> ToGestureSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(

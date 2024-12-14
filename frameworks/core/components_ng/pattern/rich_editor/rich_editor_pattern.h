@@ -1277,6 +1277,8 @@ private:
     void ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options);
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
+    void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
+    void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
