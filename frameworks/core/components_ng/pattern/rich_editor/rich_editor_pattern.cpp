@@ -7305,6 +7305,17 @@ void RichEditorPattern::CreateDragNode()
         }
     }
     RichEditorDragInfo info;
+    auto boxes = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    if (!boxes.empty()) {
+        float startX = boxes.front().Left();
+        float endX = boxes.front().Right();
+        for (const auto& box : boxes) {
+            startX = std::min(startX, box.Left());
+            endX = std::max(endX, box.Right());
+        }
+        startX = std::min(0.0f, startX);
+        info.maxSelectedWidth = std::abs(startX - endX);
+    }
     info.handleColor = GetCaretColor();
     info.selectedBackgroundColor = GetSelectedBackgroundColor();
     CalculateHandleOffsetAndShowOverlay();
