@@ -166,6 +166,35 @@ void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
     UpdateSections(args, sections, waterFlowSections);
 }
 
+RefPtr<NG::UINode> SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject)
+{
+    JSRef<JSVal> builderNodeParam = footerJsObject->GetProperty("builderNode_");
+    if (builderNodeParam->IsObject()) {
+        auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+        JSRef<JSVal> nodePtr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodePtr.IsEmpty()) {
+            const auto* vm = nodePtr->GetEcmaVM();
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* myUINode = reinterpret_cast<NG::UINode*>(node);
+            if (!myUINode) {
+                return nullptr;
+            }
+            auto refPtrUINode = AceType::Claim(myUINode);
+            return refPtrUINode;
+        }
+    }
+    return nullptr;
+}
+
+void JSWaterFlow::UpdateWaterFlowFooter(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
+{
+    JSRef<JSObject> footerJsObject = JSRef<JSObject>::Cast(args); // 4 is the index of footerContent
+    if (footerJsObject->HasProperty("builderNode_")) {
+        RefPtr<NG::UINode> refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);
+        NG::WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, refPtrUINode);
+    }
+}
+
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
     if (args.Length() > 1) {
@@ -206,6 +235,16 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
     } else {
         WaterFlowModel::GetInstance()->ResetSections();
 
+        if (obj->HasProperty("footerContent")) {
+            RefPtr<NG::UINode> refPtrUINode = nullptr;
+            auto footerContentObject = obj->GetProperty("footerContent");
+            if (footerContentObject->IsObject()) {
+                auto footerJsObject = JSRef<JSObject>::Cast(footerContentObject);
+                refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);
+            }
+            WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrUINode);
+            return;
+        }
         if (footerObject->IsFunction()) {
             // ignore footer if sections are present
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
