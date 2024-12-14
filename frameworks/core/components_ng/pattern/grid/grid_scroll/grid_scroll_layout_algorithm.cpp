@@ -1929,7 +1929,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-                    for (uint32_t y = i; y < crossCount_ - 1 && currentIndex < info_.childrenCount_; y++) {
+                    for (uint32_t y = i; y < crossCount_ && currentIndex < info_.childrenCount_; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
                     if (GreatOrEqual(cellAveLength_, 0.0f) &&
