@@ -166,9 +166,6 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   onKeyEvent(event: (event: KeyEvent) => void): this {
     throw new Error('Method not implemented.');
   }
-  focusable(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   onFocus(event: () => void): this {
     throw new Error('Method not implemented.');
   }
@@ -178,13 +175,7 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   tabIndex(index: number): this {
     throw new Error('Method not implemented.');
   }
-  defaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   groupDefaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  focusOnTouch(value: boolean): this {
     throw new Error('Method not implemented.');
   }
   animation(value: AnimateParam): this {
@@ -485,7 +476,8 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode: RenderFit): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentRenderFitModifier.identity, XComponentRenderFitModifier, fitMode);
+    return this;
   }
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
@@ -909,5 +901,19 @@ class XComponentEnableSecureModifier extends ModifierWithKey<boolean> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentRenderFitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentRenderFit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetRenderFit(node);
+    } else {
+      getUINativeModule().xComponent.setRenderFit(node, this.value);
+    }
   }
 }

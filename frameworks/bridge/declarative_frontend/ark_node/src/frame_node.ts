@@ -23,6 +23,7 @@ class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
+  protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
   protected renderNode_: RenderNode;
@@ -525,6 +526,16 @@ class FrameNode {
     this._commonEvent.setNodePtr(node);
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
+  }
+
+  get gestureEvent(): UIGestureEvent {
+    if (this._gestureEvent === undefined) {
+        this._gestureEvent = new UIGestureEvent();
+        this._gestureEvent.setNodePtr(this.nodePtr_);
+        let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+        this._gestureEvent.setWeakNodePtr(weakPtr);
+    }
+    return this._gestureEvent;
   }
   updateInstance(uiContext: UIContext): void {
     this.uiContext_ = uiContext;

@@ -5221,6 +5221,10 @@ void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetEnableSecure));
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableSecure"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetEnableSecure));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetRenderFit));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetRenderFit));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xComponent"), xComponent);
 }
 

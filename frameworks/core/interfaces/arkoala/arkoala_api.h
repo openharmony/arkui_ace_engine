@@ -4668,6 +4668,8 @@ struct ArkUIXComponentModifier {
     void (*initXComponent)(ArkUINodeHandle node);
     void (*setXComponentEnableSecure)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetXComponentEnableSecure)(ArkUINodeHandle node);
+    void (*setXComponentRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
+    void (*resetXComponentRenderFit)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {
