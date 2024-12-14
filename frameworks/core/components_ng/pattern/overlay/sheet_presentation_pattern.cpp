@@ -998,6 +998,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             CHECK_NULL_VOID(overlayManager);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
+            overlayManager->FireAutoSave(host);
             overlayManager->DestroySheet(host, pattern->GetSheetKey());
             pattern->FireCallback("false");
         }
@@ -1668,6 +1669,7 @@ void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
                 CHECK_NULL_VOID(pattern);
                 const auto& overlayManager = pattern->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
+                overlayManager->FireAutoSave(node);
                 overlayManager->DestroySheet(node, pattern->GetSheetKey());
                 pattern->FireCallback("false");
             });
