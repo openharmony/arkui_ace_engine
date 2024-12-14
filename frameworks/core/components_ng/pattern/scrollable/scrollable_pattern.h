@@ -266,8 +266,7 @@ public:
         scrollable->StopScrollable();
     }
 
-    virtual bool StartSnapAnimation(float snapDelta, float animationVelocity, float predictVelocity = 0.f,
-        float dragDistance = 0.f, SnapDirection snapDirection = SnapDirection::NONE)
+    virtual bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     {
         return false;
     }
@@ -740,6 +739,8 @@ public:
     SizeF GetViewSizeMinusPadding();
 
     void ScrollEndCallback(bool nestedScroll, float velocity);
+
+    void StopScrollableAndAnimate();
 
 protected:
     void SuggestOpIncGroup(bool flag);
