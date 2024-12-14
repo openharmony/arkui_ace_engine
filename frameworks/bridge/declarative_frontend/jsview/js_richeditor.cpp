@@ -2245,7 +2245,7 @@ void JSRichEditorBaseController::GetCaretRect(const JSCallbackInfo& args)
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     auto caretRect = controller->GetCaretRect();
-    CHECK_EQUAL_VOID(caretRect.IsEmpty(), false);
+    CHECK_EQUAL_VOID(caretRect.IsValid(), false);
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty<float>("x", caretRect.GetOffset().GetX());
     obj->SetProperty<float>("y", caretRect.GetOffset().GetY());
