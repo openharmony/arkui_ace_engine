@@ -8929,16 +8929,26 @@ RectF RichEditorPattern::GetSelectArea()
     }
     auto frontRect = selectRects.front();
     auto backRect = selectRects.back();
-    RectF res;
-    if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
-        res.SetRect(contentRect_.GetX() + paintOffset.GetX(),
-            frontRect.GetY() + richTextRect_.GetY() + paintOffset.GetY(), contentRect_.Width(),
-            backRect.Bottom() - frontRect.Top());
-    } else {
-        res.SetRect(frontRect.GetX() + richTextRect_.GetX() + paintOffset.GetX(),
-            frontRect.GetY() + richTextRect_.GetY() + paintOffset.GetY(), backRect.Right() - frontRect.Left(),
-            backRect.Bottom() - frontRect.Top());
+    float selectAreaRight = frontRect.Right();
+    float selectAreaLeft = frontRect.Left();
+    if (selectRects.size() != 1) {
+        std::unordered_map<float, RectF> selectLineRect;
+        for (const auto& box : selectRects) {
+            auto combineLineRect = box;
+            auto top = box.Top();
+            if (selectLineRect.find(top) == selectLineRect.end()) {
+                selectLineRect.insert({ top, combineLineRect });
+            } else {
+                combineLineRect = combineLineRect.CombineRectT(selectLineRect[top]);
+                selectLineRect.insert({ top, combineLineRect });
+            }
+            selectAreaRight = std::max(selectAreaRight, combineLineRect.Right());
+            selectAreaLeft = std::min(selectAreaLeft, combineLineRect.Left());
+        }
     }
+    RectF res = { selectAreaLeft + richTextRect_.GetX() + paintOffset.GetX(),
+        frontRect.GetY() + richTextRect_.GetY() + paintOffset.GetY(), selectAreaRight - selectAreaLeft,
+        backRect.Bottom() - frontRect.Top() };
     return res.IntersectRectT(contentRect);
 }
 
