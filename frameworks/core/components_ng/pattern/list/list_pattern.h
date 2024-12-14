@@ -376,6 +376,12 @@ public:
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;
+
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation)
+    {
+        isNeedDividerAnimation_ = isNeedDividerAnimation;
+    }
+
 private:
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
@@ -513,6 +519,7 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    bool isNeedDividerAnimation_ = true;
 };
 } // namespace OHOS::Ace::NG
 
