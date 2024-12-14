@@ -71,6 +71,7 @@ const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
 const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
 const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
 const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
+const SCROLL_BAR_OFFSET = 20;
 export class TipsDialog extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -2074,7 +2075,7 @@ export class AlertDialog extends ViewPU {
     AlertDialogContentBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(this.getMargin()) });
+            Column.margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create(this.contentScroller);
@@ -2094,15 +2095,7 @@ export class AlertDialog extends ViewPU {
             Text.fontSize(`${BODY_L}fp`);
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-            Text.margin({
-                end: LengthMetrics.resource({
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.padding_level8'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                })
-            });
+            Text.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
             Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
             Text.textAlign(this.textAlign);
             Text.onSizeChange((oldValue, newValue) => {
@@ -2146,9 +2139,6 @@ export class AlertDialog extends ViewPU {
         if (this.secondaryButton) {
             this.buttons.push(this.secondaryButton);
         }
-    }
-    getMargin() {
-        return 0 - PADDING_LEVEL_8;
     }
     getFontWeight() {
         if (this.primaryTitle || this.secondaryTitle) {
@@ -3983,14 +3973,20 @@ export class PopoverDialog extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.onClick(() => {
-                let screenSize = display.getDefaultDisplaySync();
-                let screenWidth = px2vp(screenSize.width);
-                if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-                    this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
-                } else {
-                    this.popover.width = this.dialogWidth;
+                try {
+                    let screenSize = display.getDefaultDisplaySync();
+                    let screenWidth = px2vp(screenSize.width);
+                    if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+                        this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
+                    } else {
+                        this.popover.width = this.dialogWidth;
+                    }
+                    this.visible = !this.visible;
+                } catch (error) {
+                    let code = error.code;
+                    let message = error.message;
+                    hilog.error(0x3900, 'Ace', `dialog popup error, code: ${code}, message: ${message}`);
                 }
-                this.visible = !this.visible;
             });
             Column.bindPopup(this.visible, {
                 builder: this.popover?.builder,

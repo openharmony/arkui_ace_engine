@@ -307,8 +307,6 @@ public:
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
-    virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
-
     virtual int32_t GetContainerModalTitleHeight()
     {
         return -1;
@@ -462,6 +460,9 @@ public:
     }
 
     virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {}
+    virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
+
+    virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
 };
 
 } // namespace OHOS::Ace

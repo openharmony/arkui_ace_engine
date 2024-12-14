@@ -39,7 +39,12 @@ private:
     void Init(const SizeF& frameSize);
     /* init WaterFlow without Sections */
     void SingleInit(const SizeF& frameSize);
-    void CheckReset();
+    /**
+     * @brief check if any items have changed and require a re-layout
+     *
+     * @return item index to refill from. -1 if nothing changed
+     */
+    int32_t CheckReset();
 
     void MeasureOnOffset(float delta);
 

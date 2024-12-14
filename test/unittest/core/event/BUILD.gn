@@ -40,6 +40,7 @@ ace_unittest("drag_event_test_ng") {
   module_output = "events"
   sources = [
     "drag_event_test_ng.cpp",
+    "drag_event_test_ng_issue.cpp",
     "drag_event_test_ng_property_config.cpp",
     "drag_event_test_ng_property_config_coverage.cpp",
   ]

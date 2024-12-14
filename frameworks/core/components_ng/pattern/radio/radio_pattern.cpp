@@ -293,6 +293,9 @@ void RadioPattern::InitTouchEvent()
         if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
             radioPattern->isTouchPreventDefault_ = info.IsPreventDefault();
         }
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             radioPattern->OnTouchDown();
         }

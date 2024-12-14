@@ -1577,7 +1577,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg086, TestSize.Level1)
 
 /**
  * @tc.name: MenuPatternTest087
- * @tc.desc: Test ShowStackExpandDisappearAnimation.
+ * @tc.desc: Test ShowStackMenuDisappearAnimation.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg087, TestSize.Level1)
@@ -1611,7 +1611,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg087, TestSize.Level1)
     auto children = subMenuNode->GetChildren();
     const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
         AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-    menuPattern->ShowStackExpandDisappearAnimation(menuNode, subMenuNode, animationOption);
+    menuPattern->ShowStackMenuDisappearAnimation(menuNode, subMenuNode, animationOption);
     EXPECT_FALSE(animationOption.curve_->IsEqual(MENU_ANIMATION_CURVE));
 }
 

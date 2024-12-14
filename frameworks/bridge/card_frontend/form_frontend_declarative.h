@@ -143,6 +143,11 @@ public:
         return isBundle_;
     }
 
+    UIContentErrorCode InnerRunCardPage(
+        const std::string& url, const std::string& params, const std::string& entryPoint);
+    UIContentErrorCode InnerRunDynamicPage(
+        const std::string& url, const std::string& params, const std::string& entryPoint);
+
     ColorMode colorMode_ = ColorMode::LIGHT;
     bool foregroundFrontend_ = false;
     double density_ = 1.0;

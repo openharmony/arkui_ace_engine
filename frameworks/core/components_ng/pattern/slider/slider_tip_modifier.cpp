@@ -480,7 +480,9 @@ void SliderTipModifier::BuildParagraph()
         textFontSize_ = SUITABLEAGING_LEVEL_2_TEXT_FONT_SIZE;
     }
     fontStyle->UpdateFontSize(textFontSize_);
-    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipeline->GetTheme<TextTheme>());
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, theme);
     auto content = content_->Get();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && fontManager->IsUseAppCustomFont()) {

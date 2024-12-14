@@ -78,6 +78,7 @@ group("core_pattern_unittest") {
     "relative_container:relative_container_test_ng",
     "render_node:render_node_test_ng",
     "rich_editor:rich_editor_test_ng",
+    "rich_editor_drag:rich_editor_drag_test_ng",
     "scroll:scroll_test_ng",
     "scroll_bar:scroll_bar_test_ng",
     "scrollable:scrollable_test_ng",

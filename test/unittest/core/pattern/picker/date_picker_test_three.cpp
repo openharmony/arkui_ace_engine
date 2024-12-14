@@ -564,14 +564,9 @@ HWTEST_F(DatePickerTestThree, DatePickerAccessibilityPropertyTestNg006, TestSize
         auto index = columnPattern->GetCurrentIndex();
         auto options = columnPattern->GetOptions();
         auto it = options.find(monthDaysColumnNode);
-        if (it != options.end()) {
-            if (it->second.size() <= index) {
-                allColumnsText.append("");
-            }
+        if (it != options.end() && index >= 0 && index < it->second.size()) {
             auto date = it->second.at(index);
             allColumnsText.append(DatePickerPattern::GetFormatString(date));
-        } else {
-            allColumnsText.append("");
         }
     }
 

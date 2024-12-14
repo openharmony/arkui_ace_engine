@@ -243,7 +243,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     ASSERT_NE(pipeline, nullptr);
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
     /**
      * @tc.steps: step6. Invoke onActionStart, onActionUpdate, onActionEnd, onActionCancel when the onActionStart
      * function exists.
@@ -659,7 +659,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
 
     /**
      * @tc.steps: step4. Invoke onActionStart callback, when info.GetSourceDevice() is SourceType::MOUSE.
@@ -955,21 +955,21 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest001, TestSize.Level1)
     auto pipeline = PipelineContext::GetMainPipelineContext();
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_DETECTING_STATUS);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_DETECTING_STATUS);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_STARTED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_STARTED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_FINISHED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_FINISHED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_STARTED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_STARTED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_STARTED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_FINISHED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_FINISHED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
 }
 
 /**
@@ -994,7 +994,8 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest002, TestSize.Level1)
     auto pipeline = PipelineContext::GetMainPipelineContext();
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     /**
      * @tc.steps: step2. Create onPreDrag function and bind to eventHub.
      * @tc.expected: Bind onPreDrag function successful.

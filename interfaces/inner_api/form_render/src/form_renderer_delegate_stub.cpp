@@ -15,6 +15,7 @@
 #include "form_renderer_delegate_stub.h"
 
 #include "form_renderer_hilog.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace Ace {
@@ -202,12 +203,13 @@ int32_t FormRendererDelegateStub::HandleOnFormLinkInfoUpdate(MessageParcel& data
 
 int32_t FormRendererDelegateStub::HandleOnGetRectRelativeToWindow(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t top = 0;
-    int32_t left = 0;
-    int32_t errCode = OnGetRectRelativeToWindow(top, left);
+    AccessibilityParentRectInfo parentRectInfo;
+    int32_t errCode = OnGetRectRelativeToWindow(parentRectInfo);
     reply.WriteInt32(errCode);
-    reply.WriteInt32(top);
-    reply.WriteInt32(left);
+    reply.WriteInt32(parentRectInfo.top);
+    reply.WriteInt32(parentRectInfo.left);
+    reply.WriteFloat(parentRectInfo.scaleX);
+    reply.WriteFloat(parentRectInfo.scaleY);
     return ERR_OK;
 }
 } // namespace Ace

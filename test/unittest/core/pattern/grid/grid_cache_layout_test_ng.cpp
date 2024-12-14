@@ -14,12 +14,11 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
 
 class GridCacheLayoutTestNg : public GridTestNg {
 public:
@@ -113,7 +112,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines001, TestSize.Level1)
 
     for (int32_t i = 0; i < 10; i++) {
         pattern_->ScrollBy(ITEM_MAIN_SIZE);
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
     }
 
     int32_t colsNumber = 3;
@@ -143,7 +142,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines002, TestSize.Level1)
 
     for (int32_t i = 0; i < 25; i++) {
         pattern_->ScrollBy(50);
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
     }
 
     float totalHeight = ITEM_MAIN_SIZE * 10;
@@ -179,7 +178,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines003, TestSize.Level1)
 
     for (int32_t i = 0; i < 14; i++) {
         pattern_->ScrollBy(100);
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
     }
 
     float totalHeight = ITEM_MAIN_SIZE * 7;
@@ -216,7 +215,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
     EXPECT_EQ(info.endIndex_, 11);
 
     pattern_->ScrollToIndex(99, false, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 89));
     EXPECT_EQ(info.startIndex_, 90);
     const std::list<int32_t> preload = { 89, 88, 87 };
@@ -244,7 +243,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create005, TestSize.Level1)
     EXPECT_EQ(info.endIndex_, 11);
 
     pattern_->ScrollToIndex(99, false, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 88));
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 88)->IsActive());
     EXPECT_EQ(GetChildHeight(frameNode_, 88), 100);
@@ -267,7 +266,7 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache001, TestSize.Level1)
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 8)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 9)->IsActive());
     EXPECT_EQ(GetChildWidth(frameNode_, 8), 115);
@@ -277,7 +276,7 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache001, TestSize.Level1)
     UpdateCurrentOffset(-200);
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.endIndex_, 11);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 13)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 10), 350);
@@ -312,12 +311,12 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache002, TestSize.Level1)
     UpdateCurrentOffset(-275);
     EXPECT_EQ(info.startIndex_, 4);
     EXPECT_EQ(info.endIndex_, 13);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildWidth(frameNode_, 15), 115.0f);
     EXPECT_EQ(GetChildX(frameNode_, 15), 125.0f);
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(100.0f), CalcLength(400.0f)));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildWidth(frameNode_, 14), 45.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 15), 45.0f);
     EXPECT_EQ(GetChildX(frameNode_, 15), 55.0f);
@@ -397,7 +396,7 @@ HWTEST_F(GridCacheLayoutTestNg, Cache001, TestSize.Level1)
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
         EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 100);
     }
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     // preload next line
     const std::list<int32_t> preloadList2 = { 15, 16, 17 };
     CheckPreloadListEqual(preloadList2);
@@ -407,14 +406,86 @@ HWTEST_F(GridCacheLayoutTestNg, Cache001, TestSize.Level1)
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
         EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 100);
     }
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
 
     pattern_->ScrollToIndex(49);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info.startIndex_, 39);
     // GridScroll algo currently not capable of preloading backward
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
+}
+
+/**
+ * @tc.name: Cache003
+ * @tc.desc: Test Grid cached items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, Cache003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    model.SetCachedCount(1);
+    model.SetLayoutOptions({});
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 23);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 9);
+    EXPECT_EQ(pattern_->info_.endIndex_, 32);
+    EXPECT_NE(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(GetItem(6, true));
+    EXPECT_FALSE(GetItem(5, true));
+    EXPECT_NE(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
+
+    UpdateCurrentOffset(60.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    ASSERT_TRUE(GetItem(5, true));
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+    EXPECT_NE(GetItem(5, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
+
+    GetItem(5, true)->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    GetItem(5, true)->SetActive(true); // ::Layout would reset PropertyFlag if item is active
+    UpdateCurrentOffset(1.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+    EXPECT_TRUE(GetItem(5, true)->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_LAYOUT);
+}
+
+/**
+ * @tc.name: Cache004
+ * @tc.desc: Test Grid layout cache with no scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, Cache004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(1);
+    model.SetLayoutOptions({});
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.endIndex_, 23);
+    EXPECT_FALSE(GetItem(24, true));
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    auto item = GetItem(24, true);
+    ASSERT_TRUE(item);
+    auto ctx = AceType::DynamicCast<MockRenderContext>(item->GetRenderContext());
+    FlushUITasks();
+    EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 400.00) - [80.00 x 50.00]");
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(600.0f)));
+    FlushUITasks();
+    EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 400.00) - [80.00 x 50.00]");
+    EXPECT_EQ(ctx->paintRect_, item->GetGeometryNode()->GetFrameRect()); // should be synced with layout
+    EXPECT_EQ(GetChildFrameNode(frameNode_, 24), item);
 }
 
 /**
@@ -442,7 +513,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      */
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
     pattern_->ScrollToIndex(4, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
 
@@ -451,7 +522,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.expected: The item(index:4) above view is active, the item(index:24) below view is active
      */
     pattern_->ScrollToIndex(8, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 24)->IsActive()); // th seventh row
@@ -461,7 +532,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.expected: The item(index:0) above view is active, the item(index:20) below view is active
      */
     pattern_->ScrollToIndex(4, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 24)->IsActive());
@@ -471,7 +542,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.expected: The item(index:16) below view is active, no item above view
      */
     pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
 }

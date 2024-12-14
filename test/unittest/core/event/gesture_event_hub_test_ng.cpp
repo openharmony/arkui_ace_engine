@@ -918,31 +918,31 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest014, TestSize.Level1)
     auto event = guestureEventHub->eventHub_.Upgrade();
     event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
     /**
      * @tc.steps: step2. call IsAllowedDrag
      * @tc.expected: result is correct
      */
     frameNode->userSet_ = true;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
 
     frameNode->userSet_ = false;
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
     eventHub->onDragStart_ = func;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
 
     guestureEventHub->HandleOnDragStart(GestureEvent());
 
     frameNode->draggable_ = true;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
 
     frameNode->draggable_ = true;
     eventHub->onDragStart_ = nullptr;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -967,7 +967,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
 
     guestureEventHub->isReceivedDragGestureInfo_ = true;
     guestureEventHub->StartDragTaskForWeb();
-    ASSERT_FALSE(guestureEventHub->isReceivedDragGestureInfo_);
+    EXPECT_FALSE(guestureEventHub->isReceivedDragGestureInfo_);
 
     guestureEventHub->HandleNotAllowDrag(GestureEvent());
 
@@ -982,7 +982,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
     guestureEventHub->HandleOnDragStart(GestureEvent());
 
     guestureEventHub->HandleNotAllowDrag(GestureEvent());
-    ASSERT_TRUE(guestureEventHub->isReceivedDragGestureInfo_);
+    EXPECT_TRUE(guestureEventHub->isReceivedDragGestureInfo_);
 }
 
 /**
@@ -1019,7 +1019,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest016, TestSize.Level1)
     guestureEventHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
     guestureEventHub->ClearUserOnClick();
     guestureEventHub->ClearUserOnTouch();
-    ASSERT_FALSE(guestureEventHub->clickEventActuator_->userCallback_);
+    EXPECT_FALSE(guestureEventHub->clickEventActuator_->userCallback_);
 }
 
 /**
@@ -1838,7 +1838,7 @@ HWTEST_F(GestureEventHubTestNg, ResetDragActionForWeb001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     guestureEventHub->ResetDragActionForWeb();
-    ASSERT_EQ(guestureEventHub->isReceivedDragGestureInfo_, false);
+    EXPECT_EQ(guestureEventHub->isReceivedDragGestureInfo_, false);
 }
 
 /**
@@ -1884,7 +1884,7 @@ HWTEST_F(GestureEventHubTestNg, SetMouseDragGatherPixelMaps001, TestSize.Level1)
     auto eventHub = guestureEventHub->eventHub_.Upgrade();
     guestureEventHub->SetMouseDragGatherPixelMaps();
     guestureEventHub->SetNotMouseDragGatherPixelMaps();
-    ASSERT_NE(PipelineContext::GetCurrentContext(), nullptr);
+    EXPECT_NE(PipelineContext::GetCurrentContext(), nullptr);
 }
 
 /**
@@ -1898,22 +1898,22 @@ HWTEST_F(GestureEventHubTestNg, IsTextCategoryComponent001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     string frameTag = V2::TEXTAREA_ETS_TAG;
     bool result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::TEXT_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::TEXTINPUT_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::SEARCH_Field_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::RICH_EDITOR_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = "";
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1933,7 +1933,7 @@ HWTEST_F(GestureEventHubTestNg, SetResponseRegion001, TestSize.Level1)
         callbackInfo = 1;
     });
     guestureEventHub->SetResponseRegion(responseRegion);
-    ASSERT_TRUE(guestureEventHub->isResponseRegion_);
+    EXPECT_TRUE(guestureEventHub->isResponseRegion_);
 }
 
 /**
@@ -1956,7 +1956,7 @@ HWTEST_F(GestureEventHubTestNg, RemoveLastResponseRect001, TestSize.Level1)
         callbackInfo = 1;
     });
     guestureEventHub->RemoveLastResponseRect();
-    ASSERT_FALSE(guestureEventHub->isResponseRegion_);
+    EXPECT_FALSE(guestureEventHub->isResponseRegion_);
 }
 
 /**
@@ -1971,6 +1971,6 @@ HWTEST_F(GestureEventHubTestNg, SetJSFrameNodeOnTouchEvent001, TestSize.Level1)
     guestureEventHub->touchEventActuator_ = nullptr;
     TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
     guestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
-    ASSERT_NE(guestureEventHub->touchEventActuator_, nullptr);
+    EXPECT_NE(guestureEventHub->touchEventActuator_, nullptr);
 }
 } // namespace OHOS::Ace::NG

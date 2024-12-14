@@ -18,7 +18,6 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
-
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_tabs_function.h"
@@ -29,8 +28,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
 namespace OHOS::Ace {
 
@@ -692,6 +691,18 @@ void JSTabs::SetBarBackgroundEffect(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarBackgroundEffect(option);
 }
 
+void JSTabs::SetPageFlipMode(const JSCallbackInfo& info)
+{
+    // default value
+    int32_t value = 0;
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        TabsModel::GetInstance()->SetPageFlipMode(value);
+        return;
+    }
+    JSViewAbstract::ParseJsInt32(info[0], value);
+    TabsModel::GetInstance()->SetPageFlipMode(value);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -735,6 +746,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("animationMode", &JSTabs::SetAnimateMode);
     JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
     JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
+    JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

@@ -321,7 +321,7 @@ void SetCheckboxChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_CHECKBOX_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
 }

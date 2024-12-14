@@ -23,6 +23,7 @@ import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 import { DataPanelBootcamp } from './DataPanelBootcamp';
+import { GaugeBootcamp } from './GaugeBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -37,6 +38,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
     { name: 'dataPanel', label: '数据面板/DataPanel'}
+    { name: 'gauge', label: '数据量规图/gauge' },
   ]
 };
 
@@ -60,6 +62,8 @@ export function DisplaysDestination(name: string, route: Route) {
     AdvancedCounterBootcamp({ title: route.label})
   } else if (name === 'displays/dataPanel'){
     DataPanelBootcamp({ title: route.label})
+  } else if (name === 'displays/gauge') {
+    GaugeBootcamp({ title: route.label })
   }
 }
 

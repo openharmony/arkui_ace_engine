@@ -230,6 +230,16 @@ public:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
+    const std::unordered_map<size_t, TouchTestResult>& GetAxisTouchTestResults() const
+    {
+        return axisTouchTestResults_;
+    }
+
+    void SetAxisTouchTestResults(std::unordered_map<size_t, TouchTestResult>& axisTouchTestResults)
+    {
+        axisTouchTestResults_ = axisTouchTestResults;
+    }
+
     void SetInnerFlag(bool value)
     {
         innerEventWin_ = value;
@@ -265,6 +275,11 @@ public:
     void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
+
+    inline const std::unordered_map<int32_t, int32_t>& GetDownFingerIds() const
+    {
+        return downFingerIds_;
+    }
 
     inline const std::unordered_map<int32_t, TouchEvent>& GetIdToTouchPoint() const
     {

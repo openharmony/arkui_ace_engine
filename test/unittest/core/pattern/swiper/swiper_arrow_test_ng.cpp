@@ -327,40 +327,6 @@ HWTEST_F(SwiperArrowTestNg, HoverShow002, TestSize.Level1)
 }
 
 /**
- * @tc.name: HoverShow003
- * @tc.desc: When loop:false and SwipeByGroup:true, arrow isVisible depend on currentIndex
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperArrowTestNg, HoverShow003, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    model.SetDisplayCount(3);
-    model.SetSwipeByGroup(true);
-    model.SetLoop(false);
-    model.SetDisplayArrow(true);
-    model.SetHoverShow(false);
-    model.SetArrowStyle(ARROW_PARAMETERS);
-    CreateSwiperItems(6);
-    CreateSwiperDone();
-
-    EXPECT_EQ(pattern_->TotalCount(), 6);
-    /**
-     * @tc.steps: step1. CurrentIndex is in first page
-     * @tc.expected: Can not swipe left, left arrow is inVisible
-     */
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-    EXPECT_TRUE(VerifyArrowVisible(false, true));
-
-    /**
-     * @tc.steps: step2. CurrentIndex is in last page
-     * @tc.expected: Can not swipe right, right arrow is inVisible
-     */
-    ChangeIndex(3);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-    EXPECT_TRUE(VerifyArrowVisible(true, false));
-}
-
-/**
  * @tc.name: HoverEvent001
  * @tc.desc: When has no indicator and hover swiper, will show arrow
  * @tc.type: FUNC

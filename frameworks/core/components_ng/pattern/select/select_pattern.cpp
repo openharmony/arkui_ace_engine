@@ -94,6 +94,7 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
             .SetType(host->GetTag())
             .SetIndex(index)
             .SetText(value)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
         if (!inspectorId.empty()) {
@@ -136,6 +137,7 @@ void SelectPattern::OnModifyDone()
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     } else {
@@ -335,6 +337,9 @@ void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -342,6 +347,7 @@ void SelectPattern::RegisterOnPress()
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);

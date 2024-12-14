@@ -2,7 +2,7 @@
     "name": "@ohos/ace_engine",
     "description": "ArkUI Cross-Platform Engine for UI layout measure and paint",
     "version": "3.1",
-    "license": "Apache 2.0",
+    "license": "Apache-2.0",
     "publishAs": "code-segment",
     "segment": {
         "destPath": "foundation/arkui/ace_engine"
