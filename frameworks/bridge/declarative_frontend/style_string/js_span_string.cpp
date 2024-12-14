@@ -142,7 +142,7 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
     auto jsSpanString = Referenced::MakeRefPtr<JSSpanString>();
     jsSpanString->IncRefCount();
-    std::string data;
+    std::u16string data;
     RefPtr<SpanString> spanString;
     if (args.Length() == 0) {
         spanString = AceType::MakeRefPtr<SpanString>(data);
@@ -152,8 +152,7 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
             spanString = AceType::MakeRefPtr<SpanString>(data);
             if (args.Length() > 1) {
                 auto thisObj = args.This();
-                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length(),
-                    thisObj);
+                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], data.length(), thisObj);
                 spanString->BindWithSpans(spanBases);
             }
         } else {
@@ -880,7 +879,7 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
 {
     auto jsSpanString = Referenced::MakeRefPtr<JSMutableSpanString>();
     jsSpanString->IncRefCount();
-    std::string data;
+    std::u16string data;
 
     RefPtr<MutableSpanString> spanString;
     if (args.Length() == 0) {
@@ -891,8 +890,7 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
             spanString = AceType::MakeRefPtr<MutableSpanString>(data);
             if (args.Length() > 1) {
                 auto thisObj = args.This();
-                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1],
-                    StringUtils::ToWstring(data).length(), thisObj);
+                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], data.length(), thisObj);
                 spanString->BindWithSpans(spanBases);
             }
         } else {
@@ -958,7 +956,7 @@ void JSMutableSpanString::ReplaceString(const JSCallbackInfo& info)
     if (!CheckParameters(start, length)) {
         return;
     }
-    std::string data = info[2]->ToString();
+    std::u16string data = info[2]->ToU16String();
     controller->ReplaceString(start, length, data);
 }
 
@@ -969,7 +967,7 @@ void JSMutableSpanString::InsertString(const JSCallbackInfo& info)
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
-    std::string data = info[1]->ToString();
+    std::u16string data = info[1]->ToU16String();
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
     // The input parameter must not cross the boundary.

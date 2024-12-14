@@ -382,6 +382,10 @@ public:
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
 
+    std::shared_ptr<Framework::JsValue> GetJsContext() override;
+
+    void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext) override;
+
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
@@ -498,6 +502,8 @@ private:
     bool ExecuteAbc(const std::string& fileName);
     bool ExecuteCardAbc(const std::string& fileName, int64_t cardId);
     bool ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
+    bool InnerExecuteIsolatedAbc(const std::string& fileName, const std::string& entryPoint);
+    bool InnerExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

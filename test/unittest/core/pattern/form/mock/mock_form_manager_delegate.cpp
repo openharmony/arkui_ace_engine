@@ -94,7 +94,7 @@ void FormManagerDelegate::ReleaseRenderer() {}
 
 void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) {}
 
-void FormManagerDelegate::OnGetRectRelativeToWindow(int32_t &top, int32_t &left) {}
+void FormManagerDelegate::OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) {}
 
 void FormManagerDelegate::SetObscured(bool isObscured) {}
 

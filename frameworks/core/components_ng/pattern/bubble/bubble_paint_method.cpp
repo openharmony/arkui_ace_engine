@@ -210,6 +210,10 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(paintProperty, false);
     enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
     arrowPlacement_ = paintProperty->GetPlacement().value_or(Placement::BOTTOM);
+    if (!enableArrow_ || !showArrow_) {
+        arrowBuildPlacement_ = Placement::NONE;
+        arrowPlacement_ = Placement::NONE;
+    }
     UpdateArrowOffset(paintProperty->GetArrowOffset(), arrowPlacement_);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -220,7 +224,7 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, false);
     padding_ = popupTheme->GetPadding();
-    return enableArrow_ && showArrow_ && popupTheme->GetPopupDoubleBorderEnable();
+    return popupTheme->GetPopupDoubleBorderEnable();
 }
 
 void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
@@ -235,6 +239,7 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
     RSPen paint;
     RSFilter filter;
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
@@ -262,6 +267,7 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
     RSPen paint;
     RSFilter filter;
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));

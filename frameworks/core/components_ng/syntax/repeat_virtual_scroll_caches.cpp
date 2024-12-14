@@ -231,8 +231,8 @@ void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key,
     AddKeyToL1(key, shouldTriggerRecycle);
 }
 
- void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
- {
+void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
+{
     TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveKeyFromL1 key:%{public}s", key.c_str());
     activeNodeKeysInL1_.erase(key);
 

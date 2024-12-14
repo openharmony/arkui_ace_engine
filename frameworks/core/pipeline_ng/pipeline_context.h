@@ -44,6 +44,8 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -80,7 +82,7 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext() = default;
+    PipelineContext();
 
     ~PipelineContext() override = default;
 
@@ -109,10 +111,7 @@ public:
 
     bool NeedSoftKeyboard() override;
 
-    void SetOnWindowFocused(const std::function<void()>& callback) override
-    {
-        focusOnNodeCallback_ = callback;
-    }
+    void SetOnWindowFocused(const std::function<void()>& callback) override;
 
     const std::function<void()>& GetWindowFocusCallback() const
     {
@@ -789,8 +788,6 @@ public:
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
-    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-        uint32_t closeButtonRightMargin, int32_t isDarkMode) override;
     int32_t GetContainerModalTitleHeight();
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
@@ -833,6 +830,16 @@ public:
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
     {
         return formVisibleMgr_;
+    }
+
+    const RefPtr<FormEventManager>& GetFormEventManager() const
+    {
+        return formEventMgr_;
+    }
+
+    const RefPtr<FormGestureManager>& GetFormGestureManager() const
+    {
+        return formGestureMgr_;
     }
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
@@ -1007,6 +1014,10 @@ public:
     bool GetContainerCustomTitleVisible() override;
 
     bool GetContainerControlButtonVisible() override;
+
+    std::string GetBundleName();
+    std::string GetModuleName();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1028,6 +1039,7 @@ protected:
         const bool supportAvoidance = false, bool forceChange = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
+    void FlushDirtyPropertyNodesWhenExist();
 
     void SetIsLayouting(bool layouting)
     {
@@ -1252,9 +1264,12 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
+    int32_t lastMouseStyle_ = 0;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
+    RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
@@ -1281,6 +1296,7 @@ private:
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     
     friend class ScopedLayout;
+    friend class FormGestureManager;
 };
 
 /**

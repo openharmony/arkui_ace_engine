@@ -452,7 +452,6 @@ HWTEST_F(TextFieldPatternTestTwo, HandleCountStyle001, TestSize.Level0)
     layoutProperty->UpdateShowCounter(true);
     layoutProperty->UpdateMaxLength(1024);
     layoutProperty->UpdateShowUnderline(true);
-    pattern->CalcCounterBoundHeight();
     pattern->CalculateBoundsRect();
     pattern->deleteForwardOperations_.emplace(10);
     pattern->deleteBackwardOperations_.emplace(10);
@@ -794,7 +793,7 @@ HWTEST_F(TextFieldPatternTestTwo, OnDragDrop001, TestSize.Level0)
     auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     ASSERT_NE(unifiedData, nullptr);
     std::vector<uint8_t> arr;
-    auto spanString = AceType::MakeRefPtr<SpanString>("Test");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Test");
     spanString->EncodeTlv(arr);
     UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
     event->SetData(unifiedData);
@@ -999,7 +998,7 @@ HWTEST_F(TextFieldPatternTestTwo, AddCounterNode001, TestSize.Level0)
     ASSERT_NE(layoutProperty, nullptr);
 
     pattern_->AddCounterNode();
-    EXPECT_TRUE(pattern_->counterTextNode_.Upgrade());
+    EXPECT_TRUE(pattern_->counterDecorator_);
     pattern_->AddCounterNode();
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
@@ -1009,8 +1008,8 @@ HWTEST_F(TextFieldPatternTestTwo, AddCounterNode001, TestSize.Level0)
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     pattern_->AddCounterNode();
     pattern_->AddCounterNode();
-    pattern_->ClearCounterNode();
-    EXPECT_TRUE(frameNode_->GetChildren().empty());
+    pattern_->CleanCounterNode();
+    EXPECT_TRUE(frameNode_->GetChildren().size() <= 1);
 }
 
 /**

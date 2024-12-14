@@ -399,14 +399,15 @@ HWTEST_F(FormRenderTest, FormRenderTest007, TestSize.Level1)
  */
 HWTEST_F(FormRenderTest, FormRenderTest008, TestSize.Level1)
 {
-    int32_t top = 50;
-    int32_t left = 50;
-    auto fun = [](int32_t&, int32_t&) {};
+    AccessibilityParentRectInfo parentRectInfo;
+    parentRectInfo.top = 50;
+    parentRectInfo.left = 50;
+    auto fun = [](AccessibilityParentRectInfo&) {};
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     renderDelegate->SetGetRectRelativeToWindowHandler(nullptr);
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_INVALID_DATA);
     renderDelegate->SetGetRectRelativeToWindowHandler(fun);
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_OK);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_OK);
 }
 
 /**
@@ -578,12 +579,13 @@ HWTEST_F(FormRenderTest, FormRenderTest015, TestSize.Level1)
     EXPECT_TRUE(formRenderer);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    int32_t top = 0;
-    int32_t left = 0;
-    formRenderer->GetRectRelativeToWindow(top, left);
+    AccessibilityParentRectInfo parentRectInfo;
+    parentRectInfo.top = 0;
+    parentRectInfo.left = 0;
+    formRenderer->GetRectRelativeToWindow(parentRectInfo);
     formRenderer->formRendererDelegate_ = renderDelegate;
     EXPECT_TRUE(formRenderer->formRendererDelegate_);
-    formRenderer->GetRectRelativeToWindow(top, left);
+    formRenderer->GetRectRelativeToWindow(parentRectInfo);
 }
 
 /**

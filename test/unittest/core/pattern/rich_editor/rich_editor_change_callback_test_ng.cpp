@@ -12,7 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -20,6 +26,17 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 int32_t testOnSelect = 0;
+bool isOnWillChangeCalled = false;
+bool isOnDidChangeCalled = false;
+RichEditorChangeValue onWillChangeValue;
+RichEditorChangeValue onDidChangeValue;
+auto& onWillRangeBefore = onWillChangeValue.rangeBefore_;
+auto& onWillReplacedSpans = onWillChangeValue.replacedSpans_;
+auto& onWillReplacedImageSpans = onWillChangeValue.replacedImageSpans_;
+auto& onWillReplacedSymbolSpans = onWillChangeValue.replacedSymbolSpans_;
+auto& onDidRangeBefore = onDidChangeValue.rangeBefore_;
+auto& onDidRangeAfter = onDidChangeValue.rangeAfter_;
+RichEditorDeleteValue aboutToDeleteValue;
 } // namespace
 
 class RichEditorChangeCallbackTestNg : public RichEditorCommonTestNg {
@@ -1391,7 +1408,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
@@ -1446,7 +1463,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
     /**
      * @tc.steps: step3. add text span
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1589,7 +1606,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1679,7 +1696,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect003, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1990,7 +2007,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, CheckScrollable, TestSize.Level1)
     richEditorPattern->CheckScrollable();
     EXPECT_FALSE(richEditorPattern->scrollable_);
 
-    AddSpan(TEST_INSERT_VALUE);
+    AddSpan(TEST_INSERT_U16VALUE);
     richEditorPattern->CheckScrollable();
     EXPECT_TRUE(richEditorPattern->scrollable_);
 

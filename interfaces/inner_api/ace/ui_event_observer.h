@@ -16,12 +16,24 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 
 #include "macros.h"
 
 namespace OHOS::Ace {
+using OnInspectorTreeResult = std::function<void(const std::shared_ptr<std::string>)>;
+
+struct ACE_FORCE_EXPORT TreeParams {
+    bool isNewVersion = true;
+    bool isVisibleOnly = false;
+    bool isContentOnly = false;
+    bool enableWeb = false;
+    std::string webContentJs;
+    bool isWindowIdOnly = false;
+};
+
 class ACE_FORCE_EXPORT UIEventObserver {
 public:
     virtual ~UIEventObserver() = default;

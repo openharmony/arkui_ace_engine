@@ -203,6 +203,9 @@ void TimePickerColumnPattern::ParseTouchListener()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->OnTouchDown();
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
@@ -290,6 +293,9 @@ RefPtr<TouchEventImpl> TimePickerColumnPattern::CreateItemTouchEventListener()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto isToss = pattern->GetTossStatus();
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss == true) {
                 pattern->touchBreak_ = true;
@@ -871,7 +877,6 @@ void TimePickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
-        hapticController_->ClearVelocityInfo();
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetHost());

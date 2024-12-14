@@ -87,11 +87,12 @@ public:
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
     void CounterLayout(LayoutWrapper* layoutWrapper);
+    void ErrorLayout(LayoutWrapper* layoutWrapper);
+
     float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper);
+
     void UpdateCounterTextMargin(LayoutWrapper* layoutWrapper);
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
-    void UpdateCounterNode(uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize) override;
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
@@ -163,7 +164,6 @@ protected:
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
 private:
-    TextAlign GetCounterNodeAlignment(LayoutWrapper* layoutWrapper);
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
@@ -177,12 +177,6 @@ private:
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
     bool IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines);
-    void HandleCounterLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
-        const RefPtr<TextFieldPattern>& pattern);
-    void HandleNonTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
-        const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
-    void HandleTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
-        const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
     float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         float imageWidth);
     float CalculateContentHeight(const LayoutConstraintF& contentConstraint);

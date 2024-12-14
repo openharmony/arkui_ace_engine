@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -73,12 +74,13 @@ struct ParsedConfig {
     std::string mcc;
     std::string mnc;
     std::string preferredLanguage;
+    std::string fontId;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
-                 preferredLanguage.empty());
+                 preferredLanguage.empty() && fontId.empty());
     }
 };
 
@@ -273,6 +275,10 @@ public:
     {
         return resourceInfo_;
     }
+
+    std::shared_ptr<Framework::JsValue> GetJsContext();
+    void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
 
     void SetOrientation(Orientation orientation) override
     {
@@ -523,6 +529,8 @@ public:
     void BuildResConfig(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
+    void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(

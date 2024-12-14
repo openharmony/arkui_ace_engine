@@ -1012,7 +1012,8 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg019, TestSize.Level1)
     model.Create();
     auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menu, nullptr);
-    auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto container =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
     auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
     container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
     menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));

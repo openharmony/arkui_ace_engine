@@ -32,7 +32,7 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optiona
     if (UpdateFillStyle(color)) {
         OnGraphicFill();
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         UpdateStrokeGradient(layout);
         if (UpdateStrokeStyle()) {
             OnGraphicStroke();

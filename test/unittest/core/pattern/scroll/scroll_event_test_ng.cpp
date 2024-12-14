@@ -1234,7 +1234,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     auto dragDistance = viewPortLength * 0.5 - 1;
     auto dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
-    auto predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    auto predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(predictSnapOffset.value(), 0);
 
@@ -1244,7 +1244,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     dragDistance = viewPortLength * 0.5 * 5;
     dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD * 5;
-    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);
@@ -1255,7 +1255,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     dragDistance = viewPortLength * 0.5;
     dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
-    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);
@@ -1266,7 +1266,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     dragDistance = viewPortLength * 0.5 - 1;
     dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD;
-    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);

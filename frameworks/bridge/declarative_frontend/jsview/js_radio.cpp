@@ -240,9 +240,8 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSRadio::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (info[0]->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
         CommonCalcDimension commonCalcDimension;
@@ -266,9 +265,8 @@ NG::PaddingProperty JSRadio::GetPadding(const std::optional<CalcDimension>& top,
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (left.has_value() && left.value().IsNonNegative()) {
         padding.left = NG::CalcLength(left.value());
     }

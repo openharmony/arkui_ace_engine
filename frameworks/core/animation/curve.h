@@ -235,7 +235,7 @@ public:
     bool IsEqual(const RefPtr<Curve>& curve) const override
     {
         auto other = AceType::DynamicCast<StepsCurve>(curve);
-        if (other) {
+        if (!other) {
             return false;
         }
         return other->GetSteps() == steps_ && other->GetStepsCurvePosition() == position_;

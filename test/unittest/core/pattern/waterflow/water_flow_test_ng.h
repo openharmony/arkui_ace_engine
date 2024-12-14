@@ -23,6 +23,10 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 #undef private
 #undef protected
 
@@ -37,6 +41,36 @@ constexpr int32_t VIEW_LINE_NUMBER = 8;
 constexpr float ITEM_MAIN_SIZE = 100.f;
 constexpr float BIG_ITEM_MAIN_SIZE = ITEM_MAIN_SIZE * 2;
 
+class WaterFlowMockLazy : public Framework::MockLazyForEachBuilder {
+public:
+    WaterFlowMockLazy(int32_t itemCnt, std::function<float(int32_t)>&& getHeight)
+        : itemCnt_(itemCnt), getHeight_(getHeight)
+    {}
+
+    void SetTotalCount(int32_t totalCount)
+    {
+        itemCnt_ = totalCount;
+    }
+protected:
+    int32_t OnGetTotalCount() override
+    {
+        return itemCnt_;
+    }
+
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+    {
+        auto node = AceType::MakeRefPtr<WaterFlowItemNode>(
+            V2::FLOW_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<WaterFlowItemPattern>());
+        node->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(FILL_LENGTH), CalcLength(getHeight_(index))));
+        return { std::to_string(index), node };
+    }
+private:
+    int32_t itemCnt_ = 0;
+    const std::function<float(int32_t)> getHeight_;
+};
+
 class WaterFlowTestNg : public TestNG {
 protected:
     static void SetUpTestSuite();
@@ -47,7 +81,7 @@ protected:
 
     WaterFlowModelNG CreateWaterFlow();
     void CreateItemsInRepeat(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
-    void CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(int32_t)>&& getHeight);
+    RefPtr<WaterFlowMockLazy> CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(int32_t)>&& getHeight);
     void CreateWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     WaterFlowItemModelNG CreateWaterFlowItem(float mainSize);
     void CreateFocusableWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
@@ -63,6 +97,8 @@ protected:
     void HandleDrag(float offset);
     RectF GetLazyChildRect(int32_t itemIndex);
     RefPtr<FrameNode> GetItem(int32_t index, bool isCache = false);
+    void AddItemInLazyForEach(int32_t index);
+    void DeleteItemInLazyForEach(int32_t index);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;

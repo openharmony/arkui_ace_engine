@@ -111,8 +111,9 @@ void PanRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s",
-        node ? node->GetTag().c_str() : "null");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "Pan accepted, tag = %{public}s, averageDistance is x %{public}f, y %{public}f",
+        node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
     // only report the pan gesture starting for touch event
@@ -514,7 +515,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
@@ -700,7 +701,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     NGGestureRecognizer::Transform(
         localPoint, GetAttachedNode(), false, isPostEventResult_, touchPoint.postEventNodeId);
     info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
-    info.SetPointerId(touchPoint.id);
+    info.SetPointerId(inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.id : lastTouchEvent_.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
     info.SetIsInterpolated(touchPoint.isInterpolated);
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);

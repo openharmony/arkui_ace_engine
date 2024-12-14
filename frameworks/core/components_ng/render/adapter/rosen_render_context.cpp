@@ -675,9 +675,6 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 
 void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnForegroundColorUpdate(value);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();
@@ -3492,6 +3489,8 @@ void RosenRenderContext::RecalculatePosition()
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
 {
     CHECK_NULL_VOID(rsNode_);
+    // When zindex is combined with transform/rotate, zindex has the action of controlling camera height
+    rsNode_->SetPositionZApplicableCamera3D(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN));
     rsNode_->SetPositionZ(static_cast<float>(value));
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
@@ -4919,6 +4918,12 @@ void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetFrameGravity(gravity);
+}
+
+void RosenRenderContext::SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUIFirstSwitch(uiFirstSwitch);
 }
 
 int32_t RosenRenderContext::CalcExpectedFrameRate(const std::string& scene, float speed)

@@ -23,6 +23,7 @@
 #define private public
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -41,6 +42,8 @@ constexpr int32_t TEST_DATA = 10;
 constexpr int32_t STANDARD_INDEX = -1;
 const std::string NAVIGATION_TITLE = "NavigationTestNg";
 const std::string TEST_TAG = "test";
+constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 } // namespace
 
 class NavigationLayoutTestNg : public testing::Test {
@@ -1663,6 +1666,103 @@ HWTEST_F(NavigationLayoutTestNg, NavigationAvoidKeyboardTest, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
     float offsetTwo = navDestinationPattern->GetAvoidKeyboardOffset();
     EXPECT_EQ(offsetTwo, offTwo);
+}
+
+/**
+ * @tc.name: NavigationSize001
+ * @tc.desc: Test GetNavigationSize & SetNavigationSize of NavigationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, NavigationSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavigationNode & NavigationPattern.
+     * @tc.expected: step1. NavigationPattern has default size.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto size = navigationPattern->GetNavigationSize();
+    ASSERT_EQ(size, SizeF());
+
+    /**
+     * @tc.steps: step2. Set Navigation size.
+     * @tc.expected: step2. Success to set navigation size.
+     */
+    const SizeF TEST_SIZE = SizeF(200.0f, 300.0f);
+    navigationPattern->SetNavigationSize(TEST_SIZE);
+    size = navigationPattern->GetNavigationSize();
+    ASSERT_EQ(size, TEST_SIZE);
+
+    /**
+     * @tc.steps: step3. Measure NavigationNode.
+     * @tc.expected: step3. NavigationSize of NavigationPattern will be update after measure.
+     */
+    auto layoutWrapper = navigation->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    const SizeF ROOT_SIZE = SizeF(DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT);
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    layoutWrapper->Measure(LayoutConstraint);
+    size = navigationPattern->GetNavigationSize();
+    ASSERT_EQ(size, ROOT_SIZE);
+}
+
+/**
+ * @tc.name: NeedForceMeasure001
+ * @tc.desc: Test ForceMeasure logic of NavDestination when NavigationContent measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, NeedForceMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavigationContentNode & NavDestinationNode.
+     * @tc.expected: step1. NavDestination's needForceMeasure flag has default value: false.
+     */
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+    ASSERT_NE(contentNode, nullptr);
+    auto navDestNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestNode, nullptr);
+    ASSERT_FALSE(navDestNode->NeedForceMeasure());
+
+    /**
+     * @tc.steps: step2. Set NavDestination need force measure.
+     * @tc.expected: step2. Flag will be update.
+     */
+    navDestNode->SetNeedForceMeasure(true);
+    ASSERT_TRUE(navDestNode->NeedForceMeasure());
+
+    /**
+     * @tc.steps: step3. Add NavDestination to NavigationContentNode and measure NavigationContentNode.
+     * @tc.expected: step3. ForceMeasure flag of NavDestiantion will be reset to false.
+     */
+    auto destLayoutProperty = navDestNode->GetLayoutProperty();
+    ASSERT_NE(destLayoutProperty, nullptr);
+    destLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    contentNode->AddChild(navDestNode);
+    auto layoutWrapper = contentNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    layoutWrapper->Measure(LayoutConstraint);
+    ASSERT_FALSE(navDestNode->NeedForceMeasure());
 }
 } // namespace OHOS::Ace::NG
 

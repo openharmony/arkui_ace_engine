@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -1102,7 +1103,7 @@ void HtmlToSpan::AddImageSpans(const SpanInfo& info, RefPtr<MutableSpanString> m
 RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     const std::string& allContent, const std::vector<SpanInfo>& spanInfos)
 {
-    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(allContent);
+    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(UtfUtils::Str8ToStr16(allContent));
     RefPtr<MutableSpanString> span;
     for (auto& info : spanInfos) {
         if (info.type == HtmlType::PARAGRAPH) {

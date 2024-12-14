@@ -101,7 +101,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
     auto mostMenuItemCount = GetOrInitMaxMenuNums(theme, navDestinationNodeBase);
-    bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
+    bool needMoreButton = menuItems.size() > mostMenuItemCount;
 
     int32_t count = 0;
     std::vector<OptionParam> params;

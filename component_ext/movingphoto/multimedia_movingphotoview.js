@@ -16,9 +16,19 @@
 const __MovingPhotoView__ = requireInternal("multimedia.movingphotoview");
 var PixelMapFormat;
 (function (PixelMapFormat) {
-    PixelMapFormat[PixelMapFormat["RGBA_8888"] = 0] = "RGBA_8888";
-    PixelMapFormat[PixelMapFormat["NV21"] = 1] = "NV21";
+    PixelMapFormat[PixelMapFormat["UNKNOWN"] = 0] = "UNKNOWN";
+    PixelMapFormat[PixelMapFormat["RGBA_8888"] = 1] = "RGBA_8888";
+    PixelMapFormat[PixelMapFormat["NV21"] = 2] = "NV21";
+    PixelMapFormat[PixelMapFormat["RGBA_1010102"] = 3] = "RGBA_1010102";
+    PixelMapFormat[PixelMapFormat["YCBCR_P010"] = 4] = "YCBCR_P010";
+    PixelMapFormat[PixelMapFormat["YCRCB_P010"] = 5] = "YCRCB_P010";
 })(PixelMapFormat || (PixelMapFormat = {}));
+var DynamicRangeMode;
+(function (DynamicRangeMode) {
+    DynamicRangeMode[DynamicRangeMode["HIGH"] = 0] = "HIGH";
+    DynamicRangeMode[DynamicRangeMode["CONSTRAINT"] = 1] = "CONSTRAINT";
+    DynamicRangeMode[DynamicRangeMode["STANDARD"] = 2] = "STANDARD";
+})(DynamicRangeMode || (DynamicRangeMode = {}));
 
 class MovingPhotoView extends JSViewAbstract {
     static create(value) {
@@ -110,4 +120,5 @@ export default {
     MovingPhotoView,
     MovingPhotoViewController: __MovingPhotoView__.MovingPhotoViewController,
     PixelMapFormat,
+    DynamicRangeMode,
 };

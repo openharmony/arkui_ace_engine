@@ -1023,6 +1023,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
     }
     ResizeWindow();
     ShowWindow();
@@ -1056,6 +1057,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
     }
     ResizeWindow();
     ShowWindow();
@@ -1101,6 +1103,7 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlay);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
             parentContainerId_, GetSubwindowId());
     }

@@ -82,19 +82,33 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         return false;
     }
 
-    auto visibleContentRect = GetVisibleContentRect();
-    GetClipHandleViewPort(visibleContentRect);
-    if (visibleContentRect.IsEmpty()) {
+    auto visibleRect = GetVisibleRect();
+    CalculateClippedRect(visibleRect);
+    if (visibleRect.IsEmpty()) {
         return false;
     }
     auto paintLeft = paintRect.Left() + paintRect.Width() / 2.0f;
     PointF bottomPoint = { paintLeft, paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
-    visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
-    visibleContentRect.SetWidth(visibleContentRect.Width() + DOUBLE * BOX_EPSILON);
-    visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
-    visibleContentRect.SetHeight(visibleContentRect.Height() + DOUBLE * BOX_EPSILON);
-    return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
+    visibleRect.SetLeft(visibleRect.GetX() - BOX_EPSILON);
+    visibleRect.SetWidth(visibleRect.Width() + DOUBLE * BOX_EPSILON);
+    visibleRect.SetTop(visibleRect.GetY() - BOX_EPSILON);
+    visibleRect.SetHeight(visibleRect.Height() + DOUBLE * BOX_EPSILON);
+    return visibleRect.IsInRegion(bottomPoint) && visibleRect.IsInRegion(topPoint);
+}
+
+RectF RichEditorSelectOverlay::GetVisibleRect()
+{
+    RectF visibleRect;
+    auto pattern = GetPattern<Pattern>();
+    CHECK_NULL_RETURN(pattern, visibleRect);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, visibleRect);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, visibleRect);
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    auto paintOffset = host->GetPaintRectWithTransform().GetOffset();
+    return RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
 }
 
 void RichEditorSelectOverlay::OnResetTextSelection()

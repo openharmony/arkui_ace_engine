@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_TEST_CORE_PATTERN_LIST_LIST_NESTED_TEST_NG_H
-#define FOUNDATION_ACE_TEST_CORE_PATTERN_LIST_LIST_NESTED_TEST_NG_H
+#ifndef FOUNDATION_ACE_TEST_CORE_PATTERN_SCROLLABLE_SCROLLABLE_NESTED_TEST_NG_H
+#define FOUNDATION_ACE_TEST_CORE_PATTERN_SCROLLABLE_SCROLLABLE_NESTED_TEST_NG_H
 
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class ListNestedTestNg : public TestNG {
+class ScrollableNestedTestNg : public TestNG {
 public:
     void SetUp() override;
     void TearDown() override;

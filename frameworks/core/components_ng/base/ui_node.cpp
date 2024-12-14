@@ -1424,6 +1424,9 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index, i
         // mark child as disappearing before adding to disappearingChildren_
         child->isDisappearing_ = true;
     }
+    if (DetectLoop(child, Claim(this))) {
+        return;
+    }
     disappearingChildren_.emplace_back(child, index, branchId);
 }
 

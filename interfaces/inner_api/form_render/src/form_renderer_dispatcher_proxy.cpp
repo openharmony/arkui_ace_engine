@@ -15,7 +15,7 @@
 #include "form_renderer_dispatcher_proxy.h"
 
 #include "form_renderer_hilog.h"
-
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace Ace {

@@ -19,10 +19,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-    constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 8.0_vp;
-    constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
-} // namespace
 
 std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -137,118 +133,6 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
-void PrepareErrorTextNode(LayoutWrapper* layoutWrapper)
-{
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto textNode = pattern->GetErrorNode();
-    CHECK_NULL_VOID(textNode);
-    auto theme = pattern->GetTheme();
-    CHECK_NULL_VOID(theme);
-    auto textNodeLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
-    CHECK_NULL_VOID(textNodeLayoutProperty);
-
-    TextStyle errorTextStyle = theme->GetErrorTextStyle(); // update content
-    auto errorText = pattern->GetErrorTextString();
-    StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
-    textNodeLayoutProperty->UpdateContent(errorText);
-}
-
-// calculate width constraint according to width of Counter and TextInput
-void BeforeErrorLayout(LayoutWrapper* layoutWrapper)
-{
-    PrepareErrorTextNode(layoutWrapper);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto textNode = pattern->GetErrorNode();
-    CHECK_NULL_VOID(textNode);
-    RectF textFieldFrameRect = geometryNode->GetFrameRect(); // calculate layoutWidth
-    auto errorValue = pattern->GetErrorTextString();
-    if (pattern->IsShowError() && !pattern->IsDisabled() && !errorValue.empty()) {
-        float padding = 0.0f;
-        auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-        if (textFieldLayoutProperty && textFieldLayoutProperty->GetPaddingProperty()) {
-            const auto& paddingProperty = textFieldLayoutProperty->GetPaddingProperty();
-            padding = paddingProperty->left.value_or(CalcLength(0.0f)).GetDimension().ConvertToPx() +
-                paddingProperty->right.value_or(CalcLength(0.0f)).GetDimension().ConvertToPx();
-        }
-        float layoutWidth = textFieldFrameRect.Width() - padding; // subtract border width
-        auto localBorder = pattern->GetBorderWidthProperty();
-        float borderWidth = pattern->GetBorderLeft(localBorder) + pattern->GetBorderRight(localBorder);
-        borderWidth = std::max(borderWidth, 0.0f);
-        layoutWidth -= borderWidth;
-        auto counterDecoratorWrapper = pattern->GetCounterNode().Upgrade();
-        if (pattern->IsShowCount() && counterDecoratorWrapper) {
-            auto counterDecorator = counterDecoratorWrapper->GetHostNode();
-            if (counterDecorator) { // subtract counter length
-                float counterWidth = pattern->CalcDecoratorWidth(counterDecorator);
-                layoutWidth -= counterWidth;
-            }
-        }
-        LayoutConstraintF invisibleConstraint;
-        invisibleConstraint.UpdateMaxSizeWithCheck({0.0f, 0.0f});
-        if (LessOrEqual(layoutWidth, 0.0f)) {
-            textNode->Measure(invisibleConstraint);
-            return;
-        }
-        LayoutConstraintF textContentConstraint;
-        textContentConstraint.UpdateMaxSizeWithCheck({layoutWidth, Infinity<float>()});
-        auto textNodeLayoutWrapper = host->GetOrCreateChildByIndex(host->GetChildIndex(textNode));
-        if (textNodeLayoutWrapper) {
-            textNode->Measure(textContentConstraint);
-            if (GreatNotEqual(pattern->CalcDecoratorWidth(textNode), layoutWidth)) {
-                textNode->Measure(invisibleConstraint);
-            }
-        }
-    }
-}
-
-void ErrorLayout(LayoutWrapper* layoutWrapper)
-{
-    BeforeErrorLayout(layoutWrapper);
-    auto decoratedNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(decoratedNode);
-    RefPtr<TextFieldPattern> textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto textFieldLayoutProperty = decoratedNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textFieldGeometryNode = decoratedNode->GetGeometryNode();
-    CHECK_NULL_VOID(textFieldGeometryNode);
-    auto textNode = textFieldPattern->GetErrorNode();
-    CHECK_NULL_VOID(textNode);
-    auto textGeometryNode = textNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeometryNode);
-
-    float errorMargin = 0.0f;
-    if (textFieldLayoutProperty->GetShowUnderlineValue(false) && textFieldPattern->IsShowError()) {
-        errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
-    } else if (textFieldPattern->NeedShowPasswordIcon() && textFieldPattern->IsShowError()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
-    } else if (textFieldPattern->IsShowError()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
-    } else {
-        errorMargin = 0;
-    }
-
-    auto textFrameRect = textFieldGeometryNode->GetFrameRect();
-    auto offset = textFieldGeometryNode->GetContentOffset();
-    auto isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto offSetX = offset.GetX();
-    if (isRTL) {
-        auto textFieldContentRect = textFieldGeometryNode->GetContentRect();
-        offSetX += textFieldContentRect.Width() - textGeometryNode->GetFrameRect().Width();
-    }
-
-    textGeometryNode->SetFrameOffset(OffsetF(offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin));
-    textNode->Layout();
-}
-
 void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
@@ -317,7 +201,7 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
     }
     if (pattern->IsShowError()) {
-        ErrorLayout(layoutWrapper);
+        TextFieldLayoutAlgorithm::ErrorLayout(layoutWrapper);
     }
 }
 

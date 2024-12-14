@@ -87,6 +87,7 @@ private:
     static constexpr uint32_t INDEX_ONE = 1;
     static constexpr uint32_t INDEX_TWO = 2;
     static constexpr uint32_t INDEX_THREE = 3;
+    static constexpr uint32_t HEADER_TEXT_MAX_LINE = 2;
     static constexpr char SUN_MENU_TAG[33] = "SelectOverlayMenuByRightClickSub";
 };
 
@@ -127,6 +128,7 @@ public:
     std::shared_ptr<SelectOverlayInfo> info_;
     std::string ability_;
     bool endIconIsHover_ = false;
+    bool isMultiImage_ = false;
 
 private:
     static constexpr int32_t TEXT_MAX_WIDTH = 500;

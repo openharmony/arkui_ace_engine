@@ -93,7 +93,7 @@ Rect TextFieldController::GetTextContentRect()
         if (textFieldPattern->IsTextArea()) {
             textFieldPattern->UpdateRectByTextAlign(rect);
         }
-        if (textFieldPattern->IsOperation()) {
+        if (textFieldPattern->HasText()) {
             return { rect.GetX(), rect.GetY(), rect.Width(), rect.Height() };
         }
         auto controller = textFieldPattern->GetTextSelectController();
@@ -107,7 +107,7 @@ int32_t TextFieldController::GetTextContentLinesNum()
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     int32_t lines = 0;
     if (textFieldPattern) {
-        if (!textFieldPattern->IsOperation()) {
+        if (!textFieldPattern->HasText()) {
             return lines;
         }
         lines = static_cast<int32_t>(textFieldPattern->GetLineCount());

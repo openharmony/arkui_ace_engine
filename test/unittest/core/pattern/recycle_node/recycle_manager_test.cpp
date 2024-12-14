@@ -122,6 +122,50 @@ HWTEST_F(RecycleManagerTest, RecyclePopTest001, TestSize.Level1)
     Clear();
 }
 
+HWTEST_F(RecycleManagerTest, RecycleEraseTest001, TestSize.Level1)
+{
+    auto child1 = AceType::MakeRefPtr<CustomNode>(GenerateId(), "test");
+    auto child2 = AceType::MakeRefPtr<CustomNode>(GenerateId(), "test");
+    auto context = PipelineContext::GetCurrentContext();
+    int32_t invalidId = -1000;
+    
+    //push node
+    RecycleManager::Push(child1->GetId(), child1);
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 1);
+    RecycleManager::Push(child2->GetId(), child2);
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 2);
+
+    // erase invalid node;
+    RecycleManager::Erase(invalidId);
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 2);
+
+    // pop node
+    RecycleManager::Pop(child1->GetId());
+    RecycleManager::Pop(child2->GetId());
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 0);
+    Clear();
+}
+
+HWTEST_F(RecycleManagerTest, RecycleEraseTest002, TestSize.Level1)
+{
+    auto child1 = AceType::MakeRefPtr<CustomNode>(GenerateId(), "test");
+    auto child2 = AceType::MakeRefPtr<CustomNode>(GenerateId(), "test");
+    auto context = PipelineContext::GetCurrentContext();
+    
+    //push node
+    RecycleManager::Push(child1->GetId(), child1);
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 1);
+    RecycleManager::Push(child2->GetId(), child2);
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 2);
+
+    // erase valid node;
+    RecycleManager::Erase(child1->GetId());
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 1);
+    RecycleManager::Erase(child2->GetId());
+    ASSERT_EQ(context->GetRecycleManager()->recyclePool_.size(), 0);
+    Clear();
+}
+
 HWTEST_F(RecycleManagerTest, RecycleConfigTest001, TestSize.Level1)
 {
     auto child1 = AceType::MakeRefPtr<CustomNode>(GenerateId(), "test");
