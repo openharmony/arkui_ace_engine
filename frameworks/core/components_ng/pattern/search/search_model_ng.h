@@ -81,6 +81,7 @@ public:
     void SetType(TextInputType value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetHalfLeading(bool value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetTextDecoration(Ace::TextDecoration value) override;
@@ -137,6 +138,7 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetOnSubmit(FrameNode* frameNode,

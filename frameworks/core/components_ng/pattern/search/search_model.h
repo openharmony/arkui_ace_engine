@@ -78,6 +78,7 @@ public:
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetHalfLeading(bool value) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
     virtual void SetAdaptMaxFontSize(const Dimension& value) {};
     virtual void SetTextDecoration(Ace::TextDecoration value) {};

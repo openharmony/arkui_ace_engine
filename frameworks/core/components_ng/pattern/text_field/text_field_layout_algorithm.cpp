@@ -1228,7 +1228,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     }
     if (layoutProperty->HasLineHeight()) {
         textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
-        textStyle.SetHalfLeading(pipeline->GetHalfLeading());
+    }
+    if (layoutProperty->HasHalfLeading()) {
+        textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
     }
     if (layoutProperty->HasFontFeature()) {
         textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
@@ -1259,7 +1261,9 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     }
     if (layoutProperty->HasLineHeight()) {
         placeholderTextStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
-        placeholderTextStyle.SetHalfLeading(pipeline->GetHalfLeading());
+    }
+    if (layoutProperty->HasHalfLeading()) {
+        placeholderTextStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
     }
     placeholderTextStyle.SetLineSpacing(theme->GetPlaceholderLineSpacing());
 }

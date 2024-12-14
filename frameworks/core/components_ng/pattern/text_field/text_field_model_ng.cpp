@@ -905,6 +905,11 @@ void TextFieldModelNG::SetLineHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
 }
 
+void TextFieldModelNG::SetHalfLeading(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value);
+}
+
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value);
@@ -1698,6 +1703,11 @@ void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& v
 void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
+}
+
+void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
 }
 
 void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)

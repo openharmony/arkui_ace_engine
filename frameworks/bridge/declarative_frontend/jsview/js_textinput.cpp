@@ -120,6 +120,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
     JSClass<JSTextInput>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextInput>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
+    JSClass<JSTextInput>::StaticMethod("halfLeading", &JSTextField::SetHalfLeading);
     JSClass<JSTextInput>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
     JSClass<JSTextInput>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
     JSClass<JSTextInput>::StaticMethod("showPassword", &JSTextField::ShowPasswordText);
