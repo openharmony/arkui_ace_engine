@@ -119,6 +119,8 @@ public:
             theme->enableDirectionalKeyFocus_ = pattern->GetAttr<int>("menu_focus_directional_key_enable", 0);
             theme->menuShadowStyle_ = static_cast<ShadowStyle>(
                 pattern->GetAttr<int>("menu_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->menuBackGroundBlurStyle_ =
+                pattern->GetAttr<int>("menu_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
         }
     };
 
@@ -339,6 +341,11 @@ public:
         return menuShadowStyle_;
     }
 
+    int GetMenuBackgroundBlurStyle() const
+    {
+        return menuBackGroundBlurStyle_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -386,6 +393,7 @@ private:
     bool hasBackBlur_ = true;
     bool enableDirectionalKeyFocus_ = false;
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace::NG

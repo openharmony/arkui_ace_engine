@@ -48,6 +48,7 @@ constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_DAY_COLOR = Color(0xff555e6b);
 constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR = Color(0xff555e6b);
 constexpr Color DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR = Color(0xff5ea1ff);
 constexpr Color DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR = Color(0xffffffff);
+constexpr int DEFAULT_CALENDAR_PICKER_DIALOG_BLUR_STYLE = 12;
 } // namespace
 
 struct CalendarThemeStructure {
@@ -347,6 +348,8 @@ public:
                 "calendar_day_key_focused_pen_width", 0.0_vp);
             theme->entryFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_entry_font_size", 0.0_fp);
             theme->dialogBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_border_radius", 0.0_vp);
+            theme->calendarPickerDialogBlurStyle_ = pattern->GetAttr<int>(
+                "calendar_picker_dialog_background_blur_style", DEFAULT_CALENDAR_PICKER_DIALOG_BLUR_STYLE);
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
@@ -794,6 +797,11 @@ public:
     {
         return calendarPickerLargerScale_;
     }
+
+    const int& GetCalendarPickerDialogBlurStyle() const
+    {
+        return calendarPickerDialogBlurStyle_;
+    }
 protected:
     CalendarTheme() = default;
 
@@ -858,6 +866,7 @@ private:
     bool isDividerTransparent_ = false;
     double calendarPickerLargeScale_ = 0.0;
     double calendarPickerLargerScale_ = 0.0;
+    int calendarPickerDialogBlurStyle_ = DEFAULT_CALENDAR_PICKER_DIALOG_BLUR_STYLE;
 };
 
 } // namespace OHOS::Ace

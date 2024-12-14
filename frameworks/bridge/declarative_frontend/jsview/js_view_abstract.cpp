@@ -1124,6 +1124,13 @@ void ParsePopupCommonParam(
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
         }
+    } else {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<PopupTheme>();
+        CHECK_NULL_VOID(theme);
+        auto blurStyle = static_cast<BlurStyle>(theme->GetPopupBackgroundBlurStyle());
+        popupParam->SetBlurStyle(blurStyle);
     }
 
     auto popupTransition = popupObj->GetProperty("transition");
