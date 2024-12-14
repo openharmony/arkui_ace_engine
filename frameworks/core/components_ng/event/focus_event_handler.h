@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HANDLER_H
 
 #include "focus_state.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
 namespace OHOS::Ace::NG {
@@ -79,6 +80,7 @@ public:
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
     OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
+    OnFocusAxisEventFunc onFocusAxisEventCallback_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
     bool isDefaultFocus_ = { false };
@@ -123,6 +125,7 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnKeyCallback, OnKeyConsumeFunc, onKeyEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnKeyPreIme, OnKeyConsumeFunc, onKeyPreImeCallback)
     ACE_DEFINE_FOCUS_EVENT(OnClickCallback, GestureEventFunc, onClickEventCallback)
+    ACE_DEFINE_FOCUS_EVENT(OnFocusAxisCallback, OnFocusAxisEventFunc, onFocusAxisEventCallback)
 
     std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
     bool forceProcessOnKeyEventInternal_ { false }; // extension use only
@@ -137,6 +140,7 @@ private:
     bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool ProcessOnKeyEventInternal(const KeyEvent& event);
+    bool HandleFocusAxisEvent(const FocusAxisEvent& event);
 
     void PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback);
 };

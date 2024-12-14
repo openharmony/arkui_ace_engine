@@ -568,6 +568,7 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
+        .hoverEffect(HoverEffect.None)
         // 间距可修改
         .margin({ right: this.buttonSpacing + 'vp' })
         .responseRegion({
@@ -659,7 +660,6 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        .hoverEffect(HoverEffect.None)
         //右间距在父组件中体现
         // .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
         .responseRegion({

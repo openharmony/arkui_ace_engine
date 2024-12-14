@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -195,6 +196,28 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange002, TestSize.Level1)
     HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
     EXPECT_TRUE(isTrigger);
+}
+
+/**
+ * @tc.name: OnContentWillChange003
+ * @tc.desc: test onContentWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnContentWillChange003, TestSize.Level1)
+{
+    auto callback = [](int32_t currentIndex, int32_t comingIndex) -> bool { return true; };
+    TabsModelNG model = CreateTabs();
+    model.SetOnContentWillChange(std::move(callback));
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    EXPECT_TRUE(pattern_->GetInterceptStatus());
+
+    auto ret = pattern_->OnContentWillChange(CURRENT_INDEX, BEGIN_INDEX);
+    EXPECT_TRUE(ret.value());
+    EXPECT_TRUE(swiperPattern_->ContentWillChange(BEGIN_INDEX));
+    EXPECT_TRUE(swiperPattern_->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX));
+    EXPECT_TRUE(tabBarPattern_->ContentWillChange(BEGIN_INDEX));
+    EXPECT_TRUE(tabBarPattern_->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX));
 }
 
 /**
@@ -616,33 +639,11 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOnContentWillChangeTest001
- * @tc.desc: test onContentWillChange
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest001, TestSize.Level1)
-{
-    auto callback = [](int32_t currentIndex, int32_t comingIndex) -> bool { return true; };
-    TabsModelNG model = CreateTabs();
-    model.SetOnContentWillChange(std::move(callback));
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_TRUE(pattern_->GetInterceptStatus());
-
-    auto ret = pattern_->OnContentWillChange(CURRENT_INDEX, BEGIN_INDEX);
-    EXPECT_TRUE(ret.value());
-    EXPECT_TRUE(swiperPattern_->ContentWillChange(BEGIN_INDEX));
-    EXPECT_TRUE(swiperPattern_->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX));
-    EXPECT_TRUE(tabBarPattern_->ContentWillChange(BEGIN_INDEX));
-    EXPECT_TRUE(tabBarPattern_->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX));
-}
-
-/**
- * @tc.name: SetOnContentWillChangeTest002
+ * @tc.name: OnWillShowAndOnWillHideTest001
  * @tc.desc: test OnWillShow and OnWillHide
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest002, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: steps1. Create parent node
@@ -702,11 +703,11 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOnContentWillChangeTest003
+ * @tc.name: OnWillShowAndOnWillHideTest002
  * @tc.desc: test OnWillShow and OnWillHide
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest003, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: steps1. Create parent node
@@ -762,11 +763,11 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOnContentWillChangeTest004
+ * @tc.name: OnWillShowAndOnWillHideTest003
  * @tc.desc: test OnWillShow and OnWillHide
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest004, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: steps2. Create parentNode
@@ -818,11 +819,11 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOnContentWillChangeTest005
+ * @tc.name: OnWillShowAndOnWillHideTest004
  * @tc.desc: test the middle tabcontents does not trigger OnWillShow and OnWillHide
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest005, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: steps2. Create parentNode
@@ -861,6 +862,103 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest005, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushUITasks();
     EXPECT_EQ(isShow, 9);
+}
+
+/**
+ * @tc.name: OnWillShowAndOnWillHideTest005
+ * @tc.desc: test OnWillShow and OnWillHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabs
+     */
+    TabsModelNG model = CreateTabs();
+    auto isShowCount = 0;
+    auto isHideCount = 0;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        TabContentModelNG tabContentModel = CreateTabContent();
+        std::function<void()> showEvent = [&isShowCount]() { isShowCount++; };
+        std::function<void()> hideEvent = [&isHideCount]() { isHideCount++; };
+        tabContentModel.SetOnWillShow(std::move(showEvent));
+        tabContentModel.SetOnWillHide(std::move(hideEvent));
+        tabContentModel.Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. first display.
+     * @tc.expected: isShowCount and isHideCount equal to 0.
+     */
+    EXPECT_EQ(isShowCount, 0);
+    EXPECT_EQ(isHideCount, 0);
+
+    /**
+     * @tc.steps: step3. SwipeTo 2.
+     * @tc.expected: isShowCount and isHideCount equal to 1.
+     */
+    swiperController_->SwipeTo(2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
+    FlushUITasks();
+    EXPECT_EQ(isShowCount, 1);
+    EXPECT_EQ(isHideCount, 1);
+
+    /**
+     * @tc.steps: step4. SwipeToWithoutAnimation 3.
+     * @tc.expected: isShowCount and isHideCount equal to 2.
+     */
+    swiperController_->SwipeToWithoutAnimation(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
+    FlushUITasks();
+    EXPECT_EQ(isShowCount, 2);
+    EXPECT_EQ(isHideCount, 2);
+}
+
+/**
+ * @tc.name: OnAppearAndOnDisappearTest001
+ * @tc.desc: test OnAppear and OnDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabs
+     */
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    CreateTabsDone(model);
+
+    auto isOnAppear = false;
+    auto isOnDisappear = false;
+    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
+    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
+    eventHub->SetOnAppear(std::move(appearEvent));
+    eventHub->SetOnDisappear(std::move(disappearEvent));
+    auto pipeline = frameNode_->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    EXPECT_FALSE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step2. trigger OnAttachToMainTree.
+     * @tc.expected: isOnAppear is true.
+     */
+    tabContentFrameNode->OnAttachToMainTree(true);
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step3. trigger OnDetachFromMainTree.
+     * @tc.expected: isOnDisappear is true.
+     */
+    tabContentFrameNode->OnDetachFromMainTree(true, pipeline);
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_TRUE(isOnDisappear);
 }
 
 /**

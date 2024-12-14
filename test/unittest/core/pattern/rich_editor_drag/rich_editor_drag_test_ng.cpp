@@ -15,14 +15,17 @@
 
 #include "rich_editor_drag_test_ng.h"
 
-#include "frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
+#include "gtest/gtest.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"
+#include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
 
 #define private public
 #define protected public
@@ -112,12 +115,12 @@ void RichEditorDragTestNG::AddImageSpan()
     imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
     imageNode->MountToParent(frameNode_, frameNode_->children_.size());
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->placeholderIndex = 0;
     pattern_->spans_.emplace_back(spanItem);
     int32_t spanTextLength = 0;
     for (auto& span : pattern_->spans_) {
-        spanTextLength += StringUtils::ToWstring(span->content).length();
+        spanTextLength += span->content.length();
         span->position = spanTextLength;
     }
 }
@@ -141,9 +144,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragTestNG001, TestSize.Level1)
     /**
      * @tc.steps: step1. Init FolderStack node with Aniamtion/AutoHalfFold props false, itemId not null.
      */
-    CreateRichEditor([](RichEditorModelNG model) {
-        model.SetTextDetectEnable(true);
-    });
+    CreateRichEditor([](RichEditorModelNG model) { model.SetTextDetectEnable(true); });
     EXPECT_TRUE(true);
 }
 
@@ -259,8 +260,8 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG003, TestSize.
     ASSERT_NE(richEditorDragPattern, nullptr);
     richEditorDragPattern->CreateNodePaintMethod();
     ASSERT_NE(richEditorDragPattern->overlayModifier_, nullptr);
-    auto richEditorDragOverlayModifier = AceType::DynamicCast<RichEditorDragOverlayModifier>(
-        richEditorDragPattern->overlayModifier_);
+    auto richEditorDragOverlayModifier =
+        AceType::DynamicCast<RichEditorDragOverlayModifier>(richEditorDragPattern->overlayModifier_);
     ASSERT_NE(richEditorDragOverlayModifier, nullptr);
 
     Testing::MockCanvas rsCanvas;
@@ -272,8 +273,8 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG003, TestSize.
     DrawingContext context { rsCanvas, 50.0f, 50.0f };
     OffsetF Offset = { 1.0f, 1.0f };
 
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2,
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imageNode, nullptr);
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
@@ -334,5 +335,130 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG004, TestSize.
     ASSERT_NE(dragOverlayModifier2, nullptr);
     dragOverlayModifier2->StartFloatingAnimate();
     EXPECT_EQ(dragOverlayModifier2->type_, DragAnimType::FLOATING);
+}
+
+/**
+ * @tc.name: CreateDragNode001
+ * @tc.desc: test CreateDragNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNode001, TestSize.Level1)
+{
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode, nullptr);
+    RichEditorDragInfo info;
+    auto textPattern = richEditorNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto newFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto newAddFrameNodeOne = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto newAddFrameNodeTwo = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    imageChildren.push_back(newFrameNode);
+    imageChildren.push_back(newAddFrameNodeOne);
+    imageChildren.push_back(newAddFrameNodeTwo);
+    textPattern->placeholderIndex_ = { 1, 2, 3, 4 };
+    textPattern->rectsForPlaceholders_ = { RectF(0.0f, 0.0f, 100.0f, 100.0f) };
+    RichEditorDragPattern::CreateDragNode(richEditorNode, imageChildren, info);
+    auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, imageChildren, info);
+    auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    EXPECT_EQ(richEditorDragPattern->rectsForPlaceholders_.size(), 0);
+}
+
+/**
+ * @tc.name: CreateDragNode002
+ * @tc.desc: test CreateDragNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNode002, TestSize.Level1)
+{
+    auto hostNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    RichEditorDragInfo info;
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto newFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto newAddFrameNodeOne = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    imageChildren.push_back(newFrameNode);
+    imageChildren.push_back(newAddFrameNodeOne);
+    textPattern->placeholderIndex_ = { 1, 2, 3 };
+    textPattern->rectsForPlaceholders_ = { RectF(0.0f, 0.0f, 100.0f, 100.0f), RectF(20.0f, 20.0f, 200.0f, 200.0f),
+        RectF(0.0f, 0.0f, 50.0f, 50.0f) };
+    textPattern->textSelector_.baseOffset = 0;
+    textPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo);
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo1);
+    auto dragNode = RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
+    auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    EXPECT_EQ(richEditorDragPattern->rectsForPlaceholders_.size(), 0);
+}
+
+/**
+ * @tc.name: CreateDragNode003
+ * @tc.desc: test CreateDragNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNode003, TestSize.Level1)
+{
+    auto hostNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    RichEditorDragInfo info;
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto newFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto newAddFrameNodeOne = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    imageChildren.push_back(newFrameNode);
+    imageChildren.push_back(newAddFrameNodeOne);
+    textPattern->placeholderIndex_ = { 1, 2, 3 };
+    textPattern->rectsForPlaceholders_ = { RectF(0.0f, 0.0f, 100.0f, 100.0f), RectF(20.0f, 20.0f, 200.0f, 200.0f),
+        RectF(0.0f, 0.0f, 50.0f, 50.0f) };
+    textPattern->textSelector_.baseOffset = 0;
+    textPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(10, 10, 250, 250));
+        }));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo);
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo1);
+    auto dragNode = RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
+    auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    EXPECT_EQ(richEditorDragPattern->rectsForPlaceholders_.size(), 4);
 }
 } // namespace OHOS::Ace::NG

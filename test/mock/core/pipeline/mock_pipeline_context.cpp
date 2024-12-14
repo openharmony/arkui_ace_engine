@@ -181,6 +181,13 @@ void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
@@ -439,6 +446,8 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
@@ -493,9 +502,6 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
-
-void PipelineContext::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-    uint32_t closeButtonRightMargin, int32_t isDarkMode) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
@@ -881,6 +887,15 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    return 0;
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

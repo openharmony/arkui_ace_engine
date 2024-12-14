@@ -366,6 +366,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(layoutProperty);
             auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
             CHECK_NULL_VOID(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateIndex(itemIndex);
             gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
             UpdateRealGridItemPositionInfo(wrapper, mainLine.first, crossLine.first);

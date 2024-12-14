@@ -147,14 +147,22 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     childConstraint.minSize.SetWidth(actualWidth - padding.Width());
     childConstraint.maxSize.SetWidth(actualWidth - padding.Width());
 
+    auto expandableHeight = MeasureExpandableHeight(childConstraint, layoutWrapper);
+
+    UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);
+}
+
+float MenuItemLayoutAlgorithm::MeasureExpandableHeight(LayoutConstraintF& childConstraint, LayoutWrapper* layoutWrapper)
+{
     auto expandableHeight = 0.0f;
     auto expandableArea = layoutWrapper->GetOrCreateChildByIndex(EXPANDABLE_AREA_VIEW_INDEX);
     if (expandableArea) {
         expandableArea->Measure(childConstraint);
-        expandableHeight = std::max(expandableArea->GetGeometryNode()->GetMarginFrameSize().Height(), 0.0f);
+        auto expandableAreaGeometryNode = expandableArea->GetGeometryNode();
+        CHECK_NULL_RETURN(expandableAreaGeometryNode, expandableHeight);
+        expandableHeight = std::max(expandableAreaGeometryNode->GetMarginFrameSize().Height(), 0.0f);
     }
-
-    UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);
+    return expandableHeight;
 }
 
 void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)

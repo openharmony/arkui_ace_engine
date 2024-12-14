@@ -1018,6 +1018,11 @@ public:
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
     }
 
+    void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) override
+    {
+        ViewAbstract::SetOnFocusAxisEvent(std::move(onFocusAxisCallback));
+    }
+
     void SetDraggable(bool draggable) override
     {
         ViewAbstract::SetDraggable(draggable);
@@ -1398,6 +1403,18 @@ public:
     void DisableOnBlur() override
     {
         ViewAbstract::DisableOnBlur();
+    }
+
+    void DisableOnFocusAxisEvent() override
+    {
+        ViewAbstract::DisableOnFocusAxisEvent();
+    }
+
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnFocusAxisCallback();
     }
 
     static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);

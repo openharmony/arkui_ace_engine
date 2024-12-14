@@ -549,7 +549,9 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
         sliderPaintProperty->UpdateValue(value_);
-        auto context = PipelineContext::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         context->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -808,7 +810,7 @@ void SliderPattern::InitializeBubble()
     CHECK_NULL_VOID(showTips_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sliderTheme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(sliderTheme);
@@ -909,7 +911,7 @@ OffsetF SliderPattern::CalculateGlobalSafeOffset()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
     auto overlayGlobalOffset = host->GetPaintRectOffset();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto safeAreaManger = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManger, OffsetF());
@@ -1211,7 +1213,9 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
     auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusSideDistance = theme->GetFocusSideDistance();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
@@ -1519,7 +1523,8 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
     auto stepRatio = paintProperty->GetStepRatio();
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio, hotBlockShadowWidth_,
-        mouseHoverFlag_, mousePressedFlag_ };
+        mouseHoverFlag_, mousePressedFlag_, PointF(), PointF(), PointF(), PointF(), PointF(), Color::TRANSPARENT,
+        Gradient(), Color::TRANSPARENT };
     auto contentSize = GetHostContentSize();
     CHECK_NULL_RETURN(contentSize, SliderContentModifier::Parameters());
     const auto& content = GetHost()->GetGeometryNode()->GetContent();
@@ -1916,17 +1921,20 @@ void SliderPattern::AddIsFocusActiveUpdateEvent()
             pattern->OnIsFocusActiveUpdate(isFocusAcitve);
         };
     }
-
-    auto pipline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContext();
     CHECK_NULL_VOID(pipline);
     pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void SliderPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContext();
     CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+    pipline->RemoveIsFocusActiveUpdateEvent(host);
 }
 
 void SliderPattern::FireBuilder()

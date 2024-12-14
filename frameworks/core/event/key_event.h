@@ -19,6 +19,7 @@
 #include <map>
 
 #include "core/event/ace_events.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/non_pointer_event.h"
 
 namespace OHOS::MMI {
@@ -672,5 +673,6 @@ using OnPaintFocusStateFunc = std::function<bool()>;
 using OnBlurFunc = std::function<void()>;
 using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
+using OnFocusAxisEventFunc = std::function<void(NG::FocusAxisEventInfo&)>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

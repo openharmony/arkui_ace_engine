@@ -76,6 +76,9 @@ public:
         int32_t action, int64_t offset) = 0;
     virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) = 0;
+    virtual void SetUIContentType(UIContentType uIContentType) {};
+    virtual bool IsRestrictedWorkerThread() { return false; }
+    virtual bool HasWorkerUsing(void *worker) { return false; }
 
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
 

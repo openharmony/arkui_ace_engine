@@ -382,6 +382,7 @@ public:
 
     void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
+    void SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch);
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 

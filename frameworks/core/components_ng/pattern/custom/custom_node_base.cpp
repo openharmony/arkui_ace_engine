@@ -35,12 +35,213 @@ CustomNodeBase::~CustomNodeBase()
     }
 }
 
+void CustomNodeBase::FireOnAppear()
+{
+    if (appearFunc_) {
+        appearFunc_();
+    }
+    executeFireOnAppear_ = true;
+}
+
+void CustomNodeBase::FireOnDisappear()
+{
+    if (destroyFunc_) {
+        destroyFunc_();
+    }
+}
+
+void CustomNodeBase::FireDidBuild()
+{
+    if (didBuildFunc_) {
+        didBuildFunc_();
+    }
+}
+
+void CustomNodeBase::SetAppearFunction(std::function<void()>&& appearFunc)
+{
+    appearFunc_ = std::move(appearFunc);
+}
+
+void CustomNodeBase::SetDidBuildFunction(std::function<void()>&& didBuildFunc)
+{
+    didBuildFunc_ = std::move(didBuildFunc);
+}
+
+void CustomNodeBase::SetUpdateFunction(std::function<void()>&& updateFunc)
+{
+    updateFunc_ = std::move(updateFunc);
+}
+
+void CustomNodeBase::SetDestroyFunction(std::function<void()>&& destroyFunc)
+{
+    destroyFunc_ = std::move(destroyFunc);
+}
+
+void CustomNodeBase::SetReloadFunction(std::function<void(bool)>&& reloadFunc)
+{
+    reloadFunc_ = std::move(reloadFunc);
+}
+
+void CustomNodeBase::FireReloadFunction(bool deep)
+{
+    if (reloadFunc_) {
+        reloadFunc_(deep);
+    }
+}
+
 void CustomNodeBase::Update()
 {
     needRebuild_ = false;
     if (updateFunc_) {
         updateFunc_();
     }
+}
+
+void CustomNodeBase::SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc)
+{
+    pageTransitionFunc_ = std::move(pageTransitionFunc);
+}
+
+void CustomNodeBase::CallPageTransitionFunction() const
+{
+    if (pageTransitionFunc_) {
+        pageTransitionFunc_();
+    }
+}
+
+void CustomNodeBase::SetForceUpdateNodeFunc(std::function<void(int32_t)>&& forceNodeUpdateFunc)
+{
+    forceNodeUpdateFunc_ = std::move(forceNodeUpdateFunc);
+}
+
+void CustomNodeBase::FireNodeUpdateFunc(ElementIdType id)
+{
+    if (forceNodeUpdateFunc_) {
+        forceNodeUpdateFunc_(id);
+    } else {
+        LOGE("fail to find node update func to execute %{public}d node update", id);
+    }
+}
+
+void CustomNodeBase::SetHasNodeUpdateFunc(std::function<bool(int32_t)>&& hasNodeUpdateFunc)
+{
+    hasNodeUpdateFunc_ = std::move(hasNodeUpdateFunc);
+}
+
+bool CustomNodeBase::FireHasNodeUpdateFunc(ElementIdType id)
+{
+    return hasNodeUpdateFunc_ && hasNodeUpdateFunc_(id);
+}
+
+void CustomNodeBase::SetRecycleFunction(std::function<void(RefPtr<CustomNodeBase>)>&& recycleCustomNode)
+{
+    recycleCustomNodeFunc_ = std::move(recycleCustomNode);
+}
+
+void CustomNodeBase::SetRecycleRenderFunc(std::function<void()>&& func)
+{
+    recycleRenderFunc_ = std::move(func);
+}
+
+bool CustomNodeBase::HasRecycleRenderFunc()
+{
+    return recycleRenderFunc_ != nullptr;
+}
+
+void CustomNodeBase::ResetRecycle()
+{
+    recycleRenderFunc_ = nullptr;
+}
+
+void CustomNodeBase::SetSetActiveFunc(std::function<void(bool)>&& func)
+{
+    setActiveFunc_ = std::move(func);
+}
+
+void CustomNodeBase::FireSetActiveFunc(bool active)
+{
+    if (setActiveFunc_) {
+        setActiveFunc_(active);
+    }
+}
+
+void CustomNodeBase::FireOnDumpInfoFunc(const std::vector<std::string>& params)
+{
+    if (onDumpInfoFunc_) {
+        onDumpInfoFunc_(params);
+    }
+}
+
+void CustomNodeBase::Reset()
+{
+    updateFunc_ = nullptr;
+    appearFunc_ = nullptr;
+    destroyFunc_ = nullptr;
+    didBuildFunc_ = nullptr;
+}
+
+void CustomNodeBase::SetJSViewName(std::string&& name)
+{
+    jsViewName_ = name;
+}
+
+std::string& CustomNodeBase::GetJSViewName()
+{
+    return jsViewName_;
+}
+
+void CustomNodeBase::SetExtraInfo(const ExtraInfo extraInfo)
+{
+    extraInfo_ = std::move(extraInfo);
+}
+
+bool CustomNodeBase::GetIsV2()
+{
+    return isV2_;
+}
+
+void CustomNodeBase::SetIsV2(bool isV2)
+{
+    isV2_ = isV2;
+}
+
+const ExtraInfo& CustomNodeBase::GetExtraInfo() const
+{
+    return extraInfo_;
+}
+
+bool CustomNodeBase::HasExtraInfo()
+{
+    if (!extraInfo_.page.empty()) {
+        return true;
+    }
+    return false;
+}
+
+void CustomNodeBase::SetThisFunc(std::function<void*()>&& getThisFunc)
+{
+    getThisFunc_ = std::move(getThisFunc);
+}
+
+void* CustomNodeBase::FireThisFunc()
+{
+    if (getThisFunc_) {
+        return getThisFunc_();
+    }
+    return nullptr;
+}
+
+std::string CustomNodeBase::FireOnDumpInspectorFunc()
+{
+    if (onDumpInspectorFunc_) {
+        return onDumpInspectorFunc_();
+    }
+    return "";
+}
+
+bool CustomNodeBase::CheckFireOnAppear()
+{
+    return executeFireOnAppear_;
 }
 
 void CustomNodeBase::MarkNeedUpdate()

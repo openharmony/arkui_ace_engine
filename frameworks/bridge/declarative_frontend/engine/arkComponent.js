@@ -1831,6 +1831,19 @@ class OnKeyPreImeModifier extends ModifierWithKey {
   }
 }
 OnKeyPreImeModifier.identity = Symbol('onKeyPreIme');
+class OnFocusAxisEventModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnFocusAxisEvent(node);
+    } else {
+      getUINativeModule().common.setOnFocusAxisEvent(node, this.value);
+    }
+  }
+}
+OnFocusAxisEventModifier.identity = Symbol('onFocusAxisEvent');
 class OnFocusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3706,6 +3719,10 @@ class ArkComponent {
   }
   onKeyPreIme(event) {
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
+    return this;
+  }
+  onFocusAxisEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
     return this;
   }
   focusable(value) {
@@ -8024,6 +8041,23 @@ class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
   }
 }
 PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
+class PatternLockSkipUnselectedPointModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetSkipUnselectedPoint(node);
+    }
+    else {
+      getUINativeModule().patternLock.setSkipUnselectedPoint(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PatternLockSkipUnselectedPointModifier.identity = Symbol('patternlockSkipUnselectedPoint');
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8062,6 +8096,10 @@ class ArkPatternLockComponent extends ArkComponent {
   }
   activateCircleStyle(value) {
     modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
+    return this;
+  }
+  skipUnselectedPoint(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockSkipUnselectedPointModifier.identity, PatternLockSkipUnselectedPointModifier, value);
     return this;
   }
   onPatternComplete(callback) {
@@ -20847,6 +20885,7 @@ class ArkNavDestinationComponent extends ArkComponent {
     return this;
   }
 }
+
 class HideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -21639,6 +21678,11 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
+  enableModeChangeAnimation(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableModeChangeAnimationModifier.identity,
+      EnableModeChangeAnimationModifier, value);
+    return this;
+  }
   hideTitleBar(isHide, animated) {
     let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
     if (!isUndefined(isHide) && !isNull(isHide)) {
@@ -21911,6 +21955,21 @@ class HideToolBarModifier extends ModifierWithKey {
   }
 }
 HideToolBarModifier.identity = Symbol('hideToolBar');
+
+class EnableModeChangeAnimationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableModeChangeAnimation(node);
+    } else {
+      getUINativeModule().navigation.setEnableModeChangeAnimation(node, this.value);
+    }
+  }
+}
+EnableModeChangeAnimationModifier.identity = Symbol('enableModeChangeAnimation');
+
 class TitleModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

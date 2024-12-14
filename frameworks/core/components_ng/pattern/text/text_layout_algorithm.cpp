@@ -73,8 +73,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
             continue;
         }
         spanItem->SetNeedRemoveNewLine(false);
-        auto wContent = StringUtils::ToWstring(spanItem->content);
-        if (wContent.back() == L'\n') {
+        if (spanItem->content.back() == u'\n') {
             if (std::next(it) == spans.end()) {
                 break;
             }
@@ -217,8 +216,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
-    auto textForAI = pattern->GetTextForAI();
-    auto wTextForAI = UtfUtils::Str8ToStr16(textForAI);
+    auto wTextForAI = pattern->GetTextForAI();
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     int32_t preEnd = 0;
     DragSpanPosition dragSpanPosition;
@@ -386,6 +384,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
         auto& style = textStyles[i];
         paragraph->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
+        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(splitStr.data()), splitStr.length(), 0);
         paragraph->AddText(splitStr);
         paragraph->PopStyle();
     }

@@ -592,13 +592,16 @@ float LayoutWrapper::GetPageCurrentOffset()
     auto pageId = host->GetPageId();
     auto parent = host;
     while (parent) {
-        if (parent->GetPageId()) {
+        if (parent->GetPageId() > 0) {
             pageId = parent->GetPageId();
             break;
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
     auto pageNode = stageManager->GetPageById(pageId);
+    if (pageId <= 0) {
+        pageNode = stageManager->GetLastPageWithTransition();
+    }
     CHECK_NULL_RETURN(pageNode, 0.0f);
     auto pageRenderContext = pageNode->GetRenderContext();
     CHECK_NULL_RETURN(pageRenderContext, 0.0f);

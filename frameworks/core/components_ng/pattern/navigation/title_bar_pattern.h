@@ -43,16 +43,7 @@ public:
         return MakeRefPtr<TitleBarAccessibilityProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto titleBarLayoutAlgorithm = MakeRefPtr<TitleBarLayoutAlgorithm>();
-        titleBarLayoutAlgorithm->SetInitialTitleOffsetY(initialTitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialTitle(isInitialTitle_);
-        titleBarLayoutAlgorithm->SetInitialSubtitleOffsetY(initialSubtitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialSubtitle(isInitialSubtitle_);
-        titleBarLayoutAlgorithm->SetMinTitleHeight(minTitleHeight_);
-        return titleBarLayoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     bool IsAtomicNode() const override
     {

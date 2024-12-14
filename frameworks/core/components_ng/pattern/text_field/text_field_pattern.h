@@ -568,7 +568,7 @@ public:
     int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
     int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
-    bool IsOperation() const
+    bool HasText() const
     {
         return !contentController_->IsEmpty();
     }
@@ -602,6 +602,7 @@ public:
     }
     std::vector<RectF> GetTextBoxesForSelect();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -847,6 +848,8 @@ public:
     {
         return dragStatus_ == DragStatus::DRAGGING;
     }
+
+    bool BetweenSelectedPosition(GestureEvent& info);
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
@@ -1649,6 +1652,7 @@ private:
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
     void AddTextFireOnChange();
+    void RecordTextInputEvent();
 
     void FilterInitializeText();
 
@@ -1685,7 +1689,6 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityMoveTextAction();
-    void SetAccessibilityScrollAction();
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
@@ -1931,13 +1934,13 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
+    bool isCustomFont_ = false;
+    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     std::function<void()> customKeyboardBuilder_;
     RefPtr<UINode> customKeyboard_;
     RefPtr<OverlayManager> keyboardOverlay_;
-    bool isCustomFont_ = false;
     TimeStamp lastClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
@@ -1948,11 +1951,11 @@ private:
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;
+    bool isSupportCameraInput_ = false;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
     std::string lastAutoFillTextValue_;
-    bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     TouchAndMoveCaretState moveCaretState_;
@@ -1969,9 +1972,9 @@ private:
     OffsetF movingCaretOffset_;
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
-    bool autoFillOtherAccount_ = false;
     uint32_t autoFillSessionId_ = 0;
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
+    bool autoFillOtherAccount_ = false;
 
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;

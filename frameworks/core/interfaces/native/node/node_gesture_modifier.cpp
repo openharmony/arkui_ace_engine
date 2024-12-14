@@ -366,7 +366,7 @@ void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
         eventData.nodeId = 0;
         eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
         eventData.gestureAsyncEvent.subKind = ON_ACTION_CANCEL;
-        SendArkUIAsyncEvent(&eventData);
+        SendArkUISyncEvent(&eventData);
     };
     gestureRef->SetOnActionCancelId(onActionCancel);
 }
@@ -425,21 +425,21 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
         ArkUIAxisEvent rawInputEvent;
         ConvertIMMEventToAxisEvent(info, rawInputEvent);
         eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
-        SendArkUIAsyncEvent(&eventData);
+        SendArkUISyncEvent(&eventData);
         return;
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         ArkUIMouseEvent rawInputEvent;
         ConvertIMMEventToMouseEvent(info, rawInputEvent);
         eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
-        SendArkUIAsyncEvent(&eventData);
+        SendArkUISyncEvent(&eventData);
         return;
     }
     ArkUITouchEvent rawInputEvent;
     std::array<ArkUITouchPoint, MAX_POINTS> points;
     ConvertIMMEventToTouchEvent(info, rawInputEvent, points);
     eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
-    SendArkUIAsyncEvent(&eventData);
+    SendArkUISyncEvent(&eventData);
 }
 
 void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam)

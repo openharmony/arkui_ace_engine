@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+
+#include <atomic>
+
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
@@ -52,6 +55,8 @@ const Dimension MENU_SAFETY_X = 8.0_vp;
 const Dimension MENU_SAFETY_Y = 96.0_vp;
 const Dimension MENU_ITEM_TEXT_PADDING = 8.0_vp;
 const Color MENU_ITEM_COLOR = Color(0xffffff);
+
+std::atomic<int32_t> g_nextListenerId = 1;
 
 RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
 {
@@ -339,19 +344,6 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_VISIBILITY, hideMaximize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MINIMIZE_VISIBILITY, hideMinimize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_CLOSE_VISIBILITY, hideClose);
-}
-
-void ContainerModalPatternEnhance::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-    uint32_t closeButtonRightMargin, int32_t colorMode)
-{
-    auto controlButtonsNode = GetCustomButtonNode();
-    CHECK_NULL_VOID(controlButtonsNode);
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE, std::to_string(spacingBetweenButtons));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonsize));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED, std::to_string(colorMode));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE,
-        std::to_string(closeButtonRightMargin));
-    CallButtonsRectChange();
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -823,9 +815,13 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     CHECK_NULL_VOID(customNode);
 
     auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
-    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, true);
     } else {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, false);
@@ -937,4 +933,27 @@ void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MENU_WIDTH_CHANGE, std::to_string(width));
 }
 
+int32_t ContainerModalPatternEnhance::AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener)
+{
+    auto id = g_nextListenerId.fetch_add(1);
+    rectChangeListeners_.emplace(id, listener);
+    return id;
+}
+
+void ContainerModalPatternEnhance::RemoveButtonsRectChangeListener(int32_t id)
+{
+    auto it = rectChangeListeners_.find(id);
+    if (it != rectChangeListeners_.end()) {
+        rectChangeListeners_.erase(it);
+    }
+}
+
+void ContainerModalPatternEnhance::NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect)
+{
+    for (auto& pair : rectChangeListeners_) {
+        if (pair.second) {
+            pair.second(containerModal, buttonsRect);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

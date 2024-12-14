@@ -1096,6 +1096,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
         options?: NavigationTitleOptions): NavigationAttribute;
     subTitle(value: string): NavigationAttribute;
     hideTitleBar(value: boolean): NavigationAttribute;
+    enableModeChangeAnimation(value: boolean): NavigationAttribute;
     hideBackButton(value: boolean): NavigationAttribute;
     titleMode(value: NavigationTitleMode): NavigationAttribute;
     menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute;

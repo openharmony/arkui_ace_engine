@@ -146,7 +146,7 @@ public:
         return script_;
     }
 
-    const std::string& GetLocaleTag() const
+    std::string GetLocaleTag()
     {
         std::shared_lock<std::shared_mutex> lock(localeTagMutex_);
         return localeTag_;

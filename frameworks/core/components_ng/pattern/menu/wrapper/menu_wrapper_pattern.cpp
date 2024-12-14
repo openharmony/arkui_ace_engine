@@ -62,21 +62,24 @@ RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RectF());
-    auto outterMenuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_RETURN(outterMenuNode, RectF());
-    auto menuZone = outterMenuNode->GetGeometryNode()->GetFrameRect();
-    innerMenuNode = GetMenuChild(outterMenuNode);
-    CHECK_NULL_RETURN(innerMenuNode, RectF());
-    auto subMenuNode = GetShowedSubMenu();
-    if (subMenuNode) {
-        innerMenuNode = subMenuNode;
-        auto scrollNode = DynamicCast<FrameNode>(innerMenuNode->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(scrollNode, RectF());
-        innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(innerMenuNode, RectF());
-        menuZone = subMenuNode->GetGeometryNode()->GetFrameRect();
+    auto children = host->GetChildren();
+    CHECK_NULL_RETURN(!children.empty(), RectF());
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child || child->GetTag() != V2::MENU_ETS_TAG) {
+            continue;
+        }
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(frameNode, RectF());
+        auto geometryNode = frameNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, RectF());
+        innerMenuNode = GetMenuChild(frameNode);
+        if (!innerMenuNode) {
+            innerMenuNode = child;
+        }
+        return geometryNode->GetFrameRect() + host->GetPaintRectOffset();
     }
-    return menuZone;
+    return RectF();
 }
 
 RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position)
@@ -365,7 +368,7 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     });
     auto menuNodePattern = DynamicCast<FrameNode>(menuNode)->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuNodePattern);
-    menuNodePattern->ShowStackExpandDisappearAnimation(DynamicCast<FrameNode>(menuNode),
+    menuNodePattern->ShowStackMenuDisappearAnimation(DynamicCast<FrameNode>(menuNode),
         DynamicCast<FrameNode>(subMenu), option);
     menuNodePattern->SetDisappearAnimation(true);
 }
@@ -409,9 +412,6 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     auto children = host->GetChildren();
     if (touch.GetTouchType() == TouchType::DOWN) {
         // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails
-        if (fingerId_ != -1) {
-            ClearLastMenuItem();
-        }
         fingerId_ = touch.GetFingerId();
         TAG_LOGD(AceLogTag::ACE_MENU, "record newest finger ID %{public}d", fingerId_);
         for (auto child = children.rbegin(); child != children.rend(); ++child) {
@@ -419,10 +419,14 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
             CHECK_NULL_VOID(menuWrapperChildNode);
             // get menuWrapperChildNode's touch region
-            auto menuWrapperChildZone = menuWrapperChildNode->GetGeometryNode()->GetFrameRect();
+            auto menuWrapperChildGeometryNode = menuWrapperChildNode->GetGeometryNode();
+            CHECK_NULL_VOID(menuWrapperChildGeometryNode);
+            auto childOffset = menuWrapperChildNode->GetPaintRectOffset();
+            auto childSize = menuWrapperChildGeometryNode->GetFrameSize();
+            auto menuWrapperChildZone = RectF(childOffset.GetX(), childOffset.GetY(),
+                childSize.Width(), childSize.Height());
             if (menuWrapperChildZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
-                currentTouchItem_ = FindTouchedMenuItem(menuWrapperChildNode, position);
-                ChangeCurMenuItemBgColor();
+                HandleInteraction(info);
                 return;
             }
             // if DOWN-touched outside the menu region, then hide menu

@@ -161,6 +161,12 @@ public:
         }
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        PaintProperty::ToTreeJson(json, config);
+        json->Put(TreeKey::CONTENT, GetCustomContent().value_or("").c_str());
+    }
+
     SizeF GetBlockSizeValue(const SizeF& defaultValue)
     {
         auto& groupProperty = GetSliderPaintStyle();

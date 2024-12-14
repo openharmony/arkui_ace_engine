@@ -53,6 +53,9 @@
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -335,6 +338,8 @@ const std::string STRING_LF = "\n";
 #define FLOAT_UNIT 100.0F
 #define DECIMAL_POINTS 2
 
+using Recorder::EventRecorder;
+
 class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
     WebAccessibilityChildTreeCallback(const WeakPtr<WebPattern> &weakPattern, int64_t accessibilityId)
@@ -442,6 +447,7 @@ WebPattern::~WebPattern()
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
+        delegate_->UnRegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME);
     }
 
     if (observer_) {
@@ -1926,7 +1932,7 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     // fake drag data when enter
     delegate_->GetOrCreateDragData();
     // use summary to set fake data
-    ClearDragData();
+    SetFakeDragData();
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
     // RequestFocus to show the carret frame_caret
     WebRequestFocus();
@@ -1996,7 +2002,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(info->GetX() - offset.value_or(OffsetF()).GetX()) * viewScale;
     int32_t localY = static_cast<int32_t>(info->GetY() - offset.value_or(OffsetF()).GetY()) * viewScale;
-
+    ClearDragData();
     RefPtr<UnifiedData> aceData = info->GetData();
     // get data from ace(from udmf), and send it to chromium
     if (aceData && aceData->GetSize() >= 1) {
@@ -2110,6 +2116,17 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
         delegate_->dragData_->ClearImageFileNames();
+    }
+}
+
+void WebPattern::SetFakeDragData()
+{
+    CHECK_NULL_VOID(delegate_);
+    std::string plain = " ";
+    std::string htmlContent = " ";
+    if (delegate_->dragData_) {
+        delegate_->dragData_->SetFragmentText(plain);
+        delegate_->dragData_->SetFragmentHtml(htmlContent);
     }
 }
 
@@ -2241,8 +2258,13 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
     if (!keyEvent.numLock && item != g_numPadFunctionMap.end()) {
         code = item->second;
     }
-    return delegate_->WebOnKeyEvent(static_cast<int32_t>(code),
-        static_cast<int32_t>(keyEvent.action), pressedCodes);
+    std::shared_ptr<NWebKeyboardEventImpl> keyboardEvent =
+        std::make_shared<NWebKeyboardEventImpl>(static_cast<int32_t>(keyEvent.code),
+                                                static_cast<int32_t>(keyEvent.action),
+                                                keyEvent.unicode,
+                                                keyEvent.enableCapsLock,
+                                                pressedCodes);
+    return delegate_->SendKeyboardEvent(keyboardEvent);
 }
 
 void WebPattern::KeyboardReDispatch(
@@ -2494,7 +2516,10 @@ void WebPattern::OnAreaChangedInner()
         isKeyboardInSafeArea_ = false;
     }
     if (layoutMode_ == WebLayoutMode::NONE && renderMode_ == RenderMode::ASYNC_RENDER) {
-        drawSize_ = size;
+        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+            drawSize_ = size;
+            TAG_LOGD(AceLogTag::ACE_WEB, "ASYNC_RENDER, drawsize_ : %{public}s", drawSize_.ToString().c_str());
+        }
         if (webOffset_ == offset) {
             return;
         }
@@ -3117,6 +3142,7 @@ void WebPattern::OnModifyDone()
                 TAG_LOGD(AceLogTag::ACE_WEB, "[getSurfaceId] set surfaceId is %{public}s", surfaceId.c_str());
             }
         }
+        RecordWebEvent(true);
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
         bool isApiGteTwelve =
@@ -3237,6 +3263,78 @@ void WebPattern::OnModifyDone()
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         InitInOfflineMode();
     }
+}
+
+extern "C" {
+char* HandleWebMessage(const char** params, int32_t size)
+{
+#if defined(PREVIEW) || defined(ACE_UNITTEST)
+    return nullptr;
+#else
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB)) {
+        return nullptr;
+    }
+    if (size < Recorder::WEB_PARAM_SIZE) {
+        return nullptr;
+    }
+    for (int32_t i = 0; i < Recorder::WEB_PARAM_SIZE; i++) {
+        if (params[i] == nullptr) {
+            return nullptr;
+        }
+    }
+    if (!EventRecorder::Get().IsMessageValid(
+        params[Recorder::WEB_PARAM_INDEX_CATEGORY], params[Recorder::WEB_PARAM_INDEX_IDENTIFIER])) {
+        return nullptr;
+    }
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventType(Recorder::EventType::WEB_ACTION)
+        .SetEventCategory(Recorder::EventCategory::CATEGORY_WEB)
+        .SetType(V2::WEB_ETS_TAG)
+        .SetExtra(Recorder::KEY_WEB_CATEGORY, params[Recorder::WEB_PARAM_INDEX_CATEGORY])
+        .SetText(params[Recorder::WEB_PARAM_INDEX_CONTENT]);
+    EventRecorder::Get().OnEvent(std::move(builder));
+    return nullptr;
+#endif
+}
+}
+
+void WebPattern::RecordWebEvent(bool isInit)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web isInit %{public}d", isInit);
+    CHECK_NULL_VOID(delegate_);
+    if (isInit) {
+        std::vector<std::pair<std::string, NativeMethodCallback>> methodList = {
+            std::make_pair<std::string, NativeMethodCallback>(Recorder::WEB_METHOD_NAME, HandleWebMessage)
+        };
+        delegate_->RegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME, methodList, false);
+        return;
+    }
+    auto cacheJsCode = EventRecorder::Get().GetCacheJsCode();
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB) || cacheJsCode.empty()) {
+        return;
+    }
+    delegate_->ExecuteTypeScript(cacheJsCode, [](std::string result) {});
+    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_);
+    UpdateJavaScriptOnDocumentEnd();
+    delegate_->JavaScriptOnDocumentEnd();
+#endif
+}
+
+void WebPattern::GetPageContentAsync(const std::string& jsCode)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    CHECK_NULL_VOID(delegate_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto webId = host->GetId();
+    Recorder::InspectorTreeCollector::Get().IncreaseTaskNum();
+    delegate_->ExecuteTypeScript(jsCode, [webId](std::string result) {
+        std::string key = "Web_" + std::to_string(webId);
+        Recorder::InspectorTreeCollector::Get().GetJson()->Put(key.c_str(), result.c_str());
+        Recorder::InspectorTreeCollector::Get().DecreaseTaskNum();
+    });
+#endif
 }
 
 void WebPattern::InitInOfflineMode()
@@ -3398,7 +3496,18 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         }
     }
     CHECK_NULL_RETURN(delegate_, false);
-    delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
+    if (delegate_->ShouldVirtualKeyboardOverlay()) {
+        if (!IsDialogNested()) {
+            double webKeyboard = keyboard - (height - GetCoordinatePoint()->GetY() - drawSize_.Height());
+            webKeyboard = (webKeyboard < 0) ? 0 : webKeyboard;
+            TAG_LOGW(AceLogTag::ACE_WEB, "VirtualKeyboard Overlaycontent is true webKeyboard:%{public}f", webKeyboard);
+            delegate_->SetVirtualKeyBoardArg(width, height, webKeyboard);
+        } else {
+            delegate_->SetVirtualKeyBoardArg(width, height, 0);
+        }
+    } else {
+        delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
+    }
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -3863,8 +3972,15 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     } else if (y > size.Height()) {
         y = offset.GetY() + size.Height();
     } else {
-        y = y + offset.GetY();
-        y = y - edgeHeight;
+        float diff = 0;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline) {
+            auto dipScale = pipeline->GetDipScale();
+            if (dipScale != 0) {
+                diff = edgeHeight - static_cast<int32_t>(static_cast<int32_t>(edgeHeight / dipScale) * dipScale);
+            }
+        }
+        y = y + offset.GetY() - edgeHeight + diff;
     }
 
     paintRect.SetOffset({ x, y });
@@ -6433,6 +6549,7 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    EventRecorder::Get().SaveJavascriptItems(scriptItems);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
         delegate_->JavaScriptOnDocumentEnd();
@@ -6449,7 +6566,9 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
 
 void WebPattern::UpdateJavaScriptOnDocumentEnd()
 {
-    if (delegate_ && onDocumentEndScriptItems_.has_value()) {
+    CHECK_NULL_VOID(delegate_);
+    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
+    if (onDocumentEndScriptItems_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
         onDocumentEndScriptItems_ = std::nullopt;
     }
