@@ -678,6 +678,9 @@ public:
     {
         return currentDisplayId_;
     }
+
+    virtual ResourceConfiguration GetResourceConfiguration() const = 0;
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
