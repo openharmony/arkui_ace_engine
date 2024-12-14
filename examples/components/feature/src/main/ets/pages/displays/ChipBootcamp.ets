@@ -112,7 +112,7 @@ export struct ChipBootcamp {
               this.chipOptionPrefixIconActivatedFillColor)
         },
         label: {
-          text: useEnabled(this.enableChipOptionLabelText, this.chipOptionLabelText) as string,
+          text: this.chipOptionLabelText,
           fontSize: useEnabled(this.enableChipOptionLabelFontSize, this.chipOptionLabelFontSize),
           fontColor: useEnabled(this.enableChipOptionLabelFontColor, this.chipOptionLabelFontColor),
           activatedFontColor: useEnabled(this.enableChipOptionLabelActivatedFontColor,
