@@ -46,8 +46,8 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
-#include "interfaces/inner_api/ace_kit/include/view/frame_node.h"
-#include "interfaces/inner_api/ace_kit/include/view/pattern.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/frame_node.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/pattern.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;

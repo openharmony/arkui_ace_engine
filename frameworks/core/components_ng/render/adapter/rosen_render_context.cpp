@@ -61,7 +61,7 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
-#include "interfaces/inner_api/ace_kit/include/view/draw/modifier.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::NG {
 

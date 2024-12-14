@@ -17,6 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H
 
 #include "base/log/log.h"
-#include "interfaces/inner_api/ace_kit/include/base/utils/utils.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/utils/utils.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H

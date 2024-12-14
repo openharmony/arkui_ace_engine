@@ -19,7 +19,7 @@
 #include <atomic>
 #include <cstdlib>
 
-#include "interfaces/inner_api/ace_kit/include/base/macros.h"
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT LifeCycleCheckable {

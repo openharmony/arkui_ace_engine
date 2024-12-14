@@ -15,11 +15,11 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
-#include "interfaces/inner_api/ace_kit/include/view/pattern.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/ace_type.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/utils/utils.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/pattern.h"
 
-#include "base/ace_type.h"
-#include "base/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 

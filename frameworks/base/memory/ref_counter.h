@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_REF_COUNTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_REF_COUNTER_H
 
-#include "interfaces/inner_api/ace_kit/include/base/ref_counter.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/ref_counter.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_REF_COUNTER_H

@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_REFERENCED_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_REFERENCED_H
 
-#include "interfaces/inner_api/ace_kit/include/base/lifecycle_checkable.h"
-#include "interfaces/inner_api/ace_kit/include/base/macros.h"
-#include "interfaces/inner_api/ace_kit/include/base/memory_monitor.h"
-#include "interfaces/inner_api/ace_kit/include/base/ref_counter.h"
+#include "ui/base/lifecycle_checkable.h"
+#include "ui/base/macros.h"
+#include "ui/base/memory_monitor.h"
+#include "ui/base/ref_counter.h"
 
 #define ACE_REMOVE(...)
 

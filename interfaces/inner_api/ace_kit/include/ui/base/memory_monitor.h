@@ -18,8 +18,8 @@
 
 #include <string>
 
-#include "interfaces/inner_api/ace_kit/include/base/macros.h"
-#include "interfaces/inner_api/ace_kit/include/base/type_info_base.h"
+#include "ui/base/macros.h"
+#include "ui/base/type_info_base.h"
 
 namespace OHOS::Ace {
 

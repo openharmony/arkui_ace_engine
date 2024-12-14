@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_ACE_TYPE_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_ACE_TYPE_H
 
-#include "interfaces/inner_api/ace_kit/include/base/referenced.h"
+#include "ui/base/referenced.h"
 
-#include "interfaces/inner_api/ace_kit/include/base/type_info_base.h"
+#include "ui/base/type_info_base.h"
 
 /**
  * Example:

@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "interfaces/inner_api/ace_kit/include/base/memory_monitor_def.h"
+#include "ui/base/memory_monitor_def.h"
 
 // Generate 'TypeInfo' for each classes.
 // And using hash code of its name for 'TypeId'.
