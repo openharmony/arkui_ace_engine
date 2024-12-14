@@ -5809,6 +5809,7 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
 void OverlayManager::RemoveFilterAnimation()
 {
     if (!hasFilter_) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter node is not exist");
         return;
     }
     auto filterNode = filterColumnNodeWeak_.Upgrade();
@@ -5829,6 +5830,7 @@ void OverlayManager::RemoveFilterAnimation()
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "removeFilter with animation");
     AnimationUtils::Animate(
         option,
         [filterContext]() {
@@ -5843,6 +5845,7 @@ void OverlayManager::RemoveFilterAnimation()
 void OverlayManager::RemoveFilter()
 {
     if (!hasFilter_) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter node is not exist");
         return;
     }
     auto columnNode = filterColumnNodeWeak_.Upgrade();
@@ -5851,6 +5854,7 @@ void OverlayManager::RemoveFilter()
         CHECK_NULL_VOID(rootNode);
         rootNode->RemoveChild(columnNode);
         rootNode->RebuildRenderContextTree();
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "removeFilter without animation");
     }
     hasFilter_ = false;
 }
