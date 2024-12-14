@@ -1374,6 +1374,8 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             "Set cursor to pointer when mouse pointer is hover exit.");
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         isHoverExit_ = true;
+    } else if (info.GetAction() == MouseAction::HOVER && isMouseLocked_) {
+        OnCursorChange(OHOS::NWeb::CursorType::CT_LOCK, nullptr);
     }
     int32_t clickNum = HandleMouseClickEvent(info);
 
@@ -1395,6 +1397,7 @@ void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
 
     std::shared_ptr<NWebMouseEventImpl> mouseEvent =
         std::make_shared<NWebMouseEventImpl>(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(),
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
         static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(info.GetAction()),
         clickNum, pressedCodes);
     delegate_->WebOnMouseEvent(mouseEvent);
@@ -5044,12 +5047,10 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     }
 }
 
-bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
+bool WebPattern::OnCursorChange(
+    const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo)
 {
-    if (cursor_type_ != type) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
-        cursor_type_ = type;
-    }
+    auto [type, info] = GetAndUpdateCursorStyleInfo(cursorType, cursorInfo);
     if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
         return false;
@@ -5083,6 +5084,31 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_
         }
     }
     return true;
+}
+
+CursorStyleInfo WebPattern::GetAndUpdateCursorStyleInfo(
+    const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo)
+{
+    auto type = cursorType;
+    auto info = cursorInfo;
+    if (type == OHOS::NWeb::CursorType::CT_LOCK) {
+        type = OHOS::NWeb::CursorType::CT_NONE;
+        isMouseLocked_ = true;
+    } else if (type == OHOS::NWeb::CursorType::CT_UNLOCK) {
+        type = cursor_type_;
+        info = nweb_cursorInfo_;
+        isMouseLocked_ = false;
+    } else {
+        if (cursor_type_ != type) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
+            cursor_type_ = type;
+        }
+        nweb_cursorInfo_.reset();
+        if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
+            nweb_cursorInfo_ = info;
+        }
+    }
+    return std::make_tuple(type, info);
 }
 
 void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
@@ -6592,7 +6618,6 @@ std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetFocusedAccessibi
     CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
 }
-
 
 std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
     int32_t direction)

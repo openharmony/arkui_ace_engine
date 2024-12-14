@@ -107,6 +107,8 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
+using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
+
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
@@ -1034,6 +1036,8 @@ private:
     void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
     int32_t GetBufferSizeByDeviceType();
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
+    CursorStyleInfo GetAndUpdateCursorStyleInfo(
+        const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1206,6 +1210,8 @@ private:
     bool isLayoutModeChanged_ = false;
     bool isDragEnd_ = false;
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
+    std::shared_ptr<OHOS::NWeb::NWebCursorInfo> nweb_cursorInfo_;
+    bool isMouseLocked_ = false;
     float touchPointX = 0;
     float touchPointY = 0;
     bool isUsingCustomKeyboardAvoid_ = false;
