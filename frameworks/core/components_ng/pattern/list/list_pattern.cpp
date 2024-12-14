@@ -266,8 +266,12 @@ ScrollAlign ListPattern::GetInitialScrollAlign() const
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float topOffset = startPos - contentStartOffset_;
-    float bottomOffset = endPos - contentMainSize_ + contentEndOffset_;
+    float topOffset = startPos;
+    float bottomOffset = endPos - contentMainSize_;
+    if (!IsScrollSnapAlignCenter()) {
+        topOffset -= contentStartOffset_;
+        bottomOffset += contentEndOffset_;
+    }
     if (GreatOrEqual(topOffset, 0.0f) && LessOrEqual(bottomOffset, 0.0f)) {
         return 0.0f;
     }
@@ -1269,8 +1273,8 @@ ScrollOffsetAbility ListPattern::GetScrollOffsetAbility()
             return true;
         },
         GetAxis(),
-        contentStartOffset_,
-        contentEndOffset_,
+        IsScrollSnapAlignCenter() ? 0 : contentStartOffset_,
+        IsScrollSnapAlignCenter() ? 0 : contentEndOffset_,
     };
 }
 
