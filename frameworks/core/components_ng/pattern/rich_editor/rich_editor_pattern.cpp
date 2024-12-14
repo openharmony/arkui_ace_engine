@@ -797,9 +797,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d, updateCaret=%{public}d",
-        isPaste, index, updateCaret);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddImageSpan, opts=%{public}s, updateCaret=%{public}d",
+        options.ToString().c_str(), updateCaret);
     NotifyExitTextPreview(false);
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -967,8 +966,8 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
 
 int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, int32_t index)
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{private}s", options.ToString().c_str());
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", ToBriefString(options).c_str());
+    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", options.ToString().c_str());
     AdjustAddPosition(options);
     NotifyExitTextPreview();
     OperationRecord record;
@@ -4573,8 +4572,9 @@ bool RichEditorPattern::CloseCustomKeyboard()
 
 int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, const PreviewRange range)
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "previewText=%{private}s, range=[%{public}d,%{public}d], isSSMode=%{public}d",
-        previewTextValue.c_str(), range.start, range.end, isSpanStringMode_);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SetPreviewText, range=[%{public}d,%{public}d], isSSMode=%{public}d",
+        range.start, range.end, isSpanStringMode_);
+    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewText=%{public}s", previewTextValue.c_str());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ERROR_BAD_PARAMETERS);
 
@@ -4847,7 +4847,7 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "insertLen=%{public}zu, isIME=%{public}d, calledByImf=%{public}d, isSpanString=%{public}d",
         StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{private}s]", StringUtils::RestoreEscape(insertValue).c_str());
+    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "insertValue=%{public}s", StringUtils::RestoreEscape(insertValue).c_str());
 
     if (isIME && calledByImf && (!isEditing_ || isDragging_)) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow input, isEditing=%{public}d, isDragging=%{public}d",
@@ -6255,8 +6255,8 @@ int32_t RichEditorPattern::ProcessDeleteNodes(std::list<RichEditorAbstractSpanRe
                 auto textTempSize = static_cast<int32_t>(textTemp.size());
                 if (textTempSize < it.OffsetInSpan()) {
                     TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "ProcessDeleteNodes failed, "
-                        "content = %{private}s, spanItemSize = %{public}d, offsetInSpan = %{public}d",
-                        StringUtils::Str16ToStr8(textTemp).c_str(), textTempSize, it.OffsetInSpan());
+                        "contentLen=%{public}zu, spanItemSize=%{public}d, offsetInSpan=%{public}d",
+                        textTemp.length(), textTempSize, it.OffsetInSpan());
                     continue;
                 }
                 textTemp.erase(it.OffsetInSpan(), it.GetEraseLength());
@@ -8699,12 +8699,14 @@ void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& n
         }
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
-                "In OnDragMoved, the cursor has always Displayed in the textField, id:%{private}d", host->GetId());
+                "In OnDragMoved, the cursor has always Displayed in the textField, id:" SEC_PLD(%{public}d),
+                    SEC_PARAM(host->GetId()));
         }
         return;
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "In OnDragMoved, the dragging node is moving in the richEditor, id:%{private}d", host->GetId());
+        "In OnDragMoved, the dragging node is moving in the richEditor, id:" SEC_PLD(%{public}d),
+            SEC_PARAM(host->GetId()));
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -8718,7 +8720,8 @@ void RichEditorPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "In OnDragLeaved, the dragging node has left from richEditor, id:%{private}d", host->GetId());
+        "In OnDragLeaved, the dragging node has left from richEditor, id:" SEC_PLD(%{public}d),
+            SEC_PARAM(host->GetId()));
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->LostFocusToViewRoot();
@@ -8734,13 +8737,15 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     StopAutoScroll();
     if (!isCursorAlwaysDisplayed_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "In OnDragEnded,"
-            " the released location is not in the current richEditor, id:%{private}d", host->GetId());
+            " the released location is not in the current richEditor, id:" SEC_PLD(%{public}d),
+                SEC_PARAM(host->GetId()));
         focusHub->LostFocus();
         StopTwinkling();
         return;
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "In OnDragEnded, the released location is in the current richEditor, id:%{private}d", host->GetId());
+        "In OnDragEnded, the released location is in the current richEditor, id:" SEC_PLD(%{public}d),
+            SEC_PARAM(host->GetId()));
     focusHub->LostFocusToViewRoot();
     isCursorAlwaysDisplayed_ = false;
     StopTwinkling();
@@ -10931,14 +10936,14 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     info.start = info.selectStart - sentenceStart;
     info.end = info.selectEnd - sentenceStart;
     spanString = ToStyledString(sentenceStart, sentenceEnd);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Sentence range=[%{public}d--%{public}d], content = %{private}s",
-        sentenceStart, sentenceEnd, spanString->GetString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Sentence range=[%{public}d-%{public}d], content=" SEC_PLD(%{public}s),
+        sentenceStart, sentenceEnd, SEC_PARAM(spanString->GetString().c_str()));
     spanString->EncodeTlv(info.sentenceBuffer);
 
     // serialize the selected text
     spanString = ToStyledString(info.selectStart, info.selectEnd);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Selected range=[%{public}d--%{public}d], content = %{private}s",
-        info.selectStart, info.selectEnd, spanString->GetString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Selected range=[%{public}d-%{public}d], content=" SEC_PLD(%{public}s),
+        info.selectStart, info.selectEnd, SEC_PARAM(spanString->GetString().c_str()));
     spanString->EncodeTlv(info.selectBuffer);
     info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
 }
@@ -11105,8 +11110,8 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
     if (spanString->GetSpanItems().empty()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{private}s",
-        start, end, spanString->GetString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content=" SEC_PLD(%{public}s),
+        start, end, SEC_PARAM(spanString->GetString().c_str()));
 
     textSelector_.Update(start, end);
     auto length = end - start;
