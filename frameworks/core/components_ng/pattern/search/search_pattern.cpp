@@ -1430,6 +1430,11 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         "minFontSize", textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr(
         "maxFontSize", textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "minFontScale", std::to_string(textFieldLayoutProperty->GetMinFontScale().value_or(0.0f)).c_str(), filter);
+    json->PutExtAttr(
+        "maxFontScale", std::to_string(textFieldLayoutProperty->GetMaxFontScale().value_or(
+		          static_cast<float>(INT32_MAX))).c_str(), filter);
     json->PutExtAttr("inputFilter", textFieldLayoutProperty->GetInputFilterValue("").c_str(), filter);
     json->PutExtAttr(
         "textIndent", textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
@@ -2217,11 +2222,31 @@ void SearchPattern::UpdateIconChangeEvent()
 
 const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSizeValue)
 {
-    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, iconSizeValue);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, iconSizeValue);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, iconSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, iconSizeValue);
+    auto maxFontScale = MAX_FONT_SCALE;
+    auto minFontScale = 0.0f;
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+    }
+    if (pipeline->GetMaxAppFontScale()) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
+    }
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+    }
+    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale),
+        ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
     }
     if (iconSizeValue.Unit() != DimensionUnit::VP) {
-        return Dimension(iconSizeValue.ConvertToPxDistribute(0.0f, MAX_FONT_SCALE));
+        return Dimension(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale));
     } else {
         return iconSizeValue;
     }

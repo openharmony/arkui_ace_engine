@@ -326,6 +326,10 @@ void TextFieldModelImpl::SetFontWeight(FontWeight value)
     component->SetEditingStyle(textStyle);
 }
 
+void TextFieldModelImpl::SetMinFontScale(const float value) {}
+
+void TextFieldModelImpl::SetMaxFontScale(const float value) {}
+
 void TextFieldModelImpl::SetTextColor(const Color& value)
 {
     auto* stack = ViewStackProcessor::GetInstance();
