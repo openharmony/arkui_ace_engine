@@ -2405,6 +2405,8 @@ frameworks/core/components_ng/pattern/overlay/sheet_view.cpp @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_view.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.cpp @arkui_superman
+frameworks/core/components_ng/pattern/overlay/sheet_wrapper_paint_method.cpp @arkui_superman
+frameworks/core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_wrapper_pattern.h @arkui_superman
 frameworks/core/components_ng/pattern/panel/ @arkui_superman
 frameworks/core/components_ng/pattern/particle/ @arkui_superman
