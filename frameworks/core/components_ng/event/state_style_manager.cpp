@@ -65,6 +65,7 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
             if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
                 auto frameNode = stateStyleMgr->GetFrameNode();
+                CHECK_NULL_VOID(frameNode);
                 TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Move out of node pressed region: %{public}s",
                     frameNode->GetTag().c_str());
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
@@ -81,11 +82,13 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
 
 void StateStyleManager::HandleTouchDown()
 {
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
 #ifdef IS_RELEASE_VERSION
-    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s", GetFrameNode()->GetTag().c_str());
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s", node->GetTag().c_str());
 #else
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s/%{public}d",
-        GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
+        node->GetTag().c_str(), node->GetId());
 #endif
     HandleScrollingParent();
     if (!hasScrollingParent_) {
@@ -102,12 +105,14 @@ void StateStyleManager::HandleTouchDown()
 
 void StateStyleManager::HandleTouchUp()
 {
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
 #ifdef IS_RELEASE_VERSION
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchUp or Cancel event node: %{public}s",
-        GetFrameNode()->GetTag().c_str());
+        node->GetTag().c_str());
 #else
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchUp or Cancel event node: %{public}s/%{public}d",
-        GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
+        node->GetTag().c_str(), node->GetId());
 #endif
     if (IsPressedStatePending()) {
         DeletePressStyleTask();
