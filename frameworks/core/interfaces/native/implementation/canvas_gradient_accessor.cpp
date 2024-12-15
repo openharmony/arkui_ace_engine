@@ -41,7 +41,6 @@ void AddColorStopImpl(CanvasGradientPeer* peer,
                       const Ark_String* color)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer);
     auto opt = color ? Converter::OptConvert<Color>(*color) : std::nullopt;
     if (!offset || !opt) {
         peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
