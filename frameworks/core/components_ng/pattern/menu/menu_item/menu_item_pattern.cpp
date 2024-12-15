@@ -472,8 +472,6 @@ void MenuItemPattern::HideSubMenu()
 void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
 {
     CHECK_NULL_VOID(expandableNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
