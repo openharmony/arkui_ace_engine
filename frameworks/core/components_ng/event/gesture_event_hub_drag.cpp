@@ -662,6 +662,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     float scale = windowScale * defaultPixelMapScale;
     PreparedInfoForDrag data = { isMenuShow, recordsSize, defaultPixelMapScale, OffsetF(),
         dragDropManager->GetUpdateDragMovePosition(), pixelMap };
+    dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         auto imageNode = overlayManager->GetPixelMapContentNode();
@@ -669,7 +670,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         CHECK_NULL_VOID(imageNode);
         data.imageNode = imageNode;
         data.dragPreviewOffsetToScreen = GetDragPreviewInitPositionToScreen(context, data);
-        dragDropManager->ResetContextMenuDragPosition();
         float previewScale =
             info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {

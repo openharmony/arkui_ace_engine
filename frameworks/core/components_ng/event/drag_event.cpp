@@ -930,6 +930,7 @@ void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t po
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->ResetContextMenuDragPosition();
     dragDropManager->SetDragDampStartPoint(point);
     dragDropManager->SetDraggingPointer(pointerId);
     isRedragStart_ = false;
