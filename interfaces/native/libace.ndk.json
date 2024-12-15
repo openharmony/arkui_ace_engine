@@ -2506,5 +2506,9 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
     }
 ]
