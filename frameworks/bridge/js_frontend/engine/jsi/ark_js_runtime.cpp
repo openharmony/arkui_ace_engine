@@ -179,7 +179,8 @@ bool ArkJSRuntime::StartDebugger()
         HdcRegister::Get().StartHdcRegister(instanceId_, callback);
         ConnectServerManager::Get().SetDebugMode();
 #endif
-        JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false };
+        //FA:true port:-1
+        JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false, -1, true };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid(), language_);
         ret = JSNApi::NotifyDebugMode(gettid(), vm_, debugOption, gettid(), debuggerPostTask_, isDebugApp);
@@ -188,7 +189,7 @@ bool ArkJSRuntime::StartDebugger()
 #endif
     }
 #if defined(IOS_PLATFORM)
-    JSNApi::DebugOption debugOption = { nullptr, isDebugMode_ };
+    JSNApi::DebugOption debugOption = { nullptr, isDebugMode_, -1, true }; //FA:true port:-1
     ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif
 #endif
