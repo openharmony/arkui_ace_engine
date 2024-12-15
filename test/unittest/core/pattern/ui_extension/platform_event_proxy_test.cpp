@@ -29,11 +29,13 @@ namespace OHOS::Ace::NG {
 namespace {
     const std::string ISOLATED_COMPONENT_ETS_TAG = "IsolatedComponent";
     const std::string EVENT_PROXT_EMPTY = "[]";
-    const std::string EVENT_PROXT_CLICK = "[ClickEvent]";
-    const std::string EVENT_PROXT_LONG_PRESS = "[LongPressEvent]";
-    const std::string EVENT_PROXT_PAN_GESTURE_VERTICAL = "[PanGestureVertical]";
-    const std::string EVENT_PROXT_PAN_GESTURE_HORIZONTAL = "[PanGestureHorizontal]";
-    const std::string EVENT_PROXT_PAN_GESTURE_ALL = "[PanGestureVertical, PanGestureHorizontal]";
+    const std::string EVENT_PROXT_CLICK = "[Click]";
+    const std::string EVENT_PROXT_LONG_PRESS = "[LongPress]";
+    const std::string EVENT_PROXT_PAN_GESTURE_UP_STR = "[Up]";
+    const std::string EVENT_PROXT_PAN_GESTURE_LEFT_STR = "[Left]";
+    const std::string EVENT_PROXT_PAN_GESTURE_VERTICAL = "[Up, Down]";
+    const std::string EVENT_PROXT_PAN_GESTURE_HORIZONTAL = "[Left, Right]";
+    const std::string EVENT_PROXT_PAN_GESTURE_ALL = "[Left, Up]";
 } // namespace
 
 class PlatformEventProxyTestNg : public testing::Test {
@@ -112,20 +114,23 @@ bool PlatformEventProxyTestNg::CheckPanGestureEvent(
     switch (panDirection) {
         case PanDirection::VERTICAL:
             ret = eventProxy->HasEventProxy(
-                static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL));
+                static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP
+                | EventProxyFlag::EVENT_PAN_GESTURE_DOWN));
             break;
         case PanDirection::HORIZONTAL:
             ret = eventProxy->HasEventProxy(
-                static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL));
+                static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT
+                | EventProxyFlag::EVENT_PAN_GESTURE_RIGHT));
             break;
         case PanDirection::ALL:
             ret = eventProxy->HasEventProxy(
-                static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL
-                | EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL));
+                static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP
+                | EventProxyFlag::EVENT_PAN_GESTURE_DOWN
+                | EventProxyFlag::EVENT_PAN_GESTURE_LEFT
+                | EventProxyFlag::EVENT_PAN_GESTURE_RIGHT));
             break;
         default:
-            LOGI("panDirection is Node");
-            break;
+            ret = eventProxy->HasEventProxy(static_cast<int32_t>(panDirection));
     }
 
     return ret;
@@ -295,17 +300,15 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy003, TestSize.Level1)
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     ASSERT_EQ(CheckPanGestureEvent(isolatedNode), false);
-    ASSERT_EQ(CheckPanGestureVerticalEvent(eventProxy), false);
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_EMPTY);
     /**
-     * @tc.steps: step2. SetPanGestureEventProxy EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL
+     * @tc.steps: step2. SetPanGestureEventProxy EventProxyFlag::EVENT_PAN_GESTURE_UP
      */
     EventProxyResultCode code = eventProxy->SetPanGestureEventProxy(gestureHub,
-        eventProxy->GetPanDirection(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL));
+        eventProxy->GetPanDirection(EventProxyFlag::EVENT_PAN_GESTURE_UP));
     ASSERT_EQ(code, EventProxyResultCode::ADD_WHEN_ADDING);
     ASSERT_EQ(CheckPanGestureEvent(isolatedNode), true);
-    ASSERT_EQ(CheckPanGestureVerticalEvent(eventProxy), true);
-    EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_VERTICAL);
+    EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_UP_STR);
     /**
      * @tc.steps: step3. SetPanGestureEventProxy EventProxyFlag::EVENT_NONE
      */
@@ -313,8 +316,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy003, TestSize.Level1)
         eventProxy->GetPanDirection(EventProxyFlag::EVENT_NONE));
     ASSERT_EQ(code, EventProxyResultCode::REMOVE_WHEN_DELETE);
     ASSERT_EQ(CheckPanGestureEvent(isolatedNode), false);
-    ASSERT_EQ(CheckPanGestureVerticalEvent(eventProxy), false);
-    EXPECT_NE(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_VERTICAL);
+    EXPECT_NE(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_UP_STR);
 #endif
 }
 
@@ -342,17 +344,15 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy004, TestSize.Level1)
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     ASSERT_EQ(CheckPanGestureEvent(isolatedNode), false);
-    ASSERT_EQ(CheckPanGestureHorizontalEvent(eventProxy), false);
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_EMPTY);
     /**
-     * @tc.steps: step2. SetPanGestureEventProxy EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL
+     * @tc.steps: step2. SetPanGestureEventProxy EventProxyFlag::EVENT_PAN_GESTURE_LEFT
      */
     EventProxyResultCode code = eventProxy->SetPanGestureEventProxy(gestureHub,
-        eventProxy->GetPanDirection(EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL));
+        eventProxy->GetPanDirection(EventProxyFlag::EVENT_PAN_GESTURE_LEFT));
     ASSERT_EQ(code, EventProxyResultCode::ADD_WHEN_ADDING);
     ASSERT_EQ(CheckPanGestureEvent(isolatedNode), true);
-    ASSERT_EQ(CheckPanGestureHorizontalEvent(eventProxy), true);
-    EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_HORIZONTAL);
+    EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_LEFT_STR);
     /**
      * @tc.steps: step3. SetPanGestureEventProxy EventProxyFlag::EVENT_NONE
      */
@@ -360,8 +360,7 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy004, TestSize.Level1)
         eventProxy->GetPanDirection(EventProxyFlag::EVENT_NONE));
     ASSERT_EQ(code, EventProxyResultCode::REMOVE_WHEN_DELETE);
     ASSERT_EQ(CheckPanGestureEvent(isolatedNode), false);
-    ASSERT_EQ(CheckPanGestureHorizontalEvent(eventProxy), false);
-    EXPECT_NE(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_HORIZONTAL);
+    EXPECT_NE(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_LEFT_STR);
 #endif
 }
 
@@ -380,23 +379,6 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy005, TestSize.Level1)
      */
     uint32_t panDirection = eventProxy->GetPanDirection(EventProxyFlag::EVENT_NONE);
     ASSERT_EQ(panDirection, PanDirection::NONE);
-    /**
-     * @tc.steps: step2. Test EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL
-     */
-    panDirection = eventProxy->GetPanDirection(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL);
-    ASSERT_EQ(panDirection, PanDirection::VERTICAL);
-    /**
-     * @tc.steps: step3. Test EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL
-     */
-    panDirection = eventProxy->GetPanDirection(EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL);
-    ASSERT_EQ(panDirection, PanDirection::HORIZONTAL);
-    /**
-     * @tc.steps: step4. Test EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL
-     *  and EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL
-     */
-    panDirection = eventProxy->GetPanDirection(EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL
-        | EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL);
-    ASSERT_EQ(panDirection, PanDirection::ALL);
 #endif
 }
 
@@ -425,33 +407,30 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy006, TestSize.Level1)
     CHECK_NULL_VOID(gestureHub);
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_EMPTY);
     /**
-     * @tc.steps: step2. Only click
+     * @tc.steps: step2. Only left
      */
     eventProxy->SetEventProxyFlag(1);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), false);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_RIGHT)), false);
     /**
-     * @tc.steps: step3. Only longPress
+     * @tc.steps: step3. Only right
      */
     eventProxy->SetEventProxyFlag(2);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), false);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT)), false);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_RIGHT)), true);
     /**
-     * @tc.steps: step4. click、longPress
+     * @tc.steps: step4. left right
      */
     eventProxy->SetEventProxyFlag(3);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), false);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_RIGHT)), true);
     /**
-     * @tc.steps: step5. Only panGestureVertical
+     * @tc.steps: step5. Only up
      */
     eventProxy->SetEventProxyFlag(4);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT)), false);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_RIGHT)), false);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP)), true);
 #endif
 }
 
@@ -481,32 +460,30 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy007, TestSize.Level1)
     CHECK_NULL_VOID(gestureHub);
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_EMPTY);
     /**
-     * @tc.steps: step1. click、panGestureVertical
+     * @tc.steps: step1. left up
      */
     eventProxy->SetEventProxyFlag(5);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP)), true);
     /**
-     * @tc.steps: step2. longPress、panGestureVertical
+     * @tc.steps: step2. right up
      */
     eventProxy->SetEventProxyFlag(6);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_RIGHT)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP)), true);
     /**
-     * @tc.steps: step3. click、longPress、panGestureVertical
+     * @tc.steps: step3. left right and up
      */
     eventProxy->SetEventProxyFlag(7);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_RIGHT)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP)), true);
     /**
-     * @tc.steps: step4. panGestureHorizontal
+     * @tc.steps: step4. down
      */
     eventProxy->SetEventProxyFlag(8);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL)), true);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP)), false);
+    EXPECT_EQ(eventProxy->HasEventProxy(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_DOWN)), true);
 #endif
 }
 
@@ -582,25 +559,12 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy009, TestSize.Level1)
      * @tc.steps: step2. 16
      */
     eventProxy->SetEventProxyFlag(16);
-    EXPECT_EQ(eventProxy->HasEventProxy(
-        static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(
-        static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(
-        static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), false);
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_EMPTY);
     /**
      * @tc.steps: step4. 17
      */
     eventProxy->SetEventProxyFlag(17);
-    EXPECT_EQ(eventProxy->HasEventProxy(
-        static_cast<int32_t>(EventProxyFlag::EVENT_CLICK)), true);
-    EXPECT_EQ(eventProxy->HasEventProxy(
-        static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(
-        static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL)), false);
-    EXPECT_EQ(eventProxy->HasEventProxy(
-        static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL)), false);
+    EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_LEFT_STR);
 #endif
 }
 
@@ -639,14 +603,16 @@ HWTEST_F(PlatformEventProxyTestNg, AddEventProxy010, TestSize.Level1)
     eventProxy->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_LONG_PRESS));
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_LONG_PRESS);
 
-    eventProxy->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL));
+    eventProxy->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_UP
+        | EventProxyFlag::EVENT_PAN_GESTURE_DOWN));
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_VERTICAL);
 
-    eventProxy->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL));
+    eventProxy->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT
+        | EventProxyFlag::EVENT_PAN_GESTURE_RIGHT));
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_HORIZONTAL);
 
     eventProxy->SetEventProxyFlag(static_cast<int32_t>(
-        EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL | EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL));
+        EventProxyFlag::EVENT_PAN_GESTURE_UP | EventProxyFlag::EVENT_PAN_GESTURE_LEFT));
     EXPECT_EQ(eventProxy->GetCurEventProxyToString(), EVENT_PROXT_PAN_GESTURE_ALL);
 #endif
 }

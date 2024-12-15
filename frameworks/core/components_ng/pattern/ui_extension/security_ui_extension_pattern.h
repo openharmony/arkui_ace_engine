@@ -89,6 +89,8 @@ public:
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void FireOnErrorCallback(
         int32_t code, const std::string& name, const std::string& message) override;
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void FireOnRemoteReadyCallback();
     void FireBindModalCallback();
