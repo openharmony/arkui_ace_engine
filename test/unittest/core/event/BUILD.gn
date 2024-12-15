@@ -16,8 +16,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("event_manager_test_ng") {
   type = "new"
   module_output = "events"
-  flutter_skia = true
-  render = true
   sources = [
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
