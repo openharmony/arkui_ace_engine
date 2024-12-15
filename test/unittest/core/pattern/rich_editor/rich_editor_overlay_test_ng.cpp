@@ -27,6 +27,8 @@ int32_t testOnDeleteComplete = 0;
 int32_t testNumber0 = 0;
 int32_t testNumber5 = 5;
 const std::string TEST_IMAGE_SOURCE = "src/image.png";
+constexpr float DEFAULT_CONTENT_WIDTH = 800.0f;
+constexpr float DEFAULT_TEXT_HEIGHT = 50.0f;
 } // namespace
 
 class RichEditorOverlayTestNg : public RichEditorCommonTestNg {
@@ -1153,6 +1155,48 @@ HWTEST_F(RichEditorOverlayTestNg, UpdateOverlayModifier001, TestSize.Level1)
     EXPECT_EQ(selection.baseOffset, -1);
     EXPECT_EQ(selection.destinationOffset, -1);
     EXPECT_FALSE(richEditorPattern->caretVisible_);
+}
+
+/**
+ * @tc.name: CalculateSelectedRect001
+ * @tc.desc: test CalculateSelectedRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, CalculateSelectedRect001, TestSize.Level1)
+{
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
+    auto result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    std::vector<RectF> rects;
+    ParagraphStyle paragraphStyle;
+    std::pair<std::vector<RectF>, ParagraphStyle> paragraphRects;
+
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT + DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
 }
 
 /**
