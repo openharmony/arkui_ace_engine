@@ -85,6 +85,8 @@ public:
     static void SetJsTextBackgroundStyle(JSRef<JSObject>& textStyleObj, const TextStyleResult& textSpanResult);
     static JSRef<JSObject> CreateJsTextBackgroundStyle(const TextBackgroundStyle& style);
     static void SetBarState(const JSCallbackInfo& info);
+    static void SetMaxLength(const JSCallbackInfo& info);
+    static void SetMaxLines(const JSCallbackInfo& info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,

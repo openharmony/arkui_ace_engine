@@ -4699,6 +4699,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorAboutToDelete)(ArkUINodeHandle node);
     void (*setRichEditorBarState)(ArkUINodeHandle node, ArkUI_Uint32 barStateValue);
     void (*resetRichEditorBarState)(ArkUINodeHandle node);
+    void (*setRichEditorMaxLength)(ArkUINodeHandle node, ArkUI_Uint32 maxLength);
+    void (*resetRichEditorMaxLength)(ArkUINodeHandle node);
+    void (*setRichEditorMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
+    void (*resetRichEditorMaxLines)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

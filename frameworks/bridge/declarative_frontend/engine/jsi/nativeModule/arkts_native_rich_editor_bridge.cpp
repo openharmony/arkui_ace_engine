@@ -1617,4 +1617,62 @@ ArkUINativeModuleValue RichEditorBridge::ResetBarState(ArkUIRuntimeCallInfo *run
     GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorBarState(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RichEditorBridge::SetMaxLength(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorMaxLength(nativeNode);
+    } else {
+        int32_t maxLength = secondArg->Int32Value(vm);
+        if (std::isinf(static_cast<float>(secondArg->ToNumber(vm)->Value()))) {
+            maxLength = INT32_MAX;
+        }
+        if (maxLength >= 0) {
+            GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorMaxLength(nativeNode, maxLength);
+        } else {
+            GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorMaxLength(nativeNode);
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetMaxLength(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorMaxLength(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber() && secondArg->Int32Value(vm) > 0) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorMaxLines(nativeNode, secondArg->Uint32Value(vm));
+    } else {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorMaxLines(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetMaxLines(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorMaxLines(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 }

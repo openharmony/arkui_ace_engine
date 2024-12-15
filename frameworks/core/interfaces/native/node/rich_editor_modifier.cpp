@@ -554,6 +554,38 @@ void ResetRichEditorBarState(ArkUINodeHandle node)
     RichEditorModelNG::SetBarState(frameNode, DEFAULT_BAR_STATE_VALUE);
 }
 
+void SetRichEditorMaxLength(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetMaxLength(frameNode, value);
+}
+
+void ResetRichEditorMaxLength(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetMaxLength(frameNode, INT_MAX);
+}
+
+void SetRichEditorMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (maxLine <= 0) {
+        RichEditorModelNG::SetMaxLines(frameNode, INT_MAX);
+        return;
+    }
+    RichEditorModelNG::SetMaxLines(frameNode, maxLine);
+}
+
+void ResetRichEditorMaxLines(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetMaxLines(frameNode, INT_MAX);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -574,7 +606,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         SetRichEditorEditMenuOptions, ResetRichEditorEditMenuOptions,
         SetRichEditorOnWillChange, ResetRichEditorOnWillChange, SetRichEditorOnDidChange, ResetRichEditorOnDidChange,
         SetRichEditorPlaceholder, ResetRichEditorPlaceholder,
-        SetRichEditorAboutToDelete, ResetRichEditorAboutToDelete, SetRichEditorBarState, ResetRichEditorBarState };
+        SetRichEditorAboutToDelete, ResetRichEditorAboutToDelete, SetRichEditorBarState, ResetRichEditorBarState,
+        SetRichEditorMaxLength, ResetRichEditorMaxLength, SetRichEditorMaxLines, ResetRichEditorMaxLines };
     return &modifier;
 }
 
