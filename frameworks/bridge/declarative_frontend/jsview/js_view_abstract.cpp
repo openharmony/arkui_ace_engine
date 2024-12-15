@@ -63,6 +63,7 @@
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -234,6 +235,8 @@ const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = 1.0_pct;
+
+enum class OperationType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN };
 
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
@@ -1692,6 +1695,47 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
         result = origin | COLOR_ALPHA_VALUE;
     }
     return result;
+}
+
+OperationType StringToOperationType(const std::string& id)
+{
+    if (id == "OH_DEFAULT_COPY") {
+        return OperationType::COPY;
+    } else if (id == "OH_DEFAULT_PASTE") {
+        return OperationType::PASTE;
+    } else if (id == "OH_DEFAULT_CUT") {
+        return OperationType::CUT;
+    } else if (id == "OH_DEFAULT_SELECT_ALL") {
+        return OperationType::SELECT_ALL;
+    } else {
+        return OperationType::UNKNOWN;
+    }
+}
+
+void UpdateOptionsLabelInfo(NG::MenuOptionsParam& param, const std::string& id)
+{
+    auto opType = StringToOperationType(id);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    switch (opType) {
+        case OperationType::COPY:
+            param.labelInfo = theme->GetCopyLabelInfo();
+            break;
+        case OperationType::PASTE:
+            param.labelInfo = theme->GetPasteLabelInfo();
+            break;
+        case OperationType::CUT:
+            param.labelInfo = theme->GetCutLabelInfo();
+            break;
+        case OperationType::SELECT_ALL:
+            param.labelInfo = theme->GetSelectAllLabelInfo();
+            break;
+        default:
+            param.labelInfo = "";
+            break;
+    }
 }
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
@@ -11217,6 +11261,14 @@ void JSViewAbstract::ParseOnCreateMenu(
                 ParseJsString(jsId, id);
             }
             menuOptionsParam.id = id;
+            auto jsLabelInfo = menuItemObject->GetProperty("labelInfo");
+            std::string labelInfo;
+            ParseJsString(jsLabelInfo, labelInfo);
+            if (jsLabelInfo->IsString() || jsLabelInfo->IsObject()) {
+                menuOptionsParam.labelInfo = labelInfo;
+            } else {
+                UpdateOptionsLabelInfo(menuOptionsParam, id);
+            }
             menuParams.emplace_back(menuOptionsParam);
         }
         return menuParams;
