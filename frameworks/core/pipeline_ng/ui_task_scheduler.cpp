@@ -325,28 +325,37 @@ void UITaskScheduler::FlushSafeAreaPaddingProcess()
     if (safeAreaPaddingProcessTasks_.empty()) {
         return;
     }
-    auto iter = safeAreaPaddingProcessTasks_.begin();
-    while (iter != safeAreaPaddingProcessTasks_.end()) {
+    auto safeAreaPaddingProcessTasks = safeAreaPaddingProcessTasks_;
+    auto iter = safeAreaPaddingProcessTasks.begin();
+    while (iter != safeAreaPaddingProcessTasks.end()) {
         auto node = *iter;
         if (!node) {
-            iter = safeAreaPaddingProcessTasks_.erase(iter);
+            iter = safeAreaPaddingProcessTasks.erase(iter);
         } else {
             node->ProcessSafeAreaPadding();
             ++iter;
         }
     }
     // clear caches after all process tasks
-    iter = safeAreaPaddingProcessTasks_.begin();
-    while (iter != safeAreaPaddingProcessTasks_.end()) {
+    iter = safeAreaPaddingProcessTasks.begin();
+    while (iter != safeAreaPaddingProcessTasks.end()) {
         auto node = *iter;
-        if (!node) {
-            iter = safeAreaPaddingProcessTasks_.erase(iter);
-        } else {
+        if (node) {
             const auto& geometryNode = node->GetGeometryNode();
             if (geometryNode) {
                 geometryNode->ResetAccumulatedSafeAreaPadding();
             }
-            ++iter;
+        }
+        ++iter;
+    }
+
+    auto eraseIter = safeAreaPaddingProcessTasks_.begin();
+    while (eraseIter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *eraseIter;
+        if (!node) {
+            eraseIter = safeAreaPaddingProcessTasks_.erase(eraseIter);
+        } else {
+            ++eraseIter;
         }
     }
 }
