@@ -20,6 +20,7 @@
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/data_resubmission_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/event_result_peer_impl.h"
 #include "core/interfaces/native/implementation/file_selector_param_peer_impl.h"
 #include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
 #include "core/interfaces/native/implementation/full_screen_exit_handler_peer_impl.h"
@@ -400,7 +401,6 @@ void OnFullScreenEnter(const OnFullScreenEnterCallback* value,
     Ark_FullScreenEnterEvent parameter;
     parameter.videoWidth = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalWidth());
     parameter.videoHeight = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalHeight());
-    parameter.handler.ptr = Referenced::RawPtr(eventInfo->GetHandler());
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();
     parameter.handler.ptr = peer;
@@ -764,6 +764,379 @@ void OnDataResubmitted(const Callback_OnDataResubmittedEvent_Void* value,
 #else
     pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebDataResubmitted");
 #endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnAudioStateChanged(const Callback_OnAudioStateChangedEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<AudioStateChangedEvent>(info.get());
+    Ark_OnAudioStateChangedEvent parameter;
+    parameter.playing = Converter::ArkValue<Ark_Boolean>(eventInfo->IsPlaying());
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter);
+}
+
+void OnFirstContentfulPaint(const Callback_OnFirstContentfulPaintEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
+        Ark_OnFirstContentfulPaintEvent parameter;
+        parameter.firstContentfulPaintMs = Converter::ArkValue<Ark_Number>(
+            eventInfo->GetFirstContentfulPaintMs());
+        parameter.navigationStartTick = Converter::ArkValue<Ark_Number>(eventInfo->GetNavigationStartTick());
+        arkCallback.Invoke(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebFirstContentfulPaint");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnFirstMeaningfulPaint(const OnFirstMeaningfulPaintCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<FirstMeaningfulPaintEvent>(info.get());
+        Ark_FirstMeaningfulPaint parameter;
+        parameter.firstMeaningfulPaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetFirstMeaningfulPaintTime());
+        parameter.navigationStartTime = Converter::ArkValue<Opt_Number>(eventInfo->GetNavigationStartTime());
+        arkCallback.Invoke(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebFirstMeaningfulPaint");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnLargestContentfulPaint(const OnLargestContentfulPaintCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
+        Ark_LargestContentfulPaint parameter;
+        parameter.imageBPP = Converter::ArkValue<Opt_Number>(eventInfo->GetImageBPP());
+        parameter.largestImageLoadEndTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestImageLoadEndTime());
+        parameter.largestImageLoadStartTime = Converter::ArkValue<Opt_Number>(
+            eventInfo->GetLargestImageLoadStartTime());
+        parameter.largestImagePaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestImagePaintTime());
+        parameter.largestTextPaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestTextPaintTime());
+        parameter.navigationStartTime = Converter::ArkValue<Opt_Number>(eventInfo->GetNavigationStartTime());
+        arkCallback.Invoke(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebLargestContentfulPaint");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
+    Ark_OnLoadInterceptEvent parameter;
+    auto peer = new WebResourceRequestPeer();
+    peer->webRequest = eventInfo->GetRequest();
+    parameter.data.ptr = peer;
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnLoadInterceptImpl return value can be incorrect");
+    return false;
+}
+
+void OnControllerAttached(const Callback_Void* value, WeakPtr<FrameNode> weakNode, int32_t instanceId) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback]() {
+        arkCallback.Invoke();
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebControllerAttached");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnOverScroll(const Callback_OnOverScrollEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
+    Ark_OnOverScrollEvent parameter;
+    parameter.xOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetX());
+    parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter);
+}
+
+void OnSafeBrowsingCheckResult(const OnSafeBrowsingCheckResultCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+        Ark_ThreatType parameter = Converter::ArkValue<Ark_ThreatType>(
+            static_cast<Converter::ThreatType>(eventInfo->GetThreatType()));
+        arkCallback.Invoke(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebSafeBrowsingCheckResult");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnNavigationEntryCommitted(const OnNavigationEntryCommittedCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NavigationEntryCommittedEvent>(info.get());
+        Ark_LoadCommittedDetails parameter;
+        parameter.didReplaceEntry = Converter::ArkValue<Ark_Boolean>(eventInfo->DidReplaceEntry());
+        parameter.isMainFrame = Converter::ArkValue<Ark_Boolean>(eventInfo->IsMainFrame());
+        parameter.isSameDocument = Converter::ArkValue<Ark_Boolean>(eventInfo->IsSameDocument());
+        parameter.navigationType = Converter::ArkValue<Ark_WebNavigationType>(eventInfo->GetNavigationType());
+        parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+        arkCallback.Invoke(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebNavigationEntryCommitted");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnIntelligentTrackingPrevention(const OnIntelligentTrackingPreventionCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<IntelligentTrackingPreventionResultEvent>(info.get());
+        Ark_IntelligentTrackingPreventionDetails parameter;
+        parameter.host = Converter::ArkValue<Ark_String>(eventInfo->GetHost());
+        parameter.trackerHost = Converter::ArkValue<Ark_String>(eventInfo->GetTrackerHost());
+        arkCallback.Invoke(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebIntelligentTrackingPreventionResult");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnNativeEmbedDataInfo(const Callback_NativeEmbedDataInfo_Void* valueInfo,
+    int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedDataInfo>(info);
+    Ark_NativeEmbedDataInfo parameter;
+    parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
+    auto emebdInfo = eventInfo->GetEmebdInfo();
+    Map_String_String map;
+    map.size = static_cast<Ark_Int32>(emebdInfo.params.size());
+    std::vector<std::string> key;
+    std::vector<std::string> value;
+    for (std::map<std::string, std::string>::iterator it = emebdInfo.params.begin();
+        it != emebdInfo.params.end(); ++it) {
+        key.push_back(it->first);
+        value.push_back(it->second);
+    }
+    Converter::ArkArrayHolder<Array_String> vecKeyHolder(key);
+    auto arkKeys = vecKeyHolder.ArkValue();
+    map.keys = arkKeys.array;
+    Converter::ArkArrayHolder<Array_String> vecValueHolder(value);
+    auto arkValues = vecValueHolder.ArkValue();
+    map.values = arkValues.array;
+    Ark_NativeEmbedInfo arkInfo = Converter::ArkValue<Ark_NativeEmbedInfo>(emebdInfo);
+    arkInfo.params = Converter::ArkValue<Opt_Map_String_String>(map);
+    parameter.info = Converter::ArkValue<Opt_NativeEmbedInfo>(arkInfo);
+    parameter.status = Converter::ArkValue<Opt_NativeEmbedStatus>(eventInfo->GetStatus());
+    parameter.surfaceId = Converter::ArkValue<Opt_String>(eventInfo->GetSurfaceId());
+    auto arkCallback = CallbackHelper(*valueInfo);
+    arkCallback.Invoke(parameter);
+}
+
+void OnNativeEmbedVisibilityChange(const OnNativeEmbedVisibilityChangeCallback* value,
+    int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedVisibilityInfo>(info);
+    Ark_NativeEmbedVisibilityInfo parameter;
+    parameter.embedId = Converter::ArkValue<Ark_String>(eventInfo->GetEmbedId());
+    parameter.visibility = Converter::ArkValue<Ark_Boolean>(eventInfo->GetVisibility());
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter);
+}
+
+void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
+    int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbeadTouchInfo>(info);
+    Ark_NativeEmbedTouchInfo parameter;
+    parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
+    auto touchEventInfo = eventInfo->GetTouchEventInfo();
+    Ark_TouchEvent touchEvent = Converter::ArkValue<Ark_TouchEvent>(touchEventInfo);
+    std::list<TouchLocationInfo> touches = touchEventInfo.GetTouches();
+    std::vector<TouchLocationInfo> vTouches { std::begin(touches), std::end(touches) };
+    Converter::ArkArrayHolder<Array_TouchObject> touchesHolder(vTouches);
+    touchEvent.touches = touchesHolder.ArkValue();
+    std::list<TouchLocationInfo> changedTouches = touchEventInfo.GetChangedTouches();
+    std::vector<TouchLocationInfo> vChangedTouches { std::begin(changedTouches), std::end(changedTouches) };
+    Converter::ArkArrayHolder<Array_TouchObject> changedTouchesHolder(vChangedTouches);
+    touchEvent.changedTouches = changedTouchesHolder.ArkValue();
+    parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(touchEvent);
+    Ark_EventResult arkEventResult;
+    auto peer = new EventResultPeer();
+    peer->handler = eventInfo->GetResult();
+    arkEventResult.ptr = peer;
+    parameter.result = Converter::ArkValue<Opt_EventResult>(arkEventResult);
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter);
+}
+
+bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<LoadOverrideEvent>(info);
+    Ark_WebResourceRequest parameter;
+    auto peer = new WebResourceRequestPeer();
+    peer->webRequest = eventInfo->GetRequest();
+    parameter.ptr = peer;
+    Callback_Boolean_Void continuation;
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnOverrideUrlLoadingImpl return value can be incorrect");
+    return false;
+}
+
+void OnRenderProcessNotResponding(const OnRenderProcessNotRespondingCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<RenderProcessNotRespondingEvent>(info);
+    Ark_RenderProcessNotRespondingData parameter;
+    parameter.jsStack = Converter::ArkValue<Ark_String>(eventInfo->GetJsStack());
+    parameter.pid = Converter::ArkValue<Ark_Number>(eventInfo->GetPid());
+    parameter.reason = Converter::ArkValue<Ark_RenderProcessNotRespondingReason>(
+        static_cast<RenderProcessNotRespondingReason>(eventInfo->GetReason()));
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter);
+}
+
+void OnRenderProcessResponding(const OnRenderProcessRespondingCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke();
+}
+
+void OnViewportFitChanged(const OnViewportFitChangedCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<ViewportFitChangedEvent>(info);
+    Ark_ViewportFit parameter = Converter::ArkValue<Ark_ViewportFit>(
+        static_cast<ViewportFit>(eventInfo->GetViewportFit()));
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter);
+}
+
+WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    WebKeyboardOption opt;
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, opt);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<InterceptKeyboardEvent>(info);
+    Ark_WebKeyboardCallbackInfo parameter;
+    auto peer = new WebKeyboardControllerPeer();
+    peer->handler = eventInfo->GetCustomKeyboardHandler();
+    parameter.controller.ptr = peer;
+
+    Map_String_String attributes;
+    auto attributesMap = eventInfo->GetAttributesMap();
+    attributes.size = static_cast<Ark_Int32>(attributesMap.size());
+    std::vector<std::string> key;
+    std::vector<std::string> value;
+    for (std::map<std::string, std::string>::iterator it = attributesMap.begin(); it != attributesMap.end(); ++it) {
+        key.push_back(it->first);
+        value.push_back(it->second);
+    }
+    Converter::ArkArrayHolder<Array_String> vecKeyHolder(key);
+    auto arkKeys = vecKeyHolder.ArkValue();
+    attributes.keys = arkKeys.array;
+    Converter::ArkArrayHolder<Array_String> vecValueHolder(value);
+    auto arkValues = vecValueHolder.ArkValue();
+    attributes.values = arkValues.array;
+    parameter.attributes = attributes;
+
+    Callback_WebKeyboardOptions_Void continuation;
+    auto arkCallback = CallbackHelper(*valueCallback);
+    arkCallback.Invoke(parameter, continuation);
+    LOGE("WebAttributeModifier::OnInterceptKeyboardAttachImpl return value can be incorrect");
+    return opt;
+}
+
+void OnAdsBlocked(const OnAdsBlockedCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
+    Ark_AdsBlockedDetails parameter;
+    parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+    std::vector<std::string> adsBlocked = eventInfo->GetAdsBlocked();
+    Converter::ArkArrayHolder<Array_String> adsBlockedHolder(adsBlocked);
+    parameter.adsBlocked = adsBlockedHolder.ArkValue();
+    auto arkCallback = CallbackHelper(*value);
+    arkCallback.Invoke(parameter);
 }
 
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier

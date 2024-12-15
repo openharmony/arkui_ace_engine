@@ -327,6 +327,41 @@ public:
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& pageVisibleId);
     static void SetOnDataResubmitted(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId);
+    static void SetAudioStateChangedId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged);
+    static void SetFirstContentfulPaintId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId);
+    static void SetFirstMeaningfulPaintId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId);
+    static void SetLargestContentfulPaintId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId);
+    static void SetOnLoadIntercept(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOverScrollId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetSafeBrowsingCheckResultId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId);
+    static void SetNavigationEntryCommittedId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId);
+    static void SetIntelligentTrackingPreventionResultId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& intelligentTrackingPreventionResultId);
+    static void SetNativeEmbedLifecycleChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetNativeEmbedVisibilityChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetNativeEmbedGestureEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnOverrideUrlLoading(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetRenderProcessNotRespondingId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetRenderProcessRespondingId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetViewportFitChangedId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnInterceptKeyboardAttach(
+        FrameNode* frameNode, std::function<WebKeyboardOption(const BaseEventInfo* info)>&& callback);
+    static void SetAdsBlockedEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

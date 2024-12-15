@@ -888,6 +888,28 @@ Header Convert(const Ark_Header& src)
 }
 
 template<>
+std::map<std::string, std::string> Convert(const Map_String_String& src)
+{
+    Array_String arkKeys {
+        .array = src.keys,
+        .length = src.size
+    };
+    Array_String arkValues {
+        .array = src.values,
+        .length = src.size
+    };
+
+    std::vector<std::string> keys = Convert<std::vector<std::string>>(arkKeys);
+    std::vector<std::string> values = Convert<std::vector<std::string>>(arkValues);
+
+    std::map<std::string, std::string> m;
+    for (size_t i = 0; i < values.size(); ++i) {
+        m[keys[i]] = values[i];
+    }
+    return m;
+}
+
+template<>
 std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
 {
     std::pair<Color, Dimension> gradientColor;

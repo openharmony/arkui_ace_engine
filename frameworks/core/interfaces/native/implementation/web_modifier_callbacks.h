@@ -104,6 +104,43 @@ void OnPageVisible(const Callback_OnPageVisibleEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
 void OnDataResubmitted(const Callback_OnDataResubmittedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnAudioStateChanged(const Callback_OnAudioStateChangedEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnFirstContentfulPaint(const Callback_OnFirstContentfulPaintEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnFirstMeaningfulPaint(const OnFirstMeaningfulPaintCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnLargestContentfulPaint(const OnLargestContentfulPaintCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnControllerAttached(const Callback_Void* value, WeakPtr<FrameNode> weakNode, int32_t instanceId);
+void OnOverScroll(const Callback_OnOverScrollEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnSafeBrowsingCheckResult(const OnSafeBrowsingCheckResultCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnNavigationEntryCommitted(const OnNavigationEntryCommittedCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnIntelligentTrackingPrevention(const OnIntelligentTrackingPreventionCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnNativeEmbedDataInfo(const Callback_NativeEmbedDataInfo_Void* valueInfo,
+    int32_t instanceId, const BaseEventInfo* info);
+void OnNativeEmbedVisibilityChange(const OnNativeEmbedVisibilityChangeCallback* value,
+    int32_t instanceId, const BaseEventInfo* info);
+void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
+    int32_t instanceId, const BaseEventInfo* info);
+bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnRenderProcessNotResponding(const OnRenderProcessNotRespondingCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnRenderProcessResponding(const OnRenderProcessRespondingCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnViewportFitChanged(const OnViewportFitChangedCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnAdsBlocked(const OnAdsBlockedCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED

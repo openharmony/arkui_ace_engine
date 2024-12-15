@@ -117,6 +117,13 @@ enum class SslError {
     UNTRUSTED = 3,
 };
 
+enum class ThreatType {
+    ILLEGAL = 0,
+    FRAUD = 1,
+    RISK = 2,
+    WARNING = 3,
+};
+
 struct Header {
     std::string headerKey;
     std::string headerValue;
