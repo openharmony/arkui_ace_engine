@@ -94,9 +94,9 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    void SetStartNode(const RefPtr<NG::UINode>& startNode);
+    void SetStartNode(const RefPtr<NG::UINode>& startNode, bool isFromComponentContent = false);
 
-    void SetEndNode(const RefPtr<NG::UINode>& endNode);
+    void SetEndNode(const RefPtr<NG::UINode>& endNode, bool isFromComponentContent = false);
 
     SizeF GetContentSize() const;
 
@@ -283,6 +283,7 @@ private:
     bool inStartDeleteArea_ = false;
     bool inEndDeleteArea_ = false;
     bool curOffsetSwipeChanged_ = false;
+    bool isFromComponentContent_ = false;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> springController_;

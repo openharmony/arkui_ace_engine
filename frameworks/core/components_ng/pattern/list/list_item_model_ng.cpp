@@ -270,12 +270,12 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     if (isStartArea) {
-        pattern->SetStartNode(builderComponent);
+        pattern->SetStartNode(builderComponent, true);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
     } else {
-        pattern->SetEndNode(builderComponent);
+        pattern->SetEndNode(builderComponent, true);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);

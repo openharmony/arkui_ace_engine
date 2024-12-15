@@ -124,7 +124,7 @@ void ListItemLayoutAlgorithm::SetSwipeActionNode(
         auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        if (!curOffsetSwipeChanged_) {
+        if (!curOffsetSwipeChanged_ && isFromComponentContent_) {
             curOffset_ = childSize.CrossSize(axis_);
             startNodeSize_ = childSize.CrossSize(axis_);
         }
@@ -138,7 +138,7 @@ void ListItemLayoutAlgorithm::SetSwipeActionNode(
         auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        if (!curOffsetSwipeChanged_) {
+        if (!curOffsetSwipeChanged_ && isFromComponentContent_) {
             curOffset_ = -childSize.CrossSize(axis_);
             endNodeSize_ = childSize.CrossSize(axis_);
         }
