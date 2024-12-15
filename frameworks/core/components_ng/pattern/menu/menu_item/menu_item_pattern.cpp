@@ -308,7 +308,6 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
         auto frameNode = GetSubMenu(customNode);
         CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
-        menuPattern->SetShowedSubMenu(frameNode);
         return;
     }
 
@@ -473,13 +472,21 @@ void MenuItemPattern::HideSubMenu()
 void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
 {
     CHECK_NULL_VOID(expandableNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     isExpanded_ = !isExpanded_;
     if (isExpanded_) {
         embeddedMenu_ = expandableNode;
         ShowEmbeddedExpandMenu(embeddedMenu_);
+        menuPattern->SetShowedSubMenu(embeddedMenu_);
     } else {
         HideEmbeddedExpandMenu(embeddedMenu_);
         embeddedMenu_ = nullptr;
+        menuPattern->SetShowedSubMenu(nullptr);
     }
 }
 
