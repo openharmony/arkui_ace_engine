@@ -323,6 +323,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(focusMenuRenderContext);
     if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
         auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
+        CHECK_NULL_VOID(focusMenuBlurStyle);
         param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
@@ -413,6 +414,7 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
 
 void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
+    CHECK_NULL_VOID(subMenu);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
@@ -582,6 +584,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
 
 void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode)
 {
+    CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
@@ -1527,13 +1530,15 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         node = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     }
-    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(node);
+    auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(false);
     auto context = PipelineBase::GetCurrentContext();
-    auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());

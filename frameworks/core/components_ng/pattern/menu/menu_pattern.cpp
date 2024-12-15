@@ -1012,6 +1012,7 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     // apply default padding from theme on inner menu
     PaddingProperty padding;
     padding.SetEdges(CalcLength(theme->GetOutPadding()));
