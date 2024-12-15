@@ -793,6 +793,45 @@ void GridLayoutInfo::ClearMapsToEndContainsMultiLineItem(int32_t idx)
     }
 }
 
+void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
+{
+    if (hasMultiLineItem_) {
+        ClearMapsFromStartContainsMultiLineItem(idx);
+        return;
+    }
+    auto gridIt = gridMatrix_.lower_bound(idx);
+    gridMatrix_.erase(gridMatrix_.begin(), gridIt);
+    auto lineIt = lineHeightMap_.lower_bound(idx);
+    lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+}
+
+void GridLayoutInfo::ClearMapsFromStartContainsMultiLineItem(int32_t idx)
+{
+    int32_t minIndex = INT_MAX;
+    for (const auto& col : gridMatrix_[idx]) {
+        minIndex = std::min(minIndex, col.second);
+    }
+
+    auto iter = gridMatrix_.begin();
+    int targetLine = idx;
+    while (targetLine > iter->first) {
+        int32_t maxIndex = INT_MIN;
+        for (const auto& col : gridMatrix_[targetLine - 1]) {
+            maxIndex = std::max(maxIndex, col.second);
+        }
+        if (maxIndex < minIndex) {
+            break;
+        }
+        targetLine--;
+    }
+    gridMatrix_.erase(gridMatrix_.begin(), gridMatrix_.find(targetLine));
+
+    auto lineIt = lineHeightMap_.find(targetLine);
+    if (lineIt != lineHeightMap_.end()) {
+        lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+    }
+}
+
 void GridLayoutInfo::ClearHeightsToEnd(int32_t idx)
 {
     auto lineIt = lineHeightMap_.lower_bound(idx);
