@@ -610,9 +610,8 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
     if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
-        !(expandDisplay && isShowInSubWindow_)) {
+        !(theme->GetExpandDisplay() && isShowInSubWindow_)) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();
