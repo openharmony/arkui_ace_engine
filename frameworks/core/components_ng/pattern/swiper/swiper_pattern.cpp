@@ -202,7 +202,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetHasCachedCapture(hasCachedCapture_);
     algo->SetIsCaptureReverse(isCaptureReverse_);
     algo->SetCachedCount(GetCachedCount());
-    algo->SetNextMarginIgnoreBlank(nextMarginIgnoreBlank_);
     algo->SetIgnoreBlankOffset(ignoreBlankOffset_);
     return algo;
 }
@@ -1116,6 +1115,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     contentMainSize_ = algo->GetContentMainSize();
     oldContentMainSize_ = contentMainSize_;
     crossMatchChild_ = algo->IsCrossMatchChild();
+    ignoreBlankOffset_ = algo->GetIgnoreBlankOffset();
     oldIndex_ = currentIndex_;
     oldChildrenSize_ = TotalCount();
     needFireCustomAnimationEvent_ = true;
@@ -1149,16 +1149,6 @@ void SwiperPattern::UpdateIgnoreBlankOffsetWithIndex()
         auto lastIgnoreBlankOffset = ignoreBlankOffset_;
         ignoreBlankOffset_ = 0.0f;
         UpdateIgnoreBlankOffsetInMap(lastIgnoreBlankOffset);
-        return;
-    }
-    if (jumpIndex_.has_value()) {
-        if (prevMarginIgnoreBlank_ && jumpIndex_.value() == 0) {
-            ignoreBlankOffset_ = -GetPrevMarginWithItemSpace();
-        } else if (nextMarginIgnoreBlank_ && jumpIndex_.value() >= (TotalCount() - GetDisplayCount())) {
-            ignoreBlankOffset_ = GetNextMarginWithItemSpace();
-        } else {
-            ignoreBlankOffset_ = 0.0f;
-        }
         return;
     }
     if (targetIndex_.has_value()) {
@@ -3798,9 +3788,7 @@ float SwiperPattern::GetItemSpace() const
     if (props->IgnoreItemSpace()) {
         return 0.0f;
     }
-    auto itemSpace =
-        ConvertToPx(props->GetItemSpace().value_or(0.0_vp), props->GetLayoutConstraint()->scaleProperty, 0.0f)
-            .value_or(0.0f);
+    auto itemSpace = props->GetItemSpace().value_or(0.0_vp).ConvertToPx();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
     auto geometryNode = host->GetGeometryNode();
