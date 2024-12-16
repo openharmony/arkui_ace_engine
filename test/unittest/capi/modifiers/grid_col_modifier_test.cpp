@@ -25,46 +25,18 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace::NG {
-namespace Converter {
-    void AssignOptValue(Opt_Number& dst, const int32_t& src)
-    {
-        auto arkValue = Converter::ArkValue<Ark_Number>(src);
-        dst.tag = ARK_TAG_INT32;
-        dst.value = arkValue;
-    }
-    void AssignOptValue(Opt_Union_Number_GridColColumnOption& dst, const Ark_Union_Number_GridColColumnOption& src)
-    {
-        dst.tag = ARK_TAG_OBJECT;
-        dst.value = src;
-    }
-    void AssignOptValue(Opt_GridColOptions& dst, const Ark_GridColOptions& src)
-    {
-        dst.tag = ARK_TAG_OBJECT;
-        dst.value = src;
-    }
-    template<typename To, typename From>
-    To OptValue(const From& src)
-    {
-        To result;
-        AssignOptValue(result, src);
-        return result;
-    }
-    template<>
-    Ark_GridColColumnOption ArkValue(const int32_t& value)
-    {
-        Opt_Number optNumValue = OptValue<Opt_Number>(value);
-        return {
-            .lg = optNumValue,
-            .md = optNumValue,
-            .sm = optNumValue,
-            .xl = optNumValue,
-            .xs = optNumValue,
-            .xxl = optNumValue
-        };
-    }
-} // namespace Converter
+void AssignArkValue(Ark_GridColColumnOption& dst, const int32_t& value)
+{
+    Opt_Number optNumValue = OHOS::Ace::NG::Converter::ArkValue<Opt_Number>(value);
+    dst.lg = optNumValue;
+    dst.md = optNumValue;
+    dst.sm = optNumValue;
+    dst.xl = optNumValue;
+    dst.xs = optNumValue;
+    dst.xxl = optNumValue;
+}
 
+namespace OHOS::Ace::NG {
 struct GridColOptions {
     int32_t span;
     int32_t offset;
@@ -91,15 +63,15 @@ using VectorOptionsTest = std::vector<TupleOptionsTest>;
 
 TupleOptionsTest getTestTuple(const GridColOptionsTestRow& src)
 {
-    auto arkSpanInputValue = Converter::ArkUnion<Ark_Union_Number_GridColColumnOption, Ark_Number>(src.input.span);
-    auto arkOffsetInputValue = Converter::ArkUnion<Ark_Union_Number_GridColColumnOption, Ark_Number>(src.input.offset);
-    auto arkOrderInputValue = Converter::ArkUnion<Ark_Union_Number_GridColColumnOption, Ark_Number>(src.input.order);
+    auto arkSpanInputValue = Converter::ArkUnion<Opt_Union_Number_GridColColumnOption, Ark_Number>(src.input.span);
+    auto arkOffsetInputValue = Converter::ArkUnion<Opt_Union_Number_GridColColumnOption, Ark_Number>(src.input.offset);
+    auto arkOrderInputValue = Converter::ArkUnion<Opt_Union_Number_GridColColumnOption, Ark_Number>(src.input.order);
     Ark_GridColOptions arkInputValue = {
-        .span = Converter::OptValue<Opt_Union_Number_GridColColumnOption>(arkSpanInputValue),
-        .offset = Converter::OptValue<Opt_Union_Number_GridColColumnOption>(arkOffsetInputValue),
-        .order = Converter::OptValue<Opt_Union_Number_GridColColumnOption>(arkOrderInputValue),
+        .span = arkSpanInputValue,
+        .offset = arkOffsetInputValue,
+        .order = arkOrderInputValue,
     };
-    auto optInputValue = Converter::OptValue<Opt_GridColOptions>(arkInputValue);
+    auto optInputValue = Converter::ArkValue<Opt_GridColOptions>(arkInputValue);
     return {src.result, optInputValue, src.expected};
 }
 

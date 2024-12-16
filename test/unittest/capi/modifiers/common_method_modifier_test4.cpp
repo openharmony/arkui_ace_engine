@@ -23,8 +23,31 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace::NG {
+void AssignArkValue(Ark_InvertOptions& dst, const float& value)
+{
+    auto arkVal = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(value);
+    dst = {arkVal, arkVal, arkVal, arkVal};
+}
 
+void AssignArkValue(Ark_PixelStretchEffectOptions& dst, const Ark_Empty& value)
+{
+    dst.left = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+    dst.top = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+    dst.right = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+    dst.bottom = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+}
+
+namespace OHOS::Ace {
+void AssignArkValue(Ark_InvertOptions& dst, const InvertOption& value)
+{
+    dst.low = NG::Converter::ArkValue<Ark_Number>(value.low_);
+    dst.high = NG::Converter::ArkValue<Ark_Number>(value.high_);
+    dst.threshold = NG::Converter::ArkValue<Ark_Number>(value.threshold_);
+    dst.thresholdRange = NG::Converter::ArkValue<Ark_Number>(value.thresholdRange_);
+}
+}
+
+namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
     const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
@@ -104,47 +127,16 @@ struct PixelStretchEffect {
     float right = 0.0;
     float bottom = 0.0;
 };
-namespace Converter {
-    template<>
-    Ark_InvertOptions ArkValue(const float& value)
-    {
-        auto arkVal = ArkValue<Ark_Number>(value);
-        return {arkVal, arkVal, arkVal, arkVal};
-    }
-    template<>
-    Ark_InvertOptions ArkValue(const InvertOption& value)
-    {
-        return {
-            .low = ArkValue<Ark_Number>(value.low_),
-            .high = ArkValue<Ark_Number>(value.high_),
-            .threshold = ArkValue<Ark_Number>(value.threshold_),
-            .thresholdRange = ArkValue<Ark_Number>(value.thresholdRange_),
-        };
-    }
-    template<>
-    Ark_PixelStretchEffectOptions ArkValue(const Ark_Empty& value)
-    {
-        Ark_PixelStretchEffectOptions dst;
-        dst.left = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        dst.top = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        dst.right = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        dst.bottom = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        return dst;
-    }
-    template<>
-    Ark_PixelStretchEffectOptions ArkValue(const PixelStretchEffect& value)
-    {
-        Ark_PixelStretchEffectOptions dst;
-        auto left = Dimension(value.left);
-        auto top = Dimension(value.top);
-        auto right = Dimension(value.right);
-        auto bottom = Dimension(value.bottom);
-        dst.left = Converter::ArkValue<Opt_Length>(left);
-        dst.top = Converter::ArkValue<Opt_Length>(top);
-        dst.right = Converter::ArkValue<Opt_Length>(right);
-        dst.bottom = Converter::ArkValue<Opt_Length>(bottom);
-        return dst;
-    }
+void AssignArkValue(Ark_PixelStretchEffectOptions& dst, const PixelStretchEffect& value)
+{
+    auto left = Dimension(value.left);
+    auto top = Dimension(value.top);
+    auto right = Dimension(value.right);
+    auto bottom = Dimension(value.bottom);
+    dst.left = Converter::ArkValue<Opt_Length>(left);
+    dst.top = Converter::ArkValue<Opt_Length>(top);
+    dst.right = Converter::ArkValue<Opt_Length>(right);
+    dst.bottom = Converter::ArkValue<Opt_Length>(bottom);
 }
 class CommonMethodModifierTest4 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,

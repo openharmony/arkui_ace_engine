@@ -23,7 +23,6 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_TRANSFORM_NAME = "transform";
     const auto ATTRIBUTE_TRANSFORM_DEFAULT_VALUE = "{}";
@@ -39,23 +38,7 @@ namespace {
     const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_KEY_NAME = "id";
     const auto ATTRIBUTE_KEY_DEFAULT_VALUE = "";
-}
-struct ClickEffect {
-    Ark_ClickEffectLevel level;
-    float scale = 0.0f;
-};
-void AssignArkValue(Ark_ClickEffect& dst, const ClickEffect& value)
-{
-    dst.level = Converter::ArkValue<Ark_ClickEffectLevel>(value.level);
-    dst.scale = Converter::ArkValue<Opt_Number>(value.scale);
-}
-struct MotionPathOptionTest {
-    std::string path = "";
-    std::optional<float> from = 0.0f;
-    std::optional<float> to = 1.0f;
-    std::optional<bool> rotatable = false;
-};
-namespace Converter {
+
     bool StrToArrayChar(char (&dst)[20], const char* src)
     {
         if (src == nullptr) {
@@ -74,29 +57,41 @@ namespace Converter {
         dst[std::min(srcLen, maxLen)] = '\0';
         return true;
     }
-    template<>
-    Ark_CustomObject ArkValue(const double (&value)[4][4])
-    {
-        LOGE("This reverse converter is created for testing purposes only. Custom objects are not supported.");
-        Ark_CustomObject dst;
-        if (StrToArrayChar(dst.kind, "Matrix4")) {
-            const int rowCount = sizeof(value) / sizeof(value[0]);
-            for (int i = 0; i < rowCount; ++i) {
-                dst.pointers[i] = (void*)value[i];
-            }
+} // namespace
+
+void AssignArkValue(Ark_CustomObject& dst, const double (&value)[4][4])
+{
+    LOGE("This reverse converter is created for testing purposes only. Custom objects are not supported.");
+    if (StrToArrayChar(dst.kind, "Matrix4")) {
+        const int rowCount = sizeof(value) / sizeof(value[0]);
+        for (int i = 0; i < rowCount; ++i) {
+            dst.pointers[i] = (void*)value[i];
         }
-        return dst;
     }
-    template<>
-    Ark_MotionPathOptions ArkValue(const MotionPathOptionTest& src)
-    {
-        Ark_MotionPathOptions dst;
-        dst.path = ArkValue<Ark_String>(src.path);
-        dst.from = ArkValue<Opt_Number>(src.from);
-        dst.to = ArkValue<Opt_Number>(src.to);
-        dst.rotatable = ArkValue<Opt_Boolean>(src.rotatable);
-        return dst;
-    }
+}
+
+namespace OHOS::Ace::NG {
+struct ClickEffect {
+    Ark_ClickEffectLevel level;
+    float scale;
+};
+void AssignArkValue(Ark_ClickEffect& dst, const ClickEffect& value)
+{
+    dst.level = value.level;
+    dst.scale = Converter::ArkValue<Opt_Number>(value.scale);
+}
+struct MotionPathOptionTest {
+    std::string path = "";
+    std::optional<float> from = 0.0f;
+    std::optional<float> to = 1.0f;
+    std::optional<bool> rotatable = false;
+};
+void AssignArkValue(Ark_MotionPathOptions& dst, const MotionPathOptionTest& src)
+{
+    dst.path = Converter::ArkValue<Ark_String>(src.path);
+    dst.from = Converter::ArkValue<Opt_Number>(src.from);
+    dst.to = Converter::ArkValue<Opt_Number>(src.to);
+    dst.rotatable = Converter::ArkValue<Opt_Boolean>(src.rotatable);
 }
 class CommonMethodModifierTest6 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
@@ -170,11 +165,11 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, Test
     Ark_CustomObject invalidValue2 = {};
     Ark_CustomObject invalidValue3 = {};
 
-    if (!Converter::StrToArrayChar(invalidValue2.kind, "invalidType")) {
+    if (!StrToArrayChar(invalidValue2.kind, "invalidType")) {
         LOGE("Error copying string to invalidValue2.kind");
         return;
     }
-    if (!Converter::StrToArrayChar(invalidValue3.kind, "Matrix4")) {
+    if (!StrToArrayChar(invalidValue3.kind, "Matrix4")) {
         LOGE("Error copying string to invalidValue3.kind");
         return;
     }
@@ -370,10 +365,10 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestValidValues, TestS
     ASSERT_NE(modifier_->setMotionPath, nullptr);
     using OneTestStep = std::tuple<Ark_MotionPathOptions, std::string>;
     MotionPathOptionTest defaultValue;
+    MotionPathOptionTest validValue = {.path = "path", .from = 1.0f, .to = 2.0f, .rotatable = true};
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_MotionPathOptions>(defaultValue), ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE},
-        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest(
-            {.path = "path", .from = 1.0f, .to = 2.0f, .rotatable = true})), ""},
+        {Converter::ArkValue<Ark_MotionPathOptions>(validValue), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setMotionPath(node_, &inputValue);
@@ -392,12 +387,11 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestInvalidValues, Tes
 {
     ASSERT_NE(modifier_->setMotionPath, nullptr);
     using OneTestStep = std::tuple<Ark_MotionPathOptions, std::string>;
-    MotionPathOptionTest defaultValue;
+    MotionPathOptionTest invalidValue1 = {.path = "path", .from = 2.0f, .to = 1.0f, .rotatable = true};
+    MotionPathOptionTest invalidValue2 = {.path = "path", .from = -2.0f, .to = -1.0f, .rotatable = true};
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest(
-            {.path = "path", .from = 2.0f, .to = 1.0f, .rotatable = true})), ""},
-        {Converter::ArkValue<Ark_MotionPathOptions>(MotionPathOptionTest(
-            {.path = "path", .from = -2.0f, .to = -1.0f, .rotatable = true})), ""},
+        {Converter::ArkValue<Ark_MotionPathOptions>(invalidValue1), ""},
+        {Converter::ArkValue<Ark_MotionPathOptions>(invalidValue2), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setMotionPath(node_, &inputValue);

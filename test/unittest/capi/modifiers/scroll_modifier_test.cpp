@@ -401,8 +401,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
     EXPECT_EQ(setVal, testValue.ToString());
 
     auto strVal = std::string("222.99px");
-    auto testStr = Converter::ArkValue<Ark_String>(strVal.data());
-    arkVal = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(testStr);
+    arkVal = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(strVal);
 
     modifier_->setScrollBarWidth(node_, &arkVal);
     setVal = GetStringAttribute(node_, jsonKey);
@@ -694,7 +693,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetValues, testing::ext::TestSize.Level1
     auto edgeEffectOptions = json->GetValue("edgeEffectOptions");
 
     bool testVal1 = edgeEffectOptions ? !GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled") : false;
-    auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(testVal1));
+    auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(testVal1);
     Ark_EdgeEffect effect = Converter::ArkValue<Ark_EdgeEffect>(EdgeEffect::FADE);
 
     modifier_->setEdgeEffect(node_, effect, &options);
@@ -722,7 +721,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
     auto defaultAlways = GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled");
     auto defaultEffect = GetStringAttribute(node_, "edgeEffect");
 
-    auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(defaultAlways));
+    auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(defaultAlways);
     Ark_EdgeEffect effect = static_cast<Ark_EdgeEffect>(INT_MAX);
     modifier_->setEdgeEffect(node_, effect, &options);
 
@@ -771,7 +770,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 
     Ark_Scroller arkScroller;
     arkScroller.ptr = peerImplPtr;
-    Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(std::optional<Ark_Scroller>(arkScroller));
+    Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(arkScroller);
     modifier_->setScrollOptions(node_, &scroller);
 
     RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();

@@ -483,8 +483,8 @@ HWTEST_F(CheckboxModifierTest, setMarkTestValidValues, TestSize.Level1)
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
     Ark_Length len1 = Converter::ArkValue<Ark_Length>(SIZE1);
     Ark_Length len2 = Converter::ArkValue<Ark_Length>(SIZE2);
-    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len1));
-    Opt_Length opt2 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len2));
+    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(len1);
+    Opt_Length opt2 = Converter::ArkValue<Opt_Length>(len2);
 
     std::unique_ptr<JsonValue> resultMark;
     std::unique_ptr<JsonValue> jsonValue;
@@ -525,8 +525,8 @@ HWTEST_F(CheckboxModifierTest, setMarkTestInvalidValues, TestSize.Level1)
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000);
     Ark_Length len1 = Converter::ArkValue<Ark_Length>(0);
     Ark_Length len2 = Converter::ArkValue<Ark_Length>(0);
-    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len1));
-    Opt_Length opt2 = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(len2));
+    Opt_Length opt1 = Converter::ArkValue<Opt_Length>(len1);
+    Opt_Length opt2 = Converter::ArkValue<Opt_Length>(len2);
     std::string resultStr;
     std::string expectedStr;
 

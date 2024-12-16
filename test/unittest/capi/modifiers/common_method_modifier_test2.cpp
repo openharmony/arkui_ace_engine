@@ -99,14 +99,21 @@ bool operator==(const OHOS::Ace::DimensionRect& lhs, const OHOS::Ace::DimensionR
 } // namespace
 
 namespace Converter {
-    Ark_Tuple_Number_Number ArkValue(Ark_Number value0, Ark_Number value1)
+    struct BlurOptions {
+        Ark_Number value0;
+        Ark_Number value1;
+    };
+    BlurOptions ArkValue(Ark_Number value0, Ark_Number value1)
     {
-        return {.value0 = value0, .value1 = value1};
+        return {
+            .value0 = value0,
+            .value1 = value1
+        };
     }
-    template<>
-    Ark_BlurOptions ArkValue(const Ark_Tuple_Number_Number& value)
+    void AssignArkValue(Ark_BlurOptions& dst, const BlurOptions& value)
     {
-        return {.grayscale = value};
+        dst.grayscale.value0 = value.value0;
+        dst.grayscale.value1 = value.value1;
     }
 }
 
@@ -1372,7 +1379,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
     auto grayscale = Converter::ArkValue(
         Converter::ArkValue<Ark_Number>(grayCoeff1),
         Converter::ArkValue<Ark_Number>(grayCoeff2));
-    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
 
     modifier_->setBackdropBlur(node_, &radius, &options);
 
@@ -1398,7 +1405,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullRadiusValue, TestSize.Le
     ASSERT_NE(json, nullptr);
     double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
-    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
 
     modifier_->setBackdropBlur(node_, nullptr, &options);
 
@@ -1421,7 +1428,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Lev
 
     Ark_Number radius = Converter::ArkValue<Ark_Number>(0);
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
-    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
 
     modifier_->setBackdropBlur(node_, &radius, &options);
 
@@ -1468,7 +1475,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
 
     Ark_Number faultyNumber = Converter::ArkValue<Ark_Number>(0);
     auto grayscale = Converter::ArkValue(faultyNumber, faultyNumber);
-    auto options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
     modifier_->setBackdropBlur(node_, &radius, &options);
 
     auto json = GetJsonValue(node_);
@@ -1483,7 +1490,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
     renderMock->backdropBlurOption.grayscale.clear();
     auto goodNumber = Converter::ArkValue<Ark_Number>(goodNumberFloat);
     grayscale = Converter::ArkValue(goodNumber, faultyNumber);
-    options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
     modifier_->setBackdropBlur(node_, &radius, &options);
 
     json = GetJsonValue(node_);
@@ -1497,7 +1504,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
 
     renderMock->backdropBlurOption.grayscale.clear();
     grayscale = Converter::ArkValue(faultyNumber, goodNumber);
-    options = Converter::ArkValue<Opt_BlurOptions>(Converter::ArkValue<Ark_BlurOptions>(grayscale));
+    options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
     modifier_->setBackdropBlur(node_, &radius, &options);
 
     json = GetJsonValue(node_);
@@ -1675,7 +1682,7 @@ HWTEST_F(CommonMethodModifierTest2, setMarkAnchorTestValidValues, TestSize.Level
 {
     Ark_Position position;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN_1) {
-        position.x = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        position.x = Converter::ArkValue<Opt_Length>(arkLength);
         position.y = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto value = Converter::ArkUnion<Ark_Union_Position_LocalizedPosition, Ark_Position>(position);
         modifier_->setMarkAnchor(node_, &value);

@@ -181,7 +181,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, autoCancelTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     // check false
-    options.autoCancel = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(false));
+    options.autoCancel = Converter::ArkValue<Opt_Boolean>(false);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -189,7 +189,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, autoCancelTest, TestSize.Level1)
     FinalizePeer();
 
     // check true
-    options.autoCancel = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(true));
+    options.autoCancel = Converter::ArkValue<Opt_Boolean>(true);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -222,7 +222,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, alignmentTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : ALIGNMENT_TEST_PLAN) {
-        options.alignment = Converter::ArkValue<Opt_DialogAlignment>(std::optional<Ark_DialogAlignment>(value));
+        options.alignment = Converter::ArkValue<Opt_DialogAlignment>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -266,7 +266,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
     for (const auto& [value, expectVal] : OFFSET_TEST_PLAN) {
         offset.dx = value;
         offset.dy = Converter::ArkValue<Ark_Length>(0);
-        options.offset = Converter::ArkValue<Opt_Offset>(std::optional<Ark_Offset>(offset));
+        options.offset = Converter::ArkValue<Opt_Offset>(offset);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -278,7 +278,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
     for (const auto& [value, expectVal] : OFFSET_TEST_PLAN) {
         offset.dy = value;
         offset.dx = Converter::ArkValue<Ark_Length>(0);
-        options.offset = Converter::ArkValue<Opt_Offset>(std::optional<Ark_Offset>(offset));
+        options.offset = Converter::ArkValue<Opt_Offset>(offset);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -300,7 +300,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, customStyleTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     // check true
-    options.customStyle = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(true));
+    options.customStyle = Converter::ArkValue<Opt_Boolean>(true);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -308,7 +308,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, customStyleTest, TestSize.Level1)
     FinalizePeer();
 
     // check false
-    options.customStyle = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(false));
+    options.customStyle = Converter::ArkValue<Opt_Boolean>(false);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -338,7 +338,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, gridCountTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : GRID_COUNT_TEST_PLAN) {
-        options.gridCount = Converter::ArkValue<Opt_Number>(std::optional<Ark_Number>(value));
+        options.gridCount = Converter::ArkValue<Opt_Number>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -366,7 +366,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, maskColorTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
-        options.maskColor = Converter::ArkValue<Opt_ResourceColor>(std::optional<Ark_ResourceColor>(value));
+        options.maskColor = Converter::ArkValue<Opt_ResourceColor>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -400,7 +400,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, showInSubWindowTest, TestSize.Level
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     // check true
-    options.showInSubWindow = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(true));
+    options.showInSubWindow = Converter::ArkValue<Opt_Boolean>(true);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -408,7 +408,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, showInSubWindowTest, TestSize.Level
     FinalizePeer();
 
     // check false
-    options.showInSubWindow = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(false));
+    options.showInSubWindow = Converter::ArkValue<Opt_Boolean>(false);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -428,7 +428,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, backgroundColorTest, TestSize.Level
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
-        options.backgroundColor = Converter::ArkValue<Opt_ResourceColor>(std::optional<Ark_ResourceColor>(value));
+        options.backgroundColor = Converter::ArkValue<Opt_ResourceColor>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -452,7 +452,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, isModalTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     // check false
-    options.isModal = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(false));
+    options.isModal = Converter::ArkValue<Opt_Boolean>(false);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -460,7 +460,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, isModalTest, TestSize.Level1)
     FinalizePeer();
 
     // check true
-    options.isModal = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(true));
+    options.isModal = Converter::ArkValue<Opt_Boolean>(true);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -503,7 +503,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, widthTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
-        options.width = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        options.width = Converter::ArkValue<Opt_Length>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -525,7 +525,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, widthInvalidTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& value : SIZE_INVALID_TEST_PLAN) {
-        options.width = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        options.width = Converter::ArkValue<Opt_Length>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -546,7 +546,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, heightTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
-        options.height = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        options.height = Converter::ArkValue<Opt_Length>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -568,7 +568,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, heightInvalidTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& value : SIZE_INVALID_TEST_PLAN) {
-        options.height = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        options.height = Converter::ArkValue<Opt_Length>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -590,8 +590,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value);
-        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(
-            std::optional<Ark_Union_Dimension_BorderRadiuses>(arkUnion));
+        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -618,8 +617,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusInvalidTest, TestSize.L
 
     for (const auto& value : SIZE_INVALID_TEST_PLAN) {
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value);
-        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(
-            std::optional<Ark_Union_Dimension_BorderRadiuses>(arkUnion));
+        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -646,13 +644,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusesInvalidTest, TestSize
 
     for (const auto& value : SIZE_INVALID_TEST_PLAN) {
         Ark_BorderRadiuses borderRadiuses;
-        borderRadiuses.topLeft = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
-        borderRadiuses.topRight = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
-        borderRadiuses.bottomLeft = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
-        borderRadiuses.bottomRight = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        borderRadiuses.topLeft = Converter::ArkValue<Opt_Length>(value);
+        borderRadiuses.topRight = Converter::ArkValue<Opt_Length>(value);
+        borderRadiuses.bottomLeft = Converter::ArkValue<Opt_Length>(value);
+        borderRadiuses.bottomRight = Converter::ArkValue<Opt_Length>(value);
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
-        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(
-            std::optional<Ark_Union_Dimension_BorderRadiuses>(arkUnion));
+        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -679,13 +676,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTopLeftTest, TestSize.L
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_BorderRadiuses borderRadiuses;
-        borderRadiuses.topLeft = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        borderRadiuses.topLeft = Converter::ArkValue<Opt_Length>(value);
         borderRadiuses.topRight = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.bottomLeft = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.bottomRight = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
-        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(
-            std::optional<Ark_Union_Dimension_BorderRadiuses>(arkUnion));
+        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -712,13 +708,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTopRightTest, TestSize.
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_BorderRadiuses borderRadiuses;
-        borderRadiuses.topRight = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        borderRadiuses.topRight = Converter::ArkValue<Opt_Length>(value);
         borderRadiuses.topLeft = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.bottomLeft = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.bottomRight = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
-        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(
-            std::optional<Ark_Union_Dimension_BorderRadiuses>(arkUnion));
+        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -745,13 +740,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusBottomLeftTest, TestSiz
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_BorderRadiuses borderRadiuses;
-        borderRadiuses.bottomLeft = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        borderRadiuses.bottomLeft = Converter::ArkValue<Opt_Length>(value);
         borderRadiuses.topLeft = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.topRight = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.bottomRight = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
-        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(
-            std::optional<Ark_Union_Dimension_BorderRadiuses>(arkUnion));
+        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -778,13 +772,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusBottomRightTest, TestSi
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_BorderRadiuses borderRadiuses;
-        borderRadiuses.bottomRight = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        borderRadiuses.bottomRight = Converter::ArkValue<Opt_Length>(value);
         borderRadiuses.topLeft = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.topRight = Converter::ArkValue<Opt_Length>(Ark_Empty());
         borderRadiuses.bottomLeft = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
-        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(
-            std::optional<Ark_Union_Dimension_BorderRadiuses>(arkUnion));
+        options.cornerRadius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -811,8 +804,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_Length>(value);
-        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(
-            std::optional<Ark_Union_Dimension_EdgeWidths>(arkUnion));
+        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -839,8 +831,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthInvalidTest, TestSize.Le
 
     for (const auto& value : SIZE_INVALID_TEST_PLAN) {
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_Length>(value);
-        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(
-            std::optional<Ark_Union_Dimension_EdgeWidths>(arkUnion));
+        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -867,13 +858,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthsInvalidTest, TestSize.L
 
     for (const auto& value : SIZE_INVALID_TEST_PLAN) {
         Ark_EdgeWidths edgeWidths;
-        edgeWidths.top = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
-        edgeWidths.left = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
-        edgeWidths.right = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
-        edgeWidths.bottom = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        edgeWidths.top = Converter::ArkValue<Opt_Length>(value);
+        edgeWidths.left = Converter::ArkValue<Opt_Length>(value);
+        edgeWidths.right = Converter::ArkValue<Opt_Length>(value);
+        edgeWidths.bottom = Converter::ArkValue<Opt_Length>(value);
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_EdgeWidths>(edgeWidths);
-        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(
-            std::optional<Ark_Union_Dimension_EdgeWidths>(arkUnion));
+        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -900,13 +890,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthLeftTest, TestSize.Level
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_EdgeWidths edgeWidths;
-        edgeWidths.left = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        edgeWidths.left = Converter::ArkValue<Opt_Length>(value);
         edgeWidths.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_EdgeWidths>(edgeWidths);
-        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(
-            std::optional<Ark_Union_Dimension_EdgeWidths>(arkUnion));
+        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -933,13 +922,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthTopTest, TestSize.Level1
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_EdgeWidths edgeWidths;
-        edgeWidths.top = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        edgeWidths.top = Converter::ArkValue<Opt_Length>(value);
         edgeWidths.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_EdgeWidths>(edgeWidths);
-        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(
-            std::optional<Ark_Union_Dimension_EdgeWidths>(arkUnion));
+        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -966,13 +954,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthRightTest, TestSize.Leve
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_EdgeWidths edgeWidths;
-        edgeWidths.right = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        edgeWidths.right = Converter::ArkValue<Opt_Length>(value);
         edgeWidths.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_EdgeWidths>(edgeWidths);
-        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(
-            std::optional<Ark_Union_Dimension_EdgeWidths>(arkUnion));
+        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -999,13 +986,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthBottomTest, TestSize.Lev
 
     for (const auto& [value, expectVal] : SIZE_TEST_PLAN) {
         Ark_EdgeWidths edgeWidths;
-        edgeWidths.bottom = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(value));
+        edgeWidths.bottom = Converter::ArkValue<Opt_Length>(value);
         edgeWidths.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edgeWidths.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_Dimension_EdgeWidths, Ark_EdgeWidths>(edgeWidths);
-        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(
-            std::optional<Ark_Union_Dimension_EdgeWidths>(arkUnion));
+        options.borderWidth = Converter::ArkValue<Opt_Union_Dimension_EdgeWidths>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1032,8 +1018,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         auto arkUnion = Converter::ArkUnion<Ark_Union_ResourceColor_EdgeColors, Ark_ResourceColor>(value);
-        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(
-            std::optional<Ark_Union_ResourceColor_EdgeColors>(arkUnion));
+        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1062,13 +1047,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorLeftTest, TestSize.Level
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         Ark_EdgeColors edgeColors;
-        edgeColors.left = Converter::ArkValue<Opt_ResourceColor>(std::optional<Ark_ResourceColor>(value));
+        edgeColors.left = Converter::ArkValue<Opt_ResourceColor>(value);
         edgeColors.top = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.right = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.bottom = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_ResourceColor_EdgeColors, Ark_EdgeColors>(edgeColors);
-        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(
-            std::optional<Ark_Union_ResourceColor_EdgeColors>(arkUnion));
+        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1097,13 +1081,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorTopTest, TestSize.Level1
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         Ark_EdgeColors edgeColors;
-        edgeColors.top = Converter::ArkValue<Opt_ResourceColor>(std::optional<Ark_ResourceColor>(value));
+        edgeColors.top = Converter::ArkValue<Opt_ResourceColor>(value);
         edgeColors.left = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.right = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.bottom = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_ResourceColor_EdgeColors, Ark_EdgeColors>(edgeColors);
-        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(
-            std::optional<Ark_Union_ResourceColor_EdgeColors>(arkUnion));
+        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1132,13 +1115,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorRightTest, TestSize.Leve
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         Ark_EdgeColors edgeColors;
-        edgeColors.right = Converter::ArkValue<Opt_ResourceColor>(std::optional<Ark_ResourceColor>(value));
+        edgeColors.right = Converter::ArkValue<Opt_ResourceColor>(value);
         edgeColors.top = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.left = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.bottom = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_ResourceColor_EdgeColors, Ark_EdgeColors>(edgeColors);
-        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(
-            std::optional<Ark_Union_ResourceColor_EdgeColors>(arkUnion));
+        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1167,13 +1149,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorBottomTest, TestSize.Lev
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         Ark_EdgeColors edgeColors;
-        edgeColors.bottom = Converter::ArkValue<Opt_ResourceColor>(std::optional<Ark_ResourceColor>(value));
+        edgeColors.bottom = Converter::ArkValue<Opt_ResourceColor>(value);
         edgeColors.top = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.right = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         edgeColors.left = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_ResourceColor_EdgeColors, Ark_EdgeColors>(edgeColors);
-        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(
-            std::optional<Ark_Union_ResourceColor_EdgeColors>(arkUnion));
+        options.borderColor = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1208,8 +1189,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : BORDER_STYLE_TEST_PLAN) {
         auto arkUnion = Converter::ArkUnion<Ark_Union_BorderStyle_EdgeStyles, Ark_BorderStyle>(value);
-        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(
-            std::optional<Ark_Union_BorderStyle_EdgeStyles>(arkUnion));
+        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1236,13 +1216,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleLeftTest, TestSize.Level
 
     for (const auto& [value, expectVal] : BORDER_STYLE_TEST_PLAN) {
         Ark_EdgeStyles edgeStyles;
-        edgeStyles.left = Converter::ArkValue<Opt_BorderStyle>(std::optional<Ark_BorderStyle>(value));
+        edgeStyles.left = Converter::ArkValue<Opt_BorderStyle>(value);
         edgeStyles.top = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.right = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.bottom = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_BorderStyle_EdgeStyles, Ark_EdgeStyles>(edgeStyles);
-        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(
-            std::optional<Ark_Union_BorderStyle_EdgeStyles>(arkUnion));
+        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1269,13 +1248,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleTopTest, TestSize.Level1
 
     for (const auto& [value, expectVal] : BORDER_STYLE_TEST_PLAN) {
         Ark_EdgeStyles edgeStyles;
-        edgeStyles.top = Converter::ArkValue<Opt_BorderStyle>(std::optional<Ark_BorderStyle>(value));
+        edgeStyles.top = Converter::ArkValue<Opt_BorderStyle>(value);
         edgeStyles.left = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.right = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.bottom = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_BorderStyle_EdgeStyles, Ark_EdgeStyles>(edgeStyles);
-        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(
-            std::optional<Ark_Union_BorderStyle_EdgeStyles>(arkUnion));
+        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1302,13 +1280,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleRightTest, TestSize.Leve
 
     for (const auto& [value, expectVal] : BORDER_STYLE_TEST_PLAN) {
         Ark_EdgeStyles edgeStyles;
-        edgeStyles.right = Converter::ArkValue<Opt_BorderStyle>(std::optional<Ark_BorderStyle>(value));
+        edgeStyles.right = Converter::ArkValue<Opt_BorderStyle>(value);
         edgeStyles.top = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.left = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.bottom = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_BorderStyle_EdgeStyles, Ark_EdgeStyles>(edgeStyles);
-        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(
-            std::optional<Ark_Union_BorderStyle_EdgeStyles>(arkUnion));
+        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1335,13 +1312,12 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleBottomTest, TestSize.Lev
 
     for (const auto& [value, expectVal] : BORDER_STYLE_TEST_PLAN) {
         Ark_EdgeStyles edgeStyles;
-        edgeStyles.bottom = Converter::ArkValue<Opt_BorderStyle>(std::optional<Ark_BorderStyle>(value));
+        edgeStyles.bottom = Converter::ArkValue<Opt_BorderStyle>(value);
         edgeStyles.top = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.right = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         edgeStyles.left = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
         auto arkUnion = Converter::ArkUnion<Ark_Union_BorderStyle_EdgeStyles, Ark_EdgeStyles>(edgeStyles);
-        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(
-            std::optional<Ark_Union_BorderStyle_EdgeStyles>(arkUnion));
+        options.borderStyle = Converter::ArkValue<Opt_Union_BorderStyle_EdgeStyles>(arkUnion);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1393,7 +1369,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, backgroundBlurStyleTest, TestSize.L
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : BKG_BLUR_STYLE_TEST_PLAN) {
-        options.backgroundBlurStyle = Converter::ArkValue<Opt_BlurStyle>(std::optional<Ark_BlurStyle>(value));
+        options.backgroundBlurStyle = Converter::ArkValue<Opt_BlurStyle>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1420,8 +1396,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, keyboardAvoidModeTest, TestSize.Lev
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : KEYBOARD_AVOID_MODE_TEST_PLAN) {
-        options.keyboardAvoidMode = Converter::ArkValue<Opt_KeyboardAvoidMode>(
-            std::optional<Ark_KeyboardAvoidMode>(value));
+        options.keyboardAvoidMode = Converter::ArkValue<Opt_KeyboardAvoidMode>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();
@@ -1442,7 +1417,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, enableHoverModeTest, TestSize.Level
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     // check true
-    options.enableHoverMode = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(true));
+    options.enableHoverMode = Converter::ArkValue<Opt_Boolean>(true);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -1450,7 +1425,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, enableHoverModeTest, TestSize.Level
     FinalizePeer();
 
     // check false
-    options.enableHoverMode = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(false));
+    options.enableHoverMode = Converter::ArkValue<Opt_Boolean>(false);
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
     peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
     dialogProperties = peerImpl->GetDialogProperties();
@@ -1475,7 +1450,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, hoverModeAreaTest, TestSize.Level1)
     GeneratedModifier::CustomDialogControllerPeerImpl * peerImpl;
 
     for (const auto& [value, expectVal] : HOWER_MODE_AREA_TYPE_TEST_PLAN) {
-        options.hoverModeArea = Converter::ArkValue<Opt_HoverModeAreaType>(std::optional<Ark_HoverModeAreaType>(value));
+        options.hoverModeArea = Converter::ArkValue<Opt_HoverModeAreaType>(value);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
         dialogProperties = peerImpl->GetDialogProperties();

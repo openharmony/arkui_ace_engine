@@ -138,7 +138,7 @@ const std::vector<ScrollableBarModeTestStep> SCROLLABLE_BAR_MODE_TEST_PLAN = {
         "BarMode.Scrollable,"
         "{\"margin\":\"-32.70vp\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}" },
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(RES_ARK_LENGTH)),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(RES_ARK_LENGTH),
         ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
         "BarMode.Scrollable,"
         "{\"margin\":\"10.00px\","
@@ -1383,29 +1383,29 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'sm' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignSmValidValues = {
-    {"sm_0", Converter::ArkValue<Opt_Number>(std::optional(0)), "0"},
-    {"sm_2", Converter::ArkValue<Opt_Number>(std::optional(2)), "2"},
-    {"sm_4", Converter::ArkValue<Opt_Number>(std::optional(4)), "4"}
+    {"sm_0", Converter::ArkValue<Opt_Number>(0), "0"},
+    {"sm_2", Converter::ArkValue<Opt_Number>(2), "2"},
+    {"sm_4", Converter::ArkValue<Opt_Number>(4), "4"}
 };
 
 // Valid values for attribute 'md' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignMdValidValues = {
-    {"md_0", Converter::ArkValue<Opt_Number>(std::optional(0)), "0"},
-    {"md_2", Converter::ArkValue<Opt_Number>(std::optional(2)), "2"},
-    {"md_4", Converter::ArkValue<Opt_Number>(std::optional(4)), "4"},
-    {"md_6", Converter::ArkValue<Opt_Number>(std::optional(6)), "6"},
-    {"md_8", Converter::ArkValue<Opt_Number>(std::optional(8)), "8"}
+    {"md_0", Converter::ArkValue<Opt_Number>(0), "0"},
+    {"md_2", Converter::ArkValue<Opt_Number>(2), "2"},
+    {"md_4", Converter::ArkValue<Opt_Number>(4), "4"},
+    {"md_6", Converter::ArkValue<Opt_Number>(6), "6"},
+    {"md_8", Converter::ArkValue<Opt_Number>(8), "8"}
 };
 
 // Valid values for attribute 'lg' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignLgValidValues = {
-    {"lg_0", Converter::ArkValue<Opt_Number>(std::optional(0)), "0"},
-    {"lg_2", Converter::ArkValue<Opt_Number>(std::optional(2)), "2"},
-    {"lg_4", Converter::ArkValue<Opt_Number>(std::optional(4)), "4"},
-    {"lg_6", Converter::ArkValue<Opt_Number>(std::optional(6)), "6"},
-    {"lg_8", Converter::ArkValue<Opt_Number>(std::optional(8)), "8"},
-    {"lg_10", Converter::ArkValue<Opt_Number>(std::optional(10)), "10"},
-    {"lg_12", Converter::ArkValue<Opt_Number>(std::optional(12)), "12"}
+    {"lg_0", Converter::ArkValue<Opt_Number>(0), "0"},
+    {"lg_2", Converter::ArkValue<Opt_Number>(2), "2"},
+    {"lg_4", Converter::ArkValue<Opt_Number>(4), "4"},
+    {"lg_6", Converter::ArkValue<Opt_Number>(6), "6"},
+    {"lg_8", Converter::ArkValue<Opt_Number>(8), "8"},
+    {"lg_10", Converter::ArkValue<Opt_Number>(10), "10"},
+    {"lg_12", Converter::ArkValue<Opt_Number>(12), "12"}
 };
 
 // Valid values for attribute 'margin' of method 'barGridAlign'
@@ -1543,25 +1543,25 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
 // Invalid values for attribute 'sm' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignSmInvalidValues = {
     {"sm_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"sm_Negative", Converter::ArkValue<Opt_Number>(std::optional(-1))},
-    {"sm_Invalid_14", Converter::ArkValue<Opt_Number>(std::optional(14))},
-    {"sm_Invalid_3", Converter::ArkValue<Opt_Number>(std::optional(3))}
+    {"sm_Negative", Converter::ArkValue<Opt_Number>(-1)},
+    {"sm_Invalid_14", Converter::ArkValue<Opt_Number>(14)},
+    {"sm_Invalid_3", Converter::ArkValue<Opt_Number>(3)}
 };
 
 // Invalid values for attribute 'md' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignMdInvalidValues = {
     {"md_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"md_negative", Converter::ArkValue<Opt_Number>(std::optional(-1))},
-    {"md_invalid_14", Converter::ArkValue<Opt_Number>(std::optional(14))},
-    {"md_invalid_3", Converter::ArkValue<Opt_Number>(std::optional(3))}
+    {"md_negative", Converter::ArkValue<Opt_Number>(-1)},
+    {"md_invalid_14", Converter::ArkValue<Opt_Number>(14)},
+    {"md_invalid_3", Converter::ArkValue<Opt_Number>(3)}
 };
 
 // Invalid values for attribute 'lg' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignLgInvalidValues = {
     {"lg_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"lg_negative", Converter::ArkValue<Opt_Number>(std::optional(-1))},
-    {"lg_invalid_14", Converter::ArkValue<Opt_Number>(std::optional(14))},
-    {"lg_invalid_3", Converter::ArkValue<Opt_Number>(std::optional(3))}
+    {"lg_negative", Converter::ArkValue<Opt_Number>(-1)},
+    {"lg_invalid_14", Converter::ArkValue<Opt_Number>(14)},
+    {"lg_invalid_3", Converter::ArkValue<Opt_Number>(3)}
 };
 
 // Invalid values for attribute 'margin' of method 'barGridAlign'

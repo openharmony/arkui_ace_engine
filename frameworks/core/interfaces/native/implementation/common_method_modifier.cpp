@@ -1191,59 +1191,47 @@ template<>
         default: LOGE("Unexpected enum value in Ark_RenderFit: %{public}d", src);
     }
 }
-
-template<>
-Ark_PreDragStatus ArkValue(const PreDragStatus& src)
-{
-    Ark_PreDragStatus dst;
-    switch (src) {
-        case PreDragStatus::ACTION_DETECTING_STATUS:
-            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_ACTION_DETECTING_STATUS;
-            break;
-        case PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION:
-            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_READY_TO_TRIGGER_DRAG_ACTION;
-            break;
-        case PreDragStatus::PREVIEW_LIFT_STARTED:
-            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LIFT_STARTED;
-            break;
-        case PreDragStatus::PREVIEW_LIFT_FINISHED:
-            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LIFT_FINISHED;
-            break;
-        case PreDragStatus::PREVIEW_LANDING_STARTED:
-            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LANDING_STARTED;
-            break;
-        case PreDragStatus::PREVIEW_LANDING_FINISHED:
-            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_PREVIEW_LANDING_FINISHED;
-            break;
-        case PreDragStatus::ACTION_CANCELED_BEFORE_DRAG:
-            dst = Ark_PreDragStatus::ARK_PRE_DRAG_STATUS_ACTION_CANCELED_BEFORE_DRAG;
-            break;
-        default:
-            break;
-    }
-    return dst;
-}
-template<>
-Ark_DragBehavior ArkValue(const DragBehavior& src)
-{
-    switch (src) {
-        case DragBehavior::COPY: return ARK_DRAG_BEHAVIOR_COPY;
-        case DragBehavior::MOVE: return ARK_DRAG_BEHAVIOR_MOVE;
-        default:
-            return ARK_DRAG_BEHAVIOR_COPY;
-    }
-}
-template<>
-Ark_DragEvent ArkValue(const OHOS::Ace::DragEvent& src)
-{
-    Ark_DragEvent dst;
-    OHOS::Ace::DragEvent& nonConstSrc = const_cast<OHOS::Ace::DragEvent&>(src);
-    bool isUseCustomAnimation2 = nonConstSrc.IsUseCustomAnimation();
-    dst.useCustomDropAnimation = ArkValue<Ark_Boolean>(isUseCustomAnimation2);
-    dst.dragBehavior = ArkValue<Ark_DragBehavior>(src.GetDragBehavior());
-    return dst;
-}
 } // namespace Converter
+} // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+void AssignArkValue(Ark_PreDragStatus& dst, const PreDragStatus& src)
+{
+    switch (src) {
+        case PreDragStatus::ACTION_DETECTING_STATUS: dst = ARK_PRE_DRAG_STATUS_ACTION_DETECTING_STATUS; break;
+        case PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION:
+            dst = ARK_PRE_DRAG_STATUS_READY_TO_TRIGGER_DRAG_ACTION;
+            break;
+        case PreDragStatus::PREVIEW_LIFT_STARTED: dst = ARK_PRE_DRAG_STATUS_PREVIEW_LIFT_STARTED; break;
+        case PreDragStatus::PREVIEW_LIFT_FINISHED: dst = ARK_PRE_DRAG_STATUS_PREVIEW_LIFT_FINISHED; break;
+        case PreDragStatus::PREVIEW_LANDING_STARTED: dst = ARK_PRE_DRAG_STATUS_PREVIEW_LANDING_STARTED; break;
+        case PreDragStatus::PREVIEW_LANDING_FINISHED: dst = ARK_PRE_DRAG_STATUS_PREVIEW_LANDING_FINISHED; break;
+        case PreDragStatus::ACTION_CANCELED_BEFORE_DRAG: dst = ARK_PRE_DRAG_STATUS_ACTION_CANCELED_BEFORE_DRAG; break;
+        default:
+            dst = static_cast<Ark_PreDragStatus>(-1);
+            LOGE("Unexpected enum value in PreDragStatus: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
+{
+    switch (src) {
+        case DragBehavior::COPY: dst = ARK_DRAG_BEHAVIOR_COPY; break;
+        case DragBehavior::MOVE: dst = ARK_DRAG_BEHAVIOR_MOVE; break;
+        default:
+            dst = static_cast<Ark_DragBehavior>(-1);
+            LOGE("Unexpected enum value in DragBehavior: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_DragEvent& dst, const DragEvent& src)
+{
+    bool isUseCustomAnimation2 = src.IsUseCustomAnimation();
+    dst.useCustomDropAnimation = NG::Converter::ArkValue<Ark_Boolean>(isUseCustomAnimation2);
+    dst.dragBehavior = NG::Converter::ArkValue<Ark_DragBehavior>(src.GetDragBehavior());
+}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {

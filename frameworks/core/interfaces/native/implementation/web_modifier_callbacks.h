@@ -290,10 +290,8 @@ auto g_onUrlLoadIntercept = [](const Type_WebAttribute_onUrlLoadIntercept_callba
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
     Ark_Literal_Union_String_WebResourceRequest_data parameter;
-    parameter.data = Converter::ArkUnion<Ark_Union_String_WebResourceRequest, Ark_String>(
-        Converter::ArkValue<Ark_String>(eventInfo->GetData()));
-    auto optParam = Converter::ArkValue<Opt_Literal_Union_String_WebResourceRequest_data>(
-        std::optional<Ark_Literal_Union_String_WebResourceRequest_data>(parameter));
+    parameter.data = Converter::ArkUnion<Ark_Union_String_WebResourceRequest, Ark_String>(eventInfo->GetData());
+    auto optParam = Converter::ArkValue<Opt_Literal_Union_String_WebResourceRequest_data>(parameter);
     Callback_Boolean_Void continuation;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(optParam, continuation);
@@ -367,10 +365,8 @@ auto g_onFullScreenEnter = [](const OnFullScreenEnterCallback* value, WeakPtr<Fr
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
     Ark_FullScreenEnterEvent parameter;
-    parameter.videoWidth = Converter::ArkValue<Opt_Number>(std::optional<Ark_Number>(
-        Converter::ArkValue<Ark_Number>(eventInfo->GetVideoNaturalWidth())));
-    parameter.videoHeight = Converter::ArkValue<Opt_Number>(std::optional<Ark_Number>(
-        Converter::ArkValue<Ark_Number>(eventInfo->GetVideoNaturalHeight())));
+    parameter.videoWidth = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalWidth());
+    parameter.videoHeight = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalHeight());
     parameter.handler.ptr = Referenced::RawPtr(eventInfo->GetHandler());
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();

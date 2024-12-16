@@ -290,7 +290,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
 
     Ark_VideoController arkController;
     arkController.ptr = controllerPtr;
-    options.controller = Converter::ArkValue<Opt_VideoController>(std::optional<Ark_VideoController>(arkController));
+    options.controller = Converter::ArkValue<Opt_VideoController>(arkController);
     modifier_->setVideoOptions(node_, &options);
 
     RefPtr<VideoControllerV2> controller = pattern->GetVideoController();
