@@ -14,9 +14,13 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled, tagDesRule } from 'common';
+import { pointer } from '@kit.InputKit';
+import { common2D, uiEffect } from '@kit.ArkGraphics2D';
+import { ColorMetrics, LengthMetrics, matrix4 } from '@kit.ArkUI';
 import promptAction from '@ohos.promptAction';
-
+import { BlockTag } from 'common/src/main/ets/model/BlockTag';
+import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { CompSizeBlocks } from './../../components/CompSizeBlocks'
 import { CompLocationBlocks } from './../../components/CompLocationBlocks'
 import { CompLayoutConstraintsBlocks } from './../../components/CompLayoutConstraintsBlocks'
@@ -39,14 +43,9 @@ import { CompHitTestControlBlocks } from '../../components/CompHitTestControlBlo
 import { CompModalTransitionBlocks } from '../../components/CompModalTransitionBlocks'
 import { CompSheetTransitionBlocks } from '../../components/CompSheetTransitionBlocks'
 import { CompObscuringBlocks } from '../../components/CompObscuringBlocks'
-import { CompDragAndDropControlBlocks } from '../../components/CompDragAndDropControlBlocks'
-import { CompUniversalTextAttributesBlocks } from '../../components/CompUniversalTextAttributesBlocks'
 import { CompRenderFitBlocks } from '../../components/CompRenderFitBlocks'
 import { CompEventMonopolizationBlocks } from '../../components/CompEventMonopolizationBlocks'
 import { CompCursorControlBlocks } from '../../components/CompCursorControlBlocks'
-import { pointer } from '@kit.InputKit';
-import { common2D, uiEffect } from '@kit.ArkGraphics2D';
-import { ColorMetrics, LengthMetrics, matrix4 } from '@kit.ArkUI';
 import { CompGradientColorBlocks } from '../../components/CompGradientColorBlocks';
 import { CompPopupControlBlocks } from '../../components/CompBindPopupBlocks';
 import { CompMenuControlBlocks } from '../../components/CompMenuControlBlocks';
@@ -65,7 +64,7 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 
 //part2
 class MyModifier implements AttributeModifier<ButtonAttribute> {
-  applyNormalAttribute(instance: ButtonAttribute): void {
+  applyNormalAttribute(instance: ButtonAttribute) {
     instance.backgroundColor('#0A59F7')
   }
 
@@ -127,10 +126,6 @@ export struct ButtonBootcamp {
   @State maxLines: number = 1;
   @State enableLabelNum: boolean = false;
   @State labelNum: number = 2;
-  @State enableLabelTextSize: boolean = false;
-  @State labelTextSize: number = 16;
-  @State enableFontColor: boolean = false;
-  @State btnFontColor: ResourceColor = $r('sys.color.font_on_primary');
   @State enableRole: boolean = false;
   @State btnRole: ButtonRole = ButtonRole.NORMAL;
   //part1
@@ -906,7 +901,7 @@ export struct ButtonBootcamp {
   @State compObscured: Array<ObscuredReasons> = []
   // Universal Text Attributes
   @State enableCompFontColor: boolean = false
-  @State compFontColor: ResourceColor | undefined = undefined
+  @State compFontColor: ResourceColor = $r('sys.color.font_on_primary');
   @State enableCompFontSize: boolean = false
   @State compFontSize: number = 16
   @State enableCompFontStyle: boolean = false
@@ -953,6 +948,9 @@ export struct ButtonBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
+  //compEvent
+  @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
+  @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -960,6 +958,34 @@ export struct ButtonBootcamp {
 
   compMaskValueChange() {
     this.progress.updateProgress(this.compMaskValue);
+  }
+
+  //compEvent
+  compEventTriggeredLog(value: string) {
+    let time = formatDate(new Date(Date.now()))
+    this.listEventTriggeredTagsTemp.push(
+      new BlockTag(time, tagDesRule(
+        this.title as string,
+        value
+      ))
+    )
+    setTimeout(() => {
+      if (AppStorage.get('Block')) {
+        this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+          this.listEventTriggeredTagsTemp
+        );
+        this.listEventTriggeredTagsTemp = [];
+      } else {
+        if (this.listEventTriggeredTagsTemp) {
+          this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+            this.listEventTriggeredTagsTemp
+          );
+        }
+        if (this.listEventTriggeredTags) {
+          this.listEventTriggeredTagsTemp = [];
+        }
+      }
+    }, 200)
   }
 
   build() {
@@ -1116,17 +1142,10 @@ export struct ButtonBootcamp {
           role: useEnabled(this.enableRole, this.btnRole)
         }
       )
-        .fontColor(useEnabled(this.enableFontColor, this.btnFontColor))
         .stateEffect(useEnabled(this.enableStateEffect, this.stateEffect))
         .labelStyle({
           overflow: useEnabled(this.enableOverFlow, this.overflow),
           maxLines: useEnabled(this.enableMaxLines, this.maxLines),
-        })
-        .fontSize(useEnabled(this.enableLabelTextSize, this.labelTextSize))
-        .onClick(() => {
-          promptAction.showToast({
-            message: '按钮被点击！'
-          });
         })//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
@@ -1369,22 +1388,18 @@ export struct ButtonBootcamp {
             this.compBackgroundBrightnessLightUpDegree
           )
         })
-
         .opacity(useEnabled(
           this.enableCompOpacity,
           this.compOpacity
         ))
-
         .visibility(useEnabled(
           this.enableCompVisibility,
           this.compVisibility
         ))
-
         .enabled(useEnabled(
           this.enableCompEnabled,
           this.compEnabled
         ))
-
         .overlay(
           useEnabled(this.enableCompOverlay, this.compOverlay),
           this.enableCompOverlayOptions ? {
@@ -1485,12 +1500,10 @@ export struct ButtonBootcamp {
         matrix4.identity().rotate({ z: 1, angle: 90 }) :
         matrix4.identity()
         )
-
         .clip(useEnabled(
           this.enableCompClip,
           this.compClip
         ))
-
         .clipShape(this.enableCompClipShape ?
           new Circle({
             width: useEnabled(
@@ -1577,9 +1590,6 @@ export struct ButtonBootcamp {
           direction: null,
           colors: null,
           repeating: null
-        })
-        .onClick(() => {
-          this.handlePopup = !this.handlePopup
         })
         .bindPopup(this.handlePopup, {
           message: this.compPopupType === 0 ? 'This is a popup with button ' : 'This is a popup only Text ',
@@ -1966,7 +1976,100 @@ export struct ButtonBootcamp {
             this.getUIContext().getCursorController().restoreDefault()
           }
         })
-        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))
+        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+        .onClick((event?: ClickEvent) => {
+          this.handlePopup = !this.handlePopup
+          promptAction.showToast({
+            message: '按钮被点击！'
+          });
+          this.compEventTriggeredLog('点击事件onClick触发');
+        })
+        .onTouch((event?: TouchEvent) => {
+          this.compEventTriggeredLog('触摸事件onTouch触发');
+        })
+        .onAttach(() => {
+          this.compEventTriggeredLog('挂载卸载事件onAttach触发');
+        })
+        .onDetach(() => {
+          this.compEventTriggeredLog('挂载卸载事件onDetach触发');
+        })
+        .onAppear(() => {
+          this.compEventTriggeredLog('挂载卸载事件onAppear触发');
+        })
+        .onDisAppear(() => {
+          this.compEventTriggeredLog('挂载卸载事件onDisAppear触发');
+        })
+        .onDragStart((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragStart触发');
+        })
+        .onDragEnter((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragEnter触发');
+        })
+        .onDragMove((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragMove触发');
+        })
+        .onDragLeave((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragLeave触发');
+        })
+        .onDrop((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDrop触发');
+        })
+        .onDragEnd((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragEnd触发');
+        })
+        .onPreDrag((preDragStatus: PreDragStatus) => {
+          this.compEventTriggeredLog('拖拽事件onPreDrag触发');
+        })
+        .onKeyEvent((event: KeyEvent) => {
+          this.compEventTriggeredLog('按键事件onKeyEvent触发');
+        })
+        .onKeyPreIme((event?: KeyEvent) => {
+          this.compEventTriggeredLog('按键事件onKeyPreIme触发');
+          return true;
+        })
+        .onFocus(() => {
+          this.compEventTriggeredLog('焦点事件onFocus触发');
+        })
+        .onBlur(() => {
+          this.compEventTriggeredLog('焦点事件onBlur触发');
+        })
+        .onMouse((event: MouseEvent) => {
+          this.compEventTriggeredLog('鼠标事件onMouse触发');
+        })
+        .onHover((isHover: boolean, event: HoverEvent) => {
+          this.compEventTriggeredLog('悬浮事件onHover触发');
+        })
+        .onAccessibilityHover((isHover: boolean, event: AccessibilityHoverEvent) => {
+          if (isHover) {
+            this.compEventTriggeredLog('无障碍悬浮事件onAccessibilityHover触发，手指进入悬浮')
+          } else {
+            this.compEventTriggeredLog('无障碍悬浮事件onAccessibilityHover触发，手指离开悬浮')
+          }
+        })
+        .onAreaChange((oldValue: Area, newValue: Area) => {
+          this.compEventTriggeredLog('组件区域变化事件onAreaChange触发')
+        })
+        .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+          this.compEventTriggeredLog('组件尺寸变化事件onSizeChange触发')
+        })
+        .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
+          if (isVisible && currentRatio >= 1.0) {
+            this.compEventTriggeredLog('组件可见区域变化事件onVisibleAreaChange触发,组件完全可见')
+          } else if (!isVisible && currentRatio <= 0.0) {
+            this.compEventTriggeredLog('组件可见区域变化事件onVisibleAreaChange触发,组件完全不可见')
+          }
+        })
+        .keyboardShortcut('1', [ModifierKey.CTRL], () => {
+          this.compEventTriggeredLog('组件快捷键事件keyboardShortcut触发,Ctrl+1')
+        })
+        .onChildTouchTest((touchInfo: Array<TouchTestInfo>) => {
+          this.compEventTriggeredLog('自定义事件分发onChildTouchTest触发')
+          return { strategy: TouchTestStrategy.DEFAULT };
+        })
+        .onTouchIntercept((event: TouchEvent) => {
+          this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
+          return HitTestMode.Default;
+        })
     }
 
   }
@@ -2048,20 +2151,6 @@ export struct ButtonBootcamp {
           step: 2,
           min: 0,
           max: 30
-        })
-
-        SliderBlock({
-          title: 'Label文本尺寸(vp)',
-          isEnabled: $enableLabelTextSize,
-          value: $labelTextSize,
-          min: 9,
-          max: 36
-        })
-
-        ColorBlock({
-          title: '字体颜色',
-          isEnabled: $enableFontColor,
-          color: $btnFontColor
         })
 
         RadioBlock({
@@ -2832,56 +2921,56 @@ export struct ButtonBootcamp {
 
         CompModalTransitionBlocks({
           enableCompBindContentCoverIsShow: $enableCompBindContentCoverIsShow,
-          compBindContentCoverIsShow:$compBindContentCoverIsShow,
-          enableCompBindContentCoverOptionsModalTransition:$enableCompBindContentCoverOptionsModalTransition,
-          compBindContentCoverOptionsModalTransition:$compBindContentCoverOptionsModalTransition,
-          enableCompBindContentCoverOptionsTransitionOpacity:$enableCompBindContentCoverOptionsTransitionOpacity,
-          compBindContentCoverOptionsTransitionOpacity:$compBindContentCoverOptionsTransitionOpacity,
+          compBindContentCoverIsShow: $compBindContentCoverIsShow,
+          enableCompBindContentCoverOptionsModalTransition: $enableCompBindContentCoverOptionsModalTransition,
+          compBindContentCoverOptionsModalTransition: $compBindContentCoverOptionsModalTransition,
+          enableCompBindContentCoverOptionsTransitionOpacity: $enableCompBindContentCoverOptionsTransitionOpacity,
+          compBindContentCoverOptionsTransitionOpacity: $compBindContentCoverOptionsTransitionOpacity,
           enableCompBindContentCoverOptionsTransitionTranslateX:
           $enableCompBindContentCoverOptionsTransitionTranslateX,
-          compBindContentCoverOptionsTransitionTranslateX:$compBindContentCoverOptionsTransitionTranslateX,
+          compBindContentCoverOptionsTransitionTranslateX: $compBindContentCoverOptionsTransitionTranslateX,
           enableCompBindContentCoverOptionsTransitionTranslateY:
           $enableCompBindContentCoverOptionsTransitionTranslateY,
           compBindContentCoverOptionsTransitionTranslateY: $compBindContentCoverOptionsTransitionTranslateY,
           enableCompBindContentCoverOptionsTransitionTranslateZ:
           $enableCompBindContentCoverOptionsTransitionTranslateZ,
-          compBindContentCoverOptionsTransitionTranslateZ:$compBindContentCoverOptionsTransitionTranslateZ,
-          enableCompBindContentCoverOptionsTransitionScaleX:$enableCompBindContentCoverOptionsTransitionScaleX,
-          compBindContentCoverOptionsTransitionScaleX:$compBindContentCoverOptionsTransitionScaleX,
-          enableCompBindContentCoverOptionsTransitionScaleY:$enableCompBindContentCoverOptionsTransitionScaleY,
-          compBindContentCoverOptionsTransitionScaleY:$compBindContentCoverOptionsTransitionScaleY,
-          enableCompBindContentCoverOptionsTransitionScaleZ:$enableCompBindContentCoverOptionsTransitionScaleZ,
-          compBindContentCoverOptionsTransitionScaleZ:$compBindContentCoverOptionsTransitionScaleZ,
+          compBindContentCoverOptionsTransitionTranslateZ: $compBindContentCoverOptionsTransitionTranslateZ,
+          enableCompBindContentCoverOptionsTransitionScaleX: $enableCompBindContentCoverOptionsTransitionScaleX,
+          compBindContentCoverOptionsTransitionScaleX: $compBindContentCoverOptionsTransitionScaleX,
+          enableCompBindContentCoverOptionsTransitionScaleY: $enableCompBindContentCoverOptionsTransitionScaleY,
+          compBindContentCoverOptionsTransitionScaleY: $compBindContentCoverOptionsTransitionScaleY,
+          enableCompBindContentCoverOptionsTransitionScaleZ: $enableCompBindContentCoverOptionsTransitionScaleZ,
+          compBindContentCoverOptionsTransitionScaleZ: $compBindContentCoverOptionsTransitionScaleZ,
           enableCompBindContentCoverOptionsTransitionScaleCenterX:
           $enableCompBindContentCoverOptionsTransitionScaleCenterX,
-          compBindContentCoverOptionsTransitionScaleCenterX:$compBindContentCoverOptionsTransitionScaleCenterX,
+          compBindContentCoverOptionsTransitionScaleCenterX: $compBindContentCoverOptionsTransitionScaleCenterX,
           enableCompBindContentCoverOptionsTransitionScaleCenterY:
           $enableCompBindContentCoverOptionsTransitionScaleCenterY,
-          compBindContentCoverOptionsTransitionScaleCenterY:$compBindContentCoverOptionsTransitionScaleCenterY,
-          enableCompBindContentCoverOptionsTransitionRotateX:$enableCompBindContentCoverOptionsTransitionRotateX,
-          compBindContentCoverOptionsTransitionRotateX:$compBindContentCoverOptionsTransitionRotateX,
-          enableCompBindContentCoverOptionsTransitionRotateY:$enableCompBindContentCoverOptionsTransitionRotateY,
-          compBindContentCoverOptionsTransitionRotateY:$compBindContentCoverOptionsTransitionRotateY,
-          enableCompBindContentCoverOptionsTransitionRotateZ:$enableCompBindContentCoverOptionsTransitionRotateZ,
-          compBindContentCoverOptionsTransitionRotateZ:$compBindContentCoverOptionsTransitionRotateZ,
+          compBindContentCoverOptionsTransitionScaleCenterY: $compBindContentCoverOptionsTransitionScaleCenterY,
+          enableCompBindContentCoverOptionsTransitionRotateX: $enableCompBindContentCoverOptionsTransitionRotateX,
+          compBindContentCoverOptionsTransitionRotateX: $compBindContentCoverOptionsTransitionRotateX,
+          enableCompBindContentCoverOptionsTransitionRotateY: $enableCompBindContentCoverOptionsTransitionRotateY,
+          compBindContentCoverOptionsTransitionRotateY: $compBindContentCoverOptionsTransitionRotateY,
+          enableCompBindContentCoverOptionsTransitionRotateZ: $enableCompBindContentCoverOptionsTransitionRotateZ,
+          compBindContentCoverOptionsTransitionRotateZ: $compBindContentCoverOptionsTransitionRotateZ,
           enableCompBindContentCoverOptionsTransitionRotateAngle:
           $enableCompBindContentCoverOptionsTransitionRotateAngle,
-          compBindContentCoverOptionsTransitionRotateAngle:$compBindContentCoverOptionsTransitionRotateAngle,
+          compBindContentCoverOptionsTransitionRotateAngle: $compBindContentCoverOptionsTransitionRotateAngle,
           enableCompBindContentCoverOptionsTransitionRotateCenterX:
           $enableCompBindContentCoverOptionsTransitionRotateCenterX,
-          compBindContentCoverOptionsTransitionRotateCenterX:$compBindContentCoverOptionsTransitionRotateCenterX,
+          compBindContentCoverOptionsTransitionRotateCenterX: $compBindContentCoverOptionsTransitionRotateCenterX,
           enableCompBindContentCoverOptionsTransitionRotateCenterY:
           $enableCompBindContentCoverOptionsTransitionRotateCenterY,
-          compBindContentCoverOptionsTransitionRotateCenterY:$compBindContentCoverOptionsTransitionRotateCenterY,
+          compBindContentCoverOptionsTransitionRotateCenterY: $compBindContentCoverOptionsTransitionRotateCenterY,
           enableCompBindContentCoverOptionsTransitionRotateCenterZ:
           $enableCompBindContentCoverOptionsTransitionRotateCenterZ,
-          compBindContentCoverOptionsTransitionRotateCenterZ:$compBindContentCoverOptionsTransitionRotateCenterZ,
+          compBindContentCoverOptionsTransitionRotateCenterZ: $compBindContentCoverOptionsTransitionRotateCenterZ,
           enableCompBindContentCoverOptionsTransitionRotatePerspective:
           $enableCompBindContentCoverOptionsTransitionRotatePerspective,
           compBindContentCoverOptionsTransitionRotatePerspective:
           $compBindContentCoverOptionsTransitionRotatePerspective,
-          enableCompBindContentCoverOptionsTransitionMove:$enableCompBindContentCoverOptionsTransitionMove,
-          compBindContentCoverOptionsTransitionMove:$compBindContentCoverOptionsTransitionMove,
+          enableCompBindContentCoverOptionsTransitionMove: $enableCompBindContentCoverOptionsTransitionMove,
+          compBindContentCoverOptionsTransitionMove: $compBindContentCoverOptionsTransitionMove,
           enableCompBindContentCoverOptionsTransitionAnimationDuration:
           $enableCompBindContentCoverOptionsTransitionAnimationDuration,
           compBindContentCoverOptionsTransitionAnimationDuration:
@@ -2999,27 +3088,6 @@ export struct ButtonBootcamp {
             { label: 'Bold', value: FontWeight.Bold },
             { label: 'Bolder', value: FontWeight.Bolder }
           ]
-        })
-
-        CompDragAndDropControlBlocks({
-          enableCompDraggable: $enableCompDraggable,
-          compDraggable: $compDraggable,
-          enableCompDragPreview: $enableCompDragPreview,
-          compDragPreview: $compDragPreview,
-          enableCompDragPreviewOptionsValueMode: $enableCompDragPreviewOptionsValueMode,
-          compDragPreviewOptionsValueMode: $compDragPreviewOptionsValueMode,
-          enableCompDragPreviewOptionsValueNumberBadge:
-          $enableCompDragPreviewOptionsValueNumberBadge,
-          compDragPreviewOptionsValueNumberBadge:
-          $compDragPreviewOptionsValueNumberBadge,
-          enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled:
-          $enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-          compDragPreviewOptionsOptionsIsMultiSelectionEnabled:
-          $compDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-          enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting:
-          $enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
-          compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting:
-          $compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting
         })
 
         RadioBlock({

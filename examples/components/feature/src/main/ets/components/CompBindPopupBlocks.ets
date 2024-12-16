@@ -108,6 +108,7 @@ export struct CompPopupControlBlocks {
 
   build() {
     Column() {
+
       RadioBlock({
         title: 'bindPopupType',
         isEnabled: $enableCompBindPopupType,
@@ -118,14 +119,13 @@ export struct CompPopupControlBlocks {
         ]
       })
 
-
       RadioBlock({
-        title: '气泡类型',
+        title: 'show.button',
         isEnabled: $enableCompPopupType,
         value: $compPopupType,
         dataSource: [
-          { label: '按钮气泡', value: 0 },
-          { label: '文本气泡', value: 1 }
+          { label: 'true', value: 0 },
+          { label: 'false', value: 1 }
         ]
       })
 

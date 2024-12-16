@@ -4,7 +4,7 @@ import { ColorBlock, RadioBlock, SliderBlock } from 'common';
 @Component
 export struct CompUniversalTextAttributesBlocks {
   @Link enableCompFontColor: boolean;
-  @Link compFontColor: ResourceColor | undefined;
+  @Link compFontColor: ResourceColor;
   @Link enableCompFontSize: boolean;
   @Link compFontSize: number;
   @Link enableCompFontStyle: boolean;
@@ -24,22 +24,22 @@ export struct CompUniversalTextAttributesBlocks {
     Column() {
       ColorBlock({
         title: 'fontColor',
-        isEnabled: this.enableCompFontColor,
-        color: this.compFontColor
+        isEnabled: $enableCompFontColor,
+        color: $compFontColor
       })
 
       SliderBlock({
         title: 'fontSize',
-        isEnabled: this.enableCompFontSize,
-        value: this.compFontSize,
+        isEnabled: $enableCompFontSize,
+        value: $compFontSize,
         min: 0,
         max: 32
       })
 
       RadioBlock({
         title: 'fontStyle',
-        isEnabled: this.enableCompFontStyle,
-        value: this.compFontStyle,
+        isEnabled: $enableCompFontStyle,
+        value: $compFontStyle,
         dataSource: [
           { label: 'Normal', value: FontStyle.Normal },
           { label: 'Italic', value: FontStyle.Italic },
@@ -48,8 +48,8 @@ export struct CompUniversalTextAttributesBlocks {
 
       RadioBlock({
         title: 'fontWeight',
-        isEnabled: this.enableCompFontWeight,
-        value: this.compFontWeight,
+        isEnabled: $enableCompFontWeight,
+        value: $compFontWeight,
         dataSource: [
           { label: 'Lighter', value: FontWeight.Lighter },
           { label: 'Normal', value: FontWeight.Normal },
@@ -62,16 +62,16 @@ export struct CompUniversalTextAttributesBlocks {
 
       SliderBlock({
         title: 'lineHeight',
-        isEnabled: this.enableCompLineHeight,
-        value: this.compLineHeight,
+        isEnabled: $enableCompLineHeight,
+        value: $compLineHeight,
         min: 0,
         max: 32
       })
 
       RadioBlock({
         title: 'decoration.value.type',
-        isEnabled: this.enableCompDecorationType,
-        value: this.compDecorationType,
+        isEnabled: $enableCompDecorationType,
+        value: $compDecorationType,
         dataSource: [
           { label: 'None', value: TextDecorationType.None },
           { label: 'Underline', value: TextDecorationType.Underline },
@@ -82,14 +82,14 @@ export struct CompUniversalTextAttributesBlocks {
 
       ColorBlock({
         title: 'decoration.value.color',
-        isEnabled: this.enableCompDecorationColor,
-        color: this.compDecorationColor
+        isEnabled: $enableCompDecorationColor,
+        color: $compDecorationColor
       })
 
       RadioBlock({
         title: 'decoration.value.style',
-        isEnabled: this.enableCompDecorationStyle,
-        value: this.compDecorationStyle,
+        isEnabled: $enableCompDecorationStyle,
+        value: $compDecorationStyle,
         dataSource: [
           { label: 'SOLID', value: TextDecorationStyle.SOLID },
           { label: 'DOUBLE', value: TextDecorationStyle.DOUBLE },
