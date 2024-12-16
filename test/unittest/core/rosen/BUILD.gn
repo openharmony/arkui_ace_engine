@@ -19,6 +19,7 @@ config("rosen_render_context_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/arkui/framework",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
 
   cflags_cc = [

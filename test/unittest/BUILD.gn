@@ -61,6 +61,7 @@ config("ace_unittest_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$hilog_root/interfaces/native/innerkits/include",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
     "$root_out_dir/arkui/framework",
     "//third_party/icu/icu4c/source/common",
     "//third_party/skia",
