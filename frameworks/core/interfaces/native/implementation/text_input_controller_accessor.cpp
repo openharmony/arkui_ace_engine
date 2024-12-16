@@ -26,7 +26,7 @@ void DestroyPeerImpl(TextInputControllerPeer* peer)
         delete peer;
     }
 }
-TextInputControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextInputControllerPeer();
 }

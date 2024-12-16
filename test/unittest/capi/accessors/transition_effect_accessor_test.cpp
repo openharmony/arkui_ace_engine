@@ -38,7 +38,7 @@ public:
     {
         Ark_String arkType = Converter::ArkValue<Ark_String>(g_message);
         Ark_TransitionEffects* arkEffects = new(Ark_TransitionEffects);
-        return accessor_->ctor(&arkType, arkEffects);
+        return static_cast<TransitionEffectPeer*>(accessor_->ctor(&arkType, arkEffects));
     }
 };
 

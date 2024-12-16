@@ -22,9 +22,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = NavDestinationModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // NavDestinationModifier
 namespace NavDestinationInterfaceModifier {
@@ -168,7 +172,7 @@ void OnWillHideImpl(Ark_NativePointer node,
     NavDestinationModelNG::SetOnWillHide(frameNode, std::move(onWillHideEvent));
 }
 void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Opt_CustomObject* value)
+                        const Opt_SystemBarStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

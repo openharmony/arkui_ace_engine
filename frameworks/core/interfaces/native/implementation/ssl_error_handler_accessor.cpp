@@ -26,7 +26,7 @@ void DestroyPeerImpl(SslErrorHandlerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-SslErrorHandlerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new SslErrorHandlerPeer();
 }

@@ -29,8 +29,8 @@ using namespace testing::ext;
 
 namespace {
 
-const Ark_String ARK_STRING = Converter::ArkValue<Ark_String>("PX");
-const Opt_CustomObject DEFAULT_SETTING_UNITS = Converter::ArkValue<Opt_CustomObject>(ARK_STRING);
+const auto ARK_STRING = Converter::ArkValue<Ark_String>("PX");
+const auto DEFAULT_SETTING_UNITS = Converter::ArkValue<Opt_LengthMetricsUnit>(Ark_LengthMetricsUnit{ARK_STRING});
 
 class MockCanvasPattern : public CanvasPattern {
 public:

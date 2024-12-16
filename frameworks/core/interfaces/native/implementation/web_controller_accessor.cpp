@@ -28,7 +28,7 @@ void DestroyPeerImpl(WebControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-WebControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<WebControllerPeerImpl>();
     peerImpl->IncRefCount();

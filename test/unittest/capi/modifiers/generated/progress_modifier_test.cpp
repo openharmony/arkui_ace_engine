@@ -425,19 +425,19 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Leve
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_ANGLE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_ANGLE_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.angle'";
+        "Default value for attribute 'color.LinearGradient_common.angle'";
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_DIRECTION_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_DIRECTION_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.direction'";
+        "Default value for attribute 'color.LinearGradient_common.direction'";
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_COLORS_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_COLORS_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.colors'";
+        "Default value for attribute 'color.LinearGradient_common.colors'";
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_REPEATING_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_REPEATING_DEFAULT_VALUE) <<
-        "Default value for attribute 'color.LinearGradient.repeating'";
+        "Default value for attribute 'color.LinearGradient_common.repeating'";
 }
 
 /*

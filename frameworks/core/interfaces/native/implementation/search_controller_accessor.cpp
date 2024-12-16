@@ -26,7 +26,7 @@ void DestroyPeerImpl(SearchControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-SearchControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<SearchControllerPeerImpl>();
     peerImpl->IncRefCount();

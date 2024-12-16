@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG {
 using namespace TestConst::CommonMethod;
-INSTANTIATE_TEST_SUITE_P(Tests, CommonMethodModifierTest, testing::Values(GENERATED_ARKUI_BLANK));
+INSTANTIATE_TEST_SUITE_P(Tests, CommonMethodModifierTest, testing::Range(0, 1));
 
 /*
  * @tc.name: setTabIndexTestDefaultValues

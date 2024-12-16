@@ -57,9 +57,13 @@ SwitchStyle Convert(const Ark_SwitchStyle& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ToggleModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::CHECKBOX, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ToggleModifier
 namespace ToggleInterfaceModifier {

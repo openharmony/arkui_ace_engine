@@ -24,7 +24,7 @@ namespace TextEditControllerExAccessor {
 void DestroyPeerImpl(TextEditControllerExPeer* peer)
 {
 }
-TextEditControllerExPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextEditControllerExPeer();
 }
@@ -50,7 +50,7 @@ Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer)
 }
 Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
 {
-    return 0;
+    return nullptr;
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

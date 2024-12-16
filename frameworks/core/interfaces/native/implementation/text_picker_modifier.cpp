@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
+
 namespace OHOS::Ace::NG {
 using PickerRangeType = std::variant<
     std::pair<bool, std::vector<NG::RangeContent>>,
@@ -374,9 +375,13 @@ ItemDivider Convert(const Ark_DividerOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = TextPickerModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // TextPickerModifier
 namespace TextPickerInterfaceModifier {
@@ -575,7 +580,7 @@ void SelectedIndexImpl(Ark_NativePointer node,
     }
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerOptions_Null* value)
+                 const Opt_DividerOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

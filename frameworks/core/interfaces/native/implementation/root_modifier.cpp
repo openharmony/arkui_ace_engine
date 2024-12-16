@@ -17,34 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct ActionSheetPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ActionSheetAccessor {
-void DestroyPeerImpl(ActionSheetPeer* peer)
+namespace RootModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
+    return nullptr;
 }
-Ark_NativePointer CtorImpl()
+} // RootModifier
+const GENERATED_ArkUIRootModifier* GetRootModifier()
 {
-    return new ActionSheetPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-void ShowImpl(const Ark_ActionSheetOptions* value)
-{
-}
-} // ActionSheetAccessor
-const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
-{
-    static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
-        ActionSheetAccessor::DestroyPeerImpl,
-        ActionSheetAccessor::CtorImpl,
-        ActionSheetAccessor::GetFinalizerImpl,
-        ActionSheetAccessor::ShowImpl,
+    static const GENERATED_ArkUIRootModifier ArkUIRootModifierImpl {
+        RootModifier::ConstructImpl,
     };
-    return &ActionSheetAccessorImpl;
+    return &ArkUIRootModifierImpl;
 }
 
 }

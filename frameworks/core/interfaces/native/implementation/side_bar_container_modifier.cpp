@@ -101,9 +101,13 @@ DividerOptions Convert(const Ark_DividerStyle& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SideBarContainerModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = SideBarContainerModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // SideBarContainerModifier
 namespace SideBarContainerInterfaceModifier {
@@ -239,7 +243,7 @@ void SideBarPositionImpl(Ark_NativePointer node,
     SideBarContainerModelNG::SetSideBarPosition(frameNode, pos);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerStyle_Null* value)
+                 const Opt_DividerStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

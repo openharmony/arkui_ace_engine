@@ -281,8 +281,7 @@ void DestroyPeerImpl(RichEditorControllerPeer* peer)
         peerImpl->DecRefCount();
     }
 }
-
-RichEditorControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<RichEditorControllerPeerImpl>();
     peerImpl->IncRefCount();

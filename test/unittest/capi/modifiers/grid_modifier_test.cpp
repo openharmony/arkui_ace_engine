@@ -222,7 +222,8 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidLayoutOptionsValues, TestSiz
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level1)
 {
-    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     EXPECT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -257,7 +258,8 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Level1)
 {
-    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     EXPECT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

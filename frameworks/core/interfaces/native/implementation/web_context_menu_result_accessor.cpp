@@ -26,7 +26,7 @@ void DestroyPeerImpl(WebContextMenuResultPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-WebContextMenuResultPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new WebContextMenuResultPeer();
 }

@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+#include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
 struct CircleOptions {
@@ -37,9 +38,13 @@ inline CircleOptions Convert(const Ark_CircleOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CircleModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = CircleModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // CircleModifier
 namespace CircleInterfaceModifier {

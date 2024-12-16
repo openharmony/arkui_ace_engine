@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MIN_THRESHOLD_PERCENTAGE = 1;
@@ -75,9 +76,13 @@ PasswordIcon Convert(const Ark_PasswordIcon& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = TextFieldModelNG::CreateFrameNode(id, "", "", false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // TextInputModifier
 namespace TextInputInterfaceModifier {

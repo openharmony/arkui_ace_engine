@@ -60,9 +60,13 @@ DataPanelOptions Convert(const Ark_DataPanelOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataPanelModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = DataPanelModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // DataPanelModifier
 namespace DataPanelInterfaceModifier {
@@ -93,7 +97,7 @@ void CloseEffectImpl(Ark_NativePointer node,
     DataPanelModelNG::SetCloseEffect(frameNode, Converter::Convert<bool>(value));
 }
 void ValueColorsImpl(Ark_NativePointer node,
-                     const Array_Union_ResourceColor_LinearGradient* value)
+                     const Array_Union_ResourceColor_LinearGradient_data_panel* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

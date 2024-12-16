@@ -24,7 +24,7 @@ namespace ICurveAccessor {
 void DestroyPeerImpl(ICurvePeer* peer)
 {
 }
-ICurvePeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ICurvePeer();
 }

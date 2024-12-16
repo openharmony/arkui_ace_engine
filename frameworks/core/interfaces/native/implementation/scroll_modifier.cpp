@@ -62,9 +62,13 @@ void AssignTo(std::optional<Dimension>& dst, const Array_Length& from)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = ScrollModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ScrollModifier
 namespace ScrollInterfaceModifier {

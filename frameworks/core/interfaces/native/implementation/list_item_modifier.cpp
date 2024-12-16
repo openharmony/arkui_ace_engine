@@ -59,9 +59,13 @@ inline ListItemEditableType Convert(const Ark_EditMode& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListItemModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = ListItemModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ListItemModifier
 namespace ListItemInterfaceModifier {

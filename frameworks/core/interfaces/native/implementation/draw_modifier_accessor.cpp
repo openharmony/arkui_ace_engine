@@ -24,7 +24,7 @@ namespace DrawModifierAccessor {
 void DestroyPeerImpl(DrawModifierPeer* peer)
 {
 }
-DrawModifierPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new DrawModifierPeer();
 }
@@ -33,15 +33,15 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void DrawBehindImpl(DrawModifierPeer* peer,
-                    const Ark_CustomObject* drawContext)
+                    const Ark_DrawContext* drawContext)
 {
 }
 void DrawContentImpl(DrawModifierPeer* peer,
-                     const Ark_CustomObject* drawContext)
+                     const Ark_DrawContext* drawContext)
 {
 }
 void DrawFrontImpl(DrawModifierPeer* peer,
-                   const Ark_CustomObject* drawContext)
+                   const Ark_DrawContext* drawContext)
 {
 }
 void InvalidateImpl(DrawModifierPeer* peer)

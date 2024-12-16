@@ -27,10 +27,10 @@ void DestroyPeerImpl(ConsoleMessagePeer* peer)
     peer->webConsoleLog = nullptr;
     delete peer;
 }
-ConsoleMessagePeer* CtorImpl(const Ark_String* message,
-                             const Ark_String* sourceId,
-                             const Ark_Number* lineNumber,
-                             Ark_MessageLevel messageLevel)
+Ark_NativePointer CtorImpl(const Ark_String* message,
+                           const Ark_String* sourceId,
+                           const Ark_Number* lineNumber,
+                           Ark_MessageLevel messageLevel)
 {
     CHECK_NULL_RETURN(message, nullptr);
     CHECK_NULL_RETURN(sourceId, nullptr);
@@ -75,7 +75,7 @@ Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
     peer->webConsoleLog->GetLogLevel();
     // log level need to be returned
     LOGE("ConsoleMessageAccessor::GetMessageLevelImpl - return value need to be supported");
-    return 0;
+    return nullptr;
 }
 } // ConsoleMessageAccessor
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()

@@ -161,6 +161,11 @@ class CommonMethodModifierTest : public ModifierTestBase<GENERATED_ArkUICommonMe
 public:
     RefPtr<RenderContext> render_;
 
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
+
     void SetUp() override
     {
         ModifierTestBase::SetUp();

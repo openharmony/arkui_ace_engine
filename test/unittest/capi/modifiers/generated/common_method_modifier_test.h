@@ -107,11 +107,18 @@ const auto ATTRIBUTE_DRAG_PREVIEW_I_EXTRA_INFO_DEFAULT_VALUE = "!NOT-DEFINED!";
 class CommonMethodModifierTest
     : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
           &GENERATED_ArkUINodeModifiers::getCommonMethodModifier, GENERATED_ARKUI_COMMON_METHOD>,
-      public testing::WithParamInterface<GENERATED_Ark_NodeType> {
+      public testing::WithParamInterface<int> {
 public:
-    virtual Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType)
+    void* CreateNodeImpl() override
     {
-        return ModifierTestBase::CreateNode(GetParam());
+        typedef void* (*ConstructFunc)(Ark_Int32, Ark_Int32);
+        const ConstructFunc constructors[] = {
+            nodeModifiers_->getBlankModifier()->construct,
+        };
+        if (GetParam() < std::size(constructors)) {
+            return constructors[GetParam()](GetId(), 0);
+        }
+        return nullptr;
     }
 
     static void SetUpTestCase()

@@ -52,9 +52,19 @@ class ModifierTestBase : public testing::Test {
 public:
     Ark_NodeHandle node_ = nullptr;
 
-    virtual Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType realNode = NodeType)
+    auto GetId()
     {
-        return basicAPI_ ? basicAPI_->createNode(realNode, GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
+        return ElementRegister::GetInstance()->MakeUniqueId();
+    }
+
+    Ark_NodeHandle CreateNode()
+    {
+        return static_cast<Ark_NodeHandle>(CreateNodeImpl());
+    }
+
+    virtual void *CreateNodeImpl()
+    {
+        return modifier_->construct(GetId(), 0);
     }
 
     virtual void DisposeNode(Ark_NodeHandle &node)

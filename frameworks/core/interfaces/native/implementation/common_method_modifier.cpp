@@ -1159,9 +1159,10 @@ constexpr int32_t CASE_1 = 1;
 constexpr int32_t CASE_2 = 2;
 
 namespace CommonMethodModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    return nullptr;
 }
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
 {
@@ -1457,7 +1458,7 @@ void ForegroundEffectImpl(Ark_NativePointer node,
     ViewAbstract::SetForegroundEffect(frameNode, convValue);
 }
 void VisualEffectImpl(Ark_NativePointer node,
-                      const Ark_CustomObject* value)
+                      const Ark_VisualEffect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1466,7 +1467,7 @@ void VisualEffectImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetVisualEffect(frameNode, convValue);
 }
 void BackgroundFilterImpl(Ark_NativePointer node,
-                          const Ark_CustomObject* value)
+                          const Ark_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1475,7 +1476,7 @@ void BackgroundFilterImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBackgroundFilter(frameNode, convValue);
 }
 void ForegroundFilterImpl(Ark_NativePointer node,
-                          const Ark_CustomObject* value)
+                          const Ark_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1484,7 +1485,7 @@ void ForegroundFilterImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetForegroundFilter(frameNode, convValue);
 }
 void CompositingFilterImpl(Ark_NativePointer node,
-                           const Ark_CustomObject* value)
+                           const Ark_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2632,12 +2633,11 @@ void AspectRatioImpl(Ark_NativePointer node,
     }
 }
 void ClickEffectImpl(Ark_NativePointer node,
-                     const Ark_Union_ClickEffect_Null* value)
+                     const Opt_ClickEffect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetClickEffect(frameNode, convValue);
 }
 void OnDragStartImpl(Ark_NativePointer node,
@@ -2695,12 +2695,11 @@ void OnDragEndImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDragEnd(frameNode, convValue);
 }
 void AllowDropImpl(Ark_NativePointer node,
-                   const Ark_Union_Array_UniformDataType_Null* value)
+                   const Opt_Array_UniformDataType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetAllowDrop(frameNode, convValue);
 }
 void DraggableImpl(Ark_NativePointer node,

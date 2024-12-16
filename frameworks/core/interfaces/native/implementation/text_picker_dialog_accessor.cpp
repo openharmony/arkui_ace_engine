@@ -24,7 +24,7 @@ namespace TextPickerDialogAccessor {
 void DestroyPeerImpl(TextPickerDialogPeer* peer)
 {
 }
-TextPickerDialogPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new TextPickerDialogPeer();
 }

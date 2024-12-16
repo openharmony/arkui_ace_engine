@@ -140,6 +140,11 @@ const Ark_Resource STRARRAY_RES_2 = CreateResource(STRARRAY_RES_2_ID, Converter:
 class SecurityComponentMethodModifierTest : public ModifierTestBase<GENERATED_ArkUISecurityComponentMethodModifier,
     &GENERATED_ArkUINodeModifiers::getSecurityComponentMethodModifier, GENERATED_ARKUI_SAVE_BUTTON> {
 public:
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getSaveButtonModifier()->construct(GetId(), 0);
+    }
+
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();

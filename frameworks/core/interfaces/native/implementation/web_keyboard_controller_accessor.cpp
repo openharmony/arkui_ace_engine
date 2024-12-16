@@ -27,7 +27,7 @@ void DestroyPeerImpl(WebKeyboardControllerPeer* peer)
     peer->handler = nullptr;
     delete peer;
 }
-WebKeyboardControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new WebKeyboardControllerPeer();
 }

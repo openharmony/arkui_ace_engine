@@ -24,7 +24,7 @@ namespace ISinglePropertyChangeSubscriberAccessor {
 void DestroyPeerImpl(ISinglePropertyChangeSubscriberPeer* peer)
 {
 }
-ISinglePropertyChangeSubscriberPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new ISinglePropertyChangeSubscriberPeer();
 }

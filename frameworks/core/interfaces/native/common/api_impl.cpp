@@ -530,6 +530,10 @@ void SetLazyItemIndexer(Ark_VMContext vmContext, Ark_NodeHandle nodePtr, int ind
         return;
     }
 }
+
+void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event)
+{
+}
 } // namespace
 } // namespace OHOS::Ace::NG
 

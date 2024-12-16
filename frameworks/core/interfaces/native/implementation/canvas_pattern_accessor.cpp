@@ -26,7 +26,7 @@ void DestroyPeerImpl(CanvasPatternPeer* peer)
         delete peer;
     }
 }
-CanvasPatternPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new CanvasPatternPeer();
 }

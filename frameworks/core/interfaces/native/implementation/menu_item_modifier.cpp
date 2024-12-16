@@ -19,7 +19,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG {
-using SelectIconType = std::variant<bool, std::optional<std::string>, void*>;
+using SelectIconType = std::variant<bool, std::optional<std::string>, Ark_SymbolGlyphModifier>;
 }
 
 namespace OHOS::Ace::NG::Converter {
@@ -56,9 +56,13 @@ SelectIconType Convert(const Ark_CustomObject& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemModifier {
-Ark_NativePointer ConstructImpl()
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
-    return 0;
+    auto frameNode = MenuItemModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // MenuItemModifier
 namespace MenuItemInterfaceModifier {

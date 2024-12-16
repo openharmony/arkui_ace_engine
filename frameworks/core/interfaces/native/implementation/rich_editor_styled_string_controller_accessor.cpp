@@ -44,12 +44,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorStyledStringControllerAccessor {
 void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl *>(peer);
     if (peerImpl) {
         delete peerImpl;
     }
 }
-RichEditorStyledStringControllerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     auto peerImpl = new RichEditorStyledStringControllerPeerImpl();
     return reinterpret_cast<RichEditorStyledStringControllerPeer *>(peerImpl);
@@ -83,7 +83,7 @@ Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
     auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     LOGW("RichEditorStyledString Accessor:: GetSelectionImpl is not implemented");
-    return 0;
+    return nullptr;
 }
 void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
                           const Ark_StyledStringChangedListener* listener)

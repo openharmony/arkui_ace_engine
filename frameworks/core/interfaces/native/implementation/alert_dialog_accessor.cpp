@@ -24,7 +24,7 @@ namespace AlertDialogAccessor {
 void DestroyPeerImpl(AlertDialogPeer* peer)
 {
 }
-AlertDialogPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new AlertDialogPeer();
 }

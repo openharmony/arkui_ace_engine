@@ -40,7 +40,7 @@ public:
         const Opt_Literal_Number_distance_fingers_PanDirection_direction DEFAULT_SETTINGS =
             Converter::ArkValue<Opt_Literal_Number_distance_fingers_PanDirection_direction>(ARK_DEFAULT_SETTINGS);
 
-        return accessor_->ctor(&DEFAULT_SETTINGS);
+        return static_cast<PanGestureOptionsPeer*>(accessor_->ctor(&DEFAULT_SETTINGS));
     }
 };
 

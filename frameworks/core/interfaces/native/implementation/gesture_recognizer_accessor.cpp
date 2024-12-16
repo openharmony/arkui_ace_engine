@@ -26,7 +26,7 @@ void DestroyPeerImpl(GestureRecognizerPeer* peer)
         delete peer;
     }
 }
-GestureRecognizerPeer* CtorImpl()
+Ark_NativePointer CtorImpl()
 {
     return new GestureRecognizerPeer();
 }
@@ -76,7 +76,7 @@ Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), nullptr);
     LOGE("ARKOALA GestureRecognizerAccessor.GetEventTargetInfoImpl not implemented -> incorrect return value!");
-    return 0;
+    return nullptr;
 }
 Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
 {
