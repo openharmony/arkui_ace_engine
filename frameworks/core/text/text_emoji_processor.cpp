@@ -56,10 +56,9 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
     // so we need an u16string to get the correct index
     std::u16string remainString = u"";
     std::u32string u32ContentToDelete;
-    int32_t deletedLength = static_cast<int32_t>(u16.length() - content.length());
     int32_t substrLength = u16.length() - startIndex;
     if (substrLength < 0) {
-        return deletedLength;
+        return 0;
     }
     if (isBackward) {
         if (startIndex == static_cast<int32_t>(u16.length())) {
@@ -97,6 +96,7 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
         content = remainString + StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32ContentToDelete));
     }
     // we need length to update the cursor
+    int32_t deletedLength = static_cast<int32_t>(u16.length() - content.length());
     return deletedLength;
 }
 

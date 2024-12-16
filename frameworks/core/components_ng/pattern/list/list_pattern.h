@@ -276,8 +276,7 @@ public:
         predictSnapOffset_ = predictSnapOffset;
     }
 
-    bool StartSnapAnimation(float snapDelta, float animationVelocity, float predictVelocity = 0.f,
-        float dragDistance = 0.f, SnapDirection snapDirection = SnapDirection::NONE) override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
 
     bool ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign scrollSnapAlign);
 
@@ -376,6 +375,12 @@ public:
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;
+
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation)
+    {
+        isNeedDividerAnimation_ = isNeedDividerAnimation;
+    }
+
 private:
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
@@ -462,6 +467,7 @@ private:
     bool smooth_ = false;
     float scrollSnapVelocity_ = 0.0f;
     bool snapTrigOnScrollStart_ = false;
+    bool snapTrigByScrollBar_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -513,6 +519,7 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    bool isNeedDividerAnimation_ = true;
 };
 } // namespace OHOS::Ace::NG
 

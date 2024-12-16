@@ -1063,4 +1063,77 @@ HWTEST_F(GridOptionLayoutTestNg, AdaptToChildMainSize002, TestSize.Level1)
     CreateDone();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_MAIN_SIZE * 2);
 }
+
+/**
+ * @tc.name: OverScroll001
+ * @tc.desc: Test Spring animation after changing item height
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OverScroll001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(15);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(-1000.f);
+    info.SetMainDelta(-100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    scrollable->HandleTouchDown();
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    for (int i = 0; i < 3; ++i) {
+        (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+        FlushUITasks();
+    }
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+
+    GetChildLayoutProperty<LayoutProperty>(frameNode_, 10)
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(110.0f)));
+    GetChildFrameNode(frameNode_, 10)->MarkDirtyNode();
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 3);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 90.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
+ * @tc.name: ChangingHeight001
+ * @tc.desc: Test Jumping while changing item heights
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ChangingHeight001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(50);
+    CreateDone();
+
+    for (int32_t i = 0; i < 50; i++) {
+        GetChildLayoutProperty<LayoutProperty>(frameNode_, i)
+            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(200.0f)));
+    }
+    FlushUITasks();
+    ScrollToIndex(40, false, ScrollAlign::AUTO);
+    EXPECT_EQ(GetChildY(frameNode_, 40), 200.0f);
+
+    for (int32_t i = 0; i < 50; i++) {
+        GetChildLayoutProperty<LayoutProperty>(frameNode_, i)
+            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(50.0f)));
+    }
+    FlushUITasks();
+    ScrollToIndex(0, false, ScrollAlign::AUTO);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+}
 } // namespace OHOS::Ace::NG

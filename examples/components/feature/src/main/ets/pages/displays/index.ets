@@ -17,10 +17,14 @@ import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { BindPopupBootcamp } from './BindPopupBootcamp';
 import { ToastBootcamp } from './ToastBootcamp';
 import { ImageboxGroupBootcamp } from '../displays/ImageBootcamp';
+import { LoadingProgressBootcamp } from '../displays/LoadingProgressBootcamp';
 import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 import { ChipGroupBootcamp } from  './ChipGroupBootcamp';
+import { CounterBootcamp } from './CounterBootcamp';
+import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
+import { DataPanelBootcamp } from './DataPanelBootcamp';
 import { GaugeBootcamp } from './GaugeBootcamp';
 
 export const displaysRoute: RouteGroup = {
@@ -31,9 +35,13 @@ export const displaysRoute: RouteGroup = {
     { name: 'bindpopup', label: '气泡/BindPopup' },
     { name: 'toast', label: '即时反馈/Toast' },
     { name: 'image', label: '图片/Image' },
+    { name: 'loading-progress', label: '加载进度/LoadingProgress' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
     { name: 'chipGroup', label: '操作块群组/ChipGroup' }
+    { name: 'counter', label: '计数器/Counter'},
+    { name: 'advancedCounter', label: '计数器/advanced.Counter'},
+    { name: 'dataPanel', label: '数据面板/DataPanel'}
     { name: 'gauge', label: '数据量规图/gauge' },
   ]
 };
@@ -46,6 +54,8 @@ export function DisplaysDestination(name: string, route: Route) {
     ToastBootcamp({ title: route.label })
   } else if (name === 'displays/image') {
     ImageboxGroupBootcamp({ title: route.label })
+  } else if (name === 'displays/loading-progress') {
+    LoadingProgressBootcamp({ title: route.label })
   } else if (name === 'displays/scrollbar') {
     ScrollBarBootcamp({ title: route.label })
   } else if (name === 'displays/text') {
@@ -54,6 +64,12 @@ export function DisplaysDestination(name: string, route: Route) {
     TextSpanUrlBootcamp({ title: route.label })
   } else if (name === 'displays/chipGroup'){
     ChipGroupBootcamp({ title: route.label })
+  } else if (name === 'displays/counter') {
+    CounterBootcamp({ title: route.label})
+  } else if (name === 'displays/advancedCounter'){
+    AdvancedCounterBootcamp({ title: route.label})
+  } else if (name === 'displays/dataPanel'){
+    DataPanelBootcamp({ title: route.label})
   } else if (name === 'displays/gauge') {
     GaugeBootcamp({ title: route.label })
   }

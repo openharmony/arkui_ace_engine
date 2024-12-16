@@ -16,18 +16,19 @@
 #include "relative_container_base_test_ng.h"
 
 namespace OHOS::Ace::NG {
-void RelativeContainerBaseTestNG::SetUpTestSuite()
+void RelativeContainerBaseTestNG::AddAlignRule(std::map<AlignDirection, AlignRule>& alignRules,
+    const AlignDirection& direction, const std::string& id, const HorizontalAlign& horizontalRule)
 {
-    TestNG::SetUpTestSuite();
+    AlignRule alignRule = { .anchor = id, .horizontal = horizontalRule };
+    alignRules[direction] = alignRule;
 }
 
-void RelativeContainerBaseTestNG::TearDownTestSuite()
+void RelativeContainerBaseTestNG::AddAlignRule(std::map<AlignDirection, AlignRule>& alignRules,
+    const AlignDirection& direction, const std::string& id, const VerticalAlign& verticalRule)
 {
-    TestNG::TearDownTestSuite();
+    AlignRule alignRule = { .anchor = id, .vertical = verticalRule };
+    alignRules[direction] = alignRule;
 }
-
-void RelativeContainerBaseTestNG::SetUp() {}
-void RelativeContainerBaseTestNG::TearDown() {}
 
 RefPtr<FrameNode> RelativeContainerBaseTestNG::CreateRelativeContainer(
     const std::function<void(RelativeContainerModelNG)>& callback)

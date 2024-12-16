@@ -1096,9 +1096,6 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     }
     if (!cacheValid) {
         info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
-        // run out of record, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
-        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
-                                                                                  : info.startMainLineIndex_);
         // If only the height of the GridItem is changed, keep the prevOffset_ and currentOffset_ equal.
         ResetOffsetWhenHeightChanged();
     }
@@ -1932,7 +1929,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 // Step1. Get wrapper of [GridItem]
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-                    for (uint32_t y = i; y < crossCount_ - 1 && currentIndex < info_.childrenCount_; y++) {
+                    for (uint32_t y = i; y < crossCount_ && currentIndex < info_.childrenCount_; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
                     if (GreatOrEqual(cellAveLength_, 0.0f) &&
