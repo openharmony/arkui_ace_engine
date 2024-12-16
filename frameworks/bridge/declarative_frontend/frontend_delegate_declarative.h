@@ -120,9 +120,10 @@ public:
     void NotifyAppStorage(
         const WeakPtr<Framework::JsEngine>& jsEngineWeak, const std::string& key, const std::string& value);
 
-    // distribute
-    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
-    std::string GetContentInfo() override;
+    // restore
+    std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        const std::string& contentInfo, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) override;
 
     // Accessibility delegate functions.
     RefPtr<Framework::AccessibilityNodeManager> GetJSAccessibilityManager() const
@@ -152,22 +153,24 @@ public:
 
     void Push(const std::string& uri, const std::string& params) override;
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void PushWithCallback(const std::string& uri, const std::string& params,
+    void PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void PushNamedRoute(const std::string& uri, const std::string& params,
+    void PushNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void ReplaceWithCallback(const std::string& uri, const std::string& params,
+    void ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void ReplaceNamedRoute(const std::string& uri, const std::string& params,
+    void ReplaceNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void BackToIndex(int32_t index, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;
+    int32_t GetCurrentPageIndex() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
     void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) override;
+    bool IsUnrestoreByIndex(int32_t index);
     void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray) override;
     std::string GetParams() override;
     int32_t GetIndexByUrl(const std::string& url) override;
@@ -341,15 +344,14 @@ public:
     void GetStageSourceMap(
         std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
 
-    void InitializeRouterManager(
-        NG::LoadPageCallback&& loadPageCallback, NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
-        NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
-        NG::UpdateRootComponentCallback&& updateRootComponentCallback);
-
 #if defined(PREVIEW)
     void SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback);
 #endif
 
+    void SetPageRouterManager(const RefPtr<NG::PageRouterManager>& routerMgr)
+    {
+        pageRouterManager_ = routerMgr;
+    }
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {
         return pageRouterManager_;

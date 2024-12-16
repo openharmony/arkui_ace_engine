@@ -264,7 +264,7 @@ public:
         return it->second;
     }
 
-    static std::string GetContentInfo(int32_t instanceId);
+    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
     void SetSharedRuntime(void* runtime) override
     {
         sharedRuntime_ = runtime;

@@ -105,6 +105,8 @@ extern const char* _binary_arkTheme_abc_end;
 namespace OHOS::Ace::Framework {
 namespace {
 
+const std::string OHMURL_START_TAG = "@bundle:";
+
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
@@ -274,6 +276,100 @@ inline bool PreloadExports(const shared_ptr<JsRuntime>& runtime, const shared_pt
 inline bool PreloadRequireNative(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
 {
     return global->SetProperty(runtime, "requireNativeModule", runtime->NewFunction(RequireNativeModule));
+}
+
+/**
+ * The old version of the SDK will not generate the ohmUrl field, so we need to build it ourselves
+ * for forward compatibility. The basic ohmUrl formats are as follows:
+ *
+ * 1. @bundle:{bundleName}/{moduleName}/ets/{pagePath}
+ * examples as follow:
+ *   @bundle:com.example.app/entry/ets/pages/Index
+ *   @bundle:com.example.app/hsp/ets/pages/Second
+ *
+ * 2. @bundle:{bundleName}/{moduleName}@{harModuleName}/ets/{pagePath}
+ * examples as follow:
+ *   @bundle:com.example.app/entry@har/ets/pages/Index
+ *   @bundle:com.example.app/hsp@har/ets/pages/Second
+ * In this case, since the compiler did not generate the harModuleName field and pagePath is a relative path during
+ * compilation, wee need to split the harModuleName and normal pathPath fields from the original pagePath.
+ * for example:
+ *    original pagePath: "../../../../har/src/main/ets/pages/harPageTwo"
+ *     -> harModuleName: "har"
+ *     -> result pagePath: "pages/harPageTwo"
+ *
+ * For any other situation, currently only format 1 ohmUrl can be returned.
+ */
+std::string BuildOhmUrl(const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
+{
+    std::string tempUrl = OHMURL_START_TAG + bundleName + "/" + moduleName;
+    std::string ohmUrl = tempUrl + "/ets/" + pagePath;
+    auto pos = pagePath.rfind("../");
+    if (pos == std::string::npos) {
+        return ohmUrl;
+    }
+    std::string newPagePath = pagePath.substr(pos + 3);
+    pos = newPagePath.find("/");
+    if (pos == std::string::npos) {
+        return ohmUrl;
+    }
+    std::string harModuleName = newPagePath.substr(0, pos);
+    pos = newPagePath.find("ets");
+    if (pos == std::string::npos) {
+        return ohmUrl;
+    }
+    newPagePath = newPagePath.substr(pos);
+    return tempUrl + "@" + harModuleName + "/" + newPagePath;
+}
+
+bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
+    std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl)
+{
+    auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+    auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+    auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
+    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
+        return false;
+    }
+    bundleName = jsBundleName->ToString(vm)->ToString(vm);
+    moduleName = jsModuleName->ToString(vm)->ToString(vm);
+    pagePath = jsPagePath->ToString(vm)->ToString(vm);
+    bool ohmUrlValid = false;
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
+        auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
+        if (jsOhmUrl->IsString(vm)) {
+            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
+            ohmUrlValid = true;
+        } else {
+            LOGE("add named router record with invalid ohmUrl!");
+        }
+    }
+    if (!ohmUrlValid) {
+        LOGI("build ohmUrl for forward compatibility");
+        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
+    }
+
+    std::string integratedHspName = "false";
+    // Integrated hsp adaptation
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
+        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
+        if (integratedHsp->IsString(vm)) {
+            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
+        }
+    }
+    if (integratedHspName == "true") {
+        LocalScope scope(vm);
+        bundleName = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
+    }
+
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
+        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
+        if (pageFullPathInfo->IsString(vm)) {
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
+        }
+    }
+
+    return true;
 }
 } // namespace
 
@@ -1408,7 +1504,7 @@ bool JsiDeclarativeEngine::LoadPluginComponent(const std::string &url, const Ref
         if (pagePath.rfind(".js") != std::string::npos) {
             pagePath = pagePath.substr(0, pagePath.length() - strlen(".js"));
         }
-        std::string pluginUrlName = "@bundle:" + pluginBundleName_ + "/" + pluginModuleName_ + "/ets/" + pagePath;
+        std::string pluginUrlName = OHMURL_START_TAG + pluginBundleName_ + "/" + pluginModuleName_ + "/ets/" + pagePath;
         return LoadNamedRouterSource(pluginUrlName, false);
     }
     return true;
@@ -1507,7 +1603,7 @@ void JsiDeclarativeEngine::LoadPluginJsWithModule(std::string& urlName)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
     auto delegate = engineInstance_->GetDelegate();
-    auto pluginUrlName = "@bundle:" + pluginBundleName_ + "/" + pluginModuleName_ + "/ets/" + urlName;
+    auto pluginUrlName = OHMURL_START_TAG + pluginBundleName_ + "/" + pluginModuleName_ + "/ets/" + urlName;
     std::vector<uint8_t> content;
     if (!delegate->GetAssetContent("ets/modules.abc", content)) {
         return;
@@ -1620,46 +1716,27 @@ int32_t JsiDeclarativeEngine::LoadNavDestinationSource(const std::string& bundle
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
     const std::string& namedRoute, panda::Local<panda::ObjectRef> params)
 {
-    auto bundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
-    if (!bundleName->IsString(vm)) {
-        return;
-    }
-    auto moduleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-    if (!moduleName->IsString(vm)) {
-        return;
-    }
-    auto pagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
-    if (!pagePath->IsString(vm)) {
-        return;
-    }
-    auto name = bundleName->ToString(vm)->ToString(vm);
-    std::string integratedHspName = "false";
-    // Integrated hsp adaptation
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
-        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
-        if (integratedHsp->IsString(vm)) {
-            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
-        }
-    }
-    if (integratedHspName == "true") {
-        LocalScope scope(vm);
-        name = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
-    }
+    std::string bundleName;
+    std::string moduleName;
+    std::string pagePath;
     std::string pageFullPath;
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
-        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
-        if (pageFullPathInfo->IsString(vm)) {
-            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
-        }
+    std::string ohmUrl;
+    if (!ParseNamedRouterParams(vm, params, bundleName, moduleName, pagePath, pageFullPath, ohmUrl)) {
+        return;
     }
-    NamedRouterProperty namedRouterProperty({ pageGenerator, name,
-        moduleName->ToString(vm)->ToString(vm), pagePath->ToString(vm)->ToString(vm) });
+
+    TAG_LOGI(AceLogTag::ACE_ROUTER,
+        "add named router record, name: %{public}s, bundleName: %{public}s, moduleName: %{public}s, "
+        "pagePath: %{public}s, pageFullPath: %{public}s, ohmUrl: %{public}s",
+        namedRoute.c_str(), bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), pageFullPath.c_str(),
+        ohmUrl.c_str());
+    NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName, moduleName, pagePath, ohmUrl });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
         ret.first->second.pageGenerator.FreeGlobalHandleAddr();
         namedRouterRegisterMap_[namedRoute] = namedRouterProperty;
     }
-    auto pagePathKey = moduleName->ToString(vm)->ToString(vm) + pagePath->ToString(vm)->ToString(vm);
+    auto pagePathKey = moduleName + pagePath;
     auto pageRet = routerPathInfoMap_.insert(std::make_pair(pagePathKey, pageFullPath));
     if (!pageRet.second) {
         routerPathInfoMap_[pagePathKey] = pageFullPath;
@@ -1731,6 +1808,16 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
         }
     }
 
+    /**
+     * The pageGenerator may be filled in two situations: one is when the developer explicitly imports it(
+     * dynamic import in ets, eg: import("hsp"); ), and the other is when the PageRouterManager preload namedRoute
+     * in Backup&Restore scenario.
+     */
+    if (iter->second.pageGenerator.IsEmpty()) {
+        LOGE("Named router %{public}s has no PageGenerator", iter->first.c_str());
+        return false;
+    }
+
     CHECK_NULL_RETURN(engineInstance_, false);
     auto runtime = engineInstance_->GetJsRuntime();
     auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
@@ -1749,6 +1836,169 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     Framework::UpdateRootComponent(vm, ret->ToObject(vm));
     JSViewStackProcessor::JsStopGetAccessRecording();
     return true;
+}
+
+std::unique_ptr<JsonValue> JsiDeclarativeEngine::GetFullPathInfo()
+{
+    auto jsonFullPathInfo = JsonUtil::CreateArray(true);
+    auto recordIter = routerPathInfoMap_.begin();
+    while (recordIter != routerPathInfoMap_.end()) {
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("url", recordIter->first.c_str());
+        jsonItem->Put("fullPathInfo", recordIter->second.c_str());
+        jsonFullPathInfo->Put(jsonItem);
+        ++recordIter;
+    }
+    return jsonFullPathInfo;
+}
+
+void JsiDeclarativeEngine::RestoreFullPathInfo(std::unique_ptr<JsonValue> fullPathInfo)
+{
+    std::unordered_map<std::string, std::string> routerPathInfoMap;
+    if (!fullPathInfo || !fullPathInfo->IsValid() || !fullPathInfo->IsArray()) {
+        LOGW("Invalid fullPathInfo");
+        return;
+    }
+
+    NamedRouterProperty property;
+    int32_t size = fullPathInfo->GetArraySize();
+    for (int32_t i = 0; i < size; ++i) {
+        auto item = fullPathInfo->GetArrayItem(i);
+        if (!item) {
+            LOGW("failed to get fullPathInfo item");
+            continue;
+        }
+        auto urlJsonValue = item->GetValue("url");
+        auto fullPathInfoJsonValue = item->GetValue("fullPathInfo");
+        if (!urlJsonValue || !urlJsonValue->IsString() ||
+            !fullPathInfoJsonValue || !fullPathInfoJsonValue->IsString()) {
+            LOGW("Invalid fullPathInfo item");
+            continue;
+        }
+
+        std::string url = urlJsonValue->GetString();
+        std::string pathInfo = fullPathInfoJsonValue->GetString();
+        routerPathInfoMap.emplace(url, pathInfo);
+    }
+
+    std::swap(routerPathInfoMap_, routerPathInfoMap);
+}
+
+std::unique_ptr<JsonValue> JsiDeclarativeEngine::GetNamedRouterInfo()
+{
+    auto jsonNamedRouterInfo = JsonUtil::CreateArray(true);
+    auto recordIter = namedRouterRegisterMap_.begin();
+    while (recordIter != namedRouterRegisterMap_.end()) {
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("name", recordIter->first.c_str());
+        const auto& property = recordIter->second;
+        jsonItem->Put("bundleName", property.bundleName.c_str());
+        jsonItem->Put("moduleName", property.moduleName.c_str());
+        jsonItem->Put("pagePath", property.pagePath.c_str());
+        jsonItem->Put("ohmUrl", property.ohmUrl.c_str());
+        jsonNamedRouterInfo->Put(jsonItem);
+        ++recordIter;
+    }
+    return jsonNamedRouterInfo;
+}
+
+void JsiDeclarativeEngine::RestoreNamedRouterInfo(std::unique_ptr<JsonValue> namedRouterInfo)
+{
+    std::unordered_map<std::string, NamedRouterProperty> namedRouterMap;
+    if (!namedRouterInfo || !namedRouterInfo->IsValid() || !namedRouterInfo->IsArray()) {
+        LOGW("Invalid namedRouterInfo");
+        return;
+    }
+
+    NamedRouterProperty property;
+    int32_t size = namedRouterInfo->GetArraySize();
+    for (int32_t i = 0; i < size; ++i) {
+        auto item = namedRouterInfo->GetArrayItem(i);
+        if (!item) {
+            LOGW("failed to get namedRouterInfo item");
+            continue;
+        }
+        auto nameJsonValue = item->GetValue("name");
+        auto bundleNameJsonValue = item->GetValue("bundleName");
+        auto moduleNameJsonValue = item->GetValue("moduleName");
+        auto pagePathJsonValue = item->GetValue("pagePath");
+        auto ohmUrlJsonValue = item->GetValue("ohmUrl");
+        if (!nameJsonValue || !nameJsonValue->IsString() ||
+            !bundleNameJsonValue || !bundleNameJsonValue->IsString() ||
+            !moduleNameJsonValue || !moduleNameJsonValue->IsString() ||
+            !pagePathJsonValue || !pagePathJsonValue->IsString() ||
+            !ohmUrlJsonValue || !ohmUrlJsonValue->IsString()) {
+            LOGW("Invalid NamedRouterInfo item");
+            continue;
+        }
+
+        std::string name = nameJsonValue->GetString();
+        property.bundleName = bundleNameJsonValue->GetString();
+        property.moduleName = moduleNameJsonValue->GetString();
+        property.pagePath = pagePathJsonValue->GetString();
+        property.ohmUrl = ohmUrlJsonValue->GetString();
+        namedRouterMap.emplace(name, property);
+    }
+
+    std::swap(namedRouterRegisterMap_, namedRouterMap);
+}
+
+bool JsiDeclarativeEngine::IsNamedRouterNeedPreload(const std::string& name)
+{
+    auto it = namedRouterRegisterMap_.find(name);
+    if (it == namedRouterRegisterMap_.end()) {
+        return false;
+    }
+    return it->second.pageGenerator.IsEmpty();
+}
+
+void JsiDeclarativeEngine::PreloadNamedRouter(const std::string& name, std::function<void(bool)>&& loadFinishCallback)
+{
+    if (!pageUrlCheckFunc_) {
+        LOGW("JSEngine didn't set PageUrlCheckFunc");
+        if (loadFinishCallback) {
+            loadFinishCallback(false);
+        }
+        return;
+    }
+    auto it = namedRouterRegisterMap_.find(name);
+    if (it == namedRouterRegisterMap_.end() || !it->second.pageGenerator.IsEmpty()) {
+        if (loadFinishCallback) {
+            loadFinishCallback(true);
+        }
+        return;
+    }
+    const auto& bundleName = it->second.bundleName;
+    const auto& moduleName = it->second.moduleName;
+    const auto& pagePath = it->second.pagePath;
+    std::string ohmUrl = it->second.ohmUrl + ".js";
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "preload named rotuer, bundleName:"
+        "%{public}s, moduleName: %{public}s, pagePath: %{public}s, ohmUrl: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), ohmUrl.c_str());
+
+    auto callback = [weak = AceType::WeakClaim(this), ohmUrl, finishCallback = loadFinishCallback]() {
+        auto jsEngine = weak.Upgrade();
+        CHECK_NULL_VOID(jsEngine);
+        bool loadSuccess = true;
+        jsEngine->LoadPageSource(ohmUrl, [ohmUrl, &loadSuccess](const std::string& errorMsg, int32_t errorCode) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER,
+                "Failed to load page source: %{public}s, errorCode: %{public}d, errorMsg: %{public}s", ohmUrl.c_str(),
+                errorCode, errorMsg.c_str());
+            loadSuccess = false;
+        });
+        if (finishCallback) {
+            finishCallback(loadSuccess);
+        }
+    };
+    auto silentInstallErrorCallBack = [finishCallback = loadFinishCallback](
+                                          int32_t errorCode, const std::string& errorMsg) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "Failed to preload named router, error = %{public}d, errorMsg = %{public}s",
+            errorCode, errorMsg.c_str());
+        if (finishCallback) {
+            finishCallback(false);
+        }
+    };
+    pageUrlCheckFunc_(ohmUrl, callback, silentInstallErrorCallBack);
 }
 
 bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint)

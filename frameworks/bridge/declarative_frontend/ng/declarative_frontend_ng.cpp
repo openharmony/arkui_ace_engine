@@ -563,18 +563,19 @@ void DeclarativeFrontendNG::NotifyUIIdle()
     }
 }
 
-std::pair<std::string, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(const std::string& contentInfo)
+std::pair<RouterRecoverRecord, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(
+    const std::string& contentInfo, ContentInfoType type)
 {
     if (delegate_) {
-        return delegate_->RestoreRouterStack(contentInfo);
+        return delegate_->RestoreRouterStack(contentInfo, type);
     }
-    return std::make_pair("", UIContentErrorCode::NULL_POINTER);
+    return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER);
 }
 
-std::string DeclarativeFrontendNG::GetContentInfo() const
+std::string DeclarativeFrontendNG::GetContentInfo(ContentInfoType type) const
 {
     if (delegate_) {
-        return delegate_->GetContentInfo();
+        return delegate_->GetContentInfo(type);
     }
     return "";
 }
