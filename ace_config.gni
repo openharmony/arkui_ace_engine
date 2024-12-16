@@ -67,6 +67,9 @@ declare_args() {
 
   # Enable wearable product support
   ace_engine_feature_wearable = false
+
+  # Enable form size change animation
+  ace_engine_feature_enable_form_size_change_animation = true
 }
 
 enable_dump_drawcmd = false
@@ -328,4 +331,8 @@ if (ace_engine_feature_wearable) {
 if (ohos_indep_compiler_enable) {
   indep_compile_includes =
       [ "//binarys/third_party/icu/innerapis/shared_icuuc/includes" ]
+}
+
+if (ace_engine_feature_enable_form_size_change_animation) {
+  ace_common_defines += [ "FORM_SIZE_CHANGE_ANIMATION" ]
 }
