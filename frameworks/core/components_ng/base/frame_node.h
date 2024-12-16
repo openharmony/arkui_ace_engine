@@ -1153,6 +1153,7 @@ public:
     std::list<RefPtr<FrameNode>> GetActiveChildren();
 
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+    void OnPropertyChangeMeasure() const;
 
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
