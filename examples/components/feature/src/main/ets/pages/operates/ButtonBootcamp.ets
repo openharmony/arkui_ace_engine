@@ -1898,7 +1898,7 @@ export struct ButtonBootcamp {
               }))
               .combine(TransitionEffect.move(
                 useEnabled(this.enableCompBindContentCoverOptionsTransitionMove,
-                this.compBindContentCoverOptionsTransitionMove)))
+                  this.compBindContentCoverOptionsTransitionMove)))
               .animation({
                 duration:
                 useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDuration,
@@ -2266,9 +2266,11 @@ export struct ButtonBootcamp {
           compBackgroundImageResizableLatticeFBoundsLeft: $compBackgroundImageResizableLatticeFBoundsLeft,
           enableCompBackgroundImageResizableLatticeFBoundsTop: $enableCompBackgroundImageResizableLatticeFBoundsTop,
           compBackgroundImageResizableLatticeFBoundsTop: $compBackgroundImageResizableLatticeFBoundsTop,
-          enableCompBackgroundImageResizableLatticeFBoundsRight: $enableCompBackgroundImageResizableLatticeFBoundsRight,
+          enableCompBackgroundImageResizableLatticeFBoundsRight:
+          $enableCompBackgroundImageResizableLatticeFBoundsRight,
           compBackgroundImageResizableLatticeFBoundsRight: $compBackgroundImageResizableLatticeFBoundsRight,
-          enableCompBackgroundImageResizableLatticeFBoundsBottom: $enableCompBackgroundImageResizableLatticeFBoundsBottom,
+          enableCompBackgroundImageResizableLatticeFBoundsBottom:
+          $enableCompBackgroundImageResizableLatticeFBoundsBottom,
           compBackgroundImageResizableLatticeFBoundsBottom: $compBackgroundImageResizableLatticeFBoundsBottom,
           enableCompBackgroundImageResizableLatticeFColors: $enableCompBackgroundImageResizableLatticeFColors,
           compBackgroundImageResizableLatticeFColors: $compBackgroundImageResizableLatticeFColors,
@@ -2814,7 +2816,8 @@ export struct ButtonBootcamp {
         CompTouchTargetBlocks({
           enableCompResponseRegionValueX: $enableCompResponseRegionValueX,
           compResponseRegionValueX: $compResponseRegionValueX,
-          enableCompResponseRegionValueY: $enableCompResponseRegionValueY,
+          enableCompResponseRegionValueY:
+          $enableCompResponseRegionValueY,
           compResponseRegionValueY: $compResponseRegionValueY,
           enableCompResponseRegionValueWidth: $enableCompResponseRegionValueWidth,
           compResponseRegionValueWidth: $compResponseRegionValueWidth,
@@ -2829,83 +2832,56 @@ export struct ButtonBootcamp {
 
         CompModalTransitionBlocks({
           enableCompBindContentCoverIsShow: $enableCompBindContentCoverIsShow,
-          compBindContentCoverIsShow: $compBindContentCoverIsShow,
-          enableCompBindContentCoverOptionsModalTransition:
-          $enableCompBindContentCoverOptionsModalTransition,
-          compBindContentCoverOptionsModalTransition:
-          $compBindContentCoverOptionsModalTransition,
-          enableCompBindContentCoverOptionsTransitionOpacity:
-          $enableCompBindContentCoverOptionsTransitionOpacity,
-          compBindContentCoverOptionsTransitionOpacity:
-          $compBindContentCoverOptionsTransitionOpacity,
+          compBindContentCoverIsShow:$compBindContentCoverIsShow,
+          enableCompBindContentCoverOptionsModalTransition:$enableCompBindContentCoverOptionsModalTransition,
+          compBindContentCoverOptionsModalTransition:$compBindContentCoverOptionsModalTransition,
+          enableCompBindContentCoverOptionsTransitionOpacity:$enableCompBindContentCoverOptionsTransitionOpacity,
+          compBindContentCoverOptionsTransitionOpacity:$compBindContentCoverOptionsTransitionOpacity,
           enableCompBindContentCoverOptionsTransitionTranslateX:
           $enableCompBindContentCoverOptionsTransitionTranslateX,
-          compBindContentCoverOptionsTransitionTranslateX:
-          $compBindContentCoverOptionsTransitionTranslateX,
+          compBindContentCoverOptionsTransitionTranslateX:$compBindContentCoverOptionsTransitionTranslateX,
           enableCompBindContentCoverOptionsTransitionTranslateY:
           $enableCompBindContentCoverOptionsTransitionTranslateY,
-          compBindContentCoverOptionsTransitionTranslateY:
-          $compBindContentCoverOptionsTransitionTranslateY,
+          compBindContentCoverOptionsTransitionTranslateY: $compBindContentCoverOptionsTransitionTranslateY,
           enableCompBindContentCoverOptionsTransitionTranslateZ:
           $enableCompBindContentCoverOptionsTransitionTranslateZ,
-          compBindContentCoverOptionsTransitionTranslateZ:
-          $compBindContentCoverOptionsTransitionTranslateZ,
-          enableCompBindContentCoverOptionsTransitionScaleX:
-          $enableCompBindContentCoverOptionsTransitionScaleX,
-          compBindContentCoverOptionsTransitionScaleX:
-          $compBindContentCoverOptionsTransitionScaleX,
-          enableCompBindContentCoverOptionsTransitionScaleY:
-          $enableCompBindContentCoverOptionsTransitionScaleY,
-          compBindContentCoverOptionsTransitionScaleY:
-          $compBindContentCoverOptionsTransitionScaleY,
-          enableCompBindContentCoverOptionsTransitionScaleZ:
-          $enableCompBindContentCoverOptionsTransitionScaleZ,
-          compBindContentCoverOptionsTransitionScaleZ:
-          $compBindContentCoverOptionsTransitionScaleZ,
+          compBindContentCoverOptionsTransitionTranslateZ:$compBindContentCoverOptionsTransitionTranslateZ,
+          enableCompBindContentCoverOptionsTransitionScaleX:$enableCompBindContentCoverOptionsTransitionScaleX,
+          compBindContentCoverOptionsTransitionScaleX:$compBindContentCoverOptionsTransitionScaleX,
+          enableCompBindContentCoverOptionsTransitionScaleY:$enableCompBindContentCoverOptionsTransitionScaleY,
+          compBindContentCoverOptionsTransitionScaleY:$compBindContentCoverOptionsTransitionScaleY,
+          enableCompBindContentCoverOptionsTransitionScaleZ:$enableCompBindContentCoverOptionsTransitionScaleZ,
+          compBindContentCoverOptionsTransitionScaleZ:$compBindContentCoverOptionsTransitionScaleZ,
           enableCompBindContentCoverOptionsTransitionScaleCenterX:
           $enableCompBindContentCoverOptionsTransitionScaleCenterX,
-          compBindContentCoverOptionsTransitionScaleCenterX:
-          $compBindContentCoverOptionsTransitionScaleCenterX,
+          compBindContentCoverOptionsTransitionScaleCenterX:$compBindContentCoverOptionsTransitionScaleCenterX,
           enableCompBindContentCoverOptionsTransitionScaleCenterY:
           $enableCompBindContentCoverOptionsTransitionScaleCenterY,
-          compBindContentCoverOptionsTransitionScaleCenterY:
-          $compBindContentCoverOptionsTransitionScaleCenterY,
-          enableCompBindContentCoverOptionsTransitionRotateX:
-          $enableCompBindContentCoverOptionsTransitionRotateX,
-          compBindContentCoverOptionsTransitionRotateX:
-          $compBindContentCoverOptionsTransitionRotateX,
-          enableCompBindContentCoverOptionsTransitionRotateY:
-          $enableCompBindContentCoverOptionsTransitionRotateY,
-          compBindContentCoverOptionsTransitionRotateY:
-          $compBindContentCoverOptionsTransitionRotateY,
-          enableCompBindContentCoverOptionsTransitionRotateZ:
-          $enableCompBindContentCoverOptionsTransitionRotateZ,
-          compBindContentCoverOptionsTransitionRotateZ:
-          $compBindContentCoverOptionsTransitionRotateZ,
+          compBindContentCoverOptionsTransitionScaleCenterY:$compBindContentCoverOptionsTransitionScaleCenterY,
+          enableCompBindContentCoverOptionsTransitionRotateX:$enableCompBindContentCoverOptionsTransitionRotateX,
+          compBindContentCoverOptionsTransitionRotateX:$compBindContentCoverOptionsTransitionRotateX,
+          enableCompBindContentCoverOptionsTransitionRotateY:$enableCompBindContentCoverOptionsTransitionRotateY,
+          compBindContentCoverOptionsTransitionRotateY:$compBindContentCoverOptionsTransitionRotateY,
+          enableCompBindContentCoverOptionsTransitionRotateZ:$enableCompBindContentCoverOptionsTransitionRotateZ,
+          compBindContentCoverOptionsTransitionRotateZ:$compBindContentCoverOptionsTransitionRotateZ,
           enableCompBindContentCoverOptionsTransitionRotateAngle:
           $enableCompBindContentCoverOptionsTransitionRotateAngle,
-          compBindContentCoverOptionsTransitionRotateAngle:
-          $compBindContentCoverOptionsTransitionRotateAngle,
+          compBindContentCoverOptionsTransitionRotateAngle:$compBindContentCoverOptionsTransitionRotateAngle,
           enableCompBindContentCoverOptionsTransitionRotateCenterX:
           $enableCompBindContentCoverOptionsTransitionRotateCenterX,
-          compBindContentCoverOptionsTransitionRotateCenterX:
-          $compBindContentCoverOptionsTransitionRotateCenterX,
+          compBindContentCoverOptionsTransitionRotateCenterX:$compBindContentCoverOptionsTransitionRotateCenterX,
           enableCompBindContentCoverOptionsTransitionRotateCenterY:
           $enableCompBindContentCoverOptionsTransitionRotateCenterY,
-          compBindContentCoverOptionsTransitionRotateCenterY:
-          $compBindContentCoverOptionsTransitionRotateCenterY,
+          compBindContentCoverOptionsTransitionRotateCenterY:$compBindContentCoverOptionsTransitionRotateCenterY,
           enableCompBindContentCoverOptionsTransitionRotateCenterZ:
           $enableCompBindContentCoverOptionsTransitionRotateCenterZ,
-          compBindContentCoverOptionsTransitionRotateCenterZ:
-          $compBindContentCoverOptionsTransitionRotateCenterZ,
+          compBindContentCoverOptionsTransitionRotateCenterZ:$compBindContentCoverOptionsTransitionRotateCenterZ,
           enableCompBindContentCoverOptionsTransitionRotatePerspective:
           $enableCompBindContentCoverOptionsTransitionRotatePerspective,
           compBindContentCoverOptionsTransitionRotatePerspective:
           $compBindContentCoverOptionsTransitionRotatePerspective,
-          enableCompBindContentCoverOptionsTransitionMove:
-          $enableCompBindContentCoverOptionsTransitionMove,
-          compBindContentCoverOptionsTransitionMove:
-          $compBindContentCoverOptionsTransitionMove,
+          enableCompBindContentCoverOptionsTransitionMove:$enableCompBindContentCoverOptionsTransitionMove,
+          compBindContentCoverOptionsTransitionMove:$compBindContentCoverOptionsTransitionMove,
           enableCompBindContentCoverOptionsTransitionAnimationDuration:
           $enableCompBindContentCoverOptionsTransitionAnimationDuration,
           compBindContentCoverOptionsTransitionAnimationDuration:
