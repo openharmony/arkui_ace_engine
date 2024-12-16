@@ -13,43 +13,63 @@
  * limitations under the License.
  */
 
-import { KeyCode } from '@ohos.multimodalInput.keyCode'
-import window from '@ohos.window'
-import common from '@ohos.app.ability.common'
-import { BusinessError } from '@kit.BasicServicesKit'
-import { hilog } from '@kit.PerformanceAnalysisKit'
+import { KeyCode } from '@ohos.multimodalInput.keyCode';
+import window from '@ohos.window';
+import common from '@ohos.app.ability.common';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 export interface ComposeTitleBarMenuItem {
   value: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
 }
 
-const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
-const PUBLIC_BACK: Resource = $r('sys.media.ohos_ic_back')
-const TEXT_EDITABLE_DIALOG = '18.3fp'
-const IMAGE_SIZE = '64vp'
-const MAX_DIALOG = '256vp'
-const MIN_DIALOG = '216vp'
+const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
+const PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left');
+const TEXT_EDITABLE_DIALOG = '18.3fp';
+const IMAGE_SIZE = '64vp';
+const MAX_DIALOG = '256vp';
+const MIN_DIALOG = '216vp';
+const RESOURCE_TYPE_SYMBOL: number = 40000;
+
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource: Resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
 
 @Component
 struct ComposeTitleBar {
-  item: ComposeTitleBarMenuItem | undefined = undefined
-  title: ResourceStr = ''
-  subtitle: ResourceStr = ''
+  item: ComposeTitleBarMenuItem | undefined = undefined;
+  title: ResourceStr = '';
+  subtitle: ResourceStr = '';
   menuItems?: Array<ComposeTitleBarMenuItem> = [];
-
-  @State titleMaxWidth: number = 0
+  @State titleMaxWidth: number = 0;
   @State fontSize: number = 1;
-
-  private static readonly totalHeight = 56
-  private static readonly leftPadding = 12
-  private static readonly rightPadding = 12
-  private static readonly portraitImageSize = 40
-  private static readonly portraitImageLeftPadding = 4
-  private static readonly portraitImageRightPadding = 16
-  private static instanceCount = 0
+  private static readonly totalHeight = 56;
+  private static readonly leftPadding = 12;
+  private static readonly rightPadding = 12;
+  private static readonly portraitImageSize = 40;
+  private static readonly portraitImageLeftPadding = 4;
+  private static readonly portraitImageRightPadding = 16;
+  private static instanceCount = 0;
 
   build() {
     Flex({
@@ -57,52 +77,56 @@ struct ComposeTitleBar {
       alignItems: ItemAlign.Stretch
     }) {
       Row() {
-        ImageMenuItem({ item: {
-          value: PUBLIC_BACK,
-          isEnabled: true,
-          action: () => this.getUIContext()?.getRouter()?.back()
-        }, index: -1 })
+        ImageMenuItem({
+          item: {
+            value: PUBLIC_BACK,
+            isEnabled: true,
+            action: () => this.getUIContext()?.getRouter()?.back()
+          }, index: -1
+        })
 
-        if (this.item !== undefined) {
-          Image(this.item.value)
-            .width(ComposeTitleBar.portraitImageSize)
-            .height(ComposeTitleBar.portraitImageSize)
-            .margin({
-              left: $r('sys.float.ohos_id_text_paragraph_margin_xs'),
-              right: $r('sys.float.ohos_id_text_paragraph_margin_m')
-            })
-            .focusable(false)
-            .borderRadius(ImageMenuItem.buttonBorderRadius)
-        }
+        Row() {
+          if (this.item !== undefined) {
+            Image(this.item.value)
+              .width(ComposeTitleBar.portraitImageSize)
+              .height(ComposeTitleBar.portraitImageSize)
+              .margin({
+                left: $r('sys.float.ohos_id_text_paragraph_margin_xs'),
+                right: $r('sys.float.ohos_id_text_paragraph_margin_m')
+              })
+              .focusable(false)
+              .borderRadius(ImageMenuItem.buttonBorderRadius)
+          }
 
-        Column() {
-          if (this.title !== undefined) {
-            Row() {
-              Text(this.title)
-                .fontWeight(FontWeight.Medium)
-                .fontSize($r('sys.float.ohos_id_text_size_headline8'))
-                .fontColor($r('sys.color.ohos_id_color_titlebar_text'))
-                .maxLines(this.subtitle !== undefined ? 1 : 2)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                .constraintSize({ maxWidth: this.titleMaxWidth })
+          Column() {
+            if (this.title !== undefined) {
+              Row() {
+                Text(this.title)
+                  .fontWeight(FontWeight.Medium)
+                  .fontSize($r('sys.float.ohos_id_text_size_headline8'))
+                  .fontColor($r('sys.color.ohos_id_color_titlebar_text'))
+                  .maxLines(this.subtitle !== undefined ? 1 : 2)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .constraintSize({ maxWidth: this.titleMaxWidth })
+              }
+              .justifyContent(FlexAlign.Start)
             }
-            .justifyContent(FlexAlign.Start)
-          }
-          if (this.subtitle !== undefined) {
-            Row() {
-              Text(this.subtitle)
-                .fontSize($r('sys.float.ohos_id_text_size_over_line'))
-                .fontColor($r('sys.color.ohos_id_color_titlebar_subtitle_text'))
-                .maxLines(1)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                .constraintSize({ maxWidth: this.titleMaxWidth })
+            if (this.subtitle !== undefined) {
+              Row() {
+                Text(this.subtitle)
+                  .fontSize($r('sys.float.ohos_id_text_size_over_line'))
+                  .fontColor($r('sys.color.ohos_id_color_titlebar_subtitle_text'))
+                  .maxLines(1)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .constraintSize({ maxWidth: this.titleMaxWidth })
+              }
+              .justifyContent(FlexAlign.Start)
             }
-            .justifyContent(FlexAlign.Start)
           }
+          .justifyContent(FlexAlign.Start)
+          .alignItems(HorizontalAlign.Start)
+          .constraintSize({ maxWidth: this.titleMaxWidth })
         }
-        .justifyContent(FlexAlign.Start)
-        .alignItems(HorizontalAlign.Start)
-        .constraintSize({ maxWidth: this.titleMaxWidth })
       }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') })
 
@@ -114,24 +138,24 @@ struct ComposeTitleBar {
     .height(ComposeTitleBar.totalHeight)
     .backgroundColor($r('sys.color.ohos_id_color_background'))
     .onAreaChange((_oldValue: Area, newValue: Area) => {
-      let newWidth = Number(newValue.width)
+      let newWidth = Number(newValue.width);
       if (this.menuItems !== undefined) {
-        let menusLength = this.menuItems.length
+        let menusLength = this.menuItems.length;
         if (menusLength >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          newWidth = newWidth - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems
+          newWidth = newWidth - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
         } else if (menusLength > 0) {
-          newWidth = newWidth - ImageMenuItem.imageHotZoneWidth * menusLength
+          newWidth = newWidth - ImageMenuItem.imageHotZoneWidth * menusLength;
         }
       }
-      this.titleMaxWidth = newWidth
-      this.titleMaxWidth -= ComposeTitleBar.leftPadding
-      this.titleMaxWidth -= ImageMenuItem.imageHotZoneWidth
+      this.titleMaxWidth = newWidth;
+      this.titleMaxWidth -= ComposeTitleBar.leftPadding;
+      this.titleMaxWidth -= ImageMenuItem.imageHotZoneWidth;
       if (this.item !== undefined) {
         this.titleMaxWidth -= ComposeTitleBar.portraitImageLeftPadding +
-          ComposeTitleBar.portraitImageSize +
-          ComposeTitleBar.portraitImageRightPadding
+        ComposeTitleBar.portraitImageSize +
+        ComposeTitleBar.portraitImageRightPadding;
       }
-      this.titleMaxWidth -= ComposeTitleBar.rightPadding
+      this.titleMaxWidth -= ComposeTitleBar.rightPadding;
     })
   }
 }
@@ -143,25 +167,21 @@ struct CollapsibleMenuSection {
     value: PUBLIC_MORE,
     label: $r('sys.string.ohos_toolbar_more'),
   } as ComposeTitleBarMenuItem;
-  index: number = 0
+  index: number = 0;
   longPressTime: number = 500;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
-
-  static readonly maxCountOfVisibleItems = 3
-  private static readonly focusPadding = 4
-  private static readonly marginsNum = 2
-  private firstFocusableIndex = -1
-
-  @State isPopupShown: boolean = false
-
-  @State isMoreIconOnFocus: boolean = false
-  @State isMoreIconOnHover: boolean = false
-  @State isMoreIconOnClick: boolean = false
-  @State fontSize: number = 1
-
+  static readonly maxCountOfVisibleItems = 3;
+  private static readonly focusPadding = 4;
+  private static readonly marginsNum = 2;
+  private firstFocusableIndex = -1;
+  @State isPopupShown: boolean = false;
+  @State isMoreIconOnFocus: boolean = false;
+  @State isMoreIconOnHover: boolean = false;
+  @State isMoreIconOnClick: boolean = false;
+  @State fontSize: number = 1;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: ComposeTitleBarDialog({
       cancel: () => {
@@ -180,16 +200,16 @@ struct CollapsibleMenuSection {
   getMoreIconFgColor() {
     return this.isMoreIconOnClick ?
     $r('sys.color.ohos_id_color_titlebar_icon_pressed') :
-    $r('sys.color.ohos_id_color_titlebar_icon')
+    $r('sys.color.ohos_id_color_titlebar_icon');
   }
 
   getMoreIconBgColor() {
     if (this.isMoreIconOnClick) {
-      return $r('sys.color.ohos_id_color_click_effect')
+      return $r('sys.color.ohos_id_color_click_effect');
     } else if (this.isMoreIconOnHover) {
-      return $r('sys.color.ohos_id_color_hover')
+      return $r('sys.color.ohos_id_color_hover');
     } else {
-      return Color.Transparent
+      return Color.Transparent;
     }
   }
 
@@ -201,13 +221,14 @@ struct CollapsibleMenuSection {
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'ComposeTitleBar',
+        `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
     if (this.menuItems) {
       this.menuItems.forEach((item, index) => {
         if (item.isEnabled && this.firstFocusableIndex == -1 &&
           index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-          this.firstFocusableIndex = this.index * 1000 + index + 1
+          this.firstFocusableIndex = this.index * 1000 + index + 1;
         }
       })
     }
@@ -229,27 +250,25 @@ struct CollapsibleMenuSection {
     }
   }
 
-
   build() {
     Column() {
       Row() {
         if (this.menuItems) {
           if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-            ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index:number) => {
+            ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: number) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
           } else {
             ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-              (item:ComposeTitleBarMenuItem, index:number) => {
+              (item: ComposeTitleBarMenuItem, index: number) => {
                 ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
               })
 
-            Row() {
-              Image(PUBLIC_MORE)
-                .width(ImageMenuItem.imageSize)
+            Button({ type: ButtonType.Normal, stateEffect: true }) {
+              SymbolGlyph(PUBLIC_MORE)
+                .fontSize(`${ImageMenuItem.imageSize}vp`)
+                .fontColor([$r('sys.color.icon_primary')])
                 .draggable(false)
-                .height(ImageMenuItem.imageSize)
-                .fillColor($r('sys.color.icon_primary'))
                 .focusable(true)
             }
             .width(ImageMenuItem.imageHotZoneWidth)
@@ -257,7 +276,6 @@ struct CollapsibleMenuSection {
             .borderRadius(ImageMenuItem.buttonBorderRadius)
             .foregroundColor(this.getMoreIconFgColor())
             .backgroundColor(this.getMoreIconBgColor())
-            .justifyContent(FlexAlign.Center)
             .stateStyles({
               focused: {
                 .border({
@@ -280,23 +298,23 @@ struct CollapsibleMenuSection {
             .onKeyEvent((event) => {
               if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
                 event.keyCode !== KeyCode.KEYCODE_SPACE) {
-                return
+                return;
               }
               if (event.type === KeyType.Down) {
-                this.isMoreIconOnClick = true
+                this.isMoreIconOnClick = true;
               }
               if (event.type === KeyType.Up) {
-                this.isMoreIconOnClick = false
+                this.isMoreIconOnClick = false;
               }
             })
             .onTouch((event) => {
               if (event.type === TouchType.Down) {
-                this.isMoreIconOnClick = true
+                this.isMoreIconOnClick = true;
               }
               if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                this.isMoreIconOnClick = false
+                this.isMoreIconOnClick = false;
                 if (this.fontSize >= this.minFontSize) {
-                  this.dialogController?.close()
+                  this.dialogController?.close();
                 }
               }
             })
@@ -317,9 +335,9 @@ struct CollapsibleMenuSection {
               popupColor: Color.White,
               enableArrow: false,
               onStateChange: (e) => {
-                this.isPopupShown = e.isVisible
+                this.isPopupShown = e.isVisible;
                 if (!e.isVisible) {
-                  this.isMoreIconOnClick = false
+                  this.isMoreIconOnClick = false;
                 }
               }
             })
@@ -338,9 +356,11 @@ struct CollapsibleMenuSection {
       if (this.menuItems) {
         ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
           this.menuItems.length),
-          (item:ComposeTitleBarMenuItem, index:number) => {
-            ImageMenuItem({ item: item, index: this.index * 1000 +
-            CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: true })
+          (item: ComposeTitleBarMenuItem, index: number) => {
+            ImageMenuItem({
+              item: item, index: this.index * 1000 +
+              CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: true
+            })
           })
       }
     }
@@ -357,26 +377,22 @@ struct CollapsibleMenuSection {
 @Component
 struct ImageMenuItem {
   item: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
-  index: number = 0
+  index: number = 0;
   longPressTime: number = 500;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
   isPopup: boolean = false;
-
-  static readonly imageSize = 24
-  static readonly imageHotZoneWidth = 48
-  static readonly buttonBorderRadius = 8
-  static readonly focusBorderWidth = 2
-  static readonly disabledImageOpacity = 0.4
-  static readonly focusablePrefix = "Id-ComposeTitleBar-ImageMenuItem-"
-
-  @State isOnFocus: boolean = false
-  @State isOnHover: boolean = false
-  @State isOnClick: boolean = false
-  @Prop fontSize: number = 1
-
+  static readonly imageSize = 24;
+  static readonly imageHotZoneWidth = 48;
+  static readonly buttonBorderRadius = 8;
+  static readonly focusBorderWidth = 2;
+  static readonly focusablePrefix = "Id-ComposeTitleBar-ImageMenuItem-";
+  @State isOnFocus: boolean = false;
+  @State isOnHover: boolean = false;
+  @State isOnClick: boolean = false;
+  @Prop fontSize: number = 1;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: ComposeTitleBarDialog({
       cancel: () => {
@@ -405,16 +421,16 @@ struct ImageMenuItem {
   getFgColor() {
     return this.isOnClick
       ? $r('sys.color.ohos_id_color_titlebar_icon_pressed')
-      : $r('sys.color.ohos_id_color_titlebar_icon')
+      : $r('sys.color.ohos_id_color_titlebar_icon');
   }
 
   getBgColor() {
     if (this.isOnClick) {
-      return $r('sys.color.ohos_id_color_click_effect')
+      return $r('sys.color.ohos_id_color_click_effect');
     } else if (this.isOnHover) {
-      return $r('sys.color.ohos_id_color_hover')
+      return $r('sys.color.ohos_id_color_hover');
     } else {
-      return Color.Transparent
+      return Color.Transparent;
     }
   }
 
@@ -426,10 +442,10 @@ struct ImageMenuItem {
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
-      hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'ComposeTitleBar',
+        `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
   }
-
 
   decideFontScale(): number {
     try {
@@ -447,26 +463,43 @@ struct ImageMenuItem {
     }
   }
 
-
   build() {
-    Row() {
-      Image(this.item?.value)
-        .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
-        .width(ImageMenuItem.imageSize)
-        .draggable(false)
-        .height(ImageMenuItem.imageSize)
-        .focusable(this.item?.isEnabled)
-        .key(ImageMenuItem.focusablePrefix + this.index)
-        .fillColor($r('sys.color.ohos_id_color_text_primary'))
+    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+      if (this.item?.symbolStyle) {
+        SymbolGlyph()
+          .attributeModifier(this.item?.symbolStyle)
+          .fontSize(`${ImageMenuItem.imageSize}vp`)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
+          .draggable(false)
+          .focusable(this.item?.isEnabled)
+          .key(ImageMenuItem.focusablePrefix + this.index)
+      } else {
+        if (Util.isSymbolResource(this.item.value)) {
+          SymbolGlyph(this.item.value as Resource)
+            .fontSize(`${ImageMenuItem.imageSize}vp`)
+            .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+            .draggable(false)
+            .focusable(this.item?.isEnabled)
+            .key(ImageMenuItem.focusablePrefix + this.index)
+        } else {
+          Image(this.item?.value)
+            .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
+            .width(ImageMenuItem.imageSize)
+            .draggable(false)
+            .height(ImageMenuItem.imageSize)
+            .focusable(this.item?.isEnabled)
+            .key(ImageMenuItem.focusablePrefix + this.index)
+            .fillColor($r('sys.color.ohos_id_color_text_primary'))
+        }
+      }
     }
-    .enabled(this.item.isEnabled? this.item.isEnabled : false)
+    .enabled(this.item.isEnabled ? this.item.isEnabled : false)
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
-    .justifyContent(FlexAlign.Center)
-    .opacity(this.item?.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
     .stateStyles({
       focused: {
         .border({
@@ -485,49 +518,49 @@ struct ImageMenuItem {
     })
     .onFocus(() => {
       if (!this.item?.isEnabled) {
-        return
+        return;
       }
-      this.isOnFocus = true
+      this.isOnFocus = true;
     })
     .onBlur(() => this.isOnFocus = false)
     .onHover((isOn) => {
       if (!this.item?.isEnabled) {
-        return
+        return;
       }
-      this.isOnHover = isOn
+      this.isOnHover = isOn;
     })
     .onKeyEvent((event) => {
       if (!this.item?.isEnabled) {
-        return
+        return;
       }
       if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
         event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return
+        return;
       }
       if (event.type === KeyType.Down) {
-        this.isOnClick = true
+        this.isOnClick = true;
       }
       if (event.type === KeyType.Up) {
-        this.isOnClick = false
+        this.isOnClick = false;
       }
     })
     .onTouch((event) => {
       if (!this.item?.isEnabled) {
-        return
+        return;
       }
       if (event.type === TouchType.Down) {
-        this.isOnClick = true
+        this.isOnClick = true;
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.isOnClick = false
+        this.isOnClick = false;
         if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-          this.dialogController?.close()
+          this.dialogController?.close();
         }
       }
     })
     .onClick(() => {
       if (this.item) {
-        return this.item.isEnabled && this.item.action?.()
+        return this.item.isEnabled && this.item.action?.();
       }
     })
     .gesture(
@@ -542,7 +575,6 @@ struct ImageMenuItem {
         }))
   }
 }
-
 
 /**
  *  ComposeTitleBarDialog
@@ -571,14 +603,36 @@ struct ComposeTitleBarDialog {
   build() {
     if (this.composeTitleBarDialog) {
       Column() {
-        Image(this.itemComposeTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .margin({
-            top: $r('sys.float.padding_level24'),
-            bottom: $r('sys.float.padding_level8'),
-          })
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.itemComposeTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
+            .fontSize(`${IMAGE_SIZE}vp`)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(new SymbolEffect(), false)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+        } else {
+          if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
+            SymbolGlyph(this.itemComposeTitleDialog.value as Resource)
+              .fontSize(`${IMAGE_SIZE}vp`)
+              .fontColor([$r('sys.color.icon_primary')])
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+          } else {
+            Image(this.itemComposeTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
         Column() {
           Text(this.composeTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
@@ -602,10 +656,24 @@ struct ComposeTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        Image(this.itemComposeTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.itemComposeTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
+            .fontSize(`${IMAGE_SIZE}vp`)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(new SymbolEffect(), false)
+        } else {
+          if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
+            SymbolGlyph(this.itemComposeTitleDialog.value as Resource)
+              .fontSize(`${IMAGE_SIZE}vp`)
+              .fontColor([$r('sys.color.icon_primary')])
+          } else {
+            Image(this.itemComposeTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
