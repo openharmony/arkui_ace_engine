@@ -1880,38 +1880,53 @@ export struct ButtonBootcamp {
                   this.compBindContentCoverOptionsTransitionRotateY),
                 z: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateZ,
                   this.compBindContentCoverOptionsTransitionRotateZ),
-                angle: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateAngle,
+                angle:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateAngle,
                   this.compBindContentCoverOptionsTransitionRotateAngle),
-                centerX: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterX,
+                centerX:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterX,
                   this.compBindContentCoverOptionsTransitionRotateCenterX) + '%',
-                centerY: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterY,
+                centerY:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterY,
                   this.compBindContentCoverOptionsTransitionRotateCenterY) + '%',
-                centerZ: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterZ,
+                centerZ:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterZ,
                   this.compBindContentCoverOptionsTransitionRotateCenterZ),
-                perspective: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotatePerspective,
+                perspective:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotatePerspective,
                   this.compBindContentCoverOptionsTransitionRotatePerspective)
               }))
-              .combine(TransitionEffect.move(useEnabled(this.enableCompBindContentCoverOptionsTransitionMove,
+              .combine(TransitionEffect.move(
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionMove,
                 this.compBindContentCoverOptionsTransitionMove)))
               .animation({
-                duration: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDuration,
+                duration:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDuration,
                   this.compBindContentCoverOptionsTransitionAnimationDuration),
-                tempo: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationTempo,
+                tempo:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationTempo,
                   this.compBindContentCoverOptionsTransitionAnimationTempo),
-                curve: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationCurve,
+                curve:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationCurve,
                   this.compBindContentCoverOptionsTransitionAnimationCurve),
-                delay: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDelay,
+                delay:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDelay,
                   this.compBindContentCoverOptionsTransitionAnimationDelay),
-                iterations: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationIterations,
+                iterations:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationIterations,
                   this.compBindContentCoverOptionsTransitionAnimationIterations),
-                playMode: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
+                playMode:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
                   this.compBindContentCoverOptionsTransitionAnimationPlayMode),
                 expectedFrameRateRange: {
-                  max: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
+                  max:
+                  useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
                     this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax),
-                  min: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
+                  min:
+                  useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
                     this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin),
-                  expected: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
+                  expected:
+                  useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
                     this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected),
                 }
               })
@@ -2815,62 +2830,118 @@ export struct ButtonBootcamp {
         CompModalTransitionBlocks({
           enableCompBindContentCoverIsShow: $enableCompBindContentCoverIsShow,
           compBindContentCoverIsShow: $compBindContentCoverIsShow,
-          enableCompBindContentCoverOptionsModalTransition: $enableCompBindContentCoverOptionsModalTransition,
-          compBindContentCoverOptionsModalTransition: $compBindContentCoverOptionsModalTransition,
-          enableCompBindContentCoverOptionsTransitionOpacity: $enableCompBindContentCoverOptionsTransitionOpacity,
-          compBindContentCoverOptionsTransitionOpacity: $compBindContentCoverOptionsTransitionOpacity,
-          enableCompBindContentCoverOptionsTransitionTranslateX: $enableCompBindContentCoverOptionsTransitionTranslateX,
-          compBindContentCoverOptionsTransitionTranslateX: $compBindContentCoverOptionsTransitionTranslateX,
-          enableCompBindContentCoverOptionsTransitionTranslateY: $enableCompBindContentCoverOptionsTransitionTranslateY,
-          compBindContentCoverOptionsTransitionTranslateY: $compBindContentCoverOptionsTransitionTranslateY,
-          enableCompBindContentCoverOptionsTransitionTranslateZ: $enableCompBindContentCoverOptionsTransitionTranslateZ,
-          compBindContentCoverOptionsTransitionTranslateZ: $compBindContentCoverOptionsTransitionTranslateZ,
-          enableCompBindContentCoverOptionsTransitionScaleX: $enableCompBindContentCoverOptionsTransitionScaleX,
-          compBindContentCoverOptionsTransitionScaleX: $compBindContentCoverOptionsTransitionScaleX,
-          enableCompBindContentCoverOptionsTransitionScaleY: $enableCompBindContentCoverOptionsTransitionScaleY,
-          compBindContentCoverOptionsTransitionScaleY: $compBindContentCoverOptionsTransitionScaleY,
-          enableCompBindContentCoverOptionsTransitionScaleZ: $enableCompBindContentCoverOptionsTransitionScaleZ,
-          compBindContentCoverOptionsTransitionScaleZ: $compBindContentCoverOptionsTransitionScaleZ,
-          enableCompBindContentCoverOptionsTransitionScaleCenterX: $enableCompBindContentCoverOptionsTransitionScaleCenterX,
-          compBindContentCoverOptionsTransitionScaleCenterX: $compBindContentCoverOptionsTransitionScaleCenterX,
-          enableCompBindContentCoverOptionsTransitionScaleCenterY: $enableCompBindContentCoverOptionsTransitionScaleCenterY,
-          compBindContentCoverOptionsTransitionScaleCenterY: $compBindContentCoverOptionsTransitionScaleCenterY,
-          enableCompBindContentCoverOptionsTransitionRotateX: $enableCompBindContentCoverOptionsTransitionRotateX,
-          compBindContentCoverOptionsTransitionRotateX: $compBindContentCoverOptionsTransitionRotateX,
-          enableCompBindContentCoverOptionsTransitionRotateY: $enableCompBindContentCoverOptionsTransitionRotateY,
-          compBindContentCoverOptionsTransitionRotateY: $compBindContentCoverOptionsTransitionRotateY,
-          enableCompBindContentCoverOptionsTransitionRotateZ: $enableCompBindContentCoverOptionsTransitionRotateZ,
-          compBindContentCoverOptionsTransitionRotateZ: $compBindContentCoverOptionsTransitionRotateZ,
-          enableCompBindContentCoverOptionsTransitionRotateAngle: $enableCompBindContentCoverOptionsTransitionRotateAngle,
-          compBindContentCoverOptionsTransitionRotateAngle: $compBindContentCoverOptionsTransitionRotateAngle,
-          enableCompBindContentCoverOptionsTransitionRotateCenterX: $enableCompBindContentCoverOptionsTransitionRotateCenterX,
-          compBindContentCoverOptionsTransitionRotateCenterX: $compBindContentCoverOptionsTransitionRotateCenterX,
-          enableCompBindContentCoverOptionsTransitionRotateCenterY: $enableCompBindContentCoverOptionsTransitionRotateCenterY,
-          compBindContentCoverOptionsTransitionRotateCenterY: $compBindContentCoverOptionsTransitionRotateCenterY,
-          enableCompBindContentCoverOptionsTransitionRotateCenterZ: $enableCompBindContentCoverOptionsTransitionRotateCenterZ,
-          compBindContentCoverOptionsTransitionRotateCenterZ: $compBindContentCoverOptionsTransitionRotateCenterZ,
-          enableCompBindContentCoverOptionsTransitionRotatePerspective: $enableCompBindContentCoverOptionsTransitionRotatePerspective,
-          compBindContentCoverOptionsTransitionRotatePerspective: $compBindContentCoverOptionsTransitionRotatePerspective,
-          enableCompBindContentCoverOptionsTransitionMove: $enableCompBindContentCoverOptionsTransitionMove,
-          compBindContentCoverOptionsTransitionMove: $compBindContentCoverOptionsTransitionMove,
-          enableCompBindContentCoverOptionsTransitionAnimationDuration: $enableCompBindContentCoverOptionsTransitionAnimationDuration,
-          compBindContentCoverOptionsTransitionAnimationDuration: $compBindContentCoverOptionsTransitionAnimationDuration,
-          enableCompBindContentCoverOptionsTransitionAnimationTempo: $enableCompBindContentCoverOptionsTransitionAnimationTempo,
-          compBindContentCoverOptionsTransitionAnimationTempo: $compBindContentCoverOptionsTransitionAnimationTempo,
-          enableCompBindContentCoverOptionsTransitionAnimationCurve: $enableCompBindContentCoverOptionsTransitionAnimationCurve,
-          compBindContentCoverOptionsTransitionAnimationCurve: $compBindContentCoverOptionsTransitionAnimationCurve,
-          enableCompBindContentCoverOptionsTransitionAnimationDelay: $enableCompBindContentCoverOptionsTransitionAnimationDelay,
-          compBindContentCoverOptionsTransitionAnimationDelay: $compBindContentCoverOptionsTransitionAnimationDelay,
-          enableCompBindContentCoverOptionsTransitionAnimationIterations: $enableCompBindContentCoverOptionsTransitionAnimationIterations,
-          compBindContentCoverOptionsTransitionAnimationIterations: $compBindContentCoverOptionsTransitionAnimationIterations,
-          enableCompBindContentCoverOptionsTransitionAnimationPlayMode: $enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
-          compBindContentCoverOptionsTransitionAnimationPlayMode: $compBindContentCoverOptionsTransitionAnimationPlayMode,
-          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin: $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
-          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin: $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
-          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax: $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
-          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax: $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
-          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected: $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
-          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected: $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected
+          enableCompBindContentCoverOptionsModalTransition:
+          $enableCompBindContentCoverOptionsModalTransition,
+          compBindContentCoverOptionsModalTransition:
+          $compBindContentCoverOptionsModalTransition,
+          enableCompBindContentCoverOptionsTransitionOpacity:
+          $enableCompBindContentCoverOptionsTransitionOpacity,
+          compBindContentCoverOptionsTransitionOpacity:
+          $compBindContentCoverOptionsTransitionOpacity,
+          enableCompBindContentCoverOptionsTransitionTranslateX:
+          $enableCompBindContentCoverOptionsTransitionTranslateX,
+          compBindContentCoverOptionsTransitionTranslateX:
+          $compBindContentCoverOptionsTransitionTranslateX,
+          enableCompBindContentCoverOptionsTransitionTranslateY:
+          $enableCompBindContentCoverOptionsTransitionTranslateY,
+          compBindContentCoverOptionsTransitionTranslateY:
+          $compBindContentCoverOptionsTransitionTranslateY,
+          enableCompBindContentCoverOptionsTransitionTranslateZ:
+          $enableCompBindContentCoverOptionsTransitionTranslateZ,
+          compBindContentCoverOptionsTransitionTranslateZ:
+          $compBindContentCoverOptionsTransitionTranslateZ,
+          enableCompBindContentCoverOptionsTransitionScaleX:
+          $enableCompBindContentCoverOptionsTransitionScaleX,
+          compBindContentCoverOptionsTransitionScaleX:
+          $compBindContentCoverOptionsTransitionScaleX,
+          enableCompBindContentCoverOptionsTransitionScaleY:
+          $enableCompBindContentCoverOptionsTransitionScaleY,
+          compBindContentCoverOptionsTransitionScaleY:
+          $compBindContentCoverOptionsTransitionScaleY,
+          enableCompBindContentCoverOptionsTransitionScaleZ:
+          $enableCompBindContentCoverOptionsTransitionScaleZ,
+          compBindContentCoverOptionsTransitionScaleZ:
+          $compBindContentCoverOptionsTransitionScaleZ,
+          enableCompBindContentCoverOptionsTransitionScaleCenterX:
+          $enableCompBindContentCoverOptionsTransitionScaleCenterX,
+          compBindContentCoverOptionsTransitionScaleCenterX:
+          $compBindContentCoverOptionsTransitionScaleCenterX,
+          enableCompBindContentCoverOptionsTransitionScaleCenterY:
+          $enableCompBindContentCoverOptionsTransitionScaleCenterY,
+          compBindContentCoverOptionsTransitionScaleCenterY:
+          $compBindContentCoverOptionsTransitionScaleCenterY,
+          enableCompBindContentCoverOptionsTransitionRotateX:
+          $enableCompBindContentCoverOptionsTransitionRotateX,
+          compBindContentCoverOptionsTransitionRotateX:
+          $compBindContentCoverOptionsTransitionRotateX,
+          enableCompBindContentCoverOptionsTransitionRotateY:
+          $enableCompBindContentCoverOptionsTransitionRotateY,
+          compBindContentCoverOptionsTransitionRotateY:
+          $compBindContentCoverOptionsTransitionRotateY,
+          enableCompBindContentCoverOptionsTransitionRotateZ:
+          $enableCompBindContentCoverOptionsTransitionRotateZ,
+          compBindContentCoverOptionsTransitionRotateZ:
+          $compBindContentCoverOptionsTransitionRotateZ,
+          enableCompBindContentCoverOptionsTransitionRotateAngle:
+          $enableCompBindContentCoverOptionsTransitionRotateAngle,
+          compBindContentCoverOptionsTransitionRotateAngle:
+          $compBindContentCoverOptionsTransitionRotateAngle,
+          enableCompBindContentCoverOptionsTransitionRotateCenterX:
+          $enableCompBindContentCoverOptionsTransitionRotateCenterX,
+          compBindContentCoverOptionsTransitionRotateCenterX:
+          $compBindContentCoverOptionsTransitionRotateCenterX,
+          enableCompBindContentCoverOptionsTransitionRotateCenterY:
+          $enableCompBindContentCoverOptionsTransitionRotateCenterY,
+          compBindContentCoverOptionsTransitionRotateCenterY:
+          $compBindContentCoverOptionsTransitionRotateCenterY,
+          enableCompBindContentCoverOptionsTransitionRotateCenterZ:
+          $enableCompBindContentCoverOptionsTransitionRotateCenterZ,
+          compBindContentCoverOptionsTransitionRotateCenterZ:
+          $compBindContentCoverOptionsTransitionRotateCenterZ,
+          enableCompBindContentCoverOptionsTransitionRotatePerspective:
+          $enableCompBindContentCoverOptionsTransitionRotatePerspective,
+          compBindContentCoverOptionsTransitionRotatePerspective:
+          $compBindContentCoverOptionsTransitionRotatePerspective,
+          enableCompBindContentCoverOptionsTransitionMove:
+          $enableCompBindContentCoverOptionsTransitionMove,
+          compBindContentCoverOptionsTransitionMove:
+          $compBindContentCoverOptionsTransitionMove,
+          enableCompBindContentCoverOptionsTransitionAnimationDuration:
+          $enableCompBindContentCoverOptionsTransitionAnimationDuration,
+          compBindContentCoverOptionsTransitionAnimationDuration:
+          $compBindContentCoverOptionsTransitionAnimationDuration,
+          enableCompBindContentCoverOptionsTransitionAnimationTempo:
+          $enableCompBindContentCoverOptionsTransitionAnimationTempo,
+          compBindContentCoverOptionsTransitionAnimationTempo:
+          $compBindContentCoverOptionsTransitionAnimationTempo,
+          enableCompBindContentCoverOptionsTransitionAnimationCurve:
+          $enableCompBindContentCoverOptionsTransitionAnimationCurve,
+          compBindContentCoverOptionsTransitionAnimationCurve:
+          $compBindContentCoverOptionsTransitionAnimationCurve,
+          enableCompBindContentCoverOptionsTransitionAnimationDelay:
+          $enableCompBindContentCoverOptionsTransitionAnimationDelay,
+          compBindContentCoverOptionsTransitionAnimationDelay:
+          $compBindContentCoverOptionsTransitionAnimationDelay,
+          enableCompBindContentCoverOptionsTransitionAnimationIterations:
+          $enableCompBindContentCoverOptionsTransitionAnimationIterations,
+          compBindContentCoverOptionsTransitionAnimationIterations:
+          $compBindContentCoverOptionsTransitionAnimationIterations,
+          enableCompBindContentCoverOptionsTransitionAnimationPlayMode:
+          $enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
+          compBindContentCoverOptionsTransitionAnimationPlayMode:
+          $compBindContentCoverOptionsTransitionAnimationPlayMode,
+          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin:
+          $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
+          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin:
+          $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
+          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax:
+          $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
+          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax:
+          $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
+          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected:
+          $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
+          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected:
+          $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected
         })
 
         CompSheetTransitionBlocks({
