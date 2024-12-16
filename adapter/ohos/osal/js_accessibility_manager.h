@@ -86,6 +86,13 @@ struct ActionParam {
     std::map<std::string, std::string> actionArguments;
 };
 
+enum class DumpMode {
+    TREE,
+    NODE,
+    HANDLE_EVENT,
+    HOVER_TEST
+};
+
 class JsAccessibilityManager : public AccessibilityNodeManager,
     public AccessibilityHoverManagerForThirdNG {
     DECLARE_ACE_TYPE(JsAccessibilityManager, AccessibilityNodeManager);
@@ -521,7 +528,11 @@ private:
     void NotifySetChildTreeIdAndWinId(int64_t elementId, const int32_t treeId, const int32_t childWindowId);
 
     bool CheckIsChildElement(
-        int64_t &elementId, const std::vector<std::string>& params, std::vector<std::string>& info);
+        int64_t &elementId,
+        const std::vector<std::string>& params,
+        std::vector<std::string>& info,
+        DumpMode mode,
+        int64_t &rootId);
 
     bool NeedRegisterChildTree(uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId);
 

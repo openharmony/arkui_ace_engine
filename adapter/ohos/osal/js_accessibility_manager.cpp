@@ -3035,12 +3035,6 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
         DumpLog::GetInstance().Print("Error: invalid arguments!");
         return;
     }
-    enum class DumpMode {
-        TREE,
-        NODE,
-        HANDLE_EVENT,
-        HOVER_TEST
-    };
     bool useWindowId = false;
     DumpMode mode = DumpMode::TREE;
     bool isDumpSimplify = params[0].compare("-simplify") == 0;
@@ -3087,7 +3081,7 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
         }
     }
     std::vector<std::string> info;
-    bool isChildElement = CheckIsChildElement(nodeId, params, info);
+    bool isChildElement = CheckIsChildElement(nodeId, params, info, mode, rootId);
     if (isChildElement) {
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "dump child element: %{public}" PRId64, nodeId);
         return;
@@ -5255,19 +5249,33 @@ void JsAccessibilityManager::NotifySetChildTreeIdAndWinId(
 }
 
 bool JsAccessibilityManager::CheckIsChildElement(
-    int64_t &elementId, const std::vector<std::string> &params, std::vector<std::string> &info)
+    int64_t &elementId,
+    const std::vector<std::string> &params,
+    std::vector<std::string> &info,
+    DumpMode mode,
+    int64_t &rootId)
 {
-    if (elementId <= 0) {
-        return false;
-    }
-
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
-    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
-    if (splitTreeId <= 0 || splitTreeId == treeId_) {
-        elementId = splitElementId;
-        return false;
+
+    if (mode == DumpMode::TREE) {
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(rootId, splitElementId, splitTreeId);
+        if (splitTreeId <= 0 || splitTreeId == treeId_) {
+            rootId = splitElementId;
+            return false;
+        }
+    } else {
+        if (elementId <= 0) {
+            return false;
+        }
+
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+        if (splitTreeId <= 0 || splitTreeId == treeId_) {
+            elementId = splitElementId;
+            return false;
+        }
     }
+
     std::lock_guard<std::mutex> lock(childTreeCallbackMapMutex_);
     for (const auto &item : childTreeCallbackMap_) {
         if (item.second == nullptr) {
