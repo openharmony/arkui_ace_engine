@@ -558,6 +558,36 @@ void JSTextField::SetFontWeight(const std::string& value)
     TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
+void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        TextFieldModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        TextFieldModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSTextField::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        TextFieldModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+}
+
 void JSTextField::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

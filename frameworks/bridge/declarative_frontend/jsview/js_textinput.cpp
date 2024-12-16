@@ -67,6 +67,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("fontWeight", &JSTextField::SetFontWeight);
     JSClass<JSTextInput>::StaticMethod("fontStyle", &JSTextField::SetFontStyle);
     JSClass<JSTextInput>::StaticMethod("fontFamily", &JSTextField::SetFontFamily);
+    JSClass<JSTextInput>::StaticMethod("minFontScale", &JSTextField::SetMinFontScale);
+    JSClass<JSTextInput>::StaticMethod("maxFontScale", &JSTextField::SetMaxFontScale);
     JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
     JSClass<JSTextInput>::StaticMethod("showPasswordIcon", &JSTextField::SetShowPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("textAlign", &JSTextField::SetTextAlign);

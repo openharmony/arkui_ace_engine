@@ -38,9 +38,11 @@ public:
     void SetDefaultAnimatablePropertyValue();
 
     void SetFontFamilies(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value);
-    void SetAdaptMinFontSize(const Dimension& value);
-    void SetAdaptMaxFontSize(const Dimension& value);
+    void SetFontSize(const Dimension& value, const TextStyle& textStyle);
+    void SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle);
+    void SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle);
+    void SetMaxFontScale(const Dimension& value);
+    void SetMinFontScale(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
     void SetFontStyle(const OHOS::Ace::FontStyle& value);
