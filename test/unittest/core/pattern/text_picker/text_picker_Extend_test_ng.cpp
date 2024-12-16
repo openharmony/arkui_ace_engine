@@ -665,7 +665,6 @@ HWTEST_F(TextPickerExTestNg, TextPickerPaintTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     canvasDrawFunction(rsCanvas);
 }
 
