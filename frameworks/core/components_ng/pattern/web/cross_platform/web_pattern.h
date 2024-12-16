@@ -376,6 +376,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -553,6 +554,7 @@ private:
     void OnOverlayScrollbarEnabledUpdate(bool value);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
+    void OnEnableFollowSystemFontWeightUpdate(bool value);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

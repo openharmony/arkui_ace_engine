@@ -3142,6 +3142,9 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateNativeVideoPlayerConfig(std::get<0>(config), std::get<1>(config));
 
         delegate_->UpdateSmoothDragResizeEnabled(GetSmoothDragResizeEnabledValue(false));
+        if (GetEnableFollowSystemFontWeight()) {
+            delegate_->UpdateEnableFollowSystemFontWeight(GetEnableFollowSystemFontWeight().value());
+        }
     }
 
     if (!GetBackgroundColor()) {
@@ -7263,5 +7266,12 @@ bool WebPattern::GetAccessibilityVisible(int64_t accessibilityId)
         return delegate_->GetAccessibilityVisible(accessibilityId);
     }
     return true;
+}
+
+void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateEnableFollowSystemFontWeight(value);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -494,6 +494,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
 
     bool IsFocus() const
     {
@@ -832,6 +833,7 @@ private:
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
+    void OnEnableFollowSystemFontWeightUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
