@@ -358,6 +358,7 @@ void SwiperPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    swiperId_ = host->GetId();
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -1354,8 +1355,9 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
 void SwiperPattern::FireAnimationStartEvent(
     int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const
 {
-    TAG_LOGI(AceLogTag::ACE_SWIPER, "FireAnimationStartEvent, currentIndex: %{public}d, nextIndex: %{public}d",
-        currentIndex, nextIndex);
+    TAG_LOGI(AceLogTag::ACE_SWIPER,
+        "FireAnimationStartEvent, currentIndex: %{public}d, nextIndex: %{public}d, id:%{public}d", currentIndex,
+        nextIndex, swiperId_);
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
@@ -1369,8 +1371,8 @@ void SwiperPattern::FireAnimationEndEvent(
 {
     TAG_LOGI(AceLogTag::ACE_SWIPER,
         "FireAnimationEndEvent currentIndex: %{public}d, currentOffset: has_value %{public}d, value %{public}fvp, "
-        "isForce: %{public}d",
-        currentIndex, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop);
+        "isForce: %{public}d, id:%{public}d",
+        currentIndex, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop, swiperId_);
     if (currentIndex == -1) {
         return;
     }
@@ -2062,7 +2064,7 @@ void SwiperPattern::BuildForEachChild(const std::set<int32_t>& indexSet, const R
     auto repeatNode = AceType::DynamicCast<RepeatVirtualScrollNode>(childNode.value());
     for (auto index : indexSet) {
         if (forEachNode && forEachNode->GetChildAtIndex(index)) {
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d", index);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d, id:%{public}d", index, swiperId_);
             forEachNode->GetChildAtIndex(index)->Build(nullptr);
             continue;
         }
@@ -2268,7 +2270,8 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionStartTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d", info.GetSourceTool());
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag start. SourceTool: %{public}d, id:%{public}d",
+            info.GetSourceTool(), pattern->swiperId_);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             pattern->isFirstAxisAction_ = true;
             return;
@@ -2317,10 +2320,11 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionUpdateTask()
 SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
 {
     return [weak = WeakClaim(this)](const GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d",
-            info.GetMainVelocity(), info.GetSourceTool());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "Swiper drag end. Velocity: %{public}f px/s, SourceTool: %{public}d id:%{public}d", info.GetMainVelocity(),
+            info.GetSourceTool(), pattern->swiperId_);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             pattern->InitIndexCanChangeMap();
             return;
@@ -2349,7 +2353,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag cancel");
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper drag cancel id:%{public}d", pattern->swiperId_);
             pattern->HandleDragEnd(0.0);
             pattern->InitIndexCanChangeMap();
         }
@@ -2879,7 +2883,7 @@ void SwiperPattern::UpdateOverlongForceStopPageRate(float forceStopPageRate)
 void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
-    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown");
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown id: %{public}d", swiperId_);
     isTouchDown_ = true;
     isTouchDownOnOverlong_ = true;
     if (InsideIndicatorRegion(locationInfo)) {
@@ -2930,7 +2934,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 void SwiperPattern::HandleTouchUp()
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchUp");
-    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchUp");
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchUp id: %{public}d", swiperId_);
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
@@ -3390,8 +3394,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::ANIMATE);
     if (iter != frameRateRange_.end()) {
         TAG_LOGI(AceLogTag::ACE_SWIPER,
-            "Property translate animation frame rate range: {min: %{public}d, max: %{public}d, expected: %{public}d}",
-            iter->second->min_, iter->second->max_, iter->second->preferred_);
+            "Property translate animation frame rate range: {min: %{public}d, max: %{public}d, expected: %{public}d}, "
+            "id: %{public}d",
+            iter->second->min_, iter->second->max_, iter->second->preferred_, swiperId_);
         iter->second->componentScene_ = COMPONENT_SWIPER_FLING;
         option.SetFrameRateRange(iter->second);
     } else {
@@ -3472,8 +3477,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         } else {
             AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
         }
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start property animation with offsetX: %{public}f, offsetY: %{public}f",
-            offset.GetX(), offset.GetY());
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "Swiper start property animation with offsetX: %{public}f, offsetY: %{public}f, id: %{public}d",
+            offset.GetX(), offset.GetY(), swiperPattern->swiperId_);
         ACE_SCOPED_TRACE_COMMERCIAL("%s start property animation, X: %f, Y: %f",
             swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, offset.GetX(), offset.GetY());
         swiperPattern->UpdateTranslateForSwiperItem(swiperPattern->itemPosition_, offset);
@@ -3544,8 +3550,9 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
             ? itemPositionInAnimation_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty()
             : OffsetF();
     TAG_LOGI(AceLogTag::ACE_SWIPER,
-        "Swiper finish property animation with offsetX: %{public}f, offsetY: %{public}f isVerifiedSuc %{public}d",
-        finalOffset.GetX(), finalOffset.GetY(), !IsItemOverlay());
+        "Swiper finish property animation with offsetX: %{public}f, offsetY: %{public}f isVerifiedSuc %{public}d, id: "
+        "%{public}d",
+        finalOffset.GetX(), finalOffset.GetY(), !IsItemOverlay(), swiperId_);
     ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
         hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
         !IsItemOverlay());
@@ -3582,8 +3589,8 @@ void SwiperPattern::PropertyCancelAnimationFinish(
         }
     }
     ACE_SCOPED_TRACE("Swiper stop propertyAni offset %f", currentOffset.GetMainOffset(GetDirection()));
-    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper stop propertyAni offset %{public}f",
-        currentOffset.GetMainOffset(GetDirection()));
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper stop propertyAni offset %{public}f, id: %{public}d",
+        currentOffset.GetMainOffset(GetDirection()), swiperId_);
     UpdateTranslateForSwiperItem(itemPositionInAnimation_, OffsetF());
     itemPositionInAnimation_.clear();
     UpdateTranslateForCaptureNode(OffsetF());
@@ -3831,7 +3838,8 @@ void SwiperPattern::OnSpringAnimationFinish()
     }
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
     AceAsyncTraceEndCommercial(0, TRAILING_ANIMATION);
-    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f", currentIndexOffset_);
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f, id: %{public}d",
+        currentIndexOffset_, swiperId_);
     ACE_SCOPED_TRACE_COMMERCIAL("%s finish spring animation, offset: %f",
         hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, currentIndexOffset_);
     springAnimationIsRunning_ = false;
@@ -4021,9 +4029,10 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         option,
         [weak = AceType::WeakClaim(this), delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f", delta);
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f, id:%{public}d",
+                delta, swiperPattern->swiperId_);
             ACE_SCOPED_TRACE_COMMERCIAL(
                 "%s start spring animation", swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
             auto host = swiperPattern->GetHost();
@@ -5817,7 +5826,7 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
     if (!disableSwipe) {
         InitPanEvent(gestureHub);
     } else if (panEvent_) {
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "Remove pan event when disable swipe.");
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Remove pan event when disable swipe. id:%{public}d", swiperId_);
         gestureHub->RemovePanEvent(panEvent_);
         panEvent_.Reset();
         if (isDragging_) {
