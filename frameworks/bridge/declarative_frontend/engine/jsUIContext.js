@@ -839,6 +839,18 @@ class FocusController {
         this.ohos_focusController.setAutoFocusTransfer(value);
         __JSScopeUtil__.restoreInstanceId();
     }
+    activate(isActive, autoInactive) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (arguments.length === 2) {
+            let result = this.ohos_focusController.activate(isActive, autoInactive);
+            __JSScopeUtil__.restoreInstanceId();
+            return result;
+        } else {
+            let result = this.ohos_focusController.activate(isActive);
+            __JSScopeUtil__.restoreInstanceId();
+            return result;
+        }
+    }
 }
 
 class CursorController {

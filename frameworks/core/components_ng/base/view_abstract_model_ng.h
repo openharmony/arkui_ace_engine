@@ -1434,9 +1434,9 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) override
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
-        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
     }
 
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) override

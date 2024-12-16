@@ -450,7 +450,8 @@ public:
         return isFocusActive_;
     }
 
-    bool SetIsFocusActive(bool isFocusActive);
+    bool SetIsFocusActive(bool isFocusActive,
+        FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -1221,6 +1222,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool autoFocusInactive_ = true;
     std::unordered_set<UINode*> attachedNodeSet_;
 
     friend class ScopedLayout;

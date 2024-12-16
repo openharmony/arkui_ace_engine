@@ -330,7 +330,7 @@ public:
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
     virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
-    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {}
+    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) {}
     virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
     virtual void SetAutoEventParam(const std::string& param) {}

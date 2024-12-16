@@ -1015,7 +1015,7 @@ public:
     
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut = true);
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
@@ -1129,6 +1129,8 @@ private:
     // donot move focus before detach if has focus view child
     bool SkipFocusMoveBeforeRemove() const;
 
+    bool IsArrowKeyStepOut(FocusStep moveStep);
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1175,6 +1177,7 @@ private:
     FocusPriority focusPriority_ = FocusPriority::AUTO;
     bool tabStop_ { false };
     bool isSwitchByEnter_ { false };
+    bool arrowKeyStepOut_ { true };
 };
 } // namespace OHOS::Ace::NG
 

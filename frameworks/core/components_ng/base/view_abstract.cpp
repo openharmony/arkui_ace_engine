@@ -4999,11 +4999,11 @@ bool ViewAbstract::GetFocusOnTouch(FrameNode* frameNode)
     return focusHub->IsFocusOnTouch().value_or(false);
 }
 
-void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
+void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
 
 void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
@@ -5013,12 +5013,13 @@ void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const 
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
-void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup)
+void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
+    bool arrowKeyStepOut)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
 
 void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,

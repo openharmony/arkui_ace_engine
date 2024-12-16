@@ -26,6 +26,7 @@
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
+constexpr size_t ARGC_ACTIVATE_PARAMTER = 2;
 }
 
 static napi_value JSClearFocus(napi_env env, napi_callback_info info)
@@ -102,12 +103,45 @@ static napi_value JsSetAutoFocusTransfer(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static napi_value JSActivate(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ACTIVATE_PARAMTER;
+    napi_value argv[ARGC_ACTIVATE_PARAMTER] = { nullptr };
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+    NAPI_ASSERT(env, argc >= 1, "requires at least 1 parameter");
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, argv[0], &type);
+    NAPI_ASSERT(env, type == napi_boolean, "the type of argv[0] is not bool");
+    bool isActive = false;
+    napi_get_value_bool(env, argv[0], &isActive);
+
+    bool autoInactive = true;
+    if (argc == ARGC_ACTIVATE_PARAMTER) {
+        napi_typeof(env, argv[1], &type);
+        NAPI_ASSERT(env, type == napi_boolean, "the type of argv[1] is not bool");
+        napi_get_value_bool(env, argv[1], &autoInactive);
+    }
+
+    napi_value obj = nullptr;
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        napi_get_boolean(env, false, &obj);
+        return obj;
+    }
+    delegate->Activate(isActive, autoInactive);
+    napi_get_null(env, &obj);
+    return obj;
+}
+
 static napi_value registerFunc(napi_env env, napi_value exports)
 {
     napi_property_descriptor animatorDesc[] = {
         DECLARE_NAPI_FUNCTION("clearFocus", JSClearFocus),
         DECLARE_NAPI_FUNCTION("requestFocus", JSRequestFocus),
         DECLARE_NAPI_FUNCTION("setAutoFocusTransfer", JsSetAutoFocusTransfer),
+        DECLARE_NAPI_FUNCTION("activate", JSActivate),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(animatorDesc) / sizeof(animatorDesc[0]), animatorDesc));
     return exports;

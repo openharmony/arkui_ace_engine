@@ -136,6 +136,8 @@ public:
 
     virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
 
+    virtual bool Activate(bool isActive, bool autoInactive = true);
+
     // restore
     virtual std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         const std::string& contentInfo, ContentInfoType type)

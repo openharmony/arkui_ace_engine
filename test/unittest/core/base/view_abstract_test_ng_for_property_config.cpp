@@ -614,7 +614,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractFocusScopeId001, TestSize.Level1)
     std::string focusScopeId = "focusScope1";
     bool isGroup = true;
     ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub()->focusType_ = FocusType::SCOPE;
-    ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+    ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, true);
 
     /**
      * @tc.steps: step2. Verify that the focus scope ID has been set.
@@ -675,7 +675,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractFocusScopeIdWithFrameNode001, TestSize.
     std::string focusScopeId = "focusScope2";
     bool isGroup = true;
     ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub()->focusType_ = FocusType::SCOPE;
-    ViewAbstract::SetFocusScopeId(AceType::RawPtr(frameNode), focusScopeId, isGroup);
+    ViewAbstract::SetFocusScopeId(AceType::RawPtr(frameNode), focusScopeId, isGroup, true);
 
     /**
      * @tc.steps: step2. Verify that the focus scope ID has been set.
