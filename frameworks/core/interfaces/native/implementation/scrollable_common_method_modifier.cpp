@@ -32,11 +32,11 @@ namespace OHOS::Ace::NG::Converter {
 template<>
 void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src)
 {
-    switch(src) {
+    switch (src) {
         case ARK_CONTENT_CLIP_MODE_CONTENT_ONLY:dst = ContentClipMode::CONTENT_ONLY;break;
         case ARK_CONTENT_CLIP_MODE_BOUNDARY:dst = ContentClipMode::BOUNDARY;break;
         case ARK_CONTENT_CLIP_MODE_SAFE_AREA:dst = ContentClipMode::SAFE_AREA;break;
-        default: LOGE("Unexpected enum value in Ark_ContentClipMode: %{public}d", src);break;           
+        default: LOGE("Unexpected enum value in Ark_ContentClipMode: %{public}d", src);break;
     }
 }
 
