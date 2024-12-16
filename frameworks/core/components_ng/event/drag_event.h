@@ -169,7 +169,8 @@ public:
     void HandleDragDampingMove(const Point& point, int32_t pointerId, bool isRedragStart = false);
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     void RestartDragTask(const GestureEvent& info);
-    static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
+    static void UpdateDragNodePosition(
+        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& frameNode, float width, float height);
     PanDirection GetDirection() const
     {
         return direction_;
@@ -271,8 +272,7 @@ public:
 
     void ShowPreviewBadgeAnimation(
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
-    static RefPtr<FrameNode> CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
-        float previewScale, bool isUsePixelMapOffset = false, OffsetF previewOffset = { 0.0f, 0.0f });
+    static RefPtr<FrameNode> CreateBadgeTextNode(int32_t childSize);
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
@@ -296,6 +296,9 @@ public:
     void GetThumbnailPixelMap(bool isSync);
     void GetThumbnailPixelMapForCustomNode();
     void GetThumbnailPixelMapForCustomNodeSync();
+
+    static void UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& textNode,
+        int32_t childSize, float previewScale, OffsetF previewOffset = { 0.0f, 0.0f });
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);

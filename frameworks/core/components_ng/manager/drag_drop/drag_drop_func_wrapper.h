@@ -60,6 +60,8 @@ public:
     static void UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode,
         float width, float height);
     static void ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event);
+    static OffsetF GetFrameNodeOffsetToWindow(
+        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

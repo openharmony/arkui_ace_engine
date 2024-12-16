@@ -1278,8 +1278,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
 
     // create text node
     auto subWindowOffset = isExpandDisplay ? subWindow->GetWindowRect().GetOffset() : OffsetF();
-    auto  textNode = DragEventActuator::CreateBadgeTextNode(frameNode, data.badgeNumber, data.previewScale, true,
-        data.dragPreviewOffsetToScreen - subWindowOffset);
+    auto textNode = DragEventActuator::CreateBadgeTextNode(data.badgeNumber);
     
     // create gatherNode
     auto originGatherNode = overlayManager->GetGatherNode();
@@ -1299,6 +1298,8 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
         subWindowOverlayManager, eventHub->GetGestureEventHub(), data.imageNode, textNode, true);
 
     // update position
+    DragEventActuator::UpdateBadgeTextNodePosition(frameNode, textNode, data.badgeNumber, data.previewScale,
+        data.dragPreviewOffsetToScreen - subWindowOffset);
     DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
     
     auto subwindowContext = data.imageNode->GetContext();

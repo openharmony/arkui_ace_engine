@@ -1079,36 +1079,28 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set filter success.");
 }
 
-OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap)
+void DragEventActuator::UpdateDragNodePosition(
+    const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& frameNode, float width, float height)
 {
-    CHECK_NULL_RETURN(frameNode, OffsetF());
-    auto centerPosition = DragDropFuncWrapper::GetPaintRectCenter(frameNode, true);
-    float width = 0.0f;
-    float height = 0.0f;
-    if (pixelMap) {
-        width = pixelMap->GetWidth();
-        height = pixelMap->GetHeight();
-    }
-    auto offsetX = centerPosition.GetX() - width / 2.0f;
-    auto offsetY = centerPosition.GetY() - height / 2.0f;
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    // Check web tag.
 #ifdef WEB_SUPPORTED
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
         auto webPattern = frameNode->GetPattern<WebPattern>();
         if (webPattern) {
             auto offsetToWindow = frameNode->GetPaintRectOffset();
-            offsetX = offsetToWindow.GetX() + webPattern->GetDragOffset().GetX();
-            offsetY = offsetToWindow.GetY() + webPattern->GetDragOffset().GetY();
+            auto offset = offsetToWindow + OffsetF(
+                webPattern->GetDragOffset().GetX(), webPattern->GetDragOffset().GetY());
+            imageContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
         }
+        return;
     }
 #endif
-    // Check web tag.
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    if (pipelineContext->HasFloatTitle()) {
-        offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
-        offsetY -= static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx());
-    }
-    return OffsetF(offsetX, offsetY);
+    DragDropFuncWrapper::UpdatePositionFromFrameNode(imageNode, frameNode, width, height);
 }
 
 void DragEventActuator::UpdateGatherAnimatePosition(
@@ -1348,7 +1340,6 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(pixelMap);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
-    auto offset = GetFloatImageOffset(frameNode, pixelMap);
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -1366,7 +1357,6 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     props->UpdateUserDefinedIdealSize(targetSize);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
-    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     ClickEffectInfo clickEffectInfo;
     clickEffectInfo.level = ClickEffectLevel::LIGHT;
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
@@ -1394,6 +1384,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
         context->FlushUITaskWithSingleDirtyNode(imageNode);
     }
     FlushSyncGeometryNodeTasks();
+    UpdateDragNodePosition(imageNode, frameNode, width, height);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -2519,43 +2510,27 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
     auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
     int32_t childSize = badgeNumber.has_value() ? badgeNumber.value()
                                              : static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()) + 1;
-    auto textNode = CreateBadgeTextNode(frameNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE, true);
+    auto textNode = CreateBadgeTextNode(childSize);
     CHECK_NULL_VOID(textNode);
     auto column = manager->GetPixelMapNode();
     CHECK_NULL_VOID(column);
     column->AddChild(textNode);
-
+    
+    UpdateBadgeTextNodePosition(frameNode, textNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE);
     DragAnimationHelper::ShowBadgeAnimation(textNode);
 }
 
-RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
-    float previewScale, bool isUsePixelMapOffset, OffsetF previewOffset)
+RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(int32_t childSize)
 {
     if (childSize <= 1) {
         return nullptr;
     }
-    CHECK_NULL_RETURN(frameNode, nullptr);
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_RETURN(textNode, nullptr);
     auto badgeLength = std::to_string(childSize).size();
     DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
 
-    auto textRenderContext = textNode->GetRenderContext();
-    CHECK_NULL_RETURN(textRenderContext, nullptr);
-    auto pixelMap = frameNode->GetPixelMap();
-    CHECK_NULL_RETURN(pixelMap, nullptr);
-    auto width = pixelMap->GetWidth();
-    auto height = pixelMap->GetHeight();
-    auto offset = isUsePixelMapOffset ? GetFloatImageOffset(frameNode, pixelMap) : frameNode->GetPaintRectOffset();
-    if (!previewOffset.NonOffset()) {
-        offset = previewOffset;
-    }
-    double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 -
-        BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
-    double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
-    textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
     textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
@@ -2757,4 +2732,29 @@ void DragEventActuator::HandleTextDragCallback(GestureEvent& info)
         gestureHub->SetPixelMap(nullptr);
     }
 }
+
+void DragEventActuator::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<FrameNode>& textNode, int32_t childSize, float previewScale, OffsetF previewOffset)
+{
+    if (childSize <= 1) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(textNode);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto pixelMap = frameNode->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    auto offset = previewOffset.NonOffset() ?
+        DragDropFuncWrapper::GetFrameNodeOffsetToWindow(textNode, frameNode, width, height) : previewOffset;
+    auto badgeLength = std::to_string(childSize).size();
+    double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 -
+        BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+    double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
+}
+
 } // namespace OHOS::Ace::NG

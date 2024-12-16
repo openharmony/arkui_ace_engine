@@ -635,6 +635,23 @@ void DragDropFuncWrapper::UpdatePositionFromFrameNode(const RefPtr<FrameNode>& t
     UpdateNodePositionToScreen(targetNode, offset);
 }
 
+OffsetF DragDropFuncWrapper::GetFrameNodeOffsetToWindow(const RefPtr<FrameNode>& targetNode,
+    const RefPtr<FrameNode>& frameNode, float width, float height)
+{
+    CHECK_NULL_RETURN(targetNode, OffsetF());
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto paintRectCenter = GetPaintRectCenterToScreen(frameNode);
+    auto offset = paintRectCenter - OffsetF(width / 2.0f, height / 2.0f);
+    offset -= GetCurrentWindowOffset(targetNode->GetContextRefPtr());
+    auto renderContext = targetNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, OffsetF());
+    RefPtr<FrameNode> parentNode = targetNode->GetAncestorNodeOfFrame(true);
+    if (parentNode) {
+        offset -= parentNode->GetPositionToWindowWithTransform();
+    }
+    return offset;
+}
+
 void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event)
 {
     event.rawPointerEvent = touchPoint.pointerEvent;
