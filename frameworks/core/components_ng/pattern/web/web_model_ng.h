@@ -260,6 +260,9 @@ public:
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void SetNestedScrollExt(FrameNode* frameNode, const std::optional<NestedScrollOptionsExt>& nestedOpt);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption);
+    static void SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle);
+    static void SetPreviewSelectionMenu(
+        FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
     static void SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnPageStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnProgressChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);

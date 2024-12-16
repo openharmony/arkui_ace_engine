@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
@@ -123,6 +124,34 @@ void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src)
 }
 
 template<>
+void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src)
+{
+    switch (src) {
+        case ARK_WEB_ELEMENT_TYPE_IMAGE: dst = WebElementType::IMAGE; break;
+        default: LOGE("Unexpected enum value in Ark_WebElementType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src)
+{
+    switch (src) {
+        case ARK_WEB_RESPONSE_TYPE_LONG_PRESS: dst = ResponseType::LONG_PRESS; break;
+        default: LOGE("Unexpected enum value in Ark_WebResponseType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SelectionMenuType>& dst, const Ark_MenuType& src)
+{
+    switch (src) {
+        case ARK_MENU_TYPE_SELECTION_MENU: dst = SelectionMenuType::SELECTION_MENU; break;
+        case ARK_MENU_TYPE_PREVIEW_MENU: dst = SelectionMenuType::PREVIEW_MENU; break;
+        default: LOGE("Unexpected enum value in Ark_MenuType: %{public}d", src);
+    }
+}
+
+template<>
 ScriptItem Convert(const Ark_ScriptItem& src)
 {
     ScriptItem item = std::make_pair(
@@ -187,7 +216,6 @@ MenuOptionsParam Convert(const Ark_ExpandedMenuItemOptions& src)
     MenuOptionsParam menuOption;
     menuOption.content = Converter::OptConvert<std::string>(src.content);
     menuOption.icon = Converter::OptConvert<std::string>(src.startIcon);
-    LOGE("Converter ExpandedMenuItemOptions `action` property supporting is not implemented yet");
     return menuOption;
 }
 
@@ -1467,12 +1495,28 @@ void SelectionMenuOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::vector<MenuOptionsParam>>(*value);
+    auto convValue = Converter::Convert<std::vector<Ark_ExpandedMenuItemOptions>>(*value);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     WebMenuOptionsParam optionParam;
     for (auto menuOption : convValue) {
-        optionParam.menuOption.push_back(menuOption);
+        auto option = Converter::Convert<MenuOptionsParam>(menuOption);
+        auto action = [arkCallback = CallbackHelper(menuOption.action), weakNode](
+                const std::string selectInfo) {
+            auto webNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(webNode);
+            ContainerScope scope(webNode->GetInstanceId());
+            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+            if (pipelineContext) {
+                pipelineContext->UpdateCurrentActiveNode(weakNode);
+                pipelineContext->SetCallBackNode(weakNode);
+            }
+            Ark_Literal_String_plainText parameter;
+            parameter.plainText = Converter::ArkValue<Ark_String>(selectInfo);
+            arkCallback.Invoke(parameter);
+        };
+        option.action = std::move(action);
+        optionParam.menuOption.push_back(option);
     }
-    LOGE("WebInterfaceModifier::SelectionMenuOptionsImpl `action` property supporting is not implemented yet");
     WebModelNG::SetSelectionMenuOptions(frameNode, optionParam);
 #endif // WEB_SUPPORTED
 }
@@ -1552,11 +1596,54 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_WebResponseType responseType,
                            const Opt_SelectionMenuOptionsExt* options)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(elementType);
-    //auto convValue = Converter::OptConvert<type>(elementType); // for enums
-    //WebModelNG::SetBindSelectionMenu(frameNode, convValue);
+    auto elType = Converter::OptConvert<WebElementType>(elementType);
+    if (!elType.has_value()) {
+        return;
+    }
+    LOGE("WebAttributeModifier::BindSelectionMenuImpl - content builder is not supported yet");
+    MenuParam menuParam;
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto arkOptions = options ? Converter::OptConvert<Ark_SelectionMenuOptionsExt>(*options) : std::nullopt;
+    if (arkOptions) {
+        auto arkOnDisappear = Converter::OptConvert<Callback_Void>(arkOptions.value().onDisappear);
+        if (arkOnDisappear) {
+            auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke();
+            };
+            menuParam.onDisappear = std::move(onDisappear);
+        }
+        auto arkOnAppear = Converter::OptConvert<Callback_Void>(arkOptions.value().onAppear);
+        if (arkOnAppear) {
+            auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke();
+            };
+            menuParam.onAppear = std::move(onAppear);
+        }
+        auto menuType = Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType);
+        bool isPreviewMenu = menuType && menuType.value() == SelectionMenuType::PREVIEW_MENU;
+        if (menuType) {
+            menuParam.previewMode = MenuPreviewMode::CUSTOM;
+            LOGE("WebAttributeModifier::BindSelectionMenuImpl - preview builder is not supported yet");
+        }
+    }
+    auto resType = Converter::OptConvert<ResponseType>(responseType);
+    if (!resType.has_value() || resType.value() != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isShow = true;
+    WebModelNG::SetNewDragStyle(frameNode, true);
+    auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
+        elType.value(), resType.value(), nullptr, nullptr, menuParam);
+    WebModelNG::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
+#endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()

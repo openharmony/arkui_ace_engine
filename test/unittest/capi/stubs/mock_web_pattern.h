@@ -107,6 +107,13 @@ public:
     void SetWebController(const RefPtr<WebController>& webController);
     RefPtr<WebController> GetWebController() const;
 
+    void SetNewDragStyle(bool isNewDragStyle)
+    {
+        isNewDragStyle_ = isNewDragStyle;
+    }
+
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
+
 private:
     std::string GetMixedModeAsString() const;
     std::string GetCacheModeAsString() const;
@@ -192,6 +199,7 @@ private:
     };
     RefPtr<WebController> webController_;
     std::optional<std::string> webData_;
+    bool isNewDragStyle_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H
