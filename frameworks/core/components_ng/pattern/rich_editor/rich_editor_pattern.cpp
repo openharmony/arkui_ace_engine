@@ -11233,7 +11233,7 @@ void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 
 RectF RichEditorPattern::GetCaretRelativeRect()
 {
-    CHECK_NULL_RETURN(caretTwinkling_, RectF(0, 0, 0, 0));
+    CHECK_NULL_RETURN(caretTwinkling_, RectF(-1, -1, -1, -1));
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     constexpr float CARET_WIDTH = 2.0f;
     return RectF(caretOffset.GetX(), caretOffset.GetY(),
