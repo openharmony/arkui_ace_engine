@@ -16,12 +16,15 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("relative_container_test_ng") {
   type = "new"
   sources = [
+    "layout/relative_container_layout_test.cpp",
+    "measure/relative_container_measure_test.cpp",
+    "old_cases/relative_container_common_ng.cpp",
+
     # "old_cases/relative_container_guideline_test_ng.cpp",
+    # "old_cases/relative_container_new_test_ng.cpp",
     "old_cases/relative_container_test_ng.cpp",
     "old_cases/relative_container_testthree_ng.cpp",
     "old_cases/relative_container_testtwo_ng.cpp",
     "relative_container_base_test_ng.cpp",
-    "relative_container_common_ng.cpp",
-    "relative_container_new_test_ng.cpp",
   ]
 }

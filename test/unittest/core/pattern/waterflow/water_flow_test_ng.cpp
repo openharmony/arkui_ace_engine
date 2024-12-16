@@ -2231,4 +2231,46 @@ HWTEST_F(WaterFlowTestNg, Delete001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 30);
     EXPECT_EQ(GetChildRect(frameNode_, 30).Bottom(), WATER_FLOW_HEIGHT);
 }
+
+/**
+ * @tc.name: Cache005
+ * @tc.desc: Test items in preloadList when Waterflow's height is changed to 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache005, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return 100.0f; });
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateDone();
+
+    pattern_->ScrollToIndex(10);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
+    std::list<int32_t> preloadList = { 26, 27, 28 };
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+
+    // change height to 0.0f.
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(0.0f))));
+    frameNode_->isConstraintNotChanged_ = false;
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 500.0f, 0)));
+    EXPECT_TRUE(pattern_->PreloadListEmpty());
+}
+
+/**
+ * @tc.name: Cache006
+ * @tc.desc: Test items in preloadList when Waterflow is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache006, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateDone();
+    EXPECT_TRUE(pattern_->PreloadListEmpty());
+}
 } // namespace OHOS::Ace::NG

@@ -105,7 +105,7 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     if (dragState_ == ListItemDragState::IDLE) {
         HandleOnItemLongPress(info);
     }
-    dragState_ = ListItemDragState::DRAGGING;
+    SetDragState(ListItemDragState::DRAGGING);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometry = host->GetGeometryNode();
@@ -127,7 +127,7 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
 
 void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
 {
-    dragState_ = ListItemDragState::LONG_PRESS;
+    SetDragState(ListItemDragState::LONG_PRESS);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -504,13 +504,13 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
     forEach->FireOnMove(fromIndex_, to);
-    dragState_ = ListItemDragState::IDLE;
+    SetDragState(dragState_ = ListItemDragState::IDLE);
 }
 
 void ListItemDragManager::HandleOnItemDragCancel()
 {
     HandleDragEndAnimation();
-    dragState_ = ListItemDragState::IDLE;
+    SetDragState(dragState_ = ListItemDragState::IDLE);
 }
 
 int32_t ListItemDragManager::GetIndex() const
@@ -527,5 +527,16 @@ int32_t ListItemDragManager::GetLanes() const
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, 1);
     return pattern->GetLanes();
+}
+
+void ListItemDragManager::SetDragState(ListItemDragState dragState)
+{
+    dragState_ = dragState;
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    bool isNeedDividerAnimation = dragState_ == ListItemDragState::IDLE;
+    pattern->SetIsNeedDividerAnimation(isNeedDividerAnimation);
 }
 } // namespace OHOS::Ace::NG

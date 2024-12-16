@@ -172,16 +172,9 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
 
 bool ScrollPattern::ScrollSnapTrigger()
 {
-    auto scrollBar = GetScrollBar();
-    auto scrollBarProxy = GetScrollBarProxy();
-    if (scrollBar && scrollBar->IsDriving()) {
-        return false;
-    }
-    if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
-        return false;
-    }
     if (ScrollableIdle() && !AnimateRunning()) {
-        if (StartSnapAnimation(0.f, 0.f, 0.f, 0.f)) {
+        SnapAnimationOptions snapAnimationOptions;
+        if (StartSnapAnimation(snapAnimationOptions)) {
             FireOnScrollStart();
             return true;
         }
@@ -851,7 +844,7 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
     float head = 0.0f;
     float tail = -scrollableDistance_;
     if (GreatOrEqual(finalPosition, head) || LessOrEqual(finalPosition, tail)) {
-        return predictSnapOffset;
+        predictSnapOffset = finalPosition;
     } else if (LessNotEqual(finalPosition, head) && GreatOrEqual(finalPosition, *(snapOffsets_.begin()))) {
         predictSnapOffset = *(snapOffsets_.begin());
     } else if (GreatNotEqual(finalPosition, tail) && LessOrEqual(finalPosition, *(snapOffsets_.rbegin()))) {
@@ -1032,9 +1025,12 @@ void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign
 
 bool ScrollPattern::NeedScrollSnapToSide(float delta)
 {
-    CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, false);
-    CHECK_NULL_RETURN(!IsSnapToInterval(), false);
+    CHECK_NULL_RETURN(IsScrollSnap(), false);
     auto finalPosition = currentOffset_ + delta;
+    if (IsEnablePagingValid() && GetEdgeEffect() != EdgeEffect::SPRING) {
+        return Positive(finalPosition) || LessNotEqual(finalPosition, -scrollableDistance_);
+    }
+    CHECK_NULL_RETURN(!IsSnapToInterval(), false);
     CHECK_NULL_RETURN(static_cast<int32_t>(snapOffsets_.size()) > 2, false);
     if (!enableSnapToSide_.first) {
         if (GreatOrEqual(currentOffset_, *(snapOffsets_.begin() + 1)) &&
@@ -1316,18 +1312,27 @@ std::string ScrollPattern::GetScrollSnapPagination() const
     return snapPaginationStr;
 }
 
-bool ScrollPattern::StartSnapAnimation(
-    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance, SnapDirection snapDirection)
+bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
 {
-    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, predictVelocity, snapDirection);
+    auto scrollBar = GetScrollBar();
+    auto scrollBarProxy = GetScrollBarProxy();
+    auto fromScrollBar = snapAnimationOptions.fromScrollBar;
+    if (!fromScrollBar && scrollBar && scrollBar->IsDriving()) {
+        return false;
+    }
+    if (!fromScrollBar && scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
+        return false;
+    }
+    auto predictSnapOffset = CalcPredictSnapOffset(snapAnimationOptions.snapDelta, snapAnimationOptions.dragDistance,
+        snapAnimationOptions.animationVelocity, snapAnimationOptions.snapDirection);
     if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
-        StartScrollSnapAnimation(predictSnapOffset.value(), animationVelocity);
+        StartScrollSnapAnimation(predictSnapOffset.value(), snapAnimationOptions.animationVelocity, fromScrollBar);
         return true;
     }
     return false;
 }
 
-void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar)
 {
     auto scrollableEvent = GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
@@ -1337,7 +1342,7 @@ void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scroll
         scrollable->UpdateScrollSnapEndWithOffset(
             -(scrollSnapDelta + currentOffset_ - scrollable->GetSnapFinalPosition()));
     } else {
-        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
+        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
     }
 }
 

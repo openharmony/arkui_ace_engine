@@ -1625,6 +1625,7 @@ EventManager::EventManager()
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
+    mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();

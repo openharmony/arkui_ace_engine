@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 namespace {
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
+    CHECK_NULL_VOID(row);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -49,6 +50,7 @@ void MenuItemGroupView::Create()
 
 void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 {
+    CHECK_NULL_VOID(header);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
@@ -74,6 +76,7 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     UpdateRowPadding(row);
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(headerStr);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -95,6 +98,7 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
 
 void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 {
+    CHECK_NULL_VOID(footer);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
@@ -120,6 +124,7 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     UpdateRowPadding(row);
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(footerStr);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

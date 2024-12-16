@@ -61,8 +61,7 @@ using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ContinuousSlidingCallback = std::function<double()>;
-using StartSnapAnimationCallback = std::function<bool(
-    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance, SnapDirection snapDirection)>;
+using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
@@ -289,7 +288,7 @@ public:
     void UpdateSpringMotion(double mainPosition, const ExtentPair& extent, const ExtentPair& initExtent);
 
     void UpdateScrollSnapStartOffset(double offset);
-    void StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity);
+    void StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity, bool fromScrollBar);
     void UpdateScrollSnapEndWithOffset(double offset);
 
     bool IsAnimationNotRunning() const;
@@ -416,7 +415,7 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
-    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar);
 
     void StopSnapController()
     {
@@ -652,6 +651,7 @@ private:
     std::function<double()> overScrollOffsetCallback_;
 
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
+    bool snapAnimationFromScrollBar_ = false;
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
     bool nestedScrolling_ = false;

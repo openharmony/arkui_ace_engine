@@ -360,10 +360,9 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    bool StartSnapAnimation(float snapDelta, float animationVelocity, float predictVelocity = 0.f,
-        float dragDistance = 0.f, SnapDirection snapDirection = SnapDirection::NONE) override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
 
-    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar);
 
     SizeF GetChildrenExpandedSize() override;
 

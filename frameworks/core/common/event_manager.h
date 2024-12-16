@@ -168,6 +168,17 @@ public:
         return refereeNG_;
     }
 
+    RefPtr<MouseStyleManager> GetMouseStyleManager() const
+    {
+        return mouseStyleManager_;
+    }
+
+    void FlushCursorStyleRequests()
+    {
+        CHECK_NULL_VOID(mouseStyleManager_);
+        mouseStyleManager_->VsyncMouseFormat();
+    }
+
     bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
@@ -377,6 +388,7 @@ private:
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
+    RefPtr<MouseStyleManager> mouseStyleManager_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
