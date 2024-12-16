@@ -964,10 +964,7 @@ export struct ButtonBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time, tagDesRule(
-        this.title as string,
-        value
-      ))
+      new BlockTag(time,value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
