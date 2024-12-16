@@ -582,8 +582,10 @@ void RosenRenderSurface::DrawBufferForXComponent(
     ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d][uid:%" PRIu64 "]", surfaceNode->bufferId_,
         surfaceNode->sendTimes_, uid);
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
-    auto transform = surfaceNode->buffer_ == nullptr ? GraphicTransformType::GRAPHIC_ROTATE_NONE
-                                                     : surfaceNode->buffer_->GetSurfaceBufferTransform();
+    auto transform = (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) ||
+        surfaceNode->buffer_ == nullptr)
+        ? GraphicTransformType::GRAPHIC_ROTATE_NONE
+        : surfaceNode->buffer_->GetSurfaceBufferTransform();
     Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
         static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->acquireFence_, transform };
     recordingCanvas.DrawSurfaceBuffer(info);

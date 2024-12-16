@@ -592,6 +592,42 @@ void GetCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, char** value)
     (*value)[size] = '\0';
 }
 
+void AddExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, void* extraData)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddCustomProperty doesn't run on UI thread");
+        return;
+    }
+    frameNode->AddExtraCustomProperty(key, extraData);
+}
+
+void* GetExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddCustomProperty doesn't run on UI thread");
+        return nullptr;
+    }
+    return frameNode->GetExtraCustomProperty(key);
+}
+
+void RemoveExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddCustomProperty doesn't run on UI thread");
+        return;
+    }
+    frameNode->RemoveExtraCustomProperty(key);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -605,7 +641,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
         SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
         SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
-        GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty };
+        GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, AddExtraCustomProperty,
+        GetExtraCustomProperty, RemoveExtraCustomProperty };
     return &modifier;
 }
 

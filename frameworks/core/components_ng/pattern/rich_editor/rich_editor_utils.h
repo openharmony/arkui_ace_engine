@@ -51,6 +51,39 @@ static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribut
     ss << "}";
     return ss.str();
 }
+
+static std::string ToBriefString(const TextStyle& style)
+{
+    std::stringstream ss;
+    ss << "{";
+    ss << style.GetTextColor().ToString() << ",";
+    ss << "FS" << style.GetFontSize().ConvertToFp() << ",";
+    ss << StringUtils::ToString(style.GetFontStyle()) << ",";
+    ss << StringUtils::ToString(style.GetFontWeight()) << ",";
+    ss << StringUtils::ToString(style.GetTextDecoration()) << ",";
+    ss << "LH" << style.GetLineHeight().ConvertToFp() << ",";
+    ss << "LS" << style.GetLetterSpacing().ConvertToFp();
+    ss << "}";
+    return ss.str();
+}
+
+static std::string ToBriefString(const TextSpanOptions& opts)
+{
+    std::stringstream ss;
+    ss << "{";
+    ss << "index=" << opts.offset.value_or(-1) << ", ";
+    ss << "len=" << opts.value.size() << ", ";
+    if (opts.style) {
+        ss << "ts=" << ToBriefString(opts.style.value()) << ", ";
+    }
+    if (opts.paraStyle) {
+        ss << "ps={" << opts.paraStyle->ToString() << "}, ";
+    }
+    ss << "themeFC=" << static_cast<int32_t>(opts.useThemeFontColor);
+    ss << "}";
+    return ss.str();
+}
+
 }
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_UTILS_H

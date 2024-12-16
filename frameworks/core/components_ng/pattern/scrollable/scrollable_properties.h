@@ -451,6 +451,14 @@ enum class ScrollSource {
     SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 };
 
+struct SnapAnimationOptions {
+    float snapDelta = 0.f;
+    float animationVelocity = 0.f;
+    float dragDistance = 0.f;
+    SnapDirection snapDirection = SnapDirection::NONE;
+    bool fromScrollBar = false;
+};
+
 // app tail animation
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
@@ -473,8 +481,7 @@ using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, List
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using StartSnapAnimationCallback = std::function<bool(
-    float delta, float animationVelocity, float predictVelocity, float dragDistance, SnapDirection snapDirection)>;
+using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 

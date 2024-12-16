@@ -561,7 +561,7 @@ HWTEST_F(ScrollableCoverTestNg, StartScrollSnapAnimationTest001, TestSize.Level1
     /**
      * @tc.steps: step2. Call StartScrollSnapAnimation
      */
-    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
+    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, false);
 
     /**
      * @tc.expected: The end position should be initialPos + scrollSnapDelta
@@ -617,8 +617,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
     scrollable->needScrollSnapChange_ = true;
     scrollable->isDragUpdateStop_ = false;
     scrollable->scrollPause_ = false;
-    scrollable->startSnapAnimationCallback_ = [](float delta, float animationVelocity, float predictVelocity,
-                                                  float dragDistance, SnapDirection snapDirection) { return false; };
+    scrollable->startSnapAnimationCallback_ = [](SnapAnimationOptions snapAnimationOptions) { return false; };
     scrollable->currentVelocity_ = 10.0f;
     auto propertyCallback = [](float offset) {};
     scrollable->frictionOffsetProperty_ =

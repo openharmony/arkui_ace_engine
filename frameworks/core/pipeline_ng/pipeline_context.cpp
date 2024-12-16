@@ -37,6 +37,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_engine.h"
@@ -604,6 +605,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushMouseEventVoluntarily();
         isNeedFlushMouseEvent_ = false;
     }
+    eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
         window_->FlushAnimationStartTime(animationTimeStamp_);
         isNeedFlushAnimationStartTime_ = false;
@@ -3438,32 +3440,14 @@ void PipelineContext::DispatchMouseEvent(
     }
 }
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass,
+    MouseStyleChangeReason reason)
 {
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    if (!mouseStyle) {
-        TAG_LOGW(AceLogTag::ACE_MOUSE, "ChangeMouseStyle mouseStyle is null");
-        return false;
-    }
-    auto window = GetWindow();
-    if (window && window->IsUserSetCursor()) {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "ChangeMouseStyle UserSetCursor");
-        return false;
-    }
-    if (!windowId) {
-        windowId = static_cast<int32_t>(GetFocusWindowId());
-    }
-    if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
-        return false;
-    }
-    int32_t currentStyle = static_cast<int32_t>(format);
-    if (lastMouseStyle_ != 0 && currentStyle == 0) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle "
-            "[%{public}d,%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
-            nodeId, mouseStyleNodeId_.value_or(-1), currentStyle, lastMouseStyle_, windowId, isByPass);
-    }
-    lastMouseStyle_ = currentStyle;
-    return mouseStyle->ChangePointerStyle(windowId, format);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_RETURN(mouseStyleManager, false);
+    mouseStyleManager->SetMouseFormat(windowId, nodeId, format, isByPass, reason);
+    RequestFrame();
+    return true;
 }
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent)
@@ -4655,11 +4639,12 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         CHECK_NULL_VOID(window);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
-        auto cursor = static_cast<MouseFormat>(cursorValue);
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "user SetCursor mouseStyle=%{public}d", cursorValue);
-        window->SetCursor(cursor);
-        window->SetUserSetCursor(true);
-        mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
+        auto mouseFormat = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        CHECK_NULL_VOID(mouseStyleManager);
+        mouseStyleManager->SetUserSetCursor(true);
+        ChangeMouseStyle(-1, mouseFormat, GetFocusWindowId(),
+            false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     }
 }
 
@@ -4669,10 +4654,11 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(window);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
-    window->SetCursor(MouseFormat::DEFAULT);
-    window->SetUserSetCursor(false);
-    TAG_LOGI(AceLogTag::ACE_MOUSE, "RestoreDefault param windowId=%{public}d", windowId);
-    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
+    ChangeMouseStyle(-1, MouseFormat::DEFAULT, windowId > 0 ? windowId : GetFocusWindowId(),
+        false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_VOID(mouseStyleManager);
+    mouseStyleManager->SetUserSetCursor(false);
 }
 
 void PipelineContext::OpenFrontendAnimation(

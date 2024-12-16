@@ -37,9 +37,11 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -70,6 +72,9 @@ const CalcLength MARGIN_LENGTH = CalcLength("8vp");
 const CalcSize TEXT_IDEAL_SIZE = CalcSize(CalcLength("50vp"), std::nullopt);
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float SELECT_WIDTH = 100.0f;
+constexpr float SELECT_HEIGHT = 200.0f;
+constexpr Dimension OPTION_MARGIN = 8.0_vp;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
@@ -1688,5 +1693,70 @@ HWTEST_F(SelectPatternTestNg, SetControlSize001, TestSize.Level1)
     selectPattern->SetControlSize(ControlSize::SMALL);
     auto controlSize = selectPattern->GetControlSize();
     EXPECT_EQ(ControlSize::SMALL, controlSize);
+}
+
+/**
+ * @tc.name: UpdateTargetSize
+ * @tc.desc: Test SelectPattern UpdateTargetSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, UpdateTargetSize001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call UpdateTargetSize.
+     * @tc.expected: the menu targetSize equal selectSize_
+     */
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    selectPattern->UpdateTargetSize();
+    auto menu = selectPattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    auto targetSize = menuLayoutProps->GetTargetSizeValue(SizeF());
+    EXPECT_EQ(targetSize, SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+
+    /**
+     * @tc.steps: step4. Get a option.
+     * @tc.expected: IsWidthModifiedBySelect false
+     */
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto option = selectPattern->options_[0];
+    auto optionPattern = option->GetPattern<MenuItemPattern>();
+    ASSERT_NE(optionPattern, nullptr);
+    EXPECT_FALSE(optionPattern->IsWidthModifiedBySelect());
+    /**
+     * @tc.steps: step5. make fitTrigger_ true and call UpdateTargetSize.
+     * @tc.expected: IsWidthModifiedBySelect true
+     */
+    selectPattern->SetOptionWidthFitTrigger(true);
+    selectPattern->UpdateTargetSize();
+    EXPECT_TRUE(optionPattern->IsWidthModifiedBySelect());
+    auto scroll = AceType::DynamicCast<FrameNode>(menu->GetFirstChild());
+    ASSERT_NE(scroll, nullptr);
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    EXPECT_TRUE(scrollPattern->IsWidthModifiedBySelect());
+    /**
+     * @tc.steps: step6. get option paint property.
+     * @tc.expected: GetSelectModifiedWidthValue equal SELECT_WIDTH
+     */
+    auto optionPaintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(optionPaintProperty);
+    auto selectModifiedWidth = optionPaintProperty->GetSelectModifiedWidthValue(0.0f);
+    EXPECT_EQ(selectModifiedWidth, SELECT_WIDTH - OPTION_MARGIN.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG
