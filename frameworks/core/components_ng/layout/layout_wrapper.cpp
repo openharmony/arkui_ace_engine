@@ -255,6 +255,11 @@ void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->CustomizeExpandSafeArea()) {
+        return;
+    }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
