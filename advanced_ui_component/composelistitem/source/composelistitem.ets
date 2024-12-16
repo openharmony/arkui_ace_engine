@@ -70,15 +70,24 @@ export declare class OperateIcon {
   public value: ResourceStr;
   public symbolStyle?: SymbolGlyphModifier;
   public action?: () => void;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 export declare class OperateButton {
   public text?: ResourceStr;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 export declare class OperateCheck {
   public isCheck?: boolean;
   public onChange?: (value: boolean) => void;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 const TEXT_MAX_LINE = 1;
@@ -119,6 +128,7 @@ const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
 const RIGHT_ONLY_RADIO_WIDTH = '30vp';
 const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
 const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
+const ACCESSIBILITY_LEVEL_AUTO = 'auto';
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
@@ -410,6 +420,9 @@ struct OperateItemStruct {
         }
       }
     })
+    .accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -462,6 +475,9 @@ struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
+    .accessibilityLevel(param.icon?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
   }
 
@@ -557,6 +573,9 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -586,6 +605,9 @@ struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(this.radio?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -615,6 +637,9 @@ struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(this.checkBox?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -626,6 +651,9 @@ struct OperateItemStruct {
           this.switchState = !this.switchState;
         })
         .hitTestBehavior(HitTestMode.Block)
+        .accessibilityLevel(this.switch?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+        .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
+        .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -768,6 +796,9 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   getFlexOptions(): FlexOptions {
@@ -815,6 +846,30 @@ struct OperateItemStruct {
   }
 }
 
+/**
+ * 获取无障碍文本
+ *
+ * @param resource 资源
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityText(resource: ResourceStr): string {
+  try {
+    let resourceString: string = '';
+    if (typeof resource === 'string') {
+      resourceString = resource;
+    } else {
+      resourceString = getContext().resourceManager.getStringSync(resource);
+    }
+    return resourceString;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
+    return '';
+  }
+}
+
 @Component
 export struct ComposeListItem {
   @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
@@ -839,6 +894,7 @@ export struct ComposeListItem {
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
   private callbackId: number | undefined = undefined;
+  @State accessibilityTextBuilder: string = '';
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -880,6 +936,21 @@ export struct ComposeListItem {
 
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
+    }
+
+    if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+      `;
+    } else {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+        ${getAccessibilityText(this.operateItem?.text ?? '')}
+      `;
     }
   }
 
@@ -1136,6 +1207,8 @@ export struct ComposeListItem {
       .padding(this.containerPadding)
     }
     .width('100%')
+    .accessibilityGroup(true)
+    .accessibilityText(this.accessibilityTextBuilder)
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING
