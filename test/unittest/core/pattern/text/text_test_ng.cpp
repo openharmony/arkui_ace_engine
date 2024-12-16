@@ -2402,10 +2402,12 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     // call onDraw function(textRacing_ = true)
     textContentModifier.StartTextRace();
+    EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::RUNNING);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
     textContentModifier.onDraw(context);
     // call onDraw function(textRacing_ = false)
     textContentModifier.StopTextRace();
+    EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::STOPPED);
     textContentModifier.onDraw(context);
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
