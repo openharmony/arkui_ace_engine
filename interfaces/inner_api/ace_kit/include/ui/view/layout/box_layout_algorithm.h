@@ -31,8 +31,7 @@ public:
 
     void Layout() override;
 
-    // TODO: unify LayoutConstraint and return size
-    void MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) override;
+    std::optional<NG::SizeF> MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) override;
 
     // Called to perform measure current render node.
     static void PerformMeasureSelf(FrameNode* frameNode);
