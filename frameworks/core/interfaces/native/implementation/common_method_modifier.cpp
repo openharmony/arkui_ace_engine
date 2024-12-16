@@ -2206,10 +2206,6 @@ void Transition0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-        union {
-        Ark_TransitionOptions value0;
-        Ark_TransitionEffect value1;
-    };
     Converter::VisitUnion(*value,
         [frameNode](const Ark_TransitionOptions& value) {
             auto convValue = Converter::Convert<TransitionOptions>(value);
