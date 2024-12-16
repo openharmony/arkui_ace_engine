@@ -105,7 +105,8 @@ void OnErrorImpl(Ark_NativePointer node,
         auto json = JsonUtil::ParseJsonString(param);
         Ark_PluginErrorData errorData;
         errorData.errcode = Converter::ArkValue<Ark_Number>(StringUtils::StringToInt(json->GetString("errcode")));
-        errorData.msg = Converter::ArkValue<Ark_String>(json->GetString("msg"));
+        auto msg = json->GetString("msg");
+        errorData.msg = Converter::ArkValue<Ark_String>(msg);
         arkCallback.Invoke(errorData);
     };
     PluginModelNG::SetOnError(frameNode, std::move(onError));
