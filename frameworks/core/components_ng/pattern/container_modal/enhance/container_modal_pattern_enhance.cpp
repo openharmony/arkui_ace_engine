@@ -196,7 +196,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth((isFloatingWindow && isShow) ? CONTAINER_BORDER_WIDTH : 0.0_vp);
     layoutProperty->UpdateBorderWidth(borderWidth);
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
