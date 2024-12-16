@@ -771,6 +771,74 @@ void EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         asyncCtx->displayId, windowId, true, false, summary };
 }
 
+#ifdef CROSS_PLATFORM
+Msdp::DeviceStatus::DragResult TranslateDragResult(Ace::DragRet ret)
+{
+    switch (ret) {
+        case Ace::DragRet::DRAG_SUCCESS:
+            return Msdp::DeviceStatus::DragResult::DRAG_SUCCESS;
+        case Ace::DragRet::DRAG_FAIL:
+            return Msdp::DeviceStatus::DragResult::DRAG_FAIL;
+        case Ace::DragRet::DRAG_CANCEL:
+            return Msdp::DeviceStatus::DragResult::DRAG_CANCEL;
+        default:
+            TAG_LOGW(AceLogTag::ACE_DRAG, "translate drag result unknown type %{public}d", static_cast<int32_t>(ret));
+            return Msdp::DeviceStatus::DragResult::DRAG_EXCEPTION;
+    }
+}
+
+Msdp::DeviceStatus::DragBehavior TranslateDragBehavior(Ace::DragBehavior ret)
+{
+    switch (ret) {
+        case Ace::DragBehavior::UNKNOWN:
+            return Msdp::DeviceStatus::DragBehavior::UNKNOWN;
+        case Ace::DragBehavior::COPY:
+            return Msdp::DeviceStatus::DragBehavior::COPY;
+        case Ace::DragBehavior::MOVE:
+            return Msdp::DeviceStatus::DragBehavior::MOVE;
+        default:
+            TAG_LOGW(AceLogTag::ACE_DRAG, "translate drag behavior unknown type %{public}d", static_cast<int32_t>(ret));
+            return Msdp::DeviceStatus::DragBehavior::UNKNOWN;
+    }
+}
+
+int32_t StartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Msdp::DeviceStatus::DragData& dragData,
+    bool isStartDragService)
+{
+    OHOS::Ace::DragDataCore dragDataCore { {}, {}, dragData.udKey, dragData.extraInfo, dragData.filterInfo,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId, dragData.toolType,
+        dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
+        dragData.hasCoordinateCorrected, dragData.summarys };
+    for (const auto& shadowInfo : dragData.shadowInfos) {
+        auto pixelMap = shadowInfo.pixelMap;
+        if (pixelMap) {
+            dragDataCore.shadowInfos.push_back(
+                { OHOS::Ace::PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap)), shadowInfo.x,
+                    shadowInfo.y });
+        } else {
+            dragDataCore.shadowInfos.push_back({ nullptr, shadowInfo.x, shadowInfo.y });
+        }
+    }
+    auto callback = [asyncCtx, isStartDragService](const OHOS::Ace::DragNotifyMsg& msg) {
+        DragNotifyMsg dragNotifyMsg = DragNotifyMsg();
+        dragNotifyMsg.displayX = msg.displayX;
+        dragNotifyMsg.displayY = msg.displayY;
+        dragNotifyMsg.targetPid = msg.targetPid;
+        dragNotifyMsg.result = TranslateDragResult(msg.result);
+        dragNotifyMsg.dragBehavior = TranslateDragBehavior(msg.dragBehavior);
+        if (isStartDragService) {
+            HandleDragEnd(asyncCtx, dragNotifyMsg);
+        } else {
+            HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
+        }
+    };
+    auto interactionInterface = OHOS::Ace::InteractionInterface::GetInstance();
+    int32_t ret = interactionInterface->StartDrag(dragDataCore, callback);
+    interactionInterface->SetDragWindowVisible(true);
+    return ret;
+}
+#endif
+
 void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
     std::optional<Msdp::DeviceStatus::DragData> dragData;
@@ -790,14 +858,17 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     auto pixelMap = dragData.value().shadowInfos[0].pixelMap;
     std::string summarys = NG::DragDropFuncWrapper::GetSummaryString(dragData.value().summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
-        "dragData, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordSize %{public}d, "
-        "extraParams length %{public}d, pointerId %{public}d, toolType %{public}d, summary %{public}s.",
-        pixelMap->GetWidth(), pixelMap->GetHeight(),
+        "dragData, pixelMap width %{public}d height %{public}d, pointerId %{public}d, toolType %{public}d"
+        ", udkey %{public}s, recordSize %{public}d, extraParams length %{public}d, summary %{public}s.",
+        pixelMap->GetWidth(), pixelMap->GetHeight(), asyncCtx->pointerId, asyncCtx->toolType,
         NG::DragDropFuncWrapper::GetAnonyString(dragData.value().udKey).c_str(), dragData.value().dragNum,
-        static_cast<int32_t>(asyncCtx->extraParams.length()), asyncCtx->pointerId, asyncCtx->toolType,
-        summarys.c_str());
+        static_cast<int32_t>(asyncCtx->extraParams.length()), summarys.c_str());
+#ifdef CROSS_PLATFORM
+    int32_t ret = StartDrag(asyncCtx, dragData.value(), true);
+#else
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+#endif
     if (ret != 0) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(asyncCtx->env, &scope);
@@ -982,8 +1053,12 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& r
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
+#ifdef CROSS_PLATFORM
+    result = StartDrag(asyncCtx, dragData, false);
+#else
     result = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData,
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+#endif
     return true;
 }
 
