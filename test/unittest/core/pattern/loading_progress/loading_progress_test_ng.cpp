@@ -103,6 +103,9 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Leve
     layoutConstraint.percentReference = SizeF(MAXSIZE_WIDTH, MAXSIZE_HEIGHT);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto size1 = layoutAlgorithm.MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_NE(size1, std::nullopt);
@@ -228,7 +231,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest003, TestSize.Level1)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
     modelNg.SetEnableLoading(false);
     loadingProgressPattern->OnModifyDone();
     EXPECT_FALSE(paintProperty->GetEnableLoading().value());
