@@ -527,6 +527,7 @@ void ToHtmlImpl(const Ark_StyledString* styledString)
     std::copy(htmlStr.begin(), htmlStr.end(), html);
     html[htmlStr.length()] = '\0';
     // html need to be returned
+    delete[] html;
     LOGE("StyledStringAccessor::ToHtmlImpl - return value need to be supported");
 }
 void MarshallingImpl(const Ark_StyledString* styledString)
@@ -556,6 +557,9 @@ void UnmarshallingImpl(Ark_Buffer buffer,
     Opt_StyledString styledString = Converter::ArkValue<Opt_StyledString>(*peer);
     Converter::ArkArrayHolder<Array_String> errorHolder(errorsStr);
     auto error = errorHolder.OptValue<Opt_Array_String>();
+    // StyledString need to be returned
+    peer->spanString = nullptr;
+    delete peer;
     LOGE("StyledStringAccessor::UnmarshallingImpl - return value need to be supported");
 }
 Ark_Int32 GetLengthImpl(StyledStringPeer* peer)

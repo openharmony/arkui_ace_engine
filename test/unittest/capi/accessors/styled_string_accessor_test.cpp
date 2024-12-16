@@ -281,7 +281,6 @@ HWTEST_F(StyledStringAccessorUnionNullTest, peerSucceeded, TestSize.Level1)
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorText, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
     EXPECT_EQ(peer_->spanString->GetString(), STRING_TEST_VALUE);
 }
@@ -293,7 +292,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorText, TestSize.Lev
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansOn, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
     auto spansStr = peer_->spanString->GetSpans(TEST_START_STR, TEST_LENGTH);
     EXPECT_EQ(spansStr.size(), 1);
@@ -322,7 +320,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansOn, TestSize.
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansFont, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_STR, TEST_LENGTH);
@@ -353,7 +350,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansFont, TestSiz
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorDecorationSpan, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_DCRN, TEST_LENGTH);
@@ -378,7 +374,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorDecorationSpan, Te
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBaselineOffsetSpan, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_BSL, TEST_LENGTH);
@@ -395,7 +390,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBaselineOffsetSpan
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLetterSpacing, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_LSP, TEST_LENGTH);
@@ -412,7 +406,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLetterSpacing, Tes
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorTextShadow, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_TSH, TEST_LENGTH);
@@ -436,7 +429,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorTextShadow, TestSi
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLineHeight, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_LNHT, TEST_LENGTH);
@@ -453,7 +445,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLineHeight, TestSi
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBackgroundColor, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_BGCL, TEST_LENGTH);
@@ -493,7 +484,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBackgroundColor, T
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorUrl, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_URL, TEST_LENGTH);
@@ -520,7 +510,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorGesture, 
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStyle, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
 
     auto spans = peer_->spanString->GetSpans(TEST_START_PSST, TEST_LENGTH);
@@ -578,9 +567,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorExtSpan, 
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringEquals, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
-    ASSERT_NE(accessor_, nullptr);
     Ark_StyledString styledString = Converter::ArkValue<Ark_StyledString>(*peer_);
     EXPECT_TRUE(accessor_->equals(peer_, &styledString));
 }
@@ -592,9 +579,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringEquals, TestSize.Level
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringLength, TestSize.Level1)
 {
-    ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
-    ASSERT_NE(accessor_, nullptr);
 
     auto length = StringUtils::ToWstring(STRING_TEST_VALUE).length();
     EXPECT_EQ(peer_->spanString->GetLength(), length);
