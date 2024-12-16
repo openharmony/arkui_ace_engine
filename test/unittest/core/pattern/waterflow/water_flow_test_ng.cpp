@@ -153,6 +153,8 @@ RefPtr<WaterFlowMockLazy> WaterFlowTestNg::CreateItemsInLazyForEach(
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     LazyForEachModelNG lazyForEachModelNG;
     lazyForEachModelNG.Create(mockLazyActuator);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     return mockLazy;
 }
 
