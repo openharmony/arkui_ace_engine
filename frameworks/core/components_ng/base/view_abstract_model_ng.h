@@ -996,6 +996,7 @@ public:
 
     static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
+        CHECK_NULL_VOID(frameNode);
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
@@ -1381,6 +1382,7 @@ public:
 
     static void DisableOnKeyPreIme(FrameNode* frameNode)
     {
+        CHECK_NULL_VOID(frameNode);
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->ClearOnKeyPreIme();

@@ -2090,9 +2090,34 @@ void OnHoverImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnHover(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnHover(frameNode);
+    }
+    auto weakeNode = AceType::WeakClaim(frameNode);
+    auto onHover = [arkCallback = CallbackHelper(*value), node = weakeNode](bool isHover, HoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        Ark_HoverEvent event;
+        auto stopPropagationHandler = [&hoverInfo]() {
+            hoverInfo.SetStopPropagation(true);
+        };
+        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
+            std::move(stopPropagationHandler));
+        event.stopPropagation = stopPropagation;
+        event.timestamp = Converter::ArkValue<Ark_Number>(static_cast<double>(
+            hoverInfo.GetTimeStamp().time_since_epoch().count()));
+        event.source = Converter::ArkValue<Ark_SourceType>(hoverInfo.GetSourceDevice());
+        event.target.area = Converter::ArkValue<Ark_Area>(hoverInfo);
+        event.sourceTool = Converter::ArkValue<Ark_SourceTool>(hoverInfo.GetSourceTool());
+        event.axisVertical = Converter::ArkValue<Opt_Number>(0.0f);
+        event.axisHorizontal = Converter::ArkValue<Opt_Number>(0.0f);
+        event.tiltX = Converter::ArkValue<Ark_Number>(hoverInfo.GetTiltX().value_or(0.0f));
+        event.tiltY = Converter::ArkValue<Ark_Number>(hoverInfo.GetTiltY().value_or(0.0f));
+        event.deviceId = Converter::ArkValue<Opt_Number>(hoverInfo.GetDeviceId());
+        arkCallback.Invoke(arkIsHover, event);
+        stopPropagation.resource.release(stopPropagation.resource.resourceId);
+    };
+    ViewAbstract::SetOnHover(frameNode, std::move(onHover));
 }
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const AccessibilityCallback* value)
@@ -2151,9 +2176,49 @@ void OnMouseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnMouse(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnMouse(frameNode);
+    }
+    auto weakeNode = AceType::WeakClaim(frameNode);
+    auto onMouse = [arkCallback = CallbackHelper(*value), node = weakeNode](MouseInfo& mouseInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_MouseEvent event;
+        event.button = Converter::ArkValue<Ark_MouseButton>(mouseInfo.GetButton());
+        event.action = Converter::ArkValue<Ark_MouseAction>(mouseInfo.GetAction());
+        const OHOS::Ace::Offset& globalLocation = mouseInfo.GetGlobalLocation();
+        event.windowX = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+        event.windowY = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+        const OHOS::Ace::Offset& localLocation = mouseInfo.GetLocalLocation();
+        event.x = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
+        event.y = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+        const OHOS::Ace::Offset& screenLocation = mouseInfo.GetScreenLocation();
+        event.displayX = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
+        event.displayY = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+        event.timestamp = Converter::ArkValue<Ark_Number>(static_cast<double>(
+            mouseInfo.GetTimeStamp().time_since_epoch().count()));
+        auto stopPropagationHandler = [&mouseInfo]() {
+            mouseInfo.SetStopPropagation(true);
+        };
+        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
+            std::move(stopPropagationHandler));
+        event.stopPropagation = stopPropagation;
+        event.deviceId = Converter::ArkValue<Opt_Number>(mouseInfo.GetDeviceId());
+        event.source = Converter::ArkValue<Ark_SourceType>(mouseInfo.GetSourceDevice());
+        event.pressure = Converter::ArkValue<Ark_Number>(mouseInfo.GetForce());
+        event.tiltX = Converter::ArkValue<Ark_Number>(mouseInfo.GetTiltX().value_or(0.0f));
+        event.tiltY = Converter::ArkValue<Ark_Number>(mouseInfo.GetTiltY().value_or(0.0f));
+        event.sourceTool = Converter::ArkValue<Ark_SourceTool>(mouseInfo.GetSourceTool());
+        event.axisVertical = Converter::ArkValue<Opt_Number>(0.0f);
+        event.axisHorizontal = Converter::ArkValue<Opt_Number>(0.0f);
+        event.target.area = Converter::ArkValue<Ark_Area>(mouseInfo);
+        arkCallback.Invoke(event);
+        stopPropagation.resource.release(stopPropagation.resource.resourceId);
+    };
+    ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
 }
 void OnTouchImpl(Ark_NativePointer node,
                  const Callback_TouchEvent_Void* value)
@@ -2218,18 +2283,70 @@ void OnKeyEventImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnKeyEvent(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnKeyEvent(frameNode);
+    }
+    auto weakeNode = AceType::WeakClaim(frameNode);
+    auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakeNode](KeyEventInfo& info) -> bool {
+        PipelineContext::SetCallBackNode(node);
+        Ark_KeyEvent event;
+        event.type = Converter::ArkValue<Ark_KeyType>(info.GetKeyType());
+        event.keyCode = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(info.GetKeyCode()));
+        event.keyText = Converter::ArkValue<Ark_String>(info.GetKeyText());
+        event.keySource = Converter::ArkValue<Ark_KeySource>(info.GetKeySource());
+        event.deviceId = Converter::ArkValue<Ark_Number>(info.GetDeviceId());
+        event.metaKey = Converter::ArkValue<Ark_Number>(info.GetMetaKey());
+        event.unicode = Converter::ArkValue<Opt_Number>(info.GetUnicode());
+        event.timestamp = Converter::ArkValue<Ark_Number>(
+        static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+        auto stopPropagationHandler = [&info]() {
+            info.SetStopPropagation(true);
+        };
+        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
+            std::move(stopPropagationHandler));
+        event.stopPropagation = stopPropagation;
+        LOGE("CommonMethodModifier::OnKeyEventImpl IntentionCode supporting is not implemented yet");
+        arkCallback.Invoke(event);
+        stopPropagation.resource.release(stopPropagation.resource.resourceId);
+        return false;
+    };
+    ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
 }
 void OnKeyPreImeImpl(Ark_NativePointer node,
                      const Callback_KeyEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnKeyPreIme(frameNode, convValue);
+    if (!value) {
+        ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+    }
+    auto weakeNode = AceType::WeakClaim(frameNode);
+    auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value), node = weakeNode](KeyEventInfo& info) -> bool {
+        PipelineContext::SetCallBackNode(node);
+        Ark_KeyEvent event;
+        event.type = Converter::ArkValue<Ark_KeyType>(info.GetKeyType());
+        event.keyCode = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(info.GetKeyCode()));
+        event.keyText = Converter::ArkValue<Ark_String>(info.GetKeyText());
+        event.keySource = Converter::ArkValue<Ark_KeySource>(info.GetKeySource());
+        event.deviceId = Converter::ArkValue<Ark_Number>(info.GetDeviceId());
+        event.metaKey = Converter::ArkValue<Ark_Number>(info.GetMetaKey());
+        event.unicode = Converter::ArkValue<Opt_Number>(info.GetUnicode());
+        event.timestamp = Converter::ArkValue<Ark_Number>(
+        static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+        auto stopPropagationHandler = [&info]() {
+            info.SetStopPropagation(true);
+        };
+        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
+            std::move(stopPropagationHandler));
+        event.stopPropagation = stopPropagation;
+        LOGE("CommonMethodModifier::OnKeyPreImeImpl IntentionCode supporting is not implemented yet");
+        Callback_Boolean_Void continuation;
+        arkCallback.Invoke(event, continuation);
+        stopPropagation.resource.release(stopPropagation.resource.resourceId);
+        LOGE("CommonMethodModifier::OnKeyPreImeImpl return value can be incorrect");
+        return false;
+    };
+    ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
 }
 void FocusableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -3535,8 +3652,50 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnTouchIntercept(frameNode, convValue);
+    auto weakeNode = AceType::WeakClaim(frameNode);
+    auto onTouchIntercept = [arkCallback = CallbackHelper(*value), node = weakeNode](
+        TouchEventInfo& info) -> HitTestMode {
+        PipelineContext::SetCallBackNode(node);
+        Ark_TouchEvent event;
+        event.source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice());
+        event.timestamp = ArkValue<Ark_Number>(static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+        event.target.area = Converter::ArkValue<Ark_Area>(info);
+        event.pressure = Converter::ArkValue<Ark_Number>(info.GetForce());
+        event.deviceId = Converter::ArkValue<Opt_Number>(info.GetDeviceId());
+        auto preventDefaultHandler = [&info]() {
+            info.SetPreventDefault(true);
+        };
+        auto preventDefault = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(preventDefaultHandler));
+        event.preventDefault = preventDefault;
+        event.tiltX = Converter::ArkValue<Ark_Number>(info.GetTiltX().value_or(0.0f));
+        event.tiltY = Converter::ArkValue<Ark_Number>(info.GetTiltY().value_or(0.0f));
+        event.sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool());
+        const std::list<TouchLocationInfo>& touchList = info.GetTouches();
+        std::vector<TouchLocationInfo> touchVector(touchList.begin(), touchList.end());
+        Converter::ArkArrayHolder<Array_TouchObject> touchesHolder(touchVector);
+        event.touches = touchesHolder.ArkValue();
+        const std::list<TouchLocationInfo>& changedTouches = info.GetChangedTouches();
+        std::vector<TouchLocationInfo> changedTouchesVector(changedTouches.begin(), changedTouches.end());
+        Converter::ArkArrayHolder<Array_TouchObject> changedTouchesHolder(changedTouchesVector);
+        event.changedTouches = changedTouchesHolder.ArkValue();
+        if (changedTouches.size() > 0) {
+            event.type = Converter::ArkValue<Ark_TouchType>(changedTouches.front().GetTouchType());
+        }
+        event.axisVertical = Converter::ArkValue<Opt_Number>(0.0f);
+        event.axisHorizontal = Converter::ArkValue<Opt_Number>(0.0f);
+        auto handler = [&info]() {
+            info.SetStopPropagation(true);
+        };
+        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(handler));
+        event.stopPropagation = stopPropagation;
+        Callback_HitTestMode_Void continuation;
+        arkCallback.Invoke(event, continuation);
+        preventDefault.resource.release(preventDefault.resource.resourceId);
+        stopPropagation.resource.release(stopPropagation.resource.resourceId);
+        LOGE("CommonMethodModifier::OnTouchInterceptImpl return value can be incorrect");
+        return HitTestMode::HTMDEFAULT;
+    };
+    ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
 }
 void OnSizeChangeImpl(Ark_NativePointer node,
                       const SizeChangeCallback* value)
