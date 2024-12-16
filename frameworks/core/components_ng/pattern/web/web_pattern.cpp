@@ -52,6 +52,7 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
@@ -3361,14 +3362,20 @@ void WebPattern::InitInOfflineMode()
             calcLayout->selfIdealSize->Height()->GetDimension().ConvertToPx() : 0;
     }
     bool isUnSetSize = (width == 0) && (height == 0);
-    auto defaultDisplay = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto container = Container::Current();
+    uint64_t displayId = 0;
+    if (container && container->GetCurrentDisplayId() != Rosen::DISPLAY_ID_INVALID) {
+        displayId = container->GetCurrentDisplayId();
+    }
+    auto defaultDisplay = OHOS::Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (isUnSetSize && defaultDisplay) {
         width = defaultDisplay->GetWidth();
         height = defaultDisplay->GetHeight();
     }
     Size drawSize = Size(width, height);
     Offset offset = Offset(0, 0);
-    TAG_LOGD(AceLogTag::ACE_WEB, "InitInOfflineMode drawsize_ : %{public}s", drawSize_.ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_WEB, "InitInOfflineMode displayId : %{public}u, drawsize_ : %{public}s",
+        (uint32_t)displayId, drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize, offset);
 
     if (!isUrlLoaded_) {
