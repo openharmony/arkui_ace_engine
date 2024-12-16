@@ -1368,7 +1368,6 @@ bool FocusHub::IsLeafFocusScope()
         return true;
     }
     if (focusDepend_ == FocusDependence::SELF) {
-        lastWeakFocusNode_ = nullptr;
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
         return true;
     }
