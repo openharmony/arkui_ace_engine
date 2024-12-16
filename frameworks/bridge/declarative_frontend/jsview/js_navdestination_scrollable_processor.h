@@ -54,8 +54,8 @@ public:
 
 private:
     void CombineIncomingScrollers();
-    void BuildNewBindingRelation();
-    void RemoveUnneededBindingRelation();
+    bool BuildNewBindingRelation();
+    bool RemoveUnneededBindingRelation();
 
     struct NestedScrollers {
         NestedScrollers() = default;

@@ -81,7 +81,7 @@ void WindowSceneModel::Create(int32_t persistentId)
     auto nodeId = stack->ClaimNodeId();
     ACE_SCOPED_TRACE("Create[%s][self:%d][%s]",
         V2::WINDOW_SCENE_ETS_TAG, nodeId, sceneSession->GetSessionInfo().bundleName_.c_str());
-    auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, persistentId,
+    auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
     stack->Push(windowNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);

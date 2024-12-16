@@ -949,6 +949,7 @@ void WebDelegateCross::RecordWebEvent(Recorder::EventType eventType, const std::
         .SetType(host->GetHostTag())
         .SetEventType(eventType)
         .SetText(param)
+        .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }

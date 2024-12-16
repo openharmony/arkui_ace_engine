@@ -50,7 +50,6 @@ ohos_source_set("preview_osal_source") {
       defines += config.defines
     }
 
-    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
     sources = [
       "${ace_root}/adapter/ohos/osal/log_wrapper.cpp",
       "ace_checker.cpp",
@@ -115,6 +114,7 @@ ohos_source_set("preview_osal_source") {
     external_deps = [
       "curl:curl_shared",
       "hilog:libhilog",
+      "window_manager:previewer_window",
     ]
 
     if (ace_use_rosen_drawing) {

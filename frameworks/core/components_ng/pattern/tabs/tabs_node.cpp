@@ -109,6 +109,15 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     json->PutExtAttr("barGridAlign", barGridAlignJson, filter);
 }
 
+void TabsNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    FrameNode::ToTreeJson(json, config);
+    if (config.contentOnly) {
+        return;
+    }
+    json->Put(TreeKey::SCROLLABLE, Scrollable());
+}
+
 bool TabsNode::Scrollable() const
 {
     if (!swiperId_.has_value()) {

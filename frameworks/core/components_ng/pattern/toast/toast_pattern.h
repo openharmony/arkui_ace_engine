@@ -147,6 +147,7 @@ public:
 
     void InitUIExtensionHostWindowRect();
     
+    RefPtr<PipelineContext> GetToastContext();
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);

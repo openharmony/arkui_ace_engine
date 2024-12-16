@@ -118,6 +118,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
+    property->UpdateTextStyle(style.text);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -202,6 +203,9 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
     style.SetBorderStyle(BorderStyle::NONE);
     renderContext->UpdateBorderStyle(style);
     auto buttonRadius = secCompTheme->GetBorderRadius();
+    if (type == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
+        buttonRadius = secCompTheme->GetDefaultBorderRadius();
+    }
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     renderContext->UpdateBackgroundColor(secCompTheme->GetBackgroundColor());
     buttonLayoutProperty->UpdateType(static_cast<ButtonType>(type));

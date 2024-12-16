@@ -137,6 +137,9 @@ void DatePickerColumnPattern::ParseTouchListener()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
             pattern->OnTouchDown();
@@ -221,6 +224,9 @@ RefPtr<TouchEventImpl> DatePickerColumnPattern::CreateItemTouchEventListener()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto isToss = pattern->GetTossStatus();
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss == true) {
                 pattern->touchBreak_ = true;

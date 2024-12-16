@@ -239,6 +239,12 @@ _arkui_shared_libs = [
     part_name = "ace_engine"
     lib_names = [ "drawabledescriptor" ]
   },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/napi/kits:napi_group"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "focuscontroller" ]
+  },
 ]
 
 if (defined(current_platform.config)) {
@@ -476,9 +482,9 @@ napi_modules = [
         lib_names = [ "fullscreenlaunchcomponent" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/innerfullscreenlaunchcomponent/interfaces:innerfullscreenlaunchcomponent"
+        label = "//foundation/arkui/advanced_ui_component/innerfullscreenlaunchcomponent/interfaces:innerfullscreenlaunchcomponent"
         subsystem_name = "arkui"
-        part_name = "ace_engine"
+        part_name = "advanced_ui_component"
         lib_names = [ "innerfullscreenlaunchcomponent" ]
       },
       {
@@ -499,27 +505,27 @@ napi_modules = [
     prefix = "atomicservice"
     shard_libs = [
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/atomicservicenavigation/interfaces:atomicservicenavigation"
+        label = "//foundation/arkui/advanced_ui_component/atomicservicenavigation/interfaces:atomicservicenavigation"
         subsystem_name = "arkui"
-        part_name = "ace_engine"
+        part_name = "advanced_ui_component"
         lib_names = [ "atomicservicenavigation" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/atomicservicetabs/interfaces:atomicservicetabs"
+        label = "//foundation/arkui/advanced_ui_component/atomicservicetabs/interfaces:atomicservicetabs"
         subsystem_name = "arkui"
-        part_name = "ace_engine"
+        part_name = "advanced_ui_component"
         lib_names = [ "atomicservicetabs" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/atomicserviceweb/interfaces:atomicserviceweb"
+        label = "//foundation/arkui/advanced_ui_component/atomicserviceweb/interfaces:atomicserviceweb"
         subsystem_name = "arkui"
-        part_name = "ace_engine"
+        part_name = "advanced_ui_component"
         lib_names = [ "atomicserviceweb" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/interstitialdialogaction/interfaces:interstitialdialogaction"
+        label = "//foundation/arkui/advanced_ui_component/interstitialdialogaction/interfaces:interstitialdialogaction"
         subsystem_name = "arkui"
-        part_name = "ace_engine"
+        part_name = "advanced_ui_component"
         lib_names = [ "interstitialdialogaction" ]
       },
     ]

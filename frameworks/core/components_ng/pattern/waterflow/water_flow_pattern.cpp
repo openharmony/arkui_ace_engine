@@ -123,14 +123,15 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     auto viewSize = geometryNode->GetFrameSize();
     auto overScroll = 0.0f;
     auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    if (Positive(info->currentOffset_)) {
-        overScroll = info->currentOffset_;
+    if (Positive(info->Offset())) {
+        overScroll = info->Offset();
     } else {
+        // distance to bottom
         overScroll = GetMainContentSize() - (info->GetContentHeight() + info->currentOffset_);
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(-info->currentOffset_, info->EstimateContentHeight(),
+    UpdateScrollBarRegion(-info->Offset(), info->EstimateTotalHeight(),
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
@@ -687,7 +688,8 @@ int32_t WaterFlowPattern::GetChildrenCount() const
 void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
-        if (footer_.Upgrade()) {
+        auto footer = footer_.Upgrade();
+        if (footer && footer->FrameCount() > 0) {
             layoutInfo_->NotifyDataChange(index - 1, count);
         } else {
             layoutInfo_->NotifyDataChange(index, count);
@@ -849,7 +851,7 @@ SizeF WaterFlowPattern::GetChildrenExpandedSize()
     float estimatedHeight = 0.0f;
     if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
         auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-        estimatedHeight = info->EstimateContentHeight();
+        estimatedHeight = info->EstimateTotalHeight();
     }
 
     if (axis == Axis::VERTICAL) {

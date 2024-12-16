@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/common/ai/data_detector_adapter.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
@@ -133,7 +134,9 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     } else if (std::holds_alternative<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(
                    menuOption.second)) {
         std::get<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(menuOption.second)(
-            mainContainerId_, textForAI_, bundleName, aiSpan.start, aiSpan.content);
+            mainContainerId_, UtfUtils::Str16ToStr8(textForAI_), bundleName, aiSpan.start, aiSpan.content);
+        TAG_LOGI(AceLogTag::ACE_TEXT, "textForAI:%{public}d, start:%{public}d, aiSpan.length:%{public}d",
+            static_cast<int32_t>(textForAI_.length()), aiSpan.start, static_cast<int32_t>(aiSpan.content.length()));
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
     }
@@ -186,13 +189,11 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& textDetectTypes)
         textDetectTypesSet_ = newTypesSet;
         typeChanged_ = true;
         aiDetectInitialized_ = false;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode();
     }
 }
 
-bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
+bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origin text entry");
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(Container::CurrentId());
@@ -222,7 +223,7 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
         aiSpanMap_[aiSpan.start] = aiSpan;
     }
     aiDetectInitialized_ = true;
-    text = entityJson->GetString("content");
+    text = UtfUtils::Str8ToStr16(entityJson->GetString("content"));
     textForAI_ = text;
     lastTextForAI_ = textForAI_;
     if (textDetectResult_.menuOptionAndAction.empty()) {
@@ -273,9 +274,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
                     return;
                 }
                 dataDetectorAdapter->ParseAIResult(result, startPos);
-                auto host = dataDetectorAdapter->GetHost();
-                CHECK_NULL_VOID(host);
-                host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+                dataDetectorAdapter->MarkDirtyNode();
             },
             "ArkUITextParseAIResult");
     };
@@ -310,16 +309,14 @@ void DataDetectorAdapter::HandleTextUrlDetect()
                     return;
                 }
                 dataDetectorAdapter->HandleUrlResult(urlEntities);
-                auto host = dataDetectorAdapter->GetHost();
-                CHECK_NULL_VOID(host);
-                host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+                dataDetectorAdapter->MarkDirtyNode();
             },
             "ArkUITextUrlParseResult");
     };
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
-        [text = textForAI_, func = std::move(textFunc)] {
+        [text = UtfUtils::Str16ToStr8(textForAI_), func = std::move(textFunc)] {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Start url entity detect using AI");
             func(DataUrlAnalyzerMgr::GetInstance().AnalyzeUrls(text));
         },
@@ -336,7 +333,7 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
         }
         AISpan aiSpan;
         aiSpan.start = entity.charOffset;
-        aiSpan.end = aiSpan.start + entity.text.length();
+        aiSpan.end = aiSpan.start + static_cast<int32_t>(entity.text.length());
         aiSpan.content = entity.text;
         aiSpan.type = TextDataDetectType::URL;
         aiSpanMap_[aiSpan.start] = aiSpan;
@@ -358,7 +355,7 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
         ParseAIJson(jsonValue, type.first, startPos);
     }
 
-    if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
+    if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(textForAI_.length())) {
         SetTextDetectResult(result);
         aiDetectFlag_ |= OTHER_DETECT_FINISH;
         if (aiDetectFlag_ == ALL_DETECT_FINISH) {
@@ -408,16 +405,14 @@ void DataDetectorAdapter::ParseAIJson(
         auto item = jsonValue->GetArrayItem(i);
         auto charOffset = item->GetInt("charOffset");
         auto oriText = item->GetString("oriText");
-        auto wTextForAI = StringUtils::ToWstring(textForAI_);
-        auto wOriText = StringUtils::ToWstring(oriText);
+        auto wOriText = UtfUtils::Str8ToStr16(oriText);
         int32_t end = startPos + charOffset + static_cast<int32_t>(wOriText.length());
-        if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length()) ||
+        if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(textForAI_.length()) ||
             end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
             TAG_LOGW(AceLogTag::ACE_TEXT, "The result of AI is wrong");
             continue;
         }
-        if (oriText !=
-            StringUtils::ToString(wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
+        if (wOriText != textForAI_.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length()))) {
             TAG_LOGW(AceLogTag::ACE_TEXT, "The charOffset is wrong");
             continue;
         }
@@ -457,11 +452,11 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
         auto aiSpanMapIt = aiSpanMap.begin();
         int32_t startPos = 0;
         bool hasSame = false;
-        auto wTextForAI = StringUtils::ToWstring(dataDetectorAdapter->textForAI_);
+        auto wTextForAI = dataDetectorAdapter->textForAI_;
         auto wTextForAILength = static_cast<int32_t>(wTextForAI.length());
         dataDetectorAdapter->PreprocessTextDetect();
         do {
-            std::string detectText = StringUtils::ToString(
+            std::string detectText = UtfUtils::Str16ToStr8(
                 wTextForAI.substr(startPos, std::min(AI_TEXT_MAX_LENGTH, wTextForAILength - startPos)));
             bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts_.size() &&
                                     detectText == dataDetectorAdapter->detectTexts_[detectTextIdx];
@@ -469,7 +464,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
                    aiSpanMapIt->first < std::min(wTextForAILength, startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP)) {
                 auto aiContent = aiSpanMapIt->second.content;
                 auto wAIContent = StringUtils::ToWstring(aiContent);
-                if (isSameDetectText || aiContent == StringUtils::ToString(wTextForAI.substr(aiSpanMapIt->first,
+                if (isSameDetectText || aiContent == UtfUtils::Str16ToStr8(wTextForAI.substr(aiSpanMapIt->first,
                     std::min(static_cast<int32_t>(wAIContent.length()), wTextForAILength - aiSpanMapIt->first)))) {
                     dataDetectorAdapter->aiSpanMap_[aiSpanMapIt->first] = aiSpanMapIt->second;
                     hasSame = true;
@@ -491,9 +486,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
             dataDetectorAdapter->HandleTextUrlDetect();
         }
         if (hasSame) {
-            auto host = dataDetectorAdapter->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            dataDetectorAdapter->MarkDirtyNode();
         }
     };
 }
@@ -501,17 +494,14 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
 void DataDetectorAdapter::StartAITask()
 {
     if (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode();
         return;
     }
     std::map<int32_t, AISpan> aiSpanMapCopy;
     if (!typeChanged_) {
         aiSpanMapCopy = aiSpanMap_;
-    } else {
-        detectTexts_.clear();
     }
+    detectTexts_.clear();
     aiSpanMap_.clear();
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
@@ -525,5 +515,15 @@ void DataDetectorAdapter::StartAITask()
         GetHost() ? GetHost()->GetId() : -1);
     taskExecutor->PostDelayedTask(
         aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
+}
+
+void DataDetectorAdapter::MarkDirtyNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 } // namespace OHOS::Ace

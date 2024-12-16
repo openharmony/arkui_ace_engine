@@ -293,7 +293,8 @@ void ButtonModelImpl::SetSize(const std::optional<Dimension>& width, const std::
 {
     if (width.has_value()) {
         SetWidth(width.value());
-    } else {
+    }
+    if (height.has_value()) {
         SetHeight(height.value());
     }
 }

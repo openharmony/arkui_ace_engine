@@ -532,7 +532,7 @@ void ContainerModalElement::SetAppTitle(const std::string& title)
     auto textComponent = containerModalComponent_->GetTitleLabel();
     CHECK_NULL_VOID(textComponent);
     if (textComponent->GetData() == title) {
-        TAG_LOGI(AceLogTag::ACE_APPBAR, "set same title, skip, title is %{public}s", title.c_str());
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "set same title, skip");
         return;
     }
     textComponent->SetData(title);
@@ -541,9 +541,8 @@ void ContainerModalElement::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(renderTitle);
     renderTitle->Update(textComponent);
     renderTitle->MarkNeedRender();
-    TAG_LOGI(AceLogTag::ACE_APPBAR,
-        "set app title successfully, title:%{public}s, isFloatingTitle:%{public}d",
-        title.c_str(), static_cast<int>(isFloatingTitle));
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "set app title successfully, isFloatingTitle:%{public}d",
+        static_cast<int>(isFloatingTitle));
 }
 
 void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)

@@ -1113,11 +1113,11 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if (!info[0]->IsObject()) {
+    if (!info[0]->IsObject() && !info[0]->IsEmpty()) {
         return;
     }
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = info[0]->IsEmpty() ? (JSRef<JSObject>::New()) : JSRef<JSObject>::Cast(info[0]);
     DatePickerType pickerType = DatePickerType::DATE;
     auto type = paramObject->GetProperty("type");
     if (type->IsNumber()) {
@@ -1668,10 +1668,10 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if (!info[0]->IsObject()) {
+    if (!info[0]->IsObject() && !info[0]->IsEmpty()) {
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = info[0]->IsEmpty() ? (JSRef<JSObject>::New()) : JSRef<JSObject>::Cast(info[0]);
     std::function<void()> cancelEvent;
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;

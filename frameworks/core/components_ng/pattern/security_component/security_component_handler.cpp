@@ -617,6 +617,12 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
+    uint64_t displayId = container->GetDisplayId();
+    if (displayId == Rosen::DISPLAY_ID_INVALID) {
+        SC_LOG_WARN("InitBaseInfoWarning: Get displayId failed, using default displayId");
+        displayId = 0;
+    }
+    buttonInfo.displayId_ = displayId;
     return true;
 }
 
@@ -853,7 +859,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
     auto& children = root->GetChildren();
     for (auto child = children.rbegin(); child != children.rend(); ++child) {
         auto node = AceType::DynamicCast<NG::FrameNode>(*child);
-        if (node && IsContextTransparent(node)) {
+        if (node && (IsContextTransparent(node) || !node->IsActive())) {
             continue;
         }
         res |= CheckSecurityComponentStatus(*child, nodeId2Rect, secNodeId, nodeId2Zindex);

@@ -201,24 +201,6 @@ class ListStickyModifier extends ModifierWithKey<number> {
   }
 }
 
-class ListEdgeEffectModifier extends ModifierWithKey<ArkListEdgeEffect> {
-  constructor(value: ArkListEdgeEffect) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('listEdgeEffect');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().list.resetListEdgeEffect(node);
-    } else {
-      getUINativeModule().list.setListEdgeEffect(node, this.value.value!, this.value.options?.alwaysEnabled);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
 class ListListDirectionModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -595,24 +577,6 @@ class ListOnDidScrollModifier extends ModifierWithKey<(xOffset: number, yOffset:
   }
 }
 
-class ListFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
-  constructor(value: ArkFadingEdge) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('listFadingEdge');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().list.resetFadingEdge(node);
-    } else {
-      getUINativeModule().list.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
 class ListChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
   constructor(value: ChildrenMainSize) {
     super(value);
@@ -739,13 +703,6 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   flingSpeedLimit(value: number): this {
     modifierWithKey(this._modifiersWithKeys, ListFlingSpeedLimitModifier.identity, ListFlingSpeedLimitModifier, value);
-    return this;
-  }
-  edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this {
-    let effect: ArkListEdgeEffect = new ArkListEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, ListEdgeEffectModifier.identity, ListEdgeEffectModifier, effect);
     return this;
   }
   contentStartOffset(value: number): this {
@@ -875,13 +832,6 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   onScrollStop(event: () => void): this {
     modifierWithKey(this._modifiersWithKeys, ListOnScrollStopModifier.identity, ListOnScrollStopModifier, event);
-    return this;
-  }
-  fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
-    let fadingEdge: ArkFadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, fadingEdge);
     return this;
   }
   childrenMainSize(value: ChildrenMainSize): this {

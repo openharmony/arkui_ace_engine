@@ -47,6 +47,8 @@ enum class UIContentType {
     FORM,                      // form
     UI_EXTENSION,              // ui extension
     SECURITY_UI_EXTENSION,     // security ui extension
+    ISOLATED_COMPONENT,     // isolatedComponent
+    DYNAMIC_COMPONENT,     // dynamicComponent
 };
 } // namespace OHOS::Ace
 

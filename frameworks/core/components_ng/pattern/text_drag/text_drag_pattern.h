@@ -212,6 +212,7 @@ public:
     Color GetDragBackgroundColor();
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
+    virtual void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes);
     static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
         const OffsetF globalOffset, const OffsetF textStartOffset);
     static void AdjustHandlers(const RectF contentRect, RectF& leftHandler, RectF& rightHandler);

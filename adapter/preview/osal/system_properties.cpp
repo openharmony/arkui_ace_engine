@@ -105,6 +105,7 @@ float SystemProperties::pageCount_ = 1.0f;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
+double SystemProperties::scrollableDistance_ = 0.0;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -345,6 +346,11 @@ double SystemProperties::GetSrollableVelocityScale()
 double SystemProperties::GetSrollableFriction()
 {
     return 0.0;
+}
+
+double SystemProperties::GetScrollableDistance()
+{
+    return scrollableDistance_;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

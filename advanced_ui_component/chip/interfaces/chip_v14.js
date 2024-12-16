@@ -979,7 +979,10 @@ export class d1 extends ViewPU {
     Button.pop();
   }
   getCloseIconAccessibilityLevel() {
-    if (this.closeOptions?.accessibilityLevel) {
+    if (
+      this.closeOptions?.accessibilityLevel === 'no' ||
+      this.closeOptions?.accessibilityLevel === 'no-hide-descendants'
+    ) {
       return this.closeOptions.accessibilityLevel;
     }
     return 'yes';
@@ -1045,10 +1048,13 @@ export class d1 extends ViewPU {
     return y4;
   }
   getSuffixIconAccessibilityLevel() {
-    if (!this.suffixIcon?.accessibilityLevel) {
-      return !this.suffixIcon?.action ? 'no' : 'yes';
+    if (
+      this.suffixIcon?.accessibilityLevel === 'no' ||
+      this.suffixIcon?.accessibilityLevel === 'no-hide-descendants'
+    ) {
+      return this.suffixIcon.accessibilityLevel;
     }
-    return this.suffixIcon.accessibilityLevel;
+    return this.suffixIcon?.action ? 'yes' : 'no';
   }
   getSuffixIconAccessibilityDescription() {
     if (typeof this.suffixIcon?.accessibilityDescription === 'undefined') {
@@ -1074,16 +1080,25 @@ export class d1 extends ViewPU {
   getSuffixSymbolAccessibilityLevel() {
     if (this.isChipActivated()) {
       if (
-        !this.suffixSymbolOptions?.activatedAccessibility?.accessibilityLevel
+        this.suffixSymbolOptions?.activatedAccessibility?.accessibilityLevel ===
+          'no' ||
+        this.suffixSymbolOptions?.activatedAccessibility?.accessibilityLevel ===
+          'no-hide-descendants'
       ) {
-        return this.suffixSymbolOptions?.action ? 'yes' : 'no';
+        return this.suffixSymbolOptions.activatedAccessibility
+          .accessibilityLevel;
       }
-      return this.suffixSymbolOptions.activatedAccessibility.accessibilityLevel;
-    }
-    if (!this.suffixSymbolOptions?.normalAccessibility?.accessibilityLevel) {
       return this.suffixSymbolOptions?.action ? 'yes' : 'no';
     }
-    return this.suffixSymbolOptions.normalAccessibility.accessibilityLevel;
+    if (
+      this.suffixSymbolOptions?.normalAccessibility?.accessibilityLevel ===
+        'no' ||
+      this.suffixSymbolOptions?.normalAccessibility?.accessibilityLevel ===
+        'no-hide-descendants'
+    ) {
+      return this.suffixSymbolOptions.normalAccessibility.accessibilityLevel;
+    }
+    return this.suffixSymbolOptions?.action ? 'yes' : 'no';
   }
   getSuffixSymbolAccessibilityDescription() {
     if (this.isChipActivated()) {

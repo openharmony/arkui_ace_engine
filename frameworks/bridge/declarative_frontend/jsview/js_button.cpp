@@ -35,26 +35,20 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<ButtonModel> ButtonModel::instance_ = nullptr;
-std::mutex ButtonModel::mutex_;
-
 ButtonModel* ButtonModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ButtonModelNG());
+    static NG::ButtonModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ButtonModelNG());
-            } else {
-                instance_.reset(new Framework::ButtonModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ButtonModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ButtonModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 
@@ -456,14 +450,14 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
-        NG::CalcLength(0.0) };
+    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
+        std::nullopt, std::nullopt };
     if (isLabelButton_) {
         auto buttonTheme = GetTheme<ButtonTheme>();
         CHECK_NULL_RETURN(buttonTheme, padding);
         auto defaultPadding = buttonTheme->GetPadding();
         padding = { NG::CalcLength(defaultPadding.Left()), NG::CalcLength(defaultPadding.Right()),
-            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()) };
+            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()), std::nullopt, std::nullopt };
     }
     if (info[0]->IsObject()) {
         CommonCalcDimension commonCalcDimension;

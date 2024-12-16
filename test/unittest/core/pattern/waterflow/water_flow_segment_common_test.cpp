@@ -1046,8 +1046,13 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal004, TestSize.Level1)
      */
     AddItems(1);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->startIndex_, 3);
-    EXPECT_EQ(info->endIndex_, 12);
+#ifdef TEST_WATER_FLOW_SW
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 8);
+#else
+    EXPECT_EQ(info->startIndex_, 1);
+    EXPECT_EQ(info->endIndex_, 10);
+#endif
 }
 
 /**

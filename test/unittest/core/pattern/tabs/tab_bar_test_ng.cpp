@@ -405,7 +405,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
-    tabBarPattern_->tabBarType_[0] = true;
+    tabBarPattern_->tabBarType_[0] = TabBarParamType::CUSTOM_BUILDER;
     tabBarPattern_->UpdateIndicator(0);
 
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
@@ -413,13 +413,13 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
-    tabBarPattern_->tabBarType_[0] = false;
+    tabBarPattern_->tabBarType_[0] = TabBarParamType::NORMAL;
     tabBarPattern_->UpdateIndicator(0);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->UpdateIndicator(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 }
 
@@ -695,6 +695,58 @@ HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabBarPatternFocusIndexChange002
+ * @tc.desc: test FocusIndexChange jumpIndex_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. FocusIndexChange index.
+     * @tc.expected: test jumpIndex_.
+     */
+    for (int index = 0; index <= TABCONTENT_NUMBER; index++) {
+        tabBarPattern_->FocusIndexChange(index);
+        EXPECT_EQ(tabBarPattern_->jumpIndex_, index);
+    }
+}
+
+/**
+ * @tc.name: TabBarPatternFocusIndexChange003
+ * @tc.desc: test FocusIndexChange targetIndex_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto itemWidth = 200.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_TRUE(tabBarPattern_->CanScroll());
+
+    /**
+     * @tc.steps: step2. FocusIndexChange index.
+     * @tc.expected: test targetIndex_.
+     */
+    tabBarPattern_->animationDuration_ = 300;
+    for (int index = 0; index <= TABCONTENT_NUMBER; index++) {
+        tabBarPattern_->FocusIndexChange(index);
+        EXPECT_EQ(tabBarPattern_->targetIndex_, index);
+    }
+}
+
+/**
  * @tc.name: TabBarPatternMaskAnimationFinish003
  * @tc.desc: test MaskAnimationFinish
  * @tc.type: FUNC
@@ -821,7 +873,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Le
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.

@@ -247,7 +247,8 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
         transactionController->GetRSTransaction() : nullptr;
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged", transaction);
     if (ret != Rosen::WSError::WS_OK) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, ret: %{public}d", static_cast<int32_t>(ret));
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
+            session_->GetPersistentId(), static_cast<int32_t>(ret));
     }
 }
 
@@ -428,7 +429,7 @@ void WindowScene::OnActivation()
 void WindowScene::DisposeSnapshotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
-    if (session_->GetBlankFlag()) {
+    if (session_->GetBlank()) {
         return;
     }
     auto surfaceNode = session_->GetSurfaceNode();
@@ -622,9 +623,9 @@ bool WindowScene::IsWindowSizeEqual()
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_EQUAL_RETURN(IsMainWindow(), false, false);
-    CHECK_EQUAL_RETURN(attachToFrameNodeFlag_ || session_->GetBlankFlag(), false, false);
+    CHECK_EQUAL_RETURN(attachToFrameNodeFlag_ || session_->GetBlank(), false, false);
     attachToFrameNodeFlag_ = false;
-    CHECK_EQUAL_RETURN(session_->GetShowRecent() && !session_->GetBlankFlag(), true, false);
+    CHECK_EQUAL_RETURN(session_->GetShowRecent() && !session_->GetBlank(), true, false);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
         surfaceNode->SetBufferAvailableCallback(callback_);
@@ -637,12 +638,12 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto size = geometryNode->GetFrameSize();
     ACE_SCOPED_TRACE("WindowSCENE::OnDirtyLayoutWrapperSwap[id:%d][%f %f][%d %d][blank:%d]",
         session_->GetPersistentId(), size.Width(), size.Height(),
-        session_->GetLayoutRect().width_, session_->GetLayoutRect().height_, session_->GetBlankFlag());
+        session_->GetLayoutRect().width_, session_->GetLayoutRect().height_, session_->GetBlank());
     if (NearEqual(size.Width(), session_->GetLayoutRect().width_, 1.0f) &&
-        NearEqual(size.Height(), session_->GetLayoutRect().height_, 1.0f) && !session_->GetBlankFlag()) {
+        NearEqual(size.Height(), session_->GetLayoutRect().height_, 1.0f) && !session_->GetBlank()) {
         return false;
     }
-    session_->SetBlankFlag(false);
+    session_->SetBlank(false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     RemoveChild(host, snapshotWindow_, snapshotWindowName_);

@@ -143,7 +143,7 @@ public:
 
     void RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle = true);
 
-    bool hasTTypeChanged(uint32_t index);
+    bool CheckTTypeChanged(uint32_t index);
 
     bool IsInL1Cache(const std::string& key) const
     {

@@ -23,23 +23,14 @@ namespace {
 constexpr float MOUSE_RECT_HOT_VP = 4.0f;
 constexpr float TOUCH_RECT_HOT_VP = 20.0f;
 constexpr double DEFAULT_HOT_DENSITY = 1.5f;
-std::map<int32_t, WeakPtr<WindowNode>> g_windowNodeMap;
 }
 
 WindowNode::WindowNode(const std::string& tag,
-    int32_t nodeId, int32_t sessionId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : FrameNode(tag, nodeId, pattern, isRoot)
-{
-    sessionId_ = sessionId;
-}
-
-WindowNode::~WindowNode()
-{
-    g_windowNodeMap.erase(sessionId_);
-}
+    int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    : FrameNode(tag, nodeId, pattern, isRoot) {}
 
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
-    int32_t nodeId, int32_t sessionId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto windowNode = ElementRegister::GetInstance()->GetSpecificItemById<WindowNode>(nodeId);
     if (windowNode) {
@@ -49,7 +40,7 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
         bool removed = ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
         if (!removed) {
             TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE,
-                "Remove item silently failed, node id: %{public}d, sessionId: %{public}d", nodeId, sessionId);
+                "Remove item silently failed, node id: %{public}d", nodeId);
         }
         auto parent = windowNode->GetParent();
         if (parent) {
@@ -57,32 +48,15 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
         }
     }
 
-    auto iter = g_windowNodeMap.find(sessionId);
-    if (iter != g_windowNodeMap.end()) {
-        auto node = iter->second.Upgrade();
-        if (node) {
-            return node;
-        }
-    }
-
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
-    windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, sessionId, pattern, false);
+    windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, pattern, false);
     windowNode->InitializePatternAndContext();
     bool added = ElementRegister::GetInstance()->AddUINode(windowNode);
     if (!added) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Add UINode failed, node id: %{public}d, sessionId: %{public}d",
-            nodeId, sessionId);
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Add UINode failed, node id: %{public}d",
+            nodeId);
     }
-    g_windowNodeMap.emplace(sessionId, WeakPtr<WindowNode>(windowNode));
     return windowNode;
-}
-
-void WindowNode::SetParent(const WeakPtr<UINode>& parent)
-{
-    if (GetParent()) {
-        RemoveFromParentCleanly(Claim(this), GetParent());
-    }
-    UINode::SetParent(parent);
 }
 
 bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,

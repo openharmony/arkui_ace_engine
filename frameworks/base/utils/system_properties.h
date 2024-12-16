@@ -606,6 +606,8 @@ public:
 
     static double GetSrollableFriction();
 
+    static double GetScrollableDistance();
+
     static bool IsNeedResampleTouchPoints();
 
     static bool IsNeedSymbol();
@@ -683,6 +685,7 @@ private:
     static float fontWeightScale_;
     static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
+    static double scrollableDistance_;
 };
 
 } // namespace OHOS::Ace

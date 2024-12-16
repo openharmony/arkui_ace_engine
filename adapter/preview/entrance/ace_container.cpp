@@ -334,7 +334,7 @@ void AceContainer::InitializeCallback()
         }
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); },
+            [context, event, &result]() { result = context->OnNonPointerEvent(event); },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent");
         return result;
     };

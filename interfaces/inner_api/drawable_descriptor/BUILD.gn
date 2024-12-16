@@ -61,7 +61,7 @@ if (is_arkui_x) {
       defines = image_decode_ios_defines
     }
     if (ace_enable_gpu) {
-      defines += [ "ACE_ENABLE_GPU" ]
+      defines += [ "RS_ENABLE_GPU" ]
     }
   }
 } else {

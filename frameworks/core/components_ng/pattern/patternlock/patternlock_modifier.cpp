@@ -83,6 +83,7 @@ void PatternLockModifier::CreateProperties()
     activeCircleColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::BLACK));
     activeBackgroundRadius_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     enableWaveEffect_ = AceType::MakeRefPtr<PropertyBool>(false);
+    enableForeground_ = AceType::MakeRefPtr<PropertyBool>(false);
 }
 
 void PatternLockModifier::AttachProperties()
@@ -108,6 +109,7 @@ void PatternLockModifier::AttachProperties()
     AttachProperty(activeCircleColor_);
     AttachProperty(activeBackgroundRadius_);
     AttachProperty(enableWaveEffect_);
+    AttachProperty(enableForeground_);
 }
 
 PatternLockModifier::PatternLockModifier()
@@ -142,12 +144,24 @@ void PatternLockModifier::onDraw(DrawingContext& context)
         return;
     }
     auto& canvas = context.canvas;
-    PaintLockLine(canvas, offset_->Get());
-    canvas.Save();
-    for (int i = 0; i < PATTERN_LOCK_COL_COUNT; i++) {
-        for (int j = 0; j < PATTERN_LOCK_COL_COUNT; j++) {
-            PaintLockCircle(canvas, offset_->Get(), i + 1, j + 1);
+    if (!enableForeground_->Get()) {
+        PaintLockLine(canvas, offset_->Get());
+        canvas.Save();
+        PaintActiveCircle(canvas, offset_->Get());
+        for (int i = 0; i < PATTERN_LOCK_COL_COUNT; i++) {
+            for (int j = 0; j < PATTERN_LOCK_COL_COUNT; j++) {
+                PaintLockCircle(canvas, offset_->Get(), i + 1, j + 1);
+            }
         }
+    } else {
+        for (int i = 0; i < PATTERN_LOCK_COL_COUNT; i++) {
+            for (int j = 0; j < PATTERN_LOCK_COL_COUNT; j++) {
+                PaintLockCircle(canvas, offset_->Get(), i + 1, j + 1);
+            }
+        }
+        PaintLockLine(canvas, offset_->Get());
+        canvas.Save();
+        PaintActiveCircle(canvas, offset_->Get());
     }
     canvas.Restore();
 }
@@ -287,7 +301,9 @@ void PatternLockModifier::PaintLockLine(RSCanvas& canvas, const OffsetF& offset)
 
     pen.SetColor(pathColor.GetValue());
     canvas.Save();
-    SetCircleClip(canvas);
+    if (!enableForeground_->Get()) {
+        SetCircleClip(canvas);
+    }
     canvas.AttachPen(pen);
     RSPath path;
     if (count > ANIMATABLE_POINT_COUNT) {
@@ -354,7 +370,6 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
     auto selectedColor = selectedColor_->Get();
     auto circleRadius = circleRadius_->Get();
     auto pointAnimateColor = pointAnimateColor_->Get();
-    auto activeCircleColor = activeCircleColor_->Get();
 
     OffsetF cellcenter = GetCircleCenterByXY(offset, x, y);
     float offsetX = cellcenter.GetX();
@@ -362,10 +377,9 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
 
     auto index = (x - 1) * PATTERN_LOCK_COL_COUNT + y - 1;
     if (CheckChoosePoint(x, y)) {
-        PaintCircle(canvas, offsetX, offsetY, GetBackgroundCircleRadius(index), ToRSColor(activeCircleColor));
-        PaintLightRing(canvas, offsetX, offsetY, GetLightRingCircleRadius(index), GetLightRingAlphaF(index));
         const int32_t lastIndexFir = 1;
         CheckIsHoverAndPaint(canvas, offsetX, offsetY, GetActiveCircleRadius(index), index);
+        PaintLightRing(canvas, offsetX, offsetY, GetLightRingCircleRadius(index), GetLightRingAlphaF(index));
         if (isMoveEventValid_->Get() && CheckChoosePointIsLastIndex(x, y, lastIndexFir)) {
             PaintCircle(canvas, offsetX, offsetY, GetActiveCircleRadius(index), ToRSColor(activeColor));
         } else {
@@ -378,6 +392,23 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
     } else {
         CheckIsHoverAndPaint(canvas, offsetX, offsetY, circleRadius, index);
         PaintCircle(canvas, offsetX, offsetY, circleRadius, ToRSColor(regularColor));
+    }
+}
+
+void PatternLockModifier::PaintActiveCircle(RSCanvas& canvas, const OffsetF& offset)
+{
+    auto activeCircleColor = activeCircleColor_->Get();
+
+    for (int x = 1; x <= PATTERN_LOCK_COL_COUNT; x++) {
+        for (int y = 1; y <= PATTERN_LOCK_COL_COUNT; y++) {
+            OffsetF cellcenter = GetCircleCenterByXY(offset, x, y);
+            float offsetX = cellcenter.GetX();
+            float offsetY = cellcenter.GetY();
+            auto index = (x - 1) * PATTERN_LOCK_COL_COUNT + y - 1;
+            if (CheckChoosePoint(x, y)) {
+                PaintCircle(canvas, offsetX, offsetY, GetBackgroundCircleRadius(index), ToRSColor(activeCircleColor));
+            }
+        }
     }
 }
 
@@ -591,6 +622,12 @@ void PatternLockModifier::SetEnableWaveEffect(bool enableWaveEffect)
 {
     CHECK_NULL_VOID(enableWaveEffect_);
     enableWaveEffect_->Set(enableWaveEffect);
+}
+
+void PatternLockModifier::SetEnableForeground(bool enableForeground)
+{
+    CHECK_NULL_VOID(enableForeground_);
+    enableForeground_->Set(enableForeground);
 }
 
 void PatternLockModifier::StartChallengeResultAnimate()

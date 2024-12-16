@@ -91,6 +91,8 @@ public:
      */
     bool NotifySnapScroll(float delta, float velocity, float barScrollableDistance, float dragDistance) const;
 
+    bool NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const;
+
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
     void NotifyScrollBarNode(float distance, int32_t source) const;
@@ -100,10 +102,7 @@ public:
         scrollSnapTrigger_ = scrollSnapTrigger;
     }
 
-    bool IsScrollSnapTrigger() const
-    {
-        return scrollSnapTrigger_;
-    }
+    bool IsScrollSnapTrigger() const;
 
     void ScrollPage(bool reverse, bool smooth);
 

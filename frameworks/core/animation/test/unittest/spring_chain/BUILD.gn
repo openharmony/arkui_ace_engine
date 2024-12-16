@@ -58,6 +58,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/common/frontend.cpp",
+    "$ace_root/frameworks/core/common/key_event_manager.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/common/window.cpp",

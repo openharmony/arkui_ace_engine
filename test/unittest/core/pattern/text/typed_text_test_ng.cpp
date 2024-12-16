@@ -154,4 +154,4 @@ HWTEST_F(TypedTextTestNg, GetUTF8Next, TestSize.Level1)
     TypedText::GetUTF8Next(text, i, j);
     EXPECT_EQ(j, 4);
 }
-}
+} // namespace OHOS::Ace::NG

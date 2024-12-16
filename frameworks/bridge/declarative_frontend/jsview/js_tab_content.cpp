@@ -513,9 +513,6 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
     if (!labelStyle.fontStyle.has_value()) {
         labelStyle.fontStyle = FontStyle::NORMAL;
     }
-    if (!labelStyle.fontFamily.has_value()) {
-        labelStyle.fontFamily = { "HarmonyOS Sans" };
-    }
     if (!labelStyle.heightAdaptivePolicy.has_value()) {
         labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }
@@ -541,6 +538,7 @@ void SetBuilderNode(const JSRef<JSObject>& paramObject)
         return;
     }
     const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_VOID(nodeptr->GetLocalHandle()->IsNativePointer(vm));
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

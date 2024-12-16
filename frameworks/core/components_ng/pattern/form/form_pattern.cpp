@@ -162,6 +162,7 @@ void FormPattern::InitClickEvent()
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto formPattern = weak.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FORM, "gestureEvent - clickCallback");
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleStaticFormEvent(
             { static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()) });
@@ -291,6 +292,7 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
     if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
     for (const auto& info : formLinkInfos_) {
         auto linkInfo = JsonUtil::ParseJsonString(info);
         CHECK_NULL_VOID(linkInfo);
@@ -561,6 +563,11 @@ void FormPattern::ReleaseRenderer()
 void FormPattern::OnRebuildFrame()
 {
     if (isSnapshot_) {
+        return;
+    }
+
+    if (isSkeletonAnimEnable_ && !isTransparencyEnable_ && !ShouldAddChildAtReuildFrame()) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "should not add child");
         return;
     }
 
@@ -1245,15 +1252,18 @@ void FormPattern::InitFormManagerDelegate()
     context->SetSizeChangeByRotateCallback(callback);
 }
 
-void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
+void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto rect = host->GetTransformRectRelativeToWindow();
-    top = rect.Top();
-    left = rect.Left();
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    parentRectInfo.top = static_cast<int32_t>(rect.Top());
+    parentRectInfo.left = static_cast<int32_t>(rect.Left());
+    parentRectInfo.scaleX = finalScale.x;
+    parentRectInfo.scaleY = finalScale.y;
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", top: %{public}d, left: %{public}d",
-        host->GetAccessibilityId(), top, left);
+        host->GetAccessibilityId(), parentRectInfo.top, parentRectInfo.left);
 }
 
 void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
@@ -1571,7 +1581,11 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    CHECK_NULL_VOID(formManagerBridge_);
+    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");  
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnActionEvent failed, form manager deleget is null!");
+        return;
+    }
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         return;
@@ -1599,8 +1613,8 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
+    isManuallyClick_ = false;
     if ("router" == type) {
-        isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -2171,17 +2185,17 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
-        [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
+        [weak = WeakClaim(this), instanceID](AccessibilityParentRectInfo& parentRectInfo) {
             ContainerScope scope(instanceID);
             auto context = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostSyncTask([weak, instanceID, &top, &left] {
+            uiTaskExecutor.PostSyncTask([weak, instanceID, &parentRectInfo] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
-                form->GetRectRelativeToWindow(top, left);
+                form->GetRectRelativeToWindow(parentRectInfo);
                 }, "ArkUIFormGetRectRelativeToWindow");
         });
 
@@ -2244,5 +2258,25 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
     if (hasContainer) {
         subContainer_->RunSameCard();
     }
+}
+
+bool FormPattern::ShouldAddChildAtReuildFrame()
+{
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_RETURN(externalRenderContext, true);
+    auto externalRsNode = externalRenderContext->GetRSNode();
+    if (externalRsNode) {
+        auto externalParentRsNode = externalRsNode->GetParent();
+        if (externalParentRsNode) {
+            uint32_t externalParentRsNodeId = externalParentRsNode->GetId();
+            TAG_LOGW(AceLogTag::ACE_FORM, "external Parent RsNode Id:%{public}d", externalParentRsNodeId);
+            if (externalParentRsNodeId != 0) {
+                return false;
+            }
+        }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_FORM, "external RsNode is null");
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

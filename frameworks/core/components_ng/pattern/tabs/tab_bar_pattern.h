@@ -132,6 +132,12 @@ enum class TabBarState {
     HIDE
 };
 
+enum class TabBarParamType {
+    NORMAL = 0,
+    CUSTOM_BUILDER,
+    COMPONENT_CONTENT
+};
+
 class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
@@ -158,6 +164,8 @@ public:
             layoutAlgorithm->SetTargetIndex(targetIndex_);
         } else if (jumpIndex_) {
             layoutAlgorithm->SetJumpIndex(jumpIndex_);
+        } else if (focusIndex_) {
+            layoutAlgorithm->SetFocusIndex(focusIndex_);
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
@@ -216,9 +224,9 @@ public:
 
     SelectedMode GetSelectedMode() const;
 
-    void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
+    void AddTabBarItemType(int32_t tabBarItemId, TabBarParamType type)
     {
-        tabBarType_.emplace(std::make_pair(tabBarItemId, isBuilder));
+        tabBarType_.emplace(std::make_pair(tabBarItemId, type));
     }
 
     bool IsContainsBuilder();
@@ -551,6 +559,7 @@ private:
         const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
+    bool InsideTabBarRegion(const TouchLocationInfo& locationInfo);
     void InitHoverEvent();
     void InitMouseEvent();
     void SetSurfaceChangeCallback();
@@ -601,6 +610,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState(bool needMarkDirty = true);
     void FocusIndexChange(int32_t index);
+    void FocusCurrentOffset();
     void UpdateGradientRegions(bool needMarkDirty = true);
 
     float GetSpace(int32_t indicator);
@@ -670,7 +680,7 @@ private:
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
-    std::unordered_map<int32_t, bool> tabBarType_;
+    std::unordered_map<int32_t, TabBarParamType> tabBarType_;
     std::optional<int32_t> animationDuration_;
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
@@ -724,6 +734,7 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;

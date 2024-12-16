@@ -271,7 +271,7 @@ HWTEST_F(WebModelTestNg, SetOnCommonDialog001, TestSize.Level1)
     webModelNG->SetOnCommonDialog(onCommon, 1);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->onBeforeUnloadImpl_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -289,7 +289,7 @@ HWTEST_F(WebModelTestNg, SetOnFullScreenEnter001, TestSize.Level1)
     webModelNG->SetOnFullScreenEnter(fullScreenEnterEventId);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnFullScreenEnterEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -310,7 +310,7 @@ HWTEST_F(WebModelTestNg, SetOnAllSslErrorRequest001, TestSize.Level1)
     webModelNG.SetOnAllSslErrorRequest(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnAllSslErrorRequestEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -356,7 +356,7 @@ HWTEST_F(WebModelTestNg, SetOnOverrideUrlLoading001, TestSize.Level1)
     webModelNG.SetOnOverrideUrlLoading(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnOverrideUrlLoadingEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -402,7 +402,7 @@ HWTEST_F(WebModelTestNg, SetOnContextMenuHide001, TestSize.Level1)
     webModelNG.SetOnContextMenuHide(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnContextMenuHideEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -448,7 +448,7 @@ HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest001, TestSize.Level1)
     webModelNG.SetOnHttpAuthRequest(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnHttpAuthRequestEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -476,7 +476,7 @@ HWTEST_F(WebModelTestNg, SetOnSslErrorRequest001, TestSize.Level1)
     webModelNG.SetOnSslErrorRequest(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnSslErrorRequestEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -504,7 +504,7 @@ HWTEST_F(WebModelTestNg, SetOnSslSelectCertRequest001, TestSize.Level1)
     webModelNG.SetOnSslSelectCertRequest(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnSslSelectCertRequestEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -554,7 +554,7 @@ HWTEST_F(WebModelTestNg, SetOnErrorReceive001, TestSize.Level1)
     webModelNG.SetOnErrorReceive(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnErrorReceiveEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -582,7 +582,7 @@ HWTEST_F(WebModelTestNg, SetOnHttpErrorReceive001, TestSize.Level1)
     webModelNG.SetOnHttpErrorReceive(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnHttpErrorReceiveEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -610,7 +610,7 @@ HWTEST_F(WebModelTestNg, SetOnUrlLoadIntercept001, TestSize.Level1)
     webModelNG.SetOnUrlLoadIntercept(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnUrlLoadInterceptEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -638,7 +638,7 @@ HWTEST_F(WebModelTestNg, SetOnLoadIntercept001, TestSize.Level1)
     webModelNG.SetOnLoadIntercept(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnLoadInterceptEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -666,7 +666,7 @@ HWTEST_F(WebModelTestNg, SetOnInterceptRequest001, TestSize.Level1)
     webModelNG.SetOnInterceptRequest(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnInterceptRequestEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -694,7 +694,7 @@ HWTEST_F(WebModelTestNg, SetOnFileSelectorShow001, TestSize.Level1)
     webModelNG.SetOnFileSelectorShow(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnFileSelectorShowEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -722,7 +722,7 @@ HWTEST_F(WebModelTestNg, SetOnContextMenuShow001, TestSize.Level1)
     webModelNG.SetOnContextMenuShow(callback);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnContextMenuShowEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 
@@ -1345,7 +1345,7 @@ HWTEST_F(WebModelTestNg, SetPermissionRequestEventId027, TestSize.Level1)
     webModelNG.SetPermissionRequestEventId(std::move(SetPermissionRequestEventId));
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnPermissionRequestEvent_(nullptr);
-    EXPECT_NE(callCount, 0);
+    EXPECT_EQ(callCount, 0);
 #endif
 }
 

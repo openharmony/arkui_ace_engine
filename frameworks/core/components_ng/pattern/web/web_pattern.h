@@ -28,6 +28,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/common/recorder/web_event_recorder.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -106,8 +107,11 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
-class WebPattern : public NestableScrollContainer, public TextBase, public Magnifier {
-    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier);
+class WebPattern : public NestableScrollContainer,
+                   public TextBase,
+                   public Magnifier,
+                   public Recorder::WebEventRecorder {
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, Recorder::WebEventRecorder);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -647,6 +651,7 @@ public:
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
+    bool IsCurrentFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
     {
         customKeyboardBuilder_ = customKeyboardBuilder;
@@ -688,6 +693,8 @@ public:
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
+    void DumpInfo() override;
+    float DumpGpuInfo();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
@@ -706,6 +713,8 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+    void RecordWebEvent(bool isInit = false) override;
+    void GetPageContentAsync(const std::string& jsCode);
 
     bool IsPreviewImageNodeExist() const
     {
@@ -749,7 +758,7 @@ private:
     bool IsNeedResizeVisibleViewport();
     bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
-    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard = false);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -846,6 +855,7 @@ private:
     void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
     void ClearDragData();
+    void SetFakeDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
@@ -867,6 +877,8 @@ private:
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
+    void HandleScaleGestureStart(const GestureEvent& event);
+    void HandleScaleGestureEnd(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -1016,7 +1028,6 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
-    void InitAiEngine();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY);
     void HideMagnifier();
@@ -1197,7 +1208,7 @@ private:
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
     float touchPointX = 0;
     float touchPointY = 0;
-    bool isAIEngineInit = false;
+    bool isUsingCustomKeyboardAvoid_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

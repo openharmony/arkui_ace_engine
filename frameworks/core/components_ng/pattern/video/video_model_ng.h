@@ -34,6 +34,7 @@ public:
     void SetControls(bool controls) override;
     void SetObjectFit(ImageFit objectFit) override;
     void SetLoop(bool loop) override;
+    void SetSurfaceBackgroundColor(Color color) override;
 
     void SetOnStart(VideoEventFunc&& onStart) override;
     void SetOnPause(VideoEventFunc&& onPause) override;

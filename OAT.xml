@@ -142,6 +142,8 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/748621363886323660" desc="自造的二进制文件无法添加版权头"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/8819493328252140263" desc="自造的二进制文件无法添加版权头"/>
                 <filteritem type="filepath" name="examples/components/hvigor/hvigor-wrapper.js" desc="检视应用工程工具链文件无法添加版权头"/>
+                <filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/rawfile/video1.mp4" desc="自造的二进制文件无法添加版权头"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/rawfile/video2.mp4" desc="自造的二进制文件无法添加版权头"/>
             </filefilter>
             <filefilter name="defaultPolicyFilter" desc="根目录LICENSE文件校验策略的过滤条件xxx" >
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加License"/>
@@ -154,6 +156,8 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/748621363886323660" desc="用于测试自造的二进制文件无法添加License"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imagecache/images/8819493328252140263" desc="用于测试自造的二进制文件无法添加License"/>
                 <filteritem type="filepath" name="examples/components/hvigor/hvigor-wrapper.js" desc="检视应用工程工具链文件无法添加License"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/rawfile/video1.mp4" desc="用于测试自造的二进制文件无法添加License"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/rawfile/video2.mp4" desc="用于测试自造的二进制文件无法添加License"/>
             </filefilter>
         </filefilterlist>
 

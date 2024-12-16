@@ -16,6 +16,7 @@
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
+#include "core/common/recorder/event_definition.h"
 #include "frameworks/core/common/recorder/event_recorder.h"
 #include "frameworks/core/common/recorder/node_data_cache.h"
 #include "frameworks/core/components_ng/pattern/image/image_pattern.h"
@@ -1782,8 +1783,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone01, TestSize.Level1)
     frameNode->isPrivacySensitive_ = true;
     frameNode->isRestoreInfoUsed_ = false;
     frameNode->restoreId_ = 1;
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     std::unordered_set<std::string> nodeSet;
     nodeSet.emplace("abc");
     Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.emplace("test", nodeSet);
