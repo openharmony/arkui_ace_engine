@@ -27,7 +27,19 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
+
 namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src)
+{
+    switch(src) {
+        case ARK_CONTENT_CLIP_MODE_CONTENT_ONLY:dst = ContentClipMode::CONTENT_ONLY;break;
+        case ARK_CONTENT_CLIP_MODE_BOUNDARY:dst = ContentClipMode::BOUNDARY;break;
+        case ARK_CONTENT_CLIP_MODE_SAFE_AREA:dst = ContentClipMode::SAFE_AREA;break;
+        default: LOGE("Unexpected enum value in Ark_ContentClipMode: %{public}d", src);break;           
+    }
+}
+
 template<>
 void AssignCast(std::optional<Dimension>& dst, const Ark_FadingEdgeOptions& src)
 {
@@ -183,8 +195,17 @@ void ClipContentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetClipContent(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_ContentClipMode& arkMode) {
+            auto mode = Converter::OptConvert<ContentClipMode>(arkMode);
+            // mode cannot be nullopt, because in model created pair for lauout property
+            ScrollableModelNG::SetContentClip(frameNode, mode.value_or(ContentClipMode::DEFAULT), nullptr);
+        },
+        [](const auto& value) {
+            LOGE("ScrollableCommonMethodModifier::ClipContentImpl set RectShape is not supported");
+        },
+        []() {}
+    );
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,
