@@ -792,7 +792,6 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
     sameSpan->content = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
-    sameSpan->backgroundStyle = TextBackgroundStyle();
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
@@ -833,6 +832,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateEllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
 
             case TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR: {
+                if (!sameSpan->backgroundStyle.has_value()) {
+                    sameSpan->backgroundStyle = TextBackgroundStyle();
+                }
                 sameSpan->backgroundStyle->backgroundColor = TLVUtil::ReadColor(buff, cursor);
                 break;
             }

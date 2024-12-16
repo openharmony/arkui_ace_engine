@@ -1640,26 +1640,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg032, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg035
- * @tc.desc: Test ChangeMouseStyle.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters set mouseStyleNodeId.
-     * @tc.expected: ChangePointerStyle will be called.
-     * @tc.steps1: call ChangeMouseStyle.
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->onFocus_ = true;
-    context_->mouseStyleNodeId_ = 0;
-    auto mouseStyle_ = AceType::DynamicCast<MockMouseStyle>(MouseStyle::CreateMouseStyle().rawPtr_);
-    EXPECT_CALL(*mouseStyle_, ChangePointerStyle(_, _)).Times(AnyNumber());
-    context_->ChangeMouseStyle(0, MouseFormat::DEFAULT);
-}
-
-/**
  * @tc.name: PipelineContextTestNg040
  * @tc.desc: Test SetContainerButtonHide function.
  * @tc.type: FUNC

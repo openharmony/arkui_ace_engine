@@ -140,7 +140,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
         }
     } else {
         globalX = contentRect.Left() + globalOffset.GetX() - dragOffset;
-        AdjustMaxWidth(width, contentRect, boxes);
+        dragPattern->AdjustMaxWidth(width, contentRect, boxes);
     }
     float contentX = (leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0) - dragOffset - delta / CONSTANT_HALF;
     dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});

@@ -201,7 +201,7 @@ void ListItemGroupLayoutAlgorithm::CheckUpdateGroupAndItemPos(LayoutWrapper* lay
         offset += OffsetF(0.0f, adjustReferenceDelta_);
     } else {
         if (layoutDirection_ == TextDirection::RTL) {
-            offset -= OffsetF(adjustTotalSize_, 0.0f);
+            offset -= OffsetF(adjustTotalSize_ + adjustReferenceDelta_, 0.0f);
         } else {
             offset += OffsetF(adjustReferenceDelta_, 0.0f);
         }

@@ -55,9 +55,11 @@ void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::FREE, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    auto layoutWrapperGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(layoutWrapperGeometryNode);
+    layoutWrapperGeometryNode->SetFrameSize(idealSize);
 
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
     // first layout after created subwindow, constraint is zero
     CheckLayoutConstraint(layoutConstraint, layoutWrapper->GetHostNode());
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {

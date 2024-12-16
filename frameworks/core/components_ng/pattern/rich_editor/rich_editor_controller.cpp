@@ -28,8 +28,6 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textLength=%{public}d, offset=%{public}d",
-        static_cast<int32_t>(options.value.length()), options.offset.value_or(-1));
     return richEditorPattern->AddTextSpan(options);
 }
 
