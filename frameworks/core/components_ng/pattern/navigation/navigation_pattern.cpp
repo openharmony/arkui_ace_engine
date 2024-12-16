@@ -700,6 +700,7 @@ void NavigationPattern::UpdateNavPathList()
     CHECK_NULL_VOID(navigationStack_);
     auto pathNames = navigationStack_->GetAllPathName();
     auto indexes = navigationStack_->GetAllPathIndex();
+    navigationStack_->InitNavPathIndex(pathNames);
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
     NavPathList navPathList;
     int32_t pathListSize = static_cast<int32_t>(pathNames.size());
@@ -787,7 +788,6 @@ void NavigationPattern::UpdateNavPathList()
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
     }
     navigationStack_->SetNavPathList(navPathList);
-    navigationStack_->InitNavPathIndex(pathNames);
 }
 
 void NavigationPattern::RefreshNavDestination()
