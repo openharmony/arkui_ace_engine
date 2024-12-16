@@ -5110,7 +5110,9 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
                 break;
             }
         case SheetType::SHEET_BOTTOM:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_OFFSET:
             if (!sheetStyle.detents.empty()) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
