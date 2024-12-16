@@ -26,8 +26,10 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const auto ATTRIBUTE_MOTION_PATH_NAME = "motionPath";
-    const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_GEOMETRY_TRANSITION_NAME = "geometryTransition";
+    const auto ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_RESTORE_ID_NAME = "restoreId";
+    const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = "";
 }
 namespace Converter {
 template<>
@@ -50,39 +52,69 @@ public:
     RefPtr<RenderContext> render_;
 };
 
+///////// GeometryTransition
 /*
- * @tc.name: setMotionPathTestDefaultValues
+ * @tc.name: setGeometryTransitionTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setMotionPathTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, setGeometryTransitionTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_MOTION_PATH_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE);
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setMotionPathTestValidValues
+ * @tc.name: setGeometryTransitionTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC /data/home/mlobakh/BZ_OHOS/OHOS/interface/sdk-js/api/@internal/component/ets/common.d.ts
+ */
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setGeometryTransition0, nullptr);
+    using OneTestStep = std::tuple<Ark_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_String>("id1"), "id1"},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setGeometryTransition0(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+///////// RestoreId
+/*
+ * @tc.name: setRestoreIdTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setMotionPathTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, setRestoreIdTestDefaultValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setMotionPath, nullptr);
-    using OneTestStep = std::tuple<Ark_MotionPathOptions, std::string>;
-    Ark_MotionPathOptions v = {
-        .path = Converter::ArkValue<Ark_String>("path"),
-        .from = Converter::ArkValue<Opt_Number>(1),
-        .to = Converter::ArkValue<Opt_Number>(2),
-        .rotatable = Converter::ArkValue<Opt_Boolean>(true),
-    };
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_RESTORE_ID_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setRestoreIdTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC /data/home/mlobakh/BZ_OHOS/OHOS/interface/sdk-js/api/@internal/component/ets/common.d.ts
+ */
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setRestoreId, nullptr);
+    using OneTestStep = std::tuple<Ark_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_MotionPathOptions>(v), ""},
+        {Converter::ArkValue<Ark_Number>(1), "1"},
+        {Converter::ArkValue<Ark_Number>(2), "2"},
+        {Converter::ArkValue<Ark_Number>(3), "3"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setMotionPath(node_, &inputValue);
+        modifier_->setRestoreId(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MOTION_PATH_NAME);
+        // std::cout << "\n********* " << fullJson->ToString() << "\n";
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_RESTORE_ID_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }

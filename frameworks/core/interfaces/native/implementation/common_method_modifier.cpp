@@ -85,6 +85,11 @@ struct GridSizeOpt {
     GridSizeType type;
 };
 
+struct GeometryTransitionOptions {
+    std::optional<bool> follow;
+    std::optional<TransitionHierarchyStrategy> hierarchyStrategy;
+};
+
 using PositionWithLocalization = std::pair<std::optional<OffsetT<Dimension>>, bool>;
 
 using ColorOrStrategy = std::variant<std::monostate, std::optional<Color>, std::optional<ForegroundColorStrategy>>;
@@ -1190,6 +1195,21 @@ template<>
         case ARK_RENDER_FIT_RESIZE_COVER_BOTTOM_RIGHT: dst = RenderFit::RESIZE_COVER_BOTTOM_RIGHT; break;
         default: LOGE("Unexpected enum value in Ark_RenderFit: %{public}d", src);
     }
+}
+TransitionHierarchyStrategy Convert(const Ark_TransitionHierarchyStrategy& src)
+{
+    if (src == ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE) {
+        return TransitionHierarchyStrategy::ADAPTIVE;
+    }
+    return TransitionHierarchyStrategy::NONE;
+}
+template<>
+GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
+{
+    GeometryTransitionOptions dst;
+    dst.follow = OptConvert<bool>(src.follow);
+    dst.hierarchyStrategy = OptConvert<TransitionHierarchyStrategy>(src.hierarchyStrategy);
+    return dst;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -3037,32 +3057,18 @@ void GeometryTransition1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_EQUAL_VOID(id || options, false);
-    /*
-    struct CJGeometryTransitionOptions {
-        bool follow = false;
-        int32_t hierarchyStrategy;
-    };
-    */
-    /*
-    typedef enum Ark_TransitionHierarchyStrategy {
-        ARK_TRANSITION_HIERARCHY_STRATEGY_NONE = 0,
-        ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE = 1,
-    } Ark_TransitionHierarchyStrategy;
-    */
-    /*
-    typedef struct Ark_GeometryTransitionOptions {
-        Opt_Boolean follow;
-        Opt_TransitionHierarchyStrategy hierarchyStrategy;
-    } Ark_GeometryTransitionOptions;
-    */
-    // CJGeometryTransitionOptions geometryTransitionOptions;
+    CHECK_EQUAL_VOID(id && options, false);
     auto idValue = id ? Converter::Convert<std::string>(*id) : "";
-    auto arkOptions = options ? Converter::OptConvert<Ark_TransitionHierarchyStrategy>(*options) : std::nullopt;
-    Ark_TransitionHierarchyStrategy transitionHierarchyStrategy;
-    bool followWithoutTransition = Converter::Convert<bool>(arkOptions.value(false));
-    bool doRegisterSharedTransition {false};
-    ViewAbstract::SetGeometryTransition(frameNode, optId.value());
+    auto optOptions = options ? Converter::OptConvert<GeometryTransitionOptions>(*options) : std::nullopt;
+    auto followWithoutTransition {false};
+    auto hierarchyStrategy = TransitionHierarchyStrategy::NONE;
+    auto doRegisterSharedTransition {false};
+    if (optOptions.has_value()) {
+        followWithoutTransition = optOptions.value().follow.value_or(false);
+        hierarchyStrategy = optOptions.value().hierarchyStrategy.value_or(TransitionHierarchyStrategy::NONE);
+        doRegisterSharedTransition = hierarchyStrategy == TransitionHierarchyStrategy::ADAPTIVE;
+    }
+    ViewAbstract::SetGeometryTransition(frameNode, idValue, followWithoutTransition, doRegisterSharedTransition);
 }
 void StateStylesImpl(Ark_NativePointer node,
                      const Ark_StateStyles* value)
@@ -3072,6 +3078,7 @@ void StateStylesImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetStateStyles(frameNode, convValue);
+    LOGE("Ark_StateStyles contains a CustomObject's which is not supported");
 }
 void RestoreIdImpl(Ark_NativePointer node,
                    const Ark_Number* value)
@@ -3079,8 +3086,8 @@ void RestoreIdImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetRestoreId(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    ViewAbstract::SetRestoreId(frameNode, convValue);
 }
 void SphericalEffectImpl(Ark_NativePointer node,
                          const Ark_Number* value)
