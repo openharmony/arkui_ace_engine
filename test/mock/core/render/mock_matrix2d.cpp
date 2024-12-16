@@ -65,6 +65,8 @@ void Matrix2D::Translate(TransformParam& param, double tx, double ty)
 
 void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry)
 {
+    param.skewX *= degree * rx;
+    param.skewY *= degree * ry;
 }
 } // namespace OHOS::Ace::NG
 
