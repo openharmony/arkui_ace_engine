@@ -813,10 +813,17 @@ class FocusController {
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
+        this.logger = logger;
         this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
+        if (!this.ohos_focusController) {
+            this.logger.error(`Failed to initialize ohos_focusController for instanceId: ${instanceId}`);
+        } else {
+            this.logger.debug(`ohos_focusController initialized successfully for instanceId: ${instanceId}`);
+        }
     }
     clearFocus() {
         if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            this.logger.warn(`clearFocus called but ohos_focusController is not available.`);
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -826,6 +833,7 @@ class FocusController {
 
     requestFocus(value) {
         if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            this.logger.warn(`requestFocus failed: ohos_focusController is not available.`);
             return false;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -836,6 +844,7 @@ class FocusController {
 
     activate(isActive, autoInactive) {
         if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            this.logger.warn(`activate called, but ohos_focusController is not available.`);
             return false;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -852,6 +861,7 @@ class FocusController {
 
     setAutoFocusTransfer(value) {
         if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            this.logger.warn(`setAutoFocusTransfer called, but ohos_focusController is not available.`);
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
