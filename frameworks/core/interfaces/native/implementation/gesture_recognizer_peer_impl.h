@@ -26,16 +26,18 @@
 #include "arkoala_api_generated.h"
 
 struct GestureRecognizerPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer> GetRecognizer() const
+    using GestureRecognizerPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>;
+
+    GestureRecognizerPtr GetRecognizer() const
     {
         return recognizer_;
     }
 
-    void SetRecognizer(const OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>& recognizer)
+    void SetRecognizer(const GestureRecognizerPtr& recognizer)
     {
         recognizer_ = recognizer;
     }
 private:
-     OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer> recognizer_;
+    GestureRecognizerPtr recognizer_;
 };
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_GESTURE_RECOGNIZER_PEER_IMPL_H
