@@ -67,7 +67,7 @@ RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
     const auto& windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
 
-    bool isMoving = windowManager->GetWindowStartMoveFlag();
+    bool isMoving = windowManager->WindowIsStartMoving();
     if (isMoving) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "window is moving, button click event is not supported");
         return nullptr;
