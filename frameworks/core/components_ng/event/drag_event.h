@@ -150,7 +150,8 @@ public:
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
         const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap = false);
     static RefPtr<PixelMap> GetPreviewPixelMap(const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode);
-    static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(const std::string& inspectorId);
+    static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(
+        const std::string& inspectorId, const RefPtr<FrameNode>& frameNode);
     static RefPtr<PixelMap> GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode);
     static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
