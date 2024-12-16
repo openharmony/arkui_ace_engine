@@ -75,11 +75,7 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
 
     auto optInfoData = Converter::OptConvert<PluginComponentOptions>(*options);
-    if (optInfoData) {
-        PluginModelNG::SetRequestPluginInfo(frameNode, optInfoData->requestPluginInfo);
-    } else {
-        PluginModelNG::SetRequestPluginInfo(frameNode, std::nullopt);
-    }
+    PluginModelNG::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
     LOGE("PluginComponentModifier::SetPluginComponentOptionsImpl setData into model isn't supported");
 #endif
 }
