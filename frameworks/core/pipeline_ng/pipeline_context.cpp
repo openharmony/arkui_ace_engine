@@ -3545,33 +3545,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
 
-    auto dragManager = GetDragDropManager();
-    if (dragManager && !dragManager->IsDragged()) {
-        if (event.action == AxisAction::BEGIN) {
-            isBeforeDragHandleAxis_ = true;
-            TouchRestrict touchRestrict { TouchRestrict::NONE };
-            touchRestrict.sourceType = event.sourceType;
-            touchRestrict.hitTestType = SourceType::TOUCH;
-            touchRestrict.inputEventType = InputEventType::AXIS;
-            // If received rotate event, no need to touchtest.
-            if (!event.isRotationEvent) {
-                eventManager_->TouchTest(scaleEvent, node, touchRestrict);
-                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
-                if (formEventMgr) {
-                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
-                }
-                auto formGestureMgr =  this->GetFormGestureManager();
-                if (formGestureMgr) {
-                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
-                        etsSerializedGesture, eventManager_);
-                }
-            }
-        }
-        eventManager_->DispatchTouchEvent(scaleEvent);
-    } else if (isBeforeDragHandleAxis_ && (event.action == AxisAction::END || event.action == AxisAction::CANCEL)) {
-        eventManager_->DispatchTouchEvent(scaleEvent);
-        isBeforeDragHandleAxis_ = false;
-    }
+    DispatchAxisEventToDragDropManager(event, node);
 
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
         eventManager_->AxisTest(scaleEvent, node);
@@ -3590,11 +3564,37 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
         ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
     }
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
+        eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
+    }
     auto mouseEvent = ConvertAxisToMouse(event);
     OnMouseMoveEventForAxisEvent(mouseEvent, node);
     if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
         formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
         formEventMgr->RemoveEtsCardTouchEventCallback(event.id);
+    }
+}
+
+void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node)
+{
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    auto dragManager = GetDragDropManager();
+    if (dragManager && !dragManager->IsDragged()) {
+        if (event.action == AxisAction::BEGIN) {
+            isBeforeDragHandleAxis_ = true;
+            TouchRestrict touchRestrict { TouchRestrict::NONE };
+            touchRestrict.sourceType = event.sourceType;
+            touchRestrict.hitTestType = SourceType::TOUCH;
+            touchRestrict.inputEventType = InputEventType::AXIS;
+            // If received rotate event, no need to touchtest.
+            if (!event.isRotationEvent) {
+                eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+            }
+        }
+        eventManager_->DispatchTouchEvent(scaleEvent);
+    } else if (isBeforeDragHandleAxis_ && (event.action == AxisAction::END || event.action == AxisAction::CANCEL)) {
+        eventManager_->DispatchTouchEvent(scaleEvent);
+        isBeforeDragHandleAxis_ = false;
     }
 }
 
