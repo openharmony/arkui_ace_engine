@@ -1,5 +1,5 @@
 import { RadioBlock } from 'common';
-import { pointer } from "@kit.InputKit";
+import { pointer } from '@kit.InputKit';
 
 @Component
 export struct CompCursorControlBlocks {

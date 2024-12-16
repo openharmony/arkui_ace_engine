@@ -689,7 +689,7 @@ export struct ButtonBootcamp {
   @State compClickEffectLevel: ClickEffectLevel = ClickEffectLevel.LIGHT;
   @State enableCompClickEffectScale: boolean = false;
   @State compClickEffectScale: number = 0.9;
-  //Accessibility
+  //accessibilityGroup
   @State enableCompAccessibilityGroup: boolean = false;
   @State compAccessibilityGroup: boolean = false;
   @State enableCompAccessibilityText: boolean = false;
@@ -954,13 +954,11 @@ export struct ButtonBootcamp {
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
 
-
-
-
-  compMaskColorChange(){
+  compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
   }
-  compMaskValueChange(){
+
+  compMaskValueChange() {
     this.progress.updateProgress(this.compMaskValue);
   }
 
@@ -981,6 +979,7 @@ export struct ButtonBootcamp {
     .hideTitleBar(true)
   }
 
+  //builder
   @Builder
   bindSheetBuilder() {
     Text('bindSheet')
@@ -1128,8 +1127,7 @@ export struct ButtonBootcamp {
           promptAction.showToast({
             message: '按钮被点击！'
           });
-        })
-          //part1
+        })//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1919,8 +1917,9 @@ export struct ButtonBootcamp {
               })
           }
         )
-        .obscured(useEnabled(this.enableCompObscured, this.compObscured))
-        // .fontColor(useEnabled(this.enableCompFontColor, this.compFontColor))
+        .obscured(useEnabled(this.enableCompObscured,
+          this.compObscured))
+        .fontColor(useEnabled(this.enableCompFontColor, this.compFontColor))
         .fontSize(useEnabled(this.enableCompFontSize, this.compFontSize))
         .fontStyle(useEnabled(this.enableCompFontStyle, this.compFontStyle))
         .fontWeight(useEnabled(this.enableCompFontWeight, this.compFontWeight))
@@ -1931,9 +1930,11 @@ export struct ButtonBootcamp {
           numberBadge: useEnabled(this.enableCompDragPreviewOptionsValueNumberBadge,
             this.compDragPreviewOptionsValueNumberBadge),
         }, {
-          isMultiSelectionEnabled: useEnabled(this.enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
+          isMultiSelectionEnabled:
+          useEnabled(this.enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
             this.compDragPreviewOptionsOptionsIsMultiSelectionEnabled),
-          defaultAnimationBeforeLifting: useEnabled(this.enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
+          defaultAnimationBeforeLifting:
+          useEnabled(this.enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
             this.compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting)
         })
         .expandSafeArea(
@@ -2960,12 +2961,18 @@ export struct ButtonBootcamp {
           compDragPreview: $compDragPreview,
           enableCompDragPreviewOptionsValueMode: $enableCompDragPreviewOptionsValueMode,
           compDragPreviewOptionsValueMode: $compDragPreviewOptionsValueMode,
-          enableCompDragPreviewOptionsValueNumberBadge: $enableCompDragPreviewOptionsValueNumberBadge,
-          compDragPreviewOptionsValueNumberBadge: $compDragPreviewOptionsValueNumberBadge,
-          enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled: $enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-          compDragPreviewOptionsOptionsIsMultiSelectionEnabled: $compDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-          enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: $enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
-          compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: $compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting
+          enableCompDragPreviewOptionsValueNumberBadge:
+          $enableCompDragPreviewOptionsValueNumberBadge,
+          compDragPreviewOptionsValueNumberBadge:
+          $compDragPreviewOptionsValueNumberBadge,
+          enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled:
+          $enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
+          compDragPreviewOptionsOptionsIsMultiSelectionEnabled:
+          $compDragPreviewOptionsOptionsIsMultiSelectionEnabled,
+          enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting:
+          $enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
+          compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting:
+          $compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting
         })
 
         RadioBlock({
@@ -3019,8 +3026,6 @@ export struct ButtonBootcamp {
     }
     .height('52%')
   }
-
-
 }
 
 @Preview
