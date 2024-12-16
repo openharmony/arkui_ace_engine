@@ -3159,7 +3159,18 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
 bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
 {
     CHECK_NULL_RETURN(delegate_, false);
-    delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
+    if (delegate_->ShouldVirtualKeyboardOverlay()) {
+        if (!IsDialogNested()) {
+            double webKeyboard = keyboard - (height - GetCoordinatePoint()->GetY() - drawSize_.Height());
+            webKeyboard = (webKeyboard < 0) ? 0 : webKeyboard;
+            TAG_LOGW(AceLogTag::ACE_WEB, "VirtualKeyboard Overlaycontent is true webKeyboard:%{public}f", webKeyboard);
+            delegate_->SetVirtualKeyBoardArg(width, height, webKeyboard);
+        } else {
+            delegate_->SetVirtualKeyBoardArg(width, height, 0);
+        }
+    } else {
+        delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
+    }
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
