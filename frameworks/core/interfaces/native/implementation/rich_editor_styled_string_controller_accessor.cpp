@@ -30,11 +30,9 @@ void AssignArkValue(Ark_Materialized& dst, const std::string& src)
 void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
 {
     auto str = src.GetReplacementString();
-    auto replacementString = AceType::DynamicCast<SpanString>(str);
+    auto replacementString = reinterpret_cast<MutableSpanString*>(str.GetRawPtr());
     if (replacementString) {
-        StyledStringPeer *peer = new StyledStringPeer();
-        peer->spanString = replacementString;
-        dst.replacementString = Converter::ArkValue<Ark_StyledString>(*peer);
+        dst.replacementString = Converter::ArkValue<Ark_StyledString>(replacementString->GetString());
     }
     dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
     dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);

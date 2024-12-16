@@ -477,7 +477,7 @@ Ark_Boolean EqualsImpl(StyledStringPeer* peer,
     CHECK_NULL_RETURN(peer->spanString, false);
     CHECK_NULL_RETURN(other, false);
     CHECK_NULL_RETURN(other->ptr, false);
-    StyledStringPeer* otherPeer = reinterpret_cast<StyledStringPeer *>(other->ptr);
+    auto otherPeer = reinterpret_cast<StyledStringPeer *>(other->ptr);
     CHECK_NULL_RETURN(otherPeer->spanString, false);
     return peer->spanString->IsEqualToSpanString(otherPeer->spanString);
 }
