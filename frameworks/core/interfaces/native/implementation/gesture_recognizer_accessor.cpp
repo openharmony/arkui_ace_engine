@@ -90,12 +90,14 @@ Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
     }
     Ark_NativePointer result;
     if (pattern) {
-        auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->ctor();
+        auto scrollableTargetInfoPeer = reinterpret_cast<ScrollableTargetInfoPeer*>(
+            GetScrollableTargetInfoAccessor()->ctor());
         scrollableTargetInfoPeer->SetPattern(pattern);
         scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
         result = reinterpret_cast<Ark_NativePointer>(scrollableTargetInfoPeer);
     } else {
-        auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->ctor();
+        auto eventTargetInfoPeer = reinterpret_cast<EventTargetInfoPeer*>(
+            GetEventTargetInfoAccessor()->ctor());
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
         result = reinterpret_cast<Ark_NativePointer>(eventTargetInfoPeer);
     }

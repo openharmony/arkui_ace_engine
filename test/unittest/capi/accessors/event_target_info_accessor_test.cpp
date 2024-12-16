@@ -36,9 +36,9 @@ class EventTargetInfoAccessorTest : public AccessorTestBase<GENERATED_ArkUIEvent
  */
 HWTEST_F(EventTargetInfoAccessorTest, ctorTest, TestSize.Level1)
 {
-    auto peer1 = this->accessor_->ctor();
-    auto peer2 = this->accessor_->ctor();
-    auto peer3 = this->accessor_->ctor();
+    auto peer1 = reinterpret_cast<EventTargetInfoPeer*>(this->accessor_->ctor());
+    auto peer2 = reinterpret_cast<EventTargetInfoPeer*>(this->accessor_->ctor());
+    auto peer3 = reinterpret_cast<EventTargetInfoPeer*>(this->accessor_->ctor());
     ASSERT_NE(peer1, nullptr);
     ASSERT_NE(peer2, nullptr);
     ASSERT_NE(peer3, nullptr);
