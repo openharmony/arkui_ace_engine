@@ -312,12 +312,17 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto scrollEndCallback = pattern->scrollEndCallback_;
+        if (scrollEndCallback) {
+            scrollEndCallback();
+        }
         pattern->scrollBarProxy_->NotifyScrollStop();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](SnapAnimationOptions snapAnimationOptions) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->isScrolling_ = false;
         auto scrollBarProxy = pattern->scrollBarProxy_;
         CHECK_NULL_RETURN(scrollBarProxy, false);
         return scrollBarProxy->NotifySnapScrollWithoutChild(snapAnimationOptions);
