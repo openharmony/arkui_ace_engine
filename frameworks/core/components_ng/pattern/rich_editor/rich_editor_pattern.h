@@ -827,17 +827,6 @@ public:
         return GetTextContentLength();
     }
 
-    OffsetF GetCaretOffset() const override
-    {
-        // only used in magnifier, return position of the handle that is currently moving
-        return movingHandleOffset_;
-    }
-
-    void SetMovingHandleOffset(const OffsetF& handleOffset)
-    {
-        movingHandleOffset_ = handleOffset;
-    }
-
     OffsetF GetParentGlobalOffset() const override
     {
         return parentGlobalOffset_;
@@ -1342,6 +1331,7 @@ private:
     bool ReplaceText(const std::string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
+    void SetMagnifierLocalOffset(Offset localOffset);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

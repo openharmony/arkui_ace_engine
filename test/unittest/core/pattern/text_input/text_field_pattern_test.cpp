@@ -1937,7 +1937,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(0.f, 0.f));
-    EXPECT_TRUE(controller->GetShowMagnifier());
+    EXPECT_FALSE(controller->GetShowMagnifier());
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
     touchEventInfo.changedTouches_.clear();
