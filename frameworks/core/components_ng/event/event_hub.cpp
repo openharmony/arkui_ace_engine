@@ -50,6 +50,10 @@ void EventHub::OnDetachContext(PipelineContext *context)
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
+    auto eventManager = context->GetEventManager();
+    if (eventManager) {
+        eventManager->DelKeyboardShortcutNode(host->GetId());
+    }
 }
 
 RefPtr<FrameNode> EventHub::GetFrameNode() const
