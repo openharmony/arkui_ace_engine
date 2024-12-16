@@ -16,7 +16,7 @@
 import measure from '@ohos.measure'
 import curves from '@ohos.curves'
 import { LengthMetrics } from '@ohos.arkui.node';
-import { common } from '@kit.AbilityKit';
+import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
@@ -44,6 +44,10 @@ const TRANS_COLOR: string = '#00FFFFFF'
 const GRADIENT_WIDTH: number = 16
 const MAX_FONT_SCALE: number = 2;
 const ERROR_CODE: number = 0x3900;
+const SYMBOL_SIZE: number = 24
+const MAX_SYMBOL_FONT_SCALE: number = 1.45
+const MIN_SYMBOL_FONT_SCALE: number = 1
+const DEFAULT_SYMBOL_FONT_SCALE: number = 1
 
 export enum FilterType {
   MULTI_LINE_FILTER,
@@ -270,6 +274,8 @@ struct MultiFilterRow {
   onItemClick: (colIndex: number) => void = () => {}
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover')
   @State isArrowBgHoverRow: boolean = false
+  @Prop fontSizeScale: number | undefined
+  @State replaceEffect: number = 0
   private filterColumnWidth: number = 0
   private lastFilterColumnWidth: number = 0
   private rowIndex: number = 0
@@ -323,7 +329,8 @@ struct MultiFilterRow {
           }
           if (curLine === 1) {
             curLine += 1
-            curLineRetainWidth = this.filterColumnWidth - vp2px(ARROW_IMG_SIZE);
+            curLineRetainWidth =
+              this.filterColumnWidth - vp2px(ARROW_IMG_SIZE * (this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE));
             i--
           } else {
             break
@@ -337,10 +344,11 @@ struct MultiFilterRow {
   @Builder
   DownAndUpArrow() {
     Row() {
-      Image(this.isArrowIconDown.value ? $r('sys.media.ohos_ic_public_arrow_down') : $r('sys.media.ohos_ic_public_arrow_up'))
-        .width(ARROW_IMG_SIZE)
+      SymbolGlyph(this.isArrowIconDown.value ? $r('sys.symbol.chevron_down') : $r('sys.symbol.chevron_up'))
+        .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
         .height(LIST_ROW_HEIGHT)
-        .fillColor($r('sys.color.ohos_id_color_tertiary'))
+        .fontColor([$r('sys.color.ohos_id_color_tertiary')])
+        .symbolEffect(new ReplaceSymbolEffect(EffectScope.WHOLE), this.replaceEffect)
         .focusable(true)
         .draggable(false)
         .stateStyles({
@@ -351,14 +359,12 @@ struct MultiFilterRow {
               color: $r('sys.color.ohos_id_color_focused_outline'),
               style: BorderStyle.Solid
             })
-            .width(ARROW_IMG_SIZE + FOCUS_BORDER_WIDTH * 2)
             .offset({ x: -FOCUS_BORDER_WIDTH })
           },
           normal: {
             .border({
               radius: $r('sys.float.ohos_id_corner_radius_clicked'),
               width: 0 })
-            .width(ARROW_IMG_SIZE)
             .offset({ x: 0 })
           }
         })
@@ -368,7 +374,6 @@ struct MultiFilterRow {
       radius: $r('sys.float.ohos_id_corner_radius_clicked')
     })
     .height(LIST_ROW_HEIGHT)
-    .width(ARROW_IMG_SIZE)
     .backgroundColor(this.isArrowBgHoverRow ? this.arrowBgColorRow : TRANS_COLOR)
     .focusable(true)
     .visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden)
@@ -404,6 +409,7 @@ struct MultiFilterRow {
       }
     })
     .onClick(() => {
+      this.replaceEffect += 1
       if (this.isArrowIconDown.value) {
         this.isArrowIconDown.value = false
         this.arrowShowStateRow.value = false
@@ -670,6 +676,15 @@ export struct Filter {
   @State floatFilterBarText: string = ''
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
+  @State fontSizeScale: number | undefined = undefined
+  private callbackId: number | undefined = undefined
+  private callbacks: EnvironmentCallback = {
+    onConfigurationUpdated: (config) => {
+      this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
+      this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
+    }, onMemoryLevel() {
+    }
+  }
 
   textColor(rowIndex: number, colIndex: number) {
     if (this.selectedFilters && this.selectedFilters.length > rowIndex &&
@@ -685,10 +700,23 @@ export struct Filter {
       let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxAppFontScale = uiContent.getMaxFontScale();
+      this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
+      this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
+      this.callbackId = uiContent.getHostContext()?.getApplicationContext()?.on('environment', this.callbacks);
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
       hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (this.callbackId) {
+      this.getUIContext()
+        .getHostContext()
+      ?.getApplicationContext()
+      ?.off('environment', this.callbackId);
+      this.callbackId = void (0)
     }
   }
 
@@ -859,6 +887,7 @@ export struct Filter {
             this.filterItemClick(rowIndex, colIndex);
           },
           rowIndex: rowIndex,
+          fontSizeScale: this.fontSizeScale,
         })
       })
     }.width(PERCENT_100)
@@ -1106,10 +1135,9 @@ export struct Filter {
               .constraintSize({ maxWidth: '85%' })
               .maxLines(1)
 
-            Image($r('sys.media.ohos_ic_public_arrow_down'))
-              .width(ARROW_IMG_SIZE)
-              .height(ARROW_IMG_SIZE)
-              .fillColor($r('sys.color.ohos_id_color_text_primary_activated'))
+            SymbolGlyph($r('sys.symbol.chevron_down'))
+              .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
+              .fontColor([$r('sys.color.ohos_id_color_text_primary_activated')])
               .focusable(true)
               .draggable(false)
           }
@@ -1128,13 +1156,11 @@ export struct Filter {
             color: $r('sys.color.ohos_id_color_focused_outline'),
             style: BorderStyle.Solid
           })
-          .width(ARROW_IMG_SIZE + FOCUS_BORDER_WIDTH * 2)
         },
         normal: {
           .border({
             radius: $r('sys.float.ohos_id_corner_radius_clicked'),
             width: 0 })
-          .width(ARROW_IMG_SIZE)
         }
       })
       .alignItems(HorizontalAlign.Center)
