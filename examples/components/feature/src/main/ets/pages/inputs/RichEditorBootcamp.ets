@@ -43,16 +43,8 @@ export struct RichEditorBootcamp {
   @State customKeyboardOption: boolean = false;
   @State enableBindSelectionMenuSpanType: boolean = false;
   @State bindSelectionMenuSpanType: RichEditorSpanType = RichEditorSpanType.TEXT;
-  // @State enableBindSelectionMenuContent: boolean = false;
-  // @State bindSelectionMenuContent: CustomBuilder = (result: void)=>{};
   @State enableBindSelectionMenuResponseType: boolean = false;
   @State bindSelectionMenuResponseType: ResponseType = ResponseType.LongPress;
-  // @State enableBindSelectionMenuResponseOptionOnAppearStart: boolean = false;
-  // @State bindSelectionMenuResponseOptionOnAppearStart: number = 0;
-  // @State enableBindSelectionMenuResponseOptionOnAppearEnd: boolean = false;
-  // @State bindSelectionMenuResponseOptionOnAppearEnd: number = 0;
-  // @State enableBindSelectionMenuResponseOptionOnAppearMenuType: boolean = false;
-  // @State bindSelectionMenuResponseOptionOnAppearMenuType: MenuType = MenuType.SELECTION_MENU
   @State enableCopyOptions: boolean = false;
   @State copyOptions: CopyOptions = CopyOptions.LocalDevice;
   @State enableEnableDataDetector: boolean = false;
@@ -75,12 +67,8 @@ export struct RichEditorBootcamp {
   @State caretColor: ResourceColor | undefined = '#007DFF';
   @State enableSelectedBackgroundColor: boolean = false;
   @State selectedBackgroundColor: ResourceColor | undefined = undefined;
-  // @State enableEditorMenuOption: boolean = false;
-  // @State editorMenuOption: EditorMenuOptions = [];
   @State enableEnterKeyType: boolean = false;
   @State enterKeyType: EnterKeyType = EnterKeyType.NEW_LINE;
-  //enableKeyboardOnFocus
-  //editMenuOption
   @State enableBarState: boolean = false;
   @State barState: BarState = BarState.Auto;
   @State enableEnableHapticFeedback: boolean = false;
@@ -149,9 +137,7 @@ export struct RichEditorBootcamp {
             })
           .caretColor(useEnabled(this.enableCaretColor, this.caretColor))
           .selectedBackgroundColor(useEnabled(this.enableSelectedBackgroundColor, this.selectedBackgroundColor))
-          // .editMenuOptions([])
           .enterKeyType(useEnabled(this.enableEnterKeyType,this.enterKeyType))
-          //enableKeyBoardOnfocus,BarState,enableHapticOnFeedback
 
       }
     }
@@ -289,7 +275,6 @@ export struct RichEditorBootcamp {
           ]
         })
 
-        //输入(placeholderValue
 
         SliderBlock({
           title: 'placeholderStyle.font.size',
