@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 
-#include <cstdint>
-#include <string>
-
 #include "base/geometry/axis.h"
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
@@ -130,6 +127,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
+    cachedItemPosition_ = listLayoutAlgorithm->GetCachedItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
@@ -338,7 +336,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
     paint->SetLaneGutter(laneGutter_);
-    paint->SetItemsPosition(itemPosition_, pressedItem_);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
     return paint;
 }
@@ -1752,6 +1750,31 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
     bool groupAtEnd = (!endGroupInfo || endGroupInfo.value().atEnd);
     posMap_->UpdatePosMapEnd(itemPos.rbegin()->first, spaceWidth_, groupAtEnd);
+}
+
+void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChange)
+{
+    if (itemPosition_.find(index) == itemPosition_.end()) {
+        return;
+    }
+    if (index == GetStartIndex()) {
+        sizeChange += delta;
+        float startPos = itemPosition_.begin()->second.startPos;
+        auto iter = itemPosition_.begin();
+        while (iter != itemPosition_.end() && NearEqual(startPos, iter->second.startPos)) {
+            iter->second.startPos += delta;
+            iter++;
+        }
+    }
+    if (index == GetEndIndex()) {
+        float endPos = itemPosition_.rbegin()->second.endPos;
+        auto iter = itemPosition_.rbegin();
+        while (iter != itemPosition_.rend() && NearEqual(endPos, iter->second.endPos)) {
+            iter->second.endPos += sizeChange;
+            iter++;
+        }
+    }
+    CalculateCurrentOffset(0.0f, ListLayoutAlgorithm::PositionMap());
 }
 
 void ListPattern::UpdateScrollBarOffset()

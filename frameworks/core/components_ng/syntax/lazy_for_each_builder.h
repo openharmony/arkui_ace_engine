@@ -334,7 +334,7 @@ public:
 
     void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
     {
-        for (int32_t i = 1; i <= cacheCount_; i++) {
+        for (int32_t i = 1; i <= cacheCount_ - endShowCached_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
                     startIndex_ > endIndex_ + i) {
@@ -348,7 +348,7 @@ public:
                 }
             }
         }
-        for (int32_t i = 1; i <= cacheCount_; i++) {
+        for (int32_t i = 1; i <= cacheCount_ - startShowCached_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
                     startIndex_ > endIndex_ + i) {
@@ -583,6 +583,13 @@ public:
     }
 
     void GetAllItems(std::vector<UINode*>& items);
+
+    void SetShowCached(int32_t start, int32_t end)
+    {
+        startShowCached_ = start;
+        endShowCached_ = end;
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
@@ -632,6 +639,8 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
+    int32_t startShowCached_ = 0;
+    int32_t endShowCached_ = 0;
     int32_t preBuildingIndex_ = -1;
     int32_t totalCountOfOriginalDataset_ = 0;
     bool needTransition = false;

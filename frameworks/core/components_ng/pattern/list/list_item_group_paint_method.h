@@ -41,8 +41,10 @@ struct DividerGroupInfo {
 class ACE_EXPORT ListItemGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListItemGroupPaintMethod, NodePaintMethod)
 public:
-    ListItemGroupPaintMethod(const V2::ItemDivider& divider, ListItemGroupPaintInfo listItemGroupPaintInfo,
-        ListItemGroupLayoutAlgorithm::PositionMap& itemPosition, const std::set<int32_t>& pressedItem)
+    ListItemGroupPaintMethod(const V2::ItemDivider& divider, const ListItemGroupPaintInfo& listItemGroupPaintInfo,
+        ListItemGroupLayoutAlgorithm::PositionMap& itemPosition,
+        ListItemGroupLayoutAlgorithm::PositionMap& cachedItemPosition,
+        const std::set<int32_t>& pressedItem)
         : divider_(divider), itemPosition_(itemPosition)
     {
         vertical_ = listItemGroupPaintInfo.vertical;
@@ -52,6 +54,9 @@ public:
         totalItemCount_ = listItemGroupPaintInfo.totalItemCount;
         layoutDirection_ = listItemGroupPaintInfo.layoutDirection;
         mainSize_ = listItemGroupPaintInfo.mainSize;
+        for (auto& [index, pos] : cachedItemPosition) {
+            itemPosition_[index] = pos;
+        }
         if (!pressedItem.empty()) {
             for (auto& child : itemPosition_) {
                 if (pressedItem.find(child.second.id) != pressedItem.end()) {
