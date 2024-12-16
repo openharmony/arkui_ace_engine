@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -42,9 +43,10 @@ enum class BindSheetDismissReason {
     SLIDE_DOWN,
 };
 class ACE_EXPORT SheetPresentationPattern :
-    public LinearLayoutPattern, public PopupBasePattern, public FocusView, public NestableScrollContainer{
+    public LinearLayoutPattern, public PopupBasePattern, public FocusView,
+        public NestableScrollContainer, public AutoFillTriggerStateHolder{
     DECLARE_ACE_TYPE(SheetPresentationPattern,
-        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer);
+        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer, AutoFillTriggerStateHolder);
 
 public:
     SheetPresentationPattern(
@@ -86,6 +88,11 @@ public:
     int32_t GetTargetId() const override
     {
         return targetId_;
+    }
+
+    const std::string& GetTargetTag() const
+    {
+        return targetTag_;
     }
 
     void FireCallback(const std::string& value)
@@ -413,6 +420,7 @@ public:
 
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
+    bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
@@ -563,6 +571,16 @@ public:
         return false;
     }
 
+    void UpdateHoverModeChangedCallbackId(const std::optional<int32_t>& id)
+    {
+        hoverModeChangedCallbackId_ = id;
+    }
+
+    bool HasHoverModeChangedCallbackId() const
+    {
+        return hoverModeChangedCallbackId_.has_value();
+    }
+
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
@@ -609,8 +627,6 @@ public:
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
 
-    float GetTitleHeight();
-
     // Nestable Scroll
     Axis GetAxis() const override
     {
@@ -623,6 +639,13 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
+    bool IsCurSheetNeedHalfFoldHover();
+    float GetMaxSheetHeightBeforeDragUpdate();
+    float GetSheetHeightBeforeDragUpdate();
+    void FireHoverModeChangeCallback();
+    void InitFoldCreaseRegion();
+    Rect GetFoldScreenRect() const;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -632,6 +655,7 @@ private:
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void RegisterHoverModeChangeCallback();
     void InitScrollProps();
     void InitPageHeight();
     void TranslateTo(float height);
@@ -712,6 +736,7 @@ private:
     float sheetFitContentHeight_ = 0.0f;
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;
+    float bottomOffsetY_ = 0.0f; // offset y with SHEET_BOTTOM_OFFSET, <= 0
     bool isFirstInit_ = true;
     bool isAnimationBreak_ = false;
     bool isAnimationProcess_ = false;
@@ -734,9 +759,11 @@ private:
     std::vector<SheetHeight> preDetents_;
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;
+    std::vector<Rect> currentFoldCreaseRegion_;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    std::optional<int32_t> hoverModeChangedCallbackId_;
 
     bool show_ = true;
     bool isDrag_ = false;

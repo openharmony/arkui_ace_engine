@@ -198,7 +198,8 @@ public:
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
-    static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
+    static void SetSafeAreaPadding(const JSCallbackInfo& info);
+    static void ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type);
     static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
     static void ParseLocalizedMarginOrLocalizedPaddingCorner(
@@ -410,6 +411,7 @@ public:
     static void JsId(const JSCallbackInfo& info);
 
     static void JsFocusable(const JSCallbackInfo& info);
+    static void JsTabStop(const JSCallbackInfo& info);
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);

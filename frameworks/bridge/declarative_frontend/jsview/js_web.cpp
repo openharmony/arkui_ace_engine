@@ -56,6 +56,9 @@ const std::string MODULE_NAME_PREFIX = "moduleName:";
 
 const int32_t SELECTION_MENU_OPTION_PARAM_INDEX = 3;
 const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
+const int32_t PARAM_ZERO = 0;
+const int32_t PARAM_ONE = 1;
+const int32_t PARAM_TWO = 2;
 
 void EraseSpace(std::string& data)
 {
@@ -824,9 +827,14 @@ public:
     {
         if (eventResult_) {
             bool result = true;
-            if (args.Length() == 1 && args[0]->IsBoolean()) {
-                result = args[0]->ToBoolean();
+            bool stopPropagation = true;
+            if (args.Length() == PARAM_ONE && args[PARAM_ZERO]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
                 eventResult_->SetGestureEventResult(result);
+            } else if (args.Length() == PARAM_TWO && args[PARAM_ZERO]->IsBoolean() && args[PARAM_ONE]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+                stopPropagation = args[PARAM_ONE]->ToBoolean();
+                eventResult_->SetGestureEventResult(result, stopPropagation);
             }
         }
     }
@@ -1960,6 +1968,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
     JSClass<JSWeb>::StaticMethod("overScrollMode", &JSWeb::OverScrollMode);
+    JSClass<JSWeb>::StaticMethod("blurOnKeyboardHideMode", &JSWeb::BlurOnKeyboardHideMode);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
@@ -3499,6 +3508,23 @@ void JSWeb::OverScrollMode(int overScrollMode)
     WebModel::GetInstance()->SetOverScrollMode(mode);
 }
 
+void JSWeb::BlurOnKeyboardHideMode(int blurOnKeyboardHideMode)
+{
+    auto mode = BlurOnKeyboardHideMode::SILENT;
+    switch (blurOnKeyboardHideMode) {
+        case 0:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+        case 1:
+            mode = BlurOnKeyboardHideMode::BLUR;
+            break;
+        default:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+    }
+    WebModel::GetInstance()->SetBlurOnKeyboardHideMode(mode);
+}
+
 void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)
 {
     WebModel::GetInstance()->SetOverviewModeAccessEnabled(isOverviewModeAccessEnabled);
@@ -4815,31 +4841,57 @@ void JSWeb::SetLayoutMode(int32_t layoutMode)
 
 void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
 {
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_ONLY,
+    NestedScrollOptionsExt nestedOpt = {
+        .scrollUp = NestedScrollMode::SELF_FIRST,
+        .scrollDown = NestedScrollMode::SELF_FIRST,
+        .scrollLeft = NestedScrollMode::SELF_FIRST,
+        .scrollRight = NestedScrollMode::SELF_FIRST,
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+        WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    int32_t froward = 0;
+    int32_t froward = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
-    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        froward = 0;
+    if (CheckNestedScrollMode(froward)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(froward);
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(froward);
     }
-    int32_t backward = 0;
+    int32_t backward = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
-    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        backward = 0;
+    if (CheckNestedScrollMode(backward)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(backward);
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(backward);
     }
-    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
-    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
-    WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+    int32_t scrollUp = -1;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollUp"), scrollUp);
+    if (CheckNestedScrollMode(scrollUp)) {
+        nestedOpt.scrollUp = static_cast<NestedScrollMode>(scrollUp);
+    }
+    int32_t scrollDown = -1;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollDown"), scrollDown);
+    if (CheckNestedScrollMode(scrollDown)) {
+        nestedOpt.scrollDown = static_cast<NestedScrollMode>(scrollDown);
+    }
+    int32_t scrollLeft = -1;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollLeft"), scrollLeft);
+    if (CheckNestedScrollMode(scrollLeft)) {
+        nestedOpt.scrollLeft = static_cast<NestedScrollMode>(scrollLeft);
+    }
+    int32_t scrollRight = -1;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollRight"), scrollRight);
+    if (CheckNestedScrollMode(scrollRight)) {
+        nestedOpt.scrollRight = static_cast<NestedScrollMode>(scrollRight);
+    }
+    WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
     args.ReturnSelf();
+}
+
+bool JSWeb::CheckNestedScrollMode(const int32_t& modeValue)
+{
+    return modeValue >= static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
+           modeValue <= static_cast<int32_t>(NestedScrollMode::PARALLEL);
 }
 
 void JSWeb::SetMetaViewport(const JSCallbackInfo& args)

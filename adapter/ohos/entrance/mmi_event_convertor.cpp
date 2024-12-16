@@ -438,6 +438,16 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     } else {
         event.action = KeyAction::UNKNOWN;
     }
+    auto keyItems = keyEvent->GetKeyItems();
+    for (auto item = keyItems.rbegin(); item != keyItems.rend(); item++) {
+        if (item->GetKeyCode() == keyEvent->GetKeyCode()) {
+            event.unicode = item->GetUnicode();
+            break;
+        } else {
+            event.unicode = 0;
+        }
+    }
+
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;

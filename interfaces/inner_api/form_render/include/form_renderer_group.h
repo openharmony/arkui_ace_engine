@@ -84,6 +84,7 @@ public:
     std::pair<std::vector<std::string>, std::string> GetOrderedAndCurrentCompIds() const;
     void RecycleForm(std::string& statusData) const;
     void RecoverRenderer(const std::vector<FormRequest>& formRequests, size_t currentCompIndex);
+    void UpdateFormSizeOfFormRequests(double width, double height, float borderWidth);
 private:
     enum class FormRendererInitState {
         UNINITIALIZED,

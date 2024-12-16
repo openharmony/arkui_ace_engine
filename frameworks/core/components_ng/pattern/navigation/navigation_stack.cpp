@@ -97,6 +97,23 @@ void NavigationStack::Add(const std::string& name, const RefPtr<UINode>& navDest
     }
 }
 
+#if defined(ENABLE_NAV_SPLIT_MODE)
+bool NavigationStack::isLastListContains(
+    const std::string& name, const RefPtr<UINode>& navDestinationNode)
+{
+    if (lastNavPathList_.empty()) {
+        return false;
+    }
+    // find from top to bottom
+    for (auto it = lastNavPathList_.rbegin(); it != lastNavPathList_.rend(); ++it) {
+        if ((*it).first == name && (*it).second == navDestinationNode) {
+            return true;
+        }
+    }
+    return false;
+}
+#endif
+
 void NavigationStack::Add(
     const std::string& name, const RefPtr<UINode>& navDestinationNode, const RefPtr<RouteInfo>& routeInfo)
 {
@@ -306,9 +323,9 @@ void NavigationStack::Clear()
     cacheNodes_.clear();
 }
 
-RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& node)
+bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
 {
-    return nullptr;
+    return false;
 }
 
 RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node)

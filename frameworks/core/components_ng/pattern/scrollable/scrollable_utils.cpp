@@ -19,6 +19,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
+Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
 std::vector<RefPtr<ForEachBaseNode>> GetForEachNodes(RefPtr<FrameNode>& host)
 {
     std::vector<RefPtr<ForEachBaseNode>> foreachNodes;
@@ -150,4 +151,51 @@ void ScrollableUtils::RecycleItemsOutOfBoundary(
     }
 }
 
+float ScrollableUtils::GetMoveOffset(
+    const RefPtr<FrameNode>& parentFrameNode,
+    const RefPtr<FrameNode>& curFrameNode,
+    bool isVertical,
+    float contentStartOffset,
+    float contentEndOffset)
+{
+    constexpr float notMove = 0.0f;
+    CHECK_NULL_RETURN(parentFrameNode, notMove);
+    CHECK_NULL_RETURN(curFrameNode, notMove);
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, notMove);
+    auto parentFrameSize = parentGeometryNode->GetFrameSize();
+    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
+    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
+    auto curGeometry = curFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(curGeometry, notMove);
+    auto curFrameSize = curGeometry->GetFrameSize();
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
+        "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",
+        curFrameNode->GetTag().c_str(), curFrameNode->GetId(), curFrameOffsetToWindow.ToString().c_str(),
+        curFrameSize.ToString().c_str(), parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(),
+        parentFrameOffsetToWindow.ToString().c_str(), parentFrameSize.ToString().c_str(), offsetToTarFrame.GetX(),
+        offsetToTarFrame.GetY());
+
+    float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
+    if (NearZero(diffToTarFrame)) {
+        return notMove;
+    }
+    float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
+    float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
+    float focusMarginStart = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentStartOffset);
+    float focusMarginEnd = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentEndOffset);
+
+    bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, (parentFrameLength));
+    float startAlignOffset = -diffToTarFrame + focusMarginStart;
+    float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMarginEnd;
+    bool start2End = LessOrEqual(diffToTarFrame, focusMarginStart);
+    bool needScroll = !NearZero(startAlignOffset, 1.0f) && !NearZero(endAlignOffset, 1.0f) &&
+                      (std::signbit(startAlignOffset) == std::signbit(endAlignOffset));
+    if (needScroll) {
+        return (totallyShow ^ start2End) ? endAlignOffset : startAlignOffset;
+    }
+    return notMove;
+}
 } // namespace OHOS::Ace::NG

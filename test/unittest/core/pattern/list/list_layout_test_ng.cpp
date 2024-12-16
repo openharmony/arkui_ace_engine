@@ -1553,6 +1553,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), LIST_HEIGHT);
 
     /**
      * @tc.steps: step2. Flush Idle Task
@@ -1566,6 +1567,8 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(cachedItem->IsActive(), false);
     cachedItem = frameNode_->GetChildByIndex(7)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -150.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
 }
 
 /**
@@ -1603,8 +1606,12 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 10);
     auto item8 = frameNode_->GetChildByIndex(8)->GetHostNode();
     EXPECT_EQ(item8->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 8), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 8), LIST_HEIGHT);
     auto item9 = frameNode_->GetChildByIndex(9)->GetHostNode();
     EXPECT_EQ(item9->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 9), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 9), LIST_HEIGHT);
 
     /**
      * @tc.steps: step2. Flush Idle Task
@@ -1616,12 +1623,20 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 14);
     auto item2 = frameNode_->GetChildByIndex(2)->GetHostNode();
     EXPECT_EQ(item2->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -150.0f);
     auto item3 = frameNode_->GetChildByIndex(3)->GetHostNode();
     EXPECT_EQ(item3->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 3), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -150.0f);
     auto item14 = frameNode_->GetChildByIndex(14)->GetHostNode();
     EXPECT_EQ(item14->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 14), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 450.0f);
     auto item15 = frameNode_->GetChildByIndex(15)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 15), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 450.0f);
 }
 
 /**

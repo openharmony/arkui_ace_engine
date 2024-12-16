@@ -169,7 +169,7 @@ RefPtr<FrameNode> VideoTestAddNg::CreateVideoNode(TestProperty& g_testProperty)
         .WillRepeatedly(Return(true));
 
     if (g_testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(g_testProperty.src.value());
+        VideoModelNG().SetSrc(g_testProperty.src.value(), "", "");
     }
     if (g_testProperty.progressRate.has_value()) {
         VideoModelNG().SetProgressRate(g_testProperty.progressRate.value());

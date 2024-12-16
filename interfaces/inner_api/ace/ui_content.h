@@ -191,7 +191,10 @@ public:
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};
-    virtual void OnFormSurfaceChange(float width, float height) {}
+    virtual void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
+
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
@@ -302,6 +305,23 @@ public:
     }
 
     virtual bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons)
+    {
+        return false;
+    }
+
+    virtual void EnableContainerModalGesture(bool isEnable) {};
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
     {
         return false;
     }

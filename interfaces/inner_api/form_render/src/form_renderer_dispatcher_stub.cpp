@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "form_renderer_dispatcher_stub.h"
+#include <transaction/rs_transaction.h>
 
 #include "appexecfwk_errors.h"
 #include "errors.h"
@@ -100,8 +101,15 @@ int32_t FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent(MessageParc
 {
     float width = data.ReadFloat();
     float height = data.ReadFloat();
+    uint32_t reason = static_cast<uint32_t>(data.ReadUint32());
+    bool hasRSTransaction = data.ReadBool();
+    std::shared_ptr<Rosen::RSTransaction> transaction = nullptr;
+    if (hasRSTransaction) {
+        std::shared_ptr<Rosen::RSTransaction> transactionTmp(data.ReadParcelable<Rosen::RSTransaction>());
+        transaction = transactionTmp;
+    }
     float borderWdidth = data.ReadFloat();
-    DispatchSurfaceChangeEvent(width, height, borderWdidth);
+    DispatchSurfaceChangeEvent(width, height, reason, transaction, borderWdidth);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }

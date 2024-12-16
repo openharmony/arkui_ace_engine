@@ -85,11 +85,29 @@ static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
     return obj;
 }
 
+static napi_value JsSetAutoFocusTransfer(napi_env env, napi_callback_info info)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        return nullptr;
+    }
+    napi_value argv[1] = { 0 };
+    napi_valuetype valueType = napi_undefined;
+    if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_boolean)) {
+        return nullptr;
+    }
+    bool isAutoFocusTransfer = true;
+    napi_get_value_bool(env, argv[0], &isAutoFocusTransfer);
+    delegate->SetAutoFocusTransfer(isAutoFocusTransfer);
+    return nullptr;
+}
+
 static napi_value registerFunc(napi_env env, napi_value exports)
 {
     napi_property_descriptor animatorDesc[] = {
         DECLARE_NAPI_FUNCTION("clearFocus", JSClearFocus),
         DECLARE_NAPI_FUNCTION("requestFocus", JSRequestFocus),
+        DECLARE_NAPI_FUNCTION("setAutoFocusTransfer", JsSetAutoFocusTransfer),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(animatorDesc) / sizeof(animatorDesc[0]), animatorDesc));
     return exports;

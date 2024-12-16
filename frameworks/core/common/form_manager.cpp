@@ -57,4 +57,11 @@ std::shared_ptr<FormUtils> FormManager::GetFormUtils()
     return formUtils_;
 }
 
+void FormManager::NotifyIsSizeChangeByRotate(bool isRotate,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    rsTransaction_ = rsTransaction;
+    isRotate_ = isRotate;
+}
+
 } // namespace OHOS::Ace

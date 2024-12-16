@@ -488,7 +488,7 @@ private:
     void DoAnimation(NavigationMode usrNavigationMode);
     void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopDestination);
-    RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
+    bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
@@ -575,6 +575,9 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    bool isBackPage_ = false;
+#endif
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;

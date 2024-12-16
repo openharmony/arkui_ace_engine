@@ -99,6 +99,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onTouch(event: (event?: TouchEvent) => void): this;
     onKeyEvent(event: (event?: KeyEvent) => void): this;
     focusable(value: boolean): this;
+    tabStop(value: boolean): this;
     onFocus(event: () => void): this;
     onBlur(event: () => void): this;
     tabIndex(index: number): this;
@@ -1029,7 +1030,9 @@ declare class ArkCheckboxComponent extends ArkComponent implements CheckboxAttri
 }
 declare class ArkNavDestinationComponent extends ArkComponent implements NavDestinationAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    title(value: any, options?: NavigationTitleOptions): this;
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+        options?: NavigationTitleOptions): this;
+    menus(value: Array<NavigationMenuItem> | undefined): this;
     hideTitleBar(value: boolean): this;
     onShown(callback: () => void): this;
     onHidden(callback: () => void): this;
@@ -1082,12 +1085,13 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     mode(value: number): NavigationAttribute;
     backButtonIcon(value: any): NavigationAttribute;
     hideNavBar(value: boolean): NavigationAttribute;
-    title(value: any, options?: NavigationTitleOptions): NavigationAttribute;
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+        options?: NavigationTitleOptions): NavigationAttribute;
     subTitle(value: string): NavigationAttribute;
     hideTitleBar(value: boolean): NavigationAttribute;
     hideBackButton(value: boolean): NavigationAttribute;
     titleMode(value: NavigationTitleMode): NavigationAttribute;
-    menus(value: any): NavigationAttribute;
+    menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute;
     toolBar(value: any): NavigationAttribute;
     toolbarConfiguration(value: any): NavigationAttribute;
     hideToolBar(value: boolean): NavigationAttribute;

@@ -222,6 +222,33 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
+    void ResetSafeAreaPadding() override
+    {
+        ViewAbstract::ResetSafeAreaPadding();
+    }
+
+    void SetSafeAreaPadding(const CalcDimension& value) override
+    {
+        if (value.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.CalcValue()));
+        } else {
+            // padding must great or equal zero.
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+        }
+    }
+
+    void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) override
+    {
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {
+        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
     void SetMargin(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -914,19 +941,19 @@ public:
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
     }
 
-    void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override
+    void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override
     {
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
-    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     }
 
-    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -1127,6 +1154,11 @@ public:
     void SetFocusable(bool focusable) override
     {
         ViewAbstract::SetFocusable(focusable);
+    }
+
+    void SetTabStop(bool tabStop) override
+    {
+        ViewAbstract::SetTabStop(tabStop);
     }
 
     void SetFocusNode(bool focus) override {}

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 #include "session_manager/include/scene_session_manager.h"
+#include "start_window_option.h"
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
@@ -118,6 +119,13 @@ public:
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->OnRemoveBlank();
+    }
+
+    void OnAppRemoveStartingWindow() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnAppRemoveStartingWindow();
     }
 
 private:
@@ -381,6 +389,22 @@ void WindowPattern::CreateASStartingWindow()
 }
 #endif
 
+void WindowPattern::UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
+    Color &color, ImageSourceInfo &sourceInfo)
+{
+    if (sessionInfo.startWindowOption == nullptr || !sessionInfo.startWindowOption->hasStartWindow) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Get starting window info from session info");
+    if (!sessionInfo.startWindowOption->startWindowBackgroundColor.empty()) {
+        Color::ParseColorString(sessionInfo.startWindowOption->startWindowBackgroundColor, color);
+    }
+    if (sessionInfo.startWindowOption->startWindowIcon != nullptr) {
+        auto pixelMap = PixelMap::CreatePixelMap(&(sessionInfo.startWindowOption->startWindowIcon));
+        sourceInfo = ImageSourceInfo(pixelMap);
+    }
+}
+
 bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
 {
     CHECK_EQUAL_RETURN(
@@ -422,6 +446,12 @@ void WindowPattern::CreateStartingWindow()
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     imageLayoutProperty->UpdateImageSourceInfo(
         ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
+    auto sourceInfo = ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_);
+    auto color = Color(backgroundColor);
+    UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
+
+    imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
     startingWindow_->MarkModifyDone();
 }

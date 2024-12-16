@@ -2436,6 +2436,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_, config.ToString().c_str());
+    bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
@@ -2476,6 +2477,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
+        context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr)) {
@@ -3013,7 +3015,8 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     return front->SetErrorEventHandler(std::move(errorCallback));
 }
 
-void UIContentImpl::OnFormSurfaceChange(float width, float height)
+void UIContentImpl::OnFormSurfaceChange(float width, float height, OHOS::Rosen::WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -3026,7 +3029,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     ContainerScope scope(instanceId_);
     auto density = pipelineContext->GetDensity();
     pipelineContext->SetRootSize(density, formWidth, formHeight);
-    pipelineContext->OnSurfaceChanged(formWidth, formHeight);
+    pipelineContext->OnSurfaceChanged(formWidth, formHeight, static_cast<WindowSizeChangeReason>(type), rsTransaction);
 }
 
 void UIContentImpl::SetFormBackgroundColor(const std::string& color)
@@ -3878,5 +3881,58 @@ void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppE
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
         TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
+}
+
+void UIContentImpl::EnableContainerModalGesture(bool isEnable)
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: EnableContainerModalGesture: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, isEnable);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerWeak = AceType::WeakClaim(AceType::RawPtr(container)), isEnable]() {
+            auto container = containerWeak.Upgrade();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->EnableContainerModalGesture(isEnable);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIEnableContainerModalGesture");
+}
+
+bool UIContentImpl::GetContainerFloatingTitleVisible()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: GetContainerFloatingTitleVisible",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->GetContainerFloatingTitleVisible();
+}
+
+bool UIContentImpl::GetContainerCustomTitleVisible()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: GetContainerCustomTitleVisible",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->GetContainerCustomTitleVisible();
+}
+
+bool UIContentImpl::GetContainerControlButtonVisible()
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: GetContainerControlButtonVisible",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->GetContainerControlButtonVisible();
 }
 } // namespace OHOS::Ace

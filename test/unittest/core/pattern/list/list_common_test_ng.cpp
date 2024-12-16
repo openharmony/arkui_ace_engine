@@ -486,7 +486,7 @@ HWTEST_F(ListCommonTestNg, FocusStep009, TestSize.Level1)
     CreateFocusableListItemGroups(3);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 3, NULL_VALUE));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 3, 4));
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), groupHeight);
     // change focus in same group

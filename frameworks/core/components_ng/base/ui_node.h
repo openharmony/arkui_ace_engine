@@ -309,8 +309,8 @@ public:
     virtual HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
 
-    virtual HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult);
+    virtual HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult);
 
     // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation
     // of parent's layout wrapper
@@ -544,7 +544,8 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
+    virtual void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false);
     virtual void DoSetActiveChildRange(
         const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
     {}

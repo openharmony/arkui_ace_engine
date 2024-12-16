@@ -114,7 +114,8 @@ public:
         return extraInfos_;
     }
 
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     const WeakPtr<UINode>& GetNavigationNode() const
     {

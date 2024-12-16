@@ -109,7 +109,9 @@ public:
     // ArkTS Form
     void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override {}
     void RunFormPage() override {}
-    void OnFormSurfaceChange(float width, float height) override {}
+    void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override {}
     void UpdateFormData(const std::string& data) override {}
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override
     {}
@@ -152,6 +154,23 @@ public:
     void SetStatusBarItemColor(uint32_t color) override;
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
+
+    void EnableContainerModalGesture(bool isEnable) override {};
+
+    bool GetContainerFloatingTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerCustomTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerControlButtonVisible() override
+    {
+        return false;
+    }
 
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,

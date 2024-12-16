@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import { LengthMetrics } from '@ohos.arkui.node';
+import common from '@ohos.app.ability.common';
 
 export enum CounterType {
   LIST = 0,
@@ -144,6 +145,8 @@ class CounterResource {
   public static readonly COUNTER_INLINE_INPUT_TEXT_MARGIN = 12;
   public static readonly COUNTER_BUTTON_INITIAL_OPACITY = 1;
   public static readonly COUNTER_BUTTON_DISABLE_OPACITY = 0.4;
+  public static readonly COUNTER_LABEL_MAX_FONT_SIZE_SCALE = 2;
+  public static readonly COUNTER_NUMBER_MAX_FONT_SIZE_SCALE = 1;
 }
 
 class CounterConstant {
@@ -249,6 +252,17 @@ export struct CounterComponent {
   private controller1: TextInputController = new TextInputController();
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
+
+  getTextInputFontSize() {
+    let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
+    let uiContext = this.getUIContext();
+    let fontSizeScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (fontSizeScale < 1) {
+      return fontSize + 'fp';
+    } else {
+      return fontSize + 'vp';
+    }
+  }
 
   convertNumberToString(value: number) {
     if (value >= 0 && value < CounterConstant.COUNTER_TEN_NUMBER) {
@@ -912,6 +926,7 @@ export struct CounterComponent {
         Text(this.numberStyleOptions.label)
           .direction(this.counterDirection)
           .fontSize(CounterResource.COUNTER_LIST_LABEL_SIZE)
+          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE);
           .fontColor(CounterResource.COUNTER_TEXT_COLOR)
           .margin({
             start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_LIST_LEFT_PADDING))
@@ -1016,6 +1031,7 @@ export struct CounterComponent {
               .width(this.textWidth.toString())
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .margin({
                 start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
@@ -1026,6 +1042,7 @@ export struct CounterComponent {
               .direction(this.counterDirection)
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .margin({
                 start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
@@ -1225,6 +1242,7 @@ export struct CounterComponent {
             Text(this.value.toString())
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .width(this.textWidth.toString())
               .margin({
@@ -1236,6 +1254,7 @@ export struct CounterComponent {
               .direction(this.counterDirection)
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .margin({
                 start: LengthMetrics.vp(CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN),
@@ -1339,6 +1358,7 @@ export struct CounterComponent {
           .direction(this.counterDirection)
           .margin({ top: CounterResource.COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE })
           .fontSize(CounterResource.COUNTER_COMPACT_LABEL_SIZE)
+          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE);
           .fontColor(CounterResource.COUNTER_TEXT_COLOR)
           .align(Alignment.Top)
       }
@@ -1362,7 +1382,7 @@ export struct CounterComponent {
               .type(InputType.PhoneNumber)
               .caretColor(Color.Transparent)
               .copyOption(CopyOptions.None)
-              .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
@@ -1512,7 +1532,7 @@ export struct CounterComponent {
               .type(InputType.PhoneNumber)
               .caretColor(Color.Transparent)
               .copyOption(CopyOptions.None)
-              .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
@@ -1790,7 +1810,7 @@ export struct CounterComponent {
             .type(InputType.Number)
             .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
-            .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .fontSize(this.getTextInputFontSize())
             .fontWeight(FontWeight.Medium)
             .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(5)
@@ -1909,6 +1929,7 @@ export struct CounterComponent {
             .direction(this.counterDirection)
             .textAlign(TextAlign.Center)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
             .fontColor(CounterResource.COUNTER_TEXT_COLOR)
             .width('8vp')
           TextInput({
@@ -1919,7 +1940,7 @@ export struct CounterComponent {
             .type(InputType.Number)
             .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
-            .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .fontSize(this.getTextInputFontSize())
             .fontWeight(FontWeight.Medium)
             .fontColor(this.hasFocusText2 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(3)
@@ -2046,6 +2067,7 @@ export struct CounterComponent {
             .direction(this.counterDirection)
             .textAlign(TextAlign.Center)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
             .fontColor(CounterResource.COUNTER_TEXT_COLOR)
             .width('8vp')
           TextInput({
@@ -2056,7 +2078,7 @@ export struct CounterComponent {
             .type(InputType.Number)
             .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
-            .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .fontSize(this.getTextInputFontSize())
             .fontWeight(FontWeight.Medium)
             .fontColor(this.hasFocusText3 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(3)

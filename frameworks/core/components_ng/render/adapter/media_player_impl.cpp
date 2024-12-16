@@ -130,7 +130,8 @@ void MediaPlayerImpl::SetVolume(float leftVolume, float rightVolume)
     player_->SetVolume(leftVolume);
 }
 
-bool MediaPlayerImpl::SetSource(const std::string& src)
+bool MediaPlayerImpl::SetSource(const std::string& src, const std::string& /* bundleName */,
+    const std::string& /* moduleName */)
 {
     CHECK_NULL_RETURN(player_, false);
     player_->SetSource(src);

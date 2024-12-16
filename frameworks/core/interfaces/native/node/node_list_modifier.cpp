@@ -657,6 +657,27 @@ void ResetListMaintainVisibleContentPosition(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListMaintainVisibleContentPosition(frameNode, false);
 }
+
+void SetShowCached(ArkUINodeHandle node, ArkUI_Bool show)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetShowCached(frameNode, show);
+}
+
+void ResetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetShowCached(frameNode, false);
+}
+
+ArkUI_Bool GetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ListModelNG::GetShowCached(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -677,7 +698,7 @@ const ArkUIListModifier* GetListModifier()
         SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions,
         SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetInitialIndex, GetlistDivider,
         SetInitialScroller, ResetInitialScroller, SetListMaintainVisibleContentPosition,
-        ResetListMaintainVisibleContentPosition };
+        ResetListMaintainVisibleContentPosition, SetShowCached, ResetShowCached, GetShowCached };
     return &modifier;
 }
 

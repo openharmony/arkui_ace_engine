@@ -144,9 +144,13 @@ public:
     }
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
+    RectF GetPaintRegion(float x, float y) override;
     void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override;
     void UpdateColor(size_t from, size_t to, const Color& color) override;
+    void TxtGetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle,
+        std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
 
 private:
     void CreateBuilder();

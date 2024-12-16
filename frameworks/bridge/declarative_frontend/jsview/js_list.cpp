@@ -182,7 +182,12 @@ void JSList::SetCachedCount(const JSCallbackInfo& info)
     int32_t cachedCount = 1;
     ParseJsInteger<int32_t>(info[0], cachedCount);
     cachedCount = cachedCount < 0 ? 1 : cachedCount;
-    ListModel::GetInstance()->SetCachedCount(cachedCount);
+    bool show = false;
+    // 2: represent 2 params.
+    if (info.Length() == 2) {
+        show = info[1]->ToBoolean();
+    }
+    ListModel::GetInstance()->SetCachedCount(cachedCount, show);
 }
 
 void JSList::SetScroller(RefPtr<JSScroller> scroller)

@@ -21,6 +21,8 @@
 #include <sstream>
 
 #include "form_info_base.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 
 #include "base/log/log.h"
 #include "core/common/container.h"
@@ -751,6 +753,10 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
+    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, width, height, borderWidth);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
     {
         std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
         if (formRendererDispatcher_ == nullptr) {
@@ -762,7 +768,18 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
             return;
         }
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
+    WindowSizeChangeReason sizeChangeReason = WindowSizeChangeReason::UNDEFINED;
+    if (FormManager::GetInstance().IsSizeChangeByRotate()) {
+        sizeChangeReason = WindowSizeChangeReason::ROTATION;
+    }
+    std::shared_ptr<Rosen::RSTransaction> transaction;
+    if (FormManager::GetInstance().GetRSTransaction().lock()) {
+        transaction = FormManager::GetInstance().GetRSTransaction().lock();
+    } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+        transaction = transactionController->GetRSTransaction();
+    }
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
+        static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)

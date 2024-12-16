@@ -2387,6 +2387,13 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
     }
 }
 
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
+{
+    if (delegate_) {
+        delegate_->UpdateBlurOnKeyboardHideMode(mode);
+    }
+}
+
 void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
 {
     if (delegate_) {
@@ -2918,6 +2925,7 @@ void WebPattern::OnModifyDone()
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
+        delegate_->UpdateBlurOnKeyboardHideMode(GetBlurOnKeyboardHideModeValue(BlurOnKeyboardHideMode::SILENT));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         if (GetMetaViewport()) {
@@ -3151,7 +3159,18 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
 bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
 {
     CHECK_NULL_RETURN(delegate_, false);
-    delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
+    if (delegate_->ShouldVirtualKeyboardOverlay()) {
+        if (!IsDialogNested()) {
+            double webKeyboard = keyboard - (height - GetCoordinatePoint()->GetY() - drawSize_.Height());
+            webKeyboard = (webKeyboard < 0) ? 0 : webKeyboard;
+            TAG_LOGW(AceLogTag::ACE_WEB, "VirtualKeyboard Overlaycontent is true webKeyboard:%{public}f", webKeyboard);
+            delegate_->SetVirtualKeyBoardArg(width, height, webKeyboard);
+        } else {
+            delegate_->SetVirtualKeyBoardArg(width, height, 0);
+        }
+    } else {
+        delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
+    }
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -5363,6 +5382,7 @@ bool WebPattern::OnBackPressed()
         inputMethod->Close();
         CHECK_NULL_RETURN(delegate_, true);
         delegate_->CloseCustomKeyboard();
+        delegate_->GestureBackBlur();
         return true;
     }
     return false;
@@ -5510,6 +5530,10 @@ ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState 
 ScrollResult WebPattern::HandleScroll(RefPtr<NestableScrollContainer> parent, float offset,
     int32_t source, NestedState state)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::HandleScroll scroll direction: %{public}d, find parent component: %{public}d",
+        expectedScrollAxis_,
+        (parent != nullptr));
     if (parent) {
         source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
         return parent->HandleScroll(offset, source, state);
@@ -5606,17 +5630,14 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_VOID(it, parentsMap_.end());
     auto parent = it->second;
-    auto nestedScroll = GetNestedScroll();
     ScrollResult result = { 0.f, true };
     auto remain = 0.f;
     if (!isFling) {
         if (scrollState_) {
-            if (((velocity < 0 && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
-                    (velocity > 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
+            if (CheckOverParentScroll(velocity, NestedScrollMode::SELF_FIRST)) {
                 result = HandleScroll(parent.Upgrade(), -velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
                 remain = result.remain;
-            } else if ((velocity < 0 && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
-                           (velocity > 0 && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
+            } else if (CheckOverParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
                 remain = -velocity;
             }
             if (!NearZero(remain)) {
@@ -5624,8 +5645,7 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
             }
         }
     } else {
-        if (((velocity > 0 && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
-                (velocity < 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
+        if (CheckParentScroll(velocity, NestedScrollMode::SELF_FIRST)) {
             if (isFirstFlingScrollVelocity_) {
                 HandleScrollVelocity(parent.Upgrade(), velocity);
                 isFirstFlingScrollVelocity_ = false;
@@ -5730,6 +5750,27 @@ RefPtr<NestableScrollContainer> WebPattern::SearchParent(Axis scrollAxis)
     return nullptr;
 }
 
+void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt &nestedScroll)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    if (nestedScroll.scrollUp == nestedScroll.scrollLeft) {
+        nestedOpt.backward = nestedScroll.scrollUp;
+    }
+    if (nestedScroll.scrollDown == nestedScroll.scrollRight) {
+        nestedOpt.forward = nestedScroll.scrollDown;
+    }
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<NestableScrollContainer>();
+    if (pattern) {
+        pattern->SetNestedScroll(nestedOpt);
+    }
+    TAG_LOGI(
+        AceLogTag::ACE_WEB, "SetNestedScrollExt nestedScroll: %{public}s", nestedScroll.ToString().c_str());
+    nestedScroll_ = nestedScroll;
+}
+
 bool WebPattern::IsDialogNested()
 {
     auto host = GetHost();
@@ -5810,9 +5851,7 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
-    auto nestedScroll = GetNestedScroll();
-    if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
-        ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
+    if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         CHECK_EQUAL_RETURN(isParentReachEdge_ && result.reachEdge, true, false);
         isParentReachEdge_ = result.reachEdge;
@@ -5820,11 +5859,9 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
         expectedScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollByRefScreen(-result.remain, 0)
                                                 : delegate_->ScrollByRefScreen(0, -result.remain);
         return true;
-    } else if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
-               ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
+    } else if (CheckParentScroll(offset, NestedScrollMode::PARALLEL)) {
         HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    } else if ((Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
-               (Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST)) {
+    } else if (CheckParentScroll(offset, NestedScrollMode::SELF_FIRST)) {
         if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
             HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
             return true;
@@ -5833,20 +5870,46 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
     return false;
 }
 
+bool WebPattern::CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode)
+{
+    auto nestedScroll = GetNestedScrollExt();
+    return (directValue > 0 && nestedScroll.scrollUp == scrollMode &&
+            expectedScrollAxis_ != Axis::HORIZONTAL) ||
+        (directValue > 0 && nestedScroll.scrollLeft == scrollMode &&
+            expectedScrollAxis_ == Axis::HORIZONTAL) ||
+        (directValue < 0 && nestedScroll.scrollDown == scrollMode &&
+            expectedScrollAxis_ != Axis::HORIZONTAL) ||
+        (directValue < 0 && nestedScroll.scrollRight == scrollMode &&
+            expectedScrollAxis_ == Axis::HORIZONTAL);
+}
+
+bool WebPattern::CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode)
+{
+    auto nestedScroll = GetNestedScrollExt();
+    return (directValue < 0 && nestedScroll.scrollUp == scrollMode &&
+            expectedScrollAxis_ != Axis::HORIZONTAL) ||
+        (directValue < 0 && nestedScroll.scrollLeft == scrollMode &&
+            expectedScrollAxis_ == Axis::HORIZONTAL) ||
+        (directValue > 0 && nestedScroll.scrollDown == scrollMode &&
+            expectedScrollAxis_ != Axis::HORIZONTAL) ||
+        (directValue > 0 && nestedScroll.scrollRight == scrollMode &&
+            expectedScrollAxis_ == Axis::HORIZONTAL);
+}
+
 bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
 {
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
-    auto nestedScroll = GetNestedScroll();
-    if (((velocity > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
-        ((velocity < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
+    if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
+        return HandleScrollVelocity(parent.Upgrade(), velocity);
+    }
+    if (CheckParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
         if (isParentReachEdge_) {
             return false;
         }
         return HandleScrollVelocity(parent.Upgrade(), velocity);
-    } else if ((velocity > 0 && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
-               (velocity < 0 && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
+    } else if (CheckParentScroll(velocity, NestedScrollMode::PARALLEL)) {
         HandleScrollVelocity(parent.Upgrade(), velocity);
     }
     return false;

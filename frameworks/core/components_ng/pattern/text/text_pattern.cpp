@@ -2036,6 +2036,7 @@ void TextPattern::OnModifyDone()
         }
     }
     bool enabledCache = eventHub->IsEnabled();
+    selectOverlay_->UpdateHandleColor();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -3026,12 +3027,13 @@ void TextPattern::SetAccessibilityAction()
 
 void TextPattern::OnColorConfigurationUpdate()
 {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(!textLayoutProperty->GetTextColorFlagByUserValue(false));
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     if (magnifierController_) {
         magnifierController_->SetColorModeChange(true);
@@ -3101,7 +3103,7 @@ void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
     CHECK_NULL_VOID(host);
     auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (!(textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
         return;
     }
     auto geometryNode = host->GetGeometryNode();
@@ -3130,37 +3132,24 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, paintMethod);
     auto frameSize = geometryNode->GetFrameSize();
-
-    auto clip = false;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        clip = true;
-    }
-    if (!context->GetClipEdge().value_or(clip)) {
-        CHECK_NULL_RETURN(pManager_, paintMethod);
-        RectF boundsRect = overlayMod_->GetBoundsRect();
-        auto boundsWidth = contentRect_.GetX() + std::ceil(pManager_->GetLongestLine());
-        auto boundsHeight =
-            contentRect_.GetY() + static_cast<float>(pManager_->GetHeight() + std::fabs(baselineOffset_));
-        boundsRect.SetWidth(boundsWidth);
-        boundsRect.SetHeight(boundsHeight);
-        
-        SetResponseRegion(frameSize, boundsRect.GetSize());
-        ProcessBoundRectByTextShadow(boundsRect);
-        ProcessBoundRectByTextMarquee(boundsRect);
-        if ((LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
-                LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
-            boundsWidth = std::max(frameSize.Width(), boundsRect.Width());
-            boundsHeight = std::max(frameSize.Height(), boundsRect.Height());
-            boundsRect.SetWidth(boundsWidth);
-            boundsRect.SetHeight(boundsHeight);
-        } else {
-            boundsRect.SetWidth(frameSize.Width());
-            boundsRect.SetHeight(frameSize.Height());
-        }
-        overlayMod_->SetBoundsRect(boundsRect);
-    } else {
+    if (context->GetClipEdge().value_or(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
         SetResponseRegion(frameSize, frameSize);
+        return paintMethod;
     }
+    CHECK_NULL_RETURN(pManager_, paintMethod);
+    RectF boundsRect = overlayMod_->GetBoundsRect();
+    auto boundsWidth = contentRect_.GetX() + std::ceil(pManager_->GetLongestLineWithIndent());
+    auto boundsHeight = contentRect_.GetY() + static_cast<float>(pManager_->GetHeight() + std::fabs(baselineOffset_));
+    boundsRect.SetWidth(boundsWidth);
+    boundsRect.SetHeight(boundsHeight);
+    SetResponseRegion(frameSize, boundsRect.GetSize());
+    ProcessBoundRectByTextShadow(boundsRect);
+    ProcessBoundRectByTextMarquee(boundsRect);
+    boundsRect.SetWidth(std::max(frameSize.Width(), boundsRect.Width()));
+    boundsRect.SetHeight(std::max(frameSize.Height(), boundsRect.Height()));
+    auto baselineOffset = LessOrEqual(baselineOffset_, 0) ? std::fabs(baselineOffset_) : 0;
+    pManager_->GetPaintRegion(boundsRect, contentRect_.GetX(), contentRect_.GetY() + baselineOffset);
+    overlayMod_->SetBoundsRect(boundsRect);
     return paintMethod;
 }
 
@@ -3849,6 +3838,25 @@ TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
     lineMetrics.y += textContentRect.GetY();
     lineMetrics.baseline += textContentRect.GetY();
     return lineMetrics;
+}
+
+std::vector<ParagraphManager::TextBox> TextPattern::GetRectsForRange(
+    int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+{
+    if (start < 0 || end < 0 || start > end) {
+        return {};
+    }
+    std::vector<ParagraphManager::TextBox> textBoxes = pManager_->GetRectsForRange(start, end, heightStyle, widthStyle);
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    std::vector<ParagraphManager::TextBox> adjustedTextBoxes;
+    for (auto& textBox : textBoxes) {
+        ParagraphManager::TextBox adjustedTextBox = textBox;
+        adjustedTextBox.rect_.SetLeft(textBox.rect_.Left() + textContentRect.Left());
+        adjustedTextBox.rect_.SetTop(textBox.rect_.Top() + textContentRect.Top());
+        adjustedTextBoxes.push_back(adjustedTextBox);
+    }
+    return adjustedTextBoxes;
 }
 
 Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)

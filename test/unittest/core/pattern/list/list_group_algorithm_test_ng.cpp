@@ -66,57 +66,32 @@ void ListGroupAlgTestNg::CreateGroupWithFooter(
  */
 HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, TestSize.Level1)
 {
-    /* *
-     * @tc.steps: step1. create List/ListItemGroup and Set Space
+    /**
+     * @tc.steps: step1. Create ListItemGroup with header
+     * @tc.expected: currentOffset is 260
      */
-    int32_t groupNumber = 2;
-    int32_t itemNumber = 3;
-    ListModelNG model = CreateList();
-    model.SetSpace(Dimension(SPACE));
-    // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
-    // FrameNode = 2 * 3
-    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE, itemNumber);
+    auto model = CreateList();
+    model.SetInitialIndex(1);
+    CreateGroupWithFooter(4, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->currentOffset_, 330);
 
-    /* *
-     * @tc.steps: step2. get child frame node from index
+    /**
+     * @tc.steps: step2. Scroll -25px, first group footer at top edge
+     * @tc.expected: Group1 Offset is 25
      */
-    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
+    pattern_->UpdateCurrentOffset(25, SCROLL_FROM_UPDATE);
+    CreateDone(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 1), OffsetF(0, 25)));
+    EXPECT_EQ(pattern_->currentOffset_, 305);
 
-    /* *
-     * @tc.steps: step3. build a object about ListItemGroupLayoutAlgorithm
+    /**
+     * @tc.steps: step3. Scroll 0px, first group footer at top edge
+     * @tc.expected: Group1 Offset is 25
      */
-    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::DynamicCast<LayoutWrapper>(groupFrameNode);
-    LayoutWrapper* wrapper = AceType::RawPtr(layoutWrapper);
-    EXPECT_TRUE(listItemGroupAl->forwardLayout_ && listItemGroupAl->headerIndex_ >= 0);
-
-    bool resTypeInit = listItemGroupAl->NeedMeasureItem(wrapper);
-    EXPECT_TRUE(resTypeInit);
-
-    listItemGroupAl->headerMainSize_ = 3.1;
-    listItemGroupAl->endPos_ = 1.1;
-
-    bool resType = listItemGroupAl->NeedMeasureItem(wrapper);
-    EXPECT_FALSE(resType);
-
-    // init data
-    listItemGroupAl->headerMainSize_ = 0.0f;
-    listItemGroupAl->startPos_ = 0.0f;
-    listItemGroupAl->endPos_ = 0.0f;
-    listItemGroupAl->referencePos_ = 0.0f;
-    listItemGroupAl->totalMainSize_ = 0.0f;
-    listItemGroupAl->footerMainSize_ = 0.0f;
-
-    // LessNotEqual check
-    listItemGroupAl->totalMainSize_ = 10.1;
-    listItemGroupAl->footerMainSize_ = 3.1;
-    listItemGroupAl->startPos_ = 8.1;
-
-    resType = listItemGroupAl->NeedMeasureItem(wrapper);
-    EXPECT_FALSE(resType);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 1), OffsetF(0, 25)));
+    EXPECT_EQ(pattern_->currentOffset_, 305);
 }
 
 /**
@@ -126,65 +101,21 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
  */
 HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, TestSize.Level1)
 {
-    /* *
-     * @tc.steps: step1. create List/ListItemGroup and Set Space
+    /**
+     * @tc.steps: step1. Create ListItemGroup with header, second group header is at bottom edge.
      */
-    int32_t groupNumber = 2;
-    int32_t itemNumber = 3;
-    ListModelNG model = CreateList();
-    model.SetSpace(Dimension(SPACE));
-    // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
-    // FrameNode = 2 * 3
-    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE, itemNumber);
+    auto model = CreateList();
+    CreateGroupWithHeader(3, V2::ListItemGroupStyle::NONE, 3);
     CreateDone(frameNode_);
 
-    /* *
-     * @tc.steps: step2. get child frame node from index
+    /**
+     * @tc.steps: step2. Scroll 450px, second group header is at top edge.
+     * @tc.expected: Group2 Offset is 290
      */
-    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-
-    RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::DynamicCast<LayoutWrapper>(groupFrameNode);
-    LayoutWrapper* wrapper = AceType::RawPtr(layoutWrapper);
-
-    /* *
-     * @tc.steps: step3. build a object about ListItemGroupLayoutAlgorithm
-     */
-    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    EXPECT_TRUE(listItemGroupAl->forwardLayout_ && listItemGroupAl->headerIndex_ >= 0);
-
-    // forwardLayout equ false, GreatNotEqual
-    listItemGroupAl->forwardLayout_ = false;
-    listItemGroupAl->headerMainSize_ = 3.1;
-    listItemGroupAl->referencePos_ = 10.1;
-    listItemGroupAl->totalMainSize_ = 10.1;
-    listItemGroupAl->endPos_ = 1.1;
-
-    bool resType = listItemGroupAl->NeedMeasureItem(wrapper);
-    EXPECT_FALSE(resType);
-
-    // init data
-    listItemGroupAl->headerMainSize_ = 0.0f;
-    listItemGroupAl->startPos_ = 0.0f;
-    listItemGroupAl->endPos_ = 0.0f;
-    listItemGroupAl->referencePos_ = 0.0f;
-    listItemGroupAl->totalMainSize_ = 0.0f;
-    listItemGroupAl->footerMainSize_ = 0.0f;
-
-    // forwardLayout false
-    listItemGroupAl->forwardLayout_ = false;
-    listItemGroupAl->totalMainSize_ = 10.1;
-    listItemGroupAl->footerMainSize_ = 3.1;
-    listItemGroupAl->startPos_ = 8.1;
-    listItemGroupAl->referencePos_ = 10.1;
-
-    resType = listItemGroupAl->NeedMeasureItem(wrapper);
-    EXPECT_FALSE(resType);
-
-    listItemGroupAl->startPos_ = 6.1;
-    resType = listItemGroupAl->NeedMeasureItem(wrapper);
-    EXPECT_TRUE(resType);
+    pattern_->UpdateCurrentOffset(-450, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 2), OffsetF(0, 290)));
+    EXPECT_EQ(pattern_->currentOffset_, 450);
 }
 
 /**
@@ -499,7 +430,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky004, TestSize.Level1)
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(secondGroupNode, FOOTER_INDEX), 0.f);
+    EXPECT_EQ(GetChildX(secondGroupNode, FOOTER_INDEX), 70.f);
     ScrollTo(ITEM_WIDTH);
     EXPECT_EQ(GetChildX(secondGroupNode, FOOTER_INDEX), 70.f);
 
@@ -938,6 +869,8 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = groupNode->GetChildByIndex(4 + 1)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(groupNode, 4 + 1), ITEM_HEIGHT * 4 + GROUP_HEADER_LEN);
 
     /**
      * @tc.steps: step3. Flush Idle Task
@@ -949,8 +882,12 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(childrenCount, 7);
     cachedItem = groupNode->GetChildByIndex(1 + 1)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+    EXPECT_EQ(GetChildY(groupNode, 1 + 1), ITEM_HEIGHT * 1 + GROUP_HEADER_LEN);
     cachedItem = groupNode->GetChildByIndex(7 + 1)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+    EXPECT_EQ(GetChildY(groupNode, 7 + 1), ITEM_HEIGHT * 7 + GROUP_HEADER_LEN);
 }
 
 /**
@@ -983,7 +920,7 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Flush Idle Task
-     * @tc.expected: ListItem 10,11 is cached
+     * @tc.expected: ListItem 8, 9 is cached
      */
     auto listPattern = frameNode_->GetPattern<ListPattern>();
     FlushIdleTask(listPattern);
@@ -991,8 +928,12 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 10);
     auto item8 = groupNode->GetChildByIndex(8 + 1)->GetHostNode();
     EXPECT_EQ(item8->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(groupNode, 8 + 1), ITEM_HEIGHT * (8 / 2) + GROUP_HEADER_LEN);
     auto item9 = groupNode->GetChildByIndex(9 + 1)->GetHostNode();
     EXPECT_EQ(item9->IsActive(), false);
+    EXPECT_EQ(GetChildX(groupNode, 9 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(groupNode, 9 + 1), ITEM_HEIGHT * (9 / 2) + GROUP_HEADER_LEN);
 
     /**
      * @tc.steps: step3. Flush Idle Task
@@ -1002,14 +943,21 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
     FlushIdleTask(listPattern);
     childrenCount = repeat->GetChildren().size();
     EXPECT_EQ(childrenCount, 14);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
     auto item2 = groupNode->GetChildByIndex(2 + 1)->GetHostNode();
     EXPECT_EQ(item2->IsActive(), false);
+    EXPECT_EQ(GetChildY(groupNode, 2 + 1), ITEM_HEIGHT * (2 / 2) + GROUP_HEADER_LEN);
     auto item3 = groupNode->GetChildByIndex(3 + 1)->GetHostNode();
     EXPECT_EQ(item3->IsActive(), false);
+    EXPECT_EQ(GetChildX(groupNode, 3 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(groupNode, 3 + 1), ITEM_HEIGHT * (3 / 2) + GROUP_HEADER_LEN);
     auto item14 = groupNode->GetChildByIndex(14 + 1)->GetHostNode();
     EXPECT_EQ(item14->IsActive(), false);
+    EXPECT_EQ(GetChildY(groupNode, 14 + 1), ITEM_HEIGHT * (14 / 2) + GROUP_HEADER_LEN);
     auto item15 = groupNode->GetChildByIndex(15 + 1)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
+    EXPECT_EQ(GetChildX(groupNode, 15 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(groupNode, 15 + 1), ITEM_HEIGHT * (15 / 2) + GROUP_HEADER_LEN);
 }
 
 /**
@@ -1089,6 +1037,84 @@ HWTEST_F(ListGroupAlgTestNg, DISABLED_ListGroupRepeatCacheCount003, TestSize.Lev
 }
 
 /**
+ * @tc.name: ListGroupRepeatCacheCount004
+ * @tc.desc: ListItemGroup lanes cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount004, TestSize.Level1)
+{
+   ListModelNG model = CreateList();
+   model.SetCachedCount(2);
+   model.SetLaneMinLength(Dimension(100));
+   model.SetLaneMaxLength(Dimension(240));
+   CreateRepeatVirtualScrollNode(3, [this](int32_t idx) {
+       ListItemGroupModelNG groupModel = CreateListItemGroup();
+       auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+       groupModel.SetHeader(std::move(header));
+       ViewAbstract::SetWidth(CalcLength(180));
+       CreateRepeatVirtualScrollNode(5, [this](int32_t idx) {
+           CreateListItem();
+           ViewStackProcessor::GetInstance()->Pop();
+           ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+       });
+   });
+   CreateDone(frameNode_);
+
+   /**
+    * @tc.steps: step1. Check Repeat frameCount
+    */
+   auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+   EXPECT_EQ(repeat->FrameCount(), 3);
+
+   /**
+    * @tc.steps: step2. Flush Idle Task
+    * @tc.expected: Group0 ListItem 4 is cached, Group1 ListItem1 is cached
+    */
+   auto listPattern = frameNode_->GetPattern<ListPattern>();
+   FlushIdleTask(listPattern);
+   // check group0
+   auto groupNode0 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(0));
+   auto repeat0 = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode0->GetChildAtIndex(1));
+   int32_t childrenCount = repeat0->GetChildren().size();
+   EXPECT_EQ(childrenCount, 5);
+   auto g0Item4 = groupNode0->GetChildByIndex(4 + 1)->GetHostNode();
+   EXPECT_EQ(g0Item4->IsActive(), false);
+   // check group1
+   auto groupNode1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(1));
+   auto repeat1 = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode1->GetChildAtIndex(1));
+   childrenCount = repeat1->GetChildren().size();
+   EXPECT_EQ(childrenCount, 1);
+   auto g1Item0 = groupNode1->GetChildByIndex(0 + 1)->GetHostNode();
+   EXPECT_EQ(g1Item0->IsActive(), false);
+
+   /**
+    * @tc.steps: step3. Flush Idle Task
+    * @tc.expected: group0 item4 cached, group1 item0 cached, group2 item0-1 cached
+    */
+   UpdateCurrentOffset(-725);
+   FlushIdleTask(listPattern);
+   // check group 0
+   childrenCount = repeat0->GetChildren().size();
+   EXPECT_EQ(childrenCount, 1);
+   g0Item4 = groupNode0->GetChildByIndex(4 + 1)->GetHostNode();
+   EXPECT_EQ(g0Item4->IsActive(), false);
+   // check group 0
+   childrenCount = repeat1->GetChildren().size();
+   EXPECT_EQ(childrenCount, 5);
+   g1Item0 = groupNode1->GetChildByIndex(0 + 1)->GetHostNode();
+   EXPECT_EQ(g1Item0->IsActive(), false);
+   // check group 2
+   auto groupNode2 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(2));
+   auto repeat2 = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode2->GetChildAtIndex(1));
+   childrenCount = repeat2->GetChildren().size();
+   EXPECT_EQ(childrenCount, 2);
+   auto g2item0 = groupNode2->GetChildByIndex(0 + 1)->GetHostNode();
+   EXPECT_EQ(g2item0->IsActive(), false);
+   auto g2item1 = groupNode2->GetChildByIndex(1 + 1)->GetHostNode();
+   EXPECT_EQ(g2item1->IsActive(), false);
+}
+
+/**
  * @tc.name: SetHeaderFooter001
  * @tc.desc: test SetHeader/SetFooter to null, will not has header/footer
  * @tc.type: FUNC
@@ -1155,7 +1181,6 @@ HWTEST_F(ListGroupAlgTestNg, ListLayoutAlgorithmTest001, TestSize.Level1)
     listItemInfo1.startPos = 0.0f;
     listItemInfo1.endPos = 180.0f;
     listLayoutAlgorithm.contentMainSize_ = 720.0f;
-    listLayoutAlgorithm.itemPosition_.empty();
     listLayoutAlgorithm.itemPosition_.emplace(std::make_pair(0, listItemInfo1));
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(listLayoutAlgorithm.itemPosition_.begin()->first);
     auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();

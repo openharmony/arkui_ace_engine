@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/base/navigation_register.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {
@@ -93,6 +94,10 @@ public:
         bool ignoreMainTitle = false);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
+    static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
+    static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
+    static void SetMenuItemSymbol(FrameNode* frameNode,
+        std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

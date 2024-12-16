@@ -1360,6 +1360,19 @@ class ArkWaterFlowEdgeEffect {
   }
 }
 
+class ArkScrollableCacheOptions {
+  count: number;
+  show: boolean;
+  constructor(count: number, show: boolean) {
+    this.count = count;
+    this.show = show;
+  }
+  isEqual(other: ArkScrollableCacheOptions): boolean {
+    return (this.count === other.count) &&
+      (this.show === other.show);
+  }
+}
+
 class ArkSelection {
   selectionStart: number;
   selectionEnd: number;
@@ -1521,13 +1534,15 @@ class ArkFontWeight {
 }
 
 class ArkNavigationTitle {
+  value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined;
   navigationTitleOptions?: NavigationTitleOptions | undefined;
 
   constructor() {
+    this.value = undefined;
     this.navigationTitleOptions = undefined;
   }
   isEqual(another: ArkNavigationTitle): boolean {
-    return this.navigationTitleOptions === another.navigationTitleOptions;
+    return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
   }
 }
 

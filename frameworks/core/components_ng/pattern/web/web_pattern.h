@@ -425,6 +425,12 @@ public:
      *  End of NestableScrollContainer implementations
      */
     void OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent);
+
+    void SetNestedScrollExt(const NestedScrollOptionsExt &nestedScroll);
+    NestedScrollOptionsExt GetNestedScrollExt() const
+    {
+        return nestedScroll_;
+    }
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -467,6 +473,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlurOnKeyboardHideMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
@@ -801,6 +808,7 @@ private:
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
+    void OnBlurOnKeyboardHideModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
     void OnMetaViewportUpdate(bool value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
@@ -955,6 +963,8 @@ private:
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);
+    bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
+    bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     bool IsDialogNested();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
@@ -1175,6 +1185,12 @@ private:
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    NestedScrollOptionsExt nestedScroll_ = {
+        .scrollUp = NestedScrollMode::SELF_ONLY,
+        .scrollDown = NestedScrollMode::SELF_ONLY,
+        .scrollLeft = NestedScrollMode::SELF_ONLY,
+        .scrollRight = NestedScrollMode::SELF_ONLY,
+    };
 };
 } // namespace OHOS::Ace::NG
 

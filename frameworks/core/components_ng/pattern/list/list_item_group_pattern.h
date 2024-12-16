@@ -61,7 +61,8 @@ struct ListMainSizeValues {
     std::optional<float> layoutStartMainPos;
     std::optional<float> layoutEndMainPos;
     float referencePos = 0.0f;
-    bool forward;
+    bool forward = true;
+    bool backward = false;
 };
 
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
@@ -226,6 +227,11 @@ public:
         return lanes_;
     }
 
+    void SetLanes(int32_t num)
+    {
+        lanes_ = num;
+    }
+
     V2::ListItemGroupStyle GetListItemGroupStyle()
     {
         return listItemGroupStyle_;
@@ -268,12 +274,22 @@ public:
     void ResetChildrenSize();
 
     void ClearItemPosition();
+    void ClearCachedItemPosition();
     void CalculateItemStartIndex();
-    void UpdateActiveChildRange(bool forward, int32_t cacheCount);
-    int32_t UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView);
-    int32_t UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView);
-    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached,
-        ListMainSizeValues listSizeValues);
+    bool NeedCacheForward(const LayoutWrapper* listWrapper) const;
+    CachedIndexInfo UpdateCachedIndex(bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache);
+    int32_t UpdateCachedIndexForward(bool outOfView, bool show, int32_t cacheCount);
+    int32_t UpdateCachedIndexBackward(bool outOfView, bool show, int32_t cacheCount);
+    std::pair<int32_t, int32_t> UpdateCachedIndexOmni(int32_t forwardCache, int32_t backwardCache);
+    void UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show);
+    void UpdateActiveChildRange(bool show);
+    void SyncItemsToCachedItemPosition();
+    void SetRecache(bool value)
+    {
+        reCache_ = value;
+    }
+    void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
+        int32_t backwardCached, ListMainSizeValues listSizeValues);
 
 private:
     bool IsNeedInitClickEventRecorder() const override
@@ -318,7 +334,11 @@ private:
 
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
+    ListItemGroupLayoutAlgorithm::PositionMap cachedItemPosition_;
+    float adjustRefPos_ = 0.0f;
+    float adjustTotalSize_ = 0.0f;
 
+    bool reCache_ = false;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;

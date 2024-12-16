@@ -756,6 +756,15 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
     }
 }
 
+void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation)
+{
+    if (result_) {
+        result_->SetGestureEventResultV2(result, stopPropagation);
+        SetSendTask();
+        eventResult_ = result;
+    }
+}
+
 void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
     const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
@@ -3989,6 +3998,26 @@ void WebDelegate::OnActive()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebOnActive");
 }
 
+void WebDelegate::GestureBackBlur()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::GestureBackBlur, webId:%{public}d", GetWebId());
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->WebComponentsBlur();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebGestureBackBlur");
+}
+
 void WebDelegate::OnWebviewHide()
 {
     auto context = context_.Upgrade();
@@ -5629,7 +5658,6 @@ void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const doub
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchPress(id, x, y, from_overlay);
     }
 }
@@ -5638,7 +5666,6 @@ void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchRelease(id, x, y, from_overlay);
     }
 }
@@ -6209,6 +6236,22 @@ void WebDelegate::UpdateOverScrollMode(const int overscrollModeValue)
             setting->PutOverscrollMode(overscrollModeValue);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOverScrollMode");
+}
+
+void WebDelegate::UpdateBlurOnKeyboardHideMode(const int isBlurOnKeyboardHideEnable)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isBlurOnKeyboardHideEnable]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
+            setting->SetBlurOnKeyboardHideMode(isBlurOnKeyboardHideEnable);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateBlurOnKeyboardHideMode");
 }
 
 void WebDelegate::UpdateCopyOptionMode(const int copyOptionModeValue)

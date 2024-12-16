@@ -43,7 +43,7 @@ public:
     void SetLaneMaxLength(const Dimension& laneMaxLength) override;
     void SetLaneGutter(const Dimension& laneGutter) override;
     void SetListItemAlign(V2::ListItemAlign listItemAlign) override;
-    void SetCachedCount(int32_t cachedCount) override;
+    void SetCachedCount(int32_t cachedCount, bool show = false) override;
     void SetMultiSelectable(bool selectable) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
@@ -81,7 +81,9 @@ public:
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetShowCached(FrameNode* frameNode, bool show);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static bool GetShowCached(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
