@@ -3395,7 +3395,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
         opts.type = safeAreaType;
     }
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
-     if (convEdges.has_value()) {
+    if (convEdges.has_value()) {
         std::vector<std::optional<uint32_t>> vec = convEdges.value();
         for (size_t i = 0; i < vec.size(); ++i) {
             safeAreaEdge |= (1 << (vec[i].has_value() ? vec[i].value() : 0));
