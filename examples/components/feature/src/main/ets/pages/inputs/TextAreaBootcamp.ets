@@ -1,4 +1,17 @@
-//多行文本框
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, useEnabled,RadioBlock,SliderBlock } from 'common';
 import { LengthMetrics, LengthUnit } from '@kit.ArkUI';
@@ -97,7 +110,6 @@ export struct TextAreaBootcamp {
   @State lineSpacingUnit: LengthUnit = LengthUnit.VP;
   @State enableLineBreakStrategy: boolean = false;
   @State lineBreakStrategy: LineBreakStrategy = LineBreakStrategy.GREEDY
-  //editMenuOption
   @State enableEnablePreviewText: boolean = false;
   @State enablePreviewText: boolean = true;
   @State enableHapticFeedback: boolean = false;
@@ -141,7 +153,6 @@ export struct TextAreaBootcamp {
         .fontSize(useEnabled(this.enableFontSize,this.fontSize))
         .fontStyle(useEnabled(this.enableFontStyle,this.fontStyle))
         .fontWeight(useEnabled(this.enableFontWeight,this.fontWeight))
-      //inputFilter
         .copyOption(useEnabled(this.enableCopyOption,this.copyOption))
         .maxLength(useEnabled(this.enableMaxLength,this.maxLength))
         .showCounter(useEnabled(this.enableShowCounterValue,this.showCounterValue))
@@ -150,7 +161,6 @@ export struct TextAreaBootcamp {
         .selectionMenuHidden(useEnabled(this.enableSelectionMenuHidden,this.selectionMenuHidden))
         .barState(useEnabled(this.enableBarState,this.barState))
         .maxLines(useEnabled(this.enableMaxLines,this.maxLines))
-        // .customKeyboard(useEnabled(this.enableCustomKeyboardOptions,this.customKeyboardOptions))
         .type(useEnabled(this.enableType,this.type))
         .enterKeyType(useEnabled(this.enableEnterKeyType,this.enterKeyType))
         .enableAutoFill(useEnabled(this.enableAutoFill,this.enableAutoFill))
@@ -179,9 +189,7 @@ export struct TextAreaBootcamp {
           unit: useEnabled(this.enableLineSpacingUnit, this.lineSpacingUnit)
         })
         .lineBreakStrategy(useEnabled(this.enableLineBreakStrategy,this.lineBreakStrategy))
-        //editMenuOptions
         .enablePreviewText(useEnabled(this.enableEnablePreviewText,this.enablePreviewText))
-        //enableHapticFeedBack
     }.justifyContent(FlexAlign.Start)
   }
 
@@ -300,8 +308,6 @@ export struct TextAreaBootcamp {
             {label: 'Bolder', value: FontWeight.Bolder },
           ]
         })
-
-        //inputFilter
 
         RadioBlock({
           title: 'copyOptions',
@@ -514,7 +520,6 @@ export struct TextAreaBootcamp {
           max: 20
         })
 
-        //fontFeature
 
         RadioBlock({
           title:'wordBreak',
@@ -637,7 +642,6 @@ export struct TextAreaBootcamp {
             { label: 'true', value: true },
           ]
         })
-        //enableHapticFeedback
       }
     }
   }
