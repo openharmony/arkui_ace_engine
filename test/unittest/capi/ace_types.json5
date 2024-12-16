@@ -2426,6 +2426,8 @@
                 "setDragPreviewTestDragPreviewDragItemInfoExtraInfoValidValues",
             ],
             "remove":[
+                "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanValidValues",
+                "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanOffsetValidValues",
                 "setRotateTestDefaultValues",
                 "setRotateTestRotateCenterXInvalidValues",
                 "setRotateTestRotateCenterYInvalidValues",

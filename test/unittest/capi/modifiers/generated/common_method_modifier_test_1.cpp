@@ -1016,102 +1016,6 @@ HWTEST_P(CommonMethodModifierTest, setUseSizeTypeTestDefaultValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_P(
-    CommonMethodModifierTest, setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanValidValues, TestSize.Level1)
-{
-    Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs initValueUseSizeType;
-
-    // Initial setup
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.xs)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.xs)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.sm)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.sm)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.md)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.md)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.lg)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.lg)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-
-    auto checkValue = [this, &initValueUseSizeType](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs inputValueUseSizeType = initValueUseSizeType;
-
-        WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(inputValueUseSizeType.xs)).span = value;
-        modifier_->setUseSizeType(node_, &inputValueUseSizeType);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultUseSizeType = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_USE_SIZE_TYPE_NAME);
-        auto resultXs = GetAttrValue<std::unique_ptr<JsonValue>>(resultUseSizeType, ATTRIBUTE_USE_SIZE_TYPE_I_XS_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultXs, ATTRIBUTE_USE_SIZE_TYPE_I_XS_I_SPAN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input
-            << ", method: setUseSizeType, attribute: useSizeType.xs.Literal_Number_offset_span.span";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanOffsetValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_P(CommonMethodModifierTest, setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanOffsetValidValues,
-    TestSize.Level1)
-{
-    Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs initValueUseSizeType;
-
-    // Initial setup
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.xs)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.xs)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.sm)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.sm)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.md)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.md)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.lg)).span =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-    WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(initValueUseSizeType.lg)).offset =
-        std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
-
-    auto checkValue = [this, &initValueUseSizeType](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs inputValueUseSizeType = initValueUseSizeType;
-
-        WriteToUnion<Ark_Literal_Number_offset_span>(WriteTo(inputValueUseSizeType.xs)).offset = value;
-        modifier_->setUseSizeType(node_, &inputValueUseSizeType);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultUseSizeType = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_USE_SIZE_TYPE_NAME);
-        auto resultXs = GetAttrValue<std::unique_ptr<JsonValue>>(resultUseSizeType, ATTRIBUTE_USE_SIZE_TYPE_I_XS_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultXs, ATTRIBUTE_USE_SIZE_TYPE_I_XS_I_OFFSET_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input
-            << ", method: setUseSizeType, attribute: useSizeType.xs.Literal_Number_offset_span.offset";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
  * @tc.name: setUseSizeTypeTestUseSizeTypeSmLiteral_Number_offset_spanSpanValidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -2324,6 +2228,97 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules0TestAlignRulesBiasHorizontalInv
         auto resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_DEFAULT_VALUE) <<
             "Input value is: " << input << ", method: setAlignRules0, attribute: alignRules.bias.horizontal";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
+}
+
+/*
+ * @tc.name: setAlignRules0TestAlignRulesBiasVerticalValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(CommonMethodModifierTest, setAlignRules0TestAlignRulesBiasVerticalValidValues, TestSize.Level1)
+{
+    Ark_AlignRuleOption initValueAlignRules;
+
+    // Initial setup
+    WriteTo(initValueAlignRules.left).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.left).align = std::get<1>(Fixtures::testFixtureEnumHorizontalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.right).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.right).align = std::get<1>(Fixtures::testFixtureEnumHorizontalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.middle).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.middle).align = std::get<1>(Fixtures::testFixtureEnumHorizontalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.top).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.top).align = std::get<1>(Fixtures::testFixtureEnumVerticalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.bottom).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.bottom).align = std::get<1>(Fixtures::testFixtureEnumVerticalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.center).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.center).align = std::get<1>(Fixtures::testFixtureEnumVerticalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.bias).horizontal =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    WriteTo(initValueAlignRules.bias).vertical =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueAlignRules](
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Ark_AlignRuleOption inputValueAlignRules = initValueAlignRules;
+
+        WriteTo(inputValueAlignRules.bias).vertical = value;
+        modifier_->setAlignRules0(node_, &inputValueAlignRules);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBias = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setAlignRules0, attribute: alignRules.bias.vertical";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setAlignRules0TestAlignRulesBiasVerticalInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(CommonMethodModifierTest, setAlignRules0TestAlignRulesBiasVerticalInvalidValues, TestSize.Level1)
+{
+    Ark_AlignRuleOption initValueAlignRules;
+
+    // Initial setup
+    WriteTo(initValueAlignRules.left).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.left).align = std::get<1>(Fixtures::testFixtureEnumHorizontalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.right).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.right).align = std::get<1>(Fixtures::testFixtureEnumHorizontalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.middle).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.middle).align = std::get<1>(Fixtures::testFixtureEnumHorizontalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.top).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.top).align = std::get<1>(Fixtures::testFixtureEnumVerticalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.bottom).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.bottom).align = std::get<1>(Fixtures::testFixtureEnumVerticalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.center).anchor = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    WriteTo(initValueAlignRules.center).align = std::get<1>(Fixtures::testFixtureEnumVerticalAlignValidValues[0]);
+    WriteTo(initValueAlignRules.bias).horizontal =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    WriteTo(initValueAlignRules.bias).vertical =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueAlignRules](const std::string& input, const Opt_Number& value) {
+        Ark_AlignRuleOption inputValueAlignRules = initValueAlignRules;
+
+        modifier_->setAlignRules0(node_, &inputValueAlignRules);
+        WriteTo(inputValueAlignRules.bias).vertical = value;
+        modifier_->setAlignRules0(node_, &inputValueAlignRules);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBias = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setAlignRules0, attribute: alignRules.bias.vertical";
     };
 
     // Check empty optional
