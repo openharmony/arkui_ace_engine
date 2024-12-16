@@ -22,6 +22,7 @@
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/flex_property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
@@ -1150,6 +1151,29 @@ void AssignCast(std::optional<OHOS::Ace::ObscuredReasons>& dst, const Ark_Obscur
     switch (src) {
         case ARK_OBSCURED_REASONS_PLACEHOLDER: dst = ObscuredReasons::PLACEHOLDER; break;
         default: LOGE("Unexpected enum value in Ark_ObscuredReasons: %{public}d", src);
+    }
+}
+
+template<>
+    void AssignCast(std::optional<uint32_t>& dst, const Ark_SafeAreaType& src)
+{
+    switch (src) {
+        case ARK_SAFE_AREA_TYPE_SYSTEM: dst = SAFE_AREA_TYPE_SYSTEM; break;
+        case ARK_SAFE_AREA_TYPE_CUTOUT: dst = SAFE_AREA_TYPE_CUTOUT; break;
+        case ARK_SAFE_AREA_TYPE_KEYBOARD: dst = SAFE_AREA_TYPE_KEYBOARD; break;
+        default: LOGE("Unexpected enum value in Ark_SafeAreaType: %{public}d", src);
+    }
+}
+
+template<>
+    void AssignCast(std::optional<uint32_t>& dst, const Ark_SafeAreaEdge& src)
+{
+    switch (src) {
+        case ARK_SAFE_AREA_EDGE_TOP: dst = SAFE_AREA_EDGE_TOP; break;
+        case ARK_SAFE_AREA_EDGE_BOTTOM: dst = SAFE_AREA_EDGE_BOTTOM; break;
+        case ARK_SAFE_AREA_EDGE_START: dst = SAFE_AREA_EDGE_START; break;
+        case ARK_SAFE_AREA_EDGE_END: dst = SAFE_AREA_EDGE_END; break;
+        default: LOGE("Unexpected enum value in Ark_SafeAreaEdge: %{public}d", src);
     }
 }
 
@@ -3332,8 +3356,16 @@ void OnSizeChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnSizeChange(frameNode, convValue);
+    auto onSizeChange = [callback = CallbackHelper(*value)](const RectF &oldRect, const RectF &newRect) {
+        Ark_SizeOptions oldSize;
+        oldSize.width = Converter::ArkValue<Opt_Length>(oldRect.Width());
+        oldSize.height = Converter::ArkValue<Opt_Length>(oldRect.Height());
+        Ark_SizeOptions newSize;
+        newSize.width = Converter::ArkValue<Opt_Length>(newRect.Width());
+        newSize.height = Converter::ArkValue<Opt_Length>(newRect.Height());
+        callback.Invoke(oldSize, newSize);
+    };
+    ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Ark_String* name,
@@ -3351,9 +3383,26 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(types);
-    //auto convValue = Converter::OptConvert<type>(types); // for enums
-    //CommonMethodModelNG::SetExpandSafeArea(frameNode, convValue);
+    auto convTypes = Converter::OptConvert<std::vector<std::optional<uint32_t>>>(*types);
+    auto convEdges = Converter::OptConvert<std::vector<std::optional<uint32_t>>>(*edges);
+    SafeAreaExpandOpts opts;
+    uint32_t safeAreaType = SAFE_AREA_TYPE_NONE;
+    if (convTypes.has_value()) {
+        std::vector<std::optional<uint32_t>> vec = convTypes.value();
+        for (size_t i = 0; i < vec.size(); ++i) {
+            safeAreaType |= (1 << (vec[i].has_value() ? vec[i].value() : 0));
+        }
+        opts.type = safeAreaType;
+    }
+    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+     if (convEdges.has_value()) {
+        std::vector<std::optional<uint32_t>> vec = convEdges.value();
+        for (size_t i = 0; i < vec.size(); ++i) {
+            safeAreaEdge |= (1 << (vec[i].has_value() ? vec[i].value() : 0));
+        }
+        opts.edges = safeAreaEdge;
+    }
+    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 void BackgroundImpl(Ark_NativePointer node,
                     const Callback_Any* builder,
