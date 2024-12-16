@@ -390,7 +390,7 @@ void NativeCanvasRenderer::QuadraticCurveTo(const QuadraticCurveParam& param)
 
 void NativeCanvasRenderer::Arc(const ArcParam& param)
 {
-    ArcParam arcParam;
+    ArcParam arcParam = param;
     double density = GetDensity();
     arcParam.x = param.x * density;
     arcParam.y = param.y * density;
@@ -407,12 +407,12 @@ void NativeCanvasRenderer::ArcTo(const ArcToParam& param)
     arcToParam.x2 = param.x2 * density;
     arcToParam.y2 = param.y2 * density;
     arcToParam.radius = param.radius * density;
-    renderingContext2DModel_->ArcTo(param);
+    renderingContext2DModel_->ArcTo(arcToParam);
 }
 
 void NativeCanvasRenderer::Ellipse(const EllipseParam& param)
 {
-    EllipseParam elParam;
+    EllipseParam elParam = param;
     double density = GetDensity();
     elParam.x = param.x * density;
     elParam.y = param.y * density;
@@ -492,8 +492,7 @@ void NativeCanvasRenderer::Rotate(const double angle)
 
 void NativeCanvasRenderer::Scale(const double x, const double y)
 {
-    double density = GetDensity();
-    renderingContext2DModel_->CanvasRendererScale(x * density, y * density);
+    renderingContext2DModel_->CanvasRendererScale(x, y);
 }
 
 void NativeCanvasRenderer::Transform(const TransformParam& param)
@@ -649,14 +648,14 @@ int64_t NativeCanvasRenderer::GetNativeImageData(
     std::vector<uint8_t> buffer(length, 0xff);
     auto imagdata = FFI::FFIData::Create<NativeImageData>();
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        imagdata->setDirtyHeight(0);
-        imagdata->setDirtyWidth(0);
+        imagdata->height_ = 0;
+        imagdata->width_ = 0;
         imagdata->data = buffer;
         return imagdata->GetID();
     }
     renderingContext2DModel_->GetImageDataModel(imageSize, buffer.data());
-    imagdata->setDirtyHeight(finalHeight);
-    imagdata->setDirtyWidth(finalWidth);
+    imagdata->height_ = finalHeight;
+    imagdata->width_ = finalWidth;
     imagdata->data = buffer;
     return imagdata->GetID();
 }
@@ -846,11 +845,11 @@ void NativeCanvasRenderer::PutImageData(const sptr<NativeImageData> imageData, c
     const double dirtyX, const double dirtyY, const double dirtyWidth, const double dirtyHeight)
 {
     double density = GetDensity();
-    int32_t imgWidth = imageData->getDirtyWidth();
-    int32_t imgHeight = imageData->getDirtyHeight();
+    int32_t imgWidth = imageData->GetWidth();
+    int32_t imgHeight = imageData->GetHeight();
     ImageData imageData_ = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
     imageData_.x = static_cast<int32_t>(dx * density);
-    imageData_.y = static_cast<int32_t>(dirtyX * density);
+    imageData_.y = static_cast<int32_t>(dy * density);
     imageData_.dirtyX = static_cast<int32_t>(dirtyX * density);
     imageData_.dirtyY = static_cast<int32_t>(dirtyY * density);
     imageData_.dirtyHeight = static_cast<int32_t>(dirtyHeight * density);
@@ -877,4 +876,33 @@ void NativeCanvasRenderer::PutImageData(const sptr<NativeImageData> imageData, c
     renderingContext2DModel_->PutImageData(imageData_);
 }
 
+void NativeCanvasRenderer::PutImageData(const sptr<NativeImageData> imageData, const double dx, const double dy)
+{
+    double density = GetDensity();
+    int32_t imgWidth = imageData->GetWidth();
+    int32_t imgHeight = imageData->GetHeight();
+    ImageData imageData_ = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
+    imageData_.x = static_cast<int32_t>(dx * density);
+    imageData_.y = static_cast<int32_t>(dy * density);
+    imageData_.dirtyWidth = imageData_.dirtyX < 0 ? std::min(imageData_.dirtyX + imageData_.dirtyWidth, imgWidth)
+                                                  : std::min(imgWidth - imageData_.dirtyX, imageData_.dirtyWidth);
+    imageData_.dirtyHeight = imageData_.dirtyY < 0 ? std::min(imageData_.dirtyY + imageData_.dirtyHeight, imgHeight)
+                                                   : std::min(imgHeight - imageData_.dirtyY, imageData_.dirtyHeight);
+    auto buffer = imageData->data;
+    int32_t bufferLength = buffer.size();
+    imageData_.data = std::vector<uint32_t>();
+    for (int32_t i = std::max(imageData_.dirtyY, 0); i < imageData_.dirtyY + imageData_.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData_.dirtyX, 0); j < imageData_.dirtyX + imageData_.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
+                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
+                uint8_t red = buffer[idx];       // idx: the 1st byte format: red
+                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
+                uint8_t blue = buffer[idx + 2];  // idx + 2: The 3rd byte format: blue
+                imageData_.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
+            }
+        }
+    }
+    renderingContext2DModel_->PutImageData(imageData_);
+}
 } // namespace OHOS::Ace::Framework

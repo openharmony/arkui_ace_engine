@@ -55,16 +55,49 @@ public:
         return transform_.scaleY;
     }
 
-    double GetTranslateX() const
+    double GetTranslateX()
     {
-        return transform_.translateX;
+        double density = Positive(GetDensity()) ? GetDensity() : 1;
+        return transform_.translateX / density;
     }
 
-    double GetTranslateY() const
+    double GetTranslateY()
     {
-        return transform_.translateY;
+        double density = Positive(GetDensity()) ? GetDensity() : 1;
+        return transform_.translateY / density;
     }
 
+    void SetScaleX(double value)
+    {
+        transform_.scaleX = value;
+    }
+
+    void SetScaleY(double value)
+    {
+        transform_.scaleY = value;
+    }
+
+    void SetRotateX(double value)
+    {
+        transform_.skewX = value;
+    }
+
+    void SetRotateY(double value)
+    {
+        transform_.skewY = value;
+    }
+
+    void SetTranslateX(double value)
+    {
+        double density = GetDensity();
+        transform_.translateX = value * density;
+    }
+
+    void SetTranslateY(double value)
+    {
+        double density = GetDensity();
+        transform_.translateY = value * density;
+    }
 
     TransformParam GetTransform() const
     {
