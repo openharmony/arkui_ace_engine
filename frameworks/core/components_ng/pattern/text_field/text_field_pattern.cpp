@@ -1411,7 +1411,9 @@ void TextFieldPattern::HandleOnUndoAction()
     if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
         redoOperationRecords_.erase(redoOperationRecords_.begin());
     }
-    redoOperationRecords_.push_back(value);
+    if (operationRecords_.size() >= 1) {
+        redoOperationRecords_.push_back(value); // the initial status is not recorded
+    }
     auto textEditingValue = operationRecords_.back(); // each record includes text and caret
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->MoveCaretToContentRect(textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
@@ -1439,6 +1441,11 @@ void TextFieldPattern::HandleOnRedoAction()
 bool TextFieldPattern::CanUndo()
 {
     return operationRecords_.size() > 1;
+}
+
+bool TextFieldPattern::HasOperationRecords()
+{
+    return !operationRecords_.empty();
 }
 
 bool TextFieldPattern::CanRedo()
