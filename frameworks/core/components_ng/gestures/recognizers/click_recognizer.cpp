@@ -362,7 +362,6 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    extraInfo_ = "";
     if (currentFingers_ < fingers_) {
         return;
     }
