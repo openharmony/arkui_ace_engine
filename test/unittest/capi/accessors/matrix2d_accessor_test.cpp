@@ -305,11 +305,6 @@ HWTEST_F(Matrix2DAccessorTest, DISABLED_getTranslateYTest, TestSize.Level1)
     }
 }
 
-
-
-
-
-
 /**
  * @tc.name: rotate1Test
  * @tc.desc:
@@ -328,13 +323,6 @@ HWTEST_F(Matrix2DAccessorTest,  rotate1Test, TestSize.Level1)
         auto rx = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
         auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
         accessor_->rotate1(peer_, &degree, &rx, &ry);
-
-
-
-        std::printf("rotate: holder        rx:%.2f==%.2f ry:%.2f==%.2f\n", peer_->transform.skewX, expectedX, peer_->transform.skewY, expectedY);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewX, expectedX, 0.01f));
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewY, expectedY, 0.01f));
     }
@@ -347,10 +335,6 @@ HWTEST_F(Matrix2DAccessorTest,  rotate1Test, TestSize.Level1)
         auto rx = Converter::ArkValue<Opt_Number>(static_cast<float>(actual));
         auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
         accessor_->rotate1(peer_, &degree, &rx, &ry);
-        std::printf("rotate: holderf       rx:%.2f==%.2f ry:%.2f==%.2f\n", peer_->transform.skewX, expectedX, peer_->transform.skewY, expectedY);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewX, expectedX, 0.01f));
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewY, expectedY, 0.01f));
     }
@@ -363,10 +347,6 @@ HWTEST_F(Matrix2DAccessorTest,  rotate1Test, TestSize.Level1)
         auto rx = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
         auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(actual));
         accessor_->rotate1(peer_, &degree, &rx, &ry);
-        std::printf("rotate: holder       rx:%.2f==%.2f ry:%.2f==%.2f\n", peer_->transform.skewX, expectedX, peer_->transform.skewY, expectedY);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewX, expectedX, 0.01f));
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewY, expectedY, 0.01f));
     }
@@ -389,22 +369,13 @@ HWTEST_F(Matrix2DAccessorTest,  rotate1InvalidValuesTest, TestSize.Level1)
         auto rx = Converter::ArkValue<Opt_Number>();
         auto ry = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
         accessor_->rotate1(peer_, &degree, &rx, &ry);
-        std::printf("rotate: optX holder        rx:%.2f==%.2f ry:%.2f==%.2f\n", peer_->transform.skewX, expectedX, peer_->transform.skewY, expectedY);
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewX, expectedX, 0.01f));
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewY, expectedY, 0.01f));
-
-
         expectedX = (peer_->transform.skewX);
         expectedY = TRANSFORM_ZERO_VALUE;
         rx = Converter::ArkValue<Opt_Number>(static_cast<float>(TRANSFORM_UNITY_VALUE));
         ry = Converter::ArkValue<Opt_Number>();
         accessor_->rotate1(peer_, &degree, &rx, &ry);
-        std::printf("rotate: optY holder        rx:%.2f==%.2f ry:%.2f==%.2f\n", peer_->transform.skewX, expectedX, peer_->transform.skewY, expectedY);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewX, expectedX, 0.01f));
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewY, expectedY, 0.01f));
 }
@@ -420,10 +391,6 @@ HWTEST_F(Matrix2DAccessorTest, setRotateYTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         auto sy = Converter::ArkValue<Ark_Number>(static_cast<float>(actual));
         accessor_->setRotateY(peer_, &sy);
-        std::printf("rotateY: holder sy:%.2f==%.2f\n", peer_->transform.skewY, actual);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewY, actual));
     }
 }
@@ -439,10 +406,6 @@ HWTEST_F(Matrix2DAccessorTest, setRotateXTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         auto sx = Converter::ArkValue<Ark_Number>(static_cast<float>(actual));
         accessor_->setRotateX(peer_, &sx);
-        std::printf("rotateX: holder sx:%.2f==%.2f\n", peer_->transform.skewX, actual);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.skewX, actual));
     }
 }
@@ -458,10 +421,6 @@ HWTEST_F(Matrix2DAccessorTest, setScaleYTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         auto sy = Converter::ArkValue<Ark_Number>(static_cast<float>(actual));
         accessor_->setScaleY(peer_, &sy);
-        std::printf("scaleY: holder sy:%.2f==%.2f\n", peer_->transform.scaleY, actual);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.scaleY, actual));
     }
 }
@@ -477,10 +436,6 @@ HWTEST_F(Matrix2DAccessorTest, setTranslateXTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         auto tx = Converter::ArkValue<Ark_Number>(static_cast<float>(actual));
         accessor_->setTranslateX(peer_, &tx);
-        std::printf("translateX: holder sx:%.2f==%.2f\n", peer_->transform.translateX, actual);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.translateX, actual));
     }
 }
@@ -496,10 +451,6 @@ HWTEST_F(Matrix2DAccessorTest, setTranslateYTest, TestSize.Level1)
     for (const auto& actual : NUMBER_TEST_PLAN) {
         auto ty = Converter::ArkValue<Ark_Number>(static_cast<float>(actual));
         accessor_->setTranslateY(peer_, &ty);
-        std::printf("translateY: holder sy:%.2f==%.2f\n", peer_->transform.translateY, actual);
-
-
-
         EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.translateY, actual));
     }
 }
