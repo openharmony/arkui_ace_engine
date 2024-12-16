@@ -16,9 +16,12 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
 
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/color.h"
 
 struct CanvasGradientPeer {
-public:
+    CanvasGradientPeer() = default;
+    virtual ~CanvasGradientPeer() = default;
+
     const std::shared_ptr<OHOS::Ace::Gradient>& GetGradient() const
     {
         return gradient_;
@@ -28,7 +31,35 @@ public:
         gradient_ = gradient;
     }
 
+    virtual void AddColorStop(const float& offset, const OHOS::Ace::Color& color)
+    {
+        CHECK_NULL_VOID(gradient_);
+        if (!isColorStopValid && gradient_->GetColors().empty()) {
+            isColorStopValid = true;
+        }
+        OHOS::Ace::GradientColor gradientColor;
+        if (offset < 0 || offset > 1) {
+            isColorStopValid = false;
+            // if the offset is invalid, fill the shape with transparent
+            gradient_->ClearColors();
+            gradientColor.SetColor(OHOS::Ace::Color::TRANSPARENT);
+            gradientColor.SetDimension(0.0);
+            gradient_->AddColor(gradientColor);
+            gradient_->AddColor(gradientColor);
+            return;
+        }
+        gradientColor.SetColor(color);
+        gradientColor.SetDimension(offset);
+        gradient_->AddColor(gradientColor);
+        auto colorSize = gradient_->GetColors().size();
+        // prevent setting only one colorStop
+        if (colorSize == 1) {
+            gradient_->AddColor(gradientColor);
+        }
+    }
+
 private:
     std::shared_ptr<OHOS::Ace::Gradient> gradient_ = nullptr;
+    bool isColorStopValid = false;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
