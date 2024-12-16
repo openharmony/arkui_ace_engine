@@ -196,6 +196,7 @@ export struct ToolBar {
     .accessibilityText(this.moreText)
     .focusable(true)
     .focusOnTouch(true)
+    .accessibilityGroup(true)
     .focusBox({
       margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
       strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
@@ -258,6 +259,7 @@ export struct ToolBar {
     })
     .opacity(this.toolBarList[index]?.state !== ItemState.DISABLE ? 1 : 0.4)
     .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
+    .accessibilityGroup(true)
     .accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
     this.toStringFormat(this.toolBarList[index]?.content))
     .accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ?? '')

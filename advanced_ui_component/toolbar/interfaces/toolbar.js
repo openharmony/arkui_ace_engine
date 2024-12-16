@@ -490,6 +490,7 @@ export class ToolBar extends ViewPU {
         'moduleName': '',
       });
       Column.accessibilityText(ObservedObject.GetRawObject(this.moreText));
+      Column.accessibilityGroup(true);
       Column.focusable(true);
       Column.focusOnTouch(true);
       Column.focusBox({
@@ -601,6 +602,7 @@ export class ToolBar extends ViewPU {
       });
       Column.opacity(this.toolBarList[b5]?.state !== ItemState.DISABLE ? 1 : 0.4);
       Column.enabled(this.toolBarList[b5]?.state !== ItemState.DISABLE);
+      Column.accessibilityGroup(true);
       Column.accessibilityText(this.toStringFormat(this.toolBarList[b5]?.accessibilityText) ??
       this.toStringFormat(this.toolBarList[b5]?.content));
       Column.accessibilityDescription(this.toStringFormat(this.toolBarList[b5]?.accessibilityDescription) ?? '');
