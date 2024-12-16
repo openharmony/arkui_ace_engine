@@ -1,4 +1,4 @@
-import { ColorBlock, RadioBlock, SliderBlock } from "common";
+import { ColorBlock, RadioBlock, SliderBlock } from 'common';
 
 @Component
 export struct CompFocusControlBlocks {

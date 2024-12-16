@@ -1,5 +1,5 @@
-import { ColorBlock, RadioBlock, SliderBlock } from "common";
-import { pointer } from "@kit.InputKit";
+import { ColorBlock, RadioBlock, SliderBlock } from 'common';
+
 
 @Component
 export struct CompOutlineBlocks {

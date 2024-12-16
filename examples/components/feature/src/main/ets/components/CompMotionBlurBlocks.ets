@@ -1,4 +1,4 @@
-import { SliderBlock } from "common";
+import { SliderBlock } from 'common';
 
 @Component
 export struct CompMotionBlurBlocks {

@@ -1,4 +1,4 @@
-import { RadioBlock } from "common";
+import { RadioBlock } from 'common';
 
 @Component
 export struct CompAccessibilityBlocks {

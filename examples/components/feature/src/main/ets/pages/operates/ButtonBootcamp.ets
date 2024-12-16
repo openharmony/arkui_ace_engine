@@ -133,6 +133,7 @@ export struct ButtonBootcamp {
   @State btnFontColor: ResourceColor = $r('sys.color.font_on_primary');
   @State enableRole: boolean = false;
   @State btnRole: ButtonRole = ButtonRole.NORMAL;
+  //part1
   // size
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
@@ -1057,7 +1058,6 @@ export struct ButtonBootcamp {
     }
     .font({
       size: useEnabled(this.enableCompBindMenuMenuFontSize, this.compBindMenuMenuFontSize),
-      family: 'HarmonyOS Sans',
       weight: useEnabled(this.enableCompBindMenuMenuFontWeight, this.compBindMenuMenuFontWeight),
       style: useEnabled(this.enableCompBindMenuMenuFontStyle, this.compBindMenuMenuFontStyle)
     })

@@ -1,5 +1,5 @@
-import { RadioBlock, SliderBlock } from "common";
-import { pointer } from "@kit.InputKit";
+import { RadioBlock, SliderBlock } from 'common';
+
 
 @Component
 export struct CompDragAndDropControlBlocks {

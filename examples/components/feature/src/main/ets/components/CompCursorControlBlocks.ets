@@ -1,4 +1,4 @@
-import { RadioBlock } from "common";
+import { RadioBlock } from 'common';
 import { pointer } from "@kit.InputKit";
 
 @Component

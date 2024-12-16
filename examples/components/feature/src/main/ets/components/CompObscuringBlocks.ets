@@ -1,5 +1,4 @@
-import { RadioBlock } from "common";
-import { pointer } from "@kit.InputKit";
+import { RadioBlock } from 'common';
 
 @Component
 export struct CompObscuringBlocks {

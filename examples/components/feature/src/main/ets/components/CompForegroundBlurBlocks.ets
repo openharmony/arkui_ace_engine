@@ -1,4 +1,4 @@
-import { RadioBlock, SliderBlock } from "common";
+import { RadioBlock, SliderBlock } from 'common';
 
 @Component
 export struct CompForegroundBlurBlocks {

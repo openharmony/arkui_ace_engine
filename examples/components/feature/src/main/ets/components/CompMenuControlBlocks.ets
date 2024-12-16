@@ -1,4 +1,4 @@
-import { ColorBlock, IconBlock, RadioBlock, SliderBlock } from "common";
+import { ColorBlock, IconBlock, RadioBlock, SliderBlock } from 'common';
 
 @Component
 export struct CompMenuControlBlocks {
