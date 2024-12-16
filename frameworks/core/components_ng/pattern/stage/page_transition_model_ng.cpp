@@ -94,4 +94,30 @@ void PageTransitionModelNG::Create()
 
 void PageTransitionModelNG::Pop()
 {}
+
+void PageTransitionModelNG::SetSlideEffect(PageTransitionEffect* transition, const std::optional<SlideEffect>& effect)
+{
+    CHECK_NULL_VOID(transition);
+    if (effect) {
+        transition->SetSlideEffect(effect.value());
+    }
+}
+
+void PageTransitionModelNG::SetTranslateEffect(PageTransitionEffect* transition, const NG::TranslateOptions& option)
+{
+    CHECK_NULL_VOID(transition);
+    transition->SetTranslateEffect(option);
+}
+
+void PageTransitionModelNG::SetScaleEffect(PageTransitionEffect* transition, const NG::ScaleOptions& option)
+{
+    CHECK_NULL_VOID(transition);
+    transition->SetScaleEffect(option);
+}
+
+void PageTransitionModelNG::SetOpacityEffect(PageTransitionEffect* transition, float opacity)
+{
+    CHECK_NULL_VOID(transition);
+    transition->SetOpacityEffect(opacity);
+}
 } // namespace OHOS::Ace::NG

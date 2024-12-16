@@ -13,9 +13,30 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/stage/page_transition_effect.h"
+#include "core/components_ng/pattern/stage/page_transition_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+using namespace OHOS::Ace::NG::Converter;
+
+namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+void AssignCast(std::optional<SlideEffect>& dst, const Ark_SlideEffect& src)
+{
+    switch (src) {
+        case ARK_SLIDE_EFFECT_LEFT: dst = SlideEffect::LEFT; break;
+        case ARK_SLIDE_EFFECT_RIGHT: dst = SlideEffect::RIGHT; break;
+        case ARK_SLIDE_EFFECT_TOP: dst = SlideEffect::TOP; break;
+        case ARK_SLIDE_EFFECT_BOTTOM: dst = SlideEffect::BOTTOM; break;
+        case ARK_SLIDE_EFFECT_START: dst = SlideEffect::START; break;
+        case ARK_SLIDE_EFFECT_END: dst = SlideEffect::END; break;
+        default: LOGE("Unexpected enum value in Ark_SlideEffect: %{public}d", src);
+    }
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonTransitionModifier {
@@ -27,38 +48,49 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 void SlideImpl(Ark_NativePointer node,
                Ark_SlideEffect value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonTransitionModelNG::SetSlide(frameNode, convValue);
+    auto transition = reinterpret_cast<PageTransitionEffect *>(node);
+    CHECK_NULL_VOID(transition);
+    auto convValue = Converter::OptConvert<SlideEffect>(value);
+    PageTransitionModelNG::SetSlideEffect(transition, convValue);
 }
 void TranslateImpl(Ark_NativePointer node,
                    const Ark_TranslateOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    auto transition = reinterpret_cast<PageTransitionEffect *>(node);
+    CHECK_NULL_VOID(transition);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonTransitionModelNG::SetTranslate(frameNode, convValue);
+    auto convValue = Converter::Convert<TranslateOptions>(*value);
+    PageTransitionModelNG::SetTranslateEffect(transition, convValue);
 }
 void ScaleImpl(Ark_NativePointer node,
                const Ark_ScaleOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    auto transition = reinterpret_cast<PageTransitionEffect *>(node);
+    CHECK_NULL_VOID(transition);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonTransitionModelNG::SetScale(frameNode, convValue);
+    auto convValue = Converter::Convert<ScaleOpt>(*value);
+    ScaleOptions option;
+    option.centerX = convValue.centerX ? convValue.centerX.value() : 0.5_pct;
+    option.centerY = convValue.centerY ? convValue.centerY.value() : 0.5_pct;
+    if (convValue.x) {
+        option.xScale = convValue.x.value();
+    }
+    if (convValue.y) {
+        option.yScale = convValue.y.value();
+    }
+    if (convValue.z) {
+        option.zScale = convValue.z.value();
+    }
+    PageTransitionModelNG::SetScaleEffect(transition, option);
 }
 void OpacityImpl(Ark_NativePointer node,
                  const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    auto transition = reinterpret_cast<PageTransitionEffect *>(node);
+    CHECK_NULL_VOID(transition);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonTransitionModelNG::SetOpacity(frameNode, convValue);
+    auto convValue = Converter::Convert<float>(*value);
+    PageTransitionModelNG::SetOpacityEffect(transition, convValue);
 }
 } // CommonTransitionModifier
 const GENERATED_ArkUICommonTransitionModifier* GetCommonTransitionModifier()

@@ -37,6 +37,8 @@
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "base/log/log_wrapper.h"
 
+using namespace OHOS::Ace::NG::Converter;
+
 namespace {
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
@@ -59,13 +61,6 @@ struct EdgesParamOptions {
 struct BiasOpt {
     std::optional<float> first;
     std::optional<float> second;
-};
-struct ScaleOpt {
-    std::optional<float> x;
-    std::optional<float> y;
-    std::optional<float> z;
-    std::optional<Dimension> centerX;
-    std::optional<Dimension> centerY;
 };
 
 struct RotateOpt {
@@ -398,18 +393,6 @@ std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_
     auto x = OptConvert<Dimension>(src.x);
     auto y = OptConvert<Dimension>(src.y);
     return {x, y};
-}
-
-template<>
-ScaleOpt Convert(const Ark_ScaleOptions& src)
-{
-    ScaleOpt scaleOptions;
-    scaleOptions.x = OptConvert<float>(src.x);
-    scaleOptions.y = OptConvert<float>(src.y);
-    scaleOptions.z = OptConvert<float>(src.z);
-    scaleOptions.centerX = OptConvert<Dimension>(src.centerX);
-    scaleOptions.centerY = OptConvert<Dimension>(src.centerY);
-    return scaleOptions;
 }
 
 template<>
@@ -929,25 +912,6 @@ void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& sr
         case ARK_TRANSITION_TYPE_DELETE: dst = TransitionType::DISAPPEARING; break;
         default: LOGE("Unexpected enum value in Opt_TransitionType: %{public}d", src);
     }
-}
-
-template<>
-TranslateOptions Convert(const Ark_TranslateOptions& src)
-{
-    TranslateOptions translateOptions;
-    auto coord = OptConvert<Dimension>(src.x);
-    if (coord.has_value()) {
-        translateOptions.x = coord.value();
-    }
-    coord = OptConvert<Dimension>(src.y);
-    if (coord.has_value()) {
-        translateOptions.y = coord.value();
-    }
-    coord = OptConvert<Dimension>(src.z);
-    if (coord.has_value()) {
-        translateOptions.z = coord.value();
-    }
-    return translateOptions;
 }
 
 template<>

@@ -434,11 +434,13 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
+    template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
+    template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
