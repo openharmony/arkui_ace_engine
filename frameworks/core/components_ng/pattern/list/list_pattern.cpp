@@ -2438,15 +2438,26 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
 int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, GetStartIndex());
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, GetStartIndex());
     auto globalOffset = host->GetTransformRelativeOffset();
     float relativeX = xOffset - globalOffset.GetX();
     float relativeY = yOffset - globalOffset.GetY();
     float mainOffset = GetAxis() == Axis::VERTICAL ? relativeY : relativeX;
     float crossOffset = GetAxis() == Axis::VERTICAL ? relativeX : relativeY;
+    float mainSize = GetMainAxisSize(GetContentSize(), GetAxis());
     float crossSize = GetCrossAxisSize(GetContentSize(), GetAxis());
+    if (TextDirection::RTL == listProperty->GetNonAutoLayoutDirection()) {
+        if (Axis::VERTICAL == GetAxis()) {
+            crossOffset = crossSize - crossOffset;
+        } else {
+            mainOffset = mainSize - mainOffset;
+        }
+    }
     int32_t lanesOffset = 0;
     if (lanes_ > 1) {
-        lanesOffset = static_cast<int32_t>(crossOffset / (crossSize / lanes_));
+        lanesOffset = static_cast<int32_t>(crossOffset / ((crossSize + laneGutter_) / lanes_));
     }
     for (auto& pos : itemPosition_) {
         if (mainOffset <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
