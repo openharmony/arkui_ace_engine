@@ -2949,6 +2949,8 @@ interfaces/inner_api/form_render/ @arondave
 interfaces/inner_api/ui_service_manager/ @arkuiframework
 interfaces/inner_api/ui_session/ @arkuiframework
 interfaces/inner_api/xcomponent_controller/ @arkuilayout
+interfaces/inner_api/ace_kit/include/ @arkui_architecture
+interfaces/inner_api/ace_kit/src/ @arkuiframework
 
 [NAPI Interfaces]
 interfaces/napi/kits/animator/ @arkui_superman
