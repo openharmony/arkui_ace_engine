@@ -412,4 +412,9 @@ void SecurityComponentModelNG::SetTextIconLayoutDirection(const SecurityComponen
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, value);
 }
+
+void SecurityComponentModelNG::SetAlign(const Alignment alignment)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, Alignment, alignment);
+}
 } // namespace OHOS::Ace::NG
