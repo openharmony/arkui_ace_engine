@@ -18,6 +18,7 @@
 #include "text_base.h"
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
@@ -503,5 +504,96 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
         EXPECT_EQ(spanDe->interval.second, 1);
         EXPECT_EQ(StringUtils::Str16ToStr8(spanDe->content), " ");
     }
+}
+
+/**
+ * @tc.name: InheritParentTextStyle001
+ * @tc.desc: test InheritParentTextStyle of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct a minimal version 10.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE)); // 12 means min platformVersion.
+    TextStyle textStyleBase;
+    textStyleBase.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    multipleAlgorithm->textStyle_ = textStyleBase;
+
+    /**
+     * @tc.steps: step2. Construct MultipleParagraphLayoutAlgorithm and test inheritTextStyle_.
+     */
+    TextStyle textStyle;
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    multipleAlgorithm->InheritParentTextStyle(textStyle);
+    EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), ADAPT_FONT_SIZE_VALUE);
+
+    /**
+     * @tc.steps: step1. Construct a minimal version 16 and test inheritTextStyle_.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 16 means min platformVersion.
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    multipleAlgorithm->InheritParentTextStyle(textStyle);
+    EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), FONT_SIZE_VALUE);
+}
+
+/**
+ * @tc.name: SpanBuildParagraph001
+ * @tc.desc: test InheritParentTextStyle of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct textLayoutAlgorithm with span.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE)); // 12 means min platformVersion.
+    std::list<RefPtr<NG::SpanItem>> selectSpanItems;
+    auto span0 = AceType::MakeRefPtr<SpanItem>();
+    span0->interval = { 0, 7 };
+    span0->content = u"012345";
+    selectSpanItems.emplace_back(span0);
+    selectSpanItems.emplace_back(span0);
+    auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager_, nullptr);
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>(selectSpanItems, pManager_, true);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetHeight(RK356_HEIGHT);
+    contentConstraint.maxSize.SetWidth(RK356_WIDTH);
+
+    /**
+     * @tc.steps: step2. test span MAX_LINES_FIRST.
+     */
+    TextStyle textStyle;
+    textStyle.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
+    textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+
+    textLayoutAlgorithm->BuildParagraph(
+        textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
+
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 12 means min platformVersion.
+
+    textLayoutAlgorithm->BuildParagraph(
+        textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+    EXPECT_EQ(textStyle.GetFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
 }
 } // namespace OHOS::Ace::NG
