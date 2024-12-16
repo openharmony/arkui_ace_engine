@@ -37,8 +37,7 @@ foreach(src, common_sources) {
 web_components_support_for_test = true
 form_component_support_for_test = true
 component3d_component_support_for_test = true
-
-#window_scene_support_for_test = true
+plugin_components_support_for_test = true
 
 ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   testonly = true
@@ -89,13 +88,18 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     defines += [ "FORM_SUPPORTED" ]
   }
 
-  #  if (defined(window_scene_support_for_test) && window_scene_support_for_test) {
-  #    defines += [ "WINDOW_SCENE_SUPPORTED" ]
-  #  }
-
   if (defined(component3d_component_support_for_test) &&
       component3d_component_support_for_test) {
     defines += [ "MODEL_COMPONENT_SUPPORTED" ]
+  }
+
+  if (defined(plugin_components_support_for_test) &&
+      plugin_components_support_for_test) {
+    defines += [ "PLUGIN_COMPONENT_SUPPORTED" ]
+    sources += [
+      "$ace_root/frameworks/core/components_ng/pattern/plugin/plugin_model_static_ng.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/plugin/plugin_node.cpp",
+    ]
   }
 
   cflags_cc = [ "-Wno-unused-variable" ]
