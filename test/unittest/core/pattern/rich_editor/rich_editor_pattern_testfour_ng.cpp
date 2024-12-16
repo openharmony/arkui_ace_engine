@@ -1213,4 +1213,85 @@ HWTEST_F(RichEditorPatternTestFourNg, InitSelection_ABOVE_LINE, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
+
+/**
+ * @tc.name: DeleteContentRichEditor001
+ * @tc.desc: test DeleteContentRichEditor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteContentRichEditor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    std::string insertValue = "hello";
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->InsertValueOperation(insertValue, &record, OperationType::DEFAULT);
+    richEditorPattern->DeleteContentRichEditor(3);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 2);
+}
+
+/**
+ * @tc.name: SetMaxLength001
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    int32_t maxLength = 1;
+    richEditorPattern->SetMaxLength(maxLength);
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), 1);
+}
+
+/**
+ * @tc.name: SetMaxLength002
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), INT_MAX);
+}
+
+/**
+ * @tc.name: AddSpan001
+ * @tc.desc: Test the function AddTextSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, AddSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    std::string insertValue = "hello";
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->InsertValueOperation(insertValue, &record, OperationType::DEFAULT);
+    int32_t maxLength = 5;
+    richEditorPattern->SetMaxLength(maxLength);
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 0: AddTextSpan
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 1: AddSymbolSpan
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 2: AddPlaceholderSpan
+    richEditorPattern->AddPlaceholderSpan(BUILDER_NODE_1, {});
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+}
 } // namespace OHOS::Ace::NG
