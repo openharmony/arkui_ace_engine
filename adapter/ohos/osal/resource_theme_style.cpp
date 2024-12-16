@@ -116,7 +116,8 @@ static const std::set<std::string> stringAttrs = {
     "rich_editor_writting_is_support",
     "ai_write_menu_name",
     "textfield_accessibility_clear",
-    "pass_point"
+    "pass_point",
+    "side_length"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
