@@ -985,6 +985,7 @@ private:
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
     bool isAnimateOverScroll_ = false;
+    bool isScrollToOverAnimation_ = false;
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
