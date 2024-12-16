@@ -16,6 +16,28 @@
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
 
+interface fontWeightItem {
+  label: string;
+  value: FontWeight | number | string;
+}
+const fontWeightDataSource: fontWeightItem[] = [
+  { label: '100', value: 100 },
+  { label: '200', value: 200 },
+  { label: '300', value: 300 },
+  { label: '400', value: 400 },
+  { label: '500', value: 500 },
+  { label: '600', value: 600 },
+  { label: '700', value: 700 },
+  { label: '800', value: 800 },
+  { label: '900', value: 900 },
+  { label: 'Lighter', value: FontWeight.Lighter },
+  { label: 'Normal', value: FontWeight.Normal },
+  { label: 'Regular', value: FontWeight.Regular },
+  { label: 'Medium', value: FontWeight.Medium },
+  { label: 'Bold', value: FontWeight.Bold },
+  { label: 'Bolder', value: FontWeight.Bolder },
+];
+
 @Component
 export struct SpanBootcamp {
   @Require @Prop title: ResourceStr;
@@ -41,7 +63,7 @@ export struct SpanBootcamp {
   @State enableLineHeight: boolean = false;
   @State lineHeight: number | undefined = undefined;
   @State enableTextFontSize: boolean = false;
-  @State textFontSize: number = 16; //length
+  @State textFontSize: number = 16;
   @State enableTextFontWeight: boolean = false;
   @State textFontWeight: FontWeight | number | string = 400|FontWeight.Normal;
   @State enableTextFontStyle: boolean = false;
@@ -58,6 +80,7 @@ export struct SpanBootcamp {
   @State textShadowOffsetY: number = 0
   @State enableTextShadowFill: boolean = false;
   @State textShadowFill: boolean = false;
+
 
   build() {
     NavDestination() {
@@ -196,23 +219,7 @@ export struct SpanBootcamp {
           title: 'fontWeight',
           isEnabled: this.enableFontWeight,
           value: this.fontWeight,
-          dataSource: [
-            { label: '100', value: 100 },
-            { label: '200', value: 200 },
-            { label: '300', value: 300 },
-            { label: '400', value: 400 },
-            { label: '500', value: 500 },
-            { label: '600', value: 600 },
-            { label: '700', value: 700 },
-            { label: '800', value: 800 },
-            { label: '900', value: 900 },
-            { label: 'Lighter', value: FontWeight.Lighter },
-            { label: 'Normal', value: FontWeight.Normal },
-            { label: 'Regular', value: FontWeight.Regular },
-            { label: 'Medium', value: FontWeight.Medium },
-            { label: 'Bold', value: FontWeight.Bold },
-            { label: 'Bolder', value: FontWeight.Bolder },
-          ]
+          dataSource: fontWeightDataSource
         })
 
         SliderBlock({
@@ -235,23 +242,7 @@ export struct SpanBootcamp {
           title: 'font.weight',
           isEnabled: this.enableTextFontWeight,
           value: this.textFontWeight,
-          dataSource: [
-            { label: '100', value: 100 },
-            { label: '200', value: 200 },
-            { label: '300', value: 300 },
-            { label: '400', value: 400 },
-            { label: '500', value: 500 },
-            { label: '600', value: 600 },
-            { label: '700', value: 700 },
-            { label: '800', value: 800 },
-            { label: '900', value: 900 },
-            { label: 'Lighter', value: FontWeight.Lighter },
-            { label: 'Normal', value: FontWeight.Normal },
-            { label: 'Regular', value: FontWeight.Regular },
-            { label: 'Medium', value: FontWeight.Medium },
-            { label: 'Bold', value: FontWeight.Bold },
-            { label: 'Bolder', value: FontWeight.Bolder },
-          ]
+          dataSource:fontWeightDataSource
         })
 
         RadioBlock({
