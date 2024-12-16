@@ -1759,7 +1759,9 @@ void WebDelegate::ShowWebView()
         window_->Show();
     }
 
-    OnActive();
+    if (!IsActivePolicyDisable()) {
+        OnActive();
+    }
     OnWebviewShow();
 }
 
@@ -1769,8 +1771,19 @@ void WebDelegate::HideWebView()
         window_->Hide();
     }
 
-    OnInactive();
+    if (!IsActivePolicyDisable()) {
+        OnInactive();
+    }
     OnWebviewHide();
+}
+
+bool WebDelegate::IsActivePolicyDisable()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        return nweb_->IsActivePolicyDisable();
+    }
+    return false;
 }
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)

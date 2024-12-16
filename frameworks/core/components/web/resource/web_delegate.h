@@ -1142,6 +1142,8 @@ public:
 
     void UnRegisterNativeArkJSFunction(const std::string& objName);
 
+    bool IsActivePolicyDisable();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
