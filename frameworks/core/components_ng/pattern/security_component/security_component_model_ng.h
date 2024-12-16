@@ -53,6 +53,9 @@ public:
     static void SetBackgroundBorderColor(const Color& value);
     static void SetBackgroundBorderStyle(const BorderStyle& value);
     static void SetBackgroundBorderRadius(const Dimension& value);
+    static void SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
+        const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
+        const std::optional<Dimension>& bottomRight);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(const std::optional<Dimension>& padding);
