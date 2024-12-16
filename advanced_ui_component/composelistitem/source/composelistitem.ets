@@ -604,8 +604,8 @@ struct OperateItemStruct {
         }
       })
       .accessibilityLevel(this.radio?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
-      .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? '', this.radio?.isCheck))
-      .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? '', this.radio?.isCheck))
+      .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -636,9 +636,8 @@ struct OperateItemStruct {
         }
       })
       .accessibilityLevel(this.checkBox?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
-      .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? '', this.checkBox?.isCheck))
-      .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? '',
-        this.checkBox?.isCheck))
+      .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -651,9 +650,8 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
         .accessibilityLevel(this.switch?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
-        .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? '', this.switch?.isCheck))
-        .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? '',
-          this.switch?.isCheck))
+        .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
+        .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -851,16 +849,15 @@ struct OperateItemStruct {
  * @param selected select state
  * @returns string
  */
-function getAccessibilityText(resource: ResourceStr, selected?: boolean): string {
+function getAccessibilityText(resource: ResourceStr): string {
   try {
-    let selectText: string = getContext().resourceManager.getStringSync(125833934);
     let resourceString: string = '';
     if (typeof resource === 'string') {
       resourceString = resource;
     } else {
       resourceString = getContext().resourceManager.getStringSync(resource);
     }
-    return selected ? `${selectText},${resourceString}` : resourceString;
+    return resourceString;
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
