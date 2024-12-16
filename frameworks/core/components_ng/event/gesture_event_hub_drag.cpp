@@ -645,6 +645,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
         }
+        data.previewScale = previewScale;
         // use menu preview scale replace default pixelMap scale.
         if (isMenuShow) {
             ProcessMenuPreviewScale(imageNode, scale, previewScale * windowScale, defaultPixelMapScale);
@@ -1277,7 +1278,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
 
     // create text node
     auto subWindowOffset = isExpandDisplay ? subWindow->GetWindowRect().GetOffset() : OffsetF();
-    auto  textNode = DragEventActuator::CreateBadgeTextNode(frameNode, data.badgeNumber, data.defaultScale, true,
+    auto  textNode = DragEventActuator::CreateBadgeTextNode(frameNode, data.badgeNumber, data.previewScale, true,
         data.dragPreviewOffsetToScreen - subWindowOffset);
     
     // create gatherNode
