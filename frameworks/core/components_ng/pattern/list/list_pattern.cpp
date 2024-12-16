@@ -122,7 +122,12 @@ bool ListPattern::HandleTargetIndex(bool isJump)
         MarkDirtyNodeSelf();
         return true;
     }
-    AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+    auto iter = itemPosition_.find(targetIndex_.value());
+    if (iter != itemPosition_.end()) {
+        AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+    } else if (lastSnapTargetIndex_ >= 0) {
+        lastSnapTargetIndex_ = -1;
+    }
     // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
     targetIndex_.reset();
     targetIndexInGroup_.reset();
@@ -934,6 +939,7 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     predictSnapOffset_ = snapAnimationOptions.snapDelta;
     scrollSnapVelocity_ = snapAnimationOptions.animationVelocity;
     snapTrigByScrollBar_ = snapAnimationOptions.fromScrollBar;
+    lastSnapTargetIndex_ = -1;
     MarkDirtyNodeSelf();
     return true;
 }
