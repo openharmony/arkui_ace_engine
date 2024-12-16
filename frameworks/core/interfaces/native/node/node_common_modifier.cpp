@@ -6207,6 +6207,28 @@ void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_
     ViewAbstractModelNG::SetBrightnessBlender(frameNode, brightnessBlender);
     ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
 }
+
+void SetTabStop(ArkUINodeHandle node, ArkUI_Bool tabstop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTabStop(frameNode, tabstop);
+}
+
+void ResetTabStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool tabstop = false;
+    ViewAbstract::SetTabStop(frameNode, tabstop);
+}
+
+ArkUI_Bool GetTabStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6283,7 +6305,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
         ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop,
-        SetBlendModeByBlender };
+        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop};
 
     return &modifier;
 }

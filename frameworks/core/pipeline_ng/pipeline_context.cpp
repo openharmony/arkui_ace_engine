@@ -911,6 +911,7 @@ void PipelineContext::FlushFocusView()
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
+        focusManager_->SetFocusViewStackState(FocusViewStackState::IDLE);
     }
 }
 

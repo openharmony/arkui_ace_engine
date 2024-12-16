@@ -128,6 +128,8 @@ public:
 
     virtual void ResetRequestFocusCallback();
 
+    virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
+
     // distribute
     virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {

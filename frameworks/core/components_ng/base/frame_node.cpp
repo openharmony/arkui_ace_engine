@@ -1345,7 +1345,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     if (focusHub) {
         auto focusView = focusHub->GetFirstChildFocusView();
         if (focusView) {
-            focusView->FocusViewClose();
+            focusView->FocusViewClose(true);
         }
         focusHub->RemoveSelf();
     }
