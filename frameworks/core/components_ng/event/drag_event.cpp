@@ -278,6 +278,25 @@ void DragEventActuator::InitDragDropStatusToIdle()
     isThumbnailCallbackTriggered_ = false;
 }
 
+// Check need getThumbnailPixelMap in collectTouchTarget, if gesture scope contain succeed recognizer, no need
+// to getThumbnailPixelMap.
+bool DragEventActuator::CheckIfNeedGetThumbnailPixelMap(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    CHECK_NULL_RETURN(longPressRecognizer_, false);
+    auto gestureReferee = eventManager->GetGestureRefereeNG(longPressRecognizer_);
+    CHECK_NULL_RETURN(gestureReferee, false);
+    if (gestureReferee->IsAnySucceedRecognizerExist(lastTouchFingerId_)) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to get thumbnail pixelmap with success recognizer.");
+        return true;
+    }
+    return false;
+}
+
 void DragEventActuator::GetThumbnailPixelMap(bool isSync)
 {
     auto actuator = WeakClaim(this).Upgrade();
@@ -419,6 +438,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
         return;
     }
+    lastTouchFingerId_ = touchRestrict.touchEvent.id;
     dragDropManager->SetIsDisableDefaultDropAnimation(false);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenuUsingGesture = focusHub == nullptr
@@ -892,8 +912,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger 150ms timer Thumbnail callback.");
             auto actuator = weak.Upgrade();
             CHECK_NULL_VOID(actuator);
-            actuator->GetThumbnailPixelMap(false);
-            actuator->SetIsThumbnailCallbackTriggered(true);
+            auto gestureHub = actuator->gestureEventHub_.Upgrade();
+            CHECK_NULL_VOID(gestureHub);
+            auto frameNode = gestureHub->GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            if (!actuator->CheckIfNeedGetThumbnailPixelMap(frameNode)) {
+                actuator->GetThumbnailPixelMap(false);
+                actuator->SetIsThumbnailCallbackTriggered(true);
+            }
         };
         longPressRecognizer_->SetThumbnailCallback(std::move(callback));
     }
