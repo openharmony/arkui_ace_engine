@@ -908,7 +908,7 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
 
 void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_MENU, "Custom MenuItem index:%{public}d receive touch event", index_);
+    TAG_LOGD(AceLogTag::ACE_MENU, "Custom MenuItem receive touch event");
     const auto& touches = info.GetTouches();
     CHECK_EQUAL_VOID(touches.empty(), true);
     auto touchType = touches.front().GetTouchType();
