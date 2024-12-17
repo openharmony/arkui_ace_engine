@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -194,7 +195,7 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
+    UpdateTargetSize();
     auto offset = host->GetPaintRectOffset();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
@@ -1112,7 +1113,11 @@ bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SetSelectSize(geometryNode->GetFrameSize());
-    UpdateTargetSize();
+    CHECK_NULL_RETURN(menuWrapper_, false);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    if (wrapperPattern && wrapperPattern->IsShow()) {
+        UpdateTargetSize();
+    }
     return false;
 }
 
