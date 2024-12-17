@@ -4260,6 +4260,22 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea(
         SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
 }
 
+int32_t SwiperPattern::GetFirstIndexInVisibleArea() const
+{
+    if (itemPosition_.empty()) {
+        return 0;
+    }
+    for (const auto& item : itemPosition_) {
+        if (Negative(item.second.startPos) && Negative(item.second.endPos)) {
+            continue;
+        }
+        if (Positive(item.second.endPos)) {
+            return item.first;
+        }
+    }
+    return itemPosition_.begin()->first;
+}
+
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetLastItemInfoInVisibleArea() const
 {
     if (itemPosition_.empty()) {
@@ -5844,6 +5860,15 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float addition
     }
 
     return std::make_pair(currentTurnPageRate, firstIndex);
+}
+
+float SwiperPattern::CalcCurrentTurnPageRate() const
+{
+    if (IsHorizontalAndRightToLeft()) {
+        return CalcCurrentPageStatusOnRTL(0.0f).first;
+    }
+
+    return CalcCurrentPageStatus(0.0f).first;
 }
 
 std::pair<float, float> SwiperPattern::CalcCurrentPageStatus(float additionalOffset) const

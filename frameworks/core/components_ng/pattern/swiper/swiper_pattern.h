@@ -632,6 +632,9 @@ public:
         return static_cast<int32_t>(pageFlipMode_);
     }
 
+    float CalcCurrentTurnPageRate() const;
+    int32_t GetFirstIndexInVisibleArea() const;
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
