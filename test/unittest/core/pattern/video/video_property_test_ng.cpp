@@ -960,8 +960,14 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest021, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), PrepareAsync())
         .WillOnce(Return(0))
         .WillOnce(Return(-1));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(false))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(true))
+        .WillOnce(Return(0));
+    videoPattern->showFirstFrame_ = false;
     videoPattern->ResetMediaPlayer();
     videoPattern->ResetMediaPlayer();
+    videoPattern->showFirstFrame_ = true;
     videoPattern->ResetMediaPlayer();
     videoPattern->mediaPlayer_ = nullptr;
     videoPattern->SetSourceForMediaPlayer();
