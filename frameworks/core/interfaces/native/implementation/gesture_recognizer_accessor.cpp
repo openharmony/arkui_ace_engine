@@ -15,10 +15,15 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 #include "gesture_recognizer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
+const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor();
 namespace GestureRecognizerAccessor {
 void DestroyPeerImpl(GestureRecognizerPeer* peer)
 {
@@ -74,9 +79,29 @@ Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
 }
 Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), nullptr);
-    LOGE("ARKOALA GestureRecognizerAccessor.GetEventTargetInfoImpl not implemented -> incorrect return value!");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto attachNode = peer->GetRecognizer() ? peer->GetRecognizer()->GetAttachedNode().Upgrade() : nullptr;
+    CHECK_NULL_RETURN(attachNode, reinterpret_cast<Ark_NativePointer>(GetEventTargetInfoAccessor()->ctor()));
+    RefPtr<Pattern> pattern;
+    if (auto swiperPattern = attachNode->GetPattern<SwiperPattern>()) {
+        pattern = swiperPattern;
+    } else if (auto scrollablePattern = attachNode->GetPattern<ScrollablePattern>()) {
+        pattern = scrollablePattern;
+    }
+    Ark_NativePointer result;
+    if (pattern) {
+        auto scrollableTargetInfoPeer = reinterpret_cast<ScrollableTargetInfoPeer*>(
+            GetScrollableTargetInfoAccessor()->ctor());
+        scrollableTargetInfoPeer->SetPattern(pattern);
+        scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        result = reinterpret_cast<Ark_NativePointer>(scrollableTargetInfoPeer);
+    } else {
+        auto eventTargetInfoPeer = reinterpret_cast<EventTargetInfoPeer*>(
+            GetEventTargetInfoAccessor()->ctor());
+        eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        result = reinterpret_cast<Ark_NativePointer>(eventTargetInfoPeer);
+    }
+    return result;
 }
 Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
 {
