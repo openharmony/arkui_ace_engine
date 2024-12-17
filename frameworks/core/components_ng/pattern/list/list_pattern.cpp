@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
@@ -85,10 +86,31 @@ void ListPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
+    auto fadingEdge = GetFadingEdge(paintProperty);
     auto overlayNode = host->GetOverlayNode();
-    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+    if (!overlayNode && fadingEdge) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+bool ListPattern::GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty)
+{
+    auto defaultFadingEdge = false;
+    if (!paintProperty->HasDefaultFadingEdge()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_RETURN(context, false);
+        auto listTheme = context->GetTheme<ListTheme>();
+        CHECK_NULL_RETURN(listTheme, false);
+        defaultFadingEdge = GetAxis() == Axis::VERTICAL ? listTheme->GetFadingEdge()
+                                                        : false;
+        paintProperty->UpdateDefaultFadingEdge(defaultFadingEdge);
+    } else {
+        defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
+    }
+    auto fadingEdge = paintProperty->GetFadingEdge().value_or(defaultFadingEdge);
+    return fadingEdge;
 }
 
 void ListPattern::ChangeAxis(RefPtr<UINode> node)
