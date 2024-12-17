@@ -436,4 +436,38 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest007, Te
     // tbm  make sure check method;
     EXPECT_NE(frameNode, nullptr);
 }
+
+/**
+ * @tc.name: JsThirdAccessibilityHoverNgTest008
+ * @tc.desc: IsAccessibilityFocusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest008, TestSize.Level1)
+{
+    auto ohAccessibilityProvider
+        = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto jsInteractionOperation = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+    int64_t hostElementId = 0;
+    jsAccessibilityManager->RegisterJsThirdProviderInteractionOperation(hostElementId, jsInteractionOperation);
+    Accessibility::AccessibilityElementInfo info;
+
+    info.SetPageId(1);
+    info.SetParent(0);
+    info.SetBelongTreeId(10);
+    info.SetAccessibilityId(11);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    EXPECT_EQ(info.GetPageId(), 65536);
+    
+    info.SetBelongTreeId(0);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    EXPECT_EQ(info.GetPageId(), 1);
+}
 } // namespace OHOS::Ace::NG
