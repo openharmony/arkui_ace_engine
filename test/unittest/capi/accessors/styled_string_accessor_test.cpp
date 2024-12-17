@@ -281,8 +281,8 @@ HWTEST_F(StyledStringAccessorUnionNullTest, peerSucceeded, TestSize.Level1)
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorText, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
-    EXPECT_EQ(peer_->GetSpanString()->GetString(), STRING_TEST_VALUE);
+    ASSERT_NE(peer_->spanString, nullptr);
+    EXPECT_EQ(peer_->spanString->GetString(), STRING_TEST_VALUE);
 }
 
 /**
@@ -292,24 +292,24 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorText, TestSize.Lev
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansOn, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
-    auto spansStr = peer_->GetSpanString()->GetSpans(TEST_START_STR, TEST_LENGTH);
+    ASSERT_NE(peer_->spanString, nullptr);
+    auto spansStr = peer_->spanString->GetSpans(TEST_START_STR, TEST_LENGTH);
     EXPECT_EQ(spansStr.size(), 1);
-    auto spansDcrn = peer_->GetSpanString()->GetSpans(TEST_START_DCRN, TEST_LENGTH);
+    auto spansDcrn = peer_->spanString->GetSpans(TEST_START_DCRN, TEST_LENGTH);
     EXPECT_EQ(spansDcrn.size(), 1);
-    auto spansBsl = peer_->GetSpanString()->GetSpans(TEST_START_BSL, TEST_LENGTH);
+    auto spansBsl = peer_->spanString->GetSpans(TEST_START_BSL, TEST_LENGTH);
     EXPECT_EQ(spansBsl.size(), 1);
-    auto spansLsp = peer_->GetSpanString()->GetSpans(TEST_START_LSP, TEST_LENGTH);
+    auto spansLsp = peer_->spanString->GetSpans(TEST_START_LSP, TEST_LENGTH);
     EXPECT_EQ(spansLsp.size(), 1);
-    auto spansShadow = peer_->GetSpanString()->GetSpans(TEST_START_TSH, TEST_LENGTH);
+    auto spansShadow = peer_->spanString->GetSpans(TEST_START_TSH, TEST_LENGTH);
     EXPECT_EQ(spansShadow.size(), 1);
-    auto spansLineHeight = peer_->GetSpanString()->GetSpans(TEST_START_LNHT, TEST_LENGTH);
+    auto spansLineHeight = peer_->spanString->GetSpans(TEST_START_LNHT, TEST_LENGTH);
     EXPECT_EQ(spansLineHeight.size(), 1);
-    auto spansBackgroundColor = peer_->GetSpanString()->GetSpans(TEST_START_BGCL, TEST_LENGTH);
+    auto spansBackgroundColor = peer_->spanString->GetSpans(TEST_START_BGCL, TEST_LENGTH);
     EXPECT_EQ(spansBackgroundColor.size(), 1);
-    auto spansUrl = peer_->GetSpanString()->GetSpans(TEST_START_URL, TEST_LENGTH);
+    auto spansUrl = peer_->spanString->GetSpans(TEST_START_URL, TEST_LENGTH);
     EXPECT_EQ(spansUrl.size(), 1);
-    auto paragraphSpan = peer_->GetSpanString()->GetSpans(TEST_START_PSST, TEST_LENGTH);
+    auto paragraphSpan = peer_->spanString->GetSpans(TEST_START_PSST, TEST_LENGTH);
     EXPECT_EQ(paragraphSpan.size(), 1);
 }
 
@@ -320,9 +320,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansOn, TestSize.
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansFont, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_STR, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_STR, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto spanFont = AceType::DynamicCast<FontSpan>(spans[0]);
     EXPECT_NE(spanFont, nullptr);
@@ -350,9 +350,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansFont, TestSiz
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorDecorationSpan, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_DCRN, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_DCRN, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto decorationSpan = AceType::DynamicCast<DecorationSpan>(spans[0]);
     EXPECT_NE(decorationSpan, nullptr);
@@ -374,9 +374,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorDecorationSpan, Te
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBaselineOffsetSpan, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_BSL, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_BSL, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto baselineSpan = AceType::DynamicCast<BaselineOffsetSpan>(spans[0]);
     EXPECT_NE(baselineSpan, nullptr);
@@ -390,9 +390,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBaselineOffsetSpan
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLetterSpacing, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_LSP, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_LSP, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto letterSpacingSpan = AceType::DynamicCast<LetterSpacingSpan>(spans[0]);
     EXPECT_NE(letterSpacingSpan, nullptr);
@@ -406,9 +406,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLetterSpacing, Tes
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorTextShadow, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_TSH, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_TSH, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto spansShadow = AceType::DynamicCast<TextShadowSpan>(spans[0]);
     EXPECT_NE(spansShadow, nullptr);
@@ -429,9 +429,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorTextShadow, TestSi
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLineHeight, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_LNHT, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_LNHT, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto lineHeight = AceType::DynamicCast<LineHeightSpan>(spans[0]);
     EXPECT_NE(lineHeight, nullptr);
@@ -445,9 +445,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLineHeight, TestSi
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBackgroundColor, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_BGCL, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_BGCL, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto backgroundColor = AceType::DynamicCast<BackgroundColorSpan>(spans[0]);
     EXPECT_NE(backgroundColor, nullptr);
@@ -484,9 +484,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBackgroundColor, T
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorUrl, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_URL, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_URL, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto urlSpan = AceType::DynamicCast<UrlSpan>(spans[0]);
     EXPECT_NE(urlSpan, nullptr);
@@ -510,9 +510,9 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorGesture, 
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStyle, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
-    auto spans = peer_->GetSpanString()->GetSpans(TEST_START_PSST, TEST_LENGTH);
+    auto spans = peer_->spanString->GetSpans(TEST_START_PSST, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto paragraphSpan = AceType::DynamicCast<ParagraphStyleSpan>(spans[0]);
     EXPECT_NE(paragraphSpan, nullptr);
@@ -567,7 +567,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorExtSpan, 
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringEquals, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
     Ark_StyledString styledString = Converter::ArkValue<Ark_StyledString>(*peer_);
     EXPECT_TRUE(accessor_->equals(peer_, &styledString));
 }
@@ -579,10 +579,10 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringEquals, TestSize.Level
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringLength, TestSize.Level1)
 {
-    ASSERT_NE(peer_->GetSpanString(), nullptr);
+    ASSERT_NE(peer_->spanString, nullptr);
 
     auto length = StringUtils::ToWstring(STRING_TEST_VALUE).length();
-    EXPECT_EQ(peer_->GetSpanString()->GetLength(), length);
+    EXPECT_EQ(peer_->spanString->GetLength(), length);
     EXPECT_EQ(accessor_->getLength(peer_), length);
 }
 

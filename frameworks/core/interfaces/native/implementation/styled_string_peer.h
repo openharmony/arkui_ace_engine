@@ -16,16 +16,6 @@
 
 #include "core/components_ng/pattern/text/span/span_string.h"
 
-struct StyledStringPeerBase {
-    OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase> spanString;
-};
-struct StyledStringPeer: public StyledStringPeerBase {
-    OHOS::Ace::RefPtr<OHOS::Ace::SpanString> GetSpanString()
-    {
-        return OHOS::Ace::AceType::DynamicCast<OHOS::Ace::SpanString>(spanString);
-    }
-    void SetSpanString(OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString)
-    {
-        this->spanString = spanString;
-    }
+struct StyledStringPeer {
+    OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString;
 };
