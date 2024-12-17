@@ -5159,21 +5159,6 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     return true;
 }
 
-void RichEditorPattern::ResetFirstNodeStyle()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto spans = tmpHost->GetChildren();
-    if (!spans.empty()) {
-        auto&& firstNode = DynamicCast<SpanNode>(*(spans.begin()));
-        if (firstNode) {
-            firstNode->ResetTextAlign();
-            firstNode->ResetLeadingMargin();
-            tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
-}
-
 bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info)
 {
     auto eventHub = GetEventHub<RichEditorEventHub>();
@@ -5303,7 +5288,6 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     if (caretPosition_ == 0) {
         info.SetLength(0);
-        ResetFirstNodeStyle();
         DoDeleteActions(0, 0, info);
         return deleteText;
     }

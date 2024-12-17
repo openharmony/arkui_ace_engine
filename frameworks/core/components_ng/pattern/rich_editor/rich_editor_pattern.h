@@ -500,7 +500,6 @@ public:
     void ClearContent(const RefPtr<UINode>& child);
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition) override;
-    void ResetFirstNodeStyle();
     bool DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
