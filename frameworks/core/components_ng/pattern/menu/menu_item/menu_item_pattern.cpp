@@ -395,8 +395,6 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
     auto frameNode = GetSubMenu(customNode);
     if (!frameNode) {
         TAG_LOGW(AceLogTag::ACE_MENU, "subMenu has no Menu node");
-    } else {
-        TAG_LOGD(AceLogTag::ACE_MENU, "subMenu tag:%{public}s", frameNode->GetTag().c_str());
     }
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
