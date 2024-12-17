@@ -120,12 +120,20 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     MeasureRow(leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
-    float contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
-
-    auto itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        float contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
+    } else {
+        float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace_;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
         : std::max(leftRowHeight, rightRowHeight);
+    } else {
+        auto itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
+        : std::max(leftRowHeight, rightRowHeight) + padding.Height();
+    }
     auto width = std::max(minRowWidth_, contentWidth);
-
+    
     needExpandContent_ = false;
     emptyWidth_ = 0.0f;
     if (contentWidth < minRowWidth_) {
@@ -144,8 +152,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
             needExpandContent_ = true;
         }
     }
-    
-    auto actualWidth = GreatNotEqual(idealWidth_, 0.0f) ? idealWidth_ : std::max(minRowWidth_, contentWidth + padding.Width());
+    auto actualWidth = GreatNotEqual(idealWidth_, 0.0f) ? idealWidth_ : width;
     childConstraint.minSize.SetWidth(actualWidth - padding.Width());
     childConstraint.maxSize.SetWidth(actualWidth - padding.Width());
 
@@ -350,35 +357,45 @@ void MenuItemLayoutAlgorithm::UpdateIconMargin(LayoutWrapper* layoutWrapper)
     }
 }
 
-void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
-    const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint)
+void MenuItemLayoutAlgorithm::InitPadding(const RefPtr<LayoutProperty>& props,
+    std::optional<LayoutConstraintF>& layoutConstraint)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        verInterval_ = GetMenuItemVerticalPadding();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        padding = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
+        return;
     }
     const auto& idealPadding = props->GetPaddingProperty();
     if (idealPadding) {
         if (!idealPadding->left.has_value()) {
-            idealPadding->left = std:make_optional<CalcLength>(CalcLength(horInterval_));
+            idealPadding->left = std::make_optional<CalcLength>(CalcLength(horInterval_));
         }
         if (!idealPadding->right.has_value()) {
-            idealPadding->right = std:make_optional<CalcLength>(CalcLength(horInterval_));
+            idealPadding->right = std::make_optional<CalcLength>(CalcLength(horInterval_));
         }
         if (!idealPadding->top.has_value()) {
-            idealPadding->top = std:make_optional<CalcLength>(CalcLength(verInterval_));
+            idealPadding->top = std::make_optional<CalcLength>(CalcLength(verInterval_));
         }
         if (!idealPadding->bottom.has_value()) {
-            idealPadding->bottom = std:make_optional<CalcLength>(CalcLength(verInterval_));
+            idealPadding->bottom = std::make_optional<CalcLength>(CalcLength(verInterval_));
         }
         padding = ConvertToPaddingPropertyF(
             idealPadding, ScaleProperty::CreateScaleProperty(), layoutConstraint->percentReference.Width()
         );
     } else {
         padding = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
-        NG::PaddingProperty defaultPaddings = NG::ConvertToCalcPaddingProperty(
-            verInterval_, verInterval_, horInterval_, horInterval_);
-        props->UpdatePadding(defaultPaddings);
     }
+    NG::PaddingProperty paddingProperty = NG::ConvertToCalcPaddingProperty(
+            padding.top, padding.bottom, padding.left, padding.right);
+    props->UpdatePadding(paddingProperty);
+}
+
+void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
+    const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        verInterval_ = GetMenuItemVerticalPadding();
+    }
+    InitPadding(props, layoutConstraint);
     maxRowWidth_ = layoutConstraint->maxSize.Width() - padding.Width();
     // update ideal width if user defined
     const auto& calcConstraint = props->GetCalcLayoutConstraint();
