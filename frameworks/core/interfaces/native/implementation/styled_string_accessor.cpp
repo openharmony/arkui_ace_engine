@@ -371,6 +371,7 @@ RefPtr<SpanBase> Convert(const StyleOptions& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 namespace StyledStringAccessor {
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
@@ -501,7 +502,8 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
     }
     auto spanString = peer->GetSpanString()->GetSubSpanString(startSpan, lengthSpan);
     CHECK_NULL_RETURN(spanString, ret);
-    auto spanPeer = new StyledStringPeer();
+    auto spanPeerCtor = GetStyledStringAccessor()->ctor(nullptr, nullptr);
+    auto spanPeer = reinterpret_cast<StyledStringPeer *>(spanPeerCtor);
     spanPeer->SetSpanString(spanString);
     ret = reinterpret_cast<Ark_NativePointer>(spanPeer);
     return ret;
@@ -518,7 +520,7 @@ void FromHtmlImpl(const Ark_String* html,
 void ToHtmlImpl(const Ark_StyledString* styledString)
 {
     CHECK_NULL_VOID(styledString);
-    StyledStringPeer* peer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
+    auto peer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->GetSpanString());
     auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(peer->GetSpanString().GetRawPtr());
