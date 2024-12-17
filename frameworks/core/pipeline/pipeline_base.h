@@ -398,7 +398,7 @@ public:
 
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
-    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
     virtual void RefreshRootBgColor() const {}
 
