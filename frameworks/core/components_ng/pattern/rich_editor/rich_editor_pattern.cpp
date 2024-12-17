@@ -6540,7 +6540,7 @@ void RichEditorPattern::HandleTouchMove(const TouchLocationInfo& info)
         UpdateSelectionByTouchMove(offset);
         return;
     }
-    CHECK_NULL_VOID(moveCaretState_.isTouchCaret);
+    CHECK_NULL_VOID(moveCaretState_.isTouchCaret && caretTwinkling_);
     if (!moveCaretState_.isMoveCaret) {
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
         if (GreatNotEqual(moveDistance, moveCaretState_.minDistance.ConvertToPx())) {
