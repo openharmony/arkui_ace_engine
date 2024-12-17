@@ -116,6 +116,7 @@ void SetHitTestMode(RefPtr<FrameNode>& popupNode, bool isBlockEvent)
     auto hub = popupNode->GetEventHub<BubbleEventHub>();
     if (hub) {
         auto ges = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(ges);
         if (!isBlockEvent) {
             ges->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
         } else {
