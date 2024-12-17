@@ -13,14 +13,45 @@
  * limitations under the License.
  */
 
+import { tagDesRule } from 'common';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { promptAction } from '@kit.ArkUI';
+import { BlockTag } from 'common/src/main/ets/model/BlockTag';
+import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 
 @Component
 export struct TabContentBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State selectedIndex: number = 0;
+  @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
+  @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+
+  compEventTriggeredLog(value: string) {
+    let time = formatDate(new Date(Date.now()))
+    this.listEventTriggeredTagsTemp.push(
+      new BlockTag(time, tagDesRule(
+        this.title as string,
+        value
+      ))
+    )
+    setTimeout(() => {
+      if (AppStorage.get('Block')) {
+        this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+          this.listEventTriggeredTagsTemp
+        );
+        this.listEventTriggeredTagsTemp = [];
+      } else {
+        if (this.listEventTriggeredTagsTemp) {
+          this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+            this.listEventTriggeredTagsTemp
+          );
+        }
+        if (this.listEventTriggeredTags) {
+          this.listEventTriggeredTagsTemp = [];
+        }
+      }
+    }, 200)
+  }
 
   build() {
     NavDestination() {
@@ -49,14 +80,10 @@ export struct TabContentBootcamp {
           }
           .tabBar('tab1')
           .onWillShow(() => {
-            promptAction.showToast({
-              message: 'tab1出现了'
-            })
+            this.compEventTriggeredLog('tab1 onWillShow触发');
           })
           .onWillHide(() => {
-            promptAction.showToast({
-              message: 'tab1隐藏了'
-            })
+            this.compEventTriggeredLog('tab1 onWillHide触发');
           })
 
           TabContent() {
@@ -64,14 +91,10 @@ export struct TabContentBootcamp {
           }
           .tabBar('tab2')
           .onWillShow(() => {
-            promptAction.showToast({
-              message: 'tab2出现了'
-            })
+            this.compEventTriggeredLog('tab2 onWillShow触发');
           })
           .onWillHide(() => {
-            promptAction.showToast({
-              message: 'tab2隐藏了'
-            })
+            this.compEventTriggeredLog('tab2 onWillHide触发');
           })
 
           TabContent() {
@@ -79,14 +102,10 @@ export struct TabContentBootcamp {
           }
           .tabBar('tab3')
           .onWillShow(() => {
-            promptAction.showToast({
-              message: 'tab3出现了'
-            })
+            this.compEventTriggeredLog('tab3 onWillShow触发');
           })
           .onWillHide(() => {
-            promptAction.showToast({
-              message: 'tab3隐藏了'
-            })
+            this.compEventTriggeredLog('tab3 onWillHide触发');
           })
         }
         .onChange((index: number) => {
