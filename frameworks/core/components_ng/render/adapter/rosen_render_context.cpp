@@ -213,6 +213,9 @@ RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
     DetachModifiers();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveExtraCustomProperty("RS_NODE");
 }
 
 void RosenRenderContext::DetachModifiers()
@@ -366,6 +369,9 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
 {
     RenderContext::SetHostNode(host);
     AddFrameNodeInfoToRsNode();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddExtraCustomProperty("RS_NODE", rsNode_.get());
 }
 
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode)
@@ -678,6 +684,9 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnPropertyChangeMeasure();
 }
 
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
@@ -1570,7 +1579,7 @@ public:
     std::function<void(const RefPtr<PixelMap>&)> callback_;
 };
 
-RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
+RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale, bool isOffline)
 {
     CHECK_NULL_RETURN(rsNode_, nullptr);
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
@@ -1582,8 +1591,8 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
-    auto ret =
-        RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
+    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY,
+        isOffline);
     if (!ret) {
         LOGE("TakeSurfaceCaptureForUI failed!");
         return nullptr;
@@ -5001,6 +5010,9 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
     }
     rsNode_ = externalNode;
     AddFrameNodeInfoToRsNode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddExtraCustomProperty("RS_NODE", rsNode_.get());
 
     ResetTransform();
     ResetTransformMatrix();

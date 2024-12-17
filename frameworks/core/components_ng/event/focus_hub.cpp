@@ -1368,7 +1368,6 @@ bool FocusHub::IsLeafFocusScope()
         return true;
     }
     if (focusDepend_ == FocusDependence::SELF) {
-        lastWeakFocusNode_ = nullptr;
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
         return true;
     }
@@ -2323,9 +2322,11 @@ bool FocusHub::UpdateFocusView()
     CHECK_NULL_RETURN(frameNode, false);
     auto focusView = frameNode->GetPattern<FocusView>();
     if (!focusView) {
-        auto focusManager = GetFocusManager();
-        CHECK_NULL_RETURN(focusManager, false);
-        focusManager->FlushFocusView();
+        if (frameNode->IsOnMainTree()) {
+            auto focusManager = GetFocusManager();
+            CHECK_NULL_RETURN(focusManager, false);
+            focusManager->FlushFocusView();
+        }
         return true;
     }
     auto focusedChild = lastWeakFocusNode_.Upgrade();

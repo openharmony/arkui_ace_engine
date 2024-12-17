@@ -266,8 +266,7 @@ public:
         scrollable->StopScrollable();
     }
 
-    virtual bool StartSnapAnimation(float snapDelta, float animationVelocity, float predictVelocity = 0.f,
-        float dragDistance = 0.f, SnapDirection snapDirection = SnapDirection::NONE)
+    virtual bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     {
         return false;
     }
@@ -741,6 +740,8 @@ public:
 
     void ScrollEndCallback(bool nestedScroll, float velocity);
 
+    void StopScrollableAndAnimate();
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -985,6 +986,7 @@ private:
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
     bool isAnimateOverScroll_ = false;
+    bool isScrollToOverAnimation_ = false;
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;

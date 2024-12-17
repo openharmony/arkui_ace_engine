@@ -237,6 +237,8 @@ private:
             securityComponentPattern->GetAttr<std::string>("description_quick_save_to_gallery", ""));
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_quick_resave_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_save_all", ""));
     }
 
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SecurityComponentTheme>& theme)

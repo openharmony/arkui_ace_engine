@@ -1329,6 +1329,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     FireFontNDKCallback(configurationChange);
+    OnPropertyChangeMeasure();
+}
+
+void FrameNode::OnPropertyChangeMeasure() const
+{
     auto layoutProperty = GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->OnPropertyChangeMeasure();
@@ -4597,7 +4602,7 @@ void FrameNode::RemoveChildInRenderTree(uint32_t index)
 
 bool FrameNode::SkipMeasureContent() const
 {
-    return layoutAlgorithm_->SkipMeasure();
+    return layoutAlgorithm_ && layoutAlgorithm_->SkipMeasure();
 }
 
 bool FrameNode::CheckNeedForceMeasureAndLayout()
@@ -6079,6 +6084,28 @@ void FrameNode::RemoveCustomProperty(const std::string& key)
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
+    }
+}
+
+void FrameNode::AddExtraCustomProperty(const std::string& key, void* extraData)
+{
+    extraCustomPropertyMap_[key] = extraData;
+}
+
+void* FrameNode::GetExtraCustomProperty(const std::string& key) const
+{
+    auto iter = extraCustomPropertyMap_.find(key);
+    if (iter != extraCustomPropertyMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
+void FrameNode::RemoveExtraCustomProperty(const std::string& key)
+{
+    auto iter = extraCustomPropertyMap_.find(key);
+    if (iter != extraCustomPropertyMap_.end()) {
+        extraCustomPropertyMap_.erase(iter);
     }
 }
 

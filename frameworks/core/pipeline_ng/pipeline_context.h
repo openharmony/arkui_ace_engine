@@ -124,6 +124,21 @@ public:
         sizeChangeByRotateCallback_ = callback;
     }
 
+    void SetLinkJumpCallback(const std::function<void(const std::string& link)>& callback)
+    {
+        linkJumpCallback_ = callback;
+    }
+
+    void ExecuteLinkJumpCallback(const std::string& link)
+    {
+        linkJumpCallback_(link);
+    }
+
+    bool GetIsLinkJumpOpen()
+    {
+        return linkJumpCallback_ != nullptr;
+    }
+
     void FireSizeChangeByRotateCallback(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
     {
@@ -494,7 +509,8 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false,
+        MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
 
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -647,22 +663,29 @@ public:
 
     void SetMouseStyleHoldNode(int32_t id)
     {
-        if (!mouseStyleNodeId_.has_value()) {
-            mouseStyleNodeId_ = id;
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->SetMouseStyleHoldNode(id);
         }
     }
 
     void FreeMouseStyleHoldNode(int32_t id)
     {
-        if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
-            mouseStyleNodeId_.reset();
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->FreeMouseStyleHoldNode(id);
         }
     }
 
     void FreeMouseStyleHoldNode()
     {
-        CHECK_NULL_VOID(mouseStyleNodeId_.has_value());
-        mouseStyleNodeId_.reset();
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->FreeMouseStyleHoldNode();
+        }
     }
 
     void MarkNeedFlushMouseEvent()
@@ -1102,6 +1125,8 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
+    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node);
+
     // only used for static form.
     void UpdateFormLinkInfos();
 
@@ -1207,7 +1232,6 @@ private:
     WeakPtr<FrameNode> screenNode_;
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
-    std::optional<int32_t> mouseStyleNodeId_;
     uint64_t resampleTimeStamp_ = 0;
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
@@ -1230,6 +1254,7 @@ private:
     std::function<void()> focusOnNodeCallback_;
     std::function<void(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
+    std::function<void(const std::string&)> linkJumpCallback_ = nullptr;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
@@ -1264,7 +1289,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
-    int32_t lastMouseStyle_ = 0;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
@@ -1294,7 +1318,7 @@ private:
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
-    
+
     friend class ScopedLayout;
     friend class FormGestureManager;
 };

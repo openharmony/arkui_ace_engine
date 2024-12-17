@@ -719,12 +719,12 @@ public:
 private:
     int32_t x_ = 0;
     int32_t y_ = 0;
+    int32_t raw_x_ = 0;
+    int32_t raw_y_ = 0;
     int32_t buttton_ = 0;
     int32_t action_ = 0;
     int32_t clickNum_ = 0;
     std::vector<int32_t> pressedCodes_ {};
-    int32_t raw_x_ = 0;
-    int32_t raw_y_ = 0;
 };
 
 class WebDelegate : public WebResource {

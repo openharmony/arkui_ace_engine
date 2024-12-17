@@ -30,6 +30,7 @@ build_component_ng("web_pattern_ng") {
     sources = [
       "richtext_model_ng.cpp",
       "touch_event_listener.cpp",
+      "transitional_node_info.cpp",
       "web_accessibility_property.cpp",
       "web_content_modifier.cpp",
       "web_context_select_overlay.cpp",

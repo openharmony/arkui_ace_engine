@@ -201,6 +201,11 @@ void MultiMenuLayoutAlgorithm::UpdateEmbeddedPercentReference(LayoutWrapper* lay
 void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
 {
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+
     float contentHeight = 0.0f;
     float contentWidth = childConstraint.selfIdealSize.Width().value();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -208,7 +213,11 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
             TAG_LOGW(AceLogTag::ACE_MENU, "child is null in MultiMenu");
             continue;
         }
-        child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
+        auto resetLayoutConstraint = ResetLayoutConstraintMinWidth(child, childConstraint);
+        if (pattern->IsEmbedded() && (resetLayoutConstraint.minSize.Width() > resetLayoutConstraint.maxSize.Width())) {
+            resetLayoutConstraint.minSize.SetWidth(resetLayoutConstraint.maxSize.Width());
+        }
+        child->Measure(resetLayoutConstraint);
         auto childGeometryNode = child->GetGeometryNode();
         CHECK_NULL_VOID(childGeometryNode);
         auto childHeight = std::max(childGeometryNode->GetMarginFrameSize().Height(),
@@ -217,11 +226,7 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-
-    auto node = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(node);
-    auto pattern = node->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(pattern);
+    
     // Stack or Embedded submenu must follow parent width
     if (pattern->IsStackSubmenu() || pattern->IsEmbedded()) {
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -253,8 +258,15 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
     float maxWidth = 0.0f;
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(node, maxWidth);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(pattern, maxWidth);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childConstraint = ResetLayoutConstraintMinWidth(child, layoutConstraint);
+        if (pattern->IsEmbedded() && (childConstraint.minSize.Width() > childConstraint.maxSize.Width())) {
+            childConstraint.minSize.SetWidth(childConstraint.maxSize.Width());
+        }
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());

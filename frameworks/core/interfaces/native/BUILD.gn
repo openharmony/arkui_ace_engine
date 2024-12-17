@@ -73,6 +73,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_container_modifier.cpp",
       "node/node_container_span_modifier.cpp",
       "node/node_content_modifier.cpp",
+      "node/node_custom_node_ext_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
       "node/node_drag_modifier.cpp",
       "node/node_folder_stack_modifier.cpp",

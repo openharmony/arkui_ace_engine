@@ -1085,6 +1085,10 @@ export class v1 extends ViewPU {
             Row.onAreaChange((q1, r1) => {
                 this.onAreaChangeEvent(q1, r1);
             });
+            Gesture.create(GesturePriority.Low);
+            PanGesture.create();
+            PanGesture.pop();
+            Gesture.pop();
         }, Row);
         this.observeComponentCreation2((e1, f1) => {
             Button.createWithChild();

@@ -29,6 +29,10 @@
 #include "locale_config.h"
 #include "native_reference.h"
 #include "ohos/init_data.h"
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+#include "res_sched_client.h"
+#include "res_type.h"
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
 #include "wm_common.h"
@@ -232,7 +236,7 @@ std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS:
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
-const std::string SUBWINDOW_TOAST_PREFIX = "ARK_APP_SUBWINDOW_TOPMOST_TOAST";
+const std::string SUBWINDOW_TOAST_PREFIX = "ARK_APP_SUBWINDOW_TOAST";
 const int32_t REQUEST_CODE = -1;
 constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
@@ -880,6 +884,7 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     auto errorCode = InitializeInner(window, url, storage, false);
     AddWatchSystemParameter();
     UpdateWindowBlur();
+    RegisterLinkJumpCallback();
     return errorCode;
 }
 
@@ -919,6 +924,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
 {
     auto errorCode = InitializeInner(window, name, storage, true);
     AddWatchSystemParameter();
+    RegisterLinkJumpCallback();
     return errorCode;
 }
 
@@ -2252,6 +2258,44 @@ void UIContentImpl::UnregisterDisplayManagerCallback()
         manager.UnregisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
         availableAreaChangedListener_ = nullptr;
     }
+}
+
+void UIContentImpl::RegisterLinkJumpCallback()
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    auto pipeLineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContextBase);
+    CHECK_NULL_VOID(pipeLineContext);
+    auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    LOGI("[%{public}s]: UIContentImpl::RegisterLinkJumpCallback", bundleName.c_str());
+    // check 1 : for efficiency, if not in whiteList, no need to call RSS interface and go IPC
+    bool isAllowedLinkJump = false;
+    // call RSS's inner api
+    auto errorNo = OHOS::ResourceSchedule::ResSchedClient::GetInstance().IsAllowedLinkJump(isAllowedLinkJump);
+    if (errorNo != NO_ERROR) {
+        LOGW("UIContentImpl::RegisterLinkJumpCallback, errorNo: %{public}i", errorNo);
+        return;
+    }
+    if (!isAllowedLinkJump) { // check 1
+        return;
+    }
+    LOGI("UIContentImpl::RegisterLinkJumpCallback, LinkJump is Open");
+    pipeLineContext->SetLinkJumpCallback([context = context_] (const std::string& link) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.AddEntity(Want::ENTITY_BROWSER);
+        want.SetUri(link);
+        want.SetAction(ACTION_VIEWDATA);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)

@@ -24,14 +24,14 @@ const curves = globalThis.requireNativeModule('ohos.curves');
 const mediaQuery = requireNapi('mediaquery');
 export var ExtraRegionPosition;
 (function (k3) {
-  k3[(k3['TOP'] = 1)] = 'TOP';
-  k3[(k3['BOTTOM'] = 2)] = 'BOTTOM';
+  k3[(k3.TOP = 1)] = 'TOP';
+  k3[(k3.BOTTOM = 2)] = 'BOTTOM';
 })(ExtraRegionPosition || (ExtraRegionPosition = {}));
 export var PresetSplitRatio;
 (function (s4) {
-  s4[(s4['LAYOUT_1V1'] = 1)] = 'LAYOUT_1V1';
-  s4[(s4['LAYOUT_2V3'] = 0.6666666666666666)] = 'LAYOUT_2V3';
-  s4[(s4['LAYOUT_3V2'] = 1.5)] = 'LAYOUT_3V2';
+  s4[(s4.LAYOUT_1V1 = 1)] = 'LAYOUT_1V1';
+  s4[(s4.LAYOUT_2V3 = 0.6666666666666666)] = 'LAYOUT_2V3';
+  s4[(s4.LAYOUT_3V2 = 1.5)] = 'LAYOUT_3V2';
 })(PresetSplitRatio || (PresetSplitRatio = {}));
 function withDefaultValue(h3, i3) {
   if (h3 === void 0 || h3 === null) {
@@ -681,8 +681,9 @@ export class FoldSplitContainer extends ViewPU {
     return { left: d, top: e, width: f, height: g };
   }
   isPortraitOrientation() {
+    let a;
     try {
-      const a = display.getDefaultDisplaySync();      
+      a = display.getDefaultDisplaySync();      
     } catch (exception) {
       Logger.error('Failed getDefaultDisplaySync. code:%{public}d, message:%{public}s',
         exception.code, exception.message);

@@ -59,14 +59,6 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
     return windowNode;
 }
 
-void WindowNode::SetParent(const WeakPtr<UINode>& parent)
-{
-    if (GetParent()) {
-        RemoveFromParentCleanly(Claim(this), GetParent());
-    }
-    UINode::SetParent(parent);
-}
-
 bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
     std::vector<RectF>* regionList)
 {
