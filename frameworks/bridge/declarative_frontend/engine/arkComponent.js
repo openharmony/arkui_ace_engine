@@ -19302,6 +19302,10 @@ class ArkTimePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity, TimepickerDateTimeOptionsModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class TimepickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -19473,6 +19477,21 @@ class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
   }
 }
 TimepickerDateTimeOptionsModifier.identity = Symbol('timepickerDateTimeOptions');
+
+class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+TimepickerEnableHapticFeedbackModifier.identity = Symbol('timepickerEnableHapticFeedback');
 
 // @ts-ignore
 if (globalThis.TimePicker !== undefined) {

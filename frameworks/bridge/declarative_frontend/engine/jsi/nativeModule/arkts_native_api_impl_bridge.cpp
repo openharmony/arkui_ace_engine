@@ -2880,6 +2880,10 @@ void ArkUINativeModule::RegisterTimepickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::SetTimepickerDateTimeOptions));
     timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTimepickerDateTimeOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::ResetTimepickerDateTimeOptions));
+    timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTimepickerEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::SetTimepickerEnableHapticFeedback));
+    timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTimepickerEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::ResetTimepickerEnableHapticFeedback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "timepicker"), timepicker);
 }
 

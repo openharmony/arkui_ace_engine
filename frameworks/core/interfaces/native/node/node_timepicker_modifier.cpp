@@ -244,6 +244,20 @@ void ResetTimepickerDateTimeOptions(ArkUINodeHandle node)
     TimePickerModelNG::SetDateTimeOptions(frameNode, hourType, minuteType, secondType);
 }
 
+void SetTimepickerEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetTimepickerEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, true);
+}
+
 ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -365,7 +379,7 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
         ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
         ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
-        ResetTimepickerDateTimeOptions };
+        ResetTimepickerDateTimeOptions, SetTimepickerEnableHapticFeedback, ResetTimepickerEnableHapticFeedback };
 
     return &modifier;
 }
