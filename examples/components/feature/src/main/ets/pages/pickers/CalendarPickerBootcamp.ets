@@ -996,7 +996,6 @@ export struct CalendarPickerBootcamp {
     }
     .font({
       size: useEnabled(this.enableCompBindMenuMenuFontSize, this.compBindMenuMenuFontSize),
-      family: 'HarmonyOS Sans',
       weight: useEnabled(this.enableCompBindMenuMenuFontWeight, this.compBindMenuMenuFontWeight),
       style: useEnabled(this.enableCompBindMenuMenuFontStyle, this.compBindMenuMenuFontStyle)
     })
