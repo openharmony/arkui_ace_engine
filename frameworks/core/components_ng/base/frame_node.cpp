@@ -4602,7 +4602,7 @@ void FrameNode::RemoveChildInRenderTree(uint32_t index)
 
 bool FrameNode::SkipMeasureContent() const
 {
-    return layoutAlgorithm_->SkipMeasure();
+    return layoutAlgorithm_ && layoutAlgorithm_->SkipMeasure();
 }
 
 bool FrameNode::CheckNeedForceMeasureAndLayout()
