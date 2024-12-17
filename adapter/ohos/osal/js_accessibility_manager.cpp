@@ -2887,7 +2887,7 @@ void JsAccessibilityManager::ProcessParameters(
     ActionType op, const std::vector<std::string>& params, std::map<std::string, std::string>& paramsMap)
 {
     if (op == ActionType::ACCESSIBILITY_ACTION_SET_TEXT) {
-        if (params.size() == EVENT_DUMP_PARAM_LENGTH_UPPER) {
+        if (params.size() == (EVENT_DUMP_ACTION_PARAM_INDEX + 1)) {
             paramsMap = { { ACTION_ARGU_SET_TEXT, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
         }
     }
@@ -3115,6 +3115,27 @@ bool JsAccessibilityManager::CheckDumpHandleEventParams(const std::vector<std::s
     }
     if (params[EVENT_DUMP_ORDER_INDEX] != DUMP_ORDER && params[EVENT_DUMP_ORDER_INDEX] != DUMP_INSPECTOR) {
         DumpLog::GetInstance().Print("Error: Unrecognized dump command for accessibility!");
+        return false;
+    }
+    return true;
+}
+
+bool JsAccessibilityManager::CheckGetActionIdAndOp(
+    const std::vector<std::string>& params,
+    int64_t& actionAccessibilityId,
+    ActionType& actionOp)
+{
+    if (EVENT_DUMP_ACTION_INDEX != std::clamp(EVENT_DUMP_ACTION_INDEX, EVENT_DUMP_ID_INDEX, params.size())) {
+        return false;
+    }
+    actionAccessibilityId = StringUtils::StringToLongInt(params[EVENT_DUMP_ID_INDEX]);
+    auto action = static_cast<AceAction>(StringUtils::StringToInt(params[EVENT_DUMP_ACTION_INDEX]));
+    actionOp = ConvertAceAction(action);
+    if ((actionOp != ActionType::ACCESSIBILITY_ACTION_SET_SELECTION) &&
+        (params.size() > EVENT_DUMP_PARAM_LENGTH_UPPER + 1)) {
+        return false;
+    }
+    if (actionOp == ActionType::ACCESSIBILITY_ACTION_INVALID) {
         return false;
     }
     return true;
