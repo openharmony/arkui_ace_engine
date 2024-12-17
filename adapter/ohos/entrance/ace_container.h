@@ -59,6 +59,7 @@ class FontManager;
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
+using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
 
 struct ParsedConfig {
     std::string colorMode;
@@ -343,6 +344,13 @@ public:
         }
     }
 
+    void OnStartAbilityOnQuery(const std::string& queryWord)
+    {
+        if (abilityOnQueryCallback_) {
+            abilityOnQueryCallback_(queryWord);
+        }
+    }
+
     int32_t GeneratePageId()
     {
         return pageId_++;
@@ -431,6 +439,11 @@ public:
     }
 
     bool IsTransparentBg() const;
+
+    void SetAbilityOnSearch(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnQueryCallback_ = std::move(callback);
+    }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
@@ -817,6 +830,7 @@ private:
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
+    AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 

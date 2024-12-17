@@ -458,6 +458,13 @@ public:
     }
     void HyperlinkStartAbility(const std::string& address) const;
 
+    using StartAbilityOnQueryHandler = std::function<void(const std::string& queryWord)>;
+    void SetStartAbilityOnQueryHandler(StartAbilityOnQueryHandler&& listener)
+    {
+        startAbilityOnQueryHandler_ = std::move(listener);
+    }
+    void StartAbilityOnQuery(const std::string& queryWord) const;
+
     using ActionEventHandler = std::function<void(const std::string& action)>;
     void SetActionEventHandler(ActionEventHandler&& listener)
     {
@@ -1554,6 +1561,7 @@ protected:
     ProfilerCallback onVsyncProfiler_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
+    StartAbilityOnQueryHandler startAbilityOnQueryHandler_;
     ActionEventHandler actionEventHandler_;
     FormLinkInfoUpdateHandler formLinkInfoUpdateHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
