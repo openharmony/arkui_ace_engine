@@ -106,6 +106,7 @@ public:
             theme->closeIconSource_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             theme->closeIconSymbolColor_ = sheetPattern->GetAttr<Color>("close_icon_symbol_color", Color(0xff182431));
             theme->sheetShadowConfig_ = sheetPattern->GetAttr<int>("sheet_shadow_config", SHEET_SHADOW_NONE);
+            theme->sheetShadowConfigS_ = sheetPattern->GetAttr<int>("sheet_shadow_config_s", SHEET_SHADOW_NONE);
             theme->sheetOuterBorderWidth_ = sheetPattern->GetAttr<Dimension>("sheet_outline_border_width", 0.0_vp);
             // If the outline border width is valid, outline border, shadow and border are default enable.
             theme->isOuterBorderEnable_ = theme->sheetOuterBorderWidth_.IsValid();
@@ -223,6 +224,11 @@ public:
         return sheetShadowConfig_;
     }
 
+    const int& GetSheetShadowConfigS() const
+    {
+        return sheetShadowConfigS_;
+    }
+
     const Dimension& GetSheetOuterBorderWidth() const
     {
         return sheetOuterBorderWidth_;
@@ -287,6 +293,7 @@ private:
     double sheetMaxAgingScale_;
     uint32_t closeIconSource_ = 0;
     int sheetShadowConfig_;
+    int sheetShadowConfigS_;
     Dimension sheetOuterBorderWidth_;
     Dimension sheetInnerBorderWidth_;
     bool isOuterBorderEnable_;

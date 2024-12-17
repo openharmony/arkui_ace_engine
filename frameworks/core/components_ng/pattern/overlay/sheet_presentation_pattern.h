@@ -675,6 +675,8 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
+    Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
+    void SetShadowStyle(bool isFocused);
     bool IsCurSheetNeedHalfFoldHover();
     float GetMaxSheetHeightBeforeDragUpdate();
     float GetSheetHeightBeforeDragUpdate();
