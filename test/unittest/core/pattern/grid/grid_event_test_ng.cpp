@@ -50,8 +50,8 @@ HWTEST_F(GridEventTestNg, HandleDrag001, TestSize.Level1)
     float dragDelta = -10.0f;
     float velocityDelta = -200.0f;
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
-    EXPECT_TRUE(Position(dragDelta + velocityDelta / TICK));
-    EXPECT_TRUE(Position(dragDelta + velocityDelta));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta));
 }
 
 /**
@@ -73,8 +73,8 @@ HWTEST_F(GridEventTestNg, HandleDrag002, TestSize.Level1)
     float dragDelta = 10.0f;
     float velocityDelta = 200.0f;
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
-    EXPECT_TRUE(Position(-dragDelta - velocityDelta / TICK));
-    EXPECT_TRUE(Position(-dragDelta - velocityDelta));
+    EXPECT_TRUE(TickPosition(-dragDelta - velocityDelta / TICK));
+    EXPECT_TRUE(TickPosition(-dragDelta - velocityDelta));
 }
 
 /**
@@ -106,9 +106,9 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll001, TestSize.Level1)
     float currentOffset = -(pattern_->GetTotalOffset());
     float velocityDelta = 100.0f;
     DragEnd(velocityDelta);
-    EXPECT_TRUE(VelocityPosition(velocityDelta, currentOffset + velocityDelta));
-    EXPECT_TRUE(Position((currentOffset + velocityDelta) / TICK));
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(velocityDelta, currentOffset + velocityDelta));
+    EXPECT_TRUE(TickPosition((currentOffset + velocityDelta) / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll002, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll to bottom
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(Position(-600.0f));
 
     /**
@@ -146,9 +146,9 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll002, TestSize.Level1)
     float currentOffset = -(pattern_->GetTotalOffset());
     float velocityDelta = -100.0f;
     DragEnd(velocityDelta);
-    EXPECT_TRUE(VelocityPosition(velocityDelta, currentOffset + velocityDelta));
-    EXPECT_TRUE(Position(-600.0f + (currentOffset + 600.0f + velocityDelta) / TICK));
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(velocityDelta, currentOffset + velocityDelta));
+    EXPECT_TRUE(TickPosition(-600.0f + (currentOffset + 600.0f + velocityDelta) / TICK));
+    EXPECT_TRUE(TickPosition(-600.0f));
 }
 
 /**
@@ -183,8 +183,8 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll003, TestSize.Level1)
     currentOffset = -(pattern_->GetTotalOffset());
     float velocityDelta = -100.0f;
     DragEnd(velocityDelta);
-    EXPECT_TRUE(VelocityPosition(velocityDelta, 0));
-    EXPECT_TRUE(VelocityPosition(velocityDelta + currentOffset, velocityDelta + currentOffset));
+    EXPECT_TRUE(TickPosition(velocityDelta, 0));
+    EXPECT_TRUE(TickPosition(velocityDelta + currentOffset, velocityDelta + currentOffset));
 }
 
 /**
@@ -211,9 +211,9 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll004, TestSize.Level1)
     EXPECT_LT(-(pattern_->GetTotalOffset()), dragDelta);
     EXPECT_GT(-(pattern_->GetTotalOffset()), 0);
     float currentOffset = -(pattern_->GetTotalOffset());
-    EXPECT_TRUE(VelocityPosition(DRAG_VELOCITY, currentOffset + DRAG_VELOCITY));
-    EXPECT_TRUE(Position((currentOffset + DRAG_VELOCITY) / TICK));
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(DRAG_VELOCITY, currentOffset + DRAG_VELOCITY));
+    EXPECT_TRUE(TickPosition((currentOffset + DRAG_VELOCITY) / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -243,7 +243,7 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll005, TestSize.Level1)
      * @tc.steps: step2. Scroll to bottom and drag over the bottom
      * @tc.expected: Can not drag over
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     DragAction(frameNode_, Offset(), -10.0f, -DRAG_VELOCITY);
     EXPECT_TRUE(Position(-600.0f));
 }
@@ -275,7 +275,7 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll006, TestSize.Level1)
      * @tc.steps: step2. Scroll to bottom and drag over the bottom
      * @tc.expected: Can not drag over
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     DragAction(frameNode_, Offset(), -10.0f, -DRAG_VELOCITY);
     EXPECT_TRUE(Position(-600.0f));
 }

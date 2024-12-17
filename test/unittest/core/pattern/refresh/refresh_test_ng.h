@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_REFRESH_REFRESH_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_REFRESH_REFRESH_TEST_NG_H
 
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 #define private public
 #define protected public
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -38,7 +38,7 @@ constexpr float RATIO = DEFAULT_FRICTION_RATIO * PERCENT;
 constexpr float CUSTOM_NODE_WIDTH = 100.f;
 constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 
-class RefreshTestNg : public TestNG {
+class RefreshTestNg : public ScrollableUtilsTestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -50,7 +50,6 @@ public:
     void CreateText();
     RefPtr<FrameNode> CreateCustomNode();
 
-    RefPtr<FrameNode> frameNode_;
     RefPtr<RefreshPattern> pattern_;
     RefPtr<RefreshEventHub> eventHub_;
     RefPtr<RefreshLayoutProperty> layoutProperty_;
