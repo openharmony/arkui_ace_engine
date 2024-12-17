@@ -148,7 +148,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   enableDargBar(value: boolean | undefined): NavigationAttribute {
     modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
     return this;
-
+  }
   ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): NavigationAttribute {
     let opts = new ArkSafeAreaExpandOpts();
     if (types && types.length >= 0) {
