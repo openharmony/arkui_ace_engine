@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
@@ -161,8 +162,10 @@ void OnStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //MarqueeModelNG::SetOnStart(frameNode, convValue);
+    auto onStart = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    MarqueeModelNG::SetOnStart(frameNode, std::move(onStart));
 }
 void OnBounceImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -170,8 +173,10 @@ void OnBounceImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //MarqueeModelNG::SetOnBounce(frameNode, convValue);
+    auto onBounce = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    MarqueeModelNG::SetOnBounce(frameNode, onBounce);
 }
 void OnFinishImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -179,8 +184,10 @@ void OnFinishImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //MarqueeModelNG::SetOnFinish(frameNode, convValue);
+    auto onFinish = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    MarqueeModelNG::SetOnFinish(frameNode, onFinish);
 }
 } // MarqueeAttributeModifier
 const GENERATED_ArkUIMarqueeModifier* GetMarqueeModifier()
