@@ -120,10 +120,10 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     MeasureRow(leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
-    float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace_;
+    float contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
 
     auto itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
-        : std::max(leftRowHeight, rightRowHeight) + padding.Height();
+        : std::max(leftRowHeight, rightRowHeight);
     auto width = std::max(minRowWidth_, contentWidth);
 
     needExpandContent_ = false;
@@ -145,7 +145,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
         }
     }
     
-    auto actualWidth = GreatNotEqual(idealWidth_, 0.0f) ? idealWidth_ : width;
+    auto actualWidth = GreatNotEqual(idealWidth_, 0.0f) ? idealWidth_ : std::max(minRowWidth_, contentWidth + padding.Width());
     childConstraint.minSize.SetWidth(actualWidth - padding.Width());
     childConstraint.maxSize.SetWidth(actualWidth - padding.Width());
 
@@ -356,7 +356,29 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         verInterval_ = GetMenuItemVerticalPadding();
     }
-    const auto& padding = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
+    const auto& idealPadding = props->GetPaddingProperty();
+    if (idealPadding) {
+        if (!idealPadding->left.has_value()) {
+            idealPadding->left = std:make_optional<CalcLength>(CalcLength(horInterval_));
+        }
+        if (!idealPadding->right.has_value()) {
+            idealPadding->right = std:make_optional<CalcLength>(CalcLength(horInterval_));
+        }
+        if (!idealPadding->top.has_value()) {
+            idealPadding->top = std:make_optional<CalcLength>(CalcLength(verInterval_));
+        }
+        if (!idealPadding->bottom.has_value()) {
+            idealPadding->bottom = std:make_optional<CalcLength>(CalcLength(verInterval_));
+        }
+        padding = ConvertToPaddingPropertyF(
+            idealPadding, ScaleProperty::CreateScaleProperty(), layoutConstraint->percentReference.Width()
+        );
+    } else {
+        padding = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
+        NG::PaddingProperty defaultPaddings = NG::ConvertToCalcPaddingProperty(
+            verInterval_, verInterval_, horInterval_, horInterval_);
+        props->UpdatePadding(defaultPaddings);
+    }
     maxRowWidth_ = layoutConstraint->maxSize.Width() - padding.Width();
     // update ideal width if user defined
     const auto& calcConstraint = props->GetCalcLayoutConstraint();
@@ -457,7 +479,6 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
 
 void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props)
 {
-    const auto& padding = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
     auto layoutDirection = props->GetNonAutoLayoutDirection();
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     auto leftRowSize = leftRow ? leftRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
