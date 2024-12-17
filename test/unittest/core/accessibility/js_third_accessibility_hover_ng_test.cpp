@@ -438,36 +438,44 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest007, Te
 }
 
 /**
- * @tc.name: JsThirdAccessibilityHoverNgTest008
- * @tc.desc: IsAccessibilityFocusable
+ * @tc.name: JsAccessibilityManager001
+ * @tc.desc: UpdateElementInfoTreeId
  * @tc.type: FUNC
  */
-HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest008, TestSize.Level1)
+HWTEST_F(JsThirdAccessibilityHoverNgTest, JsAccessibilityManager001, TestSize.Level1)
 {
-    auto ohAccessibilityProvider
-        = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    auto context = NG::PipelineContext::GetCurrentContext();
-    jsAccessibilityManager->SetPipelineContext(context);
-    jsAccessibilityManager->Register(true);
-
-    auto jsInteractionOperation = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
-        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
-    jsInteractionOperation->SetBelongTreeId(0);
-    int64_t hostElementId = 0;
-    jsAccessibilityManager->RegisterJsThirdProviderInteractionOperation(hostElementId, jsInteractionOperation);
     Accessibility::AccessibilityElementInfo info;
-
     info.SetPageId(1);
     info.SetParent(0);
     info.SetBelongTreeId(10);
     info.SetAccessibilityId(11);
     jsAccessibilityManager->UpdateElementInfoTreeId(info);
     EXPECT_NE(info.GetPageId(), 1);
-    
+
     info.SetBelongTreeId(0);
+    info.SetPageId(1);
     jsAccessibilityManager->UpdateElementInfoTreeId(info);
     EXPECT_EQ(info.GetPageId(), 1);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager002
+ * @tc.desc: UpdateAccessibilityVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdAccessibilityHoverNgTest, JsAccessibilityManager002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    // without parent node return visiable false
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode, nodeInfo);
+    EXPECT_EQ(nodeInfo.GetAccessibilityVisible(), false);
+
+    nodeInfo.SetParent(0);
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode, nodeInfo);
+    EXPECT_EQ(nodeInfo.GetAccessibilityVisible(), false);
 }
 } // namespace OHOS::Ace::NG
