@@ -14,6 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 
 const EMPTY_STRING: string = '';
 const MAX_PROGRESS: number = 100;
@@ -35,10 +36,10 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 export struct ProgressButtonV2 {
   @Param @Require progress: number;
   @Local textProgress: string = EMPTY_STRING;
-  @Param content: string = EMPTY_STRING;
+  @Param content: ResourceStr = EMPTY_STRING;
   @Local isLoading: boolean = false;
-  @Param @Once progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH;
-  @Param clickCallback: () => void = () => {};
+  @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
+  @Param onClicked: ClickCallBack = () => {};
   @Param enable: boolean = true;
 
   @Local progressColor: ResourceColor = '#330A59F7'
@@ -138,8 +139,7 @@ export struct ProgressButtonV2 {
     .backgroundColor(this.containerBackgroundColor)
     .constraintSize({minWidth: 44})
     .padding({ top: 0, bottom: 0})
-    .width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?
-      BUTTON_NORMARL_WIDTH : this.progressButtonWidth)
+    .width(this.toLengthString(this.progressButtonWidth))
     .stateEffect(this.enable)
     .onClick(() => {
       if (!this.enable) {
@@ -148,7 +148,37 @@ export struct ProgressButtonV2 {
       if (this.progress < MAX_PROGRESS) {
         this.isLoading = !this.isLoading
       }
-      this.clickCallback && this.clickCallback()
+      this.onClicked && this.onClicked()
     })
   }
+  private toLengthString(value: LengthMetrics | undefined): string {
+    if (value === void (0)) {
+      return '';
+    }
+    const length: number = value.value;
+    let lengthString: string = '';
+    switch (value.unit) {
+      case LengthUnit.PX:
+        lengthString = `${length}px`;
+        break;
+      case LengthUnit.FP:
+        lengthString = `${length}fp`;
+        break;
+      case LengthUnit.LPX:
+        lengthString = `${length}lpx`;
+        break;
+      case LengthUnit.PERCENT:
+        lengthString = `${length * 100}%`;
+        break;
+      case LengthUnit.VP:
+        lengthString = `${length}vp`;
+        break;
+      default:
+        lengthString = `${length}vp`;
+        break;
+    }
+    return lengthString;
+  }
 }
+
+export type ClickCallBack = () => void;
