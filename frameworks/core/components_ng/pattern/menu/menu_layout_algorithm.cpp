@@ -703,11 +703,12 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuPattern);
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
-    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
+    auto isContextMenu = menuPattern->IsContextMenu();
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
     InitCanExpandCurrentWindow(isShowInSubWindow);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
     }
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
