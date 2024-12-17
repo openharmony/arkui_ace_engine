@@ -27,6 +27,19 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
     if (keyEvent.isPreIme || keyEvent.action != KeyAction::DOWN) {
         return FocusIntension::NONE;
     }
+    // Arrow key event is used to trasfer focus regardless of its pressed keys
+    switch (keyEvent.code) {
+        case KeyCode::KEY_DPAD_UP:
+            return FocusIntension::UP;
+        case KeyCode::KEY_DPAD_DOWN:
+            return FocusIntension::DOWN;
+        case KeyCode::KEY_DPAD_LEFT:
+            return FocusIntension::LEFT;
+        case KeyCode::KEY_DPAD_RIGHT:
+            return FocusIntension::RIGHT;
+        default:;
+    }
+
     if (keyEvent.pressedCodes.size() != 1) {
         return keyEvent.IsExactlyShiftWith(KeyCode::KEY_TAB) ? FocusIntension::SHIFT_TAB : FocusIntension::NONE;
     }
@@ -45,14 +58,6 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
         default:;
     }
     switch (keyEvent.keyIntention) {
-        case KeyIntention::INTENTION_UP:
-            return FocusIntension::UP;
-        case KeyIntention::INTENTION_DOWN:
-            return FocusIntension::DOWN;
-        case KeyIntention::INTENTION_LEFT:
-            return FocusIntension::LEFT;
-        case KeyIntention::INTENTION_RIGHT:
-            return FocusIntension::RIGHT;
         case KeyIntention::INTENTION_SELECT:
             return FocusIntension::SELECT;
         case KeyIntention::INTENTION_ESCAPE:
