@@ -22,7 +22,18 @@ namespace RootModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    RefPtr<PipelineBase> pipeline;
+    pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, nullptr);
+    auto stageNode = stageManager->GetStageNode();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
+    return AceType::RawPtr(stageNode);
 }
 } // RootModifier
 const GENERATED_ArkUIRootModifier* GetRootModifier()
