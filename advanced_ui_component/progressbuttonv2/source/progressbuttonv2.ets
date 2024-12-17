@@ -32,6 +32,7 @@ const PROGRESS_BUTTON_PROGRESS_KEY = 'progress_button_progress_key';
 const PROGRESS_BUTTON_PRIMARY_FONT_KEY = 'progress_button_primary_font_key';
 const PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY = 'progress_button_container_background_color_key';
 const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasize_secondary_button_key';
+
 @ComponentV2
 export struct ProgressButtonV2 {
   @Param @Require progress: number;
@@ -80,7 +81,7 @@ export struct ProgressButtonV2 {
   @Monitor('isLoading')
   private getLoadingProgress() {
     if (this.isLoading) {
-      if(this.progress < 0) {
+      if (this.progress < 0) {
         this.textProgress = MIN_PERCENTAGE
       } else if (this.progress >= MAX_PROGRESS) {
         this.textProgress = MAX_PERCENTAGE
@@ -137,9 +138,9 @@ export struct ProgressButtonV2 {
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
     .backgroundColor(this.containerBackgroundColor)
-    .constraintSize({minWidth: 44})
     .padding({ top: 0, bottom: 0})
     .width(this.toLengthString(this.progressButtonWidth))
+    .constraintSize({minWidth: 44})
     .stateEffect(this.enable)
     .onClick(() => {
       if (!this.enable) {
@@ -151,6 +152,7 @@ export struct ProgressButtonV2 {
       this.onClicked && this.onClicked()
     })
   }
+
   private toLengthString(value: LengthMetrics | undefined): string {
     if (value === void (0)) {
       return '';

@@ -26,6 +26,7 @@ var __decorate = (this && this.__decorate) || function (g1, h1, i1, j1) {
 if (!("finalizeConstruction" in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 const EMPTY_STRING = '';
 const MAX_PROGRESS = 100;
 const MAX_PERCENTAGE = '100%';
@@ -46,8 +47,8 @@ export class ProgressButtonV2 extends ViewV2 {
     this.textProgress = EMPTY_STRING;
     this.initParam("content", (z && "content" in z) ? z.content : EMPTY_STRING);
     this.isLoading = false;
-    this.initParam("progressButtonWidth", (z && "progressButtonWidth" in z) ? z.progressButtonWidth : BUTTON_NORMARL_WIDTH);
-    this.initParam("clickCallback", (z && "clickCallback" in z) ? z.clickCallback : () => { });
+    this.initParam("progressButtonWidth", (z && "progressButtonWidth" in z) ? z.progressButtonWidth : LengthMetrics.vp(BUTTON_NORMARL_WIDTH));
+    this.initParam("onClicked", (z && "onClicked" in z) ? z.onClicked : () => { });
     this.initParam("enable", (z && "enable" in z) ? z.enable : true);
     this.progressColor = '#330A59F7';
     this.containerBorderColor = '#330A59F7';
@@ -105,10 +106,9 @@ export class ProgressButtonV2 extends ViewV2 {
       Button.hoverEffect(HoverEffect.None);
       Button.key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY);
       Button.backgroundColor(this.containerBackgroundColor);
-      Button.constraintSize({ minWidth: 44 });
       Button.padding({ top: 0, bottom: 0 });
-      Button.width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?
-        BUTTON_NORMARL_WIDTH : this.progressButtonWidth);
+      Button.width(this.toLengthString(this.progressButtonWidth));
+      Button.constraintSize({ minWidth: 44 });
       Button.stateEffect(this.enable);
       Button.onClick(() => {
         if (!this.enable) {
@@ -117,7 +117,7 @@ export class ProgressButtonV2 extends ViewV2 {
         if (this.progress < MAX_PROGRESS) {
           this.isLoading = !this.isLoading;
         }
-        this.clickCallback && this.clickCallback();
+        this.onClicked && this.onClicked();
       });
     }, Button);
     this.observeComponentCreation2((s, t) => {
@@ -173,6 +173,34 @@ export class ProgressButtonV2 extends ViewV2 {
     Stack.pop();
     Button.pop();
   }
+  toLengthString(b) {
+    if (b === void (0)) {
+      return '';
+    }
+    const c = b.value;
+    let d = '';
+    switch (b.unit) {
+      case LengthUnit.PX:
+        d = `${c}px`;
+        break;
+      case LengthUnit.FP:
+        d = `${c}fp`;
+        break;
+      case LengthUnit.LPX:
+        d = `${c}lpx`;
+        break;
+      case LengthUnit.PERCENT:
+        d = `${c * 100}%`;
+        break;
+      case LengthUnit.VP:
+        d = `${c}vp`;
+        break;
+      default:
+        d = `${c}vp`;
+        break;
+    }
+    return d;
+  }
   updateStateVars(a) {
     if (a === undefined) {
       return;
@@ -186,8 +214,8 @@ export class ProgressButtonV2 extends ViewV2 {
     if ("progressButtonWidth" in a) {
       this.updateParam("progressButtonWidth", a.progressButtonWidth);
     }
-    if ("clickCallback" in a) {
-      this.updateParam("clickCallback", a.clickCallback);
+    if ("onClicked" in a) {
+      this.updateParam("onClicked", a.onClicked);
     }
     if ("enable" in a) {
       this.updateParam("enable", a.enable);
@@ -215,7 +243,7 @@ __decorate([
 ], ProgressButtonV2.prototype, "progressButtonWidth", void 0);
 __decorate([
   Param
-], ProgressButtonV2.prototype, "clickCallback", void 0);
+], ProgressButtonV2.prototype, "onClicked", void 0);
 __decorate([
   Param
 ], ProgressButtonV2.prototype, "enable", void 0);
