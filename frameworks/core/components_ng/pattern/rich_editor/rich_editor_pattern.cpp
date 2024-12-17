@@ -542,6 +542,7 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    TriggerAvoidOnCaretChangeImmediately();
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -3149,7 +3150,7 @@ void RichEditorPattern::UpdateModifierCaretOffsetAndHeight()
 
 void RichEditorPattern::NotifyCaretChange()
 {
-    CHECK_NULL_VOID(IsSelected());
+    CHECK_NULL_VOID(!IsSelected());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -3258,7 +3259,11 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         return;
     }
     HandleDoubleClickOrLongPress(info, host);
-    ForceTriggerAvoidOnCaretChange(true);
+    if (IsSelected()) {
+        TriggerAvoidOnCaretChangeImmediately();
+    } else {
+        ForceTriggerAvoidOnCaretChange(true);
+    }
 }
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
