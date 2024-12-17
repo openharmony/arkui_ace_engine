@@ -86,4 +86,9 @@ void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
 {
     dst.alwaysEnabled = src;
 }
+
+void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
+{
+    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
+}
 } // namespace OHOS::Ace::NG::Converter

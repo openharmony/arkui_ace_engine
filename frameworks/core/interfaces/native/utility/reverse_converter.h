@@ -256,6 +256,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
+    void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
