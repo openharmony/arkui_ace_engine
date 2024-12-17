@@ -891,16 +891,153 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetLayoutOptions(option);
     model.SetColumnsTemplate("1fr");
+    model.SetCachedCount(0, false);
     CreateFixedItems(50);
     CreateDone();
 
     pattern_->ScrollTo(ITEM_MAIN_SIZE * 40);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 40);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().GetContentOffset(option, 0), ITEM_MAIN_SIZE * 40);
 
     pattern_->ScrollTo(ITEM_MAIN_SIZE * 20);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().GetContentOffset(option, 0), ITEM_MAIN_SIZE * 20);
+}
+
+/**
+ * @tc.name: ScrollTo002
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ScrollTo002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 45 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 40);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().GetContentOffset(option, 0), ITEM_MAIN_SIZE * 10);
+}
+
+/**
+ * @tc.name: ScrollTo003
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ScrollTo003, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 25 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 40);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 40);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().GetContentOffset(0), ITEM_MAIN_SIZE * 40);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().GetContentOffset(0), ITEM_MAIN_SIZE * 20);
+}
+
+/**
+ * @tc.name: ScrollTo004
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, DISABLED_ScrollTo004, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 25 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 38);
+    EXPECT_EQ(pattern_->EstimateHeight(), ITEM_MAIN_SIZE * 20);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().GetContentOffset(0), ITEM_MAIN_SIZE * 10);
+}
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ScrollTo005, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 25, 45 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(100);
+    CreateDone();
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 80);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 80);
+    EXPECT_EQ(pattern_->EstimateHeight(), ITEM_MAIN_SIZE * 80);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 40);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 40);
+    EXPECT_EQ(pattern_->EstimateHeight(), ITEM_MAIN_SIZE * 40);
+}
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ScrollTo006, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 5, 35};
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(0, false);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 36);
+    EXPECT_EQ(pattern_->EstimateHeight(), ITEM_MAIN_SIZE * 20);
+
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 18);
+    EXPECT_EQ(pattern_->EstimateHeight(), ITEM_MAIN_SIZE * 10);
 }
 
 /**
