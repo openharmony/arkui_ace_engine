@@ -1416,7 +1416,13 @@ void TextFieldPattern::HandleOnUndoAction()
     }
     auto textEditingValue = operationRecords_.back(); // each record includes text and caret
     contentController_->SetTextValue(textEditingValue.text);
-    selectController_->MoveCaretToContentRect(textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
+    if (value.beforeCaretPosition != -1) {
+        selectController_->MoveCaretToContentRect(
+            value.beforeCaretPosition, TextAffinity::DOWNSTREAM);
+    } else {
+        selectController_->MoveCaretToContentRect(
+            textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
+    }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -1616,7 +1622,7 @@ void TextFieldPattern::HandleOnPaste()
             static_cast<int32_t>(textfield->contentController_->GetTextUtf16Value().length()));
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
-        textfield->UpdateEditingValueToRecord();
+        textfield->UpdateEditingValueToRecord(std::max(start, end));
         if (layoutProperty->HasMaxLength()) {
             textfield->CalcCounterAfterFilterInsertValue(originLength - (end - start), pasteData,
                 static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
@@ -4539,7 +4545,7 @@ void TextFieldPattern::CleanErrorNode()
     errorDecorator_.Reset();
 }
 
-void TextFieldPattern::UpdateEditingValueToRecord()
+void TextFieldPattern::UpdateEditingValueToRecord(int32_t beforeCaretPosition)
 {
     if (operationRecords_.size() >= RECORD_MAX_LENGTH) {
         operationRecords_.erase(operationRecords_.begin());
@@ -4547,6 +4553,7 @@ void TextFieldPattern::UpdateEditingValueToRecord()
     TextEditingValueNG record {
         .text = contentController_->GetTextUtf16Value(),
         .caretPosition = selectController_->GetCaretIndex(),
+        .beforeCaretPosition = beforeCaretPosition,
     };
     operationRecords_.emplace_back(record);
 }

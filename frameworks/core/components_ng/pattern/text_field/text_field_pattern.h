@@ -740,7 +740,7 @@ public:
         return mouseStatus_;
     }
 
-    void UpdateEditingValueToRecord();
+    void UpdateEditingValueToRecord(int32_t beforeCaretPosition = -1);
 
     void UpdateScrollBarOffset() override;
 
