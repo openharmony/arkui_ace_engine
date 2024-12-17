@@ -78,12 +78,15 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/pattern/web/view_data_common.h"
+#include "core/components_ng/pattern/web/transitional_node_info.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "web_pattern.h"
+#include "nweb_handler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -423,6 +426,8 @@ WebPattern::WebPattern()
 {
     InitMagnifier();
     renderMode_ = RenderMode::ASYNC_RENDER;
+    cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
@@ -431,6 +436,8 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
       sharedRenderProcessToken_(sharedRenderProcessToken)
 {
     InitMagnifier();
+    cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
@@ -439,6 +446,8 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
       incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
 {
     InitMagnifier();
+    cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
 }
 
 WebPattern::~WebPattern()
@@ -972,7 +981,7 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->zoomErrorCount_ = 0;
             TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionStartTask startPinchScale: %{public}f",
                 pattern->startPinchScale_);
-            
+
             pattern->HandleScaleGestureStart(event);
         }
     };
@@ -2407,7 +2416,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             delegate_->LoadDataWithRichText();
         }
     }
-    
+
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         return true;
     }
@@ -2427,7 +2436,7 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
         renderContext->UpdatePaintRect(rect);
         rect.SetHeight(heightBeforeUpdate);
     }
-    
+
     if (!config.contentSizeChange || isInWindowDrag_) {
         return;
     }
@@ -4594,9 +4603,9 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
             viewDataWrap->AddPageNodeInfoWrap(nodeInfo);
         }
     }
-    viewDataWrap->SetPageUrl(viewDataCommon_.pageUrl);
-    viewDataWrap->SetUserSelected(viewDataCommon_.isUserSelected);
-    viewDataWrap->SetOtherAccount(viewDataCommon_.isOtherAccount);
+    viewDataWrap->SetPageUrl(viewDataCommon_->GetPageUrl());
+    viewDataWrap->SetUserSelected(viewDataCommon_->IsUserSelected());
+    viewDataWrap->SetOtherAccount(viewDataCommon_->IsOtherAccount());
 }
 
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
@@ -4766,32 +4775,33 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
     nodeInfos.emplace_back(node);
 }
 
-void WebPattern::ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child, ViewDataCommon& viewDataCommon)
+void WebPattern::ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child,
+    const std::shared_ptr<ViewDataCommon>& viewDataCommon)
 {
     std::string key = child->GetKey();
     if (child->IsString() && key == OHOS::NWeb::NWEB_AUTOFILL_EVENT_TYPE) {
         std::string eventType = child->GetString();
         if (NWEB_AUTOFILL_EVENTS.count(eventType) != 0) {
             OHOS::NWeb::NWebAutofillEvent event = NWEB_AUTOFILL_EVENTS.at(eventType);
-            viewDataCommon.eventType = event;
+            viewDataCommon->SetEventType(event);
         }
     }
     if (child->IsString() && key == OHOS::NWeb::NWEB_AUTOFILL_PAGE_URL) {
-        viewDataCommon.pageUrl = child->GetString();
+        viewDataCommon->SetPageUrl(child->GetString());
     }
     if (child->IsBool() && key == OHOS::NWeb::NWEB_AUTOFILL_IS_USER_SELECTED) {
-        viewDataCommon.isUserSelected = child->GetBool();
+        viewDataCommon->SetUserSelectedFlag(child->GetBool());
     }
     if (child->IsBool() && key == OHOS::NWeb::NWEB_AUTOFILL_IS_OTHER_ACCOUNT) {
-        viewDataCommon.isOtherAccount = child->GetBool();
+        viewDataCommon->SetOtherAccountFlag(child->GetBool());
     }
     if (child->IsString() && key == OHOS::NWeb::NWEB_AUTOFILL_EVENT_SOURCE) {
-        viewDataCommon.source = child->GetString();
+        viewDataCommon->SetSource(child->GetString());
     }
 }
 
 void WebPattern::ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
-    std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, ViewDataCommon& viewDataCommon)
+    std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon)
 {
     nodeInfos.clear();
     auto sourceJson = JsonUtil::ParseJsonString(viewDataJson->GetString());
@@ -4834,18 +4844,17 @@ AceAutoFillType WebPattern::GetFocusedType()
 bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
-    viewDataCommon_ = {};
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
     isPasswordFill_ = false;
     ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, viewDataCommon_);
 
-    if (isPasswordFill_ && viewDataCommon_.source != OHOS::NWeb::NWEB_AUTOFILL_FOR_LOGIN) {
+    if (isPasswordFill_ && viewDataCommon_->GetSource() != OHOS::NWeb::NWEB_AUTOFILL_FOR_LOGIN) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "Handle autofill event failed! The form contains a login node, but the soruce is incorrect.");
         return false;
     }
 
-    auto eventType = viewDataCommon_.eventType;
-
+    auto eventType = viewDataCommon_->GetEventType();
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -5053,9 +5062,9 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
-    if (cursor_type_ != type) {
+    if (cursorType_ != type) {
         TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
-        cursor_type_ = type;
+        cursorType_ = type;
     }
     if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
@@ -5192,7 +5201,7 @@ void WebPattern::OnPopupShow(bool show)
         CHECK_NULL_VOID(renderContextForPopupSurface_);
         renderContextForPopupSurface_->SetBounds(0, 0, 0, 0);
     }
-    
+
     TAG_LOGI(AceLogTag::ACE_WEB, "Web %{public}d show popup window %{public}d", GetWebId(), show);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -6597,25 +6606,37 @@ std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetAccessibilityNod
     return delegate_->GetAccessibilityNodeInfoById(accessibilityId);
 }
 
-std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetFocusedAccessibilityNode(
+std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetTransitionalNodeById(int64_t accessibilityId)
+{
+    if (!accessibilityState_) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(
+        delegate_->GetAccessibilityNodeInfoById(accessibilityId));
+}
+
+std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetFocusedAccessibilityNode(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {
     if (!accessibilityState_) {
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
+    return std::make_shared<NG::TransitionalNodeInfo>(
+        delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus));
 }
 
 
-std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
+std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
     int32_t direction)
 {
     if (!accessibilityState_) {
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    return std::make_shared<NG::TransitionalNodeInfo>(
+        delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction));
 }
 
 bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
@@ -7424,4 +7445,10 @@ float WebPattern::DumpGpuInfo()
     float totalSize = delegate_->GetNweb()->DumpGpuInfo();
     return totalSize;
 }
+
+RefPtr<WebEventHub> WebPattern::GetWebEventHub()
+{
+    return GetEventHub<WebEventHub>();
+}
+
 } // namespace OHOS::Ace::NG

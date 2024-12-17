@@ -35,6 +35,10 @@ namespace OHOS::NWeb {
 class NWebAccessibilityNodeInfo;
 } // namespace OHOS::NWeb::NWebAccessibilityNodeInfo
 
+namespace OHOS::Ace::NG {
+    class TransitionalNodeInfo;
+}
+
 namespace OHOS::Ace::Framework {
 
 struct SearchParameter {
@@ -508,10 +512,10 @@ private:
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
-    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node,
+    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         Accessibility::AccessibilityElementInfo& nodeInfo, int32_t treeId);
 
-    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node,
+    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         const CommonProperty& commonProperty, Accessibility::AccessibilityElementInfo& nodeInfo,
         const RefPtr<NG::WebPattern>& webPattern);
 
