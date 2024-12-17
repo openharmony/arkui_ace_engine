@@ -1110,6 +1110,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
     return false;
 }
 
+void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
 } // namespace OHOS::Ace

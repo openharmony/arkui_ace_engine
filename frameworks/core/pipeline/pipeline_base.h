@@ -1461,6 +1461,8 @@ public:
 
     void FireAccessibilityEvents();
 
+    virtual void SetEnableSwipeBack(bool isEnable) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
