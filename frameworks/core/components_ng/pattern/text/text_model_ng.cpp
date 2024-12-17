@@ -78,6 +78,7 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
         auto spans = spanString->GetSpanItems();
         textPattern->SetSpanItemChildren(spans);
         textPattern->SetSpanStringMode(true);
+        textPattern->AllocStyledString();
     }
 }
 

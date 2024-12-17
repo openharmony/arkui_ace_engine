@@ -561,6 +561,12 @@ public:
     {
         return isSpanStringMode_;
     }
+    void AllocStyledString()
+    {
+        if (!styledString_) {
+            styledString_ = MakeRefPtr<MutableSpanString>(u"");
+        }
+    }
     void SetStyledString(const RefPtr<SpanString>& value);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
@@ -852,7 +858,7 @@ protected:
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
     bool isSpanStringMode_ = false;
-    RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>(u"");
+    RefPtr<MutableSpanString> styledString_;
     bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
