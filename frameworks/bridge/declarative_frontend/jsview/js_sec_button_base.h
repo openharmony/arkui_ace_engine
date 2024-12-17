@@ -42,6 +42,7 @@ public:
     static void SetBackgroundBorderWidth(const JSCallbackInfo& info);
     static void SetBackgroundBorderColor(const JSCallbackInfo& info);
     static void SetBackgroundBorderRadius(const JSCallbackInfo& info);
+    static void SetAlign(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_BUTTON_BASE_H

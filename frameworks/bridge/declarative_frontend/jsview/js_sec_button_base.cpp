@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -243,5 +244,17 @@ void JSSecButtonBase::SetTextIconSpace(const JSCallbackInfo& info)
     } else {
         SecurityComponentModelNG::SetTextIconSpace(length);
     }
+}
+
+void JSSecButtonBase::SetAlign(const JSCallbackInfo& info)
+{
+    Alignment alignment;
+    if (!info[0]->IsNumber()) {
+        alignment = Alignment::CENTER;
+    } else {
+        auto value = info[0]->ToNumber<int32_t>();
+        alignment = ParseAlignment(value);
+    }
+    SecurityComponentModelNG::SetAlign(alignment);
 }
 }
