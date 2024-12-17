@@ -29,6 +29,7 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/error/error_code.h"
 #include "base/geometry/offset.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
@@ -721,6 +722,29 @@ int64_t SecurityUIExtensionPattern::WrapExtensionAbilityId(
     int64_t extensionOffset, int64_t abilityId)
 {
     return uiExtensionId_ * extensionOffset + abilityId;
+}
+
+void SecurityUIExtensionPattern::DumpInfo()
+{
+    UIEXT_LOGI("Dump SecurityUEC Info In String Format");
+    DumpLog::GetInstance().AddDesc(std::string("UecType: ").append("SecurityUIExtensionComponent"));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("eventProxy: ").append(eventProxyStr));
+}
+
+void SecurityUIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(json);
+    UIEXT_LOGI("Dump SecurityUEC Info In Json Format");
+    json->Put("UecType: ", "SecurityUIExtensionComponent");
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    json->Put("eventProxy: ", eventProxyStr.c_str());
 }
 
 const char* SecurityUIExtensionPattern::ToString(AbilityState state)
