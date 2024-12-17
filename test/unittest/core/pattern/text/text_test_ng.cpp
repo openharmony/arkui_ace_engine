@@ -2546,6 +2546,9 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textFrameNode->geometryNode_, nullptr);
+    textFrameNode->geometryNode_->SetContentOffset(OffsetF(TEXT_CONTENT_OFFSET, TEXT_CONTENT_OFFSET));
+    textFrameNode->geometryNode_->SetContentSize(SizeF(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE));
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
