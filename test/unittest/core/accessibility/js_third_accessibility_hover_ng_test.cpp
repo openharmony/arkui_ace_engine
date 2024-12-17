@@ -464,7 +464,7 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest008, Te
     info.SetBelongTreeId(10);
     info.SetAccessibilityId(11);
     jsAccessibilityManager->UpdateElementInfoTreeId(info);
-    EXPECT_EQ(info.GetPageId(), 65536);
+    EXPECT_EQ(info.GetPageId(), 655361);
     
     info.SetBelongTreeId(0);
     jsAccessibilityManager->UpdateElementInfoTreeId(info);
