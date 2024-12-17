@@ -96,6 +96,16 @@ void MenuItemLayoutAlgorithm::CheckUserHeight(LayoutWrapper* layoutWrapper)
     }
 }
 
+float MenuItemLayoutAlgorithm::CalcItemHeight(float leftRowHeight, float rightRowHeight)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return GreatNotEqual(userHeight_, 0.0f) ? userHeight_
+            : std::max(leftRowHeight, rightRowHeight);
+    }
+    return GreatNotEqual(userHeight_, 0.0f) ? userHeight_
+        : std::max(leftRowHeight, rightRowHeight) + padding.Height();
+}
+
 void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstraint,
     std::optional<LayoutConstraintF>& layoutConstraint, PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
 {
@@ -126,14 +136,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     } else {
         contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace_;
     }
-    float itemHeight;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
-        : std::max(leftRowHeight, rightRowHeight);
-    } else {
-        itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
-        : std::max(leftRowHeight, rightRowHeight) + padding.Height();
-    }
+    float itemHeight = CalcItemHeight(leftRowHeight, rightRowHeight);
     auto width = std::max(minRowWidth_, contentWidth);
     
     needExpandContent_ = false;
@@ -386,8 +389,8 @@ void MenuItemLayoutAlgorithm::InitPadding(const RefPtr<LayoutProperty>& props,
     } else {
         padding = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
     }
-    NG::PaddingProperty paddingProperty = NG::ConvertToCalcPaddingProperty(
-            padding.top, padding.bottom, padding.left, padding.right);
+    NG::PaddingProperty paddingProperty = NG::ConvertToCalcPaddingProperty(padding.top,
+        padding.bottom, padding.left, padding.right);
     props->UpdatePadding(paddingProperty);
 }
 

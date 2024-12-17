@@ -58,6 +58,7 @@ private:
     void LayoutOption(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     float MeasureExpandableHeight(LayoutConstraintF& childConstraint, LayoutWrapper* layoutWrapper);
     void InitPadding(const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint);
+    float CalcItemHeight(float leftRowHeight, float rightRowHeight);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
