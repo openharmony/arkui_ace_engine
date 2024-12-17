@@ -1530,4 +1530,13 @@ void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaTy
         default: LOGE("Unexpected enum value in Ark_HoverModeAreaType: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<SessionType>& dst, const Ark_EmbeddedType& src)
+{
+    switch (src) {
+        case ARK_EMBEDDED_TYPE_EMBEDDED_UI_EXTENSION: dst = SessionType::EMBEDDED_UI_EXTENSION; break;
+        default: LOGE("Unexpected enum value in Ark_EmbeddedType: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

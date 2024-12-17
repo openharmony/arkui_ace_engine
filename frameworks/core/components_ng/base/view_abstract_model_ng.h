@@ -56,6 +56,15 @@ public:
             ViewAbstract::SetWidth(NG::CalcLength(width));
         }
     }
+    
+    static void SetWidth(FrameNode* frameNode, const CalcDimension& width)
+    {
+        if (width.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
+        } else {
+            ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+        }
+    }
 
     void SetHeight(const CalcDimension& height) override
     {
@@ -63,6 +72,15 @@ public:
             ViewAbstract::SetHeight(NG::CalcLength(height.CalcValue()));
         } else {
             ViewAbstract::SetHeight(NG::CalcLength(height));
+        }
+    }
+
+    static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
+    {
+        if (height.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
+        } else {
+            ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
     }
 
@@ -88,12 +106,30 @@ public:
         }
     }
 
+    static void SetMinWidth(FrameNode* frameNode, const CalcDimension& minWidth)
+    {
+        if (minWidth.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMinWidth(frameNode, NG::CalcLength(minWidth.CalcValue()));
+        } else {
+            ViewAbstract::SetMinWidth(frameNode, NG::CalcLength(minWidth));
+        }
+    }
+
     void SetMinHeight(const CalcDimension& minHeight) override
     {
         if (minHeight.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetMinHeight(NG::CalcLength(minHeight.CalcValue()));
         } else {
             ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
+        }
+    }
+
+    static void SetMinHeight(FrameNode* frameNode, const CalcDimension& minHeight)
+    {
+        if (minHeight.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetMinHeight(frameNode, NG::CalcLength(minHeight.CalcValue()));
+        } else {
+            ViewAbstract::SetMinHeight(frameNode, NG::CalcLength(minHeight));
         }
     }
 

@@ -27,6 +27,10 @@ struct ModalUIExtensionCallbacks;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+const SessionType DEFAULT_EMBEDDED_SESSION_TYPE = SessionType::EMBEDDED_UI_EXTENSION;
+const CalcDimension EMBEDDED_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
+const CalcDimension EMBEDDED_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
+
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
     static RefPtr<FrameNode> Create(const std::string& bundleName, const std::string& abilityName,
@@ -40,6 +44,9 @@ public:
         bool transferringCaller = false, bool densityDpi = true) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
+    static RefPtr<FrameNode> CreateEmbeddedFrameNode(int32_t nodeId);
+    static void UpdateEmbeddedFrameNode(FrameNode* frameNode,
+        const AAFwk::Want& wantWrap, SessionType sessionType);
     // for dynamic component
     void Create() override;
     void Create(const UIExtensionConfig& config) override;
