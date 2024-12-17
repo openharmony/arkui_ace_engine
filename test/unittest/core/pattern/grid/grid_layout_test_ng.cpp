@@ -542,4 +542,45 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest004, TestSize.Level1)
 
     EXPECT_EQ(pattern_->GetCrossCount(), 1);
 }
+
+namespace {
+int32_t EstimateIndex(float pos)
+{
+    auto lines = std::floor((pos - 105.0f) / 105.0f);
+    return lines * 3 + 1;
+}
+} // namespace
+
+/**
+ * @tc.name: LargeDelta001
+ * @tc.desc: Test Grid Scrolling with large delta.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LargeDelta001, TestSize.Level1)
+{
+    // Move to OptionTestNg later when Irregular layout is fixed
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(4000);
+    CreateDone();
+
+    const auto& info = pattern_->info_;
+    UpdateCurrentOffset(-30000.0f);
+    EXPECT_EQ(info.startIndex_, 853);
+    EXPECT_EQ(EstimateIndex(30000.0f), 853);
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(30300.0f));
+    UpdateCurrentOffset(20000.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(10300.0f));
+    UpdateCurrentOffset(250.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(10050.0f));
+
+    UpdateCurrentOffset(-35000.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(45050.0f));
+}
 } // namespace OHOS::Ace::NG
