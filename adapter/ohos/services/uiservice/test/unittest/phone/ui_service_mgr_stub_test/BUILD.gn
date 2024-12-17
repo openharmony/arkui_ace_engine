@@ -32,7 +32,6 @@ ohos_unittest("ui_service_mgr_stub_test") {
   }
   deps = [
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservice",
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ace_kit:ace_kit",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
   ]
 

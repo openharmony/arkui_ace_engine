@@ -248,7 +248,6 @@ ohos_unittest("gradient_style_modifier_test") {
   configs = [ ":rosen_render_context_config" ]
 
   deps = [
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",

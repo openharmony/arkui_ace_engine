@@ -76,7 +76,6 @@ ohos_unittest("form_render_test") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -153,7 +152,6 @@ ohos_unittest("form_render_group_test") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -436,7 +434,6 @@ ohos_unittest("ui_event_test") {
   include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -536,7 +533,6 @@ ohos_unittest("native_node_napi_test") {
   ]
 
   deps = [
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -604,7 +600,6 @@ ohos_unittest("native_key_event_test") {
   ]
 
   deps = [
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -667,7 +662,6 @@ ohos_unittest("drag_and_drop_test") {
   ]
 
   deps = [
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",

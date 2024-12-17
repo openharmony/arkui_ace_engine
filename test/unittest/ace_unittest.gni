@@ -38,7 +38,7 @@ template("ace_unittest") {
   ace_external_deps = [ "googletest:gmock" ]
   flutter_sources = []
   flutter_external_deps = []
-  ace_unittest_deps = [ "$ace_root/interfaces/inner_api/ace_kit:ace_kit" ]
+  ace_unittest_deps = []
 
   # temporary support
   if (defined(invoker.external_deps)) {

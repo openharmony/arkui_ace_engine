@@ -51,7 +51,6 @@ ohos_unittest("PluginFrontendTest") {
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
   ]
 
