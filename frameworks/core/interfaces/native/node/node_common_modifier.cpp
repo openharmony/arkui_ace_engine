@@ -1710,14 +1710,16 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ArkUI_Int32 blurStyle = (*intArray)[NUM_0];
     ArkUI_Int32 colorMode = (*intArray)[NUM_1];
     ArkUI_Int32 adaptiveColor = (*intArray)[NUM_2];
+    ArkUI_Int32 policy = (*intArray)[NUM_3];
+    ArkUI_Int32 blurType = (*intArray)[NUM_4];
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1740,6 +1742,11 @@ void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], Ar
         blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
         bgBlurStyle.blurOption = blurOption;
     }
+    bgBlurStyle.policy = static_cast<BlurStyleActivePolicy>(policy);
+    bgBlurStyle.blurType = static_cast<BlurType>(blurType);
+    bgBlurStyle.isValidColor = isValidColor;
+    Color inactiveColor(inactiveColorArg);
+    bgBlurStyle.inactiveColor = inactiveColor;
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
@@ -3460,19 +3467,29 @@ void ResetForegroundEffect(ArkUINodeHandle node)
 
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
-    ArkUI_Int32 blurValuesSize)
+    ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
+    ArkUI_Uint32 inactiveColorArg)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
     radius.SetValue(radiusArg);
     Color color(colorArg);
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
 
-    EffectOption option = { radius, saturationArg, brightnessArg, color, static_cast<AdaptiveColor>(adaptiveColorArg),
-        blurOption };
-
-    CHECK_NULL_VOID(frameNode);
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturationArg;
+    option.brightness = brightnessArg;
+    option.color = color;
+    option.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorArg);
+    option.blurOption = blurOption;
+    option.blurType = static_cast<BlurType>(blurType);
+    option.policy = static_cast<BlurStyleActivePolicy>(policy);
+    Color inactiveColor(inactiveColorArg);
+    option.inactiveColor = inactiveColor;
+    option.isValidColor = isValidColor;
     ViewAbstract::SetBackgroundEffect(frameNode, option);
 }
 

@@ -1454,7 +1454,7 @@ class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle
     } else {
       getUINativeModule().common.setBackgroundBlurStyle(node,
         this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
-          this.value.blurOptions?.grayscale);
+          this.value.blurOptions?.grayscale, this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
 }
@@ -2563,7 +2563,8 @@ class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> 
       getUINativeModule().common.resetBackgroundEffect(node);
     } else {
       getUINativeModule().common.setBackgroundEffect(node, this.value.radius, this.value.saturation,
-        this.value.brightness, this.value.color, this.value.adaptiveColor, this.value.blurOptions?.grayscale);
+        this.value.brightness, this.value.color, this.value.adaptiveColor, this.value.blurOptions?.grayscale,
+        this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
 
@@ -2572,6 +2573,9 @@ class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> 
       this.value.brightness === this.stageValue.brightness &&
       isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
       this.value.adaptiveColor === this.stageValue.adaptiveColor &&
+      this.value.policy === this.stageValue.policy &&
+      this.value.inactiveColor === this.stageValue.inactiveColor &&
+      this.value.type === this.stageValue.type &&
       this.value.blurOptions?.grayscale === this.stageValue.blurOptions?.grayscale);
   }
 }
@@ -3550,6 +3554,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
       arkBackgroundBlurStyle.blurOptions = options.blurOptions;
+      arkBackgroundBlurStyle.policy = options.policy;
+      arkBackgroundBlurStyle.inactiveColor = options.inactiveColor;
+      arkBackgroundBlurStyle.type = options.type;
     }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
       BackgroundBlurStyleModifier, arkBackgroundBlurStyle);

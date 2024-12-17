@@ -2839,6 +2839,28 @@ ArkUINativeModuleValue CommonBridge::ResetLinearGradientBlur(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+void SetBackgroundBlurStyleParam(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, bool& isValidColor, Color& inactiveColor, int32_t& policy, int32_t& blurType)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    auto policyArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto inactiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    auto typeArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor)) {
+        isValidColor = true;
+    }
+    ParseJsInt32(vm, policyArg, policy);
+    if (policy < static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) ||
+        policy > static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    }
+    ParseJsInt32(vm, typeArg, blurType);
+    if (blurType < static_cast<int32_t>(BlurType::WITHIN_WINDOW) ||
+        blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    }
+}
+
 ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -2873,12 +2895,20 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
             ParseBlurOption(vm, blurOptionsArg, blurOption);
         }
     }
-    int32_t intArray[NUM_3];
+    bool isValidColor = false;
+    Color inactiveColor = Color::TRANSPARENT;
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    SetBackgroundBlurStyleParam(runtimeCallInfo, isValidColor, inactiveColor, policy, blurType);
+    int32_t intArray[NUM_5];
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
+    intArray[NUM_3] = policy;
+    intArray[NUM_4] = blurType;
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        nativeNode, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+        nativeNode, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size(),
+        isValidColor, inactiveColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -4928,6 +4958,43 @@ ArkUINativeModuleValue CommonBridge::ResetForegroundEffect(ArkUIRuntimeCallInfo*
     return panda::JSValueRef::Undefined(vm);
 }
 
+void SetBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& policy, int32_t& blurType,
+    Color& inactiveColor, bool& isValidColor)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(7);        // 7:index of parameter policy
+    Local<JSValueRef> inactiveColorArg = runtimeCallInfo->GetCallArgRef(8); // 8:index of parameter inactiveColor
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(9);          // 9:index of parameter type
+
+    ParseJsInt32(vm, policyArg, policy);
+    if (policy < static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) ||
+        policy > static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    }
+    ParseJsInt32(vm, typeArg, blurType);
+    if (blurType < static_cast<int32_t>(BlurType::WITHIN_WINDOW) ||
+        blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    }
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor)) {
+        isValidColor = true;
+    }
+}
+
+void SetAdaptiveColorParam(ArkUIRuntimeCallInfo* runtimeCallInfo, AdaptiveColor& adaptiveColor)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> adaptiveColorArg = runtimeCallInfo->GetCallArgRef(5); // 5:index of parameter adaptiveColor
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    if (adaptiveColorArg->IsNumber()) {
+        adaptiveColorValue = adaptiveColorArg->Int32Value(vm);
+        if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+        }
+    }
+}
+
 ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -4937,7 +5004,6 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> saturationArg = runtimeCallInfo->GetCallArgRef(2);    // 2:index of parameter saturation
     Local<JSValueRef> brightnessArg = runtimeCallInfo->GetCallArgRef(3);    // 3:index of parameter brightness
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(4);         // 4:index of parameter color
-    Local<JSValueRef> adaptiveColorArg = runtimeCallInfo->GetCallArgRef(5); // 5:index of parameter adaptiveColor
     Local<JSValueRef> blurOptionsArg = runtimeCallInfo->GetCallArgRef(6);   // 6:index of parameter blurOptions
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     CalcDimension radius;
@@ -4958,25 +5024,21 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
     if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
-    if (adaptiveColorArg->IsNumber()) {
-        adaptiveColorValue = adaptiveColorArg->Int32Value(vm);
-        if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
-            adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
-            adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
-        }
-    }
+    SetAdaptiveColorParam(runtimeCallInfo, adaptiveColor);
     BlurOption blurOption;
     if (blurOptionsArg->IsArray(vm)) {
         ParseBlurOption(vm, blurOptionsArg, blurOption);
     }
-
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundEffect(
-        nativeNode, static_cast<ArkUI_Float32>(radius.Value()),
-        saturation, brightness, color.GetValue(), static_cast<ArkUI_Int32>(adaptiveColor),
-        blurOption.grayscale.data(), blurOption.grayscale.size());
-
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    Color inactiveColor = Color::TRANSPARENT;
+    bool isValidColor = false;
+    SetBackgroundEffectParam(runtimeCallInfo, policy, blurType, inactiveColor, isValidColor);
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundEffect(nativeNode,
+        static_cast<ArkUI_Float32>(radius.Value()), saturation, brightness, color.GetValue(),
+        static_cast<ArkUI_Int32>(adaptiveColor), blurOption.grayscale.data(), blurOption.grayscale.size(), policy,
+        blurType, isValidColor, inactiveColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
