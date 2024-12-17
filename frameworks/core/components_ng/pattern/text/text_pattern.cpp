@@ -4255,6 +4255,7 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
 
 void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
+    AllocStyledString();
     isSpanStringMode_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -4415,6 +4416,9 @@ Offset TextPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
 {
     isSpanStringMode_ = !spans.empty();
+    if (isSpanStringMode_) {
+        AllocStyledString();
+    }
     spans_ = spans;
     ProcessSpanString();
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
