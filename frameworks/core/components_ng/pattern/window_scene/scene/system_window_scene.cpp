@@ -62,7 +62,11 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     session_->SetBounds(originBounds);
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
+    auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
+    if (ret != Rosen::WSError::WS_OK) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
+            session_->GetPersistentId(), static_cast<int32_t>(ret));
+    }
 }
 
 void SystemWindowScene::OnVisibleChange(bool visible)
