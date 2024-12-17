@@ -1886,14 +1886,16 @@ void DialogPattern::DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json)
         DimensionUnit unit = border.leftDimen.value_or(
             border.topDimen.value_or(border.rightDimen.value_or(border.bottomDimen.value_or(Dimension())))).Unit();
         Dimension defaultValue(0, unit);
-        BorderWidthProperty defaultBorder = { defaultValue, defaultValue, defaultValue, defaultValue };
+        BorderWidthProperty defaultBorder = { defaultValue, defaultValue, defaultValue, defaultValue, std::nullopt,
+            std::nullopt };
         if (!(border == defaultBorder)) {
             json->Put("BorderWidth", border.ToString().c_str());
         }
     }
     if (dialogProperties_.borderColor.has_value()) {
         auto color = dialogProperties_.borderColor.value();
-        BorderColorProperty defaultValue = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK };
+        BorderColorProperty defaultValue = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK, std::nullopt,
+            std::nullopt };
         if (!(color == defaultValue)) {
             json->Put("BorderColor", color.ToString().c_str());
         }
