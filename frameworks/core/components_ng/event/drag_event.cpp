@@ -639,7 +639,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         actuator->ResetResponseRegion();
         actuator->SetGatherNode(nullptr);
-        if (actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
+        bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
+        if (!isMenuShow && actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
         }
         if (!gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() &&
