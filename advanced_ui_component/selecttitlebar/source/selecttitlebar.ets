@@ -654,10 +654,36 @@ struct SelectTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        Image(this.selectTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.selectTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.selectTitleDialog.symbolStyle)
+            .fontSize(IMAGE_SIZE)
+            .draggable(false)
+            .focusable(this.selectTitleDialog.isEnabled)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+            .symbolEffect(new SymbolEffect(), false)
+        } else if (this.selectTitleDialog.value) {
+          if (Util.isSymbolResource(this.selectTitleDialog.value)) {
+            SymbolGlyph(this.selectTitleDialog.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(IMAGE_SIZE)
+              .draggable(false)
+              .focusable(this.selectTitleDialog.isEnabled)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+          } else {
+            Image(this.selectTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
