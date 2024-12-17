@@ -70,6 +70,9 @@ declare_args() {
 
   # Enable form size change animation
   ace_engine_feature_enable_form_size_change_animation = true
+
+  # Enalbe form menu default, wearable product is not supported
+  ace_engine_feature_form_menu_enable = true
 }
 
 enable_dump_drawcmd = false
