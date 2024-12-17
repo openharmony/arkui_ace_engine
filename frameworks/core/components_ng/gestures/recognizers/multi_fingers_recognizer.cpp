@@ -111,5 +111,15 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     touchPoints_[event.id].sourceType = event.sourceType;
     touchPoints_[event.id].sourceTool = event.sourceTool;
     touchPoints_[event.id].originalId = event.originalId;
+    TouchPoint point;
+    point.id = event.id;
+    point.x = event.x;
+    point.y = event.y;
+    point.screenX = event.screenX;
+    point.screenY = event.screenY;
+    point.sourceTool = event.sourceTool;
+    point.originalId = event.originalId;
+    touchPoints_[event.id].pointers = { point };
+    touchPoints_[event.id].pointerEvent = event.pointerEvent;
 }
 } // namespace OHOS::Ace::NG

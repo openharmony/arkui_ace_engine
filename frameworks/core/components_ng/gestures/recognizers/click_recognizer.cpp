@@ -471,6 +471,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
 #endif
     info.SetPointerEvent(lastPointEvent_);
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
+    info.SetInputEventType(inputEventType_);
     return info;
 }
 
