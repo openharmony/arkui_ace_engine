@@ -1148,6 +1148,32 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberA
     { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "-56.78" },
 };
 
+// Fixture 'MotionBlurRadiusNumber' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurRadiusNumberValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.340000152587891" },
+    { "10", Converter::ArkValue<Ark_Number>(10), "10" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+    { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.10000000149011612" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "-0.1", Converter::ArkValue<Ark_Number>(-0.1), "0" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "0" },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "0" },
+};
+
+// Fixture 'MotionBlurAnchorNumber' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurAnchorNumberValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "1" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "1" },
+    { "10", Converter::ArkValue<Ark_Number>(10), "1" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+    { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.10000000149011612" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "-0.1", Converter::ArkValue<Ark_Number>(-0.1), "0" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "0" },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "0" },
+};
+
 // Fixture 'NumberFloatAnything' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues = {
     { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },

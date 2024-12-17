@@ -35,6 +35,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
 using namespace OHOS::Ace::NG::Converter;
@@ -64,8 +65,8 @@ struct BiasOpt {
 };
 
 struct RotateOpt {
-    DimensionOffset pivot;
-    Vector5F vec5f = Vector5F(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    std::optional<DimensionOffset> center;
+    std::vector<std::optional<float>> vec5f;
 };
 
 struct TranslateOpt {
@@ -867,9 +868,26 @@ template<>
 MotionBlurOption Convert(const Ark_MotionBlurOptions& src)
 {
     MotionBlurOption options;
+    const float minValue = 0.0;
+    const float maxValue = 1.0;
     options.radius = Convert<float>(src.radius);
+    if (LessNotEqual(options.radius, minValue)) {
+        options.radius = minValue;
+    }
     options.anchor.x = Convert<float>(src.anchor.x);
+    if (LessNotEqual(options.anchor.x, minValue)) {
+        options.anchor.x = minValue;
+    }
+    if (GreatNotEqual(options.anchor.x, maxValue)) {
+        options.anchor.x = maxValue;
+    }
     options.anchor.y = Convert<float>(src.anchor.y);
+    if (LessNotEqual(options.anchor.y, minValue)) {
+        options.anchor.y = minValue;
+    }
+    if (GreatNotEqual(options.anchor.y, maxValue)) {
+        options.anchor.y = maxValue;
+    }
     return options;
 }
 
@@ -877,28 +895,21 @@ template<>
 RotateOpt Convert(const Ark_RotateOptions& src)
 {
     RotateOpt options;
-    auto coord = OptConvert<float>(src.x);
-    options.vec5f.x = coord.value_or(0.0);
-    coord = OptConvert<float>(src.y);
-    options.vec5f.y = coord.value_or(0.0);
-    coord = OptConvert<float>(src.z);
-    options.vec5f.z = coord.value_or(0.0);
-    coord = OptConvert<float>(src.angle);
-    options.vec5f.w = coord.value_or(0.0);
-    coord = OptConvert<float>(src.perspective);
-    options.vec5f.v = coord.value_or(0.0);
+    options.vec5f.emplace_back(OptConvert<float>(src.x));
+    options.vec5f.emplace_back(OptConvert<float>(src.y));
+    options.vec5f.emplace_back(OptConvert<float>(src.z));
+    options.vec5f.emplace_back(OptConvert<float>(src.angle));
+    options.vec5f.emplace_back(OptConvert<float>(src.perspective));
 
-    auto center = OptConvert<Dimension>(src.centerX);
-    if (center.has_value()) {
-        options.pivot.SetX(center.value());
-    }
-    center = OptConvert<Dimension>(src.centerY);
-    if (center.has_value()) {
-        options.pivot.SetY(center.value());
-    }
-    center = OptConvert<Dimension>(src.centerZ);
-    if (center.has_value()) {
-        options.pivot.SetZ(center.value());
+    auto centerX =  OptConvert<Dimension>(src.centerX);
+    auto centerY =  OptConvert<Dimension>(src.centerY);
+    if (centerX.has_value() && centerY.has_value()) {
+        auto center = DimensionOffset(centerX.value(), centerY.value());
+        auto centerZ =  OptConvert<Dimension>(src.centerZ);
+        if (centerZ.has_value()) {
+            center.SetZ(centerZ.value());
+        }
+        options.center = center;
     }
     return options;
 }
@@ -1003,12 +1014,15 @@ TransitionOptions Convert(const Ark_TransitionOptions& src)
 }
 
 template<>
-TransitionOptions Convert(const Ark_TransitionEffect& src)
+RefPtr<NG::ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
 {
-    TransitionOptions options;
-    LOGE("ARKOALA: CommonMethod::Convert: Ark_TransitionEffect to TransitionOptions is not implemented."
-        " Ark_Materialized issue\n");
-    return options;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect> effect;
+    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(src.ptr);
+    if (effectPeer) {
+        return effectPeer->handler;
+    } else {
+        return nullptr;
+    }
 }
 
 template<>
@@ -1016,6 +1030,7 @@ GridSizeOpt Convert(const Ark_Number& src)
 {
     GridSizeOpt options;
     options.span = OptConvert<int32_t>(src);
+    Validator::ValidateNonNegative(options.span);
     options.offset = 0;
     return options;
 }
@@ -1025,6 +1040,7 @@ GridSizeOpt Convert(const Ark_Literal_Number_offset_span& src)
 {
     GridSizeOpt options;
     options.span = OptConvert<int32_t>(src.span);
+    Validator::ValidateNonNegative(options.span);
     options.offset = OptConvert<int32_t>(src.offset);
     return options;
 }
@@ -2131,8 +2147,17 @@ void Transition0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<TransitionOptions>(*value);
-    ViewAbstract::SetTransition(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_TransitionOptions& value) {
+            auto convValue = Converter::Convert<TransitionOptions>(value);
+            ViewAbstract::SetTransition(frameNode, convValue);
+        },
+        [frameNode](const Ark_TransitionEffect& value) {
+            auto convValue = Converter::Convert<RefPtr<NG::ChainedTransitionEffect>>(value);
+             ViewAbstract::SetChainedTransition(frameNode, convValue);
+        },
+        []() {}
+    );
 }
 void Transition1Impl(Ark_NativePointer node,
                      const Ark_TransitionEffect* effect,
@@ -2141,10 +2166,23 @@ void Transition1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(effect);
-    //auto convValue = Converter::Convert<type>(effect);
-    //auto convValue = Converter::OptConvert<type>(effect); // for enums
-    //CommonMethodModelNG::SetTransition1(frameNode, convValue);
+    std::function<void(bool)> finishCallback;
+    if (onFinish) {
+        auto arkOnFinish = Converter::OptConvert<::TransitionFinishCallback>(*onFinish);
+        if (arkOnFinish) {
+                finishCallback = [callback = CallbackHelper(*arkOnFinish)](bool transitionIn) {
+                    callback.Invoke(Converter::ArkValue<Ark_Boolean>(transitionIn));
+                };
+        }
+    }
+    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(effect->ptr);
+    if (effectPeer && effectPeer->handler) {
+        ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
+    } else {
+        ViewAbstract::CleanTransition(frameNode);
+    }
 }
+    
 void MotionBlurImpl(Ark_NativePointer node,
                     const Ark_MotionBlurOptions* value)
 {
@@ -2330,11 +2368,9 @@ void RotateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<RotateOpt>(*value);
-    if (convValue.has_value()) {
-        ViewAbstract::SetPivot(frameNode, convValue.value().pivot);
-        ViewAbstract::SetRotate(frameNode, convValue.value().vec5f);
-    }
+    auto convValue = Converter::Convert<RotateOpt>(*value);
+    ViewAbstract::SetPivot(frameNode, convValue.center);
+    ViewAbstract::SetRotate(frameNode, convValue.vec5f);
 }
 void TransformImpl(Ark_NativePointer node,
                    const Ark_CustomObject* value)
@@ -2609,21 +2645,21 @@ void UseSizeTypeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto gridSizeOptXS = Converter::OptConvert<GridSizeOpt>(value->xs);
-    if (gridSizeOptXS.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOptXS.value().span, gridSizeOptXS.value().offset, GridSizeType::XS);
+    auto gridSizeOpt = Converter::OptConvert<GridSizeOpt>(value->xs);
+    if (gridSizeOpt.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::XS);
     }
-    auto gridSizeOptSM = Converter::OptConvert<GridSizeOpt>(value->sm);
-    if (gridSizeOptSM.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOptSM.value().span, gridSizeOptSM.value().offset, GridSizeType::SM);
+    gridSizeOpt = Converter::OptConvert<GridSizeOpt>(value->sm);
+    if (gridSizeOpt.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::SM);
     }
-    auto gridSizeOptMD = Converter::OptConvert<GridSizeOpt>(value->md);
-    if (gridSizeOptMD.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOptMD.value().span, gridSizeOptMD.value().offset, GridSizeType::MD);
+    gridSizeOpt = Converter::OptConvert<GridSizeOpt>(value->md);
+    if (gridSizeOpt.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::MD);
     }
-    auto gridSizeOptLG = Converter::OptConvert<GridSizeOpt>(value->lg);
-    if (gridSizeOptLG.has_value()) {
-        ViewAbstract::SetGrid(frameNode, gridSizeOptLG.value().span, gridSizeOptLG.value().offset, GridSizeType::LG);
+    gridSizeOpt= Converter::OptConvert<GridSizeOpt>(value->lg);
+    if (gridSizeOpt.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOpt.value().span, gridSizeOpt.value().offset, GridSizeType::LG);
     }
 }
 void AlignRules0Impl(Ark_NativePointer node,

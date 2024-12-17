@@ -430,6 +430,12 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 // Fixture 'NumberAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberAnythingValidValues;
 
+// Fixture 'MotionBlurRadiusNumber' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurRadiusNumberValidValues;
+
+// Fixture 'MotionBlurAnchorNumber' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurAnchorNumberValidValues;
+
 // Fixture 'NumberFloatAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues;
 
