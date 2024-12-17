@@ -120,16 +120,18 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     MeasureRow(leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
+    float contentWidth;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        float contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
+        contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
     } else {
-        float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace_;
+        contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace_;
     }
+    float itemHeight;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        auto itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
+        itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
         : std::max(leftRowHeight, rightRowHeight);
     } else {
-        auto itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
+        itemHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_
         : std::max(leftRowHeight, rightRowHeight) + padding.Height();
     }
     auto width = std::max(minRowWidth_, contentWidth);
