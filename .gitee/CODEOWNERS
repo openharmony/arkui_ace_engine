@@ -973,7 +973,7 @@ frameworks/bridge/declarative_frontend/engine/js_types.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/engine/jsUIContext.js
 frameworks/bridge/declarative_frontend/engine/jsXNode.js
-frameworks/bridge/declarative_frontend/engine/stateMgmt.js @arkuistatemgmt
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib @arkuistatemgmt
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h @arkuiframework
 frameworks/bridge/declarative_frontend/interfaces/profiler/js_profiler.cpp @arkuiframework
