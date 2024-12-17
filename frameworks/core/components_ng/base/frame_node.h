@@ -61,10 +61,6 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
-namespace OHOS::Ace::Kit {
-class FrameNode;
-}
-
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class PipelineContext;
@@ -1159,8 +1155,6 @@ public:
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
     void OnPropertyChangeMeasure() const;
 
-    void SetKitNode(const RefPtr<Kit::FrameNode>& node);
-
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
         if (visibleAreaChangeTriggerReason_ != triggerReason) {
@@ -1444,8 +1438,6 @@ private:
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
-
-    RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
@@ -45,9 +43,6 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-
-#include "interfaces/inner_api/ace_kit/include/ui/view/frame_node.h"
-#include "interfaces/inner_api/ace_kit/include/ui/view/pattern.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -497,9 +492,6 @@ FrameNode::~FrameNode()
         pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
-    if (kitNode_) {
-        kitNode_->Reset();
-    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -2209,13 +2201,6 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
 {
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
-    if (kitNode_ && kitNode_->GetPattern()) {
-        auto method = kitNode_->GetPattern()->CreateNodePaintMethod();
-        auto paintWrapper = MakeRefPtr<PaintWrapper>(
-            renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
-        paintWrapper->SetKitNodePaintMethod(method);
-        return paintWrapper;
-    }
     auto paintMethod = pattern_->CreateNodePaintMethod();
     if (paintMethod || extensionHandler_ || renderContext_->GetAccessibilityFocus().value_or(false)) {
         // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
@@ -4701,12 +4686,7 @@ RefPtr<UINode> FrameNode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
 const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needReset)
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
-        if (kitNode_ && kitNode_->GetPattern()) {
-            layoutAlgorithm_ =
-                LayoutAlgorithmWrapper::CreateLayoutAlgorithmWrapper(kitNode_->GetPattern()->CreateLayoutAlgorithm());
-        } else {
-            layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
-        }
+        layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
     }
     if (needReset) {
         layoutAlgorithm_->SetNeedMeasure();
@@ -6162,10 +6142,5 @@ std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
         }
     }
     return list;
-}
-
-void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
-{
-    kitNode_ = node;
 }
 } // namespace OHOS::Ace::NG

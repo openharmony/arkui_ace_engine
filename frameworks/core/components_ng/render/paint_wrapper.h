@@ -29,10 +29,6 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
-namespace OHOS::Ace::Kit {
-class NodePaintMethod;
-}
-
 namespace OHOS::Ace::NG {
 class NodePaintMethod;
 
@@ -46,8 +42,6 @@ public:
     ~PaintWrapper() override;
 
     void SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintImpl);
-
-    void SetKitNodePaintMethod(const RefPtr<Kit::NodePaintMethod>& nodePaintMethod);
 
     void SetTaskThread(TaskThread taskThread)
     {
@@ -122,7 +116,6 @@ private:
     RefPtr<NodePaintMethod> nodePaintImpl_;
     RefPtr<ExtensionHandler> extensionHandler_;
     TaskThread taskThread_ = MAIN_TASK;
-    RefPtr<Kit::NodePaintMethod> nodePaintMethod_;
 };
 } // namespace OHOS::Ace::NG
 
