@@ -393,6 +393,11 @@ RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
 {
     auto frameNode = GetSubMenu(customNode);
+    if (!frameNode) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "subMenu has no Menu node");
+    } else {
+        TAG_LOGD(AceLogTag::ACE_MENU, "subMenu tag:%{public}s", frameNode->GetTag().c_str());
+    }
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
         auto props = frameNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -792,6 +797,7 @@ void MenuItemPattern::RegisterOnKeyEvent()
 
 bool MenuItemPattern::OnClick()
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem index:%{public}d receive click event", index_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (onClickAIMenuItem_) {
@@ -843,6 +849,7 @@ bool MenuItemPattern::OnClick()
 
 void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem index:%{public}d receive touch event", index_);
     auto menuWrapper = GetMenuWrapper();
     // When menu wrapper exists, the pressed state is handed over to the menu wrapper
     if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
@@ -901,6 +908,7 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
 
 void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "Custom MenuItem index:%{public}d receive touch event", index_);
     const auto& touches = info.GetTouches();
     CHECK_EQUAL_VOID(touches.empty(), true);
     auto touchType = touches.front().GetTouchType();

@@ -1273,6 +1273,9 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     CHECK_NULL_VOID(mainMenu);
 
     auto [originOffset, endOffset] = GetMenuOffset(mainMenu);
+    if (originOffset ==  OffsetF()) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "not found parent MenuItem when show stack sub menu");
+    }
     auto mainMenuContext = mainMenu->GetRenderContext();
     ShowStackMenuAppearOpacityAndBlurAnimation(mainMenuContext);
     auto subMenuContext = host->GetRenderContext();
