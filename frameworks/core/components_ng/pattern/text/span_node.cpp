@@ -184,12 +184,12 @@ void SpanNode::MountToParagraph()
     }
 }
 
-void SpanNode::RequestTextFlushDirty()
+void SpanNode::RequestTextFlushDirty(bool markModifyDone)
 {
-    RequestTextFlushDirty(Claim<UINode>(this));
+    RequestTextFlushDirty(Claim<UINode>(this), markModifyDone);
 }
 
-void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node)
+void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModifyDone)
 {
     CHECK_NULL_VOID(node);
     auto parent = node->GetParent();
@@ -201,6 +201,7 @@ void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node)
             if (textPattern) {
                 ACE_TEXT_SCOPED_TRACE("RequestTextFlushDirty [Parent:%d,Tag:%s][Span:%d]", textNode->GetId(),
                     textNode->GetTag().c_str(), node->GetId());
+                CHECK_NULL_VOID(markModifyDone);
                 textPattern->OnModifyDone();
                 return;
             }

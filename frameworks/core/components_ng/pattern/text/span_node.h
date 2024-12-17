@@ -411,7 +411,7 @@ public:
             return;
         }
         spanItem_->unicode = unicode;
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void UpdateContent(const std::u16string& content)
@@ -420,7 +420,7 @@ public:
             return;
         }
         spanItem_->content = content;
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -495,12 +495,12 @@ public:
         spanItem_->ToTreeJson(json, config);
     }
 
-    void RequestTextFlushDirty();
-    static void RequestTextFlushDirty(const RefPtr<UINode>& node);
+    void RequestTextFlushDirty(bool markModifyDone = false);
+    static void RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModifyDone = true);
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void SetPropertyInfoContainer();
