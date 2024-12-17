@@ -2156,6 +2156,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOpacity));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOpacity));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVideoSurfaceBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetVideoSurfaceBackgroundColor));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVideoSurfaceBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetVideoSurfaceBackgroundColor));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetTransition));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransition"),
