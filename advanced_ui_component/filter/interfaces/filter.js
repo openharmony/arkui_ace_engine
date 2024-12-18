@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -69,7 +69,7 @@ const MAX_SYMBOL_FONT_SCALE = 1.45;
 const MIN_SYMBOL_FONT_SCALE = 1;
 const DEFAULT_SYMBOL_FONT_SCALE = 1;
 
-export var FilterType;
+export let FilterType;
 (function (e13) {
     e13[e13['MULTI_LINE_FILTER'] = 0] = 'MULTI_LINE_FILTER';
     e13[e13['LIST_FILTER'] = 1] = 'LIST_FILTER';
@@ -191,18 +191,18 @@ class GradientMask extends ViewPU {
 }
 
 class ListFilterRow extends ViewPU {
-    constructor(i12, j12, k12, l12 = -1, m12 = undefined, n12) {
-        super(i12, k12, l12, n12);
-        if (typeof m12 === 'function') {
-            this.paramsGenerator_ = m12;
+    constructor(d21, e21, f21, g21 = -1, h21 = undefined, i21) {
+        super(d21, f21, g21, i21);
+        if (typeof h21 === 'function') {
+            this.paramsGenerator_ = h21;
         }
-        this.__colorRow = new SynchedPropertyNesedObjectPU(j12.colorRow, this, 'colorRow');
-        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(j12.fontWeightRow, this, 'fontWeightRow');
+        this.__colorRow = new SynchedPropertyNesedObjectPU(e21.colorRow, this, 'colorRow');
+        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(e21.fontWeightRow, this, 'fontWeightRow');
         this.__backgroundColorRow =
-            new SynchedPropertyNesedObjectPU(j12.backgroundColorRow, this, 'backgroundColorRow');
+            new SynchedPropertyNesedObjectPU(e21.backgroundColorRow, this, 'backgroundColorRow');
         this.__isBackgroundHoverRow =
-            new SynchedPropertyNesedObjectPU(j12.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
-        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(j12.isSelectedRow, this, 'isSelectedRow');
+            new SynchedPropertyNesedObjectPU(e21.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
+        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(e21.isSelectedRow, this, 'isSelectedRow');
         this.accessibilitySelectedText = '';
         this.filterRow = { name: '', options: [] };
         this.onItemClick = () => {
@@ -211,53 +211,53 @@ class ListFilterRow extends ViewPU {
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
         this.bundleName = '';
-        this.setInitiallyProvidedValue(j12);
+        this.setInitiallyProvidedValue(e21);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(h12) {
-        this.__colorRow.set(h12.colorRow);
-        this.__fontWeightRow.set(h12.fontWeightRow);
-        this.__backgroundColorRow.set(h12.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(h12.isBackgroundHoverRow);
-        this.__isSelectedRow.set(h12.isSelectedRow);
-        if (h12.accessibilitySelectedText !== undefined) {
-            this.accessibilitySelectedText = h12.accessibilitySelectedText;
+    setInitiallyProvidedValue(c21) {
+        this.__colorRow.set(c21.colorRow);
+        this.__fontWeightRow.set(c21.fontWeightRow);
+        this.__backgroundColorRow.set(c21.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(c21.isBackgroundHoverRow);
+        this.__isSelectedRow.set(c21.isSelectedRow);
+        if (c21.accessibilitySelectedText !== undefined) {
+            this.accessibilitySelectedText = c21.accessibilitySelectedText;
         }
-        if (h12.filterRow !== undefined) {
-            this.filterRow = h12.filterRow;
+        if (c21.filterRow !== undefined) {
+            this.filterRow = c21.filterRow;
         }
-        if (h12.onItemClick !== undefined) {
-            this.onItemClick = h12.onItemClick;
+        if (c21.onItemClick !== undefined) {
+            this.onItemClick = c21.onItemClick;
         }
-        if (h12.rowIndex !== undefined) {
-            this.rowIndex = h12.rowIndex;
+        if (c21.rowIndex !== undefined) {
+            this.rowIndex = c21.rowIndex;
         }
-        if (h12.maxAppFontScale !== undefined) {
-            this.maxAppFontScale = h12.maxAppFontScale;
+        if (c21.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = c21.maxAppFontScale;
         }
-        if (h12.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = h12.isFollowingSystemFontScale;
+        if (c21.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = c21.isFollowingSystemFontScale;
         }
-        if (h12.bundleName !== undefined) {
-            this.bundleName = h12.bundleName;
+        if (c21.bundleName !== undefined) {
+            this.bundleName = c21.bundleName;
         }
     }
 
-    updateStateVars(x20) {
-        this.__colorRow.set(x20.colorRow);
-        this.__fontWeightRow.set(x20.fontWeightRow);
-        this.__backgroundColorRow.set(x20.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(x20.isBackgroundHoverRow);
-        this.__isSelectedRow.set(x20.isSelectedRow);
+    updateStateVars(b21) {
+        this.__colorRow.set(b21.colorRow);
+        this.__fontWeightRow.set(b21.fontWeightRow);
+        this.__backgroundColorRow.set(b21.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(b21.isBackgroundHoverRow);
+        this.__isSelectedRow.set(b21.isSelectedRow);
     }
 
-    purgeVariableDependenciesOnElmtId(w20) {
-        this.__colorRow.purgeDependencyOnElmtId(w20);
-        this.__fontWeightRow.purgeDependencyOnElmtId(w20);
-        this.__backgroundColorRow.purgeDependencyOnElmtId(w20);
-        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(w20);
-        this.__isSelectedRow.purgeDependencyOnElmtId(w20);
+    purgeVariableDependenciesOnElmtId(a21) {
+        this.__colorRow.purgeDependencyOnElmtId(a21);
+        this.__fontWeightRow.purgeDependencyOnElmtId(a21);
+        this.__backgroundColorRow.purgeDependencyOnElmtId(a21);
+        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(a21);
+        this.__isSelectedRow.purgeDependencyOnElmtId(a21);
     }
 
     aboutToBeDeleted() {
@@ -269,15 +269,12 @@ class ListFilterRow extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get colorRow() {
         return this.__colorRow.get();
     }
-
     get fontWeightRow() {
         return this.__fontWeightRow.get();
     }
-
     get backgroundColorRow() {
         return this.__backgroundColorRow.get();
     }
@@ -293,93 +290,93 @@ class ListFilterRow extends ViewPU {
     aboutToAppear() {
         this.initAccessibilityResource();
         try {
-            let v20 = this.getUIContext();
-            this.isFollowingSystemFontScale = v20.isFollowingSystemFontScale();
-            this.maxAppFontScale = v20.getMaxFontScale();
+            let z20 = this.getUIContext();
+            this.isFollowingSystemFontScale = z20.isFollowingSystemFontScale();
+            this.maxAppFontScale = z20.getMaxFontScale();
         }
-        catch (s20) {
-            let t20 = s20.code;
-            let u20 = s20.message;
-            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${t20}, message: ${u20}`);
+        catch (w20) {
+            let x20 = w20.code;
+            let y20 = w20.message;
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${x20}, message: ${y20}`);
         }
     }
 
     initAccessibilityResource() {
         try {
             this.bundleName = getContext(this)?.abilityInfo?.bundleName;
-            let r20 = getContext()?.resourceManager;
-            this.accessibilitySelectedText = r20?.getStringByNameSync('filter_accessibility_selected');
+            let v20 = getContext()?.resourceManager;
+            this.accessibilitySelectedText = v20?.getStringByNameSync('filter_accessibility_selected');
         }
-        catch (o20) {
-            let p20 = o20.code;
-            let q20 = o20.message;
-            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${p20}, message: ${q20}`);
+        catch (s20) {
+            let t20 = s20.code;
+            let u20 = s20.message;
+            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${t20}, message: ${u20}`);
         }
     }
 
     updateFontScale() {
-        let z11 = this.getUIContext();
-        let a12 = z11.getHostContext()?.config?.fontSizeScale ?? 1;
+        let q20 = this.getUIContext();
+        let r20 = q20.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        return Math.min(a12, this.maxAppFontScale);
+        return Math.min(r20, this.maxAppFontScale);
     }
 
-    getAccessibilityText(e20, f20, g20) {
-        let h20 = '';
+    getAccessibilityText(i20, j20, k20) {
+        let l20 = '';
         try {
-            let l20 = '';
-            if (typeof e20 === 'string') {
-                l20 = e20;
+            let p20 = '';
+            if (typeof i20 === 'string') {
+                p20 = i20;
             }
             else {
-                l20 = getContext()?.resourceManager?.getStringSync(e20?.id);
+                p20 = getContext()?.resourceManager?.getStringSync(i20?.id);
             }
-            switch (g20) {
+            switch (k20) {
                 case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-                    h20 = f20 ? this.accessibilitySelectedText : l20;
+                    l20 = j20 ? this.accessibilitySelectedText : p20;
                     break;
                 case FilterAccessibilityType.ACCESSIBILITY_DESC:
-                    h20 = f20 ? l20 : '';
+                    l20 = j20 ? p20 : '';
                     break;
                 case FilterAccessibilityType.SEND_ACCESSIBILITY:
-                    h20 = f20 ? `${this.accessibilitySelectedText},${l20}` : '';
+                    l20 = j20 ? `${this.accessibilitySelectedText},${p20}` : '';
                     break;
                 default:
                     break;
             }
         }
-        catch (i20) {
-            let j20 = i20.code;
-            let k20 = i20.message;
-            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${j20}, message: ${k20}`);
+        catch (m20) {
+            let n20 = m20.code;
+            let o20 = m20.message;
+            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${n20}, message: ${o20}`);
         }
-        return h20;
+        return l20;
     }
 
-    sendAccessibility(a20, b20) {
-        let c20 = ({
+    sendAccessibility(e20, f20) {
+        let g20 = ({
             type: 'announceForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility:
-            this.getAccessibilityText(a20, b20, FilterAccessibilityType.SEND_ACCESSIBILITY),
+            textAnnouncedForAccessibility: this.getAccessibilityText(e20,
+                f20, FilterAccessibilityType.SEND_ACCESSIBILITY),
         });
-        accessibility.sendAccessibilityEvent(c20).then(() => {
-            hilog.info(0x3900, 'Ace', `ListFilter sendAccessibility send event, event info is ${JSON.stringify(c20)}`);
+        accessibility.sendAccessibilityEvent(g20).then(() => {
+            hilog.info(0x3900, 'Ace', `ListFilter sendAccessibility send event, event info is ${JSON.stringify(g20)}`);
         });
     }
 
     initialRender() {
-        this.observeComponentCreation2((x11, y11) => {
+        this.observeComponentCreation2((c20, d20) => {
             Stack.create({ alignContent: Alignment.End });
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
         }, Stack);
-        this.observeComponentCreation2((v11, w11) => {
+        this.observeComponentCreation2((a20, b20) => {
             Stack.create({ alignContent: Alignment.Start });
         }, Stack);
-        this.observeComponentCreation2((t11, u11) => {
+        this.observeComponentCreation2((y19, z19) => {
             List.create();
             List.listDirection(Axis.Horizontal);
             List.scrollBar(BarState.Off);
@@ -387,25 +384,25 @@ class ListFilterRow extends ViewPU {
             List.height(LIST_ROW_HEIGHT);
             List.align(Alignment.Start);
         }, List);
-        this.observeComponentCreation2((p10, q10) => {
+        this.observeComponentCreation2((d18, e18) => {
             ForEach.create();
-            const b8 = (s10, t10) => {
-                const u10 = s10;
-                this.observeComponentCreation2((i11, j11) => {
+            const f18 = (h18, i18) => {
+                const j18 = h18;
+                this.observeComponentCreation2((i19, j19) => {
                     If.create();
-                    if (t10 === 0) {
+                    if (i18 === 0) {
                         this.ifElseBranchUpdateFunction(0, () => {
                             {
-                                const y8 = (r11, s11) => {
-                                    ViewStackProcessor.StartGetAccessRecordingFor(r11);
-                                    g9(r11, s11);
-                                    if (!s11) {
+                                const m19 = (w19, x19) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(w19);
+                                    n19(w19, x19);
+                                    if (!x19) {
                                         ListItem.pop();
                                     }
                                     ViewStackProcessor.StopGetAccessRecording();
                                 };
-                                const g9 = (p11, q11) => {
-                                    ListItem.create(h9, true);
+                                const n19 = (u19, v19) => {
+                                    ListItem.create(o19, true);
                                     ListItem.width({
                                         'id': -1,
                                         'type': 10002,
@@ -415,39 +412,40 @@ class ListFilterRow extends ViewPU {
                                     });
                                     ListItem.height(LIST_ROW_HEIGHT);
                                 };
-                                const h9 = (n11, o11) => {
-                                    y8(n11, o11);
+                                const o19 = (s19, t19) => {
+                                    m19(s19, t19);
                                     ListItem.pop();
                                 };
-                                this.observeComponentCreation2(g9, ListItem);
+                                this.observeComponentCreation2(n19, ListItem);
                                 ListItem.pop();
                             }
                         });
-                    } else {
+                    }
+                    else {
                         this.ifElseBranchUpdateFunction(1, () => {
                         });
                     }
                 }, If);
                 If.pop();
                 {
-                    const v8 = (g11, h11) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(g11);
-                        w8(g11, h11);
-                        if (!h11) {
+                    const l18 = (g19, h19) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(g19);
+                        m18(g19, h19);
+                        if (!h19) {
                             ListItem.pop();
                         }
                         ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const w8 = (c11, d11) => {
-                        ListItem.create(x8, true);
-                        ListItem.accessibilityText(this.getAccessibilityText(u10, this.isSelectedRow[t10],
-                            FilterAccessibilityType.ACCESSIBILITY_TEXT));
-                        ListItem.accessibilityDescription(this.getAccessibilityText(u10,
-                            this.isSelectedRow[t10], FilterAccessibilityType.ACCESSIBILITY_DESC));
+                    const m18 = (w18, x18) => {
+                        ListItem.create(n18, true);
+                        ListItem.accessibilityText(this.getAccessibilityText(j18,
+                            this.isSelectedRow[i18], FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                        ListItem.accessibilityDescription(this.getAccessibilityText(j18,
+                            this.isSelectedRow[i18], FilterAccessibilityType.ACCESSIBILITY_DESC));
                         ListItem.height(PERCENT_100);
                         ListItem.onClick(() => {
-                            this.onItemClick(t10);
-                            this.sendAccessibility(u10, true);
+                            this.onItemClick(i18);
+                            this.sendAccessibility(j18, true);
                         });
                         ListItem.focusable(true);
                         ViewStackProcessor.visualState('focused');
@@ -489,58 +487,60 @@ class ListFilterRow extends ViewPU {
                             end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
                         });
                         ViewStackProcessor.visualState();
-                        ListItem.backgroundColor(this.isBackgroundHoverRow[t10] ? this.backgroundColorRow[t10] :
+                        ListItem.backgroundColor(this.isBackgroundHoverRow[i18] ? this.backgroundColorRow[i18] :
                             TRANS_COLOR);
-                        ListItem.onHover((f11) => {
+                        ListItem.onHover((e19) => {
                             Context.animateTo({
                                 curve: FRICTION_CUBIC_BEZIER,
                                 duration: ANIMATION_DURATION_250
                             }, () => {
-                                if (f11) {
-                                    this.backgroundColorRow[t10] = {
+                                if (e19) {
+                                    this.backgroundColorRow[i18] = {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_hover'],
                                         'bundleName': '__harDefaultBundleName__',
                                         'moduleName': '__harDefaultModuleName__'
                                     };
-                                    this.isBackgroundHoverRow[t10] = true;
-                                } else {
-                                    this.isBackgroundHoverRow[t10] = false;
+                                    this.isBackgroundHoverRow[i18] = true;
+                                }
+                                else {
+                                    this.isBackgroundHoverRow[i18] = false;
                                 }
                             });
                         });
-                        ListItem.onTouch((e11) => {
-                            if (e11.type === TouchType.Down) {
+                        ListItem.onTouch((b19) => {
+                            if (b19.type === TouchType.Down) {
                                 Context.animateTo({
                                     curve: SHARP_CUBIC_BEZIER,
                                     duration: ANIMATION_DURATION_100
                                 }, () => {
-                                    this.backgroundColorRow[t10] = {
+                                    this.backgroundColorRow[i18] = {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_click_effect'],
                                         'bundleName': '__harDefaultBundleName__',
                                         'moduleName': '__harDefaultModuleName__'
                                     };
-                                    this.isBackgroundHoverRow[t10] = true;
+                                    this.isBackgroundHoverRow[i18] = true;
                                 });
-                            } else if (e11.type === TouchType.Up || e11.type === TouchType.Cancel) {
+                            }
+                            else if (b19.type === TouchType.Up || b19.type === TouchType.Cancel) {
                                 Context.animateTo({
                                     curve: SHARP_CUBIC_BEZIER,
                                     duration: ANIMATION_DURATION_100
                                 }, () => {
-                                    this.isBackgroundHoverRow[t10] = false;
+                                    this.isBackgroundHoverRow[i18] = false;
                                 });
                             }
                         });
-                        ListItem.margin({ start: LengthMetrics.vp(t10 === 0 ? -TEXT_HOT_AREA_WIDTH : 0) });
-                        ListItem.tabIndex(t10 === 0 ? this.rowIndex : -1);
+                        ListItem.margin({ start: LengthMetrics.vp(i18 === 0 ? -TEXT_HOT_AREA_WIDTH : 0) });
+                        ListItem.tabIndex(i18 === 0 ? this.rowIndex : -1);
                     };
-                    const x8 = (y10, z10) => {
-                        v8(y10, z10);
-                        this.observeComponentCreation2((a11, b11) => {
-                            Text.create(u10);
+                    const n18 = (r18, s18) => {
+                        l18(r18, s18);
+                        this.observeComponentCreation2((u18, v18) => {
+                            Text.create(j18);
                             Text.fontSize({
                                 'id': -1,
                                 'type': 10002,
@@ -550,33 +550,33 @@ class ListFilterRow extends ViewPU {
                             });
                             Text.minFontScale(1);
                             Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
-                            Text.fontColor(this.colorRow[t10]);
-                            Text.fontWeight(this.fontWeightRow[t10]);
+                            Text.fontColor(this.colorRow[i18]);
+                            Text.fontWeight(this.fontWeightRow[i18]);
                             Text.focusable(true);
                         }, Text);
                         Text.pop();
                         ListItem.pop();
                     };
-                    this.observeComponentCreation2(w8, ListItem);
+                    this.observeComponentCreation2(m18, ListItem);
                     ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(p10, this.filterRow.options, b8, undefined, true, false);
+            this.forEachUpdateFunction(d18, this.filterRow.options, f18, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         List.pop();
         {
-            this.observeComponentCreation2((l10, m10) => {
-                if (m10) {
-                    let n10 = new GradientMask(this, {
+            this.observeComponentCreation2((x17, y17) => {
+                if (y17) {
+                    let z17 = new GradientMask(this, {
                         x0: 0,
                         y0: LIST_ROW_HEIGHT / 2,
                         x1: GRADIENT_WIDTH,
                         y1: LIST_ROW_HEIGHT / 2
-                    }, undefined, l10, () => {
-                    }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 245, col: 9 });
-                    ViewPU.create(n10);
-                    let o6 = () => {
+                    }, undefined, x17, () => {
+                    }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 318, col: 9 });
+                    ViewPU.create(z17);
+                    let a18 = () => {
                         return {
                             x0: 0,
                             y0: LIST_ROW_HEIGHT / 2,
@@ -584,25 +584,26 @@ class ListFilterRow extends ViewPU {
                             y1: LIST_ROW_HEIGHT / 2
                         };
                     };
-                    n10.paramsGenerator_ = o6;
-                } else {
-                    this.updateStateVarsOfChildByElmtId(l10, {});
+                    z17.paramsGenerator_ = a18;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(x17, {});
                 }
             }, { name: 'GradientMask' });
         }
         Stack.pop();
         {
-            this.observeComponentCreation2((h10, i10) => {
-                if (i10) {
-                    let j10 = new GradientMask(this, {
+            this.observeComponentCreation2((q17, r17) => {
+                if (r17) {
+                    let s17 = new GradientMask(this, {
                         x0: GRADIENT_WIDTH,
                         y0: LIST_ROW_HEIGHT / 2,
                         x1: 0,
                         y1: LIST_ROW_HEIGHT / 2
-                    }, undefined, h10, () => {
-                    }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 253, col: 7 });
-                    ViewPU.create(j10);
-                    let h6 = () => {
+                    }, undefined, q17, () => {
+                    }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 326, col: 7 });
+                    ViewPU.create(s17);
+                    let t17 = () => {
                         return {
                             x0: GRADIENT_WIDTH,
                             y0: LIST_ROW_HEIGHT / 2,
@@ -610,9 +611,10 @@ class ListFilterRow extends ViewPU {
                             y1: LIST_ROW_HEIGHT / 2
                         };
                     };
-                    j10.paramsGenerator_ = h6;
-                } else {
-                    this.updateStateVarsOfChildByElmtId(h10, {});
+                    s17.paramsGenerator_ = t17;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(q17, {});
                 }
             }, { name: 'GradientMask' });
         }
@@ -625,25 +627,26 @@ class ListFilterRow extends ViewPU {
 }
 
 class MultiFilterRow extends ViewPU {
-    constructor(a17, b17, c17, d17 = -1, e17 = undefined, f17) {
-        super(a17, c17, d17, f17);
-        if (typeof e17 === 'function') {
-            this.paramsGenerator_ = e17;
+    constructor(e17, f17, g17, h17 = -1, i17 = undefined, j17) {
+        super(e17, g17, h17, j17);
+        if (typeof i17 === 'function') {
+            this.paramsGenerator_ = i17;
         }
-        this.__colorRow = new SynchedPropertyNesedObjectPU(b17.colorRow, this, 'colorRow');
-        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(b17.fontWeightRow, this, 'fontWeightRow');
+        this.__colorRow = new SynchedPropertyNesedObjectPU(f17.colorRow, this, 'colorRow');
+        this.__fontWeightRow =
+            new SynchedPropertyNesedObjectPU(f17.fontWeightRow, this, 'fontWeightRow');
         this.__backgroundColorRow =
-            new SynchedPropertyNesedObjectPU(b17.backgroundColorRow, this, 'backgroundColorRow');
+            new SynchedPropertyNesedObjectPU(f17.backgroundColorRow, this, 'backgroundColorRow');
         this.__isBackgroundHoverRow =
-            new SynchedPropertyNesedObjectPU(b17.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
+            new SynchedPropertyNesedObjectPU(f17.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
         this.__twoLineModeItemNumRow =
-            new SynchedPropertyNesedObjectPU(b17.twoLineModeItemNumRow, this, 'twoLineModeItemNumRow');
+            new SynchedPropertyNesedObjectPU(f17.twoLineModeItemNumRow, this, 'twoLineModeItemNumRow');
         this.__twoLineModeItemNumRecordRow =
-            new SynchedPropertyNesedObjectPU(b17.twoLineModeItemNumRecordRow, this, 'twoLineModeItemNumRecordRow');
+            new SynchedPropertyNesedObjectPU(f17.twoLineModeItemNumRecordRow, this, 'twoLineModeItemNumRecordRow');
         this.__arrowShowStateRow =
-            new SynchedPropertyNesedObjectPU(b17.arrowShowStateRow, this, 'arrowShowStateRow');
-        this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(b17.isArrowIconDown, this, 'isArrowIconDown');
-        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(b17.isSelectedRow, this, 'isSelectedRow');
+            new SynchedPropertyNesedObjectPU(f17.arrowShowStateRow, this, 'arrowShowStateRow');
+        this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(f17.isArrowIconDown, this, 'isArrowIconDown');
+        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(f17.isSelectedRow, this, 'isSelectedRow');
         this.filterRow = null;
         this.onItemClick = () => {
         };
@@ -655,7 +658,7 @@ class MultiFilterRow extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'arrowBgColorRow');
         this.__isArrowBgHoverRow = new ObservedPropertySimplePU(false, this, 'isArrowBgHoverRow');
-        this.__fontSizeScale = new SynchedPropertyObjectOneWayPU(b17.fontSizeScale, this, 'fontSizeScale');
+        this.__fontSizeScale = new SynchedPropertyObjectOneWayPU(f17.fontSizeScale, this, 'fontSizeScale');
         this.__replaceEffect = new ObservedPropertySimplePU(0, this, 'replaceEffect');
         this.__isSendArrowAccessibility = new ObservedPropertySimplePU(false, this, 'isSendArrowAccessibility');
         this.filterColumnWidth = 0;
@@ -670,104 +673,104 @@ class MultiFilterRow extends ViewPU {
         this.isFollowingSystemFontScale = false;
         this.bundleName = '';
         this.filterId = this.getUniqueId();
-        this.setInitiallyProvidedValue(b17);
+        this.setInitiallyProvidedValue(f17);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(z16) {
-        this.__colorRow.set(z16.colorRow);
-        this.__fontWeightRow.set(z16.fontWeightRow);
-        this.__backgroundColorRow.set(z16.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(z16.isBackgroundHoverRow);
-        this.__twoLineModeItemNumRow.set(z16.twoLineModeItemNumRow);
-        this.__twoLineModeItemNumRecordRow.set(z16.twoLineModeItemNumRecordRow);
-        this.__arrowShowStateRow.set(z16.arrowShowStateRow);
-        this.__isArrowIconDown.set(z16.isArrowIconDown);
-        this.__isSelectedRow.set(z16.isSelectedRow);
-        if (z16.filterRow !== undefined) {
-            this.filterRow = z16.filterRow;
+    setInitiallyProvidedValue(d17) {
+        this.__colorRow.set(d17.colorRow);
+        this.__fontWeightRow.set(d17.fontWeightRow);
+        this.__backgroundColorRow.set(d17.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(d17.isBackgroundHoverRow);
+        this.__twoLineModeItemNumRow.set(d17.twoLineModeItemNumRow);
+        this.__twoLineModeItemNumRecordRow.set(d17.twoLineModeItemNumRecordRow);
+        this.__arrowShowStateRow.set(d17.arrowShowStateRow);
+        this.__isArrowIconDown.set(d17.isArrowIconDown);
+        this.__isSelectedRow.set(d17.isSelectedRow);
+        if (d17.filterRow !== undefined) {
+            this.filterRow = d17.filterRow;
         }
-        if (z16.onItemClick !== undefined) {
-            this.onItemClick = z16.onItemClick;
+        if (d17.onItemClick !== undefined) {
+            this.onItemClick = d17.onItemClick;
         }
-        if (z16.arrowBgColorRow !== undefined) {
-            this.arrowBgColorRow = z16.arrowBgColorRow;
+        if (d17.arrowBgColorRow !== undefined) {
+            this.arrowBgColorRow = d17.arrowBgColorRow;
         }
-        if (z16.isArrowBgHoverRow !== undefined) {
-            this.isArrowBgHoverRow = z16.isArrowBgHoverRow;
+        if (d17.isArrowBgHoverRow !== undefined) {
+            this.isArrowBgHoverRow = d17.isArrowBgHoverRow;
         }
-        if (z16.replaceEffect !== undefined) {
-            this.replaceEffect = z16.replaceEffect;
+        if (d17.replaceEffect !== undefined) {
+            this.replaceEffect = d17.replaceEffect;
         }
-        if (z16.isSendArrowAccessibility !== undefined) {
-            this.isSendArrowAccessibility = z16.isSendArrowAccessibility;
+        if (d17.isSendArrowAccessibility !== undefined) {
+            this.isSendArrowAccessibility = d17.isSendArrowAccessibility;
         }
-        if (z16.filterColumnWidth !== undefined) {
-            this.filterColumnWidth = z16.filterColumnWidth;
+        if (d17.filterColumnWidth !== undefined) {
+            this.filterColumnWidth = d17.filterColumnWidth;
         }
-        if (z16.lastFilterColumnWidth !== undefined) {
-            this.lastFilterColumnWidth = z16.lastFilterColumnWidth;
+        if (d17.lastFilterColumnWidth !== undefined) {
+            this.lastFilterColumnWidth = d17.lastFilterColumnWidth;
         }
-        if (z16.rowIndex !== undefined) {
-            this.rowIndex = z16.rowIndex;
+        if (d17.rowIndex !== undefined) {
+            this.rowIndex = d17.rowIndex;
         }
-        if (z16.accessibilityExpand !== undefined) {
-            this.accessibilityExpand = z16.accessibilityExpand;
+        if (d17.accessibilityExpand !== undefined) {
+            this.accessibilityExpand = d17.accessibilityExpand;
         }
-        if (z16.accessibilitySelectedText !== undefined) {
-            this.accessibilitySelectedText = z16.accessibilitySelectedText;
+        if (d17.accessibilitySelectedText !== undefined) {
+            this.accessibilitySelectedText = d17.accessibilitySelectedText;
         }
-        if (z16.accessibilityCollapse !== undefined) {
-            this.accessibilityCollapse = z16.accessibilityCollapse;
+        if (d17.accessibilityCollapse !== undefined) {
+            this.accessibilityCollapse = d17.accessibilityCollapse;
         }
-        if (z16.accessibilityExpanded !== undefined) {
-            this.accessibilityExpanded = z16.accessibilityExpanded;
+        if (d17.accessibilityExpanded !== undefined) {
+            this.accessibilityExpanded = d17.accessibilityExpanded;
         }
-        if (z16.accessibilityCollapsed !== undefined) {
-            this.accessibilityCollapsed = z16.accessibilityCollapsed;
+        if (d17.accessibilityCollapsed !== undefined) {
+            this.accessibilityCollapsed = d17.accessibilityCollapsed;
         }
-        if (z16.maxAppFontScale !== undefined) {
-            this.maxAppFontScale = z16.maxAppFontScale;
+        if (d17.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = d17.maxAppFontScale;
         }
-        if (z16.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = z16.isFollowingSystemFontScale;
+        if (d17.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = d17.isFollowingSystemFontScale;
         }
-        if (z16.bundleName !== undefined) {
-            this.bundleName = z16.bundleName;
+        if (d17.bundleName !== undefined) {
+            this.bundleName = d17.bundleName;
         }
-        if (z16.filterId !== undefined) {
-            this.filterId = z16.filterId;
+        if (d17.filterId !== undefined) {
+            this.filterId = d17.filterId;
         }
     }
 
-    updateStateVars(y16) {
-        this.__colorRow.set(y16.colorRow);
-        this.__fontWeightRow.set(y16.fontWeightRow);
-        this.__backgroundColorRow.set(y16.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(y16.isBackgroundHoverRow);
-        this.__twoLineModeItemNumRow.set(y16.twoLineModeItemNumRow);
-        this.__twoLineModeItemNumRecordRow.set(y16.twoLineModeItemNumRecordRow);
-        this.__arrowShowStateRow.set(y16.arrowShowStateRow);
-        this.__isArrowIconDown.set(y16.isArrowIconDown);
-        this.__isSelectedRow.set(y16.isSelectedRow);
-        this.__fontSizeScale.reset(y16.fontSizeScale);
+    updateStateVars(c17) {
+        this.__colorRow.set(c17.colorRow);
+        this.__fontWeightRow.set(c17.fontWeightRow);
+        this.__backgroundColorRow.set(c17.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(c17.isBackgroundHoverRow);
+        this.__twoLineModeItemNumRow.set(c17.twoLineModeItemNumRow);
+        this.__twoLineModeItemNumRecordRow.set(c17.twoLineModeItemNumRecordRow);
+        this.__arrowShowStateRow.set(c17.arrowShowStateRow);
+        this.__isArrowIconDown.set(c17.isArrowIconDown);
+        this.__isSelectedRow.set(c17.isSelectedRow);
+        this.__fontSizeScale.reset(c17.fontSizeScale);
     }
 
-    purgeVariableDependenciesOnElmtId(x16) {
-        this.__colorRow.purgeDependencyOnElmtId(x16);
-        this.__fontWeightRow.purgeDependencyOnElmtId(x16);
-        this.__backgroundColorRow.purgeDependencyOnElmtId(x16);
-        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(x16);
-        this.__twoLineModeItemNumRow.purgeDependencyOnElmtId(x16);
-        this.__twoLineModeItemNumRecordRow.purgeDependencyOnElmtId(x16);
-        this.__arrowShowStateRow.purgeDependencyOnElmtId(x16);
-        this.__isArrowIconDown.purgeDependencyOnElmtId(x16);
-        this.__isSelectedRow.purgeDependencyOnElmtId(x16);
-        this.__arrowBgColorRow.purgeDependencyOnElmtId(x16);
-        this.__isArrowBgHoverRow.purgeDependencyOnElmtId(x16);
-        this.__fontSizeScale.purgeDependencyOnElmtId(x16);
-        this.__replaceEffect.purgeDependencyOnElmtId(x16);
-        this.__isSendArrowAccessibility.purgeDependencyOnElmtId(x16);
+    purgeVariableDependenciesOnElmtId(b17) {
+        this.__colorRow.purgeDependencyOnElmtId(b17);
+        this.__fontWeightRow.purgeDependencyOnElmtId(b17);
+        this.__backgroundColorRow.purgeDependencyOnElmtId(b17);
+        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(b17);
+        this.__twoLineModeItemNumRow.purgeDependencyOnElmtId(b17);
+        this.__twoLineModeItemNumRecordRow.purgeDependencyOnElmtId(b17);
+        this.__arrowShowStateRow.purgeDependencyOnElmtId(b17);
+        this.__isArrowIconDown.purgeDependencyOnElmtId(b17);
+        this.__isSelectedRow.purgeDependencyOnElmtId(b17);
+        this.__arrowBgColorRow.purgeDependencyOnElmtId(b17);
+        this.__isArrowBgHoverRow.purgeDependencyOnElmtId(b17);
+        this.__fontSizeScale.purgeDependencyOnElmtId(b17);
+        this.__replaceEffect.purgeDependencyOnElmtId(b17);
+        this.__isSendArrowAccessibility.purgeDependencyOnElmtId(b17);
     }
 
     aboutToBeDeleted() {
@@ -829,40 +832,40 @@ class MultiFilterRow extends ViewPU {
         return this.__arrowBgColorRow.get();
     }
 
-    set arrowBgColorRow(x9) {
-        this.__arrowBgColorRow.set(x9);
+    set arrowBgColorRow(a17) {
+        this.__arrowBgColorRow.set(a17);
     }
 
     get isArrowBgHoverRow() {
         return this.__isArrowBgHoverRow.get();
     }
 
-    set isArrowBgHoverRow(w9) {
-        this.__isArrowBgHoverRow.set(w9);
+    set isArrowBgHoverRow(z16) {
+        this.__isArrowBgHoverRow.set(z16);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(r10) {
-        this.__fontSizeScale.set(r10);
+    set fontSizeScale(y16) {
+        this.__fontSizeScale.set(y16);
     }
 
     get replaceEffect() {
         return this.__replaceEffect.get();
     }
 
-    set replaceEffect(u9) {
-        this.__replaceEffect.set(u9);
+    set replaceEffect(x16) {
+        this.__replaceEffect.set(x16);
     }
 
     get isSendArrowAccessibility() {
         return this.__isSendArrowAccessibility.get();
     }
 
-    set isSendArrowAccessibility(s16) {
-        this.__isSendArrowAccessibility.set(s16);
+    set isSendArrowAccessibility(w16) {
+        this.__isSendArrowAccessibility.set(w16);
     }
 
     aboutToAppear() {
@@ -891,17 +894,17 @@ class MultiFilterRow extends ViewPU {
     initAccessibilityResource() {
         try {
             this.bundleName = getContext(this)?.abilityInfo?.bundleName;
-            let l16 = getContext()?.resourceManager;
-            this.accessibilitySelectedText = l16?.getStringByNameSync('filter_accessibility_selected');
-            this.accessibilityExpand = l16?.getStringByNameSync('filter_accessibility_expand');
-            this.accessibilityCollapse = l16?.getStringByNameSync('filter_accessibility_collapse');
-            this.accessibilityExpanded = l16?.getStringByNameSync('filter_accessibility_expanded');
-            this.accessibilityCollapsed = l16?.getStringByNameSync('filter_accessibility_collapsed');
+            let p16 = getContext()?.resourceManager;
+            this.accessibilitySelectedText = p16?.getStringByNameSync('filter_accessibility_selected');
+            this.accessibilityExpand = p16?.getStringByNameSync('filter_accessibility_expand');
+            this.accessibilityCollapse = p16?.getStringByNameSync('filter_accessibility_collapse');
+            this.accessibilityExpanded = p16?.getStringByNameSync('filter_accessibility_expanded');
+            this.accessibilityCollapsed = p16?.getStringByNameSync('filter_accessibility_collapsed');
         }
-        catch (i16) {
-            let j16 = i16.code;
-            let k16 = i16.message;
-            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${j16}, message: ${k16}`);
+        catch (m16) {
+            let n16 = m16.code;
+            let o16 = m16.message;
+            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${n16}, message: ${o16}`);
         }
     }
 
@@ -944,67 +947,71 @@ class MultiFilterRow extends ViewPU {
         return j9;
     }
 
-    getAccessibilityText(u15, v15, w15) {
-        let x15 = '';
+    getAccessibilityText(y15, z15, a16) {
+        let b16 = '';
         try {
-            let b16 = '';
-            if (typeof u15 === 'string') {
-                b16 = u15;
+            let f16 = '';
+            if (typeof y15 === 'string') {
+                f16 = y15;
             }
             else {
-                b16 = getContext()?.resourceManager?.getStringSync(u15?.id);
+                f16 = getContext()?.resourceManager?.getStringSync(y15?.id);
             }
-            switch (w15) {
+            switch (a16) {
                 case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-                    x15 = v15 ? this.accessibilitySelectedText : b16;
+                    b16 = z15 ? this.accessibilitySelectedText : f16;
                     break;
                 case FilterAccessibilityType.ACCESSIBILITY_DESC:
-                    x15 = v15 ? b16 : '';
+                    b16 = z15 ? f16 : '';
                     break;
                 case FilterAccessibilityType.SEND_ACCESSIBILITY:
-                    x15 = v15 ? `${this.accessibilitySelectedText},${b16}` : '';
+                    b16 = z15 ? `${this.accessibilitySelectedText},${f16}` : '';
                     break;
                 default:
                     break;
             }
         }
-        catch (y15) {
-            let z15 = y15.code;
-            let a16 = y15.message;
-            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${z15}, message: ${a16}`);
+        catch (c16) {
+            let d16 = c16.code;
+            let e16 = c16.message;
+            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${d16}, message: ${e16}`);
         }
-        return x15;
+        return b16;
     }
 
-    sendAccessibility(r15, s15) {
-        let t15 = ({
+    sendAccessibility(v15, w15) {
+        let x15 = ({
             type: 'announceForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility: this.getAccessibilityText(r15,
-                s15, FilterAccessibilityType.SEND_ACCESSIBILITY),
+            textAnnouncedForAccessibility: this.getAccessibilityText(v15,
+                w15, FilterAccessibilityType.SEND_ACCESSIBILITY),
         });
-        accessibility.sendAccessibilityEvent(t15);
+        accessibility.sendAccessibilityEvent(x15);
     }
 
-    sendArrowAccessibility(n15) {
+    sendArrowAccessibility(r15) {
         this.isSendArrowAccessibility = true;
         setTimeout(() => {
-            let q15 = ({
+            let u15 = ({
                 type: 'requestFocusForAccessibility',
                 bundleName: this.bundleName,
                 triggerAction: 'common',
-                customId: n15,
+                customId: r15,
             });
-            accessibility.sendAccessibilityEvent(q15);
+            accessibility.sendAccessibilityEvent(u15);
         }, 100);
         setTimeout(() => {
             this.isSendArrowAccessibility = false;
         }, 200);
     }
 
-    DownAndUpArrow(u14 = null) {
-        this.observeComponentCreation2((z14, a15) => {
+    DownAndUpArrow(v14 = null) {
+        this.observeComponentCreation2((p15, q15) => {
+            Row.create();
+            Row.height(LIST_ROW_HEIGHT);
+        }, Row);
+        this.observeComponentCreation2((b15, c15) => {
             Button.createWithChild({ stateEffect: false, type: ButtonType.Normal });
             Button.border({
                 radius: {
@@ -1025,12 +1032,12 @@ class MultiFilterRow extends ViewPU {
             Button.accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined);
             Button.id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
             Button.visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden);
-            Button.onHover((l15) => {
+            Button.onHover((n15) => {
                 Context.animateTo({
                     curve: FRICTION_CUBIC_BEZIER,
                     duration: ANIMATION_DURATION_250
                 }, () => {
-                    if (l15) {
+                    if (n15) {
                         this.arrowBgColorRow = {
                             'id': -1,
                             'type': 10001,
@@ -1045,8 +1052,8 @@ class MultiFilterRow extends ViewPU {
                     }
                 });
             });
-            Button.onTouch((i15) => {
-                if (i15.type === TouchType.Down) {
+            Button.onTouch((k15) => {
+                if (k15.type === TouchType.Down) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -1061,7 +1068,7 @@ class MultiFilterRow extends ViewPU {
                         this.isArrowBgHoverRow = true;
                     });
                 }
-                else if (i15.type === TouchType.Up || i15.type === TouchType.Cancel) {
+                else if (k15.type === TouchType.Up || k15.type === TouchType.Cancel) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -1107,7 +1114,7 @@ class MultiFilterRow extends ViewPU {
                 this.sendArrowAccessibility(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
             });
         }, Button);
-        this.observeComponentCreation2((x14, y14) => {
+        this.observeComponentCreation2((z14, a15) => {
             SymbolGlyph.create(this.isArrowIconDown.value ? {
                 'id': -1,
                 'type': 40000,
@@ -1169,10 +1176,11 @@ class MultiFilterRow extends ViewPU {
             SymbolGlyph.tabIndex(-1);
         }, SymbolGlyph);
         Button.pop();
+        Row.pop();
     }
 
     initialRender() {
-        this.observeComponentCreation2((s14, t14) => {
+        this.observeComponentCreation2((t14, u14) => {
             Flex.create();
             Flex.width(PERCENT_100);
             Flex.padding({
@@ -1192,12 +1200,12 @@ class MultiFilterRow extends ViewPU {
                 })
             });
         }, Flex);
-        this.observeComponentCreation2((d14, e14) => {
+        this.observeComponentCreation2((e14, f14) => {
             If.create();
             if (this.filterRow?.options && this.filterRow?.options.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     if (!If.canRetake(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`)) {
-                        this.observeComponentCreation2((i14, j14) => {
+                        this.observeComponentCreation2((j14, k14) => {
                             Text.create(this.filterRow?.options[0]);
                             Text.height(LIST_ROW_HEIGHT);
                             Text.margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) });
@@ -1214,8 +1222,8 @@ class MultiFilterRow extends ViewPU {
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                             Text.fontColor(this.colorRow[0]);
                             Text.fontWeight(this.fontWeightRow[0]);
-                            Text.backgroundColor(this.isBackgroundHoverRow[0] ?
-                            this.backgroundColorRow[0] : TRANS_COLOR);
+                            Text.backgroundColor(this.isBackgroundHoverRow[0] ? this.backgroundColorRow[0] :
+                                TRANS_COLOR);
                             Text.accessibilityText(this.getAccessibilityText(this.filterRow?.options[0],
                                 this.isSelectedRow[0], FilterAccessibilityType.ACCESSIBILITY_TEXT));
                             Text.accessibilityDescription(this.getAccessibilityText(this.filterRow?.options[0],
@@ -1226,12 +1234,12 @@ class MultiFilterRow extends ViewPU {
                             });
                             Text.id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`);
                             Text.focusable(true);
-                            Text.onHover((q14) => {
+                            Text.onHover((r14) => {
                                 Context.animateTo({
                                     curve: FRICTION_CUBIC_BEZIER,
                                     duration: ANIMATION_DURATION_250
                                 }, () => {
-                                    if (q14) {
+                                    if (r14) {
                                         this.backgroundColorRow[0] = {
                                             'id': -1,
                                             'type': 10001,
@@ -1246,8 +1254,8 @@ class MultiFilterRow extends ViewPU {
                                     }
                                 });
                             });
-                            Text.onTouch((n14) => {
-                                if (n14.type === TouchType.Down) {
+                            Text.onTouch((o14) => {
+                                if (o14.type === TouchType.Down) {
                                     Context.animateTo({
                                         curve: SHARP_CUBIC_BEZIER,
                                         duration: ANIMATION_DURATION_100
@@ -1262,7 +1270,7 @@ class MultiFilterRow extends ViewPU {
                                         this.isBackgroundHoverRow[0] = true;
                                     });
                                 }
-                                else if (n14.type === TouchType.Up || n14.type === TouchType.Cancel) {
+                                else if (o14.type === TouchType.Up || o14.type === TouchType.Cancel) {
                                     Context.animateTo({
                                         curve: SHARP_CUBIC_BEZIER,
                                         duration: ANIMATION_DURATION_100
@@ -1324,16 +1332,16 @@ class MultiFilterRow extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((w13, x13) => {
+        this.observeComponentCreation2((x13, y13) => {
             Row.create();
             Row.width(PERCENT_100);
-            Row.onAreaChange((z13, a14) => {
-                this.filterColumnWidth = vp2px(parseInt(a14.width.toString(), 0));
+            Row.onAreaChange((a14, b14) => {
+                this.filterColumnWidth = vp2px(parseInt(b14.width.toString(), 0));
                 if (this.twoLineModeItemNumRow.value === 0) {
-                    let c14 = this.calcMultiFilterRowItemNum();
-                    this.twoLineModeItemNumRow.value = c14;
-                    this.twoLineModeItemNumRecordRow.value = c14;
-                    if (this.filterRow && c14 < this.filterRow.options.length - 1) {
+                    let d14 = this.calcMultiFilterRowItemNum();
+                    this.twoLineModeItemNumRow.value = d14;
+                    this.twoLineModeItemNumRecordRow.value = d14;
+                    if (this.filterRow && d14 < this.filterRow.options.length - 1) {
                         this.arrowShowStateRow.value = true;
                     }
                     else {
@@ -1341,37 +1349,37 @@ class MultiFilterRow extends ViewPU {
                     }
                 }
                 else if (this.filterColumnWidth !== this.lastFilterColumnWidth) {
-                    let b14 = this.calcMultiFilterRowItemNum();
-                    if (this.filterRow && b14 < this.filterRow.options.length - 1) {
+                    let c14 = this.calcMultiFilterRowItemNum();
+                    if (this.filterRow && c14 < this.filterRow.options.length - 1) {
                         if (!this.arrowShowStateRow.value || this.isArrowIconDown.value) {
                             this.arrowShowStateRow.value = true;
                             this.isArrowIconDown.value = true;
-                            this.twoLineModeItemNumRow.value = b14;
+                            this.twoLineModeItemNumRow.value = c14;
                         }
                     }
                     else {
                         this.arrowShowStateRow.value = false;
                         this.isArrowIconDown.value = false;
-                        this.twoLineModeItemNumRow.value = b14;
+                        this.twoLineModeItemNumRow.value = c14;
                     }
-                    this.twoLineModeItemNumRecordRow.value = b14;
+                    this.twoLineModeItemNumRecordRow.value = c14;
                 }
                 this.lastFilterColumnWidth = this.filterColumnWidth;
             });
         }, Row);
-        this.observeComponentCreation2((u13, v13) => {
+        this.observeComponentCreation2((v13, w13) => {
             Flex.create({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap });
         }, Flex);
-        this.observeComponentCreation2((x12, y12) => {
+        this.observeComponentCreation2((y12, z12) => {
             ForEach.create();
-            const z12 = (b13, c13) => {
-                const d13 = b13;
-                this.observeComponentCreation2((f13, g13) => {
+            const a13 = (c13, d13) => {
+                const e13 = c13;
+                this.observeComponentCreation2((g13, h13) => {
                     If.create();
-                    if (c13 > 0) {
+                    if (d13 > 0) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((k13, l13) => {
-                                Text.create(d13);
+                            this.observeComponentCreation2((l13, m13) => {
+                                Text.create(e13);
                                 Text.transition(TransitionEffect.OPACITY);
                                 Text.fontSize({
                                     'id': -1,
@@ -1385,60 +1393,60 @@ class MultiFilterRow extends ViewPU {
                                 Text.maxLines(1);
                                 Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                 Text.height(LIST_ROW_HEIGHT);
-                                Text.fontColor(this.colorRow[c13]);
-                                Text.fontWeight(this.fontWeightRow[c13]);
-                                Text.accessibilityText(this.getAccessibilityText(d13,
-                                    this.isSelectedRow[c13], FilterAccessibilityType.ACCESSIBILITY_TEXT));
-                                Text.accessibilityDescription(this.getAccessibilityText(d13,
-                                    this.isSelectedRow[c13], FilterAccessibilityType.ACCESSIBILITY_DESC));
-                                Text.backgroundColor(this.isBackgroundHoverRow[c13] ?
-                                this.backgroundColorRow[c13] : TRANS_COLOR);
+                                Text.fontColor(this.colorRow[d13]);
+                                Text.fontWeight(this.fontWeightRow[d13]);
+                                Text.accessibilityText(this.getAccessibilityText(e13,
+                                    this.isSelectedRow[d13], FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                                Text.accessibilityDescription(this.getAccessibilityText(e13,
+                                    this.isSelectedRow[d13], FilterAccessibilityType.ACCESSIBILITY_DESC));
+                                Text.backgroundColor(this.isBackgroundHoverRow[d13] ?
+                                this.backgroundColorRow[d13] : TRANS_COLOR);
                                 Text.onClick(() => {
-                                    this.onItemClick(c13);
-                                    this.sendAccessibility(d13, true);
+                                    this.onItemClick(d13);
+                                    this.sendAccessibility(e13, true);
                                 });
-                                Text.onHover((s13) => {
+                                Text.onHover((t13) => {
                                     Context.animateTo({
                                         curve: FRICTION_CUBIC_BEZIER,
                                         duration: ANIMATION_DURATION_250
                                     }, () => {
-                                        if (s13) {
-                                            this.backgroundColorRow[c13] = {
+                                        if (t13) {
+                                            this.backgroundColorRow[d13] = {
                                                 'id': -1,
                                                 'type': 10001,
                                                 params: ['sys.color.ohos_id_color_hover'],
                                                 'bundleName': '__harDefaultBundleName__',
                                                 'moduleName': '__harDefaultModuleName__'
                                             };
-                                            this.isBackgroundHoverRow[c13] = true;
+                                            this.isBackgroundHoverRow[d13] = true;
                                         }
                                         else {
-                                            this.isBackgroundHoverRow[c13] = false;
+                                            this.isBackgroundHoverRow[d13] = false;
                                         }
                                     });
                                 });
-                                Text.onTouch((p13) => {
-                                    if (p13.type === TouchType.Down) {
+                                Text.onTouch((q13) => {
+                                    if (q13.type === TouchType.Down) {
                                         Context.animateTo({
                                             curve: SHARP_CUBIC_BEZIER,
                                             duration: ANIMATION_DURATION_100
                                         }, () => {
-                                            this.backgroundColorRow[c13] = {
+                                            this.backgroundColorRow[d13] = {
                                                 'id': -1,
                                                 'type': 10001,
                                                 params: ['sys.color.ohos_id_color_click_effect'],
                                                 'bundleName': '__harDefaultBundleName__',
                                                 'moduleName': '__harDefaultModuleName__'
                                             };
-                                            this.isBackgroundHoverRow[c13] = true;
+                                            this.isBackgroundHoverRow[d13] = true;
                                         });
                                     }
-                                    else if (p13.type === TouchType.Up || p13.type === TouchType.Cancel) {
+                                    else if (q13.type === TouchType.Up || q13.type === TouchType.Cancel) {
                                         Context.animateTo({
                                             curve: SHARP_CUBIC_BEZIER,
                                             duration: ANIMATION_DURATION_100
                                         }, () => {
-                                            this.isBackgroundHoverRow[c13] = false;
+                                            this.isBackgroundHoverRow[d13] = false;
                                         });
                                     }
                                 });
@@ -1494,11 +1502,11 @@ class MultiFilterRow extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(x12, this.filterRow?.options.slice(0,
-                this.twoLineModeItemNumRow.value + 1), z12, undefined, true, false);
+            this.forEachUpdateFunction(y12, this.filterRow?.options.slice(0, this.twoLineModeItemNumRow.value + 1),
+                a13, undefined, true, false);
         }, ForEach);
         ForEach.pop();
-        this.observeComponentCreation2((t12, u12) => {
+        this.observeComponentCreation2((u12, v12) => {
             If.create();
             if (this.arrowShowStateRow.value) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -1522,16 +1530,16 @@ class MultiFilterRow extends ViewPU {
 }
 
 export class Filter extends ViewPU {
-    constructor(q7, r7, s7, t7 = -1, u7 = undefined, v7) {
-        super(q7, s7, t7, v7);
-        if (typeof u7 === 'function') {
-            this.paramsGenerator_ = u7;
+    constructor(h12, i12, j12, k12 = -1, l12 = undefined, m12) {
+        super(h12, j12, k12, m12);
+        if (typeof l12 === 'function') {
+            this.paramsGenerator_ = l12;
         }
         this.container = undefined;
-        this.__multiFilters = new SynchedPropertyObjectOneWayPU(r7.multiFilters, this, 'multiFilters');
-        this.__additionFilters = new SynchedPropertyObjectOneWayPU(r7.additionFilters, this, 'additionFilters');
+        this.__multiFilters = new SynchedPropertyObjectOneWayPU(i12.multiFilters, this, 'multiFilters');
+        this.__additionFilters = new SynchedPropertyObjectOneWayPU(i12.additionFilters, this, 'additionFilters');
         this.onFilterChanged = null;
-        this.__filterType = new SynchedPropertySimpleOneWayPU(r7.filterType, this, 'filterType');
+        this.__filterType = new SynchedPropertySimpleOneWayPU(i12.filterType, this, 'filterType');
         this.selectedFilters = null;
         this.__colorArr = new ObservedPropertyObjectPU(null, this, 'colorArr');
         this.__fontWeightArr = new ObservedPropertyObjectPU(null, this, 'fontWeightArr');
@@ -1546,7 +1554,6 @@ export class Filter extends ViewPU {
         this.__isAdditionBackgroundHover = new ObservedPropertyObjectPU(null, this, 'isAdditionBackgroundHover');
         this.__isSelectedArr = new ObservedPropertyObjectPU(null, this, 'isSelectedArr');
         this.__colorRefresh = new ObservedPropertySimplePU(false, this, 'colorRefresh');
-        this.__isFloatBarShow = new ObservedPropertySimplePU(false, this, 'isFloatBarShow');
         this.__isFloatBarShow = new ObservedPropertySimplePU(false, this, 'isFloatBarShow');
         this.isFloatBarShowWithoutAnimation = false;
         this.__isFloatShowAllFilter = new ObservedPropertySimplePU(false, this, 'isFloatShowAllFilter');
@@ -1564,7 +1571,7 @@ export class Filter extends ViewPU {
         this.__fontSizeScale = new ObservedPropertyObjectPU(undefined, this, 'fontSizeScale');
         this.callbackId = undefined;
         this.callbacks = {
-            onConfigurationUpdated: (w7) => {
+            onConfigurationUpdated: (n12) => {
                 this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
                 this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
             },
@@ -1584,7 +1591,7 @@ export class Filter extends ViewPU {
         this.accessibilityExpandDesc = '';
         this.bundleName = '';
         this.filterId = this.getUniqueId();
-        this.setInitiallyProvidedValue(r7);
+        this.setInitiallyProvidedValue(i12);
         this.declareWatch('isFloatBarShow', this.updateFocusForAccessibility);
         this.finalizeConstruction();
     }
@@ -1809,223 +1816,168 @@ export class Filter extends ViewPU {
     get multiFilters() {
         return this.__multiFilters.get();
     }
-
     set multiFilters(d12) {
         this.__multiFilters.set(d12);
     }
-
     get additionFilters() {
         return this.__additionFilters.get();
     }
-
     set additionFilters(c12) {
         this.__additionFilters.set(c12);
     }
-
     get filterType() {
         return this.__filterType.get();
     }
-
     set filterType(b12) {
         this.__filterType.set(b12);
     }
-
     get colorArr() {
         return this.__colorArr.get();
     }
-
     set colorArr(a12) {
         this.__colorArr.set(a12);
     }
-
     get fontWeightArr() {
         return this.__fontWeightArr.get();
     }
-
     set fontWeightArr(z11) {
         this.__fontWeightArr.set(z11);
     }
-
     get backgroundColorArr() {
         return this.__backgroundColorArr.get();
     }
-
     set backgroundColorArr(y11) {
         this.__backgroundColorArr.set(y11);
     }
-
     get isBackgroundHover() {
         return this.__isBackgroundHover.get();
     }
-
     set isBackgroundHover(x11) {
         this.__isBackgroundHover.set(x11);
     }
-
     get floatArrowBgColor() {
         return this.__floatArrowBgColor.get();
     }
-
     set floatArrowBgColor(w11) {
         this.__floatArrowBgColor.set(w11);
     }
-
     get isFloatArrowBgHover() {
         return this.__isFloatArrowBgHover.get();
     }
-
     set isFloatArrowBgHover(v11) {
         this.__isFloatArrowBgHover.set(v11);
     }
-
     get isArrowIconDownArr() {
         return this.__isArrowIconDownArr.get();
     }
-
     set isArrowIconDownArr(u11) {
         this.__isArrowIconDownArr.set(u11);
     }
-
     get additionColorArr() {
         return this.__additionColorArr.get();
     }
-
     set additionColorArr(t11) {
         this.__additionColorArr.set(t11);
     }
-
     get additionFontWeightArr() {
         return this.__additionFontWeightArr.get();
     }
-
     set additionFontWeightArr(s11) {
         this.__additionFontWeightArr.set(s11);
     }
-
     get additionBackgroundColorArr() {
         return this.__additionBackgroundColorArr.get();
     }
-
     set additionBackgroundColorArr(r11) {
         this.__additionBackgroundColorArr.set(r11);
     }
-
     get isAdditionBackgroundHover() {
         return this.__isAdditionBackgroundHover.get();
     }
-
     set isAdditionBackgroundHover(q11) {
         this.__isAdditionBackgroundHover.set(q11);
     }
-
     get isSelectedArr() {
         return this.__isSelectedArr.get();
     }
-
     set isSelectedArr(p11) {
         this.__isSelectedArr.set(p11);
     }
-
     get colorRefresh() {
         return this.__colorRefresh.get();
     }
-
     set colorRefresh(o11) {
         this.__colorRefresh.set(o11);
     }
-
     get isFloatBarShow() {
         return this.__isFloatBarShow.get();
     }
-
     set isFloatBarShow(n11) {
         this.__isFloatBarShow.set(n11);
     }
-
     get isFloatShowAllFilter() {
         return this.__isFloatShowAllFilter.get();
     }
-
     set isFloatShowAllFilter(m11) {
         this.__isFloatShowAllFilter.set(m11);
     }
-
     get floatFilterPosition() {
         return this.__floatFilterPosition.get();
     }
-
     set floatFilterPosition(l11) {
         this.__floatFilterPosition.set(l11);
     }
-
     get floatFilterBarHeight() {
         return this.__floatFilterBarHeight.get();
     }
-
     set floatFilterBarHeight(k11) {
         this.__floatFilterBarHeight.set(k11);
     }
-
     get floatFilterBarPosition() {
         return this.__floatFilterBarPosition.get();
     }
-
     set floatFilterBarPosition(j11) {
         this.__floatFilterBarPosition.set(j11);
     }
-
     get twoLineModeItemNum() {
         return this.__twoLineModeItemNum.get();
     }
-
     set twoLineModeItemNum(i11) {
         this.__twoLineModeItemNum.set(i11);
     }
-
     get twoLineModeItemNumRecord() {
         return this.__twoLineModeItemNumRecord.get();
     }
-
     set twoLineModeItemNumRecord(h11) {
         this.__twoLineModeItemNumRecord.set(h11);
     }
-
     get downArrowShowState() {
         return this.__downArrowShowState.get();
     }
-
     set downArrowShowState(g11) {
         this.__downArrowShowState.set(g11);
     }
-
     get floatFilterBarText() {
         return this.__floatFilterBarText.get();
     }
-
     set floatFilterBarText(f11) {
         this.__floatFilterBarText.set(f11);
     }
-
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-
     set fontSizeScale(e11) {
         this.__fontSizeScale.set(e11);
     }
-
     get additionFiltersSelectedIndex() {
         return this.__additionFiltersSelectedIndex.get();
     }
-
     set additionFiltersSelectedIndex(d11) {
         this.__additionFiltersSelectedIndex.set(d11);
     }
-
     get floatFilterBarAccessibilityText() {
         return this.__floatFilterBarAccessibilityText.get();
     }
-
     set floatFilterBarAccessibilityText(c11) {
         this.__floatFilterBarAccessibilityText.set(c11);
     }
@@ -2156,8 +2108,8 @@ export class Filter extends ViewPU {
             type: 'announceForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility:
-            this.getAccessibilityText(d10, e10, FilterAccessibilityType.SEND_ACCESSIBILITY),
+            textAnnouncedForAccessibility: this.getAccessibilityText(d10,
+                e10, FilterAccessibilityType.SEND_ACCESSIBILITY),
         });
         accessibility.sendAccessibilityEvent(f10).then(() => {
             hilog.info(0x3900, 'Ace', `ListFilter sendAccessibility send event, event info is ${JSON.stringify(f10)}`);
@@ -2254,8 +2206,8 @@ export class Filter extends ViewPU {
             type: 'announceForAccessibility',
             bundleName: this.bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility:
-            this.getFloatAccessibilityText(j9, FilterAccessibilityType.SEND_ACCESSIBILITY),
+            textAnnouncedForAccessibility: this.getFloatAccessibilityText(j9,
+                FilterAccessibilityType.SEND_ACCESSIBILITY),
         });
         accessibility.sendAccessibilityEvent(k9);
         if (this.multiFilters && this.multiFilters.length > 0) {
@@ -2281,17 +2233,17 @@ export class Filter extends ViewPU {
     initParams() {
         if (!this.selectedFilters) {
             this.selectedFilters = [];
-            for (let y5 of this.multiFilters) {
-                let z5 = { name: y5.name, index: -1, value: '' };
-                if (y5.options.length > 0) {
-                    z5.index = 0;
-                    z5.value = y5.options[0];
+            for (let h9 of this.multiFilters) {
+                let i9 = { name: h9.name, index: -1, value: '' };
+                if (h9.options.length > 0) {
+                    i9.index = 0;
+                    i9.value = h9.options[0];
                 }
-                this.selectedFilters.push(z5);
+                this.selectedFilters.push(i9);
             }
             if (this.additionFilters && this.additionFilters.name) {
-                let x5 = { name: this.additionFilters.name, index: -1, value: '' };
-                this.selectedFilters.push(x5);
+                let g9 = { name: this.additionFilters.name, index: -1, value: '' };
+                this.selectedFilters.push(g9);
             }
             this.refreshFloatFilterBarText();
         }
@@ -2309,35 +2261,36 @@ export class Filter extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
-            for (let r5 of this.multiFilters) {
-                let s5 = new ResourceArray();
-                let t5 = new FontWeightArray();
-                let u5 = new ResourceArray();
-                let v5 = new BooleanArray();
-                let e5 = new BooleanArray();
-                for (let w5 of r5.options.keys()) {
-                    if (w5 === 0) {
-                        s5.push({
+            for (let z8 of this.multiFilters) {
+                let a9 = new ResourceArray();
+                let b9 = new FontWeightArray();
+                let c9 = new ResourceArray();
+                let d9 = new BooleanArray();
+                let e9 = new BooleanArray();
+                for (let f9 of z8.options.keys()) {
+                    if (f9 === 0) {
+                        a9.push({
                             'id': -1,
                             'type': 10001,
                             params: ['sys.color.ohos_id_color_text_primary_activated'],
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        t5.push(FontWeight.Medium);
-                        e5.push(true);
-                    } else {
-                        s5.push({
+                        b9.push(FontWeight.Medium);
+                        e9.push(true);
+                    }
+                    else {
+                        a9.push({
                             'id': -1,
                             'type': 10001,
                             params: ['sys.color.ohos_id_color_text_primary'],
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        t5.push(FontWeight.Regular);
-                        e5.push(false);
+                        b9.push(FontWeight.Regular);
+                        e9.push(false);
                     }
-                    u5.push({
+                    c9.push({
                         'id': -1,
                         'type': 10001,
                         params: ['sys.color.ohos_id_color_hover'],
@@ -2345,12 +2298,12 @@ export class Filter extends ViewPU {
                         'moduleName': '__harDefaultModuleName__'
                     });
                 }
-                this.colorArr.push(s5);
-                this.fontWeightArr.push(t5);
-                this.backgroundColorArr.push(u5);
-                this.isBackgroundHover.push(v5);
+                this.colorArr.push(a9);
+                this.fontWeightArr.push(b9);
+                this.backgroundColorArr.push(c9);
+                this.isBackgroundHover.push(d9);
                 this.isArrowIconDownArr.push(new ObservedBoolean(true));
-                this.isSelectedArr.push(e5);
+                this.isSelectedArr.push(e9);
             }
         }
         if (this.additionFilters && this.additionFilters.options) {
@@ -2358,7 +2311,7 @@ export class Filter extends ViewPU {
             this.additionFontWeightArr = [];
             this.additionBackgroundColorArr = [];
             this.isAdditionBackgroundHover = [];
-            for (let q5 = 0; q5 < this.additionFilters.options.length; q5++) {
+            for (let y8 = 0; y8 < this.additionFilters.options.length; y8++) {
                 this.additionColorArr.push({
                     'id': -1,
                     'type': 10001,
@@ -2381,104 +2334,107 @@ export class Filter extends ViewPU {
             this.twoLineModeItemNum = [];
             this.twoLineModeItemNumRecord = [];
             this.downArrowShowState = [];
-            for (let p5 = 0; p5 < this.multiFilters.length; p5++) {
-                this.twoLineModeItemNum.push(new ObservedNumber(this.multiFilters[p5].options.length));
-                this.twoLineModeItemNumRecord.push(new ObservedNumber(this.multiFilters[p5].options.length));
+            for (let x8 = 0; x8 < this.multiFilters.length; x8++) {
+                this.twoLineModeItemNum.push(new ObservedNumber(this.multiFilters[x8].options.length));
+                this.twoLineModeItemNumRecord.push(new ObservedNumber(this.multiFilters[x8].options.length));
                 this.downArrowShowState.push(new ObservedBoolean(false));
             }
         }
     }
 
-    ListFilter(y4 = null) {
-        this.observeComponentCreation2((l5, m5) => {
+    ListFilter(z7 = null) {
+        this.observeComponentCreation2((s8, t8) => {
             Column.create();
             Column.width(PERCENT_100);
             Column.align(Alignment.Start);
-            Column.onAreaChange((n5, o5) => {
+            Column.onAreaChange((v8, w8) => {
                 if (!this.isFloatShowAllFilterWithoutAnimation && !this.isFloatBarShowWithoutAnimation) {
                     if (this.additionFilters !== null) {
                         this.filterDynamicHeight =
-                            parseInt(o5.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
-                    } else {
-                        this.filterDynamicHeight = parseInt(o5.height.toString(), 0) + FILTER_TOP_PADDING;
+                            parseInt(w8.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
+                    }
+                    else {
+                        this.filterDynamicHeight = parseInt(w8.height.toString(), 0) + FILTER_TOP_PADDING;
                     }
                     this.floatFilterPosition = -this.filterDynamicHeight;
                 }
             });
         }, Column);
-        this.observeComponentCreation2((z4, a5) => {
+        this.observeComponentCreation2((c8, d8) => {
             ForEach.create();
-            const b5 = (c5, d5) => {
-                const e5 = c5;
+            const e8 = (g8, h8) => {
+                const i8 = g8;
                 {
-                    this.observeComponentCreation2((f5, g5) => {
-                        if (g5) {
-                            let h5 = new ListFilterRow(this, {
-                                colorRow: this.colorArr ? this.colorArr[d5] : [],
-                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[d5] : [],
-                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[d5] : [],
-                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[d5] : [],
-                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[d5] : [],
-                                filterRow: e5,
-                                onItemClick: (k5) => {
-                                    this.filterItemClick(d5, k5);
+                    this.observeComponentCreation2((k8, l8) => {
+                        if (l8) {
+                            let m8 = new ListFilterRow(this, {
+                                colorRow: this.colorArr ? this.colorArr[h8] : [],
+                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
+                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
+                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[h8] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : [],
+                                filterRow: i8,
+                                onItemClick: (r8) => {
+                                    this.filterItemClick(h8, r8);
                                 },
-                                rowIndex: d5,
-                            }, undefined, f5, () => {
-                            }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 845, col: 9 });
-                            ViewPU.create(h5);
-                            let i5 = () => {
+                                rowIndex: h8,
+                            }, undefined, k8, () => {
+                            }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 1174, col: 9 });
+                            ViewPU.create(m8);
+                            let n8 = () => {
                                 return {
-                                    colorRow: this.colorArr ? this.colorArr[d5] : [],
-                                    fontWeightRow: this.fontWeightArr ? this.fontWeightArr[d5] : [],
-                                    backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[d5] : [],
-                                    isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[d5] : [],
-                                    isSelectedRow: this.isSelectedArr ? this.isSelectedArr[d5] : [],
-                                    filterRow: e5,
-                                    onItemClick: (j5) => {
-                                        this.filterItemClick(d5, j5);
+                                    colorRow: this.colorArr ? this.colorArr[h8] : [],
+                                    fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
+                                    backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
+                                    isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[h8] : [],
+                                    isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : [],
+                                    filterRow: i8,
+                                    onItemClick: (q8) => {
+                                        this.filterItemClick(h8, q8);
                                     },
-                                    rowIndex: d5
+                                    rowIndex: h8
                                 };
                             };
-                            h5.paramsGenerator_ = i5;
-                        } else {
-                            this.updateStateVarsOfChildByElmtId(f5, {
-                                colorRow: this.colorArr ? this.colorArr[d5] : [],
-                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[d5] : [],
-                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[d5] : [],
-                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[d5] : [],
-                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[d5] : [],
+                            m8.paramsGenerator_ = n8;
+                        }
+                        else {
+                            this.updateStateVarsOfChildByElmtId(k8, {
+                                colorRow: this.colorArr ? this.colorArr[h8] : [],
+                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
+                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
+                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[h8] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : []
                             });
                         }
                     }, { name: 'ListFilterRow' });
                 }
             };
-            this.forEachUpdateFunction(z4, this.multiFilters, b5, undefined, true, false);
+            this.forEachUpdateFunction(c8, this.multiFilters, e8, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
     }
 
-    MultiLineFilter(h4 = null) {
-        this.observeComponentCreation2((u4, v4) => {
+    MultiLineFilter(b7 = null) {
+        this.observeComponentCreation2((u7, v7) => {
             Column.create();
             Column.width(PERCENT_100);
-            Column.onAreaChange((w4, x4) => {
+            Column.onAreaChange((x7, y7) => {
                 if (this.additionFilters !== null) {
-                    this.filterDynamicHeight = parseInt(x4.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
-                } else {
-                    this.filterDynamicHeight = parseInt(x4.height.toString(), 0) + FILTER_TOP_PADDING;
+                    this.filterDynamicHeight = parseInt(y7.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
+                }
+                else {
+                    this.filterDynamicHeight = parseInt(y7.height.toString(), 0) + FILTER_TOP_PADDING;
                 }
                 if (!this.isFloatBarShowWithoutAnimation && !this.isFloatShowAllFilterWithoutAnimation) {
                     this.floatFilterPosition = -this.filterDynamicHeight;
                 }
             });
         }, Column);
-        this.observeComponentCreation2((i4, j4) => {
+        this.observeComponentCreation2((e7, f7) => {
             ForEach.create();
-            const k4 = (l4, m4) => {
-                const n4 = l4;
+            const g7 = (i7, m4) => {
+                const n4 = i7;
                 {
                     this.observeComponentCreation2((o4, p4) => {
                         if (p4) {
@@ -2491,6 +2447,7 @@ export class Filter extends ViewPU {
                                     new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[m4] :
                                     new ObservedNumber(0),
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[m4] : [],
                                 twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
                                 this.twoLineModeItemNumRecord[m4] :
                                     new ObservedNumber(0),
@@ -2504,7 +2461,7 @@ export class Filter extends ViewPU {
                                 fontSizeScale: this.fontSizeScale,
                                 filterId: this.filterId,
                             }, undefined, o4, () => {
-                            }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 875, col: 9 });
+                            }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 1205, col: 9 });
                             ViewPU.create(q4);
                             let r4 = () => {
                                 return {
@@ -2516,6 +2473,7 @@ export class Filter extends ViewPU {
                                         new ObservedBoolean(false),
                                     twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[m4] :
                                         new ObservedNumber(0),
+                                    isSelectedRow: this.isSelectedArr ? this.isSelectedArr[m4] : [],
                                     twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
                                     this.twoLineModeItemNumRecord[m4] :
                                         new ObservedNumber(0),
@@ -2531,7 +2489,8 @@ export class Filter extends ViewPU {
                                 };
                             };
                             q4.paramsGenerator_ = r4;
-                        } else {
+                        }
+                        else {
                             this.updateStateVarsOfChildByElmtId(o4, {
                                 colorRow: this.colorArr ? this.colorArr[m4] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[m4] : [],
@@ -2541,18 +2500,17 @@ export class Filter extends ViewPU {
                                     new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[m4] :
                                     new ObservedNumber(0),
-                                twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
-                                this.twoLineModeItemNumRecord[m4] :
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[m4] : [],
+                                twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ? this.twoLineModeItemNumRecord[m4] :
                                     new ObservedNumber(0),
-                                isArrowIconDown: this.isArrowIconDownArr ? this.isArrowIconDownArr[m4] :
-                                    new ObservedBoolean(false),
+                                isArrowIconDown: this.isArrowIconDownArr ? this.isArrowIconDownArr[m4] : new ObservedBoolean(false),
                                 fontSizeScale: this.fontSizeScale
                             });
                         }
                     }, { name: 'MultiFilterRow' });
                 }
             };
-            this.forEachUpdateFunction(i4, this.multiFilters, k4, undefined, true, false);
+            this.forEachUpdateFunction(e7, this.multiFilters, g7, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
@@ -2877,7 +2835,11 @@ export class Filter extends ViewPU {
                                     x1: GRADIENT_WIDTH,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, m2, () => {
-                                }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 1039, col: 11 });
+                                }, {
+                                    page: 'library2/src/main/ets/components/mainpage/MainPage.ets',
+                                    line: 1389,
+                                    col: 11
+                                });
                                 ViewPU.create(o2);
                                 let p2 = () => {
                                     return {
@@ -2903,7 +2865,11 @@ export class Filter extends ViewPU {
                                     x1: 0,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, i2, () => {
-                                }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 1047, col: 9 });
+                                }, {
+                                    page: 'library2/src/main/ets/components/mainpage/MainPage.ets',
+                                    line: 1397,
+                                    col: 9
+                                });
                                 ViewPU.create(k2);
                                 let l2 = () => {
                                     return {
@@ -3022,8 +2988,8 @@ export class Filter extends ViewPU {
         Column.pop();
     }
 
-    FloatFilterBar(a1 = null) {
-        this.observeComponentCreation2((n1, o1) => {
+    FloatFilterBar(m1 = null) {
+        this.observeComponentCreation2((o2, p2) => {
             Row.create();
             Row.width(PERCENT_100);
             Row.height(this.floatFilterBarHeight);
@@ -3043,7 +3009,7 @@ export class Filter extends ViewPU {
             Row.position({ x: 0, y: this.floatFilterBarPosition });
             Row.zIndex(1);
         }, Row);
-        this.observeComponentCreation2((j1, k1) => {
+        this.observeComponentCreation2((b2, c2) => {
             Column.create();
             Column.id(`FiliterFloatFilterBar_${this.getUniqueId()}`);
             Column.accessibilityText(this.getFloatAccessibilityText(this.floatFilterBarAccessibilityText,
@@ -3085,8 +3051,8 @@ export class Filter extends ViewPU {
             Column.alignItems(HorizontalAlign.Center);
             Column.width(PERCENT_100);
             Column.height(LIST_ROW_HEIGHT);
-            Column.onTouch((m1) => {
-                if (m1.type === TouchType.Down) {
+            Column.onTouch((l2) => {
+                if (l2.type === TouchType.Down) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -3100,7 +3066,8 @@ export class Filter extends ViewPU {
                         };
                         this.isFloatArrowBgHover = true;
                     });
-                } else if (m1.type === TouchType.Up || m1.type === TouchType.Cancel) {
+                }
+                else if (l2.type === TouchType.Up || l2.type === TouchType.Cancel) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -3130,8 +3097,8 @@ export class Filter extends ViewPU {
                 });
                 this.sendFloatAccessibility(this.floatFilterBarAccessibilityText);
             });
-            Column.onHover((l1) => {
-                if (l1) {
+            Column.onHover((g2) => {
+                if (g2) {
                     Context.animateTo({
                         curve: FRICTION_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_250
@@ -3145,7 +3112,8 @@ export class Filter extends ViewPU {
                         };
                         this.isFloatArrowBgHover = true;
                     });
-                } else {
+                }
+                else {
                     Context.animateTo({
                         curve: FRICTION_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_250
@@ -3155,18 +3123,18 @@ export class Filter extends ViewPU {
                 }
             });
         }, Column);
-        this.observeComponentCreation2((h1, i1) => {
+        this.observeComponentCreation2((z1, a2) => {
             Row.create();
             Row.height(PERCENT_100);
             Row.alignItems(VerticalAlign.Center);
         }, Row);
-        this.observeComponentCreation2((f1, g1) => {
+        this.observeComponentCreation2((x1, y1) => {
             Row.create();
             Row.height(LIST_ROW_HEIGHT);
             Row.margin({ start: LengthMetrics.vp(FILTER_BAR_MARGIN) });
             Row.focusable(true);
         }, Row);
-        this.observeComponentCreation2((d1, e1) => {
+        this.observeComponentCreation2((v1, w1) => {
             Text.create(this.floatFilterBarText);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fontColor({
@@ -3189,7 +3157,7 @@ export class Filter extends ViewPU {
             Text.maxLines(1);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((b1, c1) => {
+        this.observeComponentCreation2((t1, u1) => {
             SymbolGlyph.create({
                 'id': -1,
                 'type': 40000,

@@ -500,114 +500,117 @@ struct MultiFilterRow {
 
   @Builder
   DownAndUpArrow() {
-    Button({ stateEffect: false, type: ButtonType.Normal }) {
-      SymbolGlyph(this.isArrowIconDown.value ? $r('sys.symbol.chevron_down') : $r('sys.symbol.chevron_up'))
-        .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
-        .height(LIST_ROW_HEIGHT)
-        .fontColor([$r('sys.color.ohos_id_color_tertiary')])
-        .symbolEffect(new ReplaceSymbolEffect(EffectScope.WHOLE), this.replaceEffect)
-        .focusable(true)
-        .draggable(false)
-        .stateStyles({
-          focused: {
-            .border({
-              radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-              width: FOCUS_BORDER_WIDTH,
-              color: $r('sys.color.ohos_id_color_focused_outline'),
-              style: BorderStyle.Solid
-            })
-            .offset({ x: -FOCUS_BORDER_WIDTH })
-          },
-          normal: {
-            .border({
-              radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-              width: 0 })
-            .offset({ x: 0 })
+    Row() {
+      Button({ stateEffect: false, type: ButtonType.Normal }) {
+        SymbolGlyph(this.isArrowIconDown.value ? $r('sys.symbol.chevron_down') : $r('sys.symbol.chevron_up'))
+          .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
+          .height(LIST_ROW_HEIGHT)
+          .fontColor([$r('sys.color.ohos_id_color_tertiary')])
+          .symbolEffect(new ReplaceSymbolEffect(EffectScope.WHOLE), this.replaceEffect)
+          .focusable(true)
+          .draggable(false)
+          .stateStyles({
+            focused: {
+              .border({
+                radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+                width: FOCUS_BORDER_WIDTH,
+                color: $r('sys.color.ohos_id_color_focused_outline'),
+                style: BorderStyle.Solid
+              })
+              .offset({ x: -FOCUS_BORDER_WIDTH })
+            },
+            normal: {
+              .border({
+                radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+                width: 0 })
+              .offset({ x: 0 })
+            }
+          })
+          .tabIndex(-1)
+      }
+      .border({
+        radius: $r('sys.float.ohos_id_corner_radius_clicked')
+      })
+      .height(LIST_ROW_HEIGHT)
+      .backgroundColor(this.isArrowBgHoverRow ? this.arrowBgColorRow : TRANS_COLOR)
+      .focusable(true)
+      .accessibilityGroup(true)
+      .accessibilityText(this.isSendArrowAccessibility ?
+        (this.isArrowIconDown?.value ? this.accessibilityCollapsed : this.accessibilityExpanded) :
+        (this.isArrowIconDown?.value ? this.accessibilityExpand : this.accessibilityCollapse))
+      .accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined)
+      .id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`)
+      .visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden)
+      .onHover((isHover: boolean) => {
+        animateTo({
+          curve: FRICTION_CUBIC_BEZIER,
+          duration: ANIMATION_DURATION_250
+        }, () => {
+          if (isHover) {
+            this.arrowBgColorRow = $r('sys.color.ohos_id_color_hover')
+            this.isArrowBgHoverRow = true
+          } else {
+            this.isArrowBgHoverRow = false
           }
         })
-        .tabIndex(-1)
-    }
-    .border({
-      radius: $r('sys.float.ohos_id_corner_radius_clicked')
-    })
-    .height(LIST_ROW_HEIGHT)
-    .backgroundColor(this.isArrowBgHoverRow ? this.arrowBgColorRow : TRANS_COLOR)
-    .focusable(true)
-    .accessibilityGroup(true)
-    .accessibilityText(this.isSendArrowAccessibility ?
-      (this.isArrowIconDown?.value ? this.accessibilityCollapsed : this.accessibilityExpanded) :
-      (this.isArrowIconDown?.value ? this.accessibilityExpand : this.accessibilityCollapse))
-    .accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined)
-    .id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`)
-    .visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden)
-    .onHover((isHover: boolean) => {
-      animateTo({
-        curve: FRICTION_CUBIC_BEZIER,
-        duration: ANIMATION_DURATION_250
-      }, () => {
-        if (isHover) {
-          this.arrowBgColorRow = $r('sys.color.ohos_id_color_hover')
-          this.isArrowBgHoverRow = true
-        } else {
-          this.isArrowBgHoverRow = false
+      })
+      .onTouch((event) => {
+        if (event.type === TouchType.Down) {
+          animateTo({
+            curve: SHARP_CUBIC_BEZIER,
+            duration: ANIMATION_DURATION_100
+          }, () => {
+            this.arrowBgColorRow = $r('sys.color.ohos_id_color_click_effect')
+            this.isArrowBgHoverRow = true
+          })
+        } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          animateTo({
+            curve: SHARP_CUBIC_BEZIER,
+            duration: ANIMATION_DURATION_100
+          }, () => {
+            this.isArrowBgHoverRow = false
+          })
         }
       })
-    })
-    .onTouch((event) => {
-      if (event.type === TouchType.Down) {
-        animateTo({
-          curve: SHARP_CUBIC_BEZIER,
-          duration: ANIMATION_DURATION_100
-        }, () => {
-          this.arrowBgColorRow = $r('sys.color.ohos_id_color_click_effect')
-          this.isArrowBgHoverRow = true
-        })
-      } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        animateTo({
-          curve: SHARP_CUBIC_BEZIER,
-          duration: ANIMATION_DURATION_100
-        }, () => {
-          this.isArrowBgHoverRow = false
-        })
-      }
-    })
-    .onClick(() => {
-      this.replaceEffect += 1
-      if (this.isArrowIconDown.value) {
-        this.isArrowIconDown.value = false
-        this.arrowShowStateRow.value = false
-        animateTo({
-          curve: INTER_POLATING_SPRING,
-        }, () => {
-          this.twoLineModeItemNumRow.value = this.filterRow?.options.length as number
-        })
+      .onClick(() => {
+        this.replaceEffect += 1
+        if (this.isArrowIconDown.value) {
+          this.isArrowIconDown.value = false
+          this.arrowShowStateRow.value = false
+          animateTo({
+            curve: INTER_POLATING_SPRING,
+          }, () => {
+            this.twoLineModeItemNumRow.value = this.filterRow?.options.length as number
+          })
 
-        animateTo({
-          delay: 300,
-          duration: ARROW_ANIMATION_DURATION,
-          curve: SHARP_CUBIC_BEZIER
-        }, () => {
-          this.arrowShowStateRow.value = true
-        })
-      } else {
-        this.isArrowIconDown.value = true
-        this.arrowShowStateRow.value = false
+          animateTo({
+            delay: 300,
+            duration: ARROW_ANIMATION_DURATION,
+            curve: SHARP_CUBIC_BEZIER
+          }, () => {
+            this.arrowShowStateRow.value = true
+          })
+        } else {
+          this.isArrowIconDown.value = true
+          this.arrowShowStateRow.value = false
 
-        animateTo({
-          curve: INTER_POLATING_SPRING,
-        }, () => {
-          this.twoLineModeItemNumRow.value = this.twoLineModeItemNumRecordRow.value
-        })
-        animateTo({
-          delay: ARROW_SHOW_DELAY,
-          duration: ARROW_ANIMATION_DURATION,
-          curve: SHARP_CUBIC_BEZIER
-        }, () => {
-          this.arrowShowStateRow.value = true
-        })
-      }
-      this.sendArrowAccessibility(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
-    })
+          animateTo({
+            curve: INTER_POLATING_SPRING,
+          }, () => {
+            this.twoLineModeItemNumRow.value = this.twoLineModeItemNumRecordRow.value
+          })
+          animateTo({
+            delay: ARROW_SHOW_DELAY,
+            duration: ARROW_ANIMATION_DURATION,
+            curve: SHARP_CUBIC_BEZIER
+          }, () => {
+            this.arrowShowStateRow.value = true
+          })
+        }
+        this.sendArrowAccessibility(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
+      })
+    }
+    .height(LIST_ROW_HEIGHT)
   }
 
   build() {
