@@ -58,7 +58,6 @@ void WaterFlowTestNg::SetUpTestSuite()
 #endif
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
-    testing::FLAGS_gmock_verbose = "error";
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
@@ -92,6 +91,7 @@ void WaterFlowTestNg::GetWaterFlow()
     eventHub_ = frameNode_->GetEventHub<WaterFlowEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<WaterFlowLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<WaterFlowAccessibilityProperty>();
+    positionController_ = pattern_->GetOrCreatePositionController();
 }
 
 WaterFlowModelNG WaterFlowTestNg::CreateWaterFlow()
@@ -258,17 +258,6 @@ std::function<void()> WaterFlowTestNg::GetDefaultHeaderBuilder()
         ViewAbstract::SetWidth(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)));
         ViewAbstract::SetHeight(CalcLength(Dimension(50.f)));
     };
-}
-
-AssertionResult WaterFlowTestNg::IsEqualTotalOffset(float expectOffset)
-{
-    FlushLayoutTask(frameNode_);
-    float currentOffset = pattern_->GetTotalOffset();
-    if (NearEqual(currentOffset, expectOffset)) {
-        return testing::AssertionSuccess();
-    }
-    return AssertionFailure() << "currentOffset: " << currentOffset << " != "
-                              << "expectOffset: " << expectOffset;
 }
 
 void WaterFlowTestNg::HandleDrag(float offset)
@@ -1130,8 +1119,8 @@ HWTEST_F(WaterFlowTestNg, PositionController005, TestSize.Level1)
     /**
      * @tc.steps: step8. Test ScrollBy
      */
-    controller->ScrollBy(0, ITEM_MAIN_SIZE, true);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_MAIN_SIZE));
+    ScrollBy(0, ITEM_MAIN_SIZE, true);
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_MAIN_SIZE);
 }
 
@@ -1635,11 +1624,11 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
     accessibilityProperty_->ActActionScrollForward();
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
     accessibilityProperty_->ActActionScrollBackward();
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -1655,7 +1644,8 @@ HWTEST_F(WaterFlowTestNg, ScrollPage001, TestSize.Level1)
     CreateDone();
     auto controller = pattern_->positionController_;
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    FlushUITasks();
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
     EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
     EXPECT_TRUE(controller->IsAtEnd());
@@ -2189,16 +2179,14 @@ HWTEST_F(WaterFlowTestNg, Jump001, TestSize.Level1)
 
     AddItemsAtSlot(1, 100.0f, 15);
     frameNode_->ChildrenUpdatedFrom(15);
-    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(15, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
     EXPECT_EQ(GetChildY(frameNode_, 15), 0.0f);
 
     AddItemsAtSlot(1, 100.0f, 0);
     frameNode_->ChildrenUpdatedFrom(0);
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
