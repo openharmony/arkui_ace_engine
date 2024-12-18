@@ -1954,8 +1954,9 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
         if (!Negative(posInfo.mainPos)) {
             float startPos = posInfo.mainPos - currentOffset_;
             float targetPos = 0.0f;
-            GetListItemAnimatePos(startPos, startPos + posInfo.mainSize, target.align, targetPos);
-            targetPos += currentOffset_ + target.extraOffset;
+            GetListItemAnimatePos(startPos + target.extraOffset, startPos + posInfo.mainSize + target.extraOffset,
+                target.align, targetPos);
+            targetPos += currentOffset_;
             const float epsilon = 0.1f;
             if (!NearEqual(relativeOffset + prevOffset, currentOffset_, epsilon) ||
                 !NearEqual(target.targetOffset, targetPos, epsilon)) {
@@ -2030,6 +2031,11 @@ void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChang
 {
     if (itemPosition_.find(index) == itemPosition_.end()) {
         return;
+    }
+    auto posInfo = posMap_->GetPositionInfo(index);
+    auto prevPosInfo = posMap_->GetPositionInfo(index - 1);
+    if (Negative(prevPosInfo.mainPos)) {
+        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange});
     }
     if (index == GetStartIndex()) {
         sizeChange += delta;
