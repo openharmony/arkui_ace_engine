@@ -56,7 +56,7 @@ bool NeedAvoidMenuBar(PipelineContext* pipeline)
 bool NeedAvoidContainerModal(
     PipelineContext* pipeline, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    return pipeline && !pipeline->GetContainerCustomTitleVisible() &&
+    return NavigationTitleUtil::NeedAvoidContainerModal(pipeline) &&
         titleBarNode && titleBarNode->NeedAvoidContainerModal();
 }
 } // namespace

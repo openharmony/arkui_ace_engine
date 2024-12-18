@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
@@ -3239,7 +3240,7 @@ void NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNod
     CHECK_NULL_VOID(groupNode);
     auto pipeline = groupNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetContainerCustomTitleVisible()) {
+    if (!NavigationTitleUtil::NeedAvoidContainerModal(pipeline)) {
         return;
     }
     auto contentNode = AceType::DynamicCast<FrameNode>(groupNode->GetContentNode());
