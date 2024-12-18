@@ -16,19 +16,26 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
 
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
 
 struct CanvasPatternPeer {
 public:
-    const std::shared_ptr<OHOS::Ace::Pattern>& GetPattern() const
+    CanvasPatternPeer() = default;
+    virtual ~CanvasPatternPeer() = default;
+    const std::shared_ptr<OHOS::Ace::NG::CanvasPattern>& GetPattern() const
     {
         return pattern_;
     }
-    void SetPattern(const std::shared_ptr<OHOS::Ace::Pattern>& pattern)
+    void SetPattern(const std::shared_ptr<OHOS::Ace::NG::CanvasPattern>& pattern)
     {
         pattern_ = pattern;
     }
-
+    virtual void SetTransform(const OHOS::Ace::TransformParam& param)
+    {
+        CHECK_NULL_VOID(pattern_);
+        pattern_->SetTransform(param);
+    }
 private:
-    std::shared_ptr<OHOS::Ace::Pattern> pattern_ = nullptr;
+    std::shared_ptr<OHOS::Ace::NG::CanvasPattern> pattern_ = nullptr;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
