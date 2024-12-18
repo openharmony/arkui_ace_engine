@@ -32,6 +32,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -898,6 +899,17 @@ bool CheckFrameNodeByAccessibilityLevel(const RefPtr<NG::FrameNode>& frameNode, 
     return true;
 }
 
+bool IsInPageNodes(int32_t pageId, const std::vector<RefPtr<NG::FrameNode>>& pageNodes)
+{
+    for (const auto& page : pageNodes) {
+        CHECK_NULL_CONTINUE(page);
+        if (pageId == page->GetPageId()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool CheckAndSetAccessibilityVisible(const RefPtr<NG::FrameNode>& node, bool isReduceMode = false)
 {
     if (!isReduceMode) {
@@ -918,8 +930,10 @@ bool CheckAndSetAccessibilityVisible(const RefPtr<NG::FrameNode>& node, bool isR
     return node->GetAccessibilityVisible();
 }
 
-void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>& children,
-                          const CommonProperty& commonProperty, int32_t pageId)
+void GetFrameNodeChildren(
+    const RefPtr<NG::UINode>& uiNode,
+    std::vector<int64_t>& children,
+    const CommonProperty& commonProperty)
 {
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
@@ -928,7 +942,7 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>
         }
         if (uiNode->GetTag() == "stage") {
         } else if (uiNode->GetTag() == "page") {
-            if (uiNode->GetPageId() != pageId) {
+            if (!IsInPageNodes(uiNode->GetPageId(), commonProperty.pageNodes)) {
                 return;
             }
         } else if (!frameNode->IsInternal() || frameNode->IsFirstVirtualNode()) {
@@ -943,7 +957,7 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>
     if (frameNode) {
         auto overlayNode = frameNode->GetOverlayNode();
         if (overlayNode) {
-            GetFrameNodeChildren(overlayNode, children, commonProperty, pageId);
+            GetFrameNodeChildren(overlayNode, children, commonProperty);
         }
     }
 
@@ -954,25 +968,27 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>
         if (uiVirtualNode != nullptr) {
             auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
             if (virtualNode != nullptr) {
-                GetFrameNodeChildren(virtualNode, children, commonProperty, pageId);
+                GetFrameNodeChildren(virtualNode, children, commonProperty);
                 return;
             }
         }
     }
 
     for (const auto& frameChild : uiNode->GetChildren(true)) {
-        GetFrameNodeChildren(frameChild, children, commonProperty, pageId);
+        GetFrameNodeChildren(frameChild, children, commonProperty);
     }
 }
 
-void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG::FrameNode>>& children,
-                          const CommonProperty& commonProperty, int32_t pageId = -1)
+void GetFrameNodeChildren(
+    const RefPtr<NG::UINode>& uiNode,
+    std::list<RefPtr<NG::FrameNode>>& children,
+    const CommonProperty& commonProperty)
 {
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
     if (frameNode) {
         CHECK_NULL_VOID(frameNode->IsActive());
         if (uiNode->GetTag() == "page") {
-            if (pageId != -1 && uiNode->GetPageId() != pageId) {
+            if (!commonProperty.pageNodes.empty() && !IsInPageNodes(uiNode->GetPageId(), commonProperty.pageNodes)) {
                 return;
             }
         } else if (!frameNode->IsInternal() && uiNode->GetTag() != "stage") {
@@ -985,7 +1001,7 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG:
 
         auto overlayNode = frameNode->GetOverlayNode();
         if (overlayNode) {
-            GetFrameNodeChildren(overlayNode, children, commonProperty, pageId);
+            GetFrameNodeChildren(overlayNode, children, commonProperty);
         }
 
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -993,14 +1009,14 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG:
         if (uiVirtualNode != nullptr) {
             auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
             if (virtualNode != nullptr) {
-                GetFrameNodeChildren(virtualNode, children, commonProperty, pageId);
+                GetFrameNodeChildren(virtualNode, children, commonProperty);
                 return;
             }
         }
     }
 
     for (const auto& frameChild : uiNode->GetChildren(true)) {
-        GetFrameNodeChildren(frameChild, children, commonProperty, pageId);
+        GetFrameNodeChildren(frameChild, children, commonProperty);
     }
 }
 
@@ -1459,7 +1475,17 @@ void ProcessFocusScroll(const RefPtr<NG::FrameNode>& curFrameNode, RefPtr<NG::Pi
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityProcessFocusScroll");
 }
+
+int32_t GetLastPageId(const RefPtr<NG::PipelineContext>& ngPipeline)
+{
+    CHECK_NULL_RETURN(ngPipeline, -1);
+    auto stageManager = ngPipeline->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, -1);
+    auto page = stageManager->GetLastPageWithTransition();
+    CHECK_NULL_RETURN(page, -1);
+    return page->GetPageId();
 }
+} // namespace
 
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
@@ -1663,12 +1689,12 @@ void UpdateChildrenOfAccessibilityElementInfo(
     if (!IsExtensionComponent(node) || IsUIExtensionShowPlaceholder(node)) {
         std::vector<int64_t> children;
         for (const auto& item : node->GetChildren(true)) {
-            GetFrameNodeChildren(item, children, commonProperty, commonProperty.pageId);
+            GetFrameNodeChildren(item, children, commonProperty);
         }
 
         auto overlayNode = node->GetOverlayNode();
         if (overlayNode != nullptr) {
-            GetFrameNodeChildren(overlayNode, children, commonProperty, commonProperty.pageId);
+            GetFrameNodeChildren(overlayNode, children, commonProperty);
         }
 
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -1677,7 +1703,7 @@ void UpdateChildrenOfAccessibilityElementInfo(
             auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
             if (virtualNode != nullptr) {
                 children.clear();
-                GetFrameNodeChildren(virtualNode, children, commonProperty, commonProperty.pageId);
+                GetFrameNodeChildren(virtualNode, children, commonProperty);
             }
         }
         for (const auto& child : children) {
@@ -1717,7 +1743,8 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     nodeInfo.SetPageId(node->GetPageId());
-    nodeInfo.SetPagePath(commonProperty.pagePath);
+    nodeInfo.SetPagePath(
+        GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
@@ -1765,7 +1792,8 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
     nodeInfo.SetPageId(node->GetPageId());
-    nodeInfo.SetPagePath(commonProperty.pagePath);
+    nodeInfo.SetPagePath(
+        GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
@@ -1920,13 +1948,14 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     SetRectInScreen(node, nodeInfo, commonProperty, scaleX_, scaleY_);
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetInnerWindowId(commonProperty.innerWindowId);
-    // is abnormal that pageId equals to 0, use commonProperty.pageId to fix pageId
+    // is abnormal that pageId equals to 0, use last pageId to fix pageId
     if (node->GetPageId()) {
         nodeInfo.SetPageId(node->GetPageId());
     } else {
-        nodeInfo.SetPageId(commonProperty.pageId);
+        nodeInfo.SetPageId(GetLastPageId(ngPipeline));
     }
-    nodeInfo.SetPagePath(commonProperty.pagePath);
+    nodeInfo.SetPagePath(
+        GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
@@ -1974,7 +2003,8 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
 
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetPageId(node->GetPageId());
-    nodeInfo.SetPagePath(commonProperty.pagePath);
+    nodeInfo.SetPagePath(
+        GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
@@ -2007,8 +2037,10 @@ void UpdateUiExtensionParentIdForFocus(const RefPtr<NG::FrameNode>& rootNode, co
     }
 }
 
-void GetChildrenFromFrameNode(const RefPtr<NG::FrameNode>& node,
-    std::list<RefPtr<NG::FrameNode>>& children, int32_t pageId, const CommonProperty& commonProperty)
+void GetChildrenFromFrameNode(
+    const RefPtr<NG::FrameNode>& node,
+    std::list<RefPtr<NG::FrameNode>>& children,
+    const CommonProperty& commonProperty)
 {
     std::list<RefPtr<NG::FrameNode>> frameNodeChildren;
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -2016,16 +2048,16 @@ void GetChildrenFromFrameNode(const RefPtr<NG::FrameNode>& node,
     if (uiVirtualNode != nullptr) {
         auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
         if (virtualNode != nullptr) {
-            GetFrameNodeChildren(virtualNode, frameNodeChildren, commonProperty, pageId);
+            GetFrameNodeChildren(virtualNode, frameNodeChildren, commonProperty);
         }
     } else {
         for (const auto& item : node->GetChildren(true)) {
-            GetFrameNodeChildren(item, frameNodeChildren, commonProperty, pageId);
+            GetFrameNodeChildren(item, frameNodeChildren, commonProperty);
         }
 
         auto overlayNode = node->GetOverlayNode();
         if (overlayNode != nullptr) {
-            GetFrameNodeChildren(overlayNode, frameNodeChildren, commonProperty, pageId);
+            GetFrameNodeChildren(overlayNode, frameNodeChildren, commonProperty);
         }
     }
     while (!frameNodeChildren.empty()) {
@@ -2128,7 +2160,7 @@ void JsAccessibilityManager::UpdateChildrenNodeInCache(std::list<AccessibilityEl
         }
         if (!IsExtensionComponent(frameNodeParent) || IsUIExtensionShowPlaceholder(frameNodeParent)) {
             infos.push_back(nodeInfo);
-            GetChildrenFromFrameNode(frameNodeParent, children, commonProperty.pageId, commonProperty);
+            GetChildrenFromFrameNode(frameNodeParent, children, commonProperty);
             continue;
         }
         if (!((frameNodeParent->GetUiExtensionId() > NG::UI_EXTENSION_UNKNOW_ID) &&
@@ -2156,7 +2188,7 @@ void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInf
         return;
     }
     commonProperty.isReduceMode = umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN_REDUCED);
-    GetChildrenFromFrameNode(node, children, commonProperty.pageId, commonProperty);
+    GetChildrenFromFrameNode(node, children, commonProperty);
     UpdateChildrenNodeInCache(infos, commonProperty, ngPipeline, searchParam, children);
 }
 
@@ -2186,6 +2218,8 @@ void AddFocusableNode(std::list<RefPtr<NG::FrameNode>>& nodeList, const RefPtr<N
         level != NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
         std::list<RefPtr<NG::FrameNode>> children;
         CommonProperty commonProperty;
+        commonProperty.pageNodes.clear(); // empty means search all page
+        commonProperty.pagePaths.clear();
         for (const auto& child : node->GetChildren(true)) {
             GetFrameNodeChildren(child, children, commonProperty);
         }
@@ -4165,7 +4199,7 @@ void JsAccessibilityManager::DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode
     }
     std::vector<int64_t> children;
     for (const auto& item : uiNodeChildren) {
-        GetFrameNodeChildren(item, children, commonProperty, commonProperty.pageId);
+        GetFrameNodeChildren(item, children, commonProperty);
     }
     if (vNode != nullptr) {
         DumpTreeNodeInfoNG(vNode, depth + 1, commonProperty, children.size());
@@ -4188,12 +4222,12 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
     }
     std::vector<int64_t> children;
     for (const auto& item : node->GetChildren(true)) {
-        GetFrameNodeChildren(item, children, commonProperty, commonProperty.pageId);
+        GetFrameNodeChildren(item, children, commonProperty);
     }
 
     auto overlayNode = node->GetOverlayNode();
     if (overlayNode) {
-        GetFrameNodeChildren(overlayNode, children, commonProperty, commonProperty.pageId);
+        GetFrameNodeChildren(overlayNode, children, commonProperty);
     }
 
     if (isDumpSimplify) {
@@ -4254,8 +4288,8 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID, bool isDump
             commonProperty.windowId = static_cast<int32_t>(ngPipeline->GetWindowId());
             commonProperty.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
             commonProperty.windowTop = GetWindowTop(ngPipeline->GetWindowId());
-            commonProperty.pageId = 0;
-            commonProperty.pagePath = "";
+            commonProperty.pageNodes.clear(); // empty means search all page
+            commonProperty.pagePaths.clear();
             DumpTreeNG(rootNode, depth, nodeID, commonProperty, isDumpSimplify);
         }
     }
@@ -6821,6 +6855,49 @@ void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
     }
 }
 
+const std::string JsAccessibilityManager::GetPagePathInPageNodes(
+    int32_t pageId,
+    const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+    const std::vector<std::string> pagePaths)
+{
+    if (pagePaths.empty()) {
+        return GetPagePath();
+    }
+    if (pagePaths.size() != pageNodes.size()) {
+        return GetPagePath();
+    }
+    for (std::size_t i = 0; i < pageNodes.size(); ++i) {
+        CHECK_NULL_CONTINUE(pageNodes[i]);
+        if (pageId != pageNodes[i]->GetPageId()) {
+            continue;
+        }
+        return pagePaths[i];
+    }
+    return GetPagePath();
+}
+
+void JsAccessibilityManager::GetCurrentWindowPages(
+    const RefPtr<NG::PipelineContext>& ngPipeline,
+    std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+    std::vector<std::string>& pagePaths)
+{
+    CHECK_NULL_VOID(ngPipeline);
+    auto stageManager = ngPipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    if (stageManager->IsSplitMode()) {
+        pageNodes = stageManager->GetTopPagesWithTransition();
+        pagePaths = stageManager->GetTopPagePaths();
+        if (pageNodes.empty()) {
+            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Split mode enable, cannot get page");
+        }
+        return;
+    }
+    auto page = stageManager->GetLastPageWithTransition();
+    CHECK_NULL_VOID(page);
+    pageNodes.push_back(page);
+    pagePaths.push_back(GetPagePath());
+}
+
 void JsAccessibilityManager::UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context)
 {
     CHECK_NULL_VOID(context);
@@ -6887,27 +6964,24 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
 {
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
-    auto stageManager = ngPipeline->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
     if (!ngPipeline->IsFormRender()) {
         output.windowId = static_cast<int32_t>(ngPipeline->GetRealHostWindowId());
     } else {
         output.windowId = static_cast<int32_t>(GetWindowId());
     }
+
     auto windowInfo = GenerateWindowInfo(node, context);
     output.windowLeft = windowInfo.left;
     output.windowTop = windowInfo.top;
     scaleX_ = windowInfo.scaleX;
     scaleY_ = windowInfo.scaleY;
     output.innerWindowId = windowInfo.innerWindowId;
-    auto page = stageManager->GetLastPageWithTransition();
-    if (page != nullptr) {
-        output.pageId = page->GetPageId();
-        output.pagePath = GetPagePath();
-    }
+
+    // handle this time page info
+    GetCurrentWindowPages(ngPipeline, output.pageNodes, output.pagePaths);
     if (context->GetWindowId() != mainContext->GetWindowId()) {
-        output.pageId = 0;
-        output.pagePath = "";
+        output.pageNodes.clear();
+        output.pagePaths.clear();
     }
 }
 

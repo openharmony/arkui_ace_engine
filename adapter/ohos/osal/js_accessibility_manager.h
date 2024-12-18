@@ -57,8 +57,8 @@ struct CommonProperty {
     int32_t windowId = 0;
     int32_t windowLeft = 0;
     int32_t windowTop = 0;
-    int32_t pageId = 0;
-    std::string pagePath;
+    std::vector<std::string> pagePaths;
+    std::vector<RefPtr<NG::FrameNode>> pageNodes;
     bool isReduceMode = false;
 };
 
@@ -619,7 +619,17 @@ private:
     void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
+
     void RegisterDynamicRenderGetParentRectHandler();
+
+    void GetCurrentWindowPages(
+        const RefPtr<NG::PipelineContext>& ngPipeline,
+        std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        std::vector<std::string>& pagePaths);
+    const std::string GetPagePathInPageNodes(
+        int32_t pageId,
+        const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
+        const std::vector<std::string> pagePaths);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
