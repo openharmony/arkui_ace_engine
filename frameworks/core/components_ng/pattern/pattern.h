@@ -147,7 +147,7 @@ public:
     {
         return false;
     }
-    
+
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
