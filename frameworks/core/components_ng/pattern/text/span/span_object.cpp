@@ -932,4 +932,77 @@ bool BackgroundColorSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     auto backgroundColor = backgroundColorSpan->GetBackgroundColor();
     return backgroundColor == textBackgroundStyle_;
 }
+
+// UrlSpan
+UrlSpan::UrlSpan(const std::string& urlAddress) : SpanBase(0, 0), urlAddress_(urlAddress) {}
+
+UrlSpan::UrlSpan(const std::string& urlAddress, int32_t start, int32_t end)
+    : SpanBase(start, end), urlAddress_(urlAddress)
+{}
+
+std::string UrlSpan::GetUrlSpanAddress() const
+{
+    return urlAddress_;
+}
+
+void UrlSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddUrlStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveUrlStyle(spanItem);
+            break;
+    }
+}
+
+RefPtr<SpanBase> UrlSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<UrlSpan>(urlAddress_, start, end);
+    return spanBase;
+}
+
+void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    auto address = urlAddress_;
+    auto urlOnRelease = [address]() {
+        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->HyperlinkStartAbility(address);
+    };
+    spanItem->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+}
+
+void UrlSpan::RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem)
+{
+    spanItem->urlOnRelease = nullptr;
+}
+
+SpanType UrlSpan::GetSpanType() const
+{
+    return SpanType::Url;
+}
+
+std::string UrlSpan::ToString() const
+{
+    std::stringstream str;
+    str << "UrlSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool UrlSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto urlSpan = DynamicCast<UrlSpan>(other);
+    if (!urlSpan) {
+        return false;
+    }
+    auto urlAddress = urlSpan->GetUrlSpanAddress();
+    return urlAddress == urlAddress_;
+}
 } // namespace OHOS::Ace

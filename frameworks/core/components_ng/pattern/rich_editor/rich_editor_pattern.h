@@ -941,6 +941,8 @@ public:
         return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
 
+    Color GetUrlSpanColor() override;
+
     void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
 
     void TriggerAvoidOnCaretChange();
@@ -1001,7 +1003,15 @@ protected:
         return pipelineContext->GetTheme<T>();
     }
 
+    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+    PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
+
 private:
+    bool HandleUrlSpanClickEvent(const GestureEvent& info);
+    void HandleUrlSpanForegroundClear();
+    bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
+    Color GetUrlHoverColor();
+    Color GetUrlPressColor();
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);

@@ -1494,6 +1494,80 @@ HWTEST_F(SpanStringTestNg, SpanString012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanStringTest013
+ * @tc.desc: Test basic function of UrlSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString013, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("1234567890");
+
+    std::string address = "https://www.example.com";
+
+    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 7, 9));
+    auto firstSpans = spanString->GetSpans(2, 1);
+    EXPECT_EQ(firstSpans.size(), 0);
+    auto urlSpan = AceType::MakeRefPtr<UrlSpan>(address);
+    EXPECT_NE(urlSpan, nullptr);
+    EXPECT_EQ(urlSpan->GetStartIndex(), 0);
+    EXPECT_EQ(urlSpan->GetEndIndex(), 0);
+
+    auto secondUrlSpans = spanString->GetSpans(1, 1);
+    EXPECT_EQ(secondUrlSpans.size(), 0);
+
+    auto thirdUrlSpans = spanString->GetSpans(0, 1);
+    EXPECT_EQ(thirdUrlSpans.size(), 0);
+
+    auto fourthUrlSpans = spanString->GetSpans(3, 1);
+    EXPECT_EQ(fourthUrlSpans.size(), 0);
+
+    auto fifthUrlSpans = spanString->GetSpans(0, 9);
+    EXPECT_EQ(fifthUrlSpans.size(), 1);
+}
+
+/**
+ * @tc.name: SpanStringTest014
+ * @tc.desc: Test basic function of UrlSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString014, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    std::string address = "https://www.example.com";
+    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 8, 10));
+    auto subSpanString  = spanString->GetSubSpanString(0, 10);
+    EXPECT_TRUE(subSpanString->IsEqualToSpanString(spanString));
+    auto firstSpans = spanString->GetSpans(8, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto urlSpan = AceType::DynamicCast<UrlSpan>(firstSpans[0]);
+    EXPECT_NE(urlSpan, nullptr);
+    EXPECT_EQ(urlSpan->GetStartIndex(), 8);
+    EXPECT_EQ(urlSpan->GetEndIndex(), 9);
+    EXPECT_TRUE(urlSpan->GetUrlSpanAddress() == address);
+}
+
+/**
+ * @tc.name: SpanStringTest015
+ * @tc.desc: Test basic function of UrlSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString015, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    std::string address = "https://www.example.com";
+    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 0, 10));
+    auto subSpanString  = spanString->GetSubSpanString(0, 10);
+    EXPECT_TRUE(subSpanString->IsEqualToSpanString(spanString));
+    auto firstSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto urlSpan = AceType::DynamicCast<UrlSpan>(firstSpans[0]);
+    EXPECT_NE(urlSpan, nullptr);
+    EXPECT_EQ(urlSpan->GetStartIndex(), 0);
+    EXPECT_EQ(urlSpan->GetEndIndex(), 10);
+    EXPECT_TRUE(urlSpan->GetUrlSpanAddress() == address);
+}
+
+/**
  * @tc.name: Tlv001
  * @tc.desc: Test basic function of TLV
  * @tc.type: FUNC

@@ -535,6 +535,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<ExtSpan>();
         case SpanType::BackgroundColor:
             return MakeRefPtr<BackgroundColorSpan>();
+        case SpanType::Url:
+            return MakeRefPtr<UrlSpan>();
         default:
             return nullptr;
     }

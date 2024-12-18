@@ -713,12 +713,17 @@ public:
         afterLayoutCallback_ = std::nullopt;
     }
 
+    virtual Color GetUrlSpanColor();
     void DoTextSelectionTouchCancel() override;
 
     std::string GetCaretColor() const;
     std::string GetSelectedBackgroundColor() const;
 
 protected:
+    int32_t GetClickedSpanPosition()
+    {
+        return clickedSpanPosition_;
+    }
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAfterModifyDone() override;
@@ -732,9 +737,12 @@ protected:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleClickAISpanEvent(const PointF& info);
-    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
+    void HandleClickOnTextAndSpan(GestureEvent& info);
+    void RecordClickEvent();
+    void ActTextOnClick(GestureEvent& info);
+    void RecordSpanClickEvent(const RefPtr<SpanItem>& span);
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
@@ -749,6 +757,7 @@ protected:
     void UpdateSelectionType(const SelectionInfo& selection);
     void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
     bool IsSelectedBindSelectionMenu();
+    bool CheckAndClick(const RefPtr<SpanItem>& item);
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
@@ -767,6 +776,7 @@ protected:
 
     virtual bool CanStartAITask();
 
+    void MarkDirtySelf();
     void OnAttachToMainTree() override
     {
         isDetachFromMainTree_ = false;
@@ -842,8 +852,12 @@ protected:
         WeakPtr<SpanItem> span;
     };
     std::vector<SubComponentInfoEx> subComponentInfos_;
+    virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
-    
+    bool ShowShadow(const PointF& textOffset, const Color& color);
+    virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
+    bool hasUrlSpan_ = false;
+
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
@@ -854,6 +868,15 @@ private:
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     bool IsShowHandle();
+    void InitUrlMouseEvent();
+    void InitUrlTouchEvent();
+    void HandleUrlMouseEvent(const MouseInfo& info);
+    void HandleUrlTouchEvent(const TouchEventInfo& info);
+    void URLOnHover(bool isHover);
+    bool HandleUrlClick();
+    std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start);
+    Color GetUrlHoverColor();
+    Color GetUrlPressColor();
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
     void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick);
@@ -911,6 +934,9 @@ private:
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
     bool isEnableHapticFeedback_ = true;
+
+    bool urlTouchEventInitialized_ = false;
+    bool urlMouseEventInitialized_ = false;
 
     RefPtr<ParagraphManager> pManager_;
     std::vector<int32_t> placeholderIndex_;

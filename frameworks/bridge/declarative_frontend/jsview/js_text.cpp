@@ -61,21 +61,18 @@ std::mutex TextModel::mutex_;
 
 TextModel* TextModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::TextModelNG());
+    static NG::TextModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::TextModelNG());
-            } else {
-                instance_.reset(new Framework::TextModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::TextModelNG instance;
+        return &instance;
+    } else {
+        static Framework::TextModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace

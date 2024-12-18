@@ -1611,4 +1611,55 @@ void JSBackgroundColorSpan::SetBackgroundColorSpan(const RefPtr<BackgroundColorS
 {
     backgroundColorSpan_ = backgroundColorSpan;
 }
+
+// JSUrlSpan
+void JSUrlSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSUrlSpan>::Declare("UrlStyle");
+    JSClass<JSUrlSpan>::CustomProperty(
+        "url", &JSUrlSpan::GetUrlContext, &JSUrlSpan::SetUrlContext);
+    JSClass<JSUrlSpan>::Bind(globalObj, JSUrlSpan::Constructor, JSUrlSpan::Destructor);
+}
+
+void JSUrlSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto urlSpan = Referenced::MakeRefPtr<JSUrlSpan>();
+    urlSpan->IncRefCount();
+    RefPtr<UrlSpan> span;
+    if (args.Length() <= 0 || args[0]->IsObject() || args[0]->IsUndefined() || args[0]->IsNull()) {
+        span = AceType::MakeRefPtr<UrlSpan>();
+    } else  {
+        auto address = args[0]->ToString();
+        span = AceType::MakeRefPtr<UrlSpan>(address);
+    }
+    CHECK_NULL_VOID(span);
+    urlSpan->urlContextSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(urlSpan));
+}
+
+void JSUrlSpan::Destructor(JSUrlSpan* urlSpan)
+{
+    if (urlSpan != nullptr) {
+        urlSpan->DecRefCount();
+    }
+}
+
+void JSUrlSpan::GetUrlContext(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(urlContextSpan_);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(urlContextSpan_->GetUrlSpanAddress())));
+    info.SetReturnValue(ret);
+}
+
+void JSUrlSpan::SetUrlContext(const JSCallbackInfo& info) {}
+
+const RefPtr<UrlSpan>& JSUrlSpan::GetUrlSpan()
+{
+    return urlContextSpan_;
+}
+
+void JSUrlSpan::SetUrlSpan(const RefPtr<UrlSpan>& urlSpan)
+{
+    urlContextSpan_ = urlSpan;
+}
 } // namespace OHOS::Ace::Framework
