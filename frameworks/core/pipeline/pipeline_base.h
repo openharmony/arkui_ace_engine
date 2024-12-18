@@ -1445,6 +1445,8 @@ public:
     void FireAccessibilityEvents();
     void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
 
+    virtual void SetEnableSwipeBack(bool isEnable) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
