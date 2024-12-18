@@ -1207,6 +1207,39 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return false;
 }
 
+bool TabBarPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabLayoutProperty, false);
+    return tabLayoutProperty->GetSafeAreaPaddingProperty() ? true : false;
+}
+
+void TabBarPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabLayoutProperty);
+    if (!tabLayoutProperty->GetSafeAreaPaddingProperty()) {
+        return;
+    }
+    auto tabBarSize = host->GetGeometryNode()->GetMarginFrameSize();
+    auto tabBarOffset = host->GetGeometryNode()->GetMarginFrameOffset();
+    auto tabsExpandEdges = tabsNode->GetAccumulatedSafeAreaExpand();
+    auto tabBarExpandEdges = host->GetAccumulatedSafeAreaExpand();
+    auto tabBarRect = RectF(tabBarOffset.GetX(), tabBarOffset.GetY(), tabBarSize.Width(),
+        tabBarSize.Height() + tabsExpandEdges.bottom.value_or(0) + tabBarExpandEdges.bottom.value_or(0));
+    auto tabBarRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    tabBarRenderContext->UpdatePaintRect(tabBarRect);
+}
+
 void TabBarPattern::InitLongPressAndDragEvent()
 {
     auto host = GetHost();
