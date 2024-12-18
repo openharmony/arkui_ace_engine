@@ -274,6 +274,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
     JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
     JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
+    JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -829,6 +830,17 @@ void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
         opts.edges = safeAreaEdge;
     }
     NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
+}
+
+void JSNavigation::SetEnableDragBar(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navigation's drag bar is false
+        NavigationModel::GetInstance()->SetEnableDragBar(false);
+        return;
+    }
+    auto enableDragBar = info[0]->ToBoolean();
+    NavigationModel::GetInstance()->SetEnableDragBar(enableDragBar);
 }
 
 void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)

@@ -56,6 +56,7 @@ public:
 
     static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void SetSystemBarStyle(const JSCallbackInfo& info);
+    static void SetEnableDragBar(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

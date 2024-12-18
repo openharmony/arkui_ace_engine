@@ -254,6 +254,16 @@ public:
         return navigationPathInfo_;
     }
 
+    void SetDragBarNode(const RefPtr<UINode>& dragNode)
+    {
+        dragBarNode_ = dragNode;
+    }
+
+    const RefPtr<UINode>& GetDragBarNode() const
+    {
+        return dragBarNode_;
+    }
+
     void CleanHideNodes()
     {
         hideNodes_.clear();
@@ -287,6 +297,7 @@ private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    RefPtr<UINode> dragBarNode_;
     WeakPtr<NavDestinationGroupNode> parentDestinationNode_;
     // dialog hideNodes, if is true, nodes need remove
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
