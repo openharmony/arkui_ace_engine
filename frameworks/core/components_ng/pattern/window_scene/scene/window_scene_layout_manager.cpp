@@ -294,7 +294,7 @@ void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node
     CHECK_NULL_VOID(surfaceNode);
     if (!surfaceNode->GetParent()) {
         TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "node:%{public}d name:%{public}s is on ui tree but not rs tree,"
-            "screenId:%{public}" PRIu64, node->GetId, GetWindowName(node).c_str(), GetScreenId(node));
+            "screenId:%{public}" PRIu64, node->GetId(), GetWindowName(node).c_str(), GetScreenId(node));
     }
 }
 
@@ -602,7 +602,8 @@ void WindowSceneLayoutManager::GetTotalUITreeInfo(std::string& info)
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "begin task GetTotalUITreeInfo:%{public}" PRIu64, it->first);
             std::ostringstream oss;
             GetUITreeInfo(it->second, 0, 0, oss);
-            oss << "-------------------------------------RSTree-----------------------------------" << std::endl;
+            oss << "--------------------------------PatternTree" << " screenId: " <<
+                it->first << "-----------------------------------" << std::endl;
             GetRSNodeTreeInfo(GetRSNode(it->second), 0, oss);
             info.append(oss.str());
         }
