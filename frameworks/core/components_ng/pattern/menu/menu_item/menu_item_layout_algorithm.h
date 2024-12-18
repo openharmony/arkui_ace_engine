@@ -72,7 +72,7 @@ private:
     double iconSize_ = 0.0f;
     bool needExpandContent_ = false;
     bool isOption_ = false;
-    PaddingPropertyF padding;
+    PaddingPropertyF padding_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);
 };
