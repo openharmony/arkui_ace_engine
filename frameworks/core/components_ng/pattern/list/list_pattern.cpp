@@ -246,6 +246,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isInitialized_ = true;
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
+    snapTrigByScrollBar_ = false;
     return true;
 }
 
@@ -266,8 +267,12 @@ ScrollAlign ListPattern::GetInitialScrollAlign() const
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float topOffset = startPos - contentStartOffset_;
-    float bottomOffset = endPos - contentMainSize_ + contentEndOffset_;
+    float topOffset = startPos;
+    float bottomOffset = endPos - contentMainSize_;
+    if (!IsScrollSnapAlignCenter()) {
+        topOffset -= contentStartOffset_;
+        bottomOffset += contentEndOffset_;
+    }
     if (GreatOrEqual(topOffset, 0.0f) && LessOrEqual(bottomOffset, 0.0f)) {
         return 0.0f;
     }
@@ -333,6 +338,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
+    listContentModifier_->SetIsNeedDividerAnimation(isNeedDividerAnimation_);
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
@@ -909,9 +915,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
-bool ListPattern::StartSnapAnimation(
-    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance, SnapDirection snapDirection)
+bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
 {
+    auto snapDirection = snapAnimationOptions.snapDirection;
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
     auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
@@ -925,8 +931,9 @@ bool ListPattern::StartSnapAnimation(
     if (!IsScrolling()) {
         snapTrigOnScrollStart_ = true;
     }
-    predictSnapOffset_ = snapDelta;
-    scrollSnapVelocity_ = animationVelocity;
+    predictSnapOffset_ = snapAnimationOptions.snapDelta;
+    scrollSnapVelocity_ = snapAnimationOptions.animationVelocity;
+    snapTrigByScrollBar_ = snapAnimationOptions.fromScrollBar;
     MarkDirtyNodeSelf();
     return true;
 }
@@ -1009,7 +1016,7 @@ int32_t ListPattern::GetStartIndexExcludeStartOffset()
 void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
 {
     CHECK_NULL_VOID(scrollable_);
-    scrollable_->StartListSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
+    scrollable_->StartListSnapAnimation(scrollSnapDelta, scrollSnapVelocity, snapTrigByScrollBar_);
 }
 
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -1269,8 +1276,8 @@ ScrollOffsetAbility ListPattern::GetScrollOffsetAbility()
             return true;
         },
         GetAxis(),
-        contentStartOffset_,
-        contentEndOffset_,
+        IsScrollSnapAlignCenter() ? 0 : contentStartOffset_,
+        IsScrollSnapAlignCenter() ? 0 : contentEndOffset_,
     };
 }
 

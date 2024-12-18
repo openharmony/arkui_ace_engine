@@ -47,6 +47,7 @@
 #include "core/interfaces/native/node/node_container_modifier.h"
 #include "core/interfaces/native/node/node_container_span_modifier.h"
 #include "core/interfaces/native/node/node_content_modifier.h"
+#include "core/interfaces/native/node/node_custom_node_ext_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_folder_stack_modifier.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
@@ -248,6 +249,7 @@ const ArkUINodeModifiers impl = {
 #endif
 
     NodeModifier::GetContainerSpanModifier,
+    NodeModifier::GetCustomNodeExtModifier,
 };
 } // namespace
 

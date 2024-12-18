@@ -262,6 +262,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
         return;
     }
     auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<MenuItemGroupPattern>();
     pattern->UpdateMenuItemIconInfo();
 

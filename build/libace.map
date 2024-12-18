@@ -38,6 +38,7 @@
       GetArkUINodeAPI;
       GetArkUIAnyFullNodeAPI;
       GetCJUIFullNodeAPI;
+      GetArkUIFullNodeAPI;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
