@@ -451,9 +451,9 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
         toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
-        auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
             NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
             return false;
