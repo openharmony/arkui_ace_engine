@@ -17,7 +17,9 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct PixelMapMockPeer {};
+struct PixelMapMockPeer {
+    virtual ~PixelMapMockPeer() = default;
+};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapMockAccessor {

@@ -1122,4 +1122,7 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
     return &CanvasRendererAccessorImpl;
 }
 
+struct CanvasRendererPeer {
+    virtual ~CanvasRendererPeer() = default;
+};
 }

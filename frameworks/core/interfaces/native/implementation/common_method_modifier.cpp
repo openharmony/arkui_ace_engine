@@ -3040,7 +3040,7 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetAccessibilityLevel(frameNode, convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
-                                  const Callback_Any* value)
+                                  const CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3194,7 +3194,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetExpandSafeArea(frameNode, convValue);
 }
 void BackgroundImpl(Ark_NativePointer node,
-                    const Callback_Any* builder,
+                    const CustomNodeBuilder* builder,
                     const Opt_Literal_Alignment_align* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3478,7 +3478,7 @@ void BindMenu1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindMenu1(frameNode, convValue);
 }
 void BindContextMenu0Impl(Ark_NativePointer node,
-                          const Callback_Any* content,
+                          const CustomNodeBuilder* content,
                           Ark_ResponseType responseType,
                           const Opt_ContextMenuOptions* options)
 {
@@ -3490,7 +3490,7 @@ void BindContextMenu0Impl(Ark_NativePointer node,
 }
 void BindContextMenu1Impl(Ark_NativePointer node,
                           Ark_Boolean isShown,
-                          const Callback_Any* content,
+                          const CustomNodeBuilder* content,
                           const Opt_ContextMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3501,7 +3501,7 @@ void BindContextMenu1Impl(Ark_NativePointer node,
 }
 void BindContentCover0Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,
-                           const Callback_Any* builder,
+                           const CustomNodeBuilder* builder,
                            const Opt_ModalTransition* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3512,7 +3512,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
 }
 void BindContentCover1Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,
-                           const Callback_Any* builder,
+                           const CustomNodeBuilder* builder,
                            const Opt_ContentCoverOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3523,7 +3523,7 @@ void BindContentCover1Impl(Ark_NativePointer node,
 }
 void BindSheetImpl(Ark_NativePointer node,
                    const Opt_Boolean* isShow,
-                   const Callback_Any* builder,
+                   const CustomNodeBuilder* builder,
                    const Opt_SheetOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

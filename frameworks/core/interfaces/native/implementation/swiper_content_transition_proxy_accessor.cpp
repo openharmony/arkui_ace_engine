@@ -105,5 +105,4 @@ const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTrans
     };
     return &SwiperContentTransitionProxyAccessorImpl;
 }
-
 }

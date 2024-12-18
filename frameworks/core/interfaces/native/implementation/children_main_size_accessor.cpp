@@ -96,6 +96,10 @@ Ark_Int32 GetChildDefaultSizeImpl(ChildrenMainSizePeer* peer)
 
     return handler->GetChildSize(-1);
 }
+void SetChildDefaultSizeImpl(ChildrenMainSizePeer* peer,
+                             const Ark_Number* childDefaultSize)
+{
+}
 } // ChildrenMainSizeAccessor
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
 {
@@ -106,6 +110,7 @@ const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
         ChildrenMainSizeAccessor::SpliceImpl,
         ChildrenMainSizeAccessor::UpdateImpl,
         ChildrenMainSizeAccessor::GetChildDefaultSizeImpl,
+        ChildrenMainSizeAccessor::SetChildDefaultSizeImpl,
     };
     return &ChildrenMainSizeAccessorImpl;
 }

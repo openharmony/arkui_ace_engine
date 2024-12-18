@@ -554,7 +554,7 @@ void SelectionImpl(Ark_NativePointer node,
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_TextSpanType spanType,
-                           const Callback_Any* content,
+                           const CustomNodeBuilder* content,
                            Ark_TextResponseType responseType,
                            const Opt_SelectionMenuOptions* options)
 {

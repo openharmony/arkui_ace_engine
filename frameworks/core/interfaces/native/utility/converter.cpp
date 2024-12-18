@@ -1075,12 +1075,9 @@ PaddingProperty Convert(const Ark_Padding& src)
 template<>
 PaddingProperty Convert(const Ark_LocalizedPadding& src)
 {
-    return PaddingProperty {
-        .top = Converter::OptConvert<CalcLength>(src.top),
-        .bottom = Converter::OptConvert<CalcLength>(src.bottom),
-        .start = Converter::OptConvert<CalcLength>(src.start),
-        .end = Converter::OptConvert<CalcLength>(src.end)
-    };
+    //it's a stub because Ark_LocalizedPadding now return stubbed Ark_String instead of paddings values
+    PaddingProperty dst;
+    return dst;
 }
 
 template<>
