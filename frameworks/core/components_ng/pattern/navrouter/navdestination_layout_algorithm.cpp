@@ -151,9 +151,11 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
      * 1. TitleBar has no mainTitle&subTitle and hide backBotton.
      * 2. Titlebar is hidden and no titleBar animation is running.
      */
+    bool isTitleBarEmpty = !titleBarNode->GetSubtitle() && !titleBarNode->GetTitle() &&
+                           !titleBarNode->GetMenu() && !navDestinationPattern->GetBackButtonState();
     if ((translateState == BarTranslateState::NONE &&
             navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) ||
-        (!titleBarNode->GetSubtitle() && !titleBarNode->GetTitle() && !navDestinationPattern->GetBackButtonState())) {
+        isTitleBarEmpty) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         titleBarWrapper->Measure(constraint);
         return 0.0f;
