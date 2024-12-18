@@ -1885,3 +1885,6 @@ class Util {
     return true;
   }
 }
+export default {
+  TabTitleBar: TabTitleBar
+};
