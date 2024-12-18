@@ -1064,7 +1064,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
     const int32_t childSize = 3; // selected item count.
-    auto textNode = dragEventActuator->CreateBadgeTextNode(frameNode, childSize, DEFALUT_DRAG_PPIXELMAP_SCALE, false);
+    auto textNode = dragEventActuator->CreateBadgeTextNode(childSize);
     EXPECT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
