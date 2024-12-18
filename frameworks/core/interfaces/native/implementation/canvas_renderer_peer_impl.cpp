@@ -421,7 +421,7 @@ Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 void CanvasRendererPeerImpl::SetFont(std::string fontStr)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontStyle pattern not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetFont pattern not bound to component.");
         return;
     }
     bool updateFontweight = false;
@@ -474,6 +474,29 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateLinearGradien
     gradient->SetType(OHOS::Ace::GradientType::LINEAR);
     gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
     gradient->SetEndOffset(Offset(x1 * density, y1 * density));
+    return gradient;
+}
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(
+    const double x0, const double y0, const double r0, const double x1, const double y1, const double r1)
+{
+    double density = GetDensity();
+    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+    gradient->SetType(OHOS::Ace::GradientType::RADIAL);
+    gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
+    gradient->SetEndOffset(Offset(x1 * density, y1 * density));
+    gradient->SetInnerRadius(r0 * density);
+    gradient->SetOuterRadius(r1 * density);
+    return gradient;
+}
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient(
+    const double startAngle, const double x, const double y)
+{
+    double density = GetDensity();
+    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+    gradient->SetType(OHOS::Ace::GradientType::CONIC);
+    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
+    gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
+    gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
     return gradient;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

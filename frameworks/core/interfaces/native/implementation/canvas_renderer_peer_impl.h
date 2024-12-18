@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 
+#include "base/geometry/animatable_dimension.h"
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -78,17 +79,13 @@ public:
     void TriggerSetStrokeStyleImpl(const Color& color);
     void TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
     void TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
-    
-    
-    
-    
+    void SetFont(std::string fontStr);
     std::shared_ptr<OHOS::Ace::Gradient> CreateLinearGradient(
         const double x0, const double y0, const double x1, const double y1);
-    void SetFont(std::string fontStr);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient(
+        const double x0, const double y0, const double r0, const double x1, const double y1, const double r1);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(const double startAngle, const double x, const double y);
 
-    
-    
-    
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
@@ -97,14 +94,14 @@ public:
     {
         return unit_;
     }
-    void SetDensity() {
-       double density = GetDensity(true);
-       if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern "
-             "not bound to component.");
-        return;
-       }
-       pattern_->SetDensity(density);
+    void SetDensity()
+    {
+        double density = GetDensity(true);
+        if (!pattern_) {
+            LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern not bound to component.");
+            return;
+        }
+        pattern_->SetDensity(density);
     }
     inline double GetDensity(bool useSystemDensity = false)
     {
@@ -130,15 +127,6 @@ protected:
 
 private:
     Dimension GetDimensionValue(const std::string& str);
-    void FontParseFamilies(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp);
-    void FontParseStyle(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp);
-    void FontParseWeight(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp);
-
-
-    void UpdateFontWeight(Ace::FontWeight weight);
-    void UpdateFontStyle(Ace::FontStyle style);
-    void UpdateFontFamilies(const std::vector<std::string>& families);
-    void UpdateFontSize(const Dimension& size);
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double density_ = 1.0;
     int32_t densityCallbackId_ = 0;

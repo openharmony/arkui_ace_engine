@@ -82,7 +82,7 @@ Rect Convert(const Ark_Custom_Rect& src)
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();    
+const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(CanvasRendererPeer* peer)
 {
@@ -198,18 +198,14 @@ Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
     CHECK_NULL_RETURN(y0, nullptr);
     CHECK_NULL_RETURN(x1, nullptr);
     CHECK_NULL_RETURN(y1, nullptr);
-    
-    double cx0 =  static_cast<double>(Converter::Convert<float>(*x0));
+    double cx0 = static_cast<double>(Converter::Convert<float>(*x0));
     double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
     double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
     double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
-    
-    auto gradient = peerImpl->CreateLinearGradient(cx0, cy0,cx1,cy1);
+    auto gradient = peerImpl->CreateLinearGradient(cx0, cy0, cx1, cy1);
     CHECK_NULL_RETURN(gradient, nullptr);
-
     auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
     CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
-
     canvasGradientPeer->SetGradient(gradient);
     return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
 }
@@ -229,18 +225,46 @@ Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* y1,
                                            const Ark_Number* r1)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::CreateRadialGradientImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark enum for CanvasGradient type.");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(x0, nullptr);
+    CHECK_NULL_RETURN(y0, nullptr);
+    CHECK_NULL_RETURN(r0, nullptr);
+    CHECK_NULL_RETURN(x1, nullptr);
+    CHECK_NULL_RETURN(y1, nullptr);
+    CHECK_NULL_RETURN(r1, nullptr);
+    double cx0 = static_cast<double>(Converter::Convert<float>(*x0));
+    double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
+    double cr0 = static_cast<double>(Converter::Convert<float>(*r0));
+    double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
+    double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
+    double cr1 = static_cast<double>(Converter::Convert<float>(*r1));
+    auto gradient = peerImpl->CreateRadialGradient(cx0, cy0, cr0, cx1, cy1, cr0);
+    CHECK_NULL_RETURN(gradient, nullptr);
+    auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
+    CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
+    canvasGradientPeer->SetGradient(gradient);
+    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
 }
 Ark_NativePointer CreateConicGradientImpl(CanvasRendererPeer* peer,
                                           const Ark_Number* startAngle,
                                           const Ark_Number* x,
                                           const Ark_Number* y)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::CreateConicGradientImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark enum for CanvasGradient type.");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(startAngle, nullptr);
+    CHECK_NULL_RETURN(x, nullptr);
+    CHECK_NULL_RETURN(y, nullptr);
+    double ca = static_cast<double>(Converter::Convert<float>(*startAngle));
+    double cx = static_cast<double>(Converter::Convert<float>(*x));
+    double cy = static_cast<double>(Converter::Convert<float>(*y));
+    auto gradient = peerImpl->CreateConicGradient(ca, cx, cy);
+    CHECK_NULL_RETURN(gradient, nullptr);
+    auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
+    CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
+    canvasGradientPeer->SetGradient(gradient);
+    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
 }
 Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
                                        const Ark_Number* sw,
