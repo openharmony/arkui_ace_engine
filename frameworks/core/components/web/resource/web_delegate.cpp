@@ -4014,6 +4014,8 @@ void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
 
 void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::UpdateEnableFollowSystemFontWeight isfollow:%{public}d",
+        enableFollowSystemFontWeight);
     enableFollowSystemFontWeight_ = enableFollowSystemFontWeight;
     if (!enableFollowSystemFontWeight_) {
         return;

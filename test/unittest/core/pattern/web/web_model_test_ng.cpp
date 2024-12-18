@@ -2085,4 +2085,26 @@ HWTEST_F(WebModelTestNg, SetOnInterceptKeyEvent002, TestSize.Level1)
     MockPipelineContext::TearDown();
 #endif
 }
+
+/**
+ * @tc.name: SetEnableFollowSystemFontWeight001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableFollowSystemFontWeight001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableFollowSystemFontWeight(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(true), true);
+#endif
+}
 } // namespace OHOS::Ace::NG
