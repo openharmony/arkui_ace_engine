@@ -524,12 +524,6 @@ void ToHtmlImpl(const Ark_StyledString* styledString)
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->spanString);
     auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(peer->spanString.GetRawPtr());
-    char* html = new char[htmlStr.length() + 1];
-    CHECK_NULL_VOID(html);
-    std::copy(htmlStr.begin(), htmlStr.end(), html);
-    html[htmlStr.length()] = '\0';
-    // html need to be returned
-    delete[] html;
     LOGE("StyledStringAccessor::ToHtmlImpl - return value need to be supported");
 }
 void MarshallingImpl(const Ark_StyledString* styledString)
