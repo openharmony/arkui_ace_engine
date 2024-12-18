@@ -239,7 +239,9 @@ Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
     double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
     double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
     double cr1 = static_cast<double>(Converter::Convert<float>(*r1));
-    auto gradient = peerImpl->CreateRadialGradient(cx0, cy0, cr0, cx1, cy1, cr0);
+    std::vector<double> params;
+    params.insert(params.end(), { cx0, cy0, cr0, cx1, cy1, cr1 });
+    auto gradient = peerImpl->CreateRadialGradient(params);
     CHECK_NULL_RETURN(gradient, nullptr);
     auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
     CHECK_NULL_RETURN(canvasGradientPeer, nullptr);

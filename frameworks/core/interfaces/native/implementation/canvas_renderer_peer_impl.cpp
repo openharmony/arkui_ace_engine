@@ -22,6 +22,7 @@ const std::set<std::string> FONT_WEIGHTS = {
 };
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
+constexpr double MATH_2_PI = 2 * M_PI;
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 
@@ -476,11 +477,16 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateLinearGradien
     gradient->SetEndOffset(Offset(x1 * density, y1 * density));
     return gradient;
 }
-std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(
-    const double x0, const double y0, const double r0, const double x1, const double y1, const double r1)
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(const std::vector<double> params)
 {
     double density = GetDensity();
     auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+    auto x0 = params[0];
+    auto y0 = params[1];
+    auto r0 = params[2];
+    auto x1 = params[3];
+    auto y1 = params[4];
+    auto r1 = params[5];
     gradient->SetType(OHOS::Ace::GradientType::RADIAL);
     gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
     gradient->SetEndOffset(Offset(x1 * density, y1 * density));
@@ -494,7 +500,7 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
     double density = GetDensity();
     auto gradient = std::make_shared<OHOS::Ace::Gradient>();
     gradient->SetType(OHOS::Ace::GradientType::CONIC);
-    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
+    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (MATH_2_PI))));
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
     return gradient;
