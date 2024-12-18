@@ -21,6 +21,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+PaddingProperty CreatePaddingProperty(CalcLength left, CalcLength right, CalcLength top, CalcLength bottom)
+{
+    PaddingProperty padding;
+    padding.left = left;
+    padding.right = right;
+    padding.top = top;
+    padding.bottom = bottom;
+}
+
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
     CHECK_NULL_VOID(row);
@@ -32,7 +41,8 @@ void UpdateRowPadding(const RefPtr<FrameNode>& row)
 
     auto layoutProps = row->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdatePadding(PaddingProperty { padding, padding, std::nullopt, std::nullopt });
+    auto paddingProperty = CreatePaddingProperty(padding, padding, std::nullopt, std::nullopt);
+    layoutProps->UpdatePadding(paddingProperty);
 }
 } // namespace
 
