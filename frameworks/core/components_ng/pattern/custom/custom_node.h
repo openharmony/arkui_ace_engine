@@ -36,7 +36,10 @@ public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
 
     CustomNode(int32_t nodeId, const std::string& viewKey);
-    ~CustomNode() override = default;
+    ~CustomNode() override
+    {
+        ACE_SCOPED_TRACE("CustomNode:Destroy [%d]", GetId());
+    }
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
