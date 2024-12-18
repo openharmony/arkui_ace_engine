@@ -287,40 +287,47 @@ export class FoldSplitContainer extends ViewPU {
       Logger.error('Failed getFoldStatus. code:%{public}d, message:%{public}s',
         exception.code, exception.message);
     }
-    display.on('foldStatusChange', (j4) => {
-      if (this.foldStatus !== j4) {
-        this.foldStatus = j4;
-        this.updateLayout();
+    try {
+      display.on('foldStatusChange', (j4) => {
+        if (this.foldStatus !== j4) {
+          this.foldStatus = j4;
+          this.updateLayout();
+          this.updatePreferredOrientation();
+        }
+      });
+    } catch (exception) {
+      Logger.error('Failed display.on foldStatusChange. code:%{public}d, message:%{public}s',
+        exception.code, exception.message);
+    }
+    try {
+      window.getLastWindow(this.getUIContext().getHostContext(), (e4, f4) => {
+        if (e4 && e4.code) {
+          Logger.error(
+            'Failed to get window instance, error code: %{public}d',
+            e4.code
+          );
+          return;
+        }
+        const g4 = f4.getWindowProperties().id;
+        if (g4 < 0) {
+          Logger.error(
+            'Failed to get window instance because the window id is invalid. window id: %{public}d', g4);
+          return;
+        }
+        this.windowInstance = f4;
         this.updatePreferredOrientation();
-      }
-    });
-    window.getLastWindow(this.getUIContext().getHostContext(), (e4, f4) => {
-      if (e4 && e4.code) {
-        Logger.error(
-          'Failed to get window instance, error code: %{public}d',
-          e4.code
-        );
-        return;
-      }
-      const g4 = f4.getWindowProperties().id;
-      if (g4 < 0) {
-        Logger.error(
-          'Failed to get window instance because the window id is invalid. window id: %{public}d',
-          g4
-        );
-        return;
-      }
-      this.windowInstance = f4;
-      this.updatePreferredOrientation();
-      try {
-        this.windowInstance.on('windowStatusChange', (i4) => {
-          this.windowStatusType = i4;
-        });
-      } catch (exception) {
-        Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
-          exception.code, exception.message);
-      }
-    });
+        try {
+          this.windowInstance.on('windowStatusChange', (i4) => {
+            this.windowStatusType = i4;
+          });
+        } catch (exception) {
+          Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
+            exception.code, exception.message);
+        }
+      });
+    } catch (exception) {
+      Logger.error('Failed getLastWindow code:%{public}d, message:%{public}s', exception.code, exception.message);
+    }
   }
   aboutToDisappear() {
     if (this.listener) {
