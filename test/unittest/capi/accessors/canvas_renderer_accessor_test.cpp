@@ -189,11 +189,11 @@ std::vector<std::pair<std::string, Dimension>> FONT_SIZE_PX_TEST_PLAN = {
 };
 
 std::vector<std::pair<std::string, Dimension>> FONT_SIZE_VP_TEST_PLAN = {
-    { "10vp", Dimension(10, DimensionUnit::VP) },
-    { "0vp", Dimension(0, DimensionUnit::VP) },
-    { "-10vp", Dimension(-10, DimensionUnit::VP) },
-    { "", Dimension() },
-    { "invalid", Dimension() },
+    { "10vp", Dimension(10, DimensionUnit::PX) },
+    { "0vp", Dimension(0, DimensionUnit::PX) },
+    { "-10vp", Dimension(-100) },
+    { "", Dimension(-100) },
+    { "invalid", Dimension(-100) },
 };
 
 std::vector<std::pair<std::string, std::vector<std::string>>>  FONT_FAMILIES_TEST_PLAN = {
@@ -1408,7 +1408,7 @@ HWTEST_F(CanvasRendererAccessorTest, setFontSizePxTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setFontSizeVpTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setFontSizeVpTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();

@@ -51,94 +51,6 @@ const std::unordered_map<std::string, CompositeOperation> COMPOSITE_TABLE = {
     { "COPY", CompositeOperation::COPY },
     { "XOR", CompositeOperation::XOR }
 };
-
-const std::set<std::string> FONT_WEIGHTS = {
-    "100", "200", "300", "400", "500", "600", "700", "800", "900",
-    "bold", "bolder", "lighter", "medium", "normal", "regular",
-};
-const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
-const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
-const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
-constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
-constexpr double DEFAULT_QUALITY = 0.92;
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
-constexpr double DIFF = 1e-10;
-
-void FontParseSize(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
-{
-    if (fontProp.find("vp") != std::string::npos) {
-        Dimension dimension = StringUtils::StringToDimension(fontProp);
-        if (dimension.IsNegative()) {
-            return;
-        }
-        if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
-            peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value()));
-        } else if (dimension.Unit() == DimensionUnit::VP) {
-            if (dimension.IsNegative()) {
-                return;
-            }
-            peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value()));
-            LOGE("ARKOALA CanvasRendererAccessor::SetFontImpl there is no implementation in controller "
-                 "for getter method of Dimension density.");
-        }
-        peerImpl->TriggerUpdateFontSize(Dimension(0.0));
-    } else {
-        std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
-        Dimension dimension = Dimension(StringUtils::StringToDouble(fontProp));
-        if (dimension.IsNegative()) {
-            return;
-        }
-        peerImpl->TriggerUpdateFontSize(dimension);
-    }
-}
-void FontParseFamilies(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
-{
-    std::vector<std::string> fontFamilies;
-    std::stringstream stream(fontProp);
-    std::string fontFamily;
-    while (getline(stream, fontFamily, ',')) {
-        fontFamilies.emplace_back(fontFamily);
-    }
-    peerImpl->TriggerUpdateFontFamilies(fontFamilies);
-}
-void FontParseStyle(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
-{
-    auto fontStyle = fontProp == DOM_TEXT_FONT_STYLE_ITALIC ? OHOS::Ace::FontStyle::ITALIC : Ace::FontStyle::NORMAL;
-    peerImpl->TriggerUpdateFontStyle(fontStyle);
-}
-void FontParseWeight(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
-{
-    auto weight = StringUtils::StringToFontWeight(fontProp, Ace::FontWeight::NORMAL);
-    peerImpl->TriggerUpdateFontWeight(weight);
-}
-void FontParser(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontStr)
-{
-    bool updateFontweight = false;
-    bool updateFontStyle = false;
-    std::vector<std::string> fontProps;
-    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
-    for (const auto& fontProp : fontProps) {
-        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
-            updateFontweight = true;
-            FontParseWeight(peerImpl, fontProp);
-        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
-            updateFontStyle = true;
-            FontParseStyle(peerImpl, fontProp);
-        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
-            FontParseFamilies(peerImpl, fontProp);
-        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
-            FontParseSize(peerImpl, fontProp);
-        }
-    }
-    if (!updateFontStyle) {
-        peerImpl->TriggerUpdateFontStyle(Ace::FontStyle::NORMAL);
-    }
-    if (!updateFontweight) {
-        peerImpl->TriggerUpdateFontWeight(Ace::FontWeight::NORMAL);
-    }
-}
-
 } // namespace
 namespace Converter {
 
@@ -170,6 +82,7 @@ Rect Convert(const Ark_Custom_Rect& src)
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();    
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(CanvasRendererPeer* peer)
 {
@@ -279,9 +192,26 @@ Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x1,
                                            const Ark_Number* y1)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::CreateLinearGradientImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for CanvasGradient.");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(x0, nullptr);
+    CHECK_NULL_RETURN(y0, nullptr);
+    CHECK_NULL_RETURN(x1, nullptr);
+    CHECK_NULL_RETURN(y1, nullptr);
+    
+    double cx0 =  static_cast<double>(Converter::Convert<float>(*x0));
+    double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
+    double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
+    double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
+    
+    auto gradient = peerImpl->CreateLinearGradient(cx0, cy0,cx1,cy1);
+    CHECK_NULL_RETURN(gradient, nullptr);
+
+    auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
+    CHECK_NULL_RETURN(canvasGradientPeer, nullptr);
+
+    canvasGradientPeer->SetGradient(gradient);
+    return reinterpret_cast<Ark_NativePointer>(canvasGradientPeer);
 }
 Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
                                     const Ark_ImageBitmap* image,
@@ -1000,7 +930,7 @@ void SetFontImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     auto fontStr = Converter::Convert<std::string>(*font);
 
-    FontParser(peerImpl, fontStr);
+    peerImpl->SetFont(fontStr);
 }
 Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 {

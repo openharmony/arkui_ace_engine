@@ -15,8 +15,29 @@
 
 #include "canvas_renderer_peer_impl.h"
 
+namespace {
+const std::set<std::string> FONT_WEIGHTS = {
+    "100", "200", "300", "400", "500", "600", "700", "800", "900",
+    "bold", "bolder", "lighter", "medium", "normal", "regular",
+};
+const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
+const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
+}
 namespace OHOS::Ace::NG::GeneratedModifier {
 
+CanvasRendererPeerImpl::CanvasRendererPeerImpl()
+{
+    density_ = PipelineBase::GetCurrentDensity();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
+            auto canvasRender = self.Upgrade();
+            CHECK_NULL_VOID(canvasRender);
+            canvasRender->density_ = density;
+            canvasRender->SetDensity();
+        });
+    }
+}
 void CanvasRendererPeerImpl::TriggerBeginPathImpl()
 {
     if (!pattern_) {
@@ -386,42 +407,73 @@ void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::
     }
     pattern_->UpdateStrokePattern(pattern);
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontWeight(Ace::FontWeight weight)
+Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
+{
+    Dimension dimension = StringUtils::StringToDimension(str);
+    if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
+        return Dimension(dimension.Value());
+    }
+    if (dimension.Unit() == DimensionUnit::VP) {
+        return Dimension(dimension.Value() * GetDensity(true));
+    }
+    return Dimension(0.0);
+}
+void CanvasRendererPeerImpl::SetFont(std::string fontStr)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontWeight pattern "
-             "not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontStyle pattern not bound to component.");
         return;
     }
-    pattern_->UpdateFontWeight(weight);
+    bool updateFontweight = false;
+    bool updateFontStyle = false;
+    std::vector<std::string> fontProps;
+    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    for (const auto& fontProp : fontProps) {
+        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
+            auto weight = StringUtils::StringToFontWeight(fontProp, Ace::FontWeight::NORMAL);
+            pattern_->UpdateFontWeight(weight);
+        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
+            updateFontStyle = true;
+            auto fontStyle =
+                fontProp == DOM_TEXT_FONT_STYLE_ITALIC ? OHOS::Ace::FontStyle::ITALIC : Ace::FontStyle::NORMAL;
+            pattern_->UpdateFontStyle(fontStyle);
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+            std::vector<std::string> fontFamilies;
+            std::stringstream stream(fontProp);
+            std::string fontFamily;
+            while (getline(stream, fontFamily, ',')) {
+                fontFamilies.emplace_back(fontFamily);
+            }
+            pattern_->UpdateFontFamilies(fontFamilies);
+        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
+            Dimension size;
+            if (fontProp.find("vp") != std::string::npos) {
+                size = GetDimensionValue(fontProp);
+            } else {
+                std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
+                size = Dimension(StringUtils::StringToDouble(fontProp));
+            }
+            if (size.IsNonNegative()) {
+                pattern_->UpdateFontSize(size);
+            }
+        }
+    }
+    if (!updateFontStyle) {
+        pattern_->UpdateFontStyle(Ace::FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        pattern_->UpdateFontWeight(Ace::FontWeight::NORMAL);
+    }
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontStyle(Ace::FontStyle style)
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateLinearGradient(
+    const double x0, const double y0, const double x1, const double y1)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontStyle pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateFontStyle(style);
+    double density = GetDensity();
+    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+    gradient->SetType(OHOS::Ace::GradientType::LINEAR);
+    gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
+    gradient->SetEndOffset(Offset(x1 * density, y1 * density));
+    return gradient;
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontFamilies(const std::vector<std::string>& families)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateFontFamilies(families);
-}
-void CanvasRendererPeerImpl::TriggerUpdateFontSize(const Dimension& size)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontSize pattern "
-             "not bound to component.");
-        return;
-    }
-
-    pattern_->UpdateFontSize(size);
-}
-
 } // namespace OHOS::Ace::NG::GeneratedModifier

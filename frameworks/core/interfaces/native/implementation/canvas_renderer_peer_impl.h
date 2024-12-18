@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/utils/string_utils.h"
+#include "core/common/container_consts.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components/common/properties/paint_state.h"
@@ -30,7 +31,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
 class CanvasRendererPeerImpl : public Referenced {
 public:
-    CanvasRendererPeerImpl() = default;
+    CanvasRendererPeerImpl();
     ~CanvasRendererPeerImpl() override = default;
 
     void TriggerBeginPathImpl();
@@ -77,11 +78,42 @@ public:
     void TriggerSetStrokeStyleImpl(const Color& color);
     void TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
     void TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
-    void TriggerUpdateFontWeight(Ace::FontWeight weight);
-    void TriggerUpdateFontStyle(Ace::FontStyle style);
-    void TriggerUpdateFontFamilies(const std::vector<std::string>& families);
-    void TriggerUpdateFontSize(const Dimension& size);
+    
+    
+    
+    
+    std::shared_ptr<OHOS::Ace::Gradient> CreateLinearGradient(
+        const double x0, const double y0, const double x1, const double y1);
+    void SetFont(std::string fontStr);
 
+    
+    
+    
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+    void SetDensity() {
+       double density = GetDensity(true);
+       if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern "
+             "not bound to component.");
+        return;
+       }
+       pattern_->SetDensity(density);
+    }
+    inline double GetDensity(bool useSystemDensity = false)
+    {
+        if (useSystemDensity) {
+            return !NearZero(density_) ? density_ : 1.0;
+        } else {
+            return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
+        }
+    }
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);
@@ -93,8 +125,23 @@ public:
         pattern_ = canvasPattern;
     }
 
-private:
+protected:
     RefPtr<CanvasPattern> pattern_;
+
+private:
+    Dimension GetDimensionValue(const std::string& str);
+    void FontParseFamilies(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp);
+    void FontParseStyle(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp);
+    void FontParseWeight(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp);
+
+
+    void UpdateFontWeight(Ace::FontWeight weight);
+    void UpdateFontStyle(Ace::FontStyle style);
+    void UpdateFontFamilies(const std::vector<std::string>& families);
+    void UpdateFontSize(const Dimension& size);
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    double density_ = 1.0;
+    int32_t densityCallbackId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
