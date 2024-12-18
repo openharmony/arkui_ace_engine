@@ -51,9 +51,9 @@ const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE = "0.00p
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME = "enableWaveEffect";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VALUE = "true";
 
-const int32_t intNeg = -1234;
-const int32_t intZero = 0;
-const int32_t intPos = 1234;
+const int32_t INT_NEG = -1234;
+const int32_t INT_ZERO = 0;
+const int32_t INT_POS = 1234;
 const Ark_Int32 AINT32_NEG(-1234);
 const Ark_Int32 AINT32_ZERO(0);
 const Ark_Int32 AINT32_POS(1234);
@@ -466,7 +466,7 @@ HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
             EXPECT_EQ(checkEvent->input[i], testVec[i]);
         }
     };
-    std::vector<int32_t> vec = {intNeg, intZero, intPos};
+    std::vector<int32_t> vec = {INT_NEG, INT_ZERO, INT_POS};
     test(vec);
 }
 
@@ -512,9 +512,9 @@ HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
         EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
         EXPECT_EQ(checkEvent->code, testValue);
     };
-    test(intNeg);
-    test(intZero);
-    test(intPos);
+    test(INT_NEG);
+    test(INT_ZERO);
+    test(INT_POS);
 }
 
 /*
