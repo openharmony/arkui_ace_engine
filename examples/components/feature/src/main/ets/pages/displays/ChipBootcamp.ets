@@ -72,7 +72,7 @@ export struct ChipBootcamp {
   @State enableChipOptionActivatedBackgroundColor: boolean = false
   @State chipOptionActivatedBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_emphasize')
   @State enableChipOptionBorderRadius: boolean = false
-  @State chipOptionBorderRadius: Dimension = $r('sys.float.ohos_id_corner_radius_button')
+  @State chipOptionBorderRadius: Dimension = 0
   @State enableChipOptionAllowClose: boolean = false
   @State chipOptionAllowClose: boolean = true
   @State enableChipOptionDirection: boolean = false
@@ -343,16 +343,12 @@ export struct ChipBootcamp {
           isEnabled: $enableChipOptionActivatedBackgroundColor,
           color: $chipOptionActivatedBackgroundColor
         })
-        RadioBlock({
+        SliderBlock({
           title: 'options.borderRadius',
           isEnabled: $enableChipOptionBorderRadius,
           value: $chipOptionBorderRadius,
-          dataSource: [
-            { label: 'radius_button', value: $r('sys.float.ohos_id_corner_radius_button')},
-            { label: 'radius_menu', value: $r('sys.float.ohos_id_corner_radius_menu')},
-            { label: 'radius_dialog', value: $r('sys.float.ohos_id_corner_radius_dialog')},
-            { label: 'radius_card', value: $r('sys.float.ohos_id_corner_radius_card')},
-          ]
+          min: 0,
+          max: 100
         })
         RadioBlock({
           title: 'options.allowClose',
