@@ -1196,6 +1196,7 @@ template<>
         default: LOGE("Unexpected enum value in Ark_RenderFit: %{public}d", src);
     }
 }
+template<>
 TransitionHierarchyStrategy Convert(const Ark_TransitionHierarchyStrategy& src)
 {
     if (src == ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE) {

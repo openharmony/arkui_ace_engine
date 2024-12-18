@@ -32,16 +32,7 @@ namespace {
     const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = "";
 }
 namespace Converter {
-template<>
-Ark_MotionPathOptions ArkValue(const MotionPathOption& src)
-{
-    Ark_MotionPathOptions dst;
-    dst.path = ArkValue<Ark_String>(src.GetPath());
-    dst.from = ArkValue<Opt_Number>(src.GetBegin());
-    dst.to = ArkValue<Opt_Number>(src.GetEnd());
-    dst.rotatable = ArkValue<Opt_Boolean>(src.GetRotate());
-    return dst;
-}
+
 } // namespace Converter
 
 class CommonMethodModifierTest8 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -50,6 +41,11 @@ class CommonMethodModifierTest8 : public ModifierTestBase<GENERATED_ArkUICommonM
     > {
 public:
     RefPtr<RenderContext> render_;
+
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
 };
 
 ///////// GeometryTransition
