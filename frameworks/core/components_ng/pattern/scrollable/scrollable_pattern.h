@@ -410,9 +410,18 @@ public:
 
     virtual void SetLastSnapTargetIndex(int32_t lastSnapTargetIndex) {}
 
-    virtual int32_t GetLastSnapTargetIndex()
+    virtual std::optional<int32_t> GetLastSnapTargetIndex()
     {
-        return -1;
+        return std::nullopt;
+    }
+
+    virtual void ResetLastSnapTargetIndex() {}
+
+    void ResetScrollableSnapDirection()
+    {
+        auto scrollable = GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->ResetSnapDirection();
     }
 
     void SetScrollableCurrentPos(float currentPos)
