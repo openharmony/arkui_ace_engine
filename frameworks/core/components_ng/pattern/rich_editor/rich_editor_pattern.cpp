@@ -942,11 +942,42 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         placeholderPipelineContext->SetDoKeyboardAvoidAnimate(false);
     }
     SetNeedMoveCaretToContentRect();
+    AddOnPlaceholderHoverEvent(placeholderSpanNode);
     placeholderSpanNode->MarkModifyDone();
     placeholderSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return spanIndex;
+}
+
+void RichEditorPattern::AddOnPlaceholderHoverEvent(const RefPtr<PlaceholderSpanNode>& placeholderSpanNode)
+{
+    CHECK_NULL_VOID(placeholderSpanNode);
+    auto inputHub = placeholderSpanNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "placeholder, on hover event isHover=%{public}d", isHover);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnPlaceholderHover(isHover);
+    };
+    auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
+}
+
+void RichEditorPattern::OnPlaceholderHover(bool isHover)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto nodeId = host->GetId();
+    if (isHover) {
+        pipeline->FreeMouseStyleHoldNode(nodeId);
+    } else {
+        pipeline->FreeMouseStyleHoldNode();
+        ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
+    }
 }
 
 void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
@@ -4254,22 +4285,29 @@ void RichEditorPattern::InitMouseEvent()
 void RichEditorPattern::OnHover(bool isHover)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
-    auto frame = GetHost();
-    CHECK_NULL_VOID(frame);
-    auto frameId = frame->GetId();
-    auto pipeline = frame->GetContext();
-    CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
     if (isHover && (!scrollBar || (!scrollBar->IsPressed() && !scrollBar->IsHover()))) {
-        pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
-        currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
+        ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
-        currentMouseStyle_ = MouseFormat::DEFAULT;
-        pipeline->FreeMouseStyleHoldNode(frameId);
+        ChangeMouseStyle(MouseFormat::DEFAULT, true);
         HandleUrlSpanForegroundClear();
     }
+}
+
+void RichEditorPattern::ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto nodeId = host->GetId();
+    // Do not change mouse style to text-cursor if the right-button custom menu is showing
+    bool shouldPreventChange = (format == MouseFormat::TEXT_CURSOR && selectOverlay_->IsRightButtonCustomMenuShow());
+    CHECK_NULL_VOID(!shouldPreventChange);
+    pipeline->SetMouseStyleHoldNode(nodeId);
+    pipeline->ChangeMouseStyle(nodeId, format);
+    currentMouseStyle_ = format;
+    IF_TRUE(freeMouseHoldNode, pipeline->FreeMouseStyleHoldNode(nodeId));
 }
 
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
@@ -6882,20 +6920,13 @@ SelectionInfo RichEditorPattern::GetAdjustedSelectionInfo(const SelectionInfo& t
 
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto frameId = tmpHost->GetId();
-    auto pipeline = tmpHost->GetContext();
-    CHECK_NULL_VOID(pipeline);
     if (selectOverlay_->IsHandleShow() && info.GetAction() == MouseAction::PRESS) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close selectOverlay when handle is showing");
         CloseSelectOverlay();
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
-        pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
-        currentMouseStyle_ = MouseFormat::DEFAULT;
+        ChangeMouseStyle(MouseFormat::DEFAULT);
         HandleUrlSpanForegroundClear();
         return;
     }
@@ -6903,20 +6934,14 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
     if (hasUrlSpan_) {
         auto show = HandleUrlSpanShowShadow(info.GetLocalLocation(), info.GetGlobalLocation(), GetUrlHoverColor());
         if (show) {
-            pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
-            currentMouseStyle_ = MouseFormat::HAND_POINTING;
+            ChangeMouseStyle(MouseFormat::HAND_POINTING);
         } else {
-            pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
-            currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
+            ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
         }
     }
 
     if (currentMouseStyle_ == MouseFormat::DEFAULT && !IsDragging()) {
-        pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
-        currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
+        ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
     }
 
     caretUpdateType_ = CaretUpdateType::NONE;

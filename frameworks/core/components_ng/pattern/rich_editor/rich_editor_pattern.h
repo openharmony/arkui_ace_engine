@@ -531,6 +531,8 @@ public:
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
+    void AddOnPlaceholderHoverEvent(const RefPtr<PlaceholderSpanNode>& placeholderSpanNode);
+    void OnPlaceholderHover(bool isHover);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
@@ -1160,6 +1162,7 @@ private:
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     void OnHover(bool isHover);
+    void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     void UpdateCaretInfoToController();
 #if defined(ENABLE_STANDARD_INPUT)
