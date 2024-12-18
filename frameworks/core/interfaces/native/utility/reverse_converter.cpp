@@ -105,9 +105,4 @@ void AssignArkValue(Ark_Length& dst, const float& src)
     dst.value = src;
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
-
-void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
-{
-    dst.alwaysEnabled = src;
-}
 } // namespace OHOS::Ace::NG::Converter
