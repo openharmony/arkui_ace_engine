@@ -77,7 +77,6 @@ export struct ChipBootcamp {
   @State chipOptionAllowClose: boolean = true
   @State enableChipOptionDirection: boolean = false
   @State chipOptionDirection: Direction = Direction.Auto
-
   build() {
     NavDestination() {
       Drawer({
