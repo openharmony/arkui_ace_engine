@@ -1358,6 +1358,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove002, TestSize.Level1)
     richEditorPattern->moveCaretState_.isTouchCaret = true;
     richEditorPattern->moveCaretState_.isMoveCaret = false;
     richEditorPattern->moveCaretState_.touchDownOffset = Offset(5.0f, 5.0f);
+    richEditorPattern->caretTwinkling_ = true;
     Offset offset(5.0f, 5.0f);
     auto moveDistance = (offset - richEditorPattern->moveCaretState_.touchDownOffset).GetDistance();
     ASSERT_GT(richEditorPattern->moveCaretState_.minDistance.ConvertToPx(), moveDistance);
