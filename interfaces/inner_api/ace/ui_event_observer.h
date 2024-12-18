@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
