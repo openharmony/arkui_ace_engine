@@ -44,6 +44,9 @@ public:
     RefPtr<AceNode> PopAceNode();
     NG::LayoutWrapper* GetLayoutWrapper();
 
+    void MeasureChildren() override;
+    void LayoutChildren() override;
+
 private:
     AceNode* frameNode_;
     RefPtr<AceNode> nodeRef_;
