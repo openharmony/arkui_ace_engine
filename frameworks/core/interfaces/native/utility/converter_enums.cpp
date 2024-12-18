@@ -455,6 +455,18 @@ void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src)
 }
 
 template<>
+void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src)
+{
+    switch (src) {
+        case ARK_DRAG_PREVIEW_MODE_AUTO: dst = DragPreviewMode::AUTO; break;
+        case ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE: dst = DragPreviewMode::DISABLE_SCALE; break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW: dst = DragPreviewMode::ENABLE_DEFAULT_SHADOW; break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS: dst = DragPreviewMode::ENABLE_DEFAULT_RADIUS; break;
+        default: LOGE("Unexpected enum value in Ark_DragPreviewMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src)
 {
     switch (src) {
@@ -867,6 +879,32 @@ void AssignCast(std::optional<SslError>& dst, const Ark_SslError& src)
         case ARK_SSL_ERROR_DATE_INVALID: dst = SslError::DATE_INVALID; break;
         case ARK_SSL_ERROR_UNTRUSTED: dst = SslError::UNTRUSTED; break;
         default: LOGE("Unexpected enum value in Ark_SslError: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src)
+{
+    switch (src) {
+        case ARK_FUNCTION_KEY_ESC: dst = "ESC"; break;
+        case ARK_FUNCTION_KEY_F1: dst = "F1"; break;
+        case ARK_FUNCTION_KEY_F2: dst = "F2"; break;
+        case ARK_FUNCTION_KEY_F3: dst = "F3"; break;
+        case ARK_FUNCTION_KEY_F4: dst = "F4"; break;
+        case ARK_FUNCTION_KEY_F5: dst = "F5"; break;
+        case ARK_FUNCTION_KEY_F6: dst = "F6"; break;
+        case ARK_FUNCTION_KEY_F7: dst = "F7"; break;
+        case ARK_FUNCTION_KEY_F8: dst = "F8"; break;
+        case ARK_FUNCTION_KEY_F9: dst = "F9"; break;
+        case ARK_FUNCTION_KEY_F10: dst = "F10"; break;
+        case ARK_FUNCTION_KEY_F11: dst = "F11"; break;
+        case ARK_FUNCTION_KEY_F12: dst = "F12"; break;
+        case ARK_FUNCTION_KEY_TAB: dst = "TAB"; break;
+        case ARK_FUNCTION_KEY_DPAD_UP: dst = "DPAD_UP"; break;
+        case ARK_FUNCTION_KEY_DPAD_DOWN: dst = "DPAD_DOWN"; break;
+        case ARK_FUNCTION_KEY_DPAD_LEFT: dst = "DPAD_LEFT"; break;
+        case ARK_FUNCTION_KEY_DPAD_RIGHT: dst = "DPAD_RIGHT"; break;
+        default: LOGE("Unexpected enum value in Ark_FunctionKey: %{public}d", src);
     }
 }
 
@@ -1379,6 +1417,17 @@ void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src)
 }
 
 template<>
+void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src)
+{
+    switch (src) {
+        case ARK_MODIFIER_KEY_CTRL: dst = ModifierKey::CTRL; break;
+        case ARK_MODIFIER_KEY_SHIFT: dst = ModifierKey::SHIFT; break;
+        case ARK_MODIFIER_KEY_ALT: dst = ModifierKey::ALT; break;
+        default: LOGE("Unexpected enum value in Ark_ModifierKey: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src)
 {
     switch (src) {
@@ -1409,6 +1458,16 @@ void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& sr
         case ARK_TRANSITION_EDGE_END: dst = TransitionEdge::END; break;
         default:
             LOGE("Unknown transition edge type: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
+{
+    switch (src) {
+        case ARK_BLEND_APPLY_TYPE_FAST: dst = BlendApplyType::FAST; break;
+        case ARK_BLEND_APPLY_TYPE_OFFSCREEN: dst = BlendApplyType::OFFSCREEN; break;
+        default: LOGE("Unexpected enum value in Ark_BlendApplyType: %{public}d", src);
     }
 }
 

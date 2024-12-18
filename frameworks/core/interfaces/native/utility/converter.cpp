@@ -1051,6 +1051,53 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
 }
 
 template<>
+DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
+{
+    DragPreviewOption previewOption;
+    auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {
+        switch (mode) {
+            case DragPreviewMode::AUTO: previewOption.ResetDragPreviewMode(); return true;
+            case DragPreviewMode::DISABLE_SCALE: previewOption.isScaleEnabled = false; break;
+            case DragPreviewMode::ENABLE_DEFAULT_SHADOW: previewOption.isDefaultShadowEnabled = true; break;
+            case DragPreviewMode::ENABLE_DEFAULT_RADIUS: previewOption.isDefaultRadiusEnabled = true; break;
+            default: break;
+        }
+        return false;
+    };
+    Converter::VisitUnion(src.mode,
+        [previewModeHandler](const Ark_DragPreviewMode& mode) {
+            auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
+            if (previewMode) {
+                previewModeHandler(previewMode.value());
+            }
+        },
+        [previewModeHandler](const Array_DragPreviewMode& modeArray) {
+            auto previewModeArray = Converter::Convert<std::vector<Ark_DragPreviewMode>>(modeArray);
+            for (auto mode : previewModeArray) {
+                auto previewMode = Converter::OptConvert<DragPreviewMode>(mode);
+                if (previewMode && previewModeHandler(previewMode.value())) {
+                    break;
+                }
+            }
+        },
+        []() {});
+    Converter::VisitUnion(src.numberBadge,
+        [&previewOption](const Ark_Number& value) {
+            previewOption.isNumber = true;
+            previewOption.badgeNumber = Converter::Convert<int32_t>(value);
+        },
+        [&previewOption](const Ark_Boolean& value) {
+            previewOption.isNumber = false;
+            previewOption.isShowBadge = Converter::Convert<bool>(value);
+        },
+        [&previewOption]() {
+            previewOption.isNumber = false;
+            previewOption.isShowBadge = true;
+        });
+    return previewOption;
+}
+
+template<>
 RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
 {
     int32_t fRRmin = Converter::Convert<int32_t>(src.min);
