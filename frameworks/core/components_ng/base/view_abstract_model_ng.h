@@ -1407,6 +1407,8 @@ public:
         ViewAbstract::SetLightPosition(positionX, positionY, positionZ);
     }
 
+    static void SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text);
+
     void SetLightIntensity(const float value) override
     {
         ViewAbstract::SetLightIntensity(value);
