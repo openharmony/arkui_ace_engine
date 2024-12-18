@@ -266,6 +266,7 @@ public:
     static SizeF GetPercentReference(const RefPtr<FrameNode>& frameNode);
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
     void FlushForegroundModifier(const RefPtr<Modifier>& modifier) override;
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 
 #include "core/components_ng/animation/animatable_arithmetic_proxy.h"
 #include "core/animation/native_curve_helper.h"
@@ -21,6 +22,13 @@ namespace OHOS::Ace::NG {
 
 std::unordered_map<int32_t, std::shared_ptr<RSModifier>> g_ModifiersMap;
 std::mutex g_ModifiersMapLock;
+
+std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<Kit::Modifier>& modifier)
+{
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto modifierAdapter = std::make_shared<ContentModifierAdapter>(modifier);
+    return modifierAdapter;
+}
 
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier)
 {
@@ -69,6 +77,11 @@ void ModifierAdapter::RemoveModifier(int32_t modifierId)
 
 void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
+    if (kitModifier_) {
+        Kit::DrawingContext drawingContext = { context.canvas, context.width, context.height };
+        kitModifier_->OnDraw(&drawingContext);
+        return;
+    }
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     CHECK_NULL_VOID(context.canvas);
     auto modifier = modifier_.Upgrade();
