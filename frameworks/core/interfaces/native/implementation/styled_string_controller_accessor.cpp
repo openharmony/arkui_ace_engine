@@ -53,4 +53,7 @@ const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAc
     return &StyledStringControllerAccessorImpl;
 }
 
+struct StyledStringControllerPeer {
+    virtual ~StyledStringControllerPeer() = default;
+};
 }

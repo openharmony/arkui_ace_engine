@@ -126,4 +126,7 @@ const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionP
     return &NavigationTransitionProxyAccessorImpl;
 }
 
+struct NavigationTransitionProxyPeer {
+    virtual ~NavigationTransitionProxyPeer() = default;
+};
 }

@@ -56,4 +56,7 @@ const GENERATED_ArkUIAbstractPropertyAccessor* GetAbstractPropertyAccessor()
     return &AbstractPropertyAccessorImpl;
 }
 
+struct AbstractPropertyPeer {
+    virtual ~AbstractPropertyPeer() = default;
+};
 }

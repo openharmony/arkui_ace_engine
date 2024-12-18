@@ -170,27 +170,7 @@ HWTEST_F(FormComponentModifierTest, setSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, TestSize.Level1)
 {
-    Ark_Literal_Number_height_width initValueSize;
-
-    // Initial setup
-    initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-    initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-
-    auto checkValue = [this, &initValueSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Literal_Number_height_width inputValueSize = initValueSize;
-        inputValueSize.width = value;
-        modifier_->setSize(node_, &inputValueSize);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSize, attribute: size.width";
-    };
-    for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
-        checkValue(input, value, expected);
-    }
+    // need to implement correct test case because API changed. Old impl removed.
 }
 
 /*
@@ -200,26 +180,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, Te
  */
 HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeHeightValidValues, TestSize.Level1)
 {
-    Ark_Literal_Number_height_width initValueSize;
-    // Initial setup
-    initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-    initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-    auto checkValue = [this, &initValueSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Literal_Number_height_width inputValueSize = initValueSize;
-        inputValueSize.height = value;
-        modifier_->setSize(node_, &inputValueSize);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSize, attribute: size.height";
-    };
-
-    for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
-        checkValue(input, value, expected);
-    }
+    // need to implement correct test case because API changed. Old impl removed.
 }
 
 /*

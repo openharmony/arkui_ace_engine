@@ -97,4 +97,7 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
     return &SwiperControllerAccessorImpl;
 }
 
+struct SwiperControllerPeer {
+    virtual ~SwiperControllerPeer() = default;
+};
 }

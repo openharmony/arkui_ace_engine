@@ -54,4 +54,7 @@ const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor()
     return &FileSelectorResultAccessorImpl;
 }
 
+struct FileSelectorResultPeer {
+    virtual ~FileSelectorResultPeer() = default;
+};
 }

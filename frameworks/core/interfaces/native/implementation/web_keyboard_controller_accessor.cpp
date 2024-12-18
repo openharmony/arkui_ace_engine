@@ -96,4 +96,7 @@ const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAcce
     return &WebKeyboardControllerAccessorImpl;
 }
 
+struct WebKeyboardControllerPeer {
+    virtual ~WebKeyboardControllerPeer() = default;
+};
 }

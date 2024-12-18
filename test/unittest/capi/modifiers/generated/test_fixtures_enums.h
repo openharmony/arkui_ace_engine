@@ -134,10 +134,6 @@ extern std::vector<std::tuple<std::string, Ark_ImageRenderMode, std::string>> te
 extern std::vector<std::tuple<std::string, Ark_ImageRenderMode>> testFixtureEnumImageRenderModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageRepeat, std::string>> testFixtureEnumImageRepeatValidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeatInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::string>>
-    testFixtureEnumImageRotateOrientationValidValues;
-extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>>
-    testFixtureEnumImageRotateOrientationInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnumItemAlignValidValues;

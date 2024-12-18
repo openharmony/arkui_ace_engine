@@ -463,15 +463,6 @@ void OnChangeImpl(Ark_NativePointer node,
     };
     TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChange));
 }
-void OnScrollStopImpl(Ark_NativePointer node,
-                      const TextPickerScrollStopCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetOnScrollStop(frameNode, convValue);
-}
 void SelectedIndexImpl(Ark_NativePointer node,
                        const Ark_Union_Number_Array_Number* value)
 {
@@ -545,7 +536,6 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
         TextPickerAttributeModifier::OnAcceptImpl,
         TextPickerAttributeModifier::OnCancelImpl,
         TextPickerAttributeModifier::OnChangeImpl,
-        TextPickerAttributeModifier::OnScrollStopImpl,
         TextPickerAttributeModifier::SelectedIndexImpl,
         TextPickerAttributeModifier::DividerImpl,
         TextPickerAttributeModifier::GradientHeightImpl,

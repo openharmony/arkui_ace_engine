@@ -133,4 +133,7 @@ const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
     return &VideoControllerAccessorImpl;
 }
 
+struct VideoControllerPeer {
+    virtual ~VideoControllerPeer() = default;
+};
 }

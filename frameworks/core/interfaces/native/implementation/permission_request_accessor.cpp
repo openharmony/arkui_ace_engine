@@ -76,4 +76,7 @@ const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor()
     return &PermissionRequestAccessorImpl;
 }
 
+struct PermissionRequestPeer {
+    virtual ~PermissionRequestPeer() = default;
+};
 }

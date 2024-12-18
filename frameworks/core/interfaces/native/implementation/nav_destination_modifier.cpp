@@ -199,24 +199,6 @@ void SystemTransitionImpl(Ark_NativePointer node,
     LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented. "
          "No handlers for Ark_NavigationSystemTransitionType in model");
 }
-void BindToScrollableImpl(Ark_NativePointer node,
-                          const Array_Scroller* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavDestinationModelNG::SetBindToScrollable(frameNode, convValue);
-}
-void BindToNestedScrollableImpl(Ark_NativePointer node,
-                                const Array_NestedScrollInfo* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavDestinationModelNG::SetBindToNestedScrollable(frameNode, convValue);
-}
 void TitleImpl(Ark_NativePointer node,
                const Ark_Type_NavDestinationAttribute_title_value* value,
                const Opt_NavigationTitleOptions* options)
@@ -305,8 +287,6 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::SystemBarStyleImpl,
         NavDestinationAttributeModifier::RecoverableImpl,
         NavDestinationAttributeModifier::SystemTransitionImpl,
-        NavDestinationAttributeModifier::BindToScrollableImpl,
-        NavDestinationAttributeModifier::BindToNestedScrollableImpl,
         NavDestinationAttributeModifier::TitleImpl,
         NavDestinationAttributeModifier::ToolbarConfigurationImpl,
         NavDestinationAttributeModifier::HideToolBarImpl,

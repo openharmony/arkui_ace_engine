@@ -207,6 +207,7 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
+const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
@@ -228,16 +229,11 @@ const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
-const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor();
 const GENERATED_ArkUIViewAccessor* GetViewAccessor();
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor();
 const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor();
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor();
 const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor();
-const GENERATED_ArkUIAbstractPropertyAccessor* GetAbstractPropertyAccessor();
-const GENERATED_ArkUIIPropertySubscriberAccessor* GetIPropertySubscriberAccessor();
-const GENERATED_ArkUIISinglePropertyChangeSubscriberAccessor* GetISinglePropertyChangeSubscriberAccessor();
-const GENERATED_ArkUISubscribaleAbstractAccessor* GetSubscribaleAbstractAccessor();
 const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor();
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor();
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor();
@@ -431,6 +427,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
         GetUnifiedDataAccessor,
+        GetLazyForEachOpsAccessor,
         GetDrawingCanvasAccessor,
         GetFrameNodeAccessor,
         GetPixelMapAccessor,
@@ -452,16 +449,11 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetTransitionEffectAccessor,
         GetPixelMapMockAccessor,
         GetProgressMaskAccessor,
-        GetAttributeModifierAccessor,
         GetViewAccessor,
         GetTextContentControllerBaseAccessor,
         GetDynamicNodeAccessor,
         GetChildrenMainSizeAccessor,
         GetGestureModifierAccessor,
-        GetAbstractPropertyAccessor,
-        GetIPropertySubscriberAccessor,
-        GetISinglePropertyChangeSubscriberAccessor,
-        GetSubscribaleAbstractAccessor,
         GetContextMenuAccessor,
         GetCustomDialogControllerAccessor,
         GetDatePickerDialogAccessor,

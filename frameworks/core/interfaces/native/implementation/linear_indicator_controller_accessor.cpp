@@ -62,4 +62,7 @@ const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorContro
     return &LinearIndicatorControllerAccessorImpl;
 }
 
+struct LinearIndicatorControllerPeer {
+    virtual ~LinearIndicatorControllerPeer() = default;
+};
 }

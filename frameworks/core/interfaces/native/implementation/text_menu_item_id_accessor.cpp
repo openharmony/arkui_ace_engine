@@ -63,4 +63,7 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
     return &TextMenuItemIdAccessorImpl;
 }
 
+struct TextMenuItemIdPeer {
+    virtual ~TextMenuItemIdPeer() = default;
+};
 }

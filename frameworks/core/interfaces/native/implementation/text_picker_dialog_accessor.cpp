@@ -325,4 +325,7 @@ const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
     return &TextPickerDialogAccessorImpl;
 }
 
+struct TextPickerDialogPeer {
+    virtual ~TextPickerDialogPeer() = default;
+};
 }

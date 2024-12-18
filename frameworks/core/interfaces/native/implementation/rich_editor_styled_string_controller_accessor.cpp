@@ -128,4 +128,7 @@ const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyl
     return &RichEditorStyledStringControllerAccessorImpl;
 }
 
+struct RichEditorStyledStringControllerPeer {
+    virtual ~RichEditorStyledStringControllerPeer() = default;
+};
 }

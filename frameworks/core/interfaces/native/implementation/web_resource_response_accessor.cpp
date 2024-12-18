@@ -200,4 +200,7 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
     return &WebResourceResponseAccessorImpl;
 }
 
+struct WebResourceResponsePeer {
+    virtual ~WebResourceResponsePeer() = default;
+};
 }

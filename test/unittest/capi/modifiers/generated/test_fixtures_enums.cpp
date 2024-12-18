@@ -664,20 +664,6 @@ std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeat
     { "INT_MAX", static_cast<Ark_ImageRepeat>(INT_MAX) },
 };
 
-std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::string>>
-    testFixtureEnumImageRotateOrientationValidValues = {
-        { "ARK_IMAGE_ROTATE_ORIENTATION_AUTO", ARK_IMAGE_ROTATE_ORIENTATION_AUTO, "ImageRotateOrientation.AUTO" },
-        { "ARK_IMAGE_ROTATE_ORIENTATION_UP", ARK_IMAGE_ROTATE_ORIENTATION_UP, "ImageRotateOrientation.UP" },
-        { "ARK_IMAGE_ROTATE_ORIENTATION_RIGHT", ARK_IMAGE_ROTATE_ORIENTATION_RIGHT, "ImageRotateOrientation.RIGHT" },
-        { "ARK_IMAGE_ROTATE_ORIENTATION_DOWN", ARK_IMAGE_ROTATE_ORIENTATION_DOWN, "ImageRotateOrientation.DOWN" },
-        { "ARK_IMAGE_ROTATE_ORIENTATION_LEFT", ARK_IMAGE_ROTATE_ORIENTATION_LEFT, "ImageRotateOrientation.LEFT" },
-    };
-
-std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>> testFixtureEnumImageRotateOrientationInvalidValues = {
-    { "-1", static_cast<Ark_ImageRotateOrientation>(-1) },
-    { "INT_MAX", static_cast<Ark_ImageRotateOrientation>(INT_MAX) },
-};
-
 std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues = {
     { "ARK_INPUT_TYPE_NORMAL", ARK_INPUT_TYPE_NORMAL, "InputType.Normal" },
     { "ARK_INPUT_TYPE_NUMBER", ARK_INPUT_TYPE_NUMBER, "InputType.Number" },

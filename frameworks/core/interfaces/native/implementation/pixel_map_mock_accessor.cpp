@@ -51,4 +51,7 @@ const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor()
     return &PixelMapMockAccessorImpl;
 }
 
+struct PixelMapMockPeer {
+    virtual ~PixelMapMockPeer() = default;
+};
 }

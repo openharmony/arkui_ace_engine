@@ -48,4 +48,7 @@ const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
     return &ControllerHandlerAccessorImpl;
 }
 
+struct ControllerHandlerPeer {
+    virtual ~ControllerHandlerPeer() = default;
+};
 }

@@ -48,4 +48,7 @@ const GENERATED_ArkUIISinglePropertyChangeSubscriberAccessor* GetISingleProperty
     return &ISinglePropertyChangeSubscriberAccessorImpl;
 }
 
+struct ISinglePropertyChangeSubscriberPeer {
+    virtual ~ISinglePropertyChangeSubscriberPeer() = default;
+};
 }

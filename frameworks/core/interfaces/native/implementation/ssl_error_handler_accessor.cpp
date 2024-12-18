@@ -57,4 +57,7 @@ const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()
     return &SslErrorHandlerAccessorImpl;
 }
 
+struct SslErrorHandlerPeer {
+    virtual ~SslErrorHandlerPeer() = default;
+};
 }

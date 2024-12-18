@@ -203,4 +203,7 @@ const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
     return &TimePickerDialogAccessorImpl;
 }
 
+struct TimePickerDialogPeer {
+    virtual ~TimePickerDialogPeer() = default;
+};
 }

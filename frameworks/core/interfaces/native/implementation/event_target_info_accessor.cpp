@@ -56,5 +56,4 @@ const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
 struct EventTargetInfoPeer {
     virtual ~EventTargetInfoPeer() = default;
 };
-
 }

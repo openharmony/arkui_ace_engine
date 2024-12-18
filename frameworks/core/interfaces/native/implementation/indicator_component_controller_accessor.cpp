@@ -57,4 +57,7 @@ const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponent
     return &IndicatorComponentControllerAccessorImpl;
 }
 
+struct IndicatorComponentControllerPeer {
+    virtual ~IndicatorComponentControllerPeer() = default;
+};
 }

@@ -58,4 +58,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
     return &DrawingRenderingContextAccessorImpl;
 }
 
+struct DrawingRenderingContextPeer {
+    virtual ~DrawingRenderingContextPeer() = default;
+};
 }

@@ -470,4 +470,7 @@ const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccess
     return &RichEditorControllerAccessorImpl;
 }
 
+struct RichEditorControllerPeer {
+    virtual ~RichEditorControllerPeer() = default;
+};
 }

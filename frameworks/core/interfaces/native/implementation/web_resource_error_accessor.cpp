@@ -59,4 +59,7 @@ const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()
     return &WebResourceErrorAccessorImpl;
 }
 
+struct WebResourceErrorPeer {
+    virtual ~WebResourceErrorPeer() = default;
+};
 }

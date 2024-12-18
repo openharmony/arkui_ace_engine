@@ -885,8 +885,8 @@ void onClickImpl(Ark_Int32 nodeId,
 }
 namespace Scroll {
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_Number first,
-                  const Ark_Number last)
+                  const Ark_Number scrollOffset,
+                  const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1327,12 +1327,6 @@ void onCancelImpl(Ark_Int32 nodeId)
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Union_String_Array_String value,
                   const Ark_Union_Number_Array_Number index)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void onScrollStopImpl(Ark_Int32 nodeId,
-                      const Ark_Union_String_Array_String value,
-                      const Ark_Union_Number_Array_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -2388,7 +2382,6 @@ const GENERATED_ArkUITextPickerEventsReceiver* GetTextPickerEventsReceiver()
         TextPicker::onAcceptImpl,
         TextPicker::onCancelImpl,
         TextPicker::onChangeImpl,
-        TextPicker::onScrollStopImpl,
     };
 
     return &GENERATED_ArkUITextPickerEventsReceiverImpl;

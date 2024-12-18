@@ -78,4 +78,7 @@ const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
     return &FileSelectorParamAccessorImpl;
 }
 
+struct FileSelectorParamPeer {
+    virtual ~FileSelectorParamPeer() = default;
+};
 }
