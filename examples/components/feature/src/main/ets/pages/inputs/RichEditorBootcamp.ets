@@ -38,7 +38,6 @@ export struct RichEditorBootcamp {
   @State compDirection: Direction = Direction.Auto;
   @State enableCompBackgroundColor: boolean = false;
   @State compBackgroundColor: ResourceColor | undefined = undefined;
-
   @State enableCustomKeyboardOption: boolean = false;
   @State customKeyboardOption: boolean = false;
   @State enableBindSelectionMenuSpanType: boolean = false;
