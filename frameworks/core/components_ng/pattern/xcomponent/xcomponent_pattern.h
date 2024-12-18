@@ -314,6 +314,15 @@ public:
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
     void SetRenderFit(RenderFit renderFit);
+    void HandleSurfaceCreated();
+    void HandleSurfaceDestroyed();
+    void ChangeSurfaceCallbackMode(SurfaceCallbackMode mode)
+    {
+        if (surfaceCallbackModeChangeEvent_) {
+            surfaceCallbackModeChangeEvent_(mode);
+        }
+    }
+    void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
     void EnableSecure(bool isSecure);
 
 private:
@@ -382,6 +391,7 @@ private:
     void ReleaseImageAnalyzer();
     void UpdateTransformHint();
     void SetRotation(uint32_t rotation);
+    void RegisterSurfaceCallbackModeEvent();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -448,6 +458,8 @@ private:
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
     bool isEnableSecure_ = false;
+    SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
+    std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
 };
 } // namespace OHOS::Ace::NG
 
