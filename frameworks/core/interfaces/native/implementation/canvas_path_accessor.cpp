@@ -241,4 +241,5 @@ const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor()
     };
     return &CanvasPathAccessorImpl;
 }
+
 }
