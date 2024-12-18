@@ -759,6 +759,9 @@ public:
         return magnifierController_;
     }
 
+    std::string GetCaretColor() const;
+    std::string GetSelectedBackgroundColor() const;
+
 protected:
     int32_t GetClickedSpanPosition()
     {
