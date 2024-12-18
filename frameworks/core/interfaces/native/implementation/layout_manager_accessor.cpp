@@ -29,8 +29,7 @@ void DestroyPeerImpl(LayoutManagerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    LayoutManagerPeer* peer =  new LayoutManagerPeer();
-    return peer;
+    return new LayoutManagerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,16 +38,19 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Int32 GetLineCountImpl(LayoutManagerPeer* peer)
 {
     CHECK_NULL_RETURN(peer, 0);
-    CHECK_NULL_RETURN(peer->handler, 0);
-    int32_t count = peer->handler->GetLineCount();
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, 0);
+    int32_t count = handler->GetLineCount();
     return Converter::ArkValue<Ark_Int32>(count);
 }
 Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer,
                                                    const Ark_Number* x,
                                                    const Ark_Number* y)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    PositionWithAffinity result = peer->handler->GetGlyphPositionAtCoordinate(
+    CHECK_NULL_RETURN(peer && x && y, nullptr);
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, nullptr);
+    PositionWithAffinity result = handler->GetGlyphPositionAtCoordinate(
         Converter::Convert<int32_t>(*x),
         Converter::Convert<int32_t>(*y)
     );
@@ -58,8 +60,10 @@ Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer,
 Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
                                      const Ark_Number* lineNumber)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    TextLineMetrics result = peer->handler->GetLineMetrics(Converter::Convert<int32_t>(*lineNumber));
+    CHECK_NULL_RETURN(peer && lineNumber, nullptr);
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, nullptr);
+    TextLineMetrics result = handler->GetLineMetrics(Converter::Convert<int32_t>(*lineNumber));
     LOGE("LayoutManagerAccessor::GetLineMetricsImpl Incorrect return value type.");
     return nullptr;
 }
@@ -70,12 +74,14 @@ void GetRectsForRangeImpl(LayoutManagerPeer* peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(range);
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_VOID(handler);
     auto start = Converter::Convert<int32_t>(range->start.value);
     auto end = Converter::Convert<int32_t>(range->end.value);
     auto heightSt = Converter::OptConvert<RectHeightStyle>(heightStyle);
     auto widthSt = Converter::OptConvert<RectWidthStyle>(widthStyle);
     std::vector<ParagraphManager::TextBox> rects;
-    rects = peer->handler->GetRectsForRange(
+    rects = handler->GetRectsForRange(
         start,
         end,
         heightSt.value_or(RectHeightStyle::TIGHT),

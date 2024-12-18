@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/text_edit_controller_ex_peer.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
-struct TextEditControllerExPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
 void DestroyPeerImpl(TextEditControllerExPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TextEditControllerExPeer();
+    LOGE("TextEditControllerExPeer is an abstract class.");
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,23 +35,32 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Boolean>(false));
+    return Converter::ArkValue<Ark_Boolean>(peer->IsEditing());
 }
 void StopEditingImpl(TextEditControllerExPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->StopEditing();
 }
 Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer,
                                const Ark_Number* offset)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && offset, Converter::ArkValue<Ark_Boolean>(false));
+    auto offsetConv = Converter::Convert<int32_t>(*offset);
+    return Converter::ArkValue<Ark_Boolean>(peer->SetCaretOffset(offsetConv));
 }
 Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
+    return Converter::ArkValue<Ark_Int32>(peer->GetCaretOffset());
 }
 Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
 {
-    return nullptr;
+    // fix a return value
+    CHECK_NULL_RETURN(peer, 0);
+    peer->GetPreviewText();
+    return 0;
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

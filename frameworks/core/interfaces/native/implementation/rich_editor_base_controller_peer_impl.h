@@ -22,18 +22,20 @@
 #include "rich_editor_controller_structs.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
+#include "core/interfaces/native/implementation/text_edit_controller_ex_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class RichEditorBaseControllerPeerImpl {
+class RichEditorBaseControllerPeerImpl : public TextEditControllerExPeer {
 public:
     RichEditorBaseControllerPeerImpl() = default;
+    ~RichEditorBaseControllerPeerImpl() override {};
 
     void AddTargetController(const WeakPtr<RichEditorBaseController> &handler)
     {
         handler_ = handler;
     }
 
-    int32_t GetCaretOffset()
+    int32_t GetCaretOffset() override
     {
         if (auto controller = handler_.Upgrade(); controller) {
             return controller->GetCaretOffset();
@@ -41,7 +43,7 @@ public:
         return 0;
     }
 
-    bool SetCaretOffset(int32_t caretOffset)
+    bool SetCaretOffset(int32_t caretOffset) override
     {
         if (auto controller = handler_.Upgrade(); controller) {
             return controller->SetCaretOffset(caretOffset);
@@ -49,7 +51,7 @@ public:
         return false;
     }
 
-    void CloseSelectionMenu()
+    void CloseSelectionMenu() override
     {
         if (auto controller = handler_.Upgrade(); controller) {
             return controller->CloseSelectionMenu();
@@ -71,15 +73,16 @@ public:
             controller->SetTypingStyle(typingStyle, textStyle);
         }
     }
+
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options, bool isForward)
+        const std::optional<SelectionOptions>& options, bool isForward) override
     {
         if (auto controller = handler_.Upgrade(); controller) {
             controller->SetSelection(selectionStart, selectionEnd, options, isForward);
         }
     }
 
-    bool IsEditing()
+    bool IsEditing() override
     {
         if (auto controller = handler_.Upgrade(); controller) {
             return controller->IsEditing();
@@ -87,15 +90,36 @@ public:
         return false;
     }
 
-    void StopEditing()
+    void StopEditing() override
     {
         if (auto controller = handler_.Upgrade(); controller) {
             controller->StopEditing();
         }
     }
 
+    OHOS::Ace::PreviewTextInfo GetPreviewText() override
+    {
+        OHOS::Ace::PreviewTextInfo retVal;
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto ret = controller->GetPreviewTextInfo();
+            retVal.value = ret.value;
+            retVal.offset = ret.offset;
+        }
+        return retVal;
+    }
+
+    WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() override
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            return controller->GetLayoutInfoInterface();
+        }
+        return nullptr;
+    }
+
 private:
     Ace::WeakPtr<RichEditorBaseController> handler_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct RichEditorBaseControllerPeer : public OHOS::Ace::NG::GeneratedModifier::RichEditorBaseControllerPeerImpl {};
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_RICHEDITOR_BASE_CONTROLLER_PEER_IMPL_H
