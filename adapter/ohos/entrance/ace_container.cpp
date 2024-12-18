@@ -2562,10 +2562,6 @@ void AceContainer::ReleaseResourceAdapter()
     if (isFormRender_) {
         auto runtimeContext = runtimeContext_.lock();
         if (runtimeContext) {
-            auto defaultBundleName = "";
-            auto defaultModuleName = "";
-            ResourceManager::GetInstance().RemoveResourceAdapter(defaultBundleName, defaultModuleName);
-
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
