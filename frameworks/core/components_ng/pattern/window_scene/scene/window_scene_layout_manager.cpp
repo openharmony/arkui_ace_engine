@@ -606,7 +606,6 @@ void WindowSceneLayoutManager::GetTotalUITreeInfo(std::string& info)
             GetRSNodeTreeInfo(GetRSNode(it->second), 0, oss);
             info.append(oss.str());
         }
-        
     };
     mainHandler_->PostSyncTask(std::move(task), "GetTotalUITreeInfo", AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
