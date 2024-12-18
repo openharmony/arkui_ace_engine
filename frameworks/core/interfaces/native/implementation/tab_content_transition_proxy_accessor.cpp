@@ -14,15 +14,18 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/tab_content_transition_proxy_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct TabContentTransitionProxyPeer {};
-
+struct TabContentTransitionProxyPeer : public OHOS::Ace::NG::GeneratedModifier::TabContentTransitionProxyPeerImpl {};
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentTransitionProxyAccessor {
 void DestroyPeerImpl(TabContentTransitionProxyPeer* peer)
 {
+    if (peer) {
+        delete peer;
+    }
 }
 Ark_NativePointer CtorImpl()
 {
@@ -34,22 +37,36 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void FinishTransitionImpl(TabContentTransitionProxyPeer* peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->FinishTransition();
 }
 Ark_Int32 GetFromImpl(TabContentTransitionProxyPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto idx = peer->GetFrom();
+    return Converter::ArkValue<Ark_Int32>(idx);
 }
 void SetFromImpl(TabContentTransitionProxyPeer* peer,
                  const Ark_Number* from)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(from);
+    int32_t idx = Converter::Convert<int32_t>(*from);
+    peer->SetFrom(idx);
 }
 Ark_Int32 GetToImpl(TabContentTransitionProxyPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto idx = peer->GetTo();
+    return Converter::ArkValue<Ark_Int32>(idx);
 }
 void SetToImpl(TabContentTransitionProxyPeer* peer,
                const Ark_Number* to)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(to);
+    int32_t idx = Converter::Convert<int32_t>(*to);
+    peer->SetTo(idx);
 }
 } // TabContentTransitionProxyAccessor
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor()
