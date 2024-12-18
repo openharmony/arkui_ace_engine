@@ -94,8 +94,6 @@ public:
     RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
 };
 
-
-
 /**
  * @tc.name: ArcTest
  * @tc.desc:
@@ -110,7 +108,7 @@ HWTEST_F(CanvasPathAccessorTest, ArcTest, TestSize.Level1)
     auto radius = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
     auto startAngle = Converter::ArkValue<Ark_Number>(DEFAULT_START_VALUE);
     auto endAngle = Converter::ArkValue<Ark_Number>(TWO_PI_VALUE);
-    auto clockwise = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(DEFAULT_BOOL_VALUE));
+    auto clockwise = Converter::ArkValue<Opt_Boolean>(DEFAULT_BOOL_VALUE);
 
     holder->SetUp();
     EXPECT_CALL(*mockPattern_, Arc(_)).Times(EXPECTED_NUMBER_OF_CALLS);
@@ -183,7 +181,7 @@ HWTEST_F(CanvasPathAccessorTest, EllipseTest, TestSize.Level1)
     auto rotation = Converter::ArkValue<Ark_Number>(DEFAULT_ROTATION_VALUE);
     auto startAngle = Converter::ArkValue<Ark_Number>(PI_VALUE);
     auto endAngle = Converter::ArkValue<Ark_Number>(TWO_PI_VALUE);
-    auto clockwise = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(DEFAULT_BOOL_VALUE));
+    auto clockwise = Converter::ArkValue<Opt_Boolean>(DEFAULT_BOOL_VALUE);
 
     holder->SetUp();
     EXPECT_CALL(*mockPattern_, Ellipse(_)).Times(EXPECTED_NUMBER_OF_CALLS);
@@ -207,7 +205,7 @@ HWTEST_F(CanvasPathAccessorTest, LineToTest, TestSize.Level1)
     auto x2 = Converter::ArkValue<Ark_Number>(SECOND_X_VALUE);
     auto y2 = Converter::ArkValue<Ark_Number>(SECOND_Y_VALUE);
     auto x3 = Converter::ArkValue<Ark_Number>(THIRD_X_VALUE);
-    auto y3 = Converter::ArkValue<Ark_Number>(THIRD_Y_VALUE);  
+    auto y3 = Converter::ArkValue<Ark_Number>(THIRD_Y_VALUE);
     holder->SetUp();
 
     EXPECT_CALL(*mockPattern_, LineTo(FIRST_X_VALUE, FIRST_Y_VALUE)).Times(1);
