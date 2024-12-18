@@ -2930,6 +2930,8 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     }
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
     json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+    json->PutExtAttr("caretColor", GetCaretColor().c_str(), filter);
+    json->PutExtAttr("selectedBackgroundColor", GetSelectedBackgroundColor().c_str(), filter);
 }
 
 std::string TextPattern::GetBindSelectionMenuInJson() const
@@ -4887,5 +4889,27 @@ void TextPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
     if (afterLayoutCallback_.has_value()) {
         (*afterLayoutCallback_)();
     }
+}
+
+std::string TextPattern::GetCaretColor() const
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, "");
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, "");
+    return textLayoutProperty->GetCursorColorValue(theme->GetCaretColor()).ColorToString();
+}
+
+std::string TextPattern::GetSelectedBackgroundColor() const
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, "");
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, "");
+    return textLayoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor()).ColorToString();
 }
 } // namespace OHOS::Ace::NG
