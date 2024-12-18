@@ -51,6 +51,7 @@ public:
     {
         return onFocus_;
     }
+    void SetEnableSwipeBack(bool isEnable) {}
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
