@@ -91,4 +91,23 @@ void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
 {
     dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
 }
+
+void AssignArkValue(Ark_Length& dst, const Dimension& src)
+{
+    dst.type = ARK_RUNTIME_NUMBER;
+    dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
+    dst.unit = static_cast<int32_t>(src.Unit());
+}
+
+void AssignArkValue(Ark_Length& dst, const float& src)
+{
+    dst.type = ARK_RUNTIME_NUMBER;
+    dst.value = src;
+    dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
+}
+
+void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
+{
+    dst.alwaysEnabled = src;
+}
 } // namespace OHOS::Ace::NG::Converter
