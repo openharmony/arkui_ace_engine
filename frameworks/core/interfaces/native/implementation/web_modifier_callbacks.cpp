@@ -41,8 +41,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier {
 
-OnPageEndEvent g_onPageEnd = [](const Callback_OnPageEndEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnPageEnd(const Callback_OnPageEndEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -52,10 +53,11 @@ OnPageEndEvent g_onPageEnd = [](const Callback_OnPageEndEvent_Void* value,
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnPageBeginEvent g_onPageBegin = [](const Callback_OnPageBeginEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnPageBegin(const Callback_OnPageBeginEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -65,10 +67,11 @@ OnPageBeginEvent g_onPageBegin = [](const Callback_OnPageBeginEvent_Void* value,
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnProgressChangeEvent g_onProgressChange = [](const Callback_OnProgressChangeEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnProgressChange(const Callback_OnProgressChangeEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -78,10 +81,11 @@ OnProgressChangeEvent g_onProgressChange = [](const Callback_OnProgressChangeEve
     parameter.newProgress = Converter::ArkValue<Ark_Number>(eventInfo->GetNewProgress());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnTitleReceiveEvent g_onTitleReceive = [](const Callback_OnTitleReceiveEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnTitleReceive(const Callback_OnTitleReceiveEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -91,20 +95,22 @@ OnTitleReceiveEvent g_onTitleReceive = [](const Callback_OnTitleReceiveEvent_Voi
     parameter.title = Converter::ArkValue<Ark_String>(eventInfo->GetTitle());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnGeolocationHideEvent g_onGeolocationHide = [](const Callback_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnGeolocationHide(const Callback_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
-};
+}
 
-OnGeolocationShowEvent g_onGeolocationShow = [](const Callback_OnGeolocationShowEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnGeolocationShow(const Callback_OnGeolocationShowEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -117,20 +123,21 @@ OnGeolocationShowEvent g_onGeolocationShow = [](const Callback_OnGeolocationShow
     parameter.geolocation.ptr = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnRequestSelectedEvent g_onRequestSelected = [](const Callback_Void* value,
-    WeakPtr<FrameNode> weakNode, const BaseEventInfo* info) {
+void OnRequestSelected(const Callback_Void* value,
+    WeakPtr<FrameNode> weakNode, const BaseEventInfo* info)
+{
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
-};
+}
 
-OnAlertEvent g_onAlert = [](const Callback_OnAlertEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId,
-    const BaseEventInfo* info) -> bool {
+bool OnAlert(const Callback_OnAlertEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -147,10 +154,11 @@ OnAlertEvent g_onAlert = [](const Callback_OnAlertEvent_Boolean* value,
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebModifier::OnAlertImpl return value can be incorrect");
     return false;
-};
+}
 
-OnBeforeUnloadEvent g_onBeforeUnload = [](const Callback_OnBeforeUnloadEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnBeforeUnload(const Callback_OnBeforeUnloadEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -167,10 +175,11 @@ OnBeforeUnloadEvent g_onBeforeUnload = [](const Callback_OnBeforeUnloadEvent_Boo
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnBeforeUnloadImpl return value can be incorrect");
     return false;
-};
+}
 
-OnConfirmEvent g_onConfirm = [](const Callback_OnConfirmEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnConfirm(const Callback_OnConfirmEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -187,10 +196,11 @@ OnConfirmEvent g_onConfirm = [](const Callback_OnConfirmEvent_Boolean* value,
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnConfirmImpl return value can be incorrect");
     return false;
-};
+}
 
-OnPromptEvent g_onPrompt = [](const Callback_OnPromptEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -207,10 +217,11 @@ OnPromptEvent g_onPrompt = [](const Callback_OnPromptEvent_Boolean* value,
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnPromptImpl return value can be incorrect");
     return false;
-};
+}
 
-OnConsoleEvent g_onConsole = [](const Callback_OnConsoleEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, const BaseEventInfo* info) -> bool {
+bool OnConsole(const Callback_OnConsoleEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, const BaseEventInfo* info)
+{
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
@@ -224,10 +235,11 @@ OnConsoleEvent g_onConsole = [](const Callback_OnConsoleEvent_Boolean* value,
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnConsoleImpl return value can be incorrect");
     return false;
-};
+}
 
-OnErrorReceiveEvent g_onErrorReceive = [](const Callback_OnErrorReceiveEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnErrorReceive(const Callback_OnErrorReceiveEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -242,10 +254,11 @@ OnErrorReceiveEvent g_onErrorReceive = [](const Callback_OnErrorReceiveEvent_Voi
     parameter.request.ptr = requestPeer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnHttpErrorReceiveEvent g_onHttpErrorReceive = [](const Callback_OnHttpErrorReceiveEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnHttpErrorReceive(const Callback_OnHttpErrorReceiveEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -260,10 +273,11 @@ OnHttpErrorReceiveEvent g_onHttpErrorReceive = [](const Callback_OnHttpErrorRece
     parameter.response.ptr = responsePeer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnDownloadStartEvent g_onDownloadStart = [](const Callback_OnDownloadStartEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnDownloadStart(const Callback_OnDownloadStartEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -277,11 +291,11 @@ OnDownloadStartEvent g_onDownloadStart = [](const Callback_OnDownloadStartEvent_
     parameter.contentLength = Converter::ArkValue<Ark_Number>(eventInfo->GetContentLength());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnRefreshAccessedHistoryEvent g_onRefreshAccessedHistory = [](
-    const Callback_OnRefreshAccessedHistoryEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnRefreshAccessedHistory(const Callback_OnRefreshAccessedHistoryEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -292,10 +306,11 @@ OnRefreshAccessedHistoryEvent g_onRefreshAccessedHistory = [](
     parameter.isRefreshed = Converter::ArkValue<Ark_Boolean>(eventInfo->IsRefreshed());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnUrlLoadInterceptEvent g_onUrlLoadIntercept = [](const Type_WebAttribute_onUrlLoadIntercept_callback* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnUrlLoadIntercept(const Type_WebAttribute_onUrlLoadIntercept_callback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -310,10 +325,11 @@ OnUrlLoadInterceptEvent g_onUrlLoadIntercept = [](const Type_WebAttribute_onUrlL
     arkCallback.Invoke(optParam, continuation);
     LOGE("WebAttributeModifier::OnUrlLoadInterceptImpl return value can be incorrect");
     return false;
-};
+}
 
-OnRenderExitedEvent g_onRenderExited = [](const Callback_OnRenderExitedEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnRenderExited(const Callback_OnRenderExitedEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -324,10 +340,11 @@ OnRenderExitedEvent g_onRenderExited = [](const Callback_OnRenderExitedEvent_Voi
         static_cast<Converter::RenderExitReason>(eventInfo->GetExitedReason()));
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnShowFileSelectorEvent g_onShowFileSelector = [](const Callback_OnShowFileSelectorEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnShowFileSelector(const Callback_OnShowFileSelectorEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -345,10 +362,11 @@ OnShowFileSelectorEvent g_onShowFileSelector = [](const Callback_OnShowFileSelec
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnShowFileSelectorImpl return value can be incorrect");
     return false;
-};
+}
 
-OnResourceLoadEvent g_onResourceLoad = [](const Callback_OnResourceLoadEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnResourceLoad(const Callback_OnResourceLoadEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -358,20 +376,22 @@ OnResourceLoadEvent g_onResourceLoad = [](const Callback_OnResourceLoadEvent_Voi
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetOnResourceLoadUrl());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnFullScreenExitEvent g_onFullScreenExit = [](const Callback_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnFullScreenExit(const Callback_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
-};
+}
 
-OnFullScreenEnterEvent g_onFullScreenEnter = [](const OnFullScreenEnterCallback* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnFullScreenEnter(const OnFullScreenEnterCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -386,10 +406,11 @@ OnFullScreenEnterEvent g_onFullScreenEnter = [](const OnFullScreenEnterCallback*
     parameter.handler.ptr = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnScaleChangeEvent g_onScaleChange = [](const Callback_OnScaleChangeEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnScaleChange(const Callback_OnScaleChangeEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -400,10 +421,11 @@ OnScaleChangeEvent g_onScaleChange = [](const Callback_OnScaleChangeEvent_Void* 
     parameter.oldScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeOldScale());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnHttpAuthRequestEvent g_onHttpAuthRequest = [](const Callback_OnHttpAuthRequestEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnHttpAuthRequest(const Callback_OnHttpAuthRequestEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -420,10 +442,11 @@ OnHttpAuthRequestEvent g_onHttpAuthRequest = [](const Callback_OnHttpAuthRequest
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnHttpAuthRequestImpl return value can be incorrect");
     return false;
-};
+}
 
-OnInterceptRequest g_onInterceptRequest = [](const Callback_OnInterceptRequestEvent_WebResourceResponse* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> RefPtr<WebResponse> {
+RefPtr<WebResponse> OnInterceptRequest(const Callback_OnInterceptRequestEvent_WebResourceResponse* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -438,10 +461,11 @@ OnInterceptRequest g_onInterceptRequest = [](const Callback_OnInterceptRequestEv
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnInterceptRequestImpl return value can be incorrect");
     return nullptr;
-};
+}
 
-OnPermissionRequestEvent g_onPermissionRequest = [](const Callback_OnPermissionRequestEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnPermissionRequest(const Callback_OnPermissionRequestEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -453,10 +477,11 @@ OnPermissionRequestEvent g_onPermissionRequest = [](const Callback_OnPermissionR
     parameter.request.ptr = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnScreenCaptureRequestEvent g_onScreenCaptureRequest = [](const Callback_OnScreenCaptureRequestEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnScreenCaptureRequest(const Callback_OnScreenCaptureRequestEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -468,10 +493,11 @@ OnScreenCaptureRequestEvent g_onScreenCaptureRequest = [](const Callback_OnScree
     parameter.handler.ptr = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnContextMenuShowEvent g_onContextMenuShow = [](const Callback_OnContextMenuShowEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnContextMenuShow(const Callback_OnContextMenuShowEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -489,20 +515,22 @@ OnContextMenuShowEvent g_onContextMenuShow = [](const Callback_OnContextMenuShow
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnContextMenuShowImpl return value can be incorrect");
     return false;
-};
+}
 
-OnContextMenuHideEvent g_onContextMenuHide = [](const OnContextMenuHideCallback* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnContextMenuHide(const OnContextMenuHideCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
-};
+}
 
-OnSearchResultReceiveEvent g_onSearchResultReceive = [](const Callback_OnSearchResultReceiveEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnSearchResultReceive(const Callback_OnSearchResultReceiveEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -514,10 +542,11 @@ OnSearchResultReceiveEvent g_onSearchResultReceive = [](const Callback_OnSearchR
     parameter.isDoneCounting = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsDoneCounting());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnScrollEvent g_onScroll = [](const Callback_OnScrollEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnScroll(const Callback_OnScrollEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -528,10 +557,11 @@ OnScrollEvent g_onScroll = [](const Callback_OnScrollEvent_Void* value,
     parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnSslErrorEventReceiveEvent g_onSslErrorEventReceive = [](const Callback_OnSslErrorEventReceiveEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnSslErrorEventReceive(const Callback_OnSslErrorEventReceiveEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -547,10 +577,11 @@ OnSslErrorEventReceiveEvent g_onSslErrorEventReceive = [](const Callback_OnSslEr
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return true;
-};
+}
 
-OnSslErrorEvent g_onSslErrorEvent = [](const OnSslErrorEventCallback* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnSslError(const OnSslErrorEventCallback* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -572,11 +603,11 @@ OnSslErrorEvent g_onSslErrorEvent = [](const OnSslErrorEventCallback* value,
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return true;
-};
+}
 
-OnClientAuthenticationEvent g_onClientAuthenticationRequest = [](
-    const Callback_OnClientAuthenticationEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) -> bool {
+bool OnClientAuthentication(const Callback_OnClientAuthenticationEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -597,10 +628,11 @@ OnClientAuthenticationEvent g_onClientAuthenticationRequest = [](
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return false;
-};
+}
 
-OnWindowNewEvent g_onWindowNew = [](const Callback_OnWindowNewEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+void OnWindowNew(const Callback_OnWindowNewEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -615,20 +647,22 @@ OnWindowNewEvent g_onWindowNew = [](const Callback_OnWindowNewEvent_Void* value,
     parameter.handler.ptr = peer;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
-};
+}
 
-OnWindowExitEvent g_onWindowExit = [](const Callback_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info) {
+void OnWindowExit(const Callback_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
-};
+}
 
-OnKeyEvent g_onInterceptKeyEvent = [](const Callback_KeyEvent_Boolean* value,
-    WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo) -> bool {
+bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
+    WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo)
+{
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
@@ -649,10 +683,11 @@ OnKeyEvent g_onInterceptKeyEvent = [](const Callback_KeyEvent_Boolean* value,
     arkCallback.Invoke(parameter, continuation);
     LOGE("WebAttributeModifier::OnInterceptKeyEventImpl return value can be incorrect");
     return false;
-};
+}
 
-OnTouchIconUrlReceivedEvent g_onTouchIconUrlReceived = [](const Callback_OnTouchIconUrlReceivedEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+void OnTouchIconUrlReceived(const Callback_OnTouchIconUrlReceivedEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -670,10 +705,11 @@ OnTouchIconUrlReceivedEvent g_onTouchIconUrlReceived = [](const Callback_OnTouch
 #else
     pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebTouchIconUrlReceived");
 #endif // ARKUI_CAPI_UNITTEST
-};
+}
 
-OnFaviconReceivedEvent g_onFaviconReceived = [](const Callback_OnFaviconReceivedEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+void OnFaviconReceived(const Callback_OnFaviconReceivedEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -684,10 +720,11 @@ OnFaviconReceivedEvent g_onFaviconReceived = [](const Callback_OnFaviconReceived
         LOGE("WebAttributeModifier::OnFaviconReceivedImpl PixelMap supporting is not implemented yet");
         arkCallback.Invoke(parameter);
         }, "ArkUIWebFaviconReceived");
-};
+}
 
-OnPageVisibleEvent g_onPageVisible = [](const Callback_OnPageVisibleEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+void OnPageVisible(const Callback_OnPageVisibleEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -704,10 +741,11 @@ OnPageVisibleEvent g_onPageVisible = [](const Callback_OnPageVisibleEvent_Void* 
 #else
     pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebPageVisible");
 #endif // ARKUI_CAPI_UNITTEST
-};
+}
 
-OnDataResubmittedEvent g_onDataResubmitted = [](const Callback_OnDataResubmittedEvent_Void* value,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info) {
+void OnDataResubmitted(const Callback_OnDataResubmittedEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -726,7 +764,7 @@ OnDataResubmittedEvent g_onDataResubmitted = [](const Callback_OnDataResubmitted
 #else
     pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebDataResubmitted");
 #endif // ARKUI_CAPI_UNITTEST
-};
+}
 
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
