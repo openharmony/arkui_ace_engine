@@ -15514,6 +15514,22 @@ class VideoTransitionModifier extends ModifierWithKey {
   }
 }
 VideoTransitionModifier.identity = Symbol('videoTransition');
+class VideoEnableShortcutKeyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetShortcutKeyEnabled(node);
+    } else {
+      getUINativeModule().video.setShortcutKeyEnabled(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoEnableShortcutKeyModifier.identity = Symbol('videoEnableShortcutKey');
 class ArkVideoComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15541,6 +15557,10 @@ class ArkVideoComponent extends ArkComponent {
   }
   objectFit(value) {
     modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity, VideoObjectFitModifier, value);
+    return this;
+  }
+  enableShortcutKey(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoEnableShortcutKeyModifier.identity, VideoEnableShortcutKeyModifier, value);
     return this;
   }
   opacity(value) {

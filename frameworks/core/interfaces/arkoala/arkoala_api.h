@@ -2759,6 +2759,8 @@ struct ArkUIVideoModifier {
     void (*resetVideoOpacity)(ArkUINodeHandle node);
     void (*setVideoSurfaceBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetVideoSurfaceBackgroundColor)(ArkUINodeHandle node);
+    void (*setVideoShortcutKeyEnabled)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetVideoShortcutKeyEnabled)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoControllerModifier {
