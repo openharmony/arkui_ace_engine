@@ -172,20 +172,6 @@ namespace OHOS::Ace::NG::Converter {
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
     }
 
-    inline void AssignArkValue(Ark_Length& dst, const float& src)
-    {
-        dst.type = ARK_RUNTIME_NUMBER;
-        dst.value = src;
-        dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
-    }
-
-    inline void AssignArkValue(Ark_Length& dst, const Dimension& src)
-    {
-        dst.type = ARK_RUNTIME_NUMBER;
-        dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
-        dst.unit = static_cast<int32_t>(src.Unit());
-    }
-
     inline void AssignArkValue(Ark_Number& dst, const Dimension& src)
     {
         auto value = static_cast<float>(src.ConvertToVp());
@@ -215,6 +201,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
+    void AssignArkValue(Ark_Length& dst, const Dimension& src);
+    void AssignArkValue(Ark_Length& dst, const float& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src);
     void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
@@ -256,6 +244,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
+    void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);

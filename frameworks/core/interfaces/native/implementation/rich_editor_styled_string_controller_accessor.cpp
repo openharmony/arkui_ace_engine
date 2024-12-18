@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Materialized& dst, const std::string& src)
@@ -66,9 +67,8 @@ void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer,
     CHECK_NULL_VOID(styledString->ptr);
     auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    RefPtr<SpanStringBase> spanString;
-    spanString = *reinterpret_cast<RefPtr<SpanStringBase>*>(styledString->ptr);
-    peerImpl->SetStyledString(spanString);
+    auto styledStringPeer = reinterpret_cast<StyledStringPeer *>(styledString->ptr);
+    peerImpl->SetStyledString(styledStringPeer->spanString);
 }
 Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
 {
