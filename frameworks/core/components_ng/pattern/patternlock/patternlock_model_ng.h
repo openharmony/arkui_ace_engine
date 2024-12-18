@@ -50,6 +50,8 @@ public:
     static void SetActiveCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& activeCircleRadius);
     static void SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect);
     static const RefPtr<V2::PatternLockController> GetController(FrameNode* frameNode);
+    static void SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect);
+    static void SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete);
 };
 
 } // namespace OHOS::Ace::NG
