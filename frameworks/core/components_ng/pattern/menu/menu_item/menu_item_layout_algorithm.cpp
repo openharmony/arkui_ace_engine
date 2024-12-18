@@ -138,7 +138,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     }
     float itemHeight = CalcItemHeight(leftRowHeight, rightRowHeight);
     auto width = std::max(minRowWidth_, contentWidth);
-    
+
     needExpandContent_ = false;
     emptyWidth_ = 0.0f;
     if (contentWidth < minRowWidth_) {
