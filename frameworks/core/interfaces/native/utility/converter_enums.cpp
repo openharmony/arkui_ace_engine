@@ -842,6 +842,18 @@ void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
 }
 
 template<>
+void AssignCast(std::optional<SslError>& dst, const Ark_SslError& src)
+{
+    switch (src) {
+        case ARK_SSL_ERROR_INVALID: dst = SslError::INVALID; break;
+        case ARK_SSL_ERROR_HOST_MISMATCH: dst = SslError::HOST_MISMATCH; break;
+        case ARK_SSL_ERROR_DATE_INVALID: dst = SslError::DATE_INVALID; break;
+        case ARK_SSL_ERROR_UNTRUSTED: dst = SslError::UNTRUSTED; break;
+        default: LOGE("Unexpected enum value in Ark_SslError: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src)
 {
     switch (src) {

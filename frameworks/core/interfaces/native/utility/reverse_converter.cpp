@@ -69,4 +69,21 @@ void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
     dst.itemIndexInGroup = src.indexInGroup < 0 ?
         ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
 }
+
+void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src)
+{
+    dst.value0 = ArkValue<Ark_Length>(src.first);
+    dst.value1 = ArkValue<Ark_Length>(src.second);
+}
+
+void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
+{
+    dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
+    dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
+}
+
+void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
+{
+    dst.alwaysEnabled = src;
+}
 } // namespace OHOS::Ace::NG::Converter
