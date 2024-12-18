@@ -103,7 +103,9 @@ export struct SpanBootcamp {
   Content() {
     Row() {
       Text(){
-        Span('Span example.')
+        Span('This is a Span component.' +
+          ' The span component is used to display a piece of textual information.' +
+          ' Support universal attributes and universal attributes.')
           .decoration({
             type: useEnabled(this.enableDecorationType, this.decorationType),
             color: useEnabled(this.enableDecorationColor, this.decorationColor),
@@ -129,8 +131,6 @@ export struct SpanBootcamp {
             offsetY: useEnabled(this.enableTextShadowOffsetY, this.textShadowOffsetY),
             fill: useEnabled(this.enableTextShadowFill, this.textShadowFill)
           })
-
-
       }
 
     }.justifyContent(FlexAlign.Start)
