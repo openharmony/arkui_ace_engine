@@ -143,6 +143,11 @@ public:
         OnAttachToFrameNode();
     }
 
+    virtual bool CustomizeExpandSafeArea()
+    {
+        return false;
+    }
+
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
