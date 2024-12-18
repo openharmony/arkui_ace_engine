@@ -50,7 +50,7 @@ export struct TextBootcamp {
   @State enableFontColor: boolean = false;
   @State fontColor: ResourceColor | undefined = undefined;
   @State enableFontSize: boolean = false;
-  @State fontSize: number = 16; //16fp
+  @State fontSize: number = 16;
   @State enableFontStyle: boolean = false;
   @State fontStyle: FontStyle = FontStyle.Normal;
   @State enableFontWeight: boolean = false;
@@ -182,8 +182,7 @@ export struct TextBootcamp {
         .enableDataDetector(useEnabled(this.enableEnableDataDetector, this.enableDataDetector))
         .dataDetectorConfig({
           types: useEnabled(this.enableTextDataDetectorConfigTypes, this.textDataDetectorConfigTypes),
-          onDetectResultUpdate: (result: string) => {
-          },
+          onDetectResultUpdate: (result: string) => {},
         })
         .fontFeature(useEnabled(this.enableFontFeature, this.fontFeature))
         .lineSpacing({
@@ -194,8 +193,7 @@ export struct TextBootcamp {
         .lineBreakStrategy(useEnabled(this.enableLineBreakStrategy, this.lineBreakStrategy))
         .textSelectable(useEnabled(this.enableTextSelectable, this.textSelectable))
         .minFontScale(useEnabled(this.enableMinFontScale, this.minFontScale))
-        .maxFontScale(useEnabled(this.enableMaxFontScale,
-          this.maxFontScale))
+        .maxFontScale(useEnabled(this.enableMaxFontScale, this.maxFontScale))
         .fontWeight(useEnabled(this.enableFontWeightWeight, this.fontWeightWeight))
     }.justifyContent(FlexAlign.Start)
   }
@@ -411,7 +409,6 @@ export struct TextBootcamp {
           color: this.textShadowColor
         })
 
-        //XY
         SliderBlock({
           title: 'textShadow.OffsetX',
           isEnabled: this.enableTextShadowOffsetX,
