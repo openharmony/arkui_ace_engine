@@ -24,7 +24,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"
+#include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -120,7 +120,7 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
 
     auto controllerPtr =
         fullAPI_->getAccessors()->getSearchControllerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl*>(controllerPtr);
+    auto peerImplPtr = reinterpret_cast<SearchControllerPeer*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

@@ -632,4 +632,14 @@ void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src)
             LOGE("Unexpected enum value in NativeEmbedStatus: %{public}d", src);
     }
 }
+
+void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
+{
+    switch (src) {
+        case MenuPolicy::DEFAULT: dst = ARK_MENU_POLICY_DEFAULT; break;
+        case MenuPolicy::HIDE: dst = ARK_MENU_POLICY_HIDE; break;
+        case MenuPolicy::SHOW: dst = ARK_MENU_POLICY_SHOW; break;
+        default: dst = static_cast<Ark_MenuPolicy>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

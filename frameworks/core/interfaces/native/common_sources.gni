@@ -22,7 +22,6 @@ common_sources = [
   "implementation/image_bitmap_peer_impl.cpp",
   "implementation/navigation_context.cpp",
   "implementation/scroller_peer_impl.cpp",
-  "implementation/search_controller_accessor_peer_impl.cpp",
   "implementation/video_controller_peer_impl.cpp",
   "implementation/web_modifier_callbacks.cpp",
   "utility/converter_enums.cpp",

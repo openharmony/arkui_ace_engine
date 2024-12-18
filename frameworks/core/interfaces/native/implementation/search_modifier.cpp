@@ -22,7 +22,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
-#include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"
+#include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "base/utils/utils.h"
 
@@ -144,7 +144,7 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
         SearchModelNG::SetIcon(frameNode, searchOptions->icon);
         auto internalSearchController = SearchModelNG::GetSearchController(frameNode);
         CHECK_NULL_VOID(searchOptions->controller);
-        auto peerImplPtr = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl *>(
+        auto peerImplPtr = reinterpret_cast<SearchControllerPeer *>(
             searchOptions->controller.value());
         CHECK_NULL_VOID(peerImplPtr);
 

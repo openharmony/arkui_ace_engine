@@ -16,7 +16,7 @@
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
-#include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
+#include "core/interfaces/native/implementation/text_input_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -27,39 +27,39 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-class MockSearchController : public TextFieldControllerBase {
+class MockTextInputController : public TextFieldControllerBase {
 public:
-    MockSearchController() = default;
-    ~MockSearchController() override = default;
+    MockTextInputController() = default;
+    ~MockTextInputController() override = default;
     MOCK_METHOD(void, CaretPosition, (int32_t), (override));
     MOCK_METHOD(void, StopEditing, (), (override));
     MOCK_METHOD(void, SetTextSelection, (int32_t, int32_t, const std::optional<SelectionOptions>&), (override));
 };
 } // namespace
 
-class SearchControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUISearchControllerAccessor,
-    &GENERATED_ArkUIAccessors::getSearchControllerAccessor, SearchControllerPeer> {
+class TextInputControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUITextInputControllerAccessor,
+    &GENERATED_ArkUIAccessors::getTextInputControllerAccessor, TextInputControllerPeer> {
 public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        mockSearchController_ = new MockSearchController();
-        mockSearchControllerKeeper_ = AceType::Claim(mockSearchController_);
-        ASSERT_NE(mockSearchControllerKeeper_, nullptr);
+        mockTextInputController_ = new MockTextInputController();
+        mockTextInputControllerKeeper_ = AceType::Claim(mockTextInputController_);
+        ASSERT_NE(mockTextInputControllerKeeper_, nullptr);
         ASSERT_NE(peer_, nullptr);
-        peer_->SetController(mockSearchControllerKeeper_);
-        ASSERT_NE(mockSearchController_, nullptr);
+        peer_->SetController(mockTextInputControllerKeeper_);
+        ASSERT_NE(mockTextInputController_, nullptr);
     }
 
     void TearDown() override
     {
         AccessorTestBase::TearDown();
-        mockSearchControllerKeeper_ = nullptr;
-        mockSearchController_ = nullptr;
+        mockTextInputControllerKeeper_ = nullptr;
+        mockTextInputController_ = nullptr;
     }
 
-    MockSearchController* mockSearchController_ = nullptr;
-    RefPtr<MockSearchController> mockSearchControllerKeeper_ = nullptr;
+    MockTextInputController* mockTextInputController_ = nullptr;
+    RefPtr<MockTextInputController> mockTextInputControllerKeeper_ = nullptr;
 };
 
 /**
@@ -67,7 +67,7 @@ public:
  * @tc.desc: check work of caretPosition method
  * @tc.type: FUNC
  */
-HWTEST_F(SearchControllerAccessorTest, caretPositionTest, TestSize.Level1)
+HWTEST_F(TextInputControllerAccessorTest, caretPositionTest, TestSize.Level1)
 {
     constexpr int validValue1 = 10;
     constexpr int validValue2 = 55;
@@ -79,13 +79,13 @@ HWTEST_F(SearchControllerAccessorTest, caretPositionTest, TestSize.Level1)
 
     ASSERT_NE(accessor_->caretPosition, nullptr);
 
-    EXPECT_CALL(*mockSearchController_, CaretPosition(validValue1)).Times(1);
+    EXPECT_CALL(*mockTextInputController_, CaretPosition(validValue1)).Times(1);
     accessor_->caretPosition(peer_, &arkValid1);
 
-    EXPECT_CALL(*mockSearchController_, CaretPosition(validValue2)).Times(1);
+    EXPECT_CALL(*mockTextInputController_, CaretPosition(validValue2)).Times(1);
 
     accessor_->caretPosition(peer_, &arkValid2);
-    EXPECT_CALL(*mockSearchController_, CaretPosition(0)).Times(1);
+    EXPECT_CALL(*mockTextInputController_, CaretPosition(0)).Times(1);
     accessor_->caretPosition(peer_, &arkInvalid);
     accessor_->caretPosition(peer_, nullptr);
 }
@@ -95,11 +95,11 @@ HWTEST_F(SearchControllerAccessorTest, caretPositionTest, TestSize.Level1)
  * @tc.desc: check work of stopEditing method
  * @tc.type: FUNC
  */
-HWTEST_F(SearchControllerAccessorTest, StopEditingTest, TestSize.Level1)
+HWTEST_F(TextInputControllerAccessorTest, StopEditingTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->stopEditing, nullptr);
 
-    EXPECT_CALL(*mockSearchController_, StopEditing()).Times(3);
+    EXPECT_CALL(*mockTextInputController_, StopEditing()).Times(3);
     accessor_->stopEditing(peer_);
     accessor_->stopEditing(peer_);
     accessor_->stopEditing(peer_);
@@ -115,7 +115,7 @@ MATCHER_P(CompareSelectionOptions, selectionOptions, "SelectionOptions compare")
  * @tc.desc: check work of setTextSelection method
  * @tc.type: FUNC
  */
-HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
+HWTEST_F(TextInputControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTextSelection, nullptr);
     constexpr std::optional<SelectionOptions> empty = std::nullopt;
@@ -134,24 +134,24 @@ HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
         static_cast<MenuPolicy>(-1)
     };
 
-    EXPECT_CALL(*mockSearchController_, SetTextSelection(0, 0, CompareSelectionOptions(empty))).Times(0);
+    EXPECT_CALL(*mockTextInputController_, SetTextSelection(0, 0, CompareSelectionOptions(empty))).Times(0);
     accessor_->setTextSelection(peer_, nullptr, nullptr, nullptr);
 
     Ark_SelectionOptions menuOptions;
     for (auto& menuPolicy : menuPolicies) {
         test->menuPolicy = menuPolicy;
         if (menuPolicy != static_cast<MenuPolicy>(-1)) {
-            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1,
+            EXPECT_CALL(*mockTextInputController_, SetTextSelection(valid1,
                 valid2, CompareSelectionOptions(test))).Times(1);
         } else {
-            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1,
+            EXPECT_CALL(*mockTextInputController_, SetTextSelection(valid1,
                 valid2, CompareSelectionOptions(empty))).Times(1);
         }
         menuOptions.menuPolicy = ArkValue<Opt_MenuPolicy>(menuPolicy);
         auto optMenuOptions = ArkValue<Opt_SelectionOptions>(menuOptions);
         accessor_->setTextSelection(peer_, &arkValid1, &arkValid2, &optMenuOptions);
     }
-    EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1, valid2, CompareSelectionOptions(empty))).Times(1);
+    EXPECT_CALL(*mockTextInputController_, SetTextSelection(valid1, valid2, CompareSelectionOptions(empty))).Times(1);
     accessor_->setTextSelection(peer_, &arkValid1, &arkValid2, nullptr);
 }
 } // namespace OHOS::Ace::NG
