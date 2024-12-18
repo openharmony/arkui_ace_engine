@@ -1016,4 +1016,160 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign014, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollable_->state_, Scrollable::AnimationState::IDLE);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
 }
+
+/**
+ * @tc.name: StartSnapAnimation001
+ * @tc.desc: Test start snap align by mouse wheel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, StartSnapAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    // Make ListHeight not an integer multiple of ListItems
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Trigger the snapAnimation by mouse wheel.
+     * @tc.expected: the target index is correct.
+     */
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, -1);
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -50.f,
+        .animationVelocity = -500.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
+
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 0);
+
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, -1);
+
+    pattern_->AbortScrollAnimator();
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
+
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 2);
+}
+
+/**
+ * @tc.name: EndSnapAnimation001
+ * @tc.desc: Test end snap align by mouse wheel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, EndSnapAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
+    // Make ListHeight not an integer multiple of ListItems
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    CreateListItems(5);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Trigger the snapAnimation by mouse wheel.
+     * @tc.expected: the target index is correct.
+     */
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, -1);
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -50.f,
+        .animationVelocity = -500.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 4);
+
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 5);
+
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 4);
+
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 3);
+}
+
+/**
+ * @tc.name: CenterSnapAnimation001
+ * @tc.desc: Test center snap align by mouse wheel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, CenterSnapAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+    // Make ListHeight not an integer multiple of ListItems
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    CreateListItems(5);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Trigger the snapAnimation by mouse wheel.
+     * @tc.expected: the target index is correct.
+     */
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, -1);
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -50.f,
+        .animationVelocity = -500.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
+
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 2);
+
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 1);
+
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, 0);
+
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_, -1);
+}
 } // namespace OHOS::Ace::NG
