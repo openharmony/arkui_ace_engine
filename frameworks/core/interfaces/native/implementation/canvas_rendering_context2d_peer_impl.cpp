@@ -21,6 +21,102 @@ constexpr auto ERROR_VALUE = -1;
 } // namespace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+void CanvasRenderingContext2DPeerImpl::SetCanvasPattern(const RefPtr<AceType>& pattern)
+{
+    CHECK_NULL_VOID(pattern);
+    auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
+    CHECK_NULL_VOID(canvasPattern);
+    if (pattern_ == canvasPattern) {
+        return;
+    }
+    auto OnAttach = [weakCtx = WeakClaim(this)]() {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->OnAttachToCanvas();
+    };
+    auto OnDetach = [weakCtx = WeakClaim(this)]() {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->OnDetachFromCanvas();
+    };
+    pattern_ = canvasPattern;
+    pattern_->SetOnContext2DAttach(OnAttach);
+    pattern_->SetOnContext2DDetach(OnDetach);
+    pattern_->AttachRenderContext();
+}
+
+void CanvasRenderingContext2DPeerImpl::OnAttachToCanvas()
+{
+    ContainerScope scope(instanceId_);
+    for (const auto& iter : attachCallback_) {
+        if (iter.first != nullptr) {
+            iter.second();
+        }
+    }
+}
+
+void CanvasRenderingContext2DPeerImpl::OnDetachFromCanvas()
+{
+    ContainerScope scope(instanceId_);
+    for (const auto& iter : detachCallback_) {
+        if (iter.first != nullptr) {
+            iter.second();
+        }
+    }
+}
+
+CanvasCallbackFuncPairList::const_iterator CanvasRenderingContext2DPeerImpl::FindCallbackInList(CanvasCallbackFuncPairList& callbackFuncPairList, const void* callback)
+{
+    return std::find_if(callbackFuncPairList.begin(), callbackFuncPairList.end(), [callback](const auto& item) -> bool {
+        return item.first == callback;
+    });
+}
+
+void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(const CanvasCallbackFuncPair& callback, const CanvasCallbackType& type)
+{
+    if (callback.first == nullptr) {
+        if (type == CanvasCallbackType::ON_ATTACH) {
+            attachCallback_.clear();
+        } else if (type == CanvasCallbackType::ON_DETACH) {
+            detachCallback_.clear();
+        }
+        return;    
+    }
+    if (type == CanvasCallbackType::ON_ATTACH) {
+        auto iter = FindCallbackInList(attachCallback_, callback.first);
+        if (iter != attachCallback_.end()) {
+            attachCallback_.erase(iter);
+        }
+    } else if (type == CanvasCallbackType::ON_DETACH) {
+        auto iter = FindCallbackInList(detachCallback_, callback.first);
+        if (iter != detachCallback_.end()) {
+            detachCallback_.erase(iter);
+        }
+    }
+}
+
+void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CanvasCallbackFuncPair &&callback, const CanvasCallbackType& type)
+{
+    if (type == CanvasCallbackType::ON_ATTACH) {
+        auto iter = FindCallbackInList(attachCallback_, callback.first);
+        if (iter  == attachCallback_.end()) {
+            attachCallback_.emplace_back(callback);
+        }
+    } else if (type == CanvasCallbackType::ON_DETACH) {
+        auto iter = FindCallbackInList(detachCallback_, callback.first);
+        if (iter == detachCallback_.end()) {
+            detachCallback_.emplace_back(callback);
+        }
+    }
+}
+
+void CanvasRenderingContext2DPeerImpl::On(CanvasCallbackFuncPair &&callback, const CanvasCallbackType& type) {
+    AddCallbackToList(std::move(callback), type);
+}
+
+void CanvasRenderingContext2DPeerImpl::Off(CanvasCallbackFuncPair &&callback, const CanvasCallbackType& type) {
+    DeleteCallbackFromList(callback, type);
+}
 
 Ark_NativePointer CanvasRenderingContext2DPeerImpl::TriggerStartImageAnalyzer(
     const std::vector<ImageAnalyzerType> vector)
@@ -80,5 +176,4 @@ Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
     auto width = PipelineBase::Px2VpWithCurrentDensity(pattern_-> GetWidth());
     return  Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width));
 }
-
 } // namespace OHOS::Ace::NG::GeneratedModifier

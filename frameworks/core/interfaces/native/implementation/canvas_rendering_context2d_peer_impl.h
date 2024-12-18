@@ -25,11 +25,20 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-
+enum class CanvasCallbackType {
+    ON_ATTACH = 0,
+    ON_DETACH,
+    UNKNOWN
+};
+using CanvasCallbackFuncPair = std::pair<void*, std::function<void()>>;
+using CanvasCallbackFuncPairList = std::list<CanvasCallbackFuncPair>;
 class CanvasRenderingContext2DPeerImpl : public Referenced {
 public:
     CanvasRenderingContext2DPeerImpl() = default;
     ~CanvasRenderingContext2DPeerImpl() override = default;
+
+    void OnAttachToCanvas();
+    void OnDetachFromCanvas();
 
     Ark_NativePointer TriggerStartImageAnalyzer(const std::vector<ImageAnalyzerType> vector);
     void TriggerStopImageAnalyzer();
@@ -53,16 +62,10 @@ public:
         pattern_->SetAntiAlias(antialias_);
     }
 
-    void SetCanvasPattern(const RefPtr<AceType>& pattern)
-    {
-        CHECK_NULL_VOID(pattern);
-        auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
-        CHECK_NULL_VOID(canvasPattern);
-        if (pattern_ == canvasPattern) {
-            return;
-        }
-        pattern_ = canvasPattern;
-    }
+    void SetCanvasPattern(const RefPtr<AceType>& pattern);
+
+    void On(CanvasCallbackFuncPair &&callback, const CanvasCallbackType& type);
+    void Off(CanvasCallbackFuncPair &&callback, const CanvasCallbackType& type);
 
     void SetInstanceId(int32_t instanceId)
     {
@@ -80,8 +83,14 @@ protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
+    CanvasCallbackFuncPairList::const_iterator FindCallbackInList(CanvasCallbackFuncPairList& callbackFuncPairList, const void* callback);
+    void DeleteCallbackFromList(const CanvasCallbackFuncPair& callback, const CanvasCallbackType& type);
+    void AddCallbackToList(CanvasCallbackFuncPair &&callback, const CanvasCallbackType& type);
+
     bool isImageAnalyzing_ = false;
     std::vector<ImageAnalyzerType> vector_;
+    CanvasCallbackFuncPairList attachCallback_;
+    CanvasCallbackFuncPairList detachCallback_;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
