@@ -286,7 +286,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
-    void AvoidSafeArea(bool forceChange = false);
+    void AvoidSafeArea(bool forceAvoid = false);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
@@ -645,6 +645,7 @@ public:
     void FireHoverModeChangeCallback();
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
+    void RecoverHalfFoldOrAvoidStatus();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -689,11 +690,14 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
-    void AvoidKeyboardBySheetMode();
+    void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     bool AvoidKeyboardBeforeTranslate();
     void AvoidKeyboardAfterTranslate(float height);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     bool IsResizeWhenAvoidKeyboard();
+    void GetCurrentScrollHeight();
+    void RecoverAvoidKeyboardStatus();
+    void RecoverScrollOrResizeAvoidStatus();
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;

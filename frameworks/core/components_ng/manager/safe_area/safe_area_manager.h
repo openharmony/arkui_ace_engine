@@ -145,6 +145,11 @@ public:
     
     float GetKeyboardOffset(bool withoutProcess = false) const;
 
+    float GetKeyboardOffsetDirectly() const
+    {
+        return keyboardOffset_;
+    }
+
     float GetRawKeyboardHeight() const
     {
         return rawKeyboardHeight_;
