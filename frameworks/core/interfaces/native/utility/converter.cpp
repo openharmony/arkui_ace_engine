@@ -16,8 +16,10 @@
 #include "converter.h"
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -38,6 +40,12 @@ std::optional<double> FloatToDouble(const std::optional<float>& src)
 }
 
 namespace OHOS::Ace::NG::Converter {
+struct DecorationStyleInterface {
+    std::optional<TextDecoration> type;
+    std::optional<Color> color;
+    std::optional<TextDecorationStyle> style;
+};
+
 RefPtr<ThemeConstants> GetThemeConstants(Ark_NodeHandle node, Ark_CharPtr bundleName, Ark_CharPtr moduleName)
 {
     auto cardId = CardScope::CurrentId();
@@ -942,6 +950,82 @@ TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
     return options;
+}
+
+template<>
+void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
+{
+    CHECK_NULL_VOID(src.array);
+    std::string ret;
+    for (int idx = 0; idx < src.length; idx++) {
+        Ark_TextDataDetectorType type = src.array[idx];
+        switch (type) {
+            case ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER:
+                ret += "phoneNum";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_URL:
+                ret += "url";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_EMAIL:
+                ret += "email";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS:
+                ret += "location";
+                break;
+            case ARK_TEXT_DATA_DETECTOR_TYPE_DATE_TIME:
+                ret += "datetime";
+                break;
+            default:
+                break;
+        }
+        bool isLast = idx == (src.length - 1);
+        if (!isLast) {
+            ret += ",";
+        }
+    }
+    dst = ret;
+}
+
+template<>
+DecorationStyleInterface Convert(const Ark_DecorationStyleInterface& src)
+{
+    DecorationStyleInterface ret;
+    ret.type = OptConvert<TextDecoration>(src.type);
+    ret.color = OptConvert<Color>(src.color);
+    ret.style = OptConvert<TextDecorationStyle>(src.style);
+    return ret;
+}
+
+template<>
+TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
+{
+    TextDetectConfig ret;
+    ret.types = OptConvert<std::string>(src.types).value_or("");
+    auto onDetectResultUpdate = OptConvert<Callback_String_Void>(src.onDetectResultUpdate);
+    if (onDetectResultUpdate) {
+        auto callback = [arkCallback = CallbackHelper(*onDetectResultUpdate)](const std::string& arg) -> void {
+            ConvContext ctx;
+            auto arkArg = ArkValue<Ark_String>(arg, &ctx);
+            arkCallback.Invoke(arkArg);
+        };
+        ret.onResult = callback;
+    }
+    if (auto color = OptConvert<Color>(src.color); color) {
+        ret.entityColor = color.value();
+    }
+    auto decoration = OptConvert<DecorationStyleInterface>(src.decoration);
+    if (decoration) {
+        if (auto type = decoration->type) {
+            ret.entityDecorationType = type.value();
+        }
+        if (auto color = decoration->color) {
+            ret.entityDecorationColor = color.value();
+        }
+        if (auto style = decoration->style) {
+            ret.entityDecorationStyle = style.value();
+        }
+    }
+    return ret;
 }
 
 template<>

@@ -152,62 +152,6 @@ void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src, C
 }
 
 template<>
-void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
-{
-    CHECK_NULL_VOID(src.array);
-    std::string ret;
-    for (int idx = 0; idx < src.length; idx++) {
-        Ark_TextDataDetectorType type = src.array[idx];
-        switch (type) {
-            case ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER:
-                ret += "phoneNum";
-                break;
-            case ARK_TEXT_DATA_DETECTOR_TYPE_URL:
-                ret += "url";
-                break;
-            case ARK_TEXT_DATA_DETECTOR_TYPE_EMAIL:
-                ret += "email";
-                break;
-            case ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS:
-                ret += "location";
-                break;
-            case ARK_TEXT_DATA_DETECTOR_TYPE_DATE_TIME:
-                ret += "datetime";
-                break;
-            default:
-                break;
-        }
-        bool isLast = idx == (src.length - 1);
-        if (!isLast) {
-            ret += ",";
-        }
-    }
-    dst = ret;
-}
-
-template<>
-void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_DecorationStyleInterface& src)
-{
-    if (auto style = Converter::OptConvert<TextDecorationStyle>(src.style); style) {
-        dst = style.value();
-    }
-}
-
-template<>
-TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
-{
-    TextDetectConfig ret;
-    ret.types = Converter::OptConvert<std::string>(src.types).value_or("");
-    if (auto color = Converter::OptConvert<Color>(src.color); color) {
-        ret.entityColor = color.value();
-    }
-    if (auto style = Converter::OptConvert<TextDecorationStyle>(src.decoration); style) {
-        ret.entityDecorationStyle = style.value();
-    }
-    return ret;
-}
-
-template<>
 void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderStyle& src)
 {
     PlaceholderOptions ret;

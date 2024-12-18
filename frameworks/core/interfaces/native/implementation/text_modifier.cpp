@@ -473,9 +473,8 @@ void DataDetectorConfigImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextModelNG::SetDataDetectorConfig(frameNode, convValue);
-    LOGW("TextAttributeModifier::EnableDataDetectorImpl not implemented");
+    auto convValue = Converter::Convert<TextDetectConfig>(*value);
+    TextModelNG::SetTextDetectConfig(frameNode, convValue);
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
                                const Callback_Number_Number_Void* value)
