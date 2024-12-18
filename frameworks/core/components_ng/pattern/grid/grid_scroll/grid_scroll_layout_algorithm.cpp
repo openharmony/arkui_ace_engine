@@ -1130,9 +1130,10 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         if (lineHeight == info_.lineHeightMap_.end()) {
             break;
         }
-        info_.startMainLineIndex_--;
+        --info_.startMainLineIndex_;
         info_.startIndex_ = line->second.begin()->second;
         info_.currentOffset_ -= lineHeight->second + mainGap_;
+        info_.currentHeight_ -= lineHeight->second + mainGap_;
     }
 
     // skip lines not in matrix
@@ -1173,9 +1174,10 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         if (lineHeight == info_.lineHeightMap_.end()) {
             break;
         }
-        info_.startMainLineIndex_++;
-        info_.endMainLineIndex_++;
+        ++info_.startMainLineIndex_;
+        ++info_.endMainLineIndex_;
         info_.currentOffset_ += lineHeight->second + mainGap_;
+        info_.currentHeight_ += lineHeight->second + mainGap_;
     }
     info_.UpdateStartIndexByStartLine();
 
