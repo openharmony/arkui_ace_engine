@@ -103,7 +103,6 @@ constexpr int32_t TEXT_SIZE_INT = 10;
 constexpr int32_t MAX_LINES = 500;
 constexpr int32_t CURSOR_COLOR = 0;
 constexpr int32_t SELECTED_COLOR = 0;
-constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 constexpr Dimension BASELINE_OFFSET_VALUE = Dimension(20, DimensionUnit::PX);
 constexpr Dimension ADAPT_MIN_FONT_SIZE_VALUE = Dimension(50, DimensionUnit::PX);
 constexpr Dimension ADAPT_OVER_MIN_FONT_SIZE_VALUE = Dimension(100, DimensionUnit::PX);

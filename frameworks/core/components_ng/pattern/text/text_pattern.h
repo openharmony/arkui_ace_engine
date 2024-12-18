@@ -714,6 +714,10 @@ public:
     }
 
     void DoTextSelectionTouchCancel() override;
+
+    std::string GetCaretColor() const;
+    std::string GetSelectedBackgroundColor() const;
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
