@@ -943,6 +943,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h @arkui_image
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.cpp @guozonghao11
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h @guozonghao11
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.cpp @arkuipopupwindow
@@ -2627,6 +2629,7 @@ frameworks/core/components_ng/render/media_player_creator.cpp @arkuilayout
 frameworks/core/components_ng/render/media_player.h @arkuilayout
 frameworks/core/components_ng/render/modifier_adapter.h @arkuiframework
 frameworks/core/components_ng/render/node_paint_method.h @arkuiframework
+frameworks/core/components_ng/render/paint_property.cpp @arkuiframework
 frameworks/core/components_ng/render/paint_property.h @arkuiframework
 frameworks/core/components_ng/render/paint_wrapper.cpp @arkuiframework
 frameworks/core/components_ng/render/paint_wrapper.h @arkuiframework
@@ -2646,6 +2649,7 @@ frameworks/core/components_ng/render/render_surface.h @arkuilayout
 frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout
 frameworks/core/components_ng/render/snapshot_param.h @arkuievent
+frameworks/core/components_ng/token_theme/ @guozonghao11
 frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
@@ -2849,6 +2853,8 @@ frameworks/core/interfaces/native/node/text_clock_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/text_clock_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/text_timer_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/text_timer_modifier.h @arkui_image
+frameworks/core/interfaces/native/node/theme_modifier.cpp @guozonghao11
+frameworks/core/interfaces/native/node/theme_modifier.h @guozonghao11
 frameworks/core/interfaces/native/node/touch_event_convertor.h @arkuievent
 frameworks/core/interfaces/native/node/util_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/util_modifier.h @arkuiframework
