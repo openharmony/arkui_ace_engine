@@ -345,7 +345,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
             return;
         }
 
-        if (renderSurface->IsSurfaceValid()) {
+        if (!renderSurface->IsSurfaceValid()) {
             auto renderContext = renderContextWeak.Upgrade();
             CHECK_NULL_VOID(renderContext);
             if (!SystemProperties::GetExtSurfaceEnabled()) {
