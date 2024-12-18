@@ -47,4 +47,7 @@ const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
     return &ContextMenuAccessorImpl;
 }
 
+struct ContextMenuPeer {
+    virtual ~ContextMenuPeer() = default;
+};
 }

@@ -61,4 +61,7 @@ const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
     return &ICurveAccessorImpl;
 }
 
+struct ICurvePeer {
+    virtual ~ICurvePeer() = default;
+};
 }

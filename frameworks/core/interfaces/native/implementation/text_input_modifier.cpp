@@ -428,7 +428,7 @@ void ShowErrorImpl(Ark_NativePointer node,
     TextFieldModelNG::SetShowError(frameNode, convTextValue, convBoolValue);
 }
 void ShowUnitImpl(Ark_NativePointer node,
-                  const Callback_Any* value)
+                  const CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -741,7 +741,7 @@ void InputFilterImpl(Ark_NativePointer node,
     TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Callback_Any* value,
+                        const CustomNodeBuilder* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

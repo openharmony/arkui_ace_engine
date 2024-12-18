@@ -47,6 +47,7 @@ namespace GeneratedApiImpl {
     void RegisterCustomNodeAsyncEvent(Ark_NodeHandle node, Ark_Int32 eventType, void* extraParam);
     Ark_Int32 UnregisterCustomNodeEvent(Ark_NodeHandle node, Ark_Int32 eventType);
     void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle node, Ark_Int32 callback);
+    void SetCustomNodeDestroyCallback(void (*destroy)(Ark_NodeHandle nodeId));
     Ark_Int32 MeasureLayoutAndDraw(Ark_VMContext vmContext, Ark_NodeHandle rootPtr);
     Ark_Int32 MeasureNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32* data);
     Ark_Int32 LayoutNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32 (*data)[2]);
@@ -149,7 +150,6 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier();
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier();
 const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier();
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier();
-const GENERATED_ArkUICommonTransitionModifier* GetCommonTransitionModifier();
 const GENERATED_ArkUIPanelModifier* GetPanelModifier();
 const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier();
 const GENERATED_ArkUIPathModifier* GetPathModifier();
@@ -206,6 +206,11 @@ const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier();
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
+const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
+const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
+const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
+const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
 const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor();
@@ -363,7 +368,6 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetNavRouterModifier,
         GetNavigatorModifier,
         GetNodeContainerModifier,
-        GetCommonTransitionModifier,
         GetPanelModifier,
         GetPasteButtonModifier,
         GetPathModifier,
@@ -426,6 +430,11 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
+        GetUnifiedDataAccessor,
+        GetDrawingCanvasAccessor,
+        GetFrameNodeAccessor,
+        GetPixelMapAccessor,
+        GetEventEmulatorAccessor,
         GetActionSheetAccessor,
         GetAlertDialogAccessor,
         GetCalendarControllerAccessor,
@@ -540,8 +549,7 @@ const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
         OHOS::Ace::NG::GeneratedApiImpl::ApplyModifierFinish,
         OHOS::Ace::NG::GeneratedApiImpl::MarkDirty,
         OHOS::Ace::NG::GeneratedApiImpl::IsBuilderNode,
-        OHOS::Ace::NG::GeneratedApiImpl::ConvertLengthMetricsUnit,
-        OHOS::Ace::NG::GeneratedApiImpl::EmitOnClick,
+        OHOS::Ace::NG::GeneratedApiImpl::ConvertLengthMetricsUnit
     };
     return &basicNodeAPIImpl;
 }
@@ -557,6 +565,7 @@ const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI()
         OHOS::Ace::NG::GeneratedApiImpl::SetCustomMethodFlag,
         OHOS::Ace::NG::GeneratedApiImpl::GetCustomMethodFlag,
         OHOS::Ace::NG::GeneratedApiImpl::SetCustomCallback,
+        OHOS::Ace::NG::GeneratedApiImpl::SetCustomNodeDestroyCallback,
         OHOS::Ace::NG::GeneratedApiImpl::MeasureLayoutAndDraw,
         OHOS::Ace::NG::GeneratedApiImpl::MeasureNode,
         OHOS::Ace::NG::GeneratedApiImpl::LayoutNode,

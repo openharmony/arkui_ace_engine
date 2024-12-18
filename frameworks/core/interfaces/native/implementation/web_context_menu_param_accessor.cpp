@@ -147,4 +147,7 @@ const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor
     return &WebContextMenuParamAccessorImpl;
 }
 
+struct WebContextMenuParamPeer {
+    virtual ~WebContextMenuParamPeer() = default;
+};
 }

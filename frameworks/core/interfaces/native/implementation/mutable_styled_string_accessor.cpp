@@ -107,4 +107,7 @@ const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor
     return &MutableStyledStringAccessorImpl;
 }
 
+struct MutableStyledStringPeer {
+    virtual ~MutableStyledStringPeer() = default;
+};
 }

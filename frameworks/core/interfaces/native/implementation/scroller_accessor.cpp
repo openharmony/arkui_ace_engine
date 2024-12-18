@@ -130,4 +130,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
     return &ScrollerAccessorImpl;
 }
 
+struct ScrollerPeer {
+    virtual ~ScrollerPeer() = default;
+};
 }

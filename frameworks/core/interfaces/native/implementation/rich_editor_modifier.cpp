@@ -571,7 +571,7 @@ void BarStateImpl(Ark_NativePointer node,
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,
-                           const Callback_Any* content,
+                           const CustomNodeBuilder* content,
                            const Ark_Union_ResponseType_RichEditorResponseType* responseType,
                            const Opt_SelectionMenuOptions* options)
 {
@@ -610,16 +610,16 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
         };
     }
 
-    std::function<void()> buildFunc = [arkCallback = CallbackHelper(*content)]() {
-        Callback_Any_Void continuation;
-        arkCallback.Invoke(continuation);
+    std::function<void()> buildFunc = [arkCallback = CallbackHelper(*content), parentNode = frameNode]() {
+        Callback_Pointer_Void continuation;
+        arkCallback.Invoke(parentNode, continuation);
     };
 
     RichEditorModelNG::BindSelectionMenu(
         frameNode, aceSpanType.value(), aceResponseType.value(), buildFunc, menuParam);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Callback_Any* value,
+                        const CustomNodeBuilder* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -632,9 +632,9 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     }
     std::function<void()> callback = []() {};
     if (value) {
-        callback = [arkCallback = CallbackHelper(*value)]() -> void {
-            Callback_Any_Void continuation;
-            arkCallback.Invoke(continuation);
+        callback = [arkCallback = CallbackHelper(*value), parentNode = frameNode]() -> void {
+            Callback_Pointer_Void continuation;
+            arkCallback.Invoke(parentNode, continuation);
         };
     }
     RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(callback), supportAvoidance);

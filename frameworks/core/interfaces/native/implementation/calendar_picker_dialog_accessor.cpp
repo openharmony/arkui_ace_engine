@@ -47,4 +47,7 @@ const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccess
     return &CalendarPickerDialogAccessorImpl;
 }
 
+struct CalendarPickerDialogPeer {
+    virtual ~CalendarPickerDialogPeer() = default;
+};
 }

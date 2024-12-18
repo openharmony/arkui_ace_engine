@@ -328,7 +328,7 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
     return Converter::ArkValue<Ark_Int32>(result);
 }
 Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
-                             const Callback_Any* value,
+                             const CustomNodeBuilder* value,
                              const Opt_RichEditorBuilderSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
@@ -470,4 +470,7 @@ const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccess
     return &RichEditorControllerAccessorImpl;
 }
 
+struct RichEditorControllerPeer {
+    virtual ~RichEditorControllerPeer() = default;
+};
 }

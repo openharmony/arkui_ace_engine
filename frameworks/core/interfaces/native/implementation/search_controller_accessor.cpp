@@ -90,4 +90,7 @@ const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
     return &SearchControllerAccessorImpl;
 }
 
+struct SearchControllerPeer {
+    virtual ~SearchControllerPeer() = default;
+};
 }

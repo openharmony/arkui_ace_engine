@@ -608,7 +608,7 @@ void InputFilterImpl(Ark_NativePointer node,
     SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Callback_Any* value,
+                        const CustomNodeBuilder* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

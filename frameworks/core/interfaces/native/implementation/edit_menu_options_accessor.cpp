@@ -55,4 +55,7 @@ const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()
     return &EditMenuOptionsAccessorImpl;
 }
 
+struct EditMenuOptionsPeer {
+    virtual ~EditMenuOptionsPeer() = default;
+};
 }

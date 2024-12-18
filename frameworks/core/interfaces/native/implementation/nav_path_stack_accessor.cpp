@@ -439,4 +439,7 @@ const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()
     return &NavPathStackAccessorImpl;
 }
 
+struct NavPathStackPeer {
+    virtual ~NavPathStackPeer() = default;
+};
 }

@@ -230,7 +230,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
     GaugeModelNG::SetGaugeStrokeWidth(frameNode, strokeWidth);
 }
 void DescriptionImpl(Ark_NativePointer node,
-                     const Callback_Any* value)
+                     const CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

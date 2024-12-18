@@ -81,4 +81,7 @@ const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccess
     return &WebContextMenuResultAccessorImpl;
 }
 
+struct WebContextMenuResultPeer {
+    virtual ~WebContextMenuResultPeer() = default;
+};
 }

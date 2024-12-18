@@ -72,4 +72,7 @@ const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()
     return &TextBaseControllerAccessorImpl;
 }
 
+struct TextBaseControllerPeer {
+    virtual ~TextBaseControllerPeer() = default;
+};
 }
