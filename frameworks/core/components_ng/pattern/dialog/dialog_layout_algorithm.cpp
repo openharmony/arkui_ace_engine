@@ -73,19 +73,21 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
     isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
-    auto dialogContext = dialogPattern->GetDialogContext();
+    auto dialogContext = dialogPattern->GetContext();
     CHECK_NULL_VOID(dialogContext);
     isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() || dialogPattern->GetCustomNode()) &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
                             GreatOrEqual(dialogContext->GetFontScale(), 1.75f);
-    auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
-    if (isPickekDiaglog || customSize_) {
+    auto isPickerDialog = dialogPattern->GetIsPickerDialog();
+    if (isPickerDialog || customSize_) {
         isSuitableForElderly_ = false;
     }
     if (isSuitableForElderly_ || GreatOrEqual(dialogContext->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
     UpdateSafeArea();
+    isShowInFloatingWindow_ = dialogPattern->IsShowInFloatingWindow();
+    ResizeDialogSubwindow(expandDisplay_, isShowInSubWindow_, isShowInFloatingWindow_);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
@@ -123,6 +125,18 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             dialogMaxHeight_ = childLayoutConstraint.maxSize.Height();
         }
         AnalysisHeightOfChild(layoutWrapper);
+    }
+}
+
+void DialogLayoutAlgorithm::ResizeDialogSubwindow(
+    bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow)
+{
+    if (expandDisplay && isShowInSubWindow && isShowInFloatingWindow) {
+        auto currentId = Container::CurrentId();
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
+            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
+        CHECK_NULL_VOID(subWindow);
+        subWindow->ResizeDialogSubwindow();
     }
 }
 

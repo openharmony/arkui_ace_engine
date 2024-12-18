@@ -61,7 +61,7 @@ public:
         paintRect_ = rect;
     }
 
-    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -117,12 +117,24 @@ public:
         opacityMultiplier_ = opacity;
     }
 
+    bool HasDisappearTransition() const
+    {
+        return hasDisappearTransition_;
+    }
+
+    void SetTransitionOutCallback(std::function<void()>&& callback)
+    {
+        transitionOutCallback_ = std::move(callback);
+    }
+
     bool isVisible_ = true;
+    bool hasDisappearTransition_ = false;
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
+    std::function<void()> transitionOutCallback_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

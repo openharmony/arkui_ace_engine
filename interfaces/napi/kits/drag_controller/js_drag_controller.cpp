@@ -29,11 +29,11 @@
 #include "jsnapi.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
+#include "interaction_manager.h"
 
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -62,7 +62,7 @@ constexpr int32_t PARAMETER_NUM = 2;
 constexpr int32_t ARG_COUNT_3 = 3;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 1;
+constexpr int32_t SOURCE_TOOL_PEN = 2;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 
@@ -97,8 +97,9 @@ struct DragControllerAsyncCtx {
     bool hasHandle = false;
     int32_t globalX = -1;
     int32_t globalY = -1;
-    uint64_t displayId = 0;
+    int32_t displayId = 0;
     int32_t sourceType = 0;
+    int32_t toolType = -1;
     float windowScale = 1.0f;
     float dipScale = 0.0;
     int parseBuilderCount = 0;
@@ -187,6 +188,7 @@ public:
             }
             napi_delete_reference(asyncCtx_->env, customBuilderValue);
         }
+        asyncCtx_->dragAction = nullptr;
         asyncCtx_ = nullptr;
     }
 
@@ -236,7 +238,11 @@ public:
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
         DragAction* dragAction = ConvertDragAction(env, thisVar);
-        CHECK_NULL_RETURN(dragAction, nullptr);
+        if (!dragAction) {
+            NapiThrow(env, "convert drag action failed.", ERROR_CODE_PARAM_INVALID);
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         if (argc == 1) {
             for (const auto& item : dragAction->cbList_) {
                 napi_delete_reference(dragAction->env_, item);
@@ -722,9 +728,6 @@ void EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
 {
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    asyncCtx->displayId = displayInfo->GetDisplayId();
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
@@ -764,7 +767,7 @@ void EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
-        recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
+        recordSize, pointerId, asyncCtx->toolType, asyncCtx->globalX, asyncCtx->globalY,
         asyncCtx->displayId, windowId, true, false, summary };
 }
 
@@ -788,10 +791,11 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     std::string summarys = NG::DragDropFuncWrapper::GetSummaryString(dragData.value().summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "dragData, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordSize %{public}d, "
-        "extraParams length %{public}d, pointerId %{public}d, summary %{public}s.",
+        "extraParams length %{public}d, pointerId %{public}d, toolType %{public}d, summary %{public}s.",
         pixelMap->GetWidth(), pixelMap->GetHeight(),
         NG::DragDropFuncWrapper::GetAnonyString(dragData.value().udKey).c_str(), dragData.value().dragNum,
-        static_cast<int32_t>(asyncCtx->extraParams.length()), asyncCtx->pointerId, summarys.c_str());
+        static_cast<int32_t>(asyncCtx->extraParams.length()), asyncCtx->pointerId, asyncCtx->toolType,
+        summarys.c_str());
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
     if (ret != 0) {
@@ -857,9 +861,6 @@ void OnComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     CHECK_NULL_VOID(taskExecutor);
     auto windowScale = container->GetWindowScale();
     asyncCtx->windowScale = windowScale;
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    asyncCtx->displayId = displayInfo->GetDisplayId();
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -975,8 +976,8 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& r
     auto windowId = container->GetWindowId();
     Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
     Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams,
-        arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX,
-        asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
+        arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->toolType,
+        asyncCtx->globalX, asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
@@ -1412,7 +1413,8 @@ bool ParsePreviewOptions(
                 asyncCtx->dragPreviewOption.isShowBadge = true;
             } else {
                 asyncCtx->dragPreviewOption.isNumber = true;
-                napi_get_value_int32(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.badgeNumber);
+                asyncCtx->dragPreviewOption.isShowBadge = false;
+                asyncCtx->dragPreviewOption.badgeNumber = number;
             }
         } else if (valueType == napi_boolean) {
             asyncCtx->dragPreviewOption.isNumber = false;
@@ -1594,12 +1596,13 @@ bool ConfirmCurPointerEventInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx
     int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(
         asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType,
-        sourceTool, std::move(stopDragCallback));
+        sourceTool, asyncCtx->displayId, std::move(stopDragCallback));
     if (asyncCtx->sourceType == SOURCE_TYPE_MOUSE) {
         asyncCtx->pointerId = MOUSE_POINTER_ID;
     } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         asyncCtx->pointerId = PEN_POINTER_ID;
     }
+    asyncCtx->toolType = sourceTool;
     return getPointSuccess;
 }
 

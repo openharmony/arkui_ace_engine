@@ -36,7 +36,11 @@
 #ifndef ARKUI_NATIVE_TYPE_H
 #define ARKUI_NATIVE_TYPE_H
 
+#ifdef __cplusplus
 #include <cstdint>
+#else
+#include <stdint.h>
+#endif
 
 #include "drawable_descriptor.h"
 
@@ -188,6 +192,20 @@ typedef struct ArkUI_ImageAnimatorFrameInfo ArkUI_ImageAnimatorFrameInfo;
  * @since 12
 */
 typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
+
+/**
+ * @brief Define the information of the Custom Property class for custom properties.
+ *
+ * @since 14
+ */
+typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
+
+/**
+ * @brief Define ActiveChildenInfo class information.
+ *
+ * @since 14
+ */
+typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
@@ -793,6 +811,19 @@ typedef enum {
      * effect; otherwise, the Swiper triggers the edge effect. */
     ARKUI_SWIPER_NESTED_SRCOLL_SELF_FIRST,
 } ArkUI_SwiperNestedScrollMode;
+
+/**
+ * @brief Enumerates the page flipping modes using the mouse wheel for the <b>Swiper</b> component.
+ *
+ * @since 14
+ */
+typedef enum {
+    /** When the mouse wheel is scrolled continuously, multiple pages are flipped, which is determined by the number of
+     *  times that mouse events are reported. */
+    ARKUI_PAGE_FLIP_MODE_CONTINUOUS = 0,
+    /** The system does not respond to other mouse wheel events until the page flipping animation ends. */
+    ARKUI_PAGE_FLIP_MODE_SINGLE,
+} ArkUI_PageFlipMode;
 
 /**
  * @brief Enumerates the accessibility modes.
@@ -3529,6 +3560,63 @@ void OH_ArkUI_AccessibilityValue_SetCurrent(ArkUI_AccessibilityValue* value, int
 int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value);
 
 /**
+ * @brief Set accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @param rangeMin minimum value based on range components, The default value is -1。
+ * @since 16
+*/
+void OH_ArkUI_AccessibilityValue_SetRangeMin(ArkUI_AccessibilityValue* value, int32_t rangeMin);
+
+/**
+ * @brief Get accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @return minimum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 16
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMin(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility maximum value.
+ *
+ * @param value accessibility value object.
+ * @param rangeMax maximum value based on range components, The default value is -1。
+ * @since 16
+*/
+void OH_ArkUI_AccessibilityValue_SetRangeMax(ArkUI_AccessibilityValue* value, int32_t rangeMax);
+
+/**
+ * @brief Get accessibility maximum value.
+ *
+ * @param value accessibility value object.
+ * @return maximum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 16
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMax(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @param rangeCurrent value based on range components, The default value is -1。
+ * @since 16
+*/
+void OH_ArkUI_AccessibilityValue_SetRangeCurrent(ArkUI_AccessibilityValue* value, int32_t rangeCurrent);
+
+/**
+ * @brief Get accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @return current value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 16
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetRangeCurrent(ArkUI_AccessibilityValue* value);
+
+/**
  * @brief Set accessibility text value.
  *
  * @param value accessibility value object.
@@ -3747,6 +3835,49 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info);
  * @since 12
 */
 float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info);
+
+/**
+ * @brief Destroy the instance of Customs Property.
+ *
+ * @param handle The instance of Customs Property to be destroyed.
+ * @since 14
+ */
+void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle);
+
+/**
+ * @brief Get custom attribute value information.
+ *
+ * @param handle Custom attribute object pointer.
+ * @return Customize the value information within the attribute structure.
+ * @since 14
+ */
+const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle);
+
+/**
+ * @brief Destroy ActiveChildenInfo instance.
+ *
+ * @param handle ActiveChild instance to be destroyed.
+ * @since 14
+ */
+void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle);
+
+/**
+ * @brief Retrieve the child nodes of ActiveChildenInfo with the structure index.
+ *
+ * @param handle The ActiveChildenInfo instance for obtaining information.
+ * @return The child node pointer corresponding to the index. Return nullptr in case of exception
+ * @since 14
+ */
+ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildrenInfo* handle, int32_t index);
+
+/**
+ * @brief Retrieve the number of nodes within the structure of ActiveChildenInfo.
+ *
+ * @param handle The ActiveChildenInfo instance for obtaining information.
+ * @return Number of child nodes. Default value:0.
+ * @since 14
+ */
+int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle);
 #ifdef __cplusplus
 };
 #endif

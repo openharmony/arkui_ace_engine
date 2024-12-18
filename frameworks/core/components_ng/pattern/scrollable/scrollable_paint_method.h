@@ -34,11 +34,12 @@ public:
         overlayRenderContext_ = overlayRenderContext;
     }
 
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f, float startPercent = 0.0f,
-        float endPercent = 1.0f)
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, bool hasFadingEdge, float percentFading = 0.0f,
+        float startPercent = 0.0f, float endPercent = 1.0f)
     {
         isFadingTop_ = isFadingTop;
         isFadingBottom_ = isFadingBottom;
+        hasFadingEdge_ = hasFadingEdge;
         percentFading_ = percentFading;
         startPercent_ = startPercent;
         endPercent_ = endPercent;
@@ -59,14 +60,10 @@ protected:
     bool isVerticalReverse_ = false;
 
 private:
-    /**
-     * @brief Return the default content clip mode.
-     */
-    virtual ContentClipMode GetDefaultContentClip() const = 0;
-
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
+    bool hasFadingEdge_ = false;
     float percentFading_ = 0.0f;
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;

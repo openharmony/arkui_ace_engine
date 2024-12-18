@@ -543,7 +543,7 @@ void ViewAbstractModelImpl::SetLayoutPriority(int32_t priority)
     flex->SetDisplayIndex(priority);
 }
 
-void ViewAbstractModelImpl::SetPixelRound(uint8_t value) {}
+void ViewAbstractModelImpl::SetPixelRound(uint16_t value) {}
 
 void ViewAbstractModelImpl::SetLayoutWeight(float value)
 {
@@ -1063,7 +1063,7 @@ void ViewAbstractModelImpl::SetOnTouch(TouchEventFunc&& touchEventFunc)
     touchComponent->SetOnTouchId(onTouchId);
 }
 
-void ViewAbstractModelImpl::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
+void ViewAbstractModelImpl::SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback)
 {
     auto onKeyId = EventMarker(
         [func = std::move(onKeyCallback)](BaseEventInfo* info) {
@@ -1636,4 +1636,6 @@ void ViewAbstractModelImpl::SetAccessibilitySelected(bool selected, bool resetVa
 void ViewAbstractModelImpl::SetAccessibilityChecked(bool checked, bool resetValue)
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{}
 } // namespace OHOS::Ace::Framework

@@ -48,6 +48,17 @@ struct KeyboardShortcut {
     }
 };
 
+enum class VisibleAreaChangeTriggerReason : int32_t {
+    IDLE = 0,
+    VISIBLE_AREA_CHANGE = 1,
+    DETACH_FROM_MAINTREE = 2,
+    BACKGROUND = 3,
+    SELF_INVISIBLE = 4,
+    FRAMENODE_DESTROY = 5,
+    IS_NOT_ON_MAINTREE = 6,
+    ANCESTOR_INVISIBLE = 7,
+};
+
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class ACE_FORCE_EXPORT EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
@@ -219,6 +230,12 @@ public:
     }
 
     void ClearCustomerOnDragFunc();
+    void ClearCustomerOnDragStart();
+    void ClearCustomerOnDragEnter();
+    void ClearCustomerOnDragMove();
+    void ClearCustomerOnDragLeave();
+    void ClearCustomerOnDrop();
+    void ClearCustomerOnDragEnd();
     void FireCustomerOnDragFunc(
         DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams = "");
     bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -249,9 +266,15 @@ public:
     void FireOnAttach();
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
+    void ClearOnPreDrag();
     void FireOnDetach();
     void ClearStateStyle();
     void OnDetachClear();
+    void HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
+        const std::unique_ptr<OffsetF>& lastParentOffsetToWindow,
+        const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
+    void FireUntriggeredInnerOnAreaChanged(
+        const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
 
 protected:
     virtual void OnModifyDone() {}
@@ -294,6 +317,7 @@ private:
     bool enabled_ { true };
     bool developerEnabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;
+    std::vector<int32_t> hasInnerAreaChangeUntriggered_;
 
     std::vector<double> visibleAreaUserRatios_;
     VisibleCallbackInfo visibleAreaUserCallback_;

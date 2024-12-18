@@ -61,6 +61,11 @@ public:
         return rsUIDirector_->FlushAnimation(timeStamp);
     }
 
+    bool HasFirstFrameAnimation() override
+    {
+        return rsUIDirector_->HasFirstFrameAnimation();
+    }
+
     void FlushAnimationStartTime(uint64_t timeStamp) override
     {
         rsUIDirector_->FlushAnimationStartTime(timeStamp);
@@ -98,6 +103,7 @@ private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
 #ifdef ENABLE_ROSEN_BACKEND
+    void InitOnVsyncCallback();
     static std::recursive_mutex globalMutex_;
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
     Rosen::VSyncReceiver::FrameCallback frameCallback_;

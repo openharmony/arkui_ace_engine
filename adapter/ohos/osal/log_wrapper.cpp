@@ -102,6 +102,7 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_NODE_CONTAINER, "AceNodeContainer" },
     { AceLogTag::ACE_NATIVE_NODE, "AceNativeNode" },
     { AceLogTag::ACE_ISOLATED_COMPONENT, "AceIsolatedComponent" },
+    { AceLogTag::ACE_DYNAMIC_COMPONENT, "AceDynamicComponent" },
     { AceLogTag::ACE_SECURITYUIEXTENSION, "AceSecurityUiExtensionComponent" },
     { AceLogTag::ACE_MARQUEE, "AceMarquee" },
     { AceLogTag::ACE_OBSERVER, "AceObserver" },
@@ -129,6 +130,9 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_MEDIA_QUERY, "AceMediaQuery" },
     { AceLogTag::ACE_LAYOUT, "AceLayout" },
     { AceLogTag::ACE_STYLUS, "AceStylus"},
+    { AceLogTag::ACE_BADGE, "AceBadge"},
+    { AceLogTag::ACE_QRCODE, "AceQRCode"},
+    { AceLogTag::ACE_PROGRESS, "ACE_PROGRESS"},
 };
 // initial static member object
 LogLevel LogWrapper::level_ = LogLevel::DEBUG;

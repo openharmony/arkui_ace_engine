@@ -51,7 +51,6 @@ constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
 constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
 constexpr Dimension MIN_ADAPT_TITLE_FONT_SIZE = 14.0_vp;
-constexpr Dimension DISTANCE_FROM_SIDE_BAR_BUTTON = 8.0_vp;
 constexpr const char* TITLE_MAIN = "MainOnly";
 constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 
@@ -230,6 +229,16 @@ enum NavDestinationLifecycle {
     ON_DISAPPEAR
 };
 
+enum class NavigationSystemTransitionType {
+    NONE = 0,
+    TITLE = 1,
+    CONTENT = 1 << 1,
+    DEFAULT = 1 | (1 << 1),
+};
+inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
+{
+    return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));
+}
 struct NavSafeArea {
     float top = 0.0f;
     float bottom = 0.0f;

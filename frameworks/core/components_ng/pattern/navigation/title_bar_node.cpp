@@ -23,6 +23,24 @@ TitleBarNode::TitleBarNode(const std::string& tag, int32_t nodeId)
     : FrameNode(tag, nodeId, MakeRefPtr<TitleBarPattern>())
 {}
 
+TitleBarNode::~TitleBarNode()
+{
+    auto pipeline = GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto titleBarPattern = GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto backButtonDialog = titleBarPattern->GetBackButtonDialogNode();
+    if (backButtonDialog) {
+        overlayManager->CloseDialog(backButtonDialog);
+    }
+    auto menuItemDialog = titleBarPattern->GetLargeFontPopUpDialogNode();
+    if (menuItemDialog) {
+        overlayManager->CloseDialog(menuItemDialog);
+    }
+}
+
 RefPtr<TitleBarNode> TitleBarNode::GetOrCreateTitleBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
@@ -51,19 +69,5 @@ void TitleBarNode::MarkIsInitialTitle(bool isInitialTitle)
 {
     auto pattern = GetPattern<TitleBarPattern>();
     pattern->MarkIsInitialTitle(isInitialTitle);
-}
-
-void TitleBarNode::OnAttachToMainTree(bool recursive)
-{
-    FrameNode::OnAttachToMainTree(recursive);
-    auto layoutProperty = GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) &&
-        layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
-        auto pattern = GetPattern<TitleBarPattern>();
-        CHECK_NULL_VOID(pattern);
-        // register sideBar button info update callback
-        pattern->InitSideBarButtonUpdateCallbackIfNeeded();
-    }
 }
 } // namespace OHOS::Ace::NG

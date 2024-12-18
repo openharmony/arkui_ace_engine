@@ -134,7 +134,8 @@ export struct CalendarPickerDialogBootcamp {
             }
           })
         })
-    }.width('100%')
+    }
+    .width('100%')
   }
 
   @Builder
@@ -298,7 +299,8 @@ export struct CalendarPickerDialogBootcamp {
           max: 100
         })
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

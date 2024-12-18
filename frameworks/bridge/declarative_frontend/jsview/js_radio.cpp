@@ -32,9 +32,6 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
-std::mutex RadioModel::mutex_;
-
 enum class RadioIndicatorType {
     TICK = 0,
     DOT,
@@ -43,21 +40,18 @@ enum class RadioIndicatorType {
 
 RadioModel* RadioModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::RadioModelNG());
+    static NG::RadioModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RadioModelNG());
-            } else {
-                instance_.reset(new Framework::RadioModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::RadioModelNG instance;
+        return &instance;
+    } else {
+        static Framework::RadioModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -246,9 +240,8 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSRadio::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (info[0]->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
         CommonCalcDimension commonCalcDimension;
@@ -272,9 +265,8 @@ NG::PaddingProperty JSRadio::GetPadding(const std::optional<CalcDimension>& top,
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (left.has_value() && left.value().IsNonNegative()) {
         padding.left = NG::CalcLength(left.value());
     }

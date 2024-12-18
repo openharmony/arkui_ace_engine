@@ -125,6 +125,31 @@ HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FastSolveStartIndex004
+ * @tc.desc: Test return value when the height of first item is 0 and margin is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex004, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+
+    info.items_ = ITEM_MAP_3;
+    info.margins_ = { PaddingPropertyF { .top = 10.0f }};
+    info.endPosArray_ = { { 10.0f, 0 }, { 30.0f, 1 }};
+
+    EXPECT_EQ(info.TopMargin(), 10.0f);
+
+    info.currentOffset_ = 0.0f;
+    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+
+    info.currentOffset_ = -10.0f;
+    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+
+    info.currentOffset_ = -11.0f;
+    EXPECT_EQ(info.FastSolveStartIndex(), 1);
+}
+
+/**
  * @tc.name: FastSolveEndIndex001
  * @tc.desc: Test FastSolveEndIndex in WaterFlowLayoutInfo.
  * @tc.type: FUNC

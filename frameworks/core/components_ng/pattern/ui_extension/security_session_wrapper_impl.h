@@ -65,7 +65,7 @@ public:
     // The lifecycle interface
     void NotifyCreate() override;
     void NotifyForeground() override;
-    void NotifyBackground() override;
+    void NotifyBackground(bool isHandleError) override;
     void NotifyDestroy(bool isHandleError = true) override;
     void NotifyConfigurationUpdate() override;
 
@@ -73,6 +73,7 @@ public:
     void OnConnect() override;
     void OnDisconnect(bool isAbnormal) override;
     void OnExtensionTimeout(int32_t errorCode) override;
+    void OnExtensionDetachToDisplay() override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
 
     // The interface about the accessibility

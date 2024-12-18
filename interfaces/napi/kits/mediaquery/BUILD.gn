@@ -32,6 +32,12 @@ template("napi_mediaquery_static") {
       external_deps += [ "napi:ace_napi" ]
     }
 
+    if (platform != "" && (is_arkui_x || is_mingw || is_mac || is_linux)) {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
+    } else {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+    }
+
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }

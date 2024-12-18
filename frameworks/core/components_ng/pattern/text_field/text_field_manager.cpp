@@ -42,6 +42,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
         focusFieldIsInline = false;
         optionalPosition_ = std::nullopt;
         usingCustomKeyboardAvoid_ = false;
+        isScrollableChild_ = false;
     }
 }
 
@@ -56,10 +57,10 @@ bool TextFieldManagerNG::OnBackPressed()
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto rootHeight = pipeline->GetRootHeight();
-    if (GreatOrEqual(position.GetY(), rootHeight)) {
+    if (GreatOrEqual(position.GetY(), rootHeight) || LessOrEqual(position.GetY(), 0.0f)) {
         auto pattern = onFocusTextField_.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -71,9 +72,6 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
             }
             parent = parent->GetAncestorNodeOfFrame();
         }
-    }
-    if (LessOrEqual(position.GetY(), 0.0f)) {
-        return;
     }
     auto rootWidth = pipeline->GetRootWidth();
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
@@ -151,10 +149,30 @@ void TextFieldManagerNG::TriggerAvoidOnCaretChange()
     } else {
         ScrollTextFieldToSafeArea();
         auto keyboardInset = safeAreaManager->GetKeyboardInset();
+        lastKeyboardOffset_ = safeAreaManager->GetKeyboardOffsetDirectly();
         Rect keyboardRect;
         keyboardRect.SetRect(0, 0, 0, keyboardInset.Length());
-        pipeline->OnVirtualKeyboardAreaChange(keyboardRect, 0, 0);
+        pipeline->OnVirtualKeyboardAreaChange(keyboardRect,
+            GetFocusedNodeCaretRect().Top(), GetHeight());
     }
+    auto currentKeyboardOffset = safeAreaManager->GetKeyboardOffsetDirectly();
+    if (currentKeyboardOffset != lastKeyboardOffset_) {
+        AvoidKeyboardInSheet(host);
+    }
+}
+
+void TextFieldManagerNG::GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField)
+{
+    auto node = onFocusTextField.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto frameNode = node->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    isScrollableChild_ = scrollPattern->IsScrollToSafeAreaHelper();
+    TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
 }
             
 bool TextFieldManagerNG::ScrollToSafeAreaHelper(

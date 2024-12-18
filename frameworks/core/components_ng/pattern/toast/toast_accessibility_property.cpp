@@ -34,9 +34,9 @@ void ToastAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElement
     auto toastProperty = frameNode->GetPaintProperty<ToastLayoutProperty>();
     CHECK_NULL_VOID(toastProperty);
 
-    auto ToastSelectStatus = toastProperty->GetSelectStatus();
+    auto toastSelectStatus = toastProperty->GetSelectStatus();
     extraElementInfo.SetExtraElementInfo(
-        "SideBarContainerStates", static_cast<int32_t>(ToastSelectStatus));
+        "SideBarContainerStates", static_cast<int32_t>(toastSelectStatus));
 #endif
 }
 } // namespace OHOS::Ace::NG

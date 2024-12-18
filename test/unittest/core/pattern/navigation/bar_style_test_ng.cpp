@@ -30,6 +30,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
+constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+
 RefPtr<NavigationGroupNode> CreateNavigationWithTitle(const RefPtr<MockNavigationStack>& stack,
     NavigationTitlebarOptions options, NavigationTitleMode titleMode = NavigationTitleMode::FREE,
     std::optional<std::string> mainTitle = std::nullopt, std::optional<std::string> subTitle = std::nullopt)
@@ -60,7 +63,22 @@ class BarStyleTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static void RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
 };
+
+void BarStyleTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width)
+{
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { width, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { width, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { width, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { width, DEFAULT_ROOT_HEIGHT };
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+}
 
 void BarStyleTestNg::SetUpTestSuite()
 {
@@ -141,11 +159,11 @@ HWTEST_F(BarStyleTestNg, BarStyleTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SafeAreaPaddingTest001
+ * @tc.name: SafeAreaPaddingTest002
  * @tc.desc: Test whether navBar's safe area padding set without subtitle
  * @tc.type: FUNC
  */
-HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest001, TestSize.Level1)
+HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init model, create navigation with barStyle SAFE_AREA_PADDING and only mainTitle.
@@ -163,46 +181,35 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest001, TestSize.Level1)
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
     auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     ASSERT_NE(navBar, nullptr);
     auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
     ASSERT_NE(navBarContent, nullptr);
     auto contentLayoutProperty = navBarContent->GetLayoutProperty();
     ASSERT_NE(contentLayoutProperty, nullptr);
-    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    /**
-     * @tc.steps: step3. change title mode to FULL and do test again
-     */
-    navigationNode = CreateNavigationWithTitle(
-        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", std::nullopt);
-    navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    navigationPattern->OnModifyDone();
-    navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
-    navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
-    contentLayoutProperty = navBarContent->GetLayoutProperty();
-    safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    /**
-     * @tc.steps: step4. change title mode to FREE and do test again
-     */
-    navigationNode = CreateNavigationWithTitle(
-        mockNavPathStack, options, NavigationTitleMode::FREE, "navigationMainTitle", std::nullopt);
-    navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    navigationPattern->OnModifyDone();
-    navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
-    navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
-    contentLayoutProperty = navBarContent->GetLayoutProperty();
-    safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(safeAreaPadding, nullptr);
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 
 /**
- * @tc.name: SafeAreaPaddingTest002
- * @tc.desc: Test whether navBar's safe area padding set with subtitle
+ * @tc.name: SafeAreaPaddingTest003
+ * @tc.desc: Test whether navBar's safe area padding set without subtitle
  * @tc.type: FUNC
  */
-HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest002, TestSize.Level1)
+HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init model, create navigation with barStyle SAFE_AREA_PADDING and only mainTitle.
@@ -212,7 +219,7 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest002, TestSize.Level1)
     NavigationTitlebarOptions options;
     options.brOptions.barStyle = candidateBarStyle;
     auto navigationNode = CreateNavigationWithTitle(
-        mockNavPathStack, options, NavigationTitleMode::MINI, "navigationMainTitle", "subTitle");
+        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", std::nullopt);
     ASSERT_NE(navigationNode, nullptr);
     /**
      * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
@@ -220,46 +227,173 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest002, TestSize.Level1)
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
     auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     ASSERT_NE(navBar, nullptr);
     auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
     ASSERT_NE(navBarContent, nullptr);
     auto contentLayoutProperty = navBarContent->GetLayoutProperty();
     ASSERT_NE(contentLayoutProperty, nullptr);
-    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    /**
-     * @tc.steps: step3. change title mode to FULL and do test again
-     */
-    navigationNode = CreateNavigationWithTitle(
-        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", "subTitle");
-    navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    navigationPattern->OnModifyDone();
-    navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
-    navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
-    contentLayoutProperty = navBarContent->GetLayoutProperty();
-    safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    /**
-     * @tc.steps: step4. change title mode to FREE and do test again
-     */
-    navigationNode = CreateNavigationWithTitle(
-        mockNavPathStack, options, NavigationTitleMode::FREE, "navigationMainTitle", "subTitle");
-    navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    navigationPattern->OnModifyDone();
-    navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
-    navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
-    contentLayoutProperty = navBarContent->GetLayoutProperty();
-    safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(safeAreaPadding, nullptr);
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 
 /**
- * @tc.name: SafeAreaPaddingTest003
+ * @tc.name: SafeAreaPaddingTest004
+ * @tc.desc: Test whether navBar's safe area padding set without subtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle SAFE_AREA_PADDING and only mainTitle.
+     */
+    auto candidateBarStyle = BarStyle::SAFE_AREA_PADDING;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::FREE, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(safeAreaPadding, nullptr);
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: SafeAreaPaddingTest005
+ * @tc.desc: Test whether navBar's safe area padding set with subtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle SAFE_AREA_PADDING and only mainTitle.
+     */
+    auto candidateBarStyle = BarStyle::SAFE_AREA_PADDING;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::MINI, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(safeAreaPadding, nullptr);
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: SafeAreaPaddingTest006
+ * @tc.desc: Test whether navBar's safe area padding set with subtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle SAFE_AREA_PADDING and only mainTitle.
+     */
+    auto candidateBarStyle = BarStyle::SAFE_AREA_PADDING;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(safeAreaPadding, nullptr);
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: SafeAreaPaddingTest007
  * @tc.desc: Test whether navDest's safe area padding set with subtitle
  * @tc.type: FUNC
  */
-HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest003, TestSize.Level1)
+HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. init model, create navdestination with barStyle SAFE_AREA_PADDING and only mainTitle.
@@ -271,21 +405,21 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest003, TestSize.Level1)
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(navDestinationPattern, nullptr);
     navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
     auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
     ASSERT_NE(navDestinationContent, nullptr);
     auto contentLayoutProperty = navDestinationContent->GetLayoutProperty();
     ASSERT_NE(contentLayoutProperty, nullptr);
-    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    /**
-     * @tc.steps: step2. create subtitle and do test again.
-     */
-    navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", "subTitle");
-    navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
-    navDestinationPattern->OnModifyDone();
-    navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
-    contentLayoutProperty = navDestinationContent->GetLayoutProperty();
-    safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    ASSERT_EQ(safeAreaPaddingF.top.value_or(0.0f), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    ASSERT_NE(safeAreaPadding, nullptr);
+    ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
+        CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
 }
 } // namespace OHOS::Ace::NG

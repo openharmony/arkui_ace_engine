@@ -70,11 +70,6 @@ public:
     static void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled);
     static uint32_t GetOrInitMaxMenuNums(
         const RefPtr<NavigationBarTheme>& theme, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase);
-    static void HandleLongPress(
-        const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
-    static void HandleLongPressActionEnd(const RefPtr<FrameNode>& buttonNode);
-    static void InitDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
-
     static std::string GetTitleString(const RefPtr<TitleBarNode>& titleBarNode, bool isCustom);
     static std::string GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode);
 
@@ -108,15 +103,13 @@ public:
     static void FoldStatusChangedAnimation(const RefPtr<FrameNode>& host);
 
     static bool IsNeedHoverModeAction(const RefPtr<TitleBarNode>& titleBarNode);
-private:
+
     static RefPtr<FrameNode> CreatePopupDialogNode(
         const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);
     static RefPtr<FrameNode> CreateSymbolDialog(const std::string& message, const RefPtr<FrameNode>& targetNode);
-
-    static void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
-        const std::vector<NG::BarItem>& menuItems);
-    static void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
-        const std::vector<NG::BarItem>& menuItems);
+    static void UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<FrameNode>& barNode, float translate, bool isTitle);
+    static bool IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode);
 };
 
 } // namespace OHOS::Ace::NG

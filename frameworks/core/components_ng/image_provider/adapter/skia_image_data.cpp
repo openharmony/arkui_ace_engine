@@ -69,10 +69,6 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
     if (SystemProperties::GetSvgMode() <= 0) {
         return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, svgFillColor);
     }
-#ifdef NG_BUILD
-    LOGE("NG SvgDom not support!");
-    return nullptr;
-#else
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, svgFillColor);
     if (!svgDom_) {
         return nullptr;
@@ -84,7 +80,6 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
             return context->NormalizeToPx(value);
         });
     return svgDom_;
-#endif
 }
 
 std::pair<SizeF, int32_t> SkiaImageData::Parse() const

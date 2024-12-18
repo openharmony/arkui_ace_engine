@@ -210,7 +210,7 @@ public:
         std::function<void(bool)>&& onStatusChanged) override;
     void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
-    void RemoveCustomDialog() override;
+    void RemoveCustomDialog(int32_t instanceId) override;
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;

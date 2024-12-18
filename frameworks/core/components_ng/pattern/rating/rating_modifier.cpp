@@ -83,10 +83,9 @@ void RatingModifier::PaintBoard(DrawingContext& context)
             offset.GetX() + singleStarWidth * static_cast<float>((touchStar + 1)), offset.GetY() + singleStarHeight);
         const RSRoundRect rsRoundRect(rsRect, static_cast<float>(pressBorderRadius.ConvertToPx()),
             static_cast<float>(pressBorderRadius.ConvertToPx()));
-        canvas.Save();
-        canvas.ClipRoundRect(rsRoundRect, RSClipOp::INTERSECT);
-        canvas.DrawBackground(rsBrush);
-        canvas.Restore();
+        canvas.AttachBrush(rsBrush);
+        canvas.DrawRoundRect(rsRoundRect);
+        canvas.DetachBrush();
     }
 }
 

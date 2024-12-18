@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
@@ -126,8 +127,46 @@ public:
 
     void ClearFocusCalendarDay();
 
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+
+    Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
+
+    bool IsLargeSize(const RefPtr<CalendarTheme>& theme);
+
+    void InitFoldState()
+    {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        container->InitIsFoldable();
+        if (container->IsFoldable()) {
+            currentFoldStatus_ = container->GetCurrentFoldStatus();
+        }
+    }
+
+    void FireIsFoldStatusChanged()
+    {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (!container->IsFoldable()) {
+            return;
+        }
+        auto foldStatus = container->GetCurrentFoldStatus();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx();
+        if (foldStatus != currentFoldStatus_ && colSpace_ != colSpace && monthState_ == MonthState::CUR_MONTH) {
+            currentFoldStatus_ = foldStatus;
+            InitCalendarVirtualNode();
+            SetFocusNode(focusedCalendarDay_.index, true);
+        }
+    }
+
 private:
     void OnAttachToFrameNode() override;
+    void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
     void OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth);
@@ -138,7 +177,6 @@ private:
     void InitHoverEvent();
     void SetColRowSpace();
     int32_t JudgeArea(const Offset& offset);
-    Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
     RefPtr<FrameNode> AddButtonNodeIntoVirtual(const CalendarDay& calendarDay);
     void UpdateAccessibilityButtonNode(RefPtr<FrameNode> frameNode, int32_t index);
     void UpdateButtonNodeWithoutTheme(RefPtr<FrameNode> frameNode, int32_t index);
@@ -155,6 +193,7 @@ private:
     void ChangeVirtualNodeState(const CalendarDay& calendarDay);
     void SetLineNodeSize(RefPtr<FrameNode> lineNode);
     void SetFocusNode(int32_t index, bool isDeviceOrientation = false);
+    float GetWidth(const RefPtr<FrameNode>& host);
     std::string GetDayStr(int32_t index);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
@@ -162,11 +201,14 @@ private:
     bool isFirstEnter_ = false;
     int32_t selectedIndex_ = 0;
     double margin_ = 0;
+    RefPtr<FrameNode> lineNode_;
     double dayHeight_ = 0;
     double dayWidth_ = 0;
+    double colSpace_ = 0;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     std::string selectedTxt_;
     std::string disabledDesc_;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     std::vector<RefPtr<AccessibilityProperty>> accessibilityPropertyVec_;
     std::vector<RefPtr<FrameNode>> buttonAccessibilityNodeVec_;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;

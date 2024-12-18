@@ -31,9 +31,9 @@ namespace OHOS::Ace::NG {
 struct SwiperItemInfo {
     float startPos = 0.0f;
     float endPos = 0.0f;
-    RefPtr<FrameNode> node;
-    OffsetF finalOffset;
-    CancelableCallback<void()> task;
+    RefPtr<FrameNode> node = nullptr;
+    OffsetF finalOffset = OffsetF();
+    CancelableCallback<void()> task = CancelableCallback<void()>();
     bool isFinishAnimation = false;
 };
 
@@ -97,6 +97,7 @@ public:
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
+        oldContentMainSize_ = contentMainSize;
     }
 
     float GetContentCrossSize() const
@@ -296,6 +297,16 @@ public:
         ignoreBlankOffset_ = ignoreBlankOffset;
     }
 
+    void SetDuringInteraction(bool duringInteraction)
+    {
+        duringInteraction_ = duringInteraction;
+    }
+
+    std::optional<int32_t> GetJumpIndex() const
+    {
+        return jumpIndex_;
+    }
+
 private:
     void LayoutForward(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
@@ -360,6 +371,7 @@ private:
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float oldContentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     int32_t totalItemCount_ = 0;
     bool mainSizeIsDefined_ = false;
@@ -371,9 +383,11 @@ private:
     bool mainSizeIsMeasured_ = false;
     bool crossMatchChild_ = false;
     bool measured_ = false; // to distinguish first and second measure in flex layout
+    bool duringInteraction_ = false; // user interacting, include touching and translating animation.
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> currentJumpIndex_;
     std::optional<int32_t> currentTargetIndex_;
     std::optional<int32_t> customAnimationToIndex_;
     std::optional<int32_t> removeFromRSTreeIndex_;
@@ -394,6 +408,7 @@ private:
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
     float ignoreBlankOffset_ = 0.0f;
+    float currentIgnoreBlankOffset_ = 0.0f;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;

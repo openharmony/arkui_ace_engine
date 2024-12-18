@@ -193,6 +193,21 @@ public:
         return (axis_ == Axis::VERTICAL ? margins_.back().bottom : margins_.back().right).value_or(0.0f);
     }
 
+    inline void CacheItemHeight(int32_t idx, float height)
+    {
+        idxToHeight_[idx] = height;
+        heightSum_ += height;
+    }
+    std::optional<float> GetCachedHeight(int32_t idx) const;
+
+    /**
+     * @brief estimate after performing a jump
+     * @param prevStart startIndex before jump
+     */
+    void EstimateTotalOffset(int32_t prevStart, int32_t startIdx);
+
+    float EstimateTotalHeight() const override;
+
     /**
      * @brief prepare lanes in the current section.
      *
@@ -207,6 +222,14 @@ public:
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override;
 
     struct Lane;
+    /**
+     * @brief Find item's corresponding Lane
+     */
+    const Lane* GetLane(int32_t itemIdx) const;
+    Lane* GetMutableLane(int32_t itemIdx);
+
+    bool LaneOutOfBounds(size_t laneIdx, int32_t section) const;
+
     /**
      * @brief lanes in multiple sections.
      * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
@@ -235,7 +258,7 @@ private:
     inline void PrepareJump();
 
     void InitSegmentTails(const std::vector<WaterFlowSections::Section>& sections);
-    void InitLanes(const std::vector<WaterFlowSections::Section>& sections, const int32_t start);
+    void InitLanes(const std::vector<WaterFlowSections::Section>& sections, int32_t start);
 
     /**
      * @brief prepare newStartIndex_
@@ -255,16 +278,36 @@ private:
      */
     bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
+    
+    /**
+     * @param section index of section to estimate
+     * @param average item height
+     * @param bound item index boundary (inclusive)
+     */
+    float EstimateSectionHeight(uint32_t section, float average, int32_t startBound, int32_t endBound) const;
+
+    float GetAverageItemHeight() const;
 
     void ClearData();
 
+    /**
+     * @brief Sync state when there has no items in lanes.
+     */
+    void SyncOnEmptyLanes();
+
+    /**
+     * @brief cache main-axis length of measured FlowItems.
+     */
+    std::unordered_map<int32_t, float> idxToHeight_;
+    mutable float heightSum_ = 0.0f; // cache to calculate average height
+
     std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
 
-    /* cache */
     float startPos_ = 0.0f;
     float endPos_ = 0.0f;
 
     bool synced_ = false;
+    bool prevItemStart_ = false;
 
     struct ItemInfo;
 };

@@ -36,19 +36,6 @@ bool SvgPath::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     return false;
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgPath::AsPath(const Size& /* viewPort */) const
-{
-    SkPath out;
-    if (!pathD.empty()) {
-        SkParsePath::FromSVGString(d_.c_str(), &out);
-        if (attributes_.fillState.IsEvenodd()) {
-            out.setFillType(SkPathFillType::kEvenOdd);
-        }
-    }
-    return out;
-}
-#else
 RSRecordingPath SvgPath::AsPath(const Size& /* viewPort */) const
 {
     RSRecordingPath out;
@@ -60,6 +47,5 @@ RSRecordingPath SvgPath::AsPath(const Size& /* viewPort */) const
     }
     return out;
 }
-#endif
 
 } // namespace OHOS::Ace::NG

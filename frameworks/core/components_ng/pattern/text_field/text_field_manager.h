@@ -35,6 +35,14 @@ struct TextFieldInfo {
     bool enableAutoFill = true;
 };
 
+struct LaterAvoidInfo {
+    bool laterAvoid = false;
+    Rect keyboardArea;
+    double positionY = 0.0;
+    double avoidHeight = 0.0;
+    int32_t orientation = -1;
+};
+
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
     DECLARE_ACE_TYPE(TextFieldManagerNG, ManagerInterface);
 
@@ -79,8 +87,16 @@ public:
         }
         if (onFocusTextField_ != onFocusTextField) {
             SetImeAttached(false);
+            GetOnFocusTextFieldInfo(onFocusTextField);
         }
         onFocusTextField_ = onFocusTextField;
+    }
+
+    void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField);
+
+    bool IsScrollableChild()
+    {
+        return isScrollableChild_;
     }
 
     bool ScrollTextFieldToSafeArea();
@@ -198,35 +214,37 @@ public:
 
     bool GetLaterAvoid() const
     {
-        return laterAvoid_;
+        return laterAvoidInfo_.laterAvoid;
     }
 
     void SetLaterAvoid(bool laterAvoid)
     {
-        laterAvoid_ = laterAvoid;
+        laterAvoidInfo_.laterAvoid = laterAvoid;
     }
 
-    void SetLaterAvoidArgs(Rect keyboardArea, double positionY, double height)
+    void SetLaterAvoidArgs(LaterAvoidInfo laterAvoidInfo)
     {
-        laterAvoid_ = true;
-        laterAvoidKeyboardArea_ = keyboardArea;
-        laterAvoidPositionY_ = positionY;
-        laterAvoidHeight_ = height;
+        laterAvoidInfo_ = laterAvoidInfo;
     }
 
     Rect GetLaterAvoidKeyboardRect()
     {
-        return laterAvoidKeyboardArea_;
+        return laterAvoidInfo_.keyboardArea;
     }
 
     double GetLaterAvoidPositionY()
     {
-        return laterAvoidPositionY_;
+        return laterAvoidInfo_.positionY;
     }
 
     double GetLaterAvoidHeight()
     {
-        return laterAvoidHeight_;
+        return laterAvoidInfo_.avoidHeight;
+    }
+
+    int32_t GetLaterOrientation()
+    {
+        return laterAvoidInfo_.orientation;
     }
 
     void SetLastRequestKeyboardId(int32_t lastRequestKeyboardId) {
@@ -237,11 +255,57 @@ public:
         return lastRequestKeyboardId_;
     }
 
+    void SetClickPositionOffset(float clickPositionOffset)
+    {
+        clickPositionOffset_ = clickPositionOffset;
+    }
+
+    float GetClickPositionOffset()
+    {
+        return clickPositionOffset_;
+    }
+
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
     void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
+
+    void SetIsImeAttached(bool isImeAttached)
+    {
+        isImeAttached_ = isImeAttached;
+    }
+
+    bool GetIsImeAttached() const override
+    {
+        return isImeAttached_;
+    }
+
+    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
+    {
+        if (isCustomKeyboard) {
+            avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
+        } else {
+            avoidSystemKeyboardCallbacks_.insert({ id, std::move(callback) });
+        }
+    }
+
+    void RemoveAvoidKeyboardCallback(int32_t id)
+    {
+        avoidCustomKeyboardCallbacks_.erase(id);
+        avoidSystemKeyboardCallbacks_.erase(id);
+    }
+
+    void OnAfterAvoidKeyboard(bool isCustomKeyboard)
+    {
+        auto callbacks =
+            isCustomKeyboard ? std::move(avoidCustomKeyboardCallbacks_) : std::move(avoidSystemKeyboardCallbacks_);
+        for (const auto& pair : callbacks) {
+            if (pair.second) {
+                pair.second();
+            }
+        }
+    }
 
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
@@ -257,6 +321,7 @@ private:
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
     Offset position_;
+    float clickPositionOffset_ = 0.0f;
     std::optional<Offset> optionalPosition_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
@@ -267,10 +332,12 @@ private:
     bool imeAttachCalled_ = false;
     bool needToRequestKeyboard_ = true;
     std::unordered_map<int32_t, std::unordered_map<int32_t, TextFieldInfo>> textFieldInfoMap_;
-    bool laterAvoid_ = false;
-    Rect laterAvoidKeyboardArea_;
-    double laterAvoidPositionY_ = 0.0;
-    double laterAvoidHeight_ = 0.0;
+    LaterAvoidInfo laterAvoidInfo_;
+    bool isScrollableChild_ = false;
+    bool isImeAttached_ = false;
+    std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;
+    std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
+    float lastKeyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

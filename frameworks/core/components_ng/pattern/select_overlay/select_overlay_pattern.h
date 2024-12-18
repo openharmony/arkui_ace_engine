@@ -99,6 +99,8 @@ public:
 
     void UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction);
 
+    void UpdateAncestorViewPort(const std::optional<RectF>& ancestorViewPort) const;
+
     void UpdateShowArea(const RectF& area);
 
     void SetSelectRegionVisible(bool isSelectRegionVisible);
@@ -203,6 +205,7 @@ public:
             return secondHandleDrag_;
         }
     }
+    void OnColorConfigurationUpdate() override;
 
 protected:
     virtual void CheckHandleReverse();
@@ -239,6 +242,7 @@ private:
     void UpdateOffsetOnMove(RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst);
     void SetSelectMenuHeight();
     void SetContentModifierBounds(const RefPtr<SelectOverlayContentModifier>& modifier);
+    void SwitchHandleToOverlayMode(bool afterRender);
 
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -268,8 +272,6 @@ private:
 
     bool closedByGlobalTouchEvent_ = false;
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
-    bool isSimulateOnClick_ = false;
-    bool clickConsumeBySimulate_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

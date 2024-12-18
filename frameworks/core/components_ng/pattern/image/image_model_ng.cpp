@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
@@ -755,9 +756,6 @@ void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation, frameNode);
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetImageInterpolation(interpolation);
 }
 
 void ImageModelNG::ResetImageInterpolation(FrameNode *frameNode)
@@ -1039,6 +1037,22 @@ void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetAltImage();
+}
+
+void ImageModelNG::SetOrientation(ImageRotateOrientation orientation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOrientation(orientation);
+}
+
+void ImageModelNG::SetOrientation(FrameNode *frameNode, ImageRotateOrientation orientation)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOrientation(orientation);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

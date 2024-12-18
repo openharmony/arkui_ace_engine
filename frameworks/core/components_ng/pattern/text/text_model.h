@@ -47,7 +47,7 @@ struct TextDetectConfig {
 
     TextDetectConfig()
     {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
         CHECK_NULL_VOID(hyperlinkTheme);
@@ -87,7 +87,8 @@ public:
     static TextModel* GetInstance();
     virtual ~TextModel() = default;
 
-    virtual void Create(const std::string& content) = 0;
+    virtual void Create(const std::u16string& content) {};
+    virtual void Create(const std::string& content) {};
     virtual void Create(const RefPtr<SpanStringBase>& spanString) = 0;
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
@@ -122,11 +123,11 @@ public:
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
-    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) = 0;
+    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) = 0;
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
-    virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetEllipsisMode(EllipsisMode modal) = 0;
 
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;

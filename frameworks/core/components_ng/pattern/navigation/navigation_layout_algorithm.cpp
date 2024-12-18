@@ -29,6 +29,8 @@ constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 constexpr Dimension DIVIDER_DRAG_BAR_WIDTH = 12.0_vp;
 constexpr Dimension DIVIDER_DRAG_BAR_HEIGHT = 48.0_vp;
+constexpr Dimension DRAG_BAR_ITEM_WIDTH = 2.0_vp;
+constexpr Dimension DRAG_BAR_ITEM_HEIGHT = 24.0_vp;
 
 void MeasureDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& dividerSize)
@@ -53,12 +55,20 @@ void MeasureDragBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     auto index = hostNode->GetChildIndexById(dragNode->GetId());
     auto dargWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(dargWrapper);
+    auto dragBarItem = AceType::DynamicCast<FrameNode>(dragNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(dragBarItem);
+    auto dragBarItemLayoutProperty = dragBarItem->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarItemLayoutProperty);
     auto constraint = navigationLayoutProperty->CreateChildConstraint();
     if (NearZero(dividerSize.Width()) || !navigationPattern->GetEnableDragBar()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
+        dragBarItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
     } else {
         constraint.selfIdealSize = OptionalSizeF(static_cast<float>(DIVIDER_DRAG_BAR_WIDTH.ConvertToPx()),
             static_cast<float>(DIVIDER_DRAG_BAR_HEIGHT.ConvertToPx()));
+        dragBarItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DRAG_BAR_ITEM_WIDTH), CalcLength(DRAG_BAR_ITEM_HEIGHT)));
     }
     dargWrapper->Measure(constraint);
 }
@@ -78,15 +88,17 @@ void LayoutDragBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto navigationWidth = navigationGeometryNode->GetFrameSize().Width();
     auto navigationHeight = navigationGeometryNode->GetFrameSize().Height();
     auto offsetX = navBarWidth - geometryNode->GetFrameSize().Width() * HALF;
-    if (position == NavBarPosition::END) {
-        offsetX = navigationWidth - geometryNode->GetFrameSize().Width() * HALF - navBarWidth;
-    }
     auto offsetY = navigationHeight * HALF - geometryNode->GetFrameSize().Height() * HALF;
-    OffsetT<float> dargOffset = OffsetT<float>(offsetX, offsetY);
+    OffsetT<float> dragOffset = OffsetT<float>(offsetX, offsetY);
+    bool isNavBarInRight = (position == NavBarPosition::END && !AceApplicationInfo::GetInstance().IsRightToLeft()) ||
+        (position == NavBarPosition::START && AceApplicationInfo::GetInstance().IsRightToLeft());
+    if (isNavBarInRight) {
+        dragOffset.SetX(navigationWidth - navBarWidth - geometryNode->GetFrameSize().Width() * HALF);
+    }
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
-    dargOffset.AddX(padding.left.value_or(0.0f));
-    dargOffset.AddY(padding.top.value_or(0.0f));
-    geometryNode->SetMarginFrameOffset(dargOffset);
+    dragOffset.AddX(padding.left.value_or(0.0f));
+    dragOffset.AddY(padding.top.value_or(0.0f));
+    geometryNode->SetMarginFrameOffset(dragOffset);
     dargWrapper->Layout();
 }
 
@@ -376,7 +388,9 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
     bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
-    bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
+    bool enableModeChangeAnimation = navigationLayoutProperty->GetEnableModeChangeAnimation().value_or(true);
+    bool doModeSwitchAnimationInAnotherTask =
+        enableModeChangeAnimation && modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
     if (doModeSwitchAnimationInAnotherTask) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
@@ -576,6 +590,8 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navigationLayoutProperty);
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
@@ -584,6 +600,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     FitScrollFullWindow(size);
+    pattern->SetNavigationSize(size);
 
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -637,7 +654,7 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto geometryNode = hostNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-            "Navigation id is %d{public}, frameRect is %{public}s",
+            "Navigation id is %{public}d, frameRect is %{public}s",
             hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
     }
 }

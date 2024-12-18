@@ -147,7 +147,8 @@ private:
     std::string ImagesToString() const;
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
-    void DisablePreAnimatedImageAnimation(int32_t index);
+    void DisablePreAnimatedImageAnimation(uint32_t index);
+    void ControlAnimatedImageAnimation(const RefPtr<FrameNode>& imageFrameNode, bool play);
     void EnableFirstAnimatedImageAnimation();
     void UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNode, int32_t index);
     void UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index);

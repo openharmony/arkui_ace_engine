@@ -20,6 +20,11 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 
+namespace OHOS::Ace {
+
+class PipelineBase;
+};
+
 namespace OHOS::Ace::NG {
 struct ACE_EXPORT ScaleProperty {
     float vpScale = 0.0f;
@@ -44,7 +49,7 @@ struct ACE_EXPORT ScaleProperty {
         return !(*this == scaleProperty);
     }
 
-    static ScaleProperty CreateScaleProperty();
+    static ScaleProperty CreateScaleProperty(PipelineBase* context = nullptr);
 };
 
 class CalcLength {

@@ -120,7 +120,7 @@ void ButtonModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
         CHECK_NULL_VOID(buttonTheme);
         auto padding = buttonTheme->GetPadding(controlSize.value());
         PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-            CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+            CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(fontSize);
@@ -173,7 +173,7 @@ void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<Con
         CHECK_NULL_VOID(buttonTheme);
         auto padding = buttonTheme->GetPadding(controlSize.value());
         PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-            CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+            CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(frameNode, fontSize);
@@ -221,7 +221,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
@@ -251,7 +251,7 @@ void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
     layoutProperty->UpdatePadding(defaultPadding);
 }
 
@@ -266,6 +266,8 @@ void ButtonModelNG::CreateWithChild(const CreateWithPara& para)
         SetButtonStyle(para.buttonStyleMode);
         SetControlSize(para.controlSize);
         SetRole(para.buttonRole);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
     }
 }
 
@@ -294,7 +296,7 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
     CHECK_NULL_RETURN(buttonTheme, nullptr);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
     layoutProperty->UpdatePadding(defaultPadding);
     return frameNode;
 }
@@ -309,9 +311,9 @@ void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddi
     pattern->SetHasCustomPadding(true);
 }
 
-void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
+void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold)
 {
-    ViewAbstract::SetOnClick(std::move(tapEventFunc));
+    ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
 }
 
 void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)
@@ -370,6 +372,19 @@ void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLef
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
 }
 
+void ButtonModelNG::SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
+    const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+    const std::optional<Dimension>& radiusBottomEnd)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopStart = radiusTopStart;
+    borderRadius.radiusTopEnd = radiusTopEnd;
+    borderRadius.radiusBottomStart = radiusBottomStart;
+    borderRadius.radiusBottomEnd = radiusBottomEnd;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
+}
+
 void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
@@ -388,7 +403,7 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());
     } else {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             // undefined use ROUNDED_RECTANGLE type.
             ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
         } else {
@@ -555,6 +570,12 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, value, frameNode);
     return value;
 }
+
+void ButtonModelNG::GetAutoDisable(FrameNode* frameNode, bool autoDisable)
+{
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, AutoDisable, autoDisable, frameNode);
+}
+
 void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)
 {
     CHECK_NULL_VOID(frameNode);
@@ -584,7 +605,7 @@ void ButtonModelNG::ResetBorderRadius()
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 {
     ButtonType value = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         value = ButtonType::ROUNDED_RECTANGLE;
         ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
                                                         frameNode, ButtonType::ROUNDED_RECTANGLE);

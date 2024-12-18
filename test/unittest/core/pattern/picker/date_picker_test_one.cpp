@@ -275,7 +275,10 @@ HWTEST_F(DatePickerTestOne, NeedAdaptForAging002, TestSize.Level1)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(3.2f);
     pipeline->fontScale_ = 5.0f;
+    pipeline->rootHeight_ = 1000;
     bool ret = DatePickerDialogView::NeedAdaptForAging();
     ASSERT_TRUE(ret);
 }
@@ -311,7 +314,8 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue004, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->followSystem_ = true;
+    pipeline->maxAppFontScale_ = 5.0f;
     Dimension fontSizeValue = 20.0_px;
     Dimension fontSizeLimit = 40.0_px;
     /**
@@ -356,7 +360,9 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue006, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(2.0f);
+    pipeline->rootWidth_ = 1000;
     Dimension fontSizeValue = 20.0_px;
     Dimension fontSizeLimit = 40.0_px;
     /**
@@ -365,9 +371,9 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue006, TestSize.Level1)
      * @tc.expected: result expect equal fontSizeValue - fontSizeLimit / fontSizeScale.
      */
     auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, false);
-    float fontSizeScale = pipeline->GetFontScale();
+    float fontSizeScale = pipeline->GetMaxAppFontScale();
     auto fontSizeValueResult = fontSizeLimit / fontSizeScale;
-    EXPECT_EQ((int)result.Value(), (fontSizeValue - fontSizeValueResult).Value());
+    EXPECT_EQ((int)result.Value(), (fontSizeLimit - fontSizeValueResult).Value());
 }
 
 /**
@@ -416,9 +422,10 @@ HWTEST_F(DatePickerTestOne, ConvertTitleFontScaleValue001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(6.0f);
+    pipeline->rootWidth_ = 1000;
     Dimension fontSizeValue = 50.0_px;
-
     auto result = DatePickerDialogView::ConvertTitleFontScaleValue(fontSizeValue);
     EXPECT_EQ((int)result.Value(), 14);
 }
@@ -433,9 +440,10 @@ HWTEST_F(DatePickerTestOne, ConvertTitleFontScaleValue002, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(3.2f);
+    pipeline->rootWidth_ = 1000;
     Dimension fontSizeValue = 50.0_vp;
-
     auto result = DatePickerDialogView::ConvertTitleFontScaleValue(fontSizeValue);
     EXPECT_EQ((int)result.Value(), 72);
 }
@@ -566,7 +574,6 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton002, TestSize.Level1)
     ASSERT_NE(buttonTitleNode, nullptr);
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     buttonTitleNode->MountToParent(contentColumn);
-    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     datePickerPattern->SetContentRowNode(contentRow);
     contentRow->MountToParent(contentColumn);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -580,9 +587,9 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton002, TestSize.Level1)
     ASSERT_NE(nextButton, nullptr);
     auto nextButtonLayoutProperty = nextButton->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(nextButtonLayoutProperty, nullptr);
+    nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     EXPECT_EQ(nextButtonLayoutProperty->propVisibility_, VisibleType::VISIBLE);
 }
-
 /**
  * @tc.name: SwitchContentRowButton003
  * @tc.desc: Test DatePickerDialogView SwitchContentRowButton.
@@ -622,7 +629,6 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton003, TestSize.Level1)
     auto buttonTitleNode = DatePickerDialogView::CreateTitleButtonNode(datePickerNode);
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     buttonTitleNode->MountToParent(contentColumn);
-    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     datePickerPattern->SetContentRowNode(contentRow);
     contentRow->MountToParent(contentColumn);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -637,6 +643,7 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton003, TestSize.Level1)
     ASSERT_NE(confirmButton, nullptr);
     auto confirmLayoutProperty = confirmButton->GetLayoutProperty<LayoutProperty>();
     ASSERT_NE(confirmLayoutProperty, nullptr);
+    confirmLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     EXPECT_EQ(confirmLayoutProperty->propVisibility_, VisibleType::VISIBLE);
 }
 
@@ -693,6 +700,7 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton004, TestSize.Level1)
     ASSERT_NE(nextButton, nullptr);
     auto nextButtonLayoutProperty = nextButton->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(nextButtonLayoutProperty, nullptr);
+    nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     EXPECT_EQ(nextButtonLayoutProperty->propVisibility_, VisibleType::VISIBLE);
 }
 

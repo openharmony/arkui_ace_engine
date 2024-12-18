@@ -52,6 +52,8 @@ struct NativeTextShadow {
     double offsetX;
     double offsetY;
     uint32_t color;
+    bool isFilled;
+    int32_t type;
 };
 CJ_EXPORT VectorNativeTextShadow FFICJCreateVectorNativeTextShadow(int64_t size);
 CJ_EXPORT void FFICJVectorNativeTextShadowSetElement(
@@ -72,6 +74,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontFeature(const char* fontFeature);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkTextClockControllerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockControllerStart(int64_t selfID);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockControllerStop(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkTextClockDateTimeOptions(const char* hourOptions);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_CLOCK_FFI_H

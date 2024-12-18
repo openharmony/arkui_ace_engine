@@ -22,7 +22,9 @@
 #include "movingphoto_controller.h"
 #include "movingphoto_utils.h"
 
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
@@ -32,6 +34,7 @@
 #include "core/components_ng/render/render_surface.h"
 #include "core/components/video/video_utils.h"
 #include "core/components/image/image_event.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace::NG {
 class MovingPhotoPattern : public Pattern {
@@ -97,10 +100,26 @@ public:
         currentDateModified_ = currentDateModified;
     }
 
+    void SetMovingPhotoFormat(MovingPhotoFormat format)
+    {
+        movingPhotoFormat_ = format;
+    }
+
+    void SetDynamicRangeMode(DynamicRangeMode rangeMode)
+    {
+        dynamicRangeMode_ = rangeMode;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
     }
+
+    void EnableAnalyzer(bool enabled);
+
+    void SetImageAIOptions(void* options);
+
+    bool GetAnalyzerState();
 
 protected:
     int32_t instanceId_;
@@ -123,12 +142,16 @@ private:
     void VisibleAreaCallback(bool visible);
 
     void InitEvent();
+    void LongPressEventModify(bool status);
     void HandleLongPress(GestureEvent& info);
     void HandleTouchEvent(TouchEventInfo& info);
 
     void UpdateImageNode();
     void UpdateVideoNode();
     void UpdatePlayMode();
+    void HandleImageAnalyzerMode();
+    void MovingPhotoFormatConvert(MovingPhotoFormat format);
+    void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -172,22 +195,41 @@ private:
     void SelectPlaybackMode(PlaybackMode mode);
     void StartPlayback();
     void StartAnimation();
+    void RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
+            const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode);
     void StopPlayback();
     void PausePlayback();
+    void RefreshMovingPhoto();
     void StopAnimation();
     void StopAnimationCallback();
     void StartAutoPlay();
     void StartRepeatPlay();
     void SetAutoPlayPeriod(int64_t startTime, int64_t endTime);
+    void HandleImageAnalyzerPlayCallBack();
 
     void UpdateMediaPlayerSpeed();
     void UpdateMediaPlayerMuted();
 
     void HideImageNode();
 
+    bool IsSupportImageAnalyzer();
+    bool ShouldUpdateImageAnalyzer();
+    void StartImageAnalyzer();
+    void StartUpdateImageAnalyzer();
+    void CreateAnalyzerOverlay();
+    void DestroyAnalyzerOverlay();
+    void UpdateAnalyzerOverlay();
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void UpdateOverlayVisibility(VisibleType type);
+    void GetPixelMap();
+    int64_t GetUriCoverPosition();
+    void HandleAnalyzerPlayEvent(bool canPlay);
+    bool IsRefreshMovingPhotoReturn(bool status);
+
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<MovingPhotoController> controller_;
+    RefPtr<PixelMap> pixelMap_;
 
     int32_t fd_ = -1;
     int64_t autoPlayPeriodStartTime_ = -1;
@@ -208,8 +250,22 @@ private:
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     int64_t currentDateModified_ = -2;
+    MovingPhotoFormat movingPhotoFormat_ = MovingPhotoFormat::UNKNOWN;
+    PixelFormat imageFormat_ = PixelFormat::UNKNOWN;
+    DynamicRangeMode dynamicRangeMode_ = DynamicRangeMode::HIGH;
 
+    bool isEnableAnalyzer_ = false;
+    bool isContentSizeChanged_ = false;
+    bool isAnalyzerCreated_ = false;
+    bool isPixelMapChanged_ = false;
+    bool isAnalyzerPlaying_ = false;
+    bool isRefreshMovingPhoto_ = false;
+    bool isRefreshMovingPhotoPlaying_ = false;
+    
     Rect lastBoundsRect_;
+    Rect contentRect_;
+
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MovingPhotoPattern);
 };

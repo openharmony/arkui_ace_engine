@@ -26,11 +26,7 @@ RefPtr<SvgNode> SvgRect::Create()
     return AceType::MakeRefPtr<SvgRect>();
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgRect::AsPath(const Size& viewPort) const
-#else
 RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
-#endif
 {
     double rx = 0.0;
     if (GreatOrEqual(rectAttr_.rx.Value(), 0.0)) {
@@ -48,16 +44,6 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
             ry = ConvertDimensionToPx(rectAttr_.rx, viewPort, SvgLengthType::HORIZONTAL);
         }
     }
-#ifndef USE_ROSEN_DRAWING
-    SkRRect roundRect = SkRRect::MakeRectXY(
-        SkRect::MakeXYWH(ConvertDimensionToPx(rectAttr_.x, viewPort, SvgLengthType::HORIZONTAL),
-            ConvertDimensionToPx(rectAttr_.y, viewPort, SvgLengthType::VERTICAL),
-            ConvertDimensionToPx(rectAttr_.width, viewPort, SvgLengthType::HORIZONTAL),
-            ConvertDimensionToPx(rectAttr_.height, viewPort, SvgLengthType::VERTICAL)),
-        rx, ry);
-    SkPath path;
-    path.addRRect(roundRect);
-#else
     RSScalar left = ConvertDimensionToPx(rectAttr_.x, viewPort, SvgLengthType::HORIZONTAL);
     RSScalar top = ConvertDimensionToPx(rectAttr_.y, viewPort, SvgLengthType::VERTICAL);
     RSScalar width = ConvertDimensionToPx(rectAttr_.width, viewPort, SvgLengthType::HORIZONTAL);
@@ -65,7 +51,6 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
     RSRoundRect roundRect = RSRoundRect(RSRect(left, top, width + left, height + top), rx, ry);
     RSRecordingPath path;
     path.AddRoundRect(roundRect);
-#endif
     return path;
 }
 

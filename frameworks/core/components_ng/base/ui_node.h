@@ -95,10 +95,10 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
+    RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
-    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     // Only for the currently loaded children, do not expand.
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -142,7 +142,7 @@ public:
         return children_;
     }
 
-    RefPtr<UINode> GetLastChild()
+    RefPtr<UINode> GetLastChild() const
     {
         if (children_.empty()) {
             return nullptr;
@@ -150,7 +150,7 @@ public:
         return children_.back();
     }
 
-    RefPtr<UINode> GetFirstChild()
+    RefPtr<UINode> GetFirstChild() const
     {
         if (children_.empty()) {
             return nullptr;
@@ -176,7 +176,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    virtual void SetParent(const WeakPtr<UINode>& parent)
+    void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -184,6 +184,7 @@ public:
 
     // performance.
     PipelineContext* GetContext() const;
+    PipelineContext* GetAttachedContext() const;
     PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr() const;
@@ -309,8 +310,8 @@ public:
     virtual HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
 
-    virtual HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult);
+    virtual HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult);
 
     // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation
     // of parent's layout wrapper
@@ -373,6 +374,8 @@ public:
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
+
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -544,7 +547,8 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
+    virtual void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false);
     virtual void DoSetActiveChildRange(
         const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
     {}
@@ -757,7 +761,7 @@ public:
 
     virtual void GetInspectorValue();
     virtual void NotifyWebPattern(bool isRegister);
-    void GetContainerComponentText(std::string& text);
+    void GetContainerComponentText(std::u16string& text);
 
     enum class NotificationType : int32_t {
         START_CHANGE_POSITION = 0,
@@ -775,7 +779,7 @@ public:
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
     // Used to mark freeze and block dirty mark.
-    virtual void SetFreeze(bool isFreeze);
+    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
     bool IsFreeze() const
     {
         return isFreeze_;
@@ -790,6 +794,14 @@ public:
     {
         isCNode_ = createByCapi;
     }
+
+    virtual RefPtr<UINode> GetCurrentPageRootNode()
+    {
+        return nullptr;
+    }
+
+    virtual void AddCustomProperty(const std::string& key, const std::string& value) {}
+    virtual void RemoveCustomProperty(const std::string& key) {}
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -835,7 +847,7 @@ protected:
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
     virtual void OnFreezeStateChange() {}
-    virtual void UpdateChildrenFreezeState(bool isFreeze);
+    virtual void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false);
 
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
@@ -882,7 +894,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = INT32_MAX;
+    int32_t depth_ = 1;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;

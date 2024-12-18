@@ -146,7 +146,7 @@ struct CJUICommonModifier {
     void (*resetRenderGroup)(ArkUINodeHandle node);
     void (*setRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetRenderFit)(ArkUINodeHandle node);
-    void (*setUseEffect)(ArkUINodeHandle node, ArkUI_Bool useEffect);
+    void (*setUseEffect)(ArkUINodeHandle node, ArkUI_Bool useEffect, ArkUI_Int32 effectType);
     void (*resetUseEffect)(ArkUINodeHandle node);
     void (*setForegroundColor)(ArkUINodeHandle node, ArkUI_Bool isColor, ArkUI_Uint32 color);
     void (*resetForegroundColor)(ArkUINodeHandle node);
@@ -1468,6 +1468,8 @@ struct CJUINavDestinationModifier {
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setNavDestinationSystemTransition)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetNavDestinationSystemTransition)(ArkUINodeHandle node);
 };
 
 struct CJUITextAreaModifier {
@@ -2056,6 +2058,8 @@ struct CJUIToggleModifier {
 struct CJUINavigationModifier {
     void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetHideToolBar)(ArkUINodeHandle node);
+    void (*setEnableModeChangeAnimation)(ArkUINodeHandle node, ArkUI_Bool isEnable);
+    void (*resetEnableModeChangeAnimation)(ArkUINodeHandle node);
     void (*setHideNavBar)(ArkUINodeHandle node, ArkUI_Bool hideNavBar);
     void (*resetHideNavBar)(ArkUINodeHandle node);
     void (*setTitleMode)(ArkUINodeHandle node, ArkUI_Int32 value);
@@ -2788,6 +2792,10 @@ struct CJUIPatternLockModifier {
     void (*resetPatternLockActiveCircleRadius)(ArkUINodeHandle node);
     void (*setPatternLockEnableWaveEffect)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetPatternLockEnableWaveEffect)(ArkUINodeHandle node);
+    void (*setPatternLockEnableForeground)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockEnableForeground)(ArkUINodeHandle node);
+    void (*setPatternLockSkipUnselectedPoint)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockSkipUnselectedPoint)(ArkUINodeHandle node);
 };
 
 struct CJUIColumnSplitModifier {
@@ -3395,13 +3403,6 @@ struct CJUIExtendedNodeAPI {
     void (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId);
     void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext);
     /// Events.
-    /**
-     * Returns != 0 if an event was received,
-     * fills in supplied buffer in such a case.
-     * Must not block, blocking is performed by
-     * ArkoalaHostApi.waitForVsync().
-     */
-    ArkUI_Int32 (*checkEvent)(ArkUINodeEvent* event);
     /**
      * Add an event to the event queue, so that
      * it will be picked up later by checkEvent().

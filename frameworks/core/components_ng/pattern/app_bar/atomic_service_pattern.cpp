@@ -357,7 +357,9 @@ void AtomicServicePattern::UpdateIconLayout(RefPtr<AppBarTheme>& theme, RefPtr<F
         margin.left = CalcLength(theme->GetIconInsideMargin());
         margin.right = CalcLength(theme->GetIconOutsideMargin());
     }
-    icon->GetLayoutProperty<ImageLayoutProperty>()->UpdateMargin(margin);
+    auto layoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMargin(margin);
 
     icon->MarkModifyDone();
     icon->MarkDirtyNode();

@@ -376,14 +376,10 @@ void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallba
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
-    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
-    if (onCreateMenuCallback) {
-        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
-    }
-    if (onMenuItemClickCallback) {
-        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-    }
+    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback);
+    NG::OnCreateMenuCallback* onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+    NG::OnMenuItemClickCallback* onMenuItemClick
+        = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
     RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
 }
 

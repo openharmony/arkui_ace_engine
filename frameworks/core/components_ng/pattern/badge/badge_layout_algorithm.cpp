@@ -103,10 +103,11 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto badgeWidth = 0.0;
     auto badgeHeight = badgeCircleDiameter;
-    auto countLimit = layoutProperty->GetBadgeMaxCountValue();
+    auto countLimit =
+        layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
     auto badgeCircleRadius = badgeCircleDiameter / 2;
 
-    std::string textData;
+    std::u16string textData;
     if (textLayoutProperty->HasContent()) {
         textData = textLayoutProperty->GetContentValue();
     }
@@ -257,7 +258,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textGeometryNode = textWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
 
-    std::string textData;
+    std::u16string textData;
     if (textLayoutProperty->HasContent()) {
         textData = textLayoutProperty->GetContentValue();
     }
@@ -296,9 +297,9 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
     OffsetF textOffset;
-    if (!layoutProperty->GetIsPositionXy().value()) {
+    if (layoutProperty->GetIsPositionXy().has_value() && !layoutProperty->GetIsPositionXy().value()) {
         textOffset = GetTextDataOffset(layoutProperty, badgeCircleDiameter, badgeCircleRadius,
-            geometryNode, textData == " ");
+            geometryNode, textData == u" ");
     } else {
         textOffset = GetTextOffsetByPosition(layoutProperty, geometryNode);
     }

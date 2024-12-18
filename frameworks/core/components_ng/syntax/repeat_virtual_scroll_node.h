@@ -73,6 +73,9 @@ public:
      */
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
+    void OnRecycle() override;
+    void OnReuse() override;
+
     /**
      * scenario: called by layout informs:
      *   - start: the first visible index
@@ -89,10 +92,8 @@ public:
      * those items out of cached range are removed from L1
      * requests idle task
      */
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
-
-    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
-        RefPtr<FrameNode>& frameNode);
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     /**
      * those items with index in cachedItems are marked active
@@ -161,7 +162,7 @@ public:
         isLoop_ = isLoop;
     }
 protected:
-    void UpdateChildrenFreezeState(bool isFreeze) override;
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void PostIdleTask();
 
@@ -177,6 +178,13 @@ private:
     // drop UINode with given key from L1 but keep in L2
     // detach from tree and request tree sync
     void DropFromL1(const std::string& key);
+
+    // check whether UINode (index) is in the L1 cache range
+    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
+        RefPtr<FrameNode>& frameNode);
+
+    // process params sent by parent
+    void CheckActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
 
     // RepeatVirtualScrollNode is not instance of FrameNode
     // needs to propagate active state to all items inside

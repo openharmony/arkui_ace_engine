@@ -40,8 +40,18 @@ void ImageAnalyzerMgr::BuildNodeFunc(
 {
 }
 
+void ImageAnalyzerMgr::BuildNodeFunc(std::string uri, void* pixelMap, int frameTimestamp,
+    void* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData)
+{
+}
+
 void ImageAnalyzerMgr::UpdateImage(
     void** overlayData, void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig)
+{
+}
+
+void ImageAnalyzerMgr::UpdateImage(void** overlayData, std::string uri, void* pixelMap,
+    int frameTimestamp, void* config, ImageAnalyzerInnerConfig* uiConfig)
 {
 }
 

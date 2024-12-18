@@ -38,6 +38,15 @@ constexpr int32_t INVALID_DESTINATION_MODE = -1;
 constexpr char JS_STRINGIFIED_UNDEFINED[] = "undefined";
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
 constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
+
+napi_env GetNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
 }
 
 std::string JSRouteInfo::GetName()
@@ -329,6 +338,7 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
         pattern->SetIndex(index);
         auto onPop = GetOnPopByIndex(index);
         auto isEntry = GetIsEntryByIndex(index);
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "create destination node, isEntry %{public}d", isEntry);
         auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
@@ -431,7 +441,6 @@ bool JSNavigationStack::GetIsEntryByIndex(int32_t index)
 void JSNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    CHECK_NULL_VOID(dataSourceObj_->IsEmpty());
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -837,15 +846,31 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     }
     // deal route config and execute route config builder
     auto container = Container::Current();
+    CHECK_NULL_RETURN(container, ERROR_CODE_INTERNAL_ERROR);
     auto navigationRoute = container->GetNavigationRoute();
-    if (!navigationRoute->HasLoaded(name)) {
-        int32_t res = navigationRoute->LoadPage(name);
-        if (res != 0) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
-            return navDestBuilderFunc_->IsEmpty() ? ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED
-                : ERROR_CODE_DESTINATION_NOT_FOUND;
-        }
+    if (!navigationRoute) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation route is invalid");
+        return ERROR_CODE_INTERNAL_ERROR;
     }
+    if (!navigationRoute->HasLoaded(name) && navigationRoute->LoadPage(name) != 0) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
+        return navDestBuilderFunc_->IsEmpty() ? ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED
+            : ERROR_CODE_DESTINATION_NOT_FOUND;
+    }
+    int32_t result = ExecuteBuilderByConfig(name, customNode, param);
+    if (result != ERROR_CODE_NO_ERROR) {
+        return result;
+    }
+    node = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (!GetNavDestinationNodeInUINode(node, desNode)) {
+        return ERROR_CODE_DESTINATION_NOT_FOUND;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t JSNavigationStack::ExecuteBuilderByConfig(const std::string& name,
+    const WeakPtr<NG::UINode>& customNode, const JSRef<JSVal>& param)
+{
     auto parentCustomNode = AceType::DynamicCast<NG::CustomNode>(customNode.Upgrade());
     CHECK_NULL_RETURN(parentCustomNode, ERROR_CODE_INTERNAL_ERROR);
     auto thisObjTmp = parentCustomNode->FireThisFunc();
@@ -874,10 +899,6 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     }
     auto builder = JSRef<JSFunc>::Cast(builderProp);
     builder->Call(thisObj, number, params);
-    node = NG::ViewStackProcessor::GetInstance()->Finish();
-    if (!GetNavDestinationNodeInUINode(node, desNode)) {
-        return ERROR_CODE_DESTINATION_NOT_FOUND;
-    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -935,7 +956,9 @@ void JSNavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32
     auto name = GetNameByIndex(index);
     auto param = GetParamByIndex(index);
     auto onPop = GetOnPopByIndex(index);
-    auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+    auto isEntry = GetIsEntryByIndex(index);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "update destination node info, isEntry %{public}d", isEntry);
+    auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
     pattern->SetNavPathInfo(pathInfo);
 }
 
@@ -1062,13 +1085,17 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
 
 std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
 {
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, JS_STRINGIFIED_UNDEFINED);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, JS_STRINGIFIED_UNDEFINED);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-
+    auto env = GetNapiEnv();
+    if (!env) {
+        return JS_STRINGIFIED_UNDEFINED;
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return JS_STRINGIFIED_UNDEFINED;
+    }
     if (dataSourceObj_->IsEmpty()) {
+        napi_close_handle_scope(env, scope);
         return JS_STRINGIFIED_UNDEFINED;
     }
     napi_value navPathStack = JsConverter::ConvertJsValToNapiValue(dataSourceObj_);
@@ -1089,17 +1116,20 @@ std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
     if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
         napi_get_and_clear_last_exception(env, &stringifyParam);
+        napi_close_handle_scope(env, scope);
         return JS_STRINGIFIED_UNDEFINED;
     }
     size_t len = 0;
     napi_get_value_string_utf8(env, stringifyParam, nullptr, 0, &len);
     std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
     napi_get_value_string_utf8(env, stringifyParam, paramChar.get(), len + 1, &len);
+    napi_close_handle_scope(env, scope);
     return paramChar.get();
 }
 
 void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     JSRef<JSArray> newPathArray = JSRef<JSArray>::New();
     for (int32_t index = 0; index < static_cast<int32_t>(navdestinationsInfo.size()); ++index) {
         auto infoName = navdestinationsInfo[index].name;
@@ -1121,6 +1151,7 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
 
 bool JSNavigationStack::IsFromRecovery(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return false;
@@ -1134,6 +1165,7 @@ bool JSNavigationStack::IsFromRecovery(int32_t index)
 
 void JSNavigationStack::SetFromRecovery(int32_t index, bool fromRecovery)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return;
@@ -1143,6 +1175,7 @@ void JSNavigationStack::SetFromRecovery(int32_t index, bool fromRecovery)
 
 int32_t JSNavigationStack::GetRecoveredDestinationMode(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, 0);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return INVALID_DESTINATION_MODE;

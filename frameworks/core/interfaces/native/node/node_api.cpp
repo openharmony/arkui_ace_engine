@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
@@ -33,6 +34,7 @@
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_custom_node_ext_modifier.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
@@ -146,48 +148,24 @@ const CJUIStateModifier* GetCJUIStateModifier()
 } // namespace NodeModifier
 
 namespace NodeEvent {
-std::deque<ArkUINodeEvent> g_eventQueue;
-int CheckEvent(ArkUINodeEvent* event)
-{
-    if (!g_eventQueue.empty()) {
-        *event = g_eventQueue.front();
-        g_eventQueue.pop_front();
-        return 1;
-    }
-    return 0;
-}
 
 static EventReceiver globalEventReceiver = nullptr;
 
-void SendArkUIAsyncEvent(ArkUINodeEvent* event)
+void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
     if (globalEventReceiver) {
         globalEventReceiver(event);
-    } else {
-        g_eventQueue.push_back(*event);
     }
 }
 } // namespace NodeEvent
 
 namespace CustomNodeEvent {
-std::deque<ArkUICustomNodeEvent> g_eventQueue;
-int CheckEvent(ArkUICustomNodeEvent* event)
-{
-    if (!g_eventQueue.empty()) {
-        *event = g_eventQueue.front();
-        g_eventQueue.pop_front();
-        return 1;
-    }
-    return 0;
-}
 
 void (*g_fliter)(ArkUICustomNodeEvent* event) = nullptr;
-void SendArkUIAsyncEvent(ArkUICustomNodeEvent* event)
+void SendArkUISyncEvent(ArkUICustomNodeEvent* event)
 {
     if (g_fliter) {
         g_fliter(event);
-    } else {
-        g_eventQueue.push_back(*event);
     }
 }
 } // namespace CustomNodeEvent
@@ -228,6 +206,53 @@ ArkUINodeHandle GetNodeByViewStack()
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
 }
 
+ArkUINodeHandle GetTopNodeByViewStack()
+{
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(node, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(node);
+}
+
+ArkUINodeHandle CreateCustomNode(ArkUI_CharPtr tag)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNode(tag));
+}
+
+ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
+}
+
+void CreateNewScope()
+{
+    ViewStackModel::GetInstance()->NewScope();
+}
+
+ArkUIRSNodeHandle GetRSNodeByNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto rsNode = frameNode->GetExtraCustomProperty("RS_NODE");
+    CHECK_NULL_RETURN(rsNode, nullptr);
+    return reinterpret_cast<ArkUIRSNodeHandle>(rsNode);
+}
+
+void RegisterOEMVisualEffect(ArkUIOEMVisualEffectFuncHandle func)
+{
+    OEMVisualEffectFunc oemFunc = reinterpret_cast<OEMVisualEffectFunc>(func);
+    ViewAbstract::RegisterOEMVisualEffect(oemFunc);
+}
+
+void SetOnNodeDestroyCallback(ArkUINodeHandle node, void (*onDestroy)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onDestroyCallback = [node, onDestroy](int32_t nodeId) {
+        onDestroy(node);
+    };
+    uiNode->SetOnNodeDestroyCallback(std::move(onDestroyCallback));
+}
+
 void DisposeNode(ArkUINodeHandle node)
 {
     ViewModel::DisposeNode(node);
@@ -238,10 +263,7 @@ ArkUI_CharPtr GetName(ArkUINodeHandle node)
     return ViewModel::GetName(node);
 }
 
-static void DumpTree(ArkUINodeHandle node, int indent)
-{
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "dumpTree %{public}p", node);
-}
+static void DumpTree(ArkUINodeHandle node, int indent) {}
 
 void DumpTreeNode(ArkUINodeHandle node)
 {
@@ -304,14 +326,10 @@ ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, Ark
     return ERROR_CODE_NO_ERROR;
 }
 
-void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value)
-{
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p SetAttribute %{public}s, %{public}s", node, attribute, value);
-}
+void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value) {}
 
 ArkUI_CharPtr GetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p GetAttribute %{public}s", node, attribute);
     return "";
 }
 
@@ -336,7 +354,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
     NodeModifier::SetOnBlur,
-    nullptr,
+    NodeModifier::SetOnKeyEvent,
     NodeModifier::SetOnMouse,
     NodeModifier::SetOnAreaChange,
     nullptr,
@@ -353,6 +371,8 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDragLeave,
     NodeModifier::SetOnDragEnd,
     NodeModifier::SetOnPreDrag,
+    NodeModifier::SetOnKeyPreIme,
+    NodeModifier::SetOnFocusAxisEvent,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -436,6 +456,7 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnChange,
+    NodeModifier::SetTextPickerOnScrollStop,
 };
 
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -535,7 +556,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnClick,
     NodeModifier::ResetOnHover,
     NodeModifier::ResetOnBlur,
-    nullptr,
+    NodeModifier::ResetOnKeyEvent,
     NodeModifier::ResetOnMouse,
     NodeModifier::ResetOnAreaChange,
     NodeModifier::ResetOnVisibleAreaChange,
@@ -545,6 +566,15 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnAttach,
     NodeModifier::ResetOnDetach,
     nullptr,
+    NodeModifier::ResetOnDragStart,
+    NodeModifier::ResetOnDragEnter,
+    NodeModifier::ResetOnDragDrop,
+    NodeModifier::ResetOnDragMove,
+    NodeModifier::ResetOnDragLeave,
+    NodeModifier::ResetOnDragEnd,
+    NodeModifier::ResetOnPreDrag,
+    NodeModifier::ResetOnKeyPreIme,
+    NodeModifier::ResetOnFocusAxisEvent,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1869,21 +1899,22 @@ ArkUIExtendedNodeAPI impl_extended = {
     GetPipelineContext,
     SetVsyncCallback,
     UnblockVsyncWait,
-    NodeEvent::CheckEvent,
-    NodeEvent::SendArkUIAsyncEvent, // sendEvent
+    NodeEvent::SendArkUISyncEvent, // sendEvent
     nullptr, // callContinuation
     nullptr, // setChildTotalCount
     ShowCrash,
+    GetTopNodeByViewStack,
+    CreateCustomNode,
+    GetOrCreateCustomNode,
+    GetRSNodeByNode,
+    CreateNewScope,
+    RegisterOEMVisualEffect,
+    SetOnNodeDestroyCallback,
 };
 /* clang-format on */
 
 void CanvasDrawRect(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
-    ArkUI_Float32 bottom, ArkUIPaintHandle paint)
-{
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
-        "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n", canvas, left, top, right,
-        bottom);
-}
+    ArkUI_Float32 bottom, ArkUIPaintHandle paint) {}
 
 const ArkUIGraphicsCanvas* GetCanvasAPI()
 {
@@ -2111,9 +2142,8 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "UnmarshallStyledStringDescriptor");
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(descriptor->spanString, ARKUI_ERROR_CODE_INVALID_STYLED_STRING);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
-    SpanString* spanString = new SpanString("");
+    SpanString* spanString = new SpanString(u"");
     spanString->DecodeTlvExt(vec, spanString);
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -2296,8 +2326,7 @@ const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
         GetPipelineContext,
         SetVsyncCallback,
         UnblockVsyncWait,
-        NodeEvent::CheckEvent,
-        NodeEvent::SendArkUIAsyncEvent,
+        NodeEvent::SendArkUISyncEvent,
         nullptr, // callContinuation
         nullptr, // setChildTotalCount
         ShowCrash,
@@ -2346,14 +2375,14 @@ const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
     return &OHOS::Ace::NG::impl_full;
 }
 
-void SendArkUIAsyncEvent(ArkUINodeEvent* event)
+void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
-    OHOS::Ace::NG::NodeEvent::SendArkUIAsyncEvent(event);
+    OHOS::Ace::NG::NodeEvent::SendArkUISyncEvent(event);
 }
 
 void SendArkUIAsyncCustomEvent(ArkUICustomNodeEvent* event)
 {
-    OHOS::Ace::NG::CustomNodeEvent::SendArkUIAsyncEvent(event);
+    OHOS::Ace::NG::CustomNodeEvent::SendArkUISyncEvent(event);
 }
 
 ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)

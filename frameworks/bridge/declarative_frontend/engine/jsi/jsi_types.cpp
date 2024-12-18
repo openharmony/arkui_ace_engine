@@ -135,6 +135,23 @@ std::string JsiValue::ToString() const
     return GetHandle()->ToString(vm)->ToString(vm);
 }
 
+std::u16string JsiValue::ToU16String() const
+{
+    auto vm = GetEcmaVM();
+    Local<StringRef> stringRef;
+    panda::LocalScope scope(vm);
+    if (IsObject()) {
+        stringRef = JSON::Stringify(vm, GetLocalHandle())->ToString(vm);
+    } else {
+        stringRef = GetHandle()->ToString(vm);
+    }
+    auto utf16Len = stringRef->Length(vm);
+    std::unique_ptr<char16_t[]> pBuf16 = std::make_unique<char16_t[]>(utf16Len);
+    char16_t *buf16 = pBuf16.get();
+    auto resultLen = stringRef->WriteUtf16(vm, buf16, utf16Len);
+    return std::u16string(buf16, resultLen);
+}
+
 bool JsiValue::ToBoolean() const
 {
     return GetHandle()->BooleaValue(GetEcmaVM());
@@ -486,7 +503,7 @@ bool JsiCallbackInfo::GetUint32Arg(size_t index, uint32_t& value) const
     return true;
 }
 
-bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
+bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value, bool isJudgeSpecialValue) const
 {
     auto arg = info_->GetCallArgRef(index);
     if (arg.IsEmpty()) {
@@ -494,6 +511,9 @@ bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
     }
     bool ret = false;
     value = arg->GetValueDouble(ret);
+    if (isJudgeSpecialValue) {
+        return (std::isnan(value) || std::isinf(value)) ? false : ret;
+    }
     return ret;
 }
 

@@ -143,7 +143,7 @@ public:
         popAnimations_.clear();
     }
 
-    bool CheckCanHandleBack();
+    bool CheckCanHandleBack(bool& isEntry);
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
@@ -153,12 +153,15 @@ public:
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
+    void ConfigureNavigationWithAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void UnconfigureNavigationAndDisableAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    RefPtr<NavigationManager> FetchNavigationManager();
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+        const AnimationFinishCallback finishCallback);
     virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+        const AnimationFinishCallback finishCallback);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -284,6 +287,21 @@ public:
         return dragBarNode_;
     }
 
+    void GenerateAnimationId()
+    {
+        animationId_++;
+    }
+
+    int32_t GetAnimationId() const
+    {
+        return animationId_;
+    }
+
+    void UpdateTransitionAnimationId(const RefPtr<FrameNode>& curNode);
+
+    bool CheckAnimationIdValid(const RefPtr<FrameNode>& curNode, const int32_t animationId);
+
+    std::string ToDumpString();
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -301,6 +319,7 @@ private:
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
+    RefPtr<FrameNode> TransitionAnimationIsValid(const RefPtr<FrameNode>& node, bool isNavBar);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
@@ -311,6 +330,7 @@ private:
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
+    std::atomic_int32_t animationId_ = 0;
     std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };

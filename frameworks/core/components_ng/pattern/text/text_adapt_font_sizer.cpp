@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 
 namespace OHOS::Ace::NG {
-bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::string& content,
+bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::u16string& content,
     const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     double maxFontSize = 0.0;
@@ -64,7 +64,7 @@ bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::strin
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }
 
-bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::string& content,
+bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::u16string& content,
     const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     double maxFontSize = 0.0;

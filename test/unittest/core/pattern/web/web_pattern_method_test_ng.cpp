@@ -647,7 +647,7 @@ HWTEST_F(WebPatternMethodTestNg, OnCursorChange_003, TestSize.Level1)
     auto info = std::make_shared<NWebCursorInfoTestImpl>();
     ASSERT_NE(info, nullptr);
     OHOS::NWeb::CursorType type = OHOS::NWeb::CursorType::CT_CONTEXTMENU;
-    webPattern->isHoverExit_ = true;
+    webPattern->isHoverExit_ = false;
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
     EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(0));
@@ -708,7 +708,7 @@ HWTEST_F(WebPatternMethodTestNg, OnCursorChange_005, TestSize.Level1)
     auto info = std::make_shared<NWebCursorInfoTestImpl>();
     ASSERT_NE(info, nullptr);
     OHOS::NWeb::CursorType type = OHOS::NWeb::CursorType::CT_CUSTOM;
-    webPattern->isHoverExit_ = true;
+    webPattern->isHoverExit_ = false;
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
     EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(0));
@@ -1113,7 +1113,6 @@ HWTEST_F(WebPatternMethodTestNg, InitPanEvent_003, TestSize.Level1)
     GestureEvent event;
     auto parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
     webPattern->SetNestedScrollParent(parent);
-    EXPECT_CALL(*parent, OnScrollDragEndRecursive()).Times(1);
     gestureHub->panEventActuator_->panEvents_.back()->GetActionEndEventFunc()(event);
     webPattern->parent_ = nullptr;
     gestureHub->panEventActuator_->panEvents_.back()->GetActionEndEventFunc()(event);

@@ -15,9 +15,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 
-#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
-#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
-#endif
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_model.h"
@@ -29,6 +26,33 @@ using SetWebIdCallback = std::function<void(int32_t)>;
 using SetHapPathCallback = std::function<void(const std::string&)>;
 using JsProxyCallback = std::function<void()>;
 using setPermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+
+// enum type used for decoupe NWeb dependency, same as NWeb::ImageColorType
+enum class TransImageColorType {
+    // Unknown color type
+    COLOR_TYPE_UNKNOWN = -1,
+
+    // RGBA with 8 bits per pixel (32 bits total).
+    COLOR_TYPE_RGBA_8888 = 0,
+
+    // RGRA with 8 bits per pixel (32 bits total).
+    COLOR_TYPE_BGRA_8888 = 1,
+};
+
+// enum type used for decoupe NWeb dependency, same as NWeb::ImageAlphaType
+enum class TransImageAlphaType {
+    // Unknown alpha type
+    ALPHA_TYPE_UNKNOWN = -1,
+
+    // No transparency. The alpha component is ignored.
+    ALPHA_TYPE_OPAQUE = 0,
+
+    // Transparency with pre-multiplied alpha component.
+    ALPHA_TYPE_PREMULTIPLIED = 1,
+
+    // Transparency with post-multiplied alpha component.
+    ALPHA_TYPE_POSTMULTIPLIED = 2,
+};
 
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
@@ -68,6 +92,8 @@ public:
     void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNewDragStyle(bool isNewDragStyle) override;
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) override;
     void SetJsEnabled(bool isJsEnabled) override;
     void SetFileAccessEnabled(bool isFileAccessEnabled) override;
     void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) override;
@@ -82,6 +108,7 @@ public:
     void SetRefreshAccessedHistoryId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetCacheMode(WebCacheMode cacheMode) override;
     void SetOverScrollMode(OverScrollMode mode) override;
+    void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) override;
     void SetCopyOptionMode(CopyOptions mode) override;
     void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled) override;
     void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled) override;

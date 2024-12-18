@@ -20,7 +20,6 @@
 #include "core/components/swiper/swiper_component.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 constexpr float DRAG_DELTA = 400.0f;
 } // namespace
@@ -41,7 +40,7 @@ void SwiperEventTestNg::HandleDrag(GestureEvent info)
     HandleDragStart(info);
     HandleDragUpdate(info);
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperEventTestNg::HandleDragStart(GestureEvent info)
@@ -88,7 +87,7 @@ GestureEvent SwiperEventTestNg::CreateDragInfo(bool moveDirection)
  */
 HWTEST_F(SwiperEventTestNg, HandleDrag001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     GestureEvent info;
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
@@ -128,7 +127,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag002, TestSize.Level1)
     /**
      * @tc.steps: step1. Set HotRegion and drag in it
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     MockPaintRect(frameNode_);
 
     /**
@@ -139,7 +138,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag002, TestSize.Level1)
     HandleDragStart(info);
     HandleDragUpdate(info);
     HandleDragCancel();
-    EXPECT_EQ(pattern_->targetIndex_, 0);
+    EXPECT_FALSE(pattern_->targetIndex_);
 }
 
 /**
@@ -152,7 +151,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
     /**
      * @tc.steps: step1. Set HotRegion and drag in it
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     MockPaintRect(frameNode_);
 
     /**
@@ -162,7 +161,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), DRAG_DELTA);
 
     /**
@@ -170,7 +169,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
      * @tc.expected: Item(index:0) OffsetX not more than SWIPER_WIDTH
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), SWIPER_WIDTH);
 
     /**
@@ -178,7 +177,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag003, TestSize.Level1)
      * @tc.expected: Change CurrentIndex by MainVelocity direction
      */
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
 }
 
@@ -192,9 +191,10 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
     /**
      * @tc.steps: step1. Set HotRegion and drag in it
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndex(3);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndex(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
 
     /**
@@ -204,7 +204,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 3), -DRAG_DELTA);
 
     /**
@@ -212,7 +212,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.expected: Item(index:3) OffsetX not more than SWIPER_WIDTH
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 3), -SWIPER_WIDTH);
 
     /**
@@ -220,7 +220,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.expected: Change CurrentIndex by MainVelocity direction
      */
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
 }
 
@@ -234,9 +234,10 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
     /**
      * @tc.steps: step1. Set loop false, set HotRegion and drag in it
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
 
     /**
@@ -246,7 +247,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 0), DRAG_DELTA);
     EXPECT_GT(GetChildX(frameNode_, 0), 0.f);
 
@@ -256,7 +257,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
      */
     float preDelta = GetChildX(frameNode_, 0);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 0), DRAG_DELTA * 2);
     EXPECT_GT(GetChildX(frameNode_, 0), preDelta);
 
@@ -265,7 +266,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag005, TestSize.Level1)
      * @tc.expected: Change still 0
      */
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -279,10 +280,11 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
     /**
      * @tc.steps: step1. Set loop false, set HotRegion and drag in it
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetIndex(3);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetIndex(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
 
     /**
@@ -292,7 +294,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 3), 0.f);
     EXPECT_GT(GetChildX(frameNode_, 3), -DRAG_DELTA);
 
@@ -302,7 +304,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
      */
     float preDelta = GetChildX(frameNode_, 3);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 3), preDelta);
     EXPECT_GT(GetChildX(frameNode_, 3), -DRAG_DELTA * 2);
 
@@ -311,7 +313,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag006, TestSize.Level1)
      * @tc.expected: Change still 3
      */
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
 }
 
@@ -325,10 +327,11 @@ HWTEST_F(SwiperEventTestNg, HandleDrag007, TestSize.Level1)
     /**
      * @tc.steps: step1. Set loop false and EdgeEffect::FADE, set HotRegion and drag in it
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetEdgeEffect(EdgeEffect::FADE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetEdgeEffect(EdgeEffect::FADE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
 
     /**
@@ -338,14 +341,14 @@ HWTEST_F(SwiperEventTestNg, HandleDrag007, TestSize.Level1)
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->fadeOffset_, DRAG_DELTA);
 
     /**
      * @tc.steps: step3. HandleDragEnd
      */
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
 
@@ -359,11 +362,12 @@ HWTEST_F(SwiperEventTestNg, HandleDrag008, TestSize.Level1)
     /**
      * @tc.steps: step1. Set loop false and EdgeEffect::FADE, set HotRegion and drag in it
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetEdgeEffect(EdgeEffect::FADE);
-        model.SetIndex(3);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetEdgeEffect(EdgeEffect::FADE);
+    model.SetIndex(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
 
     /**
@@ -373,14 +377,14 @@ HWTEST_F(SwiperEventTestNg, HandleDrag008, TestSize.Level1)
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->fadeOffset_, -DRAG_DELTA);
 
     /**
      * @tc.steps: step3. HandleDragEnd
      */
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
 
@@ -391,10 +395,11 @@ HWTEST_F(SwiperEventTestNg, HandleDrag008, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, HandleDrag009, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(2);
-        model.SetSwipeByGroup(true);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Drag to right
@@ -425,46 +430,46 @@ HWTEST_F(SwiperEventTestNg, HandleDrag010, TestSize.Level1)
      * @tc.steps: step1. HandleDragUpdate abs(delta) > SWIPER_WIDTH / 2 and velocity < threshold
      * @tc.expected: Item index is equal to -1
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     MockPaintRect(frameNode_);
     GestureEvent info = CreateDragInfo(false);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity > threshold
      * @tc.expected: Item index is equal to -1
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     MockPaintRect(frameNode_);
     info = CreateDragInfo(false);
     info.SetMainDelta(DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
 
     /**
      * @tc.steps: step3. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity < threshold
      * @tc.expected: Item index is equal to 0
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     MockPaintRect(frameNode_);
     info = CreateDragInfo(false);
     info.SetMainDelta(DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -480,52 +485,55 @@ HWTEST_F(SwiperEventTestNg, HandleDrag011, TestSize.Level1)
      * @tc.steps: step1. HandleDragUpdate abs(delta) > SWIPER_WIDTH / 2 and velocity < threshold
      * @tc.expected: Item index is equal to 4
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndex(3);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndex(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
 
     /**
      * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity > threshold
      * @tc.expected: Item index is equal to 4
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndex(3);
-    });
+    model = CreateSwiper();
+    model.SetIndex(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
     info = CreateDragInfo(true);
     info.SetMainDelta(-DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
 
     /**
      * @tc.steps: step3. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity < threshold
      * @tc.expected: Item index is equal to 3
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndex(3);
-    });
+    model = CreateSwiper();
+    model.SetIndex(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
     MockPaintRect(frameNode_);
     info = CreateDragInfo(true);
     info.SetMainDelta(-DRAG_DELTA / 2);
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
 }
 
@@ -536,7 +544,7 @@ HWTEST_F(SwiperEventTestNg, HandleDrag011, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_EQ(res.remain, 0.0f);
@@ -555,7 +563,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll001, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, HandleScroll).Times(0);
@@ -576,7 +584,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll002, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
     pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
@@ -606,7 +614,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll003, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
     pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
@@ -637,15 +645,14 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll004, TestSize.Level1)
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create swipernode.
+     * @tc.steps: step1. Create swiperNode.
      */
-    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    ASSERT_NE(swiperPattern, nullptr);
-    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
-    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
-    swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
-    auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    CreateSwiper();
+    CreateSwiperDone();
+    layoutProperty_->UpdateLoop(false);
+    paintProperty_->UpdateEdgeEffect(EdgeEffect::SPRING);
+    pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_EQ(res.remain, 4.5f);
     // three level nesting
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
@@ -655,13 +662,13 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
     EXPECT_CALL(*mockScroll, HandleScroll(4.5f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 4.5f, .reachEdge = true }));
-    swiperPattern->parent_ = mockScroll;
+    pattern_->parent_ = mockScroll;
     NestedScrollOptions nestedOpt = {
         .forward = NestedScrollMode::SELF_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
     };
-    swiperPattern->SetNestedScroll(nestedOpt);
-    res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
+    pattern_->SetNestedScroll(nestedOpt);
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 4.5f);
 }
 
@@ -672,7 +679,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     // during animation
     pattern_->targetIndex_ = 1;
@@ -695,16 +702,16 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll006, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
 
     // showPrevious
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
-    EXPECT_EQ(res.remain, 0.0f);
+    EXPECT_EQ(res.remain, 5);
 
     // showNext
     res = pattern_->HandleScroll(-5.0f, SCROLL_FROM_AXIS, NestedState::CHILD_SCROLL);
-    EXPECT_EQ(res.remain, 0.0f);
+    EXPECT_EQ(res.remain, -5);
 }
 
 /**
@@ -714,13 +721,11 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll007, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = 0.0f } });
     int32_t callCount = 0;
-    eventHub_->SetGestureSwipeEvent([&](int32_t index, const AnimationCallbackInfo& info) {
-        ++callCount;
-    });
-    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+    eventHub_->SetGestureSwipeEvent([&](int32_t index, const AnimationCallbackInfo& info) { ++callCount; });
+    pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
     pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     pattern_->HandleScroll(-2.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
@@ -735,24 +740,21 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll008, TestSize.Level1)
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll009, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create swipernode.
+     * @tc.steps: step1. Create swiperNode.
      */
-    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    ASSERT_NE(swiperPattern, nullptr);
-    auto layoutproperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-    layoutproperty->UpdateLoop(false);
+    CreateSwiper();
+    CreateSwiperDone();
+    layoutProperty_->UpdateLoop(false);
     /**
      * @tc.steps: step2. alignment Right to left (RTL),state != NestedState::GESTURE.
      */
-    layoutproperty->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_EQ(swiperPattern->IsHorizontalAndRightToLeft(), true);
-    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
-    swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
-    auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    EXPECT_EQ(res.remain, -4.5f);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_EQ(pattern_->IsHorizontalAndRightToLeft(), true);
+    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+    pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, 4.5f);
 }
-
 
 /**
  * @tc.name: SwiperPatternHandleScrollMultiChildren001
@@ -761,27 +763,26 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll009, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->usePropertyAnimation_ = true;
-    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+    CreateDefaultSwiper();
+    pattern_->propertyAnimationIsRunning_ = true;
+    pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
 
     // second child calling
-    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
 
     // first child ending
     pattern_->OnScrollEndRecursive(std::nullopt);
     EXPECT_FALSE(pattern_->childScrolling_);
-    EXPECT_EQ(pattern_->targetIndex_, 0);
 
     // second child scrolling
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     pattern_->OnScrollEndRecursive(std::nullopt);
 
     // self scroll
@@ -796,7 +797,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     pattern_->childScrolling_ = true;
     auto res = pattern_->HandleScrollVelocity(5.0f);
@@ -815,10 +816,11 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity001, TestSize.Level
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::NONE);
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetEdgeEffect(EdgeEffect::NONE);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(1).WillOnce(Return(true));
     pattern_->parent_ = mockScroll;
@@ -852,7 +854,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level
 
     pattern_->UpdateCurrentOffset(-5.0f);
     pattern_->MarkDirtyNodeSelf();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->HandleDragEnd(-5.0f);
 }
 
@@ -863,7 +865,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
     pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = 0.0f } });
@@ -901,10 +903,11 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity003, TestSize.Level
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::NONE);
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetEdgeEffect(EdgeEffect::NONE);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     /**
      * @tc.steps: step1. alignment Right to left (RTL).
      */
@@ -926,7 +929,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity004, TestSize.Level
  */
 HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->currentFirstIndex_ = 1;
     pattern_->currentIndex_ = 1;
@@ -942,7 +945,7 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop001, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
     pattern_->currentIndex_ = 0;
@@ -966,7 +969,7 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop002, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->currentFirstIndex_ = 0;
     pattern_->currentIndex_ = pattern_->TotalCount() - 1;
@@ -988,44 +991,13 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleTouchBottomLoop004
- * @tc.desc: test Swiper indicator touch left bottom in loop when SwipeByGroup is true
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-        model.SetSwipeByGroup(true);
-        model.SetLoop(true);
-    }, 6);
-    EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
-    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 2;
-    pattern_->currentIndex_ = 0;
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
-    pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
-
-    pattern_->currentIndex_ = pattern_->TotalCount() - 3;
-    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-}
-
-/**
  * @tc.name: SwiperFunc002
  * @tc.desc: OnVisibleChange
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperEventTestNg, SwiperFunc002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     bool isVisible = false;
     pattern_->OnVisibleChange(isVisible);
     pattern_->isInit_ = false;
@@ -1047,7 +1019,7 @@ HWTEST_F(SwiperEventTestNg, SwiperFunc002, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternOnVisibleChange003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->isWindowShow_ = false;
 
     /**
@@ -1068,9 +1040,10 @@ HWTEST_F(SwiperEventTestNg, OnIndexChange001, TestSize.Level1)
 {
     bool isTrigger = false;
     auto onChangeEvent = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetOnChangeEvent(std::move(onChangeEvent));
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChangeEvent(std::move(onChangeEvent));
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Call ShowNext
@@ -1103,10 +1076,11 @@ HWTEST_F(SwiperEventTestNg, OnIndexChange001, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, OnScrollStartEnd001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetEdgeEffect(EdgeEffect::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetEdgeEffect(EdgeEffect::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     auto mockScrollNode = FrameNode::CreateFrameNode("MockScroll", -1, mockScroll);
     frameNode_->MountToParent(mockScrollNode);
@@ -1124,7 +1098,7 @@ HWTEST_F(SwiperEventTestNg, OnScrollStartEnd001, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll start
      */
-    pattern_->OnScrollStartRecursive(5.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 5.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 3);
 
@@ -1152,11 +1126,12 @@ HWTEST_F(SwiperEventTestNg, OnScrollStartEnd001, TestSize.Level1)
  */
 HWTEST_F(SwiperEventTestNg, OnScrollStartEnd002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisableSwipe(true);
-        model.SetLoop(false);
-        model.SetEdgeEffect(EdgeEffect::NONE);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisableSwipe(true);
+    model.SetLoop(false);
+    model.SetEdgeEffect(EdgeEffect::NONE);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     auto mockScrollNode = FrameNode::CreateFrameNode("MockScroll", -1, mockScroll);
     frameNode_->MountToParent(mockScrollNode);
@@ -1173,7 +1148,7 @@ HWTEST_F(SwiperEventTestNg, OnScrollStartEnd002, TestSize.Level1)
      * @tc.steps: step1. Scroll start
      * @tc.expected: Can not start because of DisableSwipe
      */
-    pattern_->OnScrollStartRecursive(5.0f, 0.0f);
+    pattern_->OnScrollStartRecursive(pattern_, 5.0f, 0.0f);
     EXPECT_FALSE(pattern_->childScrolling_);
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
 
@@ -1199,9 +1174,10 @@ HWTEST_F(SwiperEventTestNg, OnChange001, TestSize.Level1)
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         currentIndex = swiperInfo->GetIndex();
     };
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetOnChange(std::move(onChange));
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChange(std::move(onChange));
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Show next page
@@ -1226,18 +1202,17 @@ HWTEST_F(SwiperEventTestNg, OnChange001, TestSize.Level1)
 HWTEST_F(SwiperEventTestNg, OnAnimation001, TestSize.Level1)
 {
     bool isAnimationStart = false;
-    auto onAnimationStart =
-        [&isAnimationStart](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
-            isAnimationStart = true;
-        };
-    bool isAnimationEnd = false;
-    auto onAnimationEnd = [&isAnimationEnd](int32_t index, const AnimationCallbackInfo& info) {
-        isAnimationEnd = true;
+    auto onAnimationStart = [&isAnimationStart](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+        isAnimationStart = true;
     };
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetOnAnimationStart(std::move(onAnimationStart));
-        model.SetOnAnimationEnd(std::move(onAnimationEnd));
-    });
+    bool isAnimationEnd = false;
+    auto onAnimationEnd = [&isAnimationEnd](
+                              int32_t index, const AnimationCallbackInfo& info) { isAnimationEnd = true; };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnAnimationStart(std::move(onAnimationStart));
+    model.SetOnAnimationEnd(std::move(onAnimationEnd));
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Show next page
@@ -1259,7 +1234,7 @@ HWTEST_F(SwiperEventTestNg, UpdateSwiperPanEvent001, TestSize.Level1)
      * @tc.steps: step1. DisableSwipe default is false
      * @tc.expected: Has panEvent_
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     EXPECT_FALSE(pattern_->IsDisableSwipe());
     EXPECT_NE(pattern_->panEvent_, nullptr);
 
@@ -1275,12 +1250,146 @@ HWTEST_F(SwiperEventTestNg, UpdateSwiperPanEvent001, TestSize.Level1)
      * @tc.steps: step3. When is dragging
      * @tc.expected: Stop dragging
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     GestureEvent info = CreateDragInfo(true);
     HandleDragStart(info);
     EXPECT_TRUE(pattern_->isTouchDown_);
     layoutProperty_->UpdateDisableSwipe(true);
     frameNode_->MarkModifyDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
+}
+
+/**
+ * @tc.name: MouseAxisEventWithPageFlipMode001
+ * @tc.desc: PageFlipMode property test with CONTINUOUS mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    // default mode is PageFlipMode::CONTINUOUS(0)
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 0);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+    info.SetMainDelta(-10.f);
+    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    panEvent->actionStart_(info);
+    EXPECT_TRUE(pattern_->isFirstAxisAction_);
+    panEvent->actionUpdate_(info);
+    EXPECT_FALSE(pattern_->isFirstAxisAction_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    pattern_->propertyAnimationIsRunning_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 2);
+}
+
+/**
+ * @tc.name: MouseAxisEventWithPageFlipMode002
+ * @tc.desc: PageFlipMode property test with SINGLE mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetPageFlipMode(1);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    // mode is PageFlipMode::SINGLE(0)
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 1);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+    info.SetMainDelta(-10.f);
+    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    panEvent->actionStart_(info);
+    EXPECT_TRUE(pattern_->isFirstAxisAction_);
+    // axis update event will flip page, and isFirstAxisAction_ will be marked
+    panEvent->actionUpdate_(info);
+    EXPECT_FALSE(pattern_->isFirstAxisAction_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    // propertyAnimation running will block page flipping
+    pattern_->propertyAnimationIsRunning_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    // frameAnimation running will block page flipping
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->translateAnimationIsRunning_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankDragTest001
+ * @tc.desc: Test Swiper IgnoreBlank with drag. When totalcount equal to displaycount, ignoreBlankOffset_ will be 0.f.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, MarginIgnoreBlankDragTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop false, totalcount equal to displaycount.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+    model.SetNextMargin(Dimension(0.f), true);
+    model.SetDisplayCount(4);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+
+    /**
+     * @tc.steps: step2. drag over end.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+
+    info.SetMainDelta(-SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. drag over start.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    info.SetMainDelta(SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankDragTest002
+ * @tc.desc: Test Swiper IgnoreBlank with drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, MarginIgnoreBlankDragTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop false, index = 1.
+     * @tc.expected: ignoreBlankOffset_ will be NEXT_MARGIN.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetNextMargin(Dimension(NEXT_MARGIN), true);
+    model.SetDisplayCount(3);
+    model.SetIndex(1);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, NEXT_MARGIN);
+
+    /**
+     * @tc.steps: step2. drag over start.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
 }
 } // namespace OHOS::Ace::NG

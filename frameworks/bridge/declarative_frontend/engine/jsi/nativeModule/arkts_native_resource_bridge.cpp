@@ -89,6 +89,30 @@ ArkUINativeModuleValue ResourceBridge::GetColorValue(ArkUIRuntimeCallInfo* runti
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ResourceBridge::GetStringValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    std::string result;
+    if (ArkTSUtils::ParseJsString(vm, firstArg, result)) {
+        return panda::StringRef::NewFromUtf8(vm, result.c_str());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ResourceBridge::GetNumberValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    double result;
+    if (ArkTSUtils::ParseJsDouble(vm, firstArg, result)) {
+        return panda::NumberRef::New(vm, result);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ResourceBridge::ClearCache(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

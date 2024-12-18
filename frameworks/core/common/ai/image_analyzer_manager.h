@@ -25,8 +25,15 @@ namespace OHOS::Ace {
 class ImageAnalyzerAdapter;
 }
 
+struct ACE_FORCE_EXPORT MovingPhotoAnalyzerInfo {
+    std::string uri = "";
+    int64_t frameTimestamp = 0;
+    float contentWidth = 0.0f;
+    float contentHeight = 0.0f;
+};
+
 namespace OHOS::Ace {
-class ImageAnalyzerManager : public AceType {
+class ACE_FORCE_EXPORT ImageAnalyzerManager : public AceType {
     DECLARE_ACE_TYPE(ImageAnalyzerManager, AceType);
 public:
     ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNode, ImageAnalyzerHolder holder);
@@ -37,7 +44,9 @@ public:
     
     bool IsSupportImageAnalyzerFeature();
     void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
+    void CreateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, MovingPhotoAnalyzerInfo info);
     void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
+    void UpdateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, MovingPhotoAnalyzerInfo info);
     void UpdateAnalyzerOverlayLayout();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode, const PixelMapInfo& info = {});
     void DestroyAnalyzerOverlay();
@@ -53,6 +62,7 @@ public:
     void UpdateAIButtonConfig(AIButtonConfig config);
     void UpdateOverlayActiveStatus(bool status);
     void SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback);
+    void SetOnCanPlayCallback(OnCanPlayCallback&& callback);
 
 private:
     bool UpdateVideoConfig(const PixelMapInfo& info);

@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/utils/utils.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -96,6 +97,18 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
+void TextDragPattern::CalculateFloatTitleOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset)
+{
+    auto pipeline = dragNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto stageOffset = stageNode->GetTransformRelativeOffset();
+    offset -= stageOffset;
+}
+
 TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode)
 {
     auto dragContext = dragNode->GetRenderContext();
@@ -107,6 +120,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
     auto globalOffset = pattern->GetParentGlobalOffset();
+    CalculateFloatTitleOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
     AdjustHandlers(contentRect, leftHandler, rightHandler);
@@ -126,7 +140,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
         }
     } else {
         globalX = contentRect.Left() + globalOffset.GetX() - dragOffset;
-        width = contentRect.Width();
+        dragPattern->AdjustMaxWidth(width, contentRect, boxes);
     }
     float contentX = (leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0) - dragOffset - delta / CONSTANT_HALF;
     dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});
@@ -140,6 +154,20 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     TextDragData data(rect, width + bothOffset, height + bothOffset, leftHandler.Height(), rightHandler.Height());
     data.initSelecitonInfo(info, leftHandler.GetY() == rightHandler.GetY());
     return data;
+}
+
+void TextDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)
+{
+    width = contentRect.Width();
+    CHECK_NULL_VOID(!boxes.empty());
+    float startX = boxes.front().Left();
+    float endX = boxes.front().Right();
+    for (const auto& box : boxes) {
+        startX = std::min(startX, box.Left());
+        endX = std::max(endX, box.Right());
+    }
+    startX = std::min(0.0f, startX);
+    width = std::abs(startX - endX);
 }
 
 RectF TextDragPattern::GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
@@ -320,10 +348,19 @@ void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_
 
 Color TextDragPattern::GetDragBackgroundColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color(TEXT_DRAG_COLOR_BG));
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, Color(TEXT_DRAG_COLOR_BG));
     return textTheme->GetDragBackgroundColor();
+}
+
+Dimension TextDragPattern::GetDragCornerRadius()
+{
+    auto deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        return TEXT_DRAG_RADIUS_2IN1;
+    }
+    return TEXT_DRAG_RADIUS;
 }
 } // namespace OHOS::Ace::NG

@@ -101,8 +101,19 @@ bool HspSilentInstall::IsHspExist(const std::string &moduleName, const std::stri
         return module.moduleName == moduleName;
     });
     if (res) {
+        TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "InitRouteMap when module exists");
+        InitRouteMap();
         return true;
     }
     return false;
+}
+
+void HspSilentInstall::InitRouteMap()
+{
+    auto container = OHOS::Ace::Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto navigationRoute = container->GetNavigationRoute();
+    CHECK_NULL_VOID(navigationRoute);
+    navigationRoute->InitRouteMap();
 }
 } // namespace OHOS::NavPushPathHelper

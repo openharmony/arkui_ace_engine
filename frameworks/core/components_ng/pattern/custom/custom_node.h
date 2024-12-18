@@ -114,7 +114,8 @@ public:
         return extraInfos_;
     }
 
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     const WeakPtr<UINode>& GetNavigationNode() const
     {
@@ -130,7 +131,13 @@ public:
 
     void FireCustomDisappear() override;
 
+    // called for DFX
+    void DumpInfo() override;
 private:
+    // for DFX
+    void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
+    void DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo);
+
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;

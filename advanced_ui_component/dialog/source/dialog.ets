@@ -85,6 +85,7 @@ const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
 const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
+const SCROLL_BAR_OFFSET = 20;
 
 @CustomDialog
 export struct TipsDialog {
@@ -117,6 +118,7 @@ export struct TipsDialog {
   imageIndex: number = 0;
   textIndex: number = 1;
   checkBoxIndex: number = 2;
+  appMaxFontScale: number = 3.2;
 
   build() {
     CustomDialogContentComponent({
@@ -220,6 +222,7 @@ export struct TipsDialog {
           Row() {
             Text(this.title)
               .fontSize(`${TITLE_S}fp`)
+              .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
               .fontWeight(FontWeight.Bold)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
@@ -259,6 +262,8 @@ export struct TipsDialog {
   aboutToAppear() {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    let uiContext: UIContext = this.getUIContext();
+    this.appMaxFontScale = uiContext.getMaxFontScale();
     this.initButtons();
     this.initMargin();
   }
@@ -410,7 +415,6 @@ export struct SelectDialog {
     })
   }
 
-
   @Builder
   buildContent(): void {
     Scroll(this.contentScroller) {
@@ -461,6 +465,7 @@ export struct SelectDialog {
                 .borderRadius($r('sys.float.corner_radius_level8'))
                 .buttonStyle(ButtonStyleMode.TEXTUAL)
                 .paddingStyle()
+
                 if (index < this.radioContent.length - 1) {
                   Divider().color(this.dividerColorWithTheme).paddingStyle();
                 }
@@ -823,10 +828,10 @@ export struct AlertDialog {
           .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
-          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+          .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
-          .onAreaChange((oldValue: Area, newValue: Area) => {
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             this.updateTextAlign(Number(newValue.width));
           })
           .onKeyEvent((event: KeyEvent) => {
@@ -838,7 +843,7 @@ export struct AlertDialog {
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
     }
-    .margin({ end: LengthMetrics.vp(this.getMargin()) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear(): void {
@@ -862,10 +867,6 @@ export struct AlertDialog {
     if (this.secondaryButton) {
       this.buttons.push(this.secondaryButton);
     }
-  }
-
-  private getMargin(): number {
-    return 0 - PADDING_LEVEL_8;
   }
 
   private getFontWeight(): number {
@@ -1059,7 +1060,7 @@ struct CustomDialogContentComponent {
         .margin(this.customStyle ? {
           start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
           end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
-          bottom: $r('sys.float.ohos_id_dialog_margin_bottom'),
+          bottom: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_bottom')),
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
@@ -1325,26 +1326,26 @@ struct CustomDialogContentComponent {
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
@@ -1467,17 +1468,41 @@ struct CustomDialogContentComponent {
 }
 
 @Extend(Button)
-function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDialogController) {
+function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOptions[],
+  controller?: CustomDialogController) {
   .onClick(() => {
     if (buttonOptions.action) {
       buttonOptions.action();
     }
     controller?.close();
   })
-  .defaultFocus(true)
+  .defaultFocus(buttonOptions.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
+}
+
+/**
+ * is button list has default focus
+ *
+ * @param buttonList button list
+ * @returns boolean
+ */
+function isHasDefaultFocus(buttonList?: ButtonOptions[]): boolean {
+  try {
+    let isHasDefaultFocus: boolean = false;
+    buttonList?.forEach((button) => {
+      if (button.defaultFocus) {
+        isHasDefaultFocus = true;
+      }
+    })
+    return isHasDefaultFocus;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `get defaultFocus exist error, code: ${code}, message: ${message}`);
+    return false;
+  }
 }
 
 /**
@@ -1695,14 +1720,20 @@ export struct PopoverDialog {
       this.targetBuilder();
     }
     .onClick(() => {
-      let screenSize: display.Display = display.getDefaultDisplaySync();
-      let screenWidth: number = px2vp(screenSize.width);
-      if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-        this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
-      } else {
-        this.popover.width = this.dialogWidth;
+      try {
+        let screenSize: display.Display = display.getDefaultDisplaySync();
+        let screenWidth: number = px2vp(screenSize.width);
+        if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+          this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
+        } else {
+          this.popover.width = this.dialogWidth;
+        }
+        this.visible = !this.visible;
+      } catch (error) {
+        let code = error.code;
+        let message = error.message;
+        hilog.error(0x3900, 'Ace', `dialog popup error, code: ${code}, message: ${message}`);
       }
-      this.visible = !this.visible;
     })
     .bindPopup(this.visible, {
       builder: this.popover?.builder,

@@ -107,6 +107,11 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
     RSCanvas& canvas = context.canvas;
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
     for (size_t i = 0; i < totalCount; ++i) {
+        if (i >= contentProperty.unselectedIndicatorWidth.size() ||
+            i >= contentProperty.unselectedIndicatorHeight.size()) {
+            break;
+        }
+
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         float width = contentProperty.unselectedIndicatorWidth[i];
         float height = contentProperty.unselectedIndicatorHeight[i];
@@ -201,13 +206,13 @@ void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& ma
 }
 
 std::pair<float, float> OverlengthDotIndicatorModifier::CalcLongPointEndCenterXWithBlack(
-    int32_t index, const LinearVector<float>& itemHalfSizes)
+    size_t index, const LinearVector<float>& itemHalfSizes)
 {
     if (isHorizontalAndRTL_) {
-        index = maxDisplayCount_ - 1 - index;
+        index = static_cast<size_t>(maxDisplayCount_ - 1 - static_cast<int32_t>(index));
     }
 
-    if (static_cast<size_t>(index) >= animationEndCenterX_.size()) {
+    if (index >= animationEndCenterX_.size()) {
         return std::make_pair(0.0f, 0.0f);
     }
 
@@ -245,7 +250,8 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     newPointOpacity_->Set(0);
     isSelectedColorAnimEnd_ = false;
     isTouchBottomLoop_ = true;
-    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetSelectedIndex_, itemHalfSizes);
+    auto longPointEndCenterX =
+        CalcLongPointEndCenterXWithBlack(static_cast<size_t>(targetSelectedIndex_), itemHalfSizes);
     blackPointsAnimEnd_ = false;
     AnimationUtils::StartAnimation(blackPointOption, [&]() {
         vectorBlackPointCenterX_->Set(animationEndCenterX_);
@@ -261,10 +267,11 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     }, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        if (!modifier->blackPointsAnimEnd_) {
+        if (!modifier->blackPointsAnimEnd_ && (modifier->needUpdate_ || !modifier->isAutoPlay_)) {
             modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
             modifier->currentOverlongType_ = modifier->targetOverlongType_;
             modifier->blackPointsAnimEnd_ = true;
+            modifier->needUpdate_ = false;
         }
     });
 }
@@ -359,7 +366,7 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
         targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ + 1 : currentSelectedIndex_ - 1;
     }
 
-    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetIndex, itemHalfSizes);
+    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(static_cast<size_t>(targetIndex), itemHalfSizes);
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         auto dragTargetCenterX = (overlongSelectedEndCenterX_.second + overlongSelectedEndCenterX_.first) * HALF_FLOAT;
         overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first +
@@ -471,6 +478,10 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const Linea
 
     if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                   gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
+        if (NearZero(turnPageRate_) && touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+            return;
+        }
+
         UpdateUnselectedCenterXOnDrag();
         UpdateSelectedCenterXOnDrag(itemHalfSizes);
         targetSelectedIndex_ = currentSelectedIndex_;
@@ -607,7 +618,10 @@ void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<
 void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margin,
     const LinearVector<float>& itemHalfSizes, GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop)
 {
-    StopAnimation(false);
+    StopBlackAnimation();
+
+    needUpdate_ = false;
+    blackPointsAnimEnd_ = true;
     currentSelectedIndex_ = targetSelectedIndex_;
     currentOverlongType_ = targetOverlongType_;
     isTouchBottomLoop_ = false;
@@ -629,24 +643,11 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
         pointCenterX.emplace_back(overlongSelectedEndCenterX_);
     }
 
-    PlayLongPointAnimation(pointCenterX, gestureState, touchBottomTypeLoop, animationEndCenterX_);
+    PlayLongPointAnimation(pointCenterX, gestureState, touchBottomTypeLoop, animationEndCenterX_, false);
 }
 
-void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
+void OverlengthDotIndicatorModifier::StopBlackAnimation()
 {
-    if (ifImmediately) {
-        AnimationOption option;
-        option.SetDuration(0);
-        option.SetCurve(Curves::LINEAR);
-        AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
-            auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID(modifier);
-            modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
-            modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
-        });
-    }
-
-    blackPointsAnimEnd_ = true;
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
@@ -663,6 +664,23 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;
+}
+
+void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
+{
+    if (ifImmediately) {
+        AnimationOption option;
+        option.SetDuration(0);
+        option.SetCurve(Curves::LINEAR);
+        AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
+            modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
+        });
+    }
+
+    StopBlackAnimation();
 }
 
 void OverlengthDotIndicatorModifier::InitOverlongSelectedIndex(int32_t pageIndex)

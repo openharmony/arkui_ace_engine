@@ -34,6 +34,8 @@ public:
     void OnAccepted() override;
     void OnRejected() override;
 
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -52,7 +54,7 @@ private:
     GestureJudgeResult TriggerGestureJudgeCallback();
     Offset ComputePinchCenter();
 
-    bool IsCtrlBeingPressed();
+    bool IsCtrlBeingPressed(const AxisEvent& event);
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;

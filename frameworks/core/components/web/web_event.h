@@ -515,6 +515,10 @@ class ACE_EXPORT WebSslErrorEvent : public BaseEventInfo {
 public:
     WebSslErrorEvent(const RefPtr<SslErrorResult>& result, int32_t error)
         : BaseEventInfo("WebSslErrorEvent"), result_(result), error_(error) {}
+    WebSslErrorEvent(const RefPtr<SslErrorResult>& result, int32_t error,
+        const std::vector<std::string>& certChainData)
+        : BaseEventInfo("WebSslErrorEvent"), result_(result), error_(error),
+        certChainData_(certChainData) {}
     ~WebSslErrorEvent() = default;
 
     const RefPtr<SslErrorResult>& GetResult() const
@@ -527,9 +531,15 @@ public:
         return error_;
     }
 
+    const std::vector<std::string>& GetCertChainData() const
+    {
+        return certChainData_;
+    }
+
 private:
     RefPtr<SslErrorResult> result_;
     int32_t error_;
+    std::vector<std::string> certChainData_;
 };
 
 class ACE_EXPORT AllSslErrorResult : public AceType {
@@ -1379,6 +1389,7 @@ public:
     virtual int GetMediaType() const = 0;
     virtual int GetInputFieldType() const = 0;
     virtual std::string GetSelectionText() const = 0;
+    virtual void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const {}
 };
 
 class ACE_EXPORT ContextMenuResult : public AceType {

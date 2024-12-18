@@ -256,84 +256,11 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
         if (formUtils) {
             formManagerBridge_->SetFormUtils(formUtils);
         }
-        formManagerBridge_->AddFormAcquireCallback(
-            [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module, std::string data,
-                std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo,
-                const FrontendType& frontendType, const FrontendType& uiSyntax) {
-                ContainerScope scope(instanceID);
-                auto element = weak.Upgrade();
-                auto uiTaskExecutor = SingleTaskExecutor::Make(
-                    element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak,
-                                        instanceID, frontendType, uiSyntax] {
-                    ContainerScope scope(instanceID);
-                    auto form = weak.Upgrade();
-                    if (form) {
-                        auto container = form->GetSubContainer();
-                        if (container) {
-                            container->SetWindowConfig(
-                                { formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
-                            container->RunCard(id, path, module, data, imageDataMap,
-                                               formJsInfo.formSrc, frontendType, uiSyntax);
-                        }
-                    }
-                }, "ArkUIFormAcquireAndRunCard");
-            });
-        formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this), instanceID](int64_t id, std::string data,
-            std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap) {
-            ContainerScope scope(instanceID);
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([id, data, imageDataMap, weak, instanceID] {
-                ContainerScope scope(instanceID);
-                auto form = weak.Upgrade();
-                if (form) {
-                    if (form->ISAllowUpdate()) {
-                        form->GetSubContainer()->UpdateCard(data, imageDataMap);
-                    }
-                }
-            }, "ArkUIFormUpdateCard");
-        });
-        formManagerBridge_->AddFormErrorCallback(
-            [weak = WeakClaim(this), instanceID](std::string code, std::string msg) {
-                ContainerScope scope(instanceID);
-                auto element = weak.Upgrade();
-                auto uiTaskExecutor = SingleTaskExecutor::Make(
-                    element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                uiTaskExecutor.PostTask([code, msg, weak, instanceID] {
-                    ContainerScope scope(instanceID);
-                    auto form = weak.Upgrade();
-                    if (form) {
-                        form->HandleOnErrorEvent(code, msg);
-                    }
-
-                    auto render = form->GetRenderNode();
-                    if (!render) {
-                        LOGE("remove card from screen fail, due to could not get card render node");
-                        return;
-                    }
-                    auto renderForm = AceType::DynamicCast<RenderForm>(render);
-                    if (renderForm) {
-                        renderForm->RemoveChildren();
-                    }
-                }, "ArkUIFormRemoveCard");
-            });
-        formManagerBridge_->AddFormUninstallCallback(
-            [weak = WeakClaim(this), instanceID](int64_t formId) {
-                ContainerScope scope(instanceID);
-                auto element = weak.Upgrade();
-                auto uiTaskExecutor = SingleTaskExecutor::Make(
-                    element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                uiTaskExecutor.PostTask(
-                    [formId, weak, instanceID] {
-                        ContainerScope scope(instanceID);
-                        auto form = weak.Upgrade();
-                        if (form) {
-                            form->HandleOnUninstallEvent(formId);
-                        }
-                    }, "ArkUIFormUninstall");
-            });
+ 
+        InitAddFormAcquireCallback(instanceID);
+        InitAddFormUpdateCallback(instanceID);
+        InitAddFormErrorCallback(instanceID);
+        InitAddFormUninstallCallback(instanceID);
     }
 }
 
@@ -422,6 +349,102 @@ void FormElement::CreateCardContainer()
 RefPtr<RenderNode> FormElement::CreateRenderNode()
 {
     return RenderForm::Create();
+}
+
+void FormElement::InitAddFormAcquireCallback(int32_t instanceID)
+{
+    auto callback = [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module,
+                        std::string data, std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap,
+                        AppExecFwk::FormJsInfo formJsInfo, const FrontendType& frontendType,
+                        const FrontendType& uiSyntax) {
+        ContainerScope scope(instanceID);
+        auto element = weak.Upgrade();
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType, uiSyntax] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                if (form && form->GetSubContainer()) {
+                    auto container = form->GetSubContainer();
+                    container->SetWindowConfig(
+                        { formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
+                    container->RunCard(
+                        id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
+                }
+            },
+            "ArkUIFormAcquireAndRunCard");
+    };
+    formManagerBridge_->AddFormAcquireCallback(callback);
+}
+
+void FormElement::InitAddFormUpdateCallback(int32_t instanceID)
+{
+    auto callback = [weak = WeakClaim(this), instanceID](int64_t id, std::string data,
+                        std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap) {
+        ContainerScope scope(instanceID);
+        auto element = weak.Upgrade();
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [id, data, imageDataMap, weak, instanceID] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                if (form && form->ISAllowUpdate()) {
+                    form->GetSubContainer()->UpdateCard(data, imageDataMap);
+                }
+            },
+            "ArkUIFormUpdateCard");
+    };
+    formManagerBridge_->AddFormUpdateCallback(callback);
+}
+
+void FormElement::InitAddFormErrorCallback(int32_t instanceID)
+{
+    formManagerBridge_->AddFormErrorCallback([weak = WeakClaim(this), instanceID](std::string code, std::string msg) {
+        ContainerScope scope(instanceID);
+        auto element = weak.Upgrade();
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [code, msg, weak, instanceID] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                if (form) {
+                    form->HandleOnErrorEvent(code, msg);
+                }
+
+                auto render = form->GetRenderNode();
+                if (!render) {
+                    LOGE("remove card from screen fail, due to could not get card render node");
+                    return;
+                }
+                auto renderForm = AceType::DynamicCast<RenderForm>(render);
+                if (renderForm) {
+                    renderForm->RemoveChildren();
+                }
+            },
+            "ArkUIFormRemoveCard");
+    });
+}
+
+void FormElement::InitAddFormUninstallCallback(int32_t instanceID)
+{
+    formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
+        ContainerScope scope(instanceID);
+        auto element = weak.Upgrade();
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [formId, weak, instanceID] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                if (form) {
+                    form->HandleOnUninstallEvent(formId);
+                }
+            },
+            "ArkUIFormUninstall");
+    });
 }
 
 } // namespace OHOS::Ace

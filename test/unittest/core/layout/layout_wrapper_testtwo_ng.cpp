@@ -615,17 +615,18 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest011, TestSize.Level1)
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest012, TestSize.Level1)
 {
     ExpandEdges totalExpand;
+    PaddingPropertyF innerSpace;
     auto node = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
 
     RefPtr<LayoutWrapperNode> layoutWrapper =
             AceType::MakeRefPtr<LayoutWrapperNode>(node, nullptr, node->GetLayoutProperty());
-    EXPECT_FALSE(layoutWrapper->AccumulateExpandCacheHit(totalExpand));
+    EXPECT_FALSE(layoutWrapper->AccumulateExpandCacheHit(totalExpand, innerSpace));
     EXPECT_EQ(totalExpand, ExpandEdges());
 
     RefPtr<GeometryNode> gn = AceType::MakeRefPtr<GeometryNode>();
     gn->frame_.rect_ = RectF{10.0f, 20.0f, 30.0f, 40.0f};
     layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(node, gn, node->GetLayoutProperty());
-    EXPECT_FALSE(layoutWrapper->AccumulateExpandCacheHit(totalExpand));
+    EXPECT_FALSE(layoutWrapper->AccumulateExpandCacheHit(totalExpand, innerSpace));
     EXPECT_EQ(totalExpand, ExpandEdges());
 
     ExpandEdges safeAreaPadding;
@@ -633,17 +634,17 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest012, TestSize.Level1)
     safeAreaPadding.right = std::make_optional<float>(20.0f);
     safeAreaPadding.top = std::make_optional<float>(30.0f);
     safeAreaPadding.bottom = std::make_optional<float>(40.0f);
-    EXPECT_FALSE(layoutWrapper->AccumulateExpandCacheHit(totalExpand));
+    EXPECT_FALSE(layoutWrapper->AccumulateExpandCacheHit(totalExpand, innerSpace));
     EXPECT_EQ(totalExpand, ExpandEdges());
     layoutWrapper->geometryNode_->SetAccumulatedSafeAreaEdges(safeAreaPadding);
-    EXPECT_TRUE(layoutWrapper->AccumulateExpandCacheHit(totalExpand));
+    EXPECT_TRUE(layoutWrapper->AccumulateExpandCacheHit(totalExpand, innerSpace));
     EXPECT_EQ(totalExpand, ExpandEdges());
     totalExpand.left = std::make_optional<float>(100.0f);
     totalExpand.right = std::make_optional<float>(200.0f);
     totalExpand.top = std::make_optional<float>(300.0f);
     totalExpand.bottom = std::make_optional<float>(400.0f);
 
-    EXPECT_TRUE(layoutWrapper->AccumulateExpandCacheHit(totalExpand));
+    EXPECT_TRUE(layoutWrapper->AccumulateExpandCacheHit(totalExpand, innerSpace));
     ExpandEdges safeAreaPadding1;
     safeAreaPadding1.left = std::make_optional<float>(110.0f);
     safeAreaPadding1.right = std::make_optional<float>(220.0f);
@@ -747,6 +748,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest014, TestSize.Level1)
  */
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
 {
+    //AvoidKeyboard() can get page node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
@@ -944,6 +946,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level1)
  */
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
 {
+    //AvoidKeyboard() can get overlay node from host instead of relying on the stageManager.
     auto node = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);

@@ -265,8 +265,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions001, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("2", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"2", content);
 }
 
 /**
@@ -319,8 +319,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollUp001, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("2", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"2", content);
 }
 
 /**
@@ -373,8 +373,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollDown001
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("4", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"4", content);
 }
 
 /**
@@ -550,8 +550,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions003, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test2", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"test2", content);
 }
 
 /**
@@ -727,8 +727,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions008, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"", content);
 }
 
 /**
@@ -1085,8 +1085,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollUp003, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test3", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"test3", content);
 }
 
 /**
@@ -1198,8 +1198,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollDown003
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    std::string content = textLayoutProperty->GetContent().value_or("");
-    EXPECT_EQ("test1", content);
+    std::u16string content = textLayoutProperty->GetContent().value_or(u"");
+    EXPECT_EQ(u"test1", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
 }
 
@@ -1402,7 +1402,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScroll005, Te
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    EXPECT_EQ("1", textLayoutProperty->GetContent().value());
+    EXPECT_EQ(u"1", textLayoutProperty->GetContent().value());
 }
 
 /**
@@ -1449,8 +1449,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions016, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"", content);
     count = columnPattern->GetOptionCount();
     EXPECT_EQ(ZERO, count);
 }

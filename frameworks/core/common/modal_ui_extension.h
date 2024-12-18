@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 
 namespace OHOS::AAFwk {
 class Want;
@@ -32,7 +33,7 @@ namespace OHOS::Ace {
 class ModalUIExtension final {
 public:
     static RefPtr<NG::FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isAsyncModalBinding = false, bool isModal = true);
+        const NG::InnerModalUIExtensionConfig& config);
 
     static int32_t GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode);
 

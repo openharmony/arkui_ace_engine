@@ -32,7 +32,6 @@ public:
     void SetRefreshing(bool isRefreshing) override;
     void SetIndicatorOffset(const Dimension& indicatorOffset) override;
     void SetFriction(int32_t friction) override;
-    void SetProgressColor(const Color& progressColor) override;
     void SetOnStateChange(StateChangeEvent&& stateChange) override;
     void SetOnRefreshing(RefreshingEvent&& refreshing) override;
     void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
@@ -58,6 +57,7 @@ public:
     void SetShowTimeDistance(const Dimension& showTimeDistance) override {}
     void SetTextStyle(const TextStyle& textStyle) override {}
     void SetProgressBackgroundColor(const Color& backgroundColor) override {}
+    void SetProgressColor(const Color& progressColor) override {}
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);

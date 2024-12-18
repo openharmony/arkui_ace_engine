@@ -16,10 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkCanvas.h"
-#endif
-
 #include "core/components/toggle/render_toggle.h"
 #include "core/components/transform/rosen_render_transform.h"
 
@@ -38,11 +34,7 @@ public:
 
 private:
     Size Measure() override;
-#ifndef USE_ROSEN_DRAWING
-    void DrawToggle(SkCanvas* canvas, const Offset& offset) const;
-#else
     void DrawToggle(RSCanvas* canvas, const Offset& offset) const;
-#endif
     void UpdateLayer();
     Color GetStatusColor() const;
     Matrix4 transformLayer_ = Matrix4::CreateIdentity();

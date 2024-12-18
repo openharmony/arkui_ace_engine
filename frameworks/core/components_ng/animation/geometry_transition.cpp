@@ -391,6 +391,24 @@ RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node)
     return newNode;
 }
 
+void GeometryTransition::SyncGeometryPropertiesAfterLayout(const RefPtr<FrameNode>& syncNode)
+{
+    CHECK_NULL_VOID(syncNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask(
+        [nodeWeak = WeakClaim(RawPtr(syncNode))]() {
+            auto node = nodeWeak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto renderContext = node->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto geometryNode = node->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            renderContext->SyncGeometryProperties(RawPtr(geometryNode));
+            renderContext->SetBorderRadius(renderContext->GetBorderRadius().value_or(BorderRadiusProperty()));
+        }, true);
+}
+
 // For nodes without transition (still on the tree), but still need to follow the matched node which has
 // transition (parameter is its transition direction).
 bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction)
@@ -411,6 +429,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         hasOutAnim_ = false;
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow cancelled");
         holder_ = nullptr;
+        SyncGeometryPropertiesAfterLayout(outNode);
         return false;
     }
     if (direction.value()) {

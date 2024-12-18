@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/rect.h"
@@ -38,9 +39,10 @@
 namespace OHOS::Ace::NG {
 TextFieldPaintMethod::TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
     const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
-    const RefPtr<TextFieldContentModifier>& textFieldContentModifier)
+    const RefPtr<TextFieldContentModifier>& textFieldContentModifier,
+    const RefPtr<TextFieldForegroundModifier>& textFieldForegroundModifier)
     : pattern_(pattern), textFieldOverlayModifier_(textFieldOverlayModifier),
-      textFieldContentModifier_(textFieldContentModifier)
+      textFieldContentModifier_(textFieldContentModifier), textFieldForegroundModifier_(textFieldForegroundModifier)
 {}
 
 RefPtr<Modifier> TextFieldPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
@@ -65,9 +67,9 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textValue = textFieldPattern->GetTextValue();
+    auto textValue = textFieldPattern->GetTextUtf16Value();
     auto isPasswordType = textFieldPattern->IsInPasswordMode();
-    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue("").empty();
+    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue(u"").empty();
     auto needObscureText = isPasswordType && textFieldPattern->GetTextObscured() && !showPlaceHolder;
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -75,10 +77,9 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    auto text =
-        TextFieldPattern::CreateDisplayText(textValue, textFieldPattern->GetNakedCharPosition(),
-            needObscureText, theme->IsShowPasswordDirectly());
-    auto displayText = StringUtils::Str16ToStr8(text);
+    auto text = TextFieldPattern::CreateDisplayText(
+        textValue, textFieldPattern->GetNakedCharPosition(), needObscureText, theme->IsShowPasswordDirectly());
+    auto displayText = text;
     textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
 
@@ -110,9 +111,8 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     textFieldContentModifier_->SetShowErrorState(
-        layoutProperty->GetShowErrorTextValue(false) &&
-        !textFieldPattern->IsNormalInlineState());
-    textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
+        layoutProperty->GetShowErrorTextValue(false) && !textFieldPattern->IsNormalInlineState());
+    textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(u""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
     PropertyChangeFlag flag = 0;
     if (textFieldContentModifier_->NeedMeasureUpdate(flag)) {
@@ -212,5 +212,21 @@ void TextFieldPaintMethod::UpdateScrollBar()
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     textFieldOverlayModifier_->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
+
+RefPtr<Modifier> TextFieldPaintMethod::GetForegroundModifier(PaintWrapper* paintWrapper)
+{
+    return textFieldForegroundModifier_;
+}
+
+void TextFieldPaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(textFieldForegroundModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    textFieldForegroundModifier_->SetInnerBorderWidth(
+        static_cast<float>(paintProperty->GetInnerBorderWidthValue(Dimension()).ConvertToPx()));
 }
 } // namespace OHOS::Ace::NG

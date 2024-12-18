@@ -101,7 +101,9 @@ class FrameNode {
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nativeRef = nativeRef;
     this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+    __JSScopeUtil__.restoreInstanceId();
     if (this._nodeId === -1) {
       return;
     }
@@ -124,6 +126,14 @@ class FrameNode {
   }
   getNodePtr(): NodePtr | null {
     return this.nodePtr_;
+  }
+  getValidNodePtr(): NodePtr {
+    const node = this.getNodePtr();
+    if (node === null) {
+      throw Error('The FrameNode has been disposed!');
+    } else {
+      return node;
+    }
   }
   dispose(): void {
     this.renderNode_?.dispose();
@@ -165,11 +175,15 @@ class FrameNode {
 
   convertToFrameNode(nodePtr: NodePtr, nodeId: number = -1): FrameNode | null {
     if (nodeId === -1) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
     }
     if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       let frameNode = new ProxyFrameNode(this.uiContext_);
       let node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
       frameNode.setNodePtr(node);
       frameNode._nodeId = nodeId;
       FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
@@ -342,8 +356,10 @@ class FrameNode {
   }
 
   getParent(): FrameNode | null {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const result = getUINativeModule().frameNode.getParent(this.getNodePtr());
     const nodeId = result?.nodeId;
+    __JSScopeUtil__.restoreInstanceId();
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
@@ -355,7 +371,9 @@ class FrameNode {
   }
 
   getChildrenCount(isExpanded?: boolean): number {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   getPositionToParent(): Position {
@@ -389,12 +407,12 @@ class FrameNode {
   }
 
   getMeasuredSize(): Size {
-    const size = getUINativeModule().frameNode.getMeasuredSize(this.getNodePtr());
+    const size = getUINativeModule().frameNode.getMeasuredSize(this.getValidNodePtr());
     return { width: size[0], height: size[1] };
   }
 
   getLayoutPosition(): Position {
-    const position = getUINativeModule().frameNode.getLayoutPosition(this.getNodePtr());
+    const position = getUINativeModule().frameNode.getLayoutPosition(this.getValidNodePtr());
     return { x: position[0], y: position[1] };
   }
 
@@ -465,7 +483,9 @@ class FrameNode {
   }
 
   getInspectorInfo(): Object {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
     const inspectorInfo = JSON.parse(inspectorInfoStr);
     return inspectorInfo;
   }
@@ -495,12 +515,16 @@ class FrameNode {
     const minSize: Size = constraint.minSize;
     const maxSize: Size = constraint.maxSize;
     const percentReference: Size = constraint.percentReference;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
       maxSize.height, percentReference.width, percentReference.height);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   layout(position: Position): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   setNeedsLayout(): void {

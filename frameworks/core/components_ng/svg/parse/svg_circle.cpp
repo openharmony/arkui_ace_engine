@@ -27,16 +27,6 @@ RefPtr<SvgNode> SvgCircle::Create()
     return AceType::MakeRefPtr<SvgCircle>();
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgCircle::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    path.addCircle(ConvertDimensionToPx(circleAttr_.cx, viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(circleAttr_.cy, viewPort, SvgLengthType::VERTICAL),
-        ConvertDimensionToPx(circleAttr_.r, viewPort, SvgLengthType::OTHER));
-    return path;
-}
-#else
 RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
@@ -45,7 +35,6 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
         ConvertDimensionToPx(circleAttr_.r, viewPort, SvgLengthType::OTHER));
     return path;
 }
-#endif
 
 void SvgCircle::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
 {

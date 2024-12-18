@@ -20,8 +20,8 @@
 #include "core/components_ng/base/frame_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
-#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_parser.h"
+#include "texgine/src/font_config.h"
+#include "texgine/src/font_parser.h"
 #endif
 #endif
 #ifdef USE_PLATFORM_FONT
@@ -65,6 +65,7 @@ void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 {
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
+    FontNodeChangeStyleNG();
 }
 
 bool FontManager::IsDefaultFontChanged()
@@ -254,6 +255,19 @@ void FontManager::UnRegisterCallback(const WeakPtr<RenderNode>& node)
 {
     for (auto& fontLoader : fontLoaders_) {
         fontLoader->RemoveCallback(node);
+    }
+}
+
+void FontManager::FontNodeChangeStyleNG()
+{
+    for (auto iter = fontNodesNG_.begin(); iter != fontNodesNG_.end();) {
+        auto fontNode = iter->Upgrade();
+        CHECK_NULL_VOID(fontNode);
+        auto frameNode = DynamicCast<NG::FrameNode>(fontNode);
+        if (frameNode) {
+            frameNode->OnPropertyChangeMeasure();
+        }
+        ++iter;
     }
 }
 

@@ -70,6 +70,12 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
+    void SetSystemTransitionType(NG::NavigationSystemTransitionType type) override;
+    static void SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type);
+    void SetScrollableProcessor(
+        const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) override;
+    void UpdateBindingWithScrollable(
+        std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

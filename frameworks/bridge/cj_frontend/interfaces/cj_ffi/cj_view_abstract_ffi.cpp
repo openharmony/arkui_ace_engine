@@ -15,14 +15,14 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
-
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
+
+#include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_pixel_unit_convert_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "bridge/cj_frontend/cppview/shape_abstract.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -79,24 +79,11 @@ const std::vector<Alignment> ALIGNMENT_LIST = { Alignment::TOP_LEFT, Alignment::
     Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT, Alignment::BOTTOM_LEFT,
     Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT };
 
-const std::vector<RenderFit> RENDERFITS = {
-    RenderFit::CENTER,
-    RenderFit::TOP,
-    RenderFit::BOTTOM,
-    RenderFit::LEFT,
-    RenderFit::RIGHT,
-    RenderFit::TOP_LEFT,
-    RenderFit::TOP_RIGHT,
-    RenderFit::BOTTOM_LEFT,
-    RenderFit::BOTTOM_RIGHT,
-    RenderFit::RESIZE_FILL,
-    RenderFit::RESIZE_CONTAIN,
-    RenderFit::RESIZE_CONTAIN_TOP_LEFT,
-    RenderFit::RESIZE_CONTAIN_BOTTOM_RIGHT,
-    RenderFit::RESIZE_COVER,
-    RenderFit::RESIZE_COVER_TOP_LEFT,
-    RenderFit::RESIZE_COVER_BOTTOM_RIGHT
-};
+const std::vector<RenderFit> RENDERFITS = { RenderFit::CENTER, RenderFit::TOP, RenderFit::BOTTOM, RenderFit::LEFT,
+    RenderFit::RIGHT, RenderFit::TOP_LEFT, RenderFit::TOP_RIGHT, RenderFit::BOTTOM_LEFT, RenderFit::BOTTOM_RIGHT,
+    RenderFit::RESIZE_FILL, RenderFit::RESIZE_CONTAIN, RenderFit::RESIZE_CONTAIN_TOP_LEFT,
+    RenderFit::RESIZE_CONTAIN_BOTTOM_RIGHT, RenderFit::RESIZE_COVER, RenderFit::RESIZE_COVER_TOP_LEFT,
+    RenderFit::RESIZE_COVER_BOTTOM_RIGHT };
 
 // Regex for match the placeholder.
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
@@ -168,9 +155,7 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
     if (!primaryString.empty()) {
         ButtonProperties propertiesPrimary;
         propertiesPrimary.value = primaryString;
-        auto touchPrimaryCallback = [primaryActionFunc](TouchEventInfo&) {
-            primaryActionFunc();
-        };
+        auto touchPrimaryCallback = [primaryActionFunc](TouchEventInfo&) { primaryActionFunc(); };
         auto onNewClick = [primaryActionFunc](const GestureEvent& info) -> void { primaryActionFunc(); };
         propertiesPrimary.touchFunc = touchPrimaryCallback;
         propertiesPrimary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
@@ -182,9 +167,7 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
     if (!secondaryString.empty()) {
         ButtonProperties propertiesSecondary;
         propertiesSecondary.value = secondaryString;
-        auto touchSecondaryCallback = [secondaryActionFunc](TouchEventInfo&) {
-            secondaryActionFunc();
-        };
+        auto touchSecondaryCallback = [secondaryActionFunc](TouchEventInfo&) { secondaryActionFunc(); };
         auto onNewClick = [secondaryActionFunc](const GestureEvent& info) -> void { secondaryActionFunc(); };
         propertiesSecondary.touchFunc = touchSecondaryCallback;
         propertiesSecondary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
@@ -661,9 +644,7 @@ void FfiOHOSAceFrameworkViewAbstractSetTranslateY(double translateValue, int32_t
 
 void FfiOHOSAceFrameworkViewAbstractSetTransition()
 {
-    ViewAbstractModel::GetInstance()->SetTransition(
-        NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL)
-    );
+    ViewAbstractModel::GetInstance()->SetTransition(NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
 }
 
 void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id)
@@ -1053,7 +1034,7 @@ void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bin
 }
 
 void FfiOHOSAceFrameworkViewAbstractKeyShortcut(
-    std::string& value, int32_t *keysArray, int64_t size, void (*callback)(void))
+    std::string& value, int32_t* keysArray, int64_t size, void (*callback)(void))
 {
     std::vector<ModifierKey> keys(size);
     keys.clear();
@@ -1071,7 +1052,7 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcut(
 }
 
 void FfiOHOSAceFrameworkViewAbstractKeyShortcutByFuncKey(
-    int32_t value, int32_t *keysArray, int64_t size, void (*callback)(void))
+    int32_t value, int32_t* keysArray, int64_t size, void (*callback)(void))
 {
     if (size == 0) {
         ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<ModifierKey>(), nullptr);
@@ -1082,7 +1063,7 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByFuncKey(
 }
 
 void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
-    const char* value, int32_t *keysArray, int64_t size, void (*callback)(void))
+    const char* value, int32_t* keysArray, int64_t size, void (*callback)(void))
 {
     std::string keyValue(value);
     if (size == 0 || keyValue.empty()) {
@@ -1097,9 +1078,9 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
 
 void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
 {
-    std::function<void(bool)> onStateChangeFunc =
-        (reinterpret_cast<int64_t>(value.onStateChange) == 0) ?
-        ([](bool) -> void {}) : CJLambda::Create(value.onStateChange);
+    std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(value.onStateChange) == 0)
+                                                      ? ([](bool) -> void {})
+                                                      : CJLambda::Create(value.onStateChange);
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(value.isShow);
     popupParam->SetUseCustomComponent(true);
@@ -1139,9 +1120,7 @@ void FfiOHOSAceFrameworkViewAbstractBindMenu(
         auto label = vectorValue[i];
         params[i].value = label;
         LOGD("option #%{public}d is %{public}s", static_cast<int>(i), params[i].value.c_str());
-        params[i].action = [menuActionHandle, label]() {
-            menuActionHandle(label);
-        };
+        params[i].action = [menuActionHandle, label]() { menuActionHandle(label); };
     }
     NG::MenuParam options;
     ViewAbstractModel::GetInstance()->BindMenu(std::move(params), nullptr, options);
@@ -1159,12 +1138,11 @@ void FfiOHOSAceFrameworkViewAbstractBindContextMenu(void (*builder)(), int32_t r
         LOGE("bindContextMenu error, invalid value for responseType");
         return;
     }
-    NG::MenuParam options {.type = NG::MenuType::CONTEXT_MENU};
+    NG::MenuParam options { .type = NG::MenuType::CONTEXT_MENU };
     auto buildFunc = CJLambda::Create(builder);
     auto emptyFunc = std::function([] {});
     ViewAbstractModel::GetInstance()->BindContextMenu(
-        static_cast<OHOS::Ace::ResponseType>(responseType), buildFunc, options, emptyFunc
-    );
+        static_cast<OHOS::Ace::ResponseType>(responseType), buildFunc, options, emptyFunc);
 }
 
 static void NewGetCjGradientColorStops(NG::Gradient& gradient, CArrCColors cjColors)
@@ -1419,12 +1397,11 @@ void FfiOHOSAceFrameworkViewAbstractExpandSafeArea(uint32_t types, uint32_t edge
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
-void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
-    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
-    std::function<void()>& onWillDisappear)
+void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear, std::function<void()>& onDisappear,
+    std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear)
 {
     if (options.onAppear.hasValue) {
-        onAppear =  CJLambda::Create(options.onAppear.value);
+        onAppear = CJLambda::Create(options.onAppear.value);
     }
     if (options.onDisappear.hasValue) {
         onDisappear = CJLambda::Create(options.onDisappear.value);
@@ -1436,7 +1413,7 @@ void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
         onWillAppear = CJLambda::Create(options.onWillAppear.value);
     }
     if (options.onWillDisappear.hasValue) {
-        onWillDisappear =  CJLambda::Create(options.onWillDisappear.value);
+        onWillDisappear = CJLambda::Create(options.onWillDisappear.value);
     }
 }
 
@@ -1529,8 +1506,7 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
 void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
 {
     sheetStyle.isTitleBuilder = true;
-    titleBuilderFunction = option.title.hasValue ? CJLambda::Create(option.title.value)
-                                        : ([]() -> void {});
+    titleBuilderFunction = option.title.hasValue ? CJLambda::Create(option.title.value) : ([]() -> void {});
 }
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)
 {
@@ -1552,16 +1528,15 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
-    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc,
-        onWillAppearCallback, onWillDisappearCallback);
+    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc, onWillAppearCallback,
+        onWillDisappearCallback);
     ParseSheetStyle(option, sheetStyle);
     ParseSheetTitle(option, sheetStyle, titleBuilderFunction);
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
-        std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
-        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback),
-        std::move(onDetentsDidChangeCallback), std::move(onWidthDidChangeCallback),
-        std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
+        std::move(shouldDismissFunc), std::move(onWillDismissCallback), std::move(onWillAppearCallback),
+        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
+        std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
     return;
 }
 
@@ -1569,22 +1544,22 @@ void FFIOHOSAceFrameworkFocusable(bool isFocusable)
 {
     ViewAbstractModel::GetInstance()->SetFocusable(isFocusable);
 }
- 
+
 void FFIOHOSAceFrameworkTabIndex(int32_t index)
 {
     ViewAbstractModel::GetInstance()->SetTabIndex(index);
 }
- 
+
 void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus)
 {
     ViewAbstractModel::GetInstance()->SetDefaultFocus(isDefaultFocus);
 }
- 
+
 void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus)
 {
     ViewAbstractModel::GetInstance()->SetGroupDefaultFocus(isGroupDefaultFocus);
 }
- 
+
 void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch)
 {
     ViewAbstractModel::GetInstance()->SetFocusOnTouch(isFocusOnTouch);
@@ -1632,14 +1607,107 @@ void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJConte
     NG::ContentCoverParam contentCoverParam;
     std::function<void(const int32_t&)> onWillDismissFunc;
     // parse callback
-    std::function<void()> onShowCallback = options.onAppear.hasValue ? CJLambda::Create(options.onAppear.value)
-                                                                                   : ([]() -> void {});
-    std::function<void()> onDismissCallback = options.onDisappear.hasValue ? CJLambda::Create(options.onDisappear.value)
-                                                                                   : ([]() -> void {});
+    std::function<void()> onShowCallback =
+        options.onAppear.hasValue ? CJLambda::Create(options.onAppear.value) : ([]() -> void {});
+    std::function<void()> onDismissCallback =
+        options.onDisappear.hasValue ? CJLambda::Create(options.onDisappear.value) : ([]() -> void {});
 
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, nullptr, std::move(buildFunc), modalStyle,
         std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
         std::move(onWillDismissCallback), contentCoverParam);
+}
+
+ExternalString FFIGetResourceString(NativeResourceObject obj)
+{
+    std::string result;
+    if (!ViewAbstract::ParseCjString(obj, result)) {
+        LOGE("Parse string failed.");
+    }
+    return ::Utils::MallocCString(result);
+}
+
+ExternalString FFIGetResourceMedia(NativeResourceObject obj)
+{
+    std::string result;
+    if (!ViewAbstract::ParseCjMedia(obj, result)) {
+        LOGE("Parse media failed.");
+    }
+    return ::Utils::MallocCString(result);
+}
+
+uint32_t FFIGetResourceColor(NativeResourceObject obj)
+{
+    Color color;
+    if (!ViewAbstract::ParseCjColor(obj, color)) {
+        LOGE("Parse color failed.");
+    }
+    return color.GetValue();
+}
+
+RetDimension FFIGetResourceDimension(NativeResourceObject obj)
+{
+    CalcDimension result;
+    RetDimension ret = { .value = 0.0, .unit = 0 };
+    if (!ViewAbstract::ParseCjDimension(obj, result, DimensionUnit::VP)) {
+        LOGE("Parse dimension failed.");
+    }
+    ret.value = result.Value();
+    ret.unit = static_cast<int32_t>(result.Unit());
+    return ret;
+}
+
+double FFIGetResourceDouble(NativeResourceObject obj)
+{
+    double result;
+    if (!ViewAbstract::ParseCjDouble(obj, result)) {
+        LOGE("Parse double failed.");
+    }
+    return result;
+}
+
+int32_t FFIGetResourceInt32(NativeResourceObject obj)
+{
+    int32_t result;
+    if (!ViewAbstract::ParseCjInteger(obj, result)) {
+        LOGE("Parse int32 failed.");
+    }
+    return result;
+}
+
+uint32_t FFIGetResourceUInt32(NativeResourceObject obj)
+{
+    uint32_t result;
+    if (!ViewAbstract::ParseCjInteger(obj, result)) {
+        LOGE("Parse uint32 failed.");
+    }
+    return result;
+}
+
+bool FFIGetResourceBool(NativeResourceObject obj)
+{
+    bool result;
+    if (!ViewAbstract::ParseCjBool(obj, result)) {
+        LOGE("Parse bool failed.");
+    }
+    return result;
+}
+
+VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj)
+{
+    auto result = new std::vector<uint32_t>;
+    if (!ViewAbstract::ParseCjIntegerArray(obj, *result)) {
+        LOGE("Parse uint32 array failed.");
+    }
+    return result;
+}
+
+VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj)
+{
+    auto result = new std::vector<std::string>;
+    if (!ViewAbstract::ParseCjStringArray(obj, *result)) {
+        LOGE("Parse string array failed.");
+    }
+    return result;
 }
 }
 

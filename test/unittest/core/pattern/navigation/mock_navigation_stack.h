@@ -130,10 +130,6 @@ public:
     bool CreateNodeByIndex(int32_t index, const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode>& customNode,
         OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode>& node) override;
 
-    std::vector<std::string> GetAllPathName() override;
-
-    std::vector<int32_t> GetAllPathIndex() override;
-
     void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override;
 
     void InitNavPathIndex(const std::vector<std::string>& pathNames) override;
@@ -148,6 +144,8 @@ public:
 
     bool IsFromRecovery(int32_t index);
 
+    std::string GetNavDestinationIdByIndex(int32_t index);
+
     //  ============================ operation below is for mock NavPathStack in arkTS ============================
     /**
      * @brief simply mock push operation of NavPathStack(@arkTS)
@@ -159,6 +157,18 @@ public:
     // pushPath(info: NavPathInfo, animated?: boolean): void
     // pushPath(info: NavPathInof, options?: NavigationOptions): void
     void MockPushPath(MockNavPathInfo info, bool animated = true, LaunchMode launchmode = LaunchMode::STANDARD);
+
+    bool MockRemoveByNavDestinationId(const std::string& navDestinationId);
+
+    int32_t MockRemoveByInexes(std::vector<int32_t> indexes);
+
+    int32_t MockRemoveByName(const std::string& name);
+
+    int32_t MockPopToName(const std::string& name);
+
+    void MockPopToIndex(int32_t index);
+
+    int32_t MockMoveToTop(const std::string& name);
 
     void Clear() override;
 
@@ -172,6 +182,11 @@ public:
     {
         return static_cast<int32_t>(mockPathArray_.size());
     }
+
+    std::vector<std::string> GetAllPathName() override;
+
+    std::vector<int32_t> GetAllPathIndex() override;
+
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;

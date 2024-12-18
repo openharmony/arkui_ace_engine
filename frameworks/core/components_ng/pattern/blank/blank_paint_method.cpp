@@ -24,8 +24,6 @@ void BlankPaintMethod::PaintRect(RSCanvas& canvas, PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<BlankPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
     auto color = paintProperty->GetColor().value_or(Color::TRANSPARENT);
     auto layoutSize = paintWrapper->GetContentSize();
     auto offset = paintWrapper->GetContentOffset();

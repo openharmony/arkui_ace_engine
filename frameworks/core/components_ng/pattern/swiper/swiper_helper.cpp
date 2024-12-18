@@ -268,6 +268,8 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     DumpDirection(swiper.direction_);
     swiper.IsDisableSwipe() ? DumpLog::GetInstance().AddDesc("disableSwipe:true")
                             : DumpLog::GetInstance().AddDesc("disableSwipe:false");
+    swiper.GetNonAutoLayoutDirection() == TextDirection::RTL ? DumpLog::GetInstance().AddDesc("TextDirection::RTL")
+                                                             : DumpLog::GetInstance().AddDesc("TextDirection::LTR");
 }
 
 void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
@@ -283,9 +285,6 @@ void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
     swiper.targetIndex_.has_value()
         ? DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(swiper.targetIndex_.value()))
         : DumpLog::GetInstance().AddDesc("targetIndex:null");
-    swiper.preTargetIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("preTargetIndex:" + std::to_string(swiper.preTargetIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("preTargetIndex:null");
     swiper.pauseTargetIndex_.has_value()
         ? DumpLog::GetInstance().AddDesc("pauseTargetIndex:" + std::to_string(swiper.pauseTargetIndex_.value()))
         : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");
@@ -350,7 +349,7 @@ void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
                               : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
     swiper.mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")
                                : DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:false");
-    swiper.usePropertyAnimation_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
+    swiper.propertyAnimationIsRunning_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
                                  : DumpLog::GetInstance().AddDesc("usePropertyAnimation:false");
     swiper.isUserFinish_ ? DumpLog::GetInstance().AddDesc("isUserFinish:true")
                          : DumpLog::GetInstance().AddDesc("isUserFinish:false");

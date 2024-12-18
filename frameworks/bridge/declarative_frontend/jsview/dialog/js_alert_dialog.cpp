@@ -437,7 +437,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             AlertDialogModel::GetInstance()->SetOnCancel(eventFunc, properties);
         }
 
-        std::function<void(const int32_t& info)> onWillDismissFunc = nullptr;
+        std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismissFunc = nullptr;
         ParseDialogCallback(obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 

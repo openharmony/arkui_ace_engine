@@ -30,8 +30,6 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
-#include "root_scene.h"
-#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -39,6 +37,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -99,7 +98,8 @@ constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
-constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+constexpr int32_t POPUP_EDGE_INTERVAL = 8;
+constexpr int32_t POPUP_MIN_EDGE = 1;
 constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
@@ -194,6 +194,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         auto nativeEngine = reinterpret_cast<NativeEngine*>(sharedRuntime);
         auto env = reinterpret_cast<napi_env>(nativeEngine);
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
+    }
+}
+
+void ParseLanguage(ConfigurationChange& configurationChange, const std::string& languageTag)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
 } // namespace
@@ -502,6 +514,46 @@ bool AceContainer::RemoveOverlayBySubwindowManager(int32_t instanceId)
         }
     }
     return false;
+}
+
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContext()
+{
+    auto context = runtimeContext_.lock();
+    if (context == nullptr) {
+        LOGW("runtimeContext_ is null.");
+    }
+
+    return context;
+}
+
+void AceContainer::SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext)
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->SetJsContext(jsContext);
+}
+
+std::shared_ptr<Framework::JsValue> AceContainer::GetJsContext()
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_RETURN(jsEngine, nullptr);
+    return jsEngine->GetJsContext();
 }
 
 bool AceContainer::OnBackPressed(int32_t instanceId)
@@ -907,18 +959,18 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& keyEventCallback = [context = pipelineContext_, id = instanceId_](const KeyEvent& event) {
+    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](const NonPointerEvent& event) {
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result, id]() {
+            [context, &event, &result, id]() {
                 ContainerScope scope(id);
-                result = context->OnKeyEvent(event);
+                result = context->OnNonPointerEvent(event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerNonPointerEvent", PriorityType::VIP);
         return result;
     };
-    aceView_->RegisterKeyEventCallback(keyEventCallback);
+    aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -935,14 +987,6 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-
-        if (type != WindowSizeChangeReason::ROTATION) {
-            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
-            context->RequestFrame();
-            return;
-        }
-        context->ResetSurfaceChangeMsg();
-
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -983,8 +1027,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
-                aceContainer->UpdateResourceDensity(density);
-                aceContainer->NotifyDensityUpdate();
+                aceContainer->NotifyDensityUpdate(density);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -1033,7 +1076,7 @@ void AceContainer::InitializeCallback()
 void AceContainer::InitDragEventCallback()
 {
     if (!isFormRender_) {
-        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const PointerEvent& pointerEvent,
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const DragPointerEvent& pointerEvent,
                                        const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);
@@ -1339,26 +1382,33 @@ private:
 
         auto trans = node->GetTransformRelativeOffset();
         auto bottomAvoidHeight = GetBottomAvoidHeight();
+        auto edge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_EDGE_INTERVAL);
+        auto minEdge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_MIN_EDGE);
 
         bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
-
-        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
-            (size.height + POPUP_EDGE_INTERVAL + bottomAvoidHeight)) {
+        if (rectf.GetY() > size.height + edge + minEdge) {
+            if (isBottom) {
+                deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
+            } else {
+                deltaY = rect_.top - trans.GetY();
+            }
+        } else if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+            (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
             // popup will display at the bottom of the container
             if (isBottom) {
-                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY() + edge;
             } else {
-                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - POPUP_EDGE_INTERVAL;
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge;
             }
         } else {
             // popup will display in the middle of the container
             if (isBottom) {
                 deltaY = rect_.top + rect_.height -
-                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() + edge;
             } else {
-                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() - edge;
             }
         }
         return deltaY;
@@ -1640,13 +1690,13 @@ public:
     virtual ~SaveRequestCallback() = default;
     void OnSaveRequestSuccess() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestSuccess called");
         ProcessOnFinish();
     }
 
     void OnSaveRequestFailed() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestFailed called");
         ProcessOnFinish();
     }
 
@@ -1676,7 +1726,7 @@ private:
 bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
     const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative, int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "RequestAutoSave called");
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
@@ -1761,6 +1811,9 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    if (IsUIExtensionWindow()) {
+        DumpLog::GetInstance().SetSeparator(";");
+    }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
     DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
@@ -2026,6 +2079,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     }
 #endif
 
+    if (isDynamicRender_) {
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
+    }
+
     auto windowDensityCallback = [weak = WeakClaim(this)]() {
         auto container = weak.Upgrade();
         CHECK_NULL_RETURN(container, 0.0);
@@ -2110,6 +2167,21 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    auto uiExtensionEventCallback = [weak = WeakClaim(this)] (uint32_t eventId) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(eventId);
+    };
+    pipelineContext_->SetUIExtensionEventCallback(uiExtensionEventCallback);
+
+    auto accessibilityEventCallback = [weak = WeakClaim(this)] (uint32_t eventId, int64_t parameter) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireAccessibilityEventCallback(eventId, parameter);
+    };
+    pipelineContext_->SetAccessibilityEventCallback(accessibilityEventCallback);
+
     if (GetSettings().usePlatformAsUIThread) {
         FrameReport::GetInstance().Init();
     } else {
@@ -2168,6 +2240,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         if (jsEngine && !isFormRender_) {
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
+            jsEngine->JsSetAceDebugMode();
         }
     }
 
@@ -2315,8 +2388,9 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-    windowManager->SetGetWindowStartMoveFlagCallBack(
-        [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
+    windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
+    windowManager->SetWindowIsStartMovingCallBack(
+        [window = uiWindow_]() -> bool { return static_cast<bool>(window->IsStartMoving()); });
     windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
     windowManager->SetWindowSplitSecondaryCallBack(
@@ -2345,7 +2419,9 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> bool {
             return window->GetFreeMultiWindowModeEnabledState();
         });
-
+    windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
+        window->OnContainerModalEvent(name, value);
+    });
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
@@ -2369,28 +2445,6 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
-Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
-{
-    Rosen::WSRect avoidArea;
-    Rect sessionAvoidArea;
-    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    }
-    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
-        sessionAvoidArea.ToString().c_str());
-    return sessionAvoidArea;
-}
-
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
 {
     CHECK_NULL_RETURN(uiWindow_, {});
@@ -2411,6 +2465,12 @@ Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
         return avoidArea;
     }
     return {};
+}
+
+uint32_t AceContainer::GetStatusBarHeight()
+{
+    CHECK_NULL_RETURN(uiWindow_, 0);
+    return static_cast<uint32_t>(uiWindow_->GetStatusBarHeight());
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
@@ -2437,6 +2497,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 
 void AceContainer::CheckAndSetFontFamily()
 {
+    CHECK_NULL_VOID(pipelineContext_);
     auto fontManager = pipelineContext_->GetFontManager();
     CHECK_NULL_VOID(fontManager);
     if (fontManager->IsUseAppCustomFont()) {
@@ -2469,7 +2530,7 @@ void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
     if (!parsedConfig.fontScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
         if (fontSizeScale != pipelineContext_->GetFontScale()) {
@@ -2478,8 +2539,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
-            parsedConfig.fontWeightScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontWeightScale: %{public}s", parsedConfig.fontWeightScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
         if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
@@ -2539,23 +2599,15 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
         configurationChange.skinUpdate = skinUpdate;
-        if (fontUpdate) {
+        if ((isDynamicRender_ || isFormRender_) && fontUpdate) {
             CheckAndSetFontFamily();
         }
     }
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
+void AceContainer::BuildResConfig(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
-    if (!parsedConfig.IsValid()) {
-        LOGW("AceContainer::OnConfigurationUpdated param is empty");
-        return;
-    }
-    ConfigurationChange configurationChange;
-    CHECK_NULL_VOID(pipelineContext_);
-    auto themeManager = pipelineContext_->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto resConfig = GetResourceConfiguration();
     if (!parsedConfig.colorMode.empty()) {
         configurationChange.colorModeUpdate = true;
         if (parsedConfig.colorMode == "dark") {
@@ -2574,14 +2626,8 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
     if (!parsedConfig.languageTag.empty()) {
-        std::string language;
-        std::string script;
-        std::string region;
-        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
-        if (!language.empty() || !script.empty() || !region.empty()) {
-            configurationChange.languageUpdate = true;
-            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-        }
+        ParseLanguage(configurationChange, parsedConfig.languageTag);
+        resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
         auto fontManager = pipelineContext_->GetFontManager();
@@ -2605,7 +2651,23 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
+}
+
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+    ConfigurationChange configurationChange;
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto resConfig = GetResourceConfiguration();
+    BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
+        ParseLanguage(configurationChange, parsedConfig.preferredLanguage);
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
@@ -2621,12 +2683,27 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         front->OnConfigurationUpdated(configuration);
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    if (configurationChange.IsNeedUpdate()) {
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
+}
+
+void AceContainer::UpdateConfigurationSyncForAll(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+
+    if (!parsedConfig.fontId.empty()) {
+        CheckAndSetFontFamily();
+    }
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -2673,9 +2750,7 @@ void AceContainer::NotifyConfigurationChange(
                         pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
                     }
                     pipeline->NotifyConfigurationChange();
-                    if (configurationChange.IsNeedUpdate()) {
-                        pipeline->FlushReload(configurationChange);
-                    }
+                    pipeline->FlushReload(configurationChange);
                     if (needReloadTransition) {
                         // reload transition animation
                         pipeline->FlushReloadTransition();
@@ -2703,7 +2778,8 @@ void AceContainer::HotReload()
 
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->FlushReload(ConfigurationChange());
+            ConfigurationChange configurationChange { .hotReloadUpdate = true };
+            pipeline->FlushReload(configurationChange);
         },
         TaskExecutor::TaskType::UI, "ArkUIHotReload");
 }
@@ -2906,6 +2982,15 @@ bool AceContainer::IsUIExtensionWindow()
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
 }
 
+void AceContainer::FireUIExtensionEventCallback(uint32_t eventId)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FireUIExtensionEventCallback event[%u]", eventId);
+    uiWindow_->NotifyExtensionEventAsync(eventId);
+}
+
 bool AceContainer::IsSceneBoardEnabled()
 {
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
@@ -3022,7 +3107,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
             callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
         } else {
-            if (!pointerItem.IsPressed()) {
+            if (!pointerItem.IsPressed() || pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
                 for (const auto& callback : callbacksIter->second) {
                     if (callback) {
                         callback();
@@ -3038,7 +3123,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 bool AceContainer::GetCurPointerEventInfo(
     int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     MMI::PointerEvent::PointerItem pointerItem;
@@ -3056,7 +3141,8 @@ bool AceContainer::GetCurPointerEventInfo(
     sourceType = currentPointerEvent->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
-    sourceTool = pointerItem.GetToolType();
+    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
+    displayId = currentPointerEvent->GetTargetDisplayId();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;
 }
@@ -3214,6 +3300,24 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
         TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityHoverEvent");
 }
 
+void AceContainer::FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), eventId, parameter] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto accessibilityManager = ngPipeline->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            accessibilityManager->FireAccessibilityEventCallback(eventId, parameter);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityEventCallback");
+}
+
 std::vector<Ace::RectF> AceContainer::GetOverlayNodePositions()
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -3281,12 +3385,15 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
     return true;
 }
 
-void AceContainer::NotifyDensityUpdate()
+void AceContainer::NotifyDensityUpdate(double density)
 {
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
         frontend->FlushReload();
+    }
+    if (fullUpdate) {
+        UpdateResourceDensity(density);
     }
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);

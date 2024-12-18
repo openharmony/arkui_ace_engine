@@ -82,8 +82,9 @@ public:
 
     void FireDisappearCallback(const RefPtr<NavDestinationGroupNode>& navDestination)
     {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle Respond user onDisappear. id is %{public}d",
-            name_.c_str(), navDestination->GetId());
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "%{public}s lifecycle Respond user onDisappear. navdestinationId:%{public}d, navigationId:%{public}d",
+            name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
         EventHub::FireOnDisappear();
     }
 

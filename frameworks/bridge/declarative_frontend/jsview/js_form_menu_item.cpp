@@ -89,7 +89,7 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
     errObj->SetProperty<int32_t>("code", errCode);
     errObj->SetProperty<std::string>("message", errMsg);
     params[0] = errObj;
-    params[1] = JSRef<JSVal>::Make(ToJSValue(formId));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(std::to_string(formId)));
     jsCBFunc->ExecuteJS(NUM_CALLBACKNUM, params);
 }
 

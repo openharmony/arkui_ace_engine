@@ -38,7 +38,7 @@ struct ImageSizeStyle {
         }
         json->PutExtAttr("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str(), filter);
         json->PutExtAttr("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("autoResize", propAutoResize.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("autoResize", propAutoResize.value_or(false) ? "true" : "false", filter);
     }
 };
 
@@ -171,6 +171,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlaceHolderStyle, TextBackgroundStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasPlaceHolderStyle, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageRotateOrientation, ImageRotateOrientation, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

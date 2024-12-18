@@ -127,14 +127,6 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
-void AccessibilityEventListenerImpl::OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType)
-{
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
-}
-
 void FindListenerImpl::OnFindResultReceived(
     const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting)
 {
@@ -516,9 +508,11 @@ bool WebClientImpl::OnFileSelectorShow(
 
 void WebClientImpl::OnResource(const std::string& url)
 {
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    auto task = delegate->GetTaskExecutor();
+    // Don't use RefPtr<WebDelegate> object here!
+    // OnResource will be called in a background thread. When the RefPtr object is
+    // the last reference, the destructor will be called here, which may cause
+    // js-object-releasing of WebDelegate in non-main thread.
+    auto task = Container::CurrentTaskExecutorSafely();
     CHECK_NULL_VOID(task);
     std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
     task->PostTask(
@@ -1274,5 +1268,48 @@ bool WebClientImpl::CloseImageOverlaySelection()
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
     return delegate->CloseImageOverlaySelection();
+}
+
+bool WebClientImpl::OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+    OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result),
+        static_cast<int32_t>(error), certChainData);
+    auto task = delegate->GetTaskExecutor();
+    CHECK_NULL_RETURN(task, false);
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnSslErrorRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientSslErrorRequest");
+    return jsResult;
+}
+
+void WebClientImpl::OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnAccessibilityEvent accessibilityId: %{public}" PRId64 ", eventType: %{public}d",
+        accessibilityId, eventType);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
+}
+
+bool WebClientImpl::IsCurrentFocus()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->IsCurrentFocus();
 }
 } // namespace OHOS::Ace

@@ -97,6 +97,7 @@ public:
     bool IsUndefined() const;
     bool IsNull() const;
     std::string ToString() const;
+    std::u16string ToU16String() const;
     bool ToBoolean() const;
 
     template<typename T>
@@ -312,7 +313,7 @@ public:
     bool GetBooleanArg(size_t index, bool& value) const;
     bool GetInt32Arg(size_t index, int32_t& value) const;
     bool GetUint32Arg(size_t index, uint32_t& value) const;
-    bool GetDoubleArg(size_t index, double& value) const;
+    bool GetDoubleArg(size_t index, double& value, bool isJudgeSpecialValue = false) const;
     bool GetDoubleArrayArg(size_t index, std::vector<double>& valueArr) const;
     bool GetStringArg(size_t index, std::string& value) const;
 

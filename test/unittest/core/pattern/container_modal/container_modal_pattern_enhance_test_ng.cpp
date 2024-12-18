@@ -54,6 +54,15 @@ class ContainerModalPatternEnhanceTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    RefPtr<FrameNode> CreateContent();
+    void CreateContainerModal();
+    void GetInstance();
+    RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
+    ContainerModalViewEnhance* viewEnhance_;
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<LayoutProperty> layoutProperty_;
+    RefPtr<ContainerModalAccessibilityProperty> accessibilityProperty_;
+    RefPtr<ContainerModalPatternEnhance> pattern_;
 };
 void ContainerModalPatternEnhanceTestNg::SetUpTestCase()
 {
@@ -69,6 +78,55 @@ void ContainerModalPatternEnhanceTestNg::TearDownTestCase()
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
+
+void ContainerModalPatternEnhanceTestNg::GetInstance()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    viewEnhance_ = new ContainerModalViewEnhance();
+    pattern_ = frameNode_->GetPattern<ContainerModalPatternEnhance>();
+    pattern_->AttachToFrameNode(frameNode_);
+    layoutProperty_ = frameNode_->GetLayoutProperty();
+    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ContainerModalAccessibilityProperty>();
+}
+
+void ContainerModalPatternEnhanceTestNg::CreateContainerModal()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::CONTAINER_MODAL_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ContainerModalPatternEnhance>(); });
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto windowModeCallback = [windowMode]() { return windowMode; };
+    windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback));
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+}
+
+RefPtr<PaintWrapper> ContainerModalPatternEnhanceTestNg::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+    return wrapper;
+}
+
+RefPtr<FrameNode> ContainerModalViewEnhanceTestNg ::CreateContent()
+{
+    return AceType::MakeRefPtr<FrameNode>("content", 0, AceType::MakeRefPtr<Pattern>());
+}
+
 /**
  * @tc.name: ContainerModalPatternEnhanceTest001
  * @tc.desc: Test OnWindowUnfocused
@@ -509,5 +567,64 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest021
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
     containerPattern->UpdateTitleInTargetPos(false, true);
     EXPECT_NE(containerPattern, nullptr);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest022
+ * @tc.desc: Test EnableContainerModalGesture
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest022, TestSize.Level1)
+{
+    CreateContainerModal();
+
+    // EnableContainerModalGesture to false
+    pattern_->EnableContainerModalGesture(false);
+
+    // all events are null
+    auto floatingTitleRow = GetFloatingTitleRow();
+    EXPECT_NE(floatingTitleRow, nullptr);
+    auto floatingTitleRowEventHub = floatingTitleRow->GetOrCreateGestureEventHub();
+    EXPECT_NE(floatingTitleRowEventHub, nullptr);
+    EXPECT_EQ(floatingTitleRowEventHub->IsGestureEmpty(), true);
+
+    auto customTitleRow = GetCustomTitleRow();
+    EXPECT_NE(customTitleRow, nullptr);
+    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
+    EXPECT_NE(customTitleRowEventHub, nullptr);
+    EXPECT_EQ(customTitleRowEventHub->IsGestureEmpty(), true);
+    EXPECT_EQ(customTitleRowEventHub->IsPanEventEmpty(), true);
+
+    auto gestureRow = GetGestureRow();
+    EXPECT_NE(gestureRow, nullptr);
+    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureRowEventHub, nullptr);
+    EXPECT_EQ(gestureRowEventHub->IsGestureEmpty(), true);
+    EXPECT_EQ(gestureRowEventHub->IsPanEventEmpty(), true);
+
+    // EnableContainerModalGesture to true
+    pattern_->EnableContainerModalGesture(true);
+
+    // all events are not null
+    auto floatingTitleRow = GetFloatingTitleRow();
+    EXPECT_NE(floatingTitleRow, nullptr);
+    auto floatingTitleRowEventHub = floatingTitleRow->GetOrCreateGestureEventHub();
+    EXPECT_NE(floatingTitleRowEventHub, nullptr);
+    EXPECT_EQ(floatingTitleRowEventHub->IsGestureEmpty(), false);
+
+    auto customTitleRow = GetCustomTitleRow();
+    EXPECT_NE(customTitleRow, nullptr);
+    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
+    EXPECT_NE(customTitleRowEventHub, nullptr);
+    EXPECT_EQ(customTitleRowEventHub->IsGestureEmpty(), false);
+    EXPECT_EQ(customTitleRowEventHub->IsPanEventEmpty(), false);
+
+    auto gestureRow = GetGestureRow();
+    EXPECT_NE(gestureRow, nullptr);
+    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureRowEventHub, nullptr);
+    EXPECT_EQ(gestureRowEventHub->IsGestureEmpty(), false);
+    EXPECT_EQ(gestureRowEventHub->IsPanEventEmpty(), false);
 }
 } // namespace OHOS::Ace::NG

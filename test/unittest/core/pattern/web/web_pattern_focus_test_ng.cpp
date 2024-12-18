@@ -283,7 +283,8 @@ public:
         return false;
     }
 
-    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance, float velocity) override
+    std::optional<float> CalcPredictSnapOffset(
+        float delta, float dragDistance, float velocity, SnapDirection snapDirection) override
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;
@@ -347,7 +348,7 @@ public:
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override
     {}
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override
+    ScrollOffsetAbility GetScrollOffsetAbility() override
     {
         return { nullptr, Axis::NONE };
     }
@@ -574,31 +575,6 @@ HWTEST_F(WebPatternFocusTestNg, UnRegisterTextBlurCallback, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->UnRegisterTextBlurCallback();
     EXPECT_FALSE(webPattern->textBlurAccessibilityEnable_);
-#endif
-}
-
-/**
- * @tc.name: InitAiEngine
- * @tc.desc: InitAiEngine.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternFocusTestNg, InitAiEngine, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    MockPipelineContext::SetUp();
-    webPattern->InitAiEngine();
-    webPattern->InitAiEngine();
-    MockPipelineContext::TearDown();
 #endif
 }
 

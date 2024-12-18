@@ -1,0 +1,17 @@
+<svg width="20.000000" height="20.000000" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>
+			Created with Pixso.
+	</desc>
+	<defs>
+		<clipPath id="clip2_25">
+			<rect id="-" width="20.000000" height="20.000000" fill="white" fill-opacity="0"/>
+		</clipPath>
+	</defs>
+	<g clip-path="url(#clip2_25)">
+		<path id="直线 1" d="M3 8.5L8 8.5" stroke="#182431" stroke-opacity="0.900000" stroke-width="1.500000" stroke-linecap="round"/>
+		<path id="直线 1" d="M12 4L17 4" stroke="#182431" stroke-opacity="0.900000" stroke-width="1.500000" stroke-linecap="round"/>
+		<path id="直线 3" d="M12 8L17 8" stroke="#182431" stroke-opacity="0.900000" stroke-width="1.500000" stroke-linecap="round"/>
+		<path id="直线 4" d="M12 12L17 12" stroke="#182431" stroke-opacity="0.900000" stroke-width="1.500000" stroke-linecap="round"/>
+		<path id="直线 5" d="M3 16L17 16" stroke="#182431" stroke-opacity="0.900000" stroke-width="1.500000" stroke-linecap="round"/>
+	</g>
+</svg>

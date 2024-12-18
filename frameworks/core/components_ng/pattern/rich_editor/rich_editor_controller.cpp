@@ -28,8 +28,6 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textLength=%{public}d, offset=%{public}d",
-        static_cast<int32_t>(options.value.length()), options.offset.value_or(-1));
     return richEditorPattern->AddTextSpan(options);
 }
 
@@ -65,6 +63,7 @@ void RichEditorController::UpdateSpanStyle(
     }
     richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);
     richEditorPattern->UpdateSpanStyle(start, end, textStyle, imageStyle);
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
 
 void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
@@ -77,7 +76,7 @@ SelectionInfo RichEditorController::GetSpansInfo(int32_t start, int32_t end)
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, {});
     ACE_SCOPED_TRACE("RichEditorControllerGetSpansInfo");
-    return richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
+    return richEditorPattern->GetSpansInfoByRange(start, end);
 }
 
 SelectionInfo RichEditorController::GetSelectionSpansInfo()
@@ -109,6 +108,7 @@ void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, cons
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->UpdateParagraphStyle(start, end, style);
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
 std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start, int32_t end)
 {

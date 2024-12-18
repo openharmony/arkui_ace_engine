@@ -38,7 +38,7 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     CHECK_NULL_VOID(constraint);
     auto contentGeometryNode = contentWrapper->GetGeometryNode();
     CHECK_NULL_VOID(contentGeometryNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -93,7 +93,7 @@ void CalendarPickerLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);

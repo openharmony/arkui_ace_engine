@@ -42,7 +42,7 @@ namespace {
 constexpr int32_t SHEET_DETENTS_TWO = 2;
 constexpr int32_t SHEET_DETENTS_THREE = 3;
 } // namespace
-RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<FrameNode> builder,
+RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
     RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle)
 {
     // create sheet node
@@ -57,6 +57,9 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
     operationColumn->MountToParent(sheetNode);
@@ -85,8 +88,8 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     MarginProperty margin;
-    margin.right = CalcLength(sheetTheme->GetTitleTextMargin());
-    margin.left = CalcLength(sheetTheme->GetTitleTextMargin());
+    margin.right = CalcLength(sheetTheme->GetTitleTextHorizMargin());
+    margin.left = CalcLength(sheetTheme->GetTitleTextHorizMargin());
     layoutProps->UpdateMargin(margin);
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
@@ -166,8 +169,10 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
-    buttonLayoutProperty->UpdateBorderRadius(
-        { SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS });
+    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    BorderRadiusProperty borderRaduis;
+    borderRaduis.SetRadius(sheetTheme->GetCloseIconRadius());
+    buttonLayoutProperty->UpdateBorderRadius(borderRaduis);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SHEET_CLOSE_ICON_WIDTH), CalcLength(SHEET_CLOSE_ICON_HEIGHT)));
     buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -206,7 +211,8 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
     RefPtr<FrameNode> iconNode;
 
     // when api >= 12, use symbol format image, else use image format.
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         iconNode = FrameNode::CreateFrameNode(
             V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(iconNode);
@@ -214,7 +220,7 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
         CHECK_NULL_VOID(symbolLayoutProperty);
         uint32_t symbolId = sheetTheme->GetCloseIconSource();
         symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
-        symbolLayoutProperty->UpdateFontSize(SHEET_CLOSE_ICON_IMAGE_HEIGHT);
+        symbolLayoutProperty->UpdateFontSize(sheetTheme->GetCloseIconWidth());
         symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});
     } else {
         iconNode = FrameNode::CreateFrameNode(
@@ -304,6 +310,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
 
 RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
+    CHECK_NULL_RETURN(sheetNode, nullptr);
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto subtitleId = pattern->GetSubtitleId();
@@ -343,6 +350,17 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     return subtitleRow;
 }
 
+void SheetView::SetTitleColumnMinSize(RefPtr<LayoutProperty> layoutProperty, const NG::SheetStyle& sheetStyle)
+{
+    if (sheetStyle.sheetTitle.has_value()) {
+        layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+        if (sheetStyle.sheetSubtitle.has_value()) {
+            layoutProperty->UpdateCalcMinSize(CalcSize(
+                std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
+        }
+    }
+}
+
 RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
     auto titleColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -350,6 +368,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(titleColumn, nullptr);
     auto layoutProperty = titleColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    SetTitleColumnMinSize(layoutProperty, sheetStyle);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();

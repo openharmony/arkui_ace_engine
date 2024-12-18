@@ -179,4 +179,11 @@ int32_t ScrollableController::GetItemIndex(double x, double y) const
     CHECK_NULL_RETURN(pattern, -1);
     return pattern->GetItemIndex(x, y);
 }
+
+void ScrollableController::StopAnimate()
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->StopAnimate();
+}
 } // namespace OHOS::Ace::NG

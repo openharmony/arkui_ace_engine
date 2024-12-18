@@ -122,6 +122,7 @@ private:
     void HandleTextOnAccessibilityFocusCallback(int32_t x, int32_t y);
     void ModifyAccessibilityVirtualNode();
     bool GetHandleCircleRadius(float& handleCircleRadius);
+    std::string ReplacePlaceHolder(const std::string& str, int32_t number);
     void UpdateAccessibilityTextNode(RefPtr<FrameNode> frameNode, float handleCircleRadius, int32_t x, int32_t y);
     void HandleTouchEvent(const TouchEventInfo& info);
     void OnTouchDown(const TouchLocationInfo& info);
@@ -160,6 +161,7 @@ private:
     OffsetF GetLastChoosePointOffset();
     void CalculateCellCenter();
     OffsetF GetTouchOffsetToNode();
+    void InitSkipUnselectedPoint();
 
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
@@ -179,6 +181,7 @@ private:
     int32_t fingerId_ = -1;
 
     mutable bool autoReset_ = true;
+    bool skipUnselectedPoint_ = false;
     Dimension circleRadius_;
 
     RefPtr<PatternLockModifier> patternLockModifier_;

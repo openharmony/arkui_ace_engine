@@ -217,6 +217,30 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
     }
 }
 
+void GridRowLayoutAlgorithm::OnBreakPointChange(LayoutWrapper* layoutWrapper, const V2::GridSizeType& sizeType)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto task = [weak = WeakClaim(RawPtr(frameNode)), sizeType]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto sizeTypeString = GridRowLayoutAlgorithm::ConvertSizeTypeToString(sizeType);
+        auto hostLayoutProperty = host->GetLayoutProperty<GridRowLayoutProperty>();
+        CHECK_NULL_VOID(hostLayoutProperty);
+        auto hostEventHub = host->GetEventHub<GridRowEventHub>();
+        CHECK_NULL_VOID(hostEventHub);
+        hostLayoutProperty->UpdateSizeType(sizeType);
+        TAG_LOGD(AceLogTag::ACE_GRIDROW,
+            "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
+            "%{public}d",
+            host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
+            hostLayoutProperty->GetBreakPointsValue().reference);
+        hostEventHub->FireChangeEvent(sizeTypeString);
+    };
+    context->AddAfterLayoutTask(task);
+}
 void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     gridColChildrenRows_.clear();
@@ -227,7 +251,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     CreateChildrenConstraint(maxSize, layoutProperty->CreatePaddingAndBorder());
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto windowManager = context->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -235,24 +261,7 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
         Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
-        auto frameNode = layoutWrapper->GetHostNode();
-        auto task = [weak = WeakClaim(RawPtr(frameNode)), sizeType]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            auto sizeTypeString = GridRowLayoutAlgorithm::ConvertSizeTypeToString(sizeType);
-            auto hostLayoutProperty = host->GetLayoutProperty<GridRowLayoutProperty>();
-            CHECK_NULL_VOID(hostLayoutProperty);
-            auto hostEventHub = host->GetEventHub<GridRowEventHub>();
-            CHECK_NULL_VOID(hostEventHub);
-            hostLayoutProperty->UpdateSizeType(sizeType);
-            TAG_LOGD(AceLogTag::ACE_GRIDROW,
-                "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
-                "%{public}d",
-                host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
-                hostLayoutProperty->GetBreakPointsValue().reference);
-            hostEventHub->FireChangeEvent(sizeTypeString);
-        };
-        context->AddAfterLayoutTask(task);
+        OnBreakPointChange(layoutWrapper, sizeType);
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
     gutterInDouble_ =
@@ -265,7 +274,6 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float childrenHeight =
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
     float selfHeight = maxSize.Height();
-
     MeasureSelf(layoutWrapper, childrenHeight, selfHeight);
 }
 

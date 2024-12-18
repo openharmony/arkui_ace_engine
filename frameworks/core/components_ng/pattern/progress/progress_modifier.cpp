@@ -51,7 +51,8 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
       borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.borderColor))),
       value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.value)),
-      ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
+      ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(
+        GradientArithmetic(progressAnimatableProperty_.ringProgressColor))),
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingTailDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
@@ -1060,14 +1061,14 @@ void ProgressModifier::PaintBeginHalf(RSCanvas& canvas, RSBrush& brush, const Ri
     brush.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
 #endif
+    float drawAngle = ANGLE_180 + FLOAT_ZERO_FIVE;
     beginPath.MoveTo(centerPt.GetX() + radius - halfThickness, centerPt.GetY());
     beginPath.ArcTo(centerPt.GetX() + radius - halfThickness, centerPt.GetY() - halfThickness,
         centerPt.GetX() + radius + halfThickness, centerPt.GetY() + halfThickness, ANGLE_180, ANGLE_180);
     beginPath.ArcTo(centerPt.GetX() - radius - halfThickness, centerPt.GetY() - radius - halfThickness,
-        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + radius + halfThickness, 0, ANGLE_180);
-    beginPath.LineTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY());
+        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + radius + halfThickness, 0, drawAngle);
     beginPath.ArcTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY() - radius + halfThickness,
-        centerPt.GetX() + radius - halfThickness, centerPt.GetY() + radius - halfThickness, ANGLE_180, -ANGLE_180);
+        centerPt.GetX() + radius - halfThickness, centerPt.GetY() + radius - halfThickness, drawAngle, -drawAngle);
     beginPath.Close();
 
     canvas.Save();

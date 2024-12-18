@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
+#include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 
 namespace OHOS::Ace {
 class NavDestinationModel {
@@ -71,6 +72,11 @@ public:
 
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
+    virtual void SetSystemTransitionType(NG::NavigationSystemTransitionType type) {};
+    virtual void SetScrollableProcessor(
+        const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) {}
+    virtual void UpdateBindingWithScrollable(
+        std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

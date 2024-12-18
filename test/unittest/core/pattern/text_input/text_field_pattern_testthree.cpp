@@ -178,7 +178,7 @@ HWTEST_F(TextFieldPatternTestThree, SetPreviewTextOperation001, TestSize.Level0)
     EXPECT_TRUE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 
-    pattern_->InitEditingValueText("");
+    pattern_->InitEditingValueText(u"");
     EXPECT_FALSE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 }
@@ -548,11 +548,40 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     pattern_->HandleOnAIWrite();
 
     std::vector<uint8_t> buff;
-    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     pattern_->HandleAIWriteResult(0, 5, buff);
     auto contentController = pattern_->GetTextContentController();
-    auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
+    auto sentenceContent = StringUtils::Str16ToStr8(contentController->GetSelectedValue(0, spanStr->GetLength()));
     ASSERT_EQ(sentenceContent, spanStr->GetString());
+}
+
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        pattern_->imeShown_ = true;
+#else
+        pattern_->connection_= true;
+#endif
+    pattern_->HandleOnCameraInput();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    pattern_->HandleOnCameraInput();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
 }
 } // namespace OHOS::Ace::NG

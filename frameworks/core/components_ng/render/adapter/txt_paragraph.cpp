@@ -26,6 +26,7 @@ namespace {
 const std::u16string ELLIPSIS = u"\u2026";
 const std::u16string SYMBOL_TRANS = u"\uF0001";
 const int32_t LENGTH_INCREMENT = 2;
+constexpr int32_t THOUSAND = 1000;
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
@@ -104,7 +105,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     Rosen::TextStyle txtStyle;
 #endif
     textAlign_ = style.GetTextAlign();
-    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
+    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContextSafely(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
 
@@ -184,8 +185,8 @@ uint32_t TxtParagraph::destructCount = 0;
 
 TxtParagraph::~TxtParagraph()
 {
-    if (destructCount % 100 == 0) {
-        TAG_LOGI(AceLogTag::ACE_TEXT,
+    if (destructCount % THOUSAND == 0) {
+        TAG_LOGW(AceLogTag::ACE_TEXT,
             "destroy TxtParagraph with placeholderCnt_ %{public}d, textAlign_ %{public}d, count %{public}u",
             placeholderCnt_, static_cast<int>(textAlign_), destructCount);
     }
@@ -222,13 +223,13 @@ float TxtParagraph::GetTextWidth()
 #ifndef USE_GRAPHIC_TEXT_GINE
         return std::max(paragrah->GetLongestLine(), paragrah->GetMaxIntrinsicWidth());
 #else
-        return std::max(paragrah->GetActualWidth(), paragrah->GetMaxIntrinsicWidth());
+        return std::max(paragrah->GetLongestLineWithIndent(), paragrah->GetMaxIntrinsicWidth());
 #endif
     }
 #ifndef USE_GRAPHIC_TEXT_GINE
     return paragrah->GetLongestLine();
 #else
-    return paragrah->GetActualWidth();
+    return paragrah->GetLongestLineWithIndent();
 #endif
 }
 
@@ -319,13 +320,7 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Paint");
     auto paragrah = GetParagraph();
     CHECK_NULL_VOID(paragrah);
-#ifndef USE_ROSEN_DRAWING
-    SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-    paragrah->Paint(skCanvas, x, y);
-#else
     paragrah->Paint(&canvas, x, y);
-#endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
         CalculateLeadingMarginOffest(x, y);
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
@@ -360,15 +355,6 @@ void TxtParagraph::CalculateLeadingMarginOffest(float& x, float& y)
         SizeF(sizeRect.Width(), static_cast<float>(firstLineMetrics.height)), sizeRect, paraStyle_.leadingMarginAlign)
              .GetY();
 }
-
-#ifndef USE_ROSEN_DRAWING
-void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
-{
-    auto paragrah = GetParagraph();
-    CHECK_NULL_VOID(skCanvas && paragrah);
-    paragrah->Paint(skCanvas, x, y);
-}
-#endif
 
 // ToDo:adjust index
 int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos)
@@ -434,8 +420,12 @@ void TxtParagraph::AdjustIndexForward(const Offset& offset, bool compareOffset, 
         index, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
-        --index;
-        AdjustIndexForward(offset, false, index);
+        if (IsTargetCharAtIndex(NEWLINE_CODE, index)) {
+            --index;
+            AdjustIndexForward(offset, false, index);
+        } else if (IsIndexAtLineEnd(offset, index)) {
+            --index;
+        }
         return;
     }
     const auto& textBox = *boxes.begin();
@@ -911,8 +901,17 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
         result.offset.SetY(textBox.rect.GetTop());
 #endif
     }
-    if (paraStyle_.align != TextAlign::START) {
-        HandleTextAlign(result, paraStyle_.align);
+
+    auto textAlign = paraStyle_.align;
+    if (paraStyle_.direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else if (textAlign == TextAlign::END) {
+            textAlign = TextAlign::START;
+        }
+    }
+    if (textAlign != TextAlign::START) {
+        HandleTextAlign(result, textAlign);
     } else {
         if (paraStyle_.leadingMargin) {
             HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
@@ -990,6 +989,18 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
         lineMetrics.runMetrics.insert(std::map<size_t, RunMetrics>::value_type(it.first, runMetrics));
     }
     return lineMetrics;
+}
+
+RectF TxtParagraph::GetPaintRegion(float x, float y)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+#endif
+    CHECK_NULL_RETURN(paragraphTxt, RectF());
+    auto region = paragraphTxt->GeneratePaintRegion(x, y);
+    return RectF(region.GetLeft(), region.GetTop(), region.GetWidth(), region.GetHeight());
 }
 
 void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes)
@@ -1082,6 +1093,8 @@ bool TxtParagraph::GetLineMetricsByCoordinate(const Offset& offset, LineMetrics&
         lineMetrics.descender = resMetric.descender;
         lineMetrics.capHeight = resMetric.capHeight;
         lineMetrics.xHeight = resMetric.xHeight;
+        lineMetrics.startIndex = static_cast<int32_t>(resMetric.startIndex);
+        lineMetrics.endIndex = static_cast<int32_t>(resMetric.endIndex);
     }
     return ret;
 }
@@ -1121,5 +1134,28 @@ void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->UpdateColor(from, to, ToRSColor(color));
 #endif
+}
+
+int32_t TxtParagraph::GetIndexWithoutPlaceHolder(int32_t index)
+{
+    int32_t newIndex = index;
+    for (auto placeholderIndex : placeholderPosition_) {
+        if (placeholderIndex < static_cast<size_t>(index)) {
+            newIndex--;
+        }
+    }
+    return newIndex;
+}
+
+bool TxtParagraph::IsTargetCharAtIndex(char16_t targetChar, int32_t index)
+{
+    auto textIndex = GetIndexWithoutPlaceHolder(index);
+    return text_[std::max(0, textIndex)] == targetChar;
+}
+
+bool TxtParagraph::IsIndexAtLineEnd(const Offset& offset, int32_t index)
+{
+    LineMetrics lineMetrics;
+    return GetLineMetricsByCoordinate(offset, lineMetrics) && (index == lineMetrics.endIndex);
 }
 } // namespace OHOS::Ace::NG

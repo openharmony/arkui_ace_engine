@@ -24,6 +24,7 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
     const std::optional<int32_t>& indicator)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RADIO_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(

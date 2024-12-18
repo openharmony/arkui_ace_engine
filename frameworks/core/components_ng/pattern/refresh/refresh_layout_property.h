@@ -50,7 +50,6 @@ public:
         value->propIsRefreshing_ = CloneIsRefreshing();
         value->propIndicatorOffset_ = CloneIndicatorOffset();
         value->propFriction_ = CloneFriction();
-        value->propProgressColor_ = CloneProgressColor();
         value->propLoadingText_ = CloneLoadingText();
         value->propPullToRefresh_ = ClonePullToRefresh();
         value->propRefreshOffset_ = CloneRefreshOffset();
@@ -65,7 +64,6 @@ public:
         ResetIsRefreshing();
         ResetIndicatorOffset();
         ResetFriction();
-        ResetProgressColor();
         ResetLoadingText();
         ResetPullToRefresh();
         ResetRefreshOffset();
@@ -97,7 +95,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorOffset, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Friction, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressColor, Color, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingText, std::string, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullToRefresh, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshOffset, Dimension, PROPERTY_UPDATE_LAYOUT);

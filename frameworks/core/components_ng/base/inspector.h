@@ -22,14 +22,23 @@
 #include "base/utils/macros.h"
 #include "bridge/common/utils/componentInfo.h"
 #include "core/components_ng/base/frame_node.h"
+#include "interfaces/inner_api/ace/ui_event_observer.h"
 #include "rec_node.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 using InspectorTreeMap = std::unordered_map<int32_t, RefPtr<RecNode>>;
+
+struct InspectorChildrenParameters {
+    int32_t pageId = 0;
+    bool isActive = false;
+    bool isLayoutInspector = false;
+};
+
 class ACE_FORCE_EXPORT Inspector {
 public:
-    static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key, bool notDetach = false);
+    static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key, bool notDetach = false,
+        bool skipoffscreenNodes = false);
     static std::string GetInspectorNodeByKey(const std::string& key,
         const InspectorFilter& filter = InspectorFilter());
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);
@@ -38,12 +47,13 @@ public:
     static std::string GetInspector(bool isLayoutInspector, const InspectorFilter& filter, bool& needThrow);
     static std::string GetInspectorOfNode(RefPtr<NG::UINode> node);
     static std::string GetSubWindowInspector(bool isLayoutInspector = false);
-    static std::string GetSimplifiedInspector(int32_t containerId);
+    static std::string GetSimplifiedInspector(int32_t containerId, const TreeParams& params, bool isSync);
     static void HideAllMenus();
     static void AddOffscreenNode(RefPtr<FrameNode> node);
     static void RemoveOffscreenNode(RefPtr<FrameNode> node);
     static void GetInspectorTree(InspectorTreeMap& treesInfo);
     static void GetOffScreenTreeNodes(InspectorTreeMap& nodes);
+    static void GetRecordAllPagesNodes(InspectorTreeMap& treesInfo);
 
 private:
     static RefPtr<RecNode> AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes);
@@ -51,6 +61,7 @@ private:
         std::vector<RefPtr<NG::UINode>> children, int32_t pageId, InspectorTreeMap& recNodes);
     static void GetInspectorChildrenInfo(
         const RefPtr<NG::UINode>& parent, InspectorTreeMap& recNodes, int32_t pageId, uint32_t depth = UINT32_MAX);
+    static void RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, InspectorTreeMap& treesInfo);
 
 private:
     static std::set<RefPtr<FrameNode>> offscreenNodes;

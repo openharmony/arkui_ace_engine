@@ -276,6 +276,15 @@ void XComponentModelNG::EnableSecure(bool isSecure)
     xcPattern->EnableSecure(isSecure);
 }
 
+void XComponentModelNG::HdrBrightness(float hdrBrightness)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->HdrBrightness(hdrBrightness);
+}
+
 bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -492,6 +501,14 @@ void XComponentModelNG::EnableSecure(FrameNode* frameNode, bool enable)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->EnableSecure(enable);
+}
+
+void XComponentModelNG::HdrBrightness(FrameNode* frameNode, float hdrBrightness)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->HdrBrightness(hdrBrightness);
 }
 
 void XComponentModelNG::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)

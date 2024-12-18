@@ -64,6 +64,7 @@ private:
         std::pair<double, double>& gutter, V2::GridSizeType sizeType, int32_t columnNum);
     void CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper,
         std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>>& row, float currentRowHeight);
+    void OnBreakPointChange(LayoutWrapper* layoutWrapper, const V2::GridSizeType& sizeType);
     std::pair<double, double> gutterInDouble_ { 0, 0 };
     double columnUnitWidth_ = 0;
     std::list<ChildrenRow> gridColChildrenRows_ {};

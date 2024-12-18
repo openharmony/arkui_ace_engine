@@ -57,7 +57,7 @@ int32_t InjectorUtils::CalculateNextPosValueWithLinear(
     // one px at least
     absStep = (absStep == 0) ? 1 : absStep;
     int32_t result = startPoint + static_cast<float>((absStep * (currentIndex + 1)) * possitive);
-    if (possitive) {
+    if (possitive > 0) {
         result = (result > targetPoint) ? targetPoint : result;
     } else {
         result = (result < targetPoint) ? targetPoint : result;
@@ -77,9 +77,15 @@ int InjectorUtils::Combination(int n, int k)
 Point InjectorUtils::BezierCurve(const std::vector<Point>& controlPoints, double t)
 {
     Point result = { 0.0, 0.0 };
-    int n = controlPoints.size() - 1;
+    size_t count = controlPoints.size();
+    if (count <= 1) {
+        std::cout << "too few control points" << std::endl;
+        return result;
+    }
 
-    for (int i = 0; i <= n; ++i) {
+    size_t n = count - 1;
+
+    for (size_t i = 0; i <= n; ++i) {
         double coeff = static_cast<double>(Combination(n, i)) * pow(t, i) * pow(1 - t, n - i);
         result.x += coeff * controlPoints[i].x;
         result.y += coeff * controlPoints[i].y;

@@ -31,6 +31,13 @@ class ExtraElementInfo;
 }
 
 namespace OHOS::Ace::NG {
+struct WindowSceneInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
@@ -52,6 +59,8 @@ using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
 using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
+
+using GetWindowScenePositionImpl = std::function<void((WindowSceneInfo& windowSceneInfo))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -408,11 +417,17 @@ public:
 
     void OnAccessibilityFocusCallback(bool isFocus);
 
+    void SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl);
+
+    void GetWindowScenePosition(WindowSceneInfo& windowSceneInfo);
+
     bool GetAccessibilityFocusState() const;
 
     void SetAccessibilityFocusState(bool state);
 
     void SetAccessibilityGroup(bool accessibilityGroup);
+
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred);
 
     void SetChildTreeId(int32_t childTreeId);
 
@@ -420,11 +435,19 @@ public:
 
     void SetAccessibilityText(const std::string& text);
 
+    void SetAccessibilityTextWithEvent(const std::string& text);
+
     void SetAccessibilityTextHint(const std::string& text);
 
     void SetAccessibilityDescription(const std::string& accessibilityDescription);
 
+    void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
+
     bool IsAccessibilityGroup() const;
+
+    bool IsAccessibilityTextPreferred() const;
+
+    void NotifyComponentChangeEvent(AccessibilityEventType eventType);
 
     int32_t GetChildTreeId() const;
 
@@ -502,6 +525,10 @@ public:
 
     static bool IsTagInSubTreeComponent(const std::string& tag);
 
+    static bool IsTagInModalDialog(const RefPtr<FrameNode>& node);
+
+    static bool HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl);
@@ -547,6 +574,18 @@ public:
     bool HasUserCurrentValue();
     int32_t GetUserCurrentValue();
 
+    void SetUserRangeMinValue(const int32_t rangeMinValue);
+    bool HasUserRangeMinValue() const;
+    int32_t GetUserRangeMinValue() const;
+
+    void SetUserRangeMaxValue(const int32_t rangeMaxValue);
+    bool HasUserRangeMaxValue() const;
+    int32_t GetUserRangeMaxValue() const;
+
+    void SetUserRangeCurrentValue(const int32_t rangeCurrentValue);
+    bool HasUserRangeCurrentValue() const;
+    int32_t GetUserRangeCurrentValue() const;
+
     void SetUserTextValue(const std::string& textValue);
     bool HasUserTextValue();
     std::string GetUserTextValue();
@@ -555,6 +594,9 @@ public:
     bool HasUserCheckable();
     bool IsUserCheckable();
     void ResetUserCheckable();
+
+    virtual bool IsAccessibilityHoverPriority() const;
+    void SetAccessibilityHoverPriority(bool hoverPriority);
 
 private:
     // node should be not-null
@@ -617,8 +659,12 @@ protected:
     ActionsImpl actionsImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
+    GetWindowScenePositionImpl getWindowScenePositionImpl_;
+
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
+    bool accessibilityTextPreferred_ = false;
+    bool accessibilityHoverPriority_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;
@@ -638,6 +684,9 @@ protected:
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;
     std::optional<int32_t> currentValue_;
+    std::optional<int32_t> rangeMinValue_;
+    std::optional<int32_t> rangeMaxValue_;
+    std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
 };
 } // namespace OHOS::Ace::NG

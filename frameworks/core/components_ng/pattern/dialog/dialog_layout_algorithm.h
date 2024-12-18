@@ -96,6 +96,8 @@ private:
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
     void ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp);
 
+    void ResizeDialogSubwindow(bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow);
+
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
@@ -125,6 +127,8 @@ private:
     HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
 
     KeyboardAvoidMode keyboardAvoidMode_ = KeyboardAvoidMode::DEFAULT;
+
+    bool isShowInFloatingWindow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

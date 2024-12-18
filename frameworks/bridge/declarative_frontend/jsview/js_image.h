@@ -54,6 +54,7 @@ public:
     static void SetSmoothEdge(const JSCallbackInfo& info);
     static void SetDynamicRangeMode(const JSCallbackInfo& info);
     static void SetEnhancedImageQuality(const JSCallbackInfo& info);
+    static void SetOrientation(const JSCallbackInfo& info);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);

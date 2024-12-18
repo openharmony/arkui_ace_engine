@@ -61,4 +61,24 @@ void WaterFlowLayoutInfoBase::InitMargins(
         }
     }
 }
+
+void WaterFlowLayoutInfoBase::UpdateDefaultCachedCount()
+{
+    static float pageCount = SystemProperties::GetPageCount();
+    if (pageCount <= 0.0f) {
+        return;
+    }
+    int32_t itemCount = endIndex_ - startIndex_ + 1;
+    if (itemCount <= 0) {
+        return;
+    }
+    constexpr int32_t MAX_DEFAULT_CACHED_COUNT = 16;
+    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
+    if (newCachedCount > MAX_DEFAULT_CACHED_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW, "Default cachedCount exceed 16");
+        defCachedCount_ = MAX_DEFAULT_CACHED_COUNT;
+    } else {
+        defCachedCount_ = std::max(newCachedCount, defCachedCount_);
+    }
+}
 } // namespace OHOS::Ace::NG

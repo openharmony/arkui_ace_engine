@@ -41,12 +41,20 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     SetFontSize(DEFAULT_FONT_SIZE);
     // The default value of TextAlign is TextAlign::START.
     SetDefaultTextAlign();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPathChanged_ = false;
+        isPath2dChanged_ = false;
+    }
 }
 
 void OffscreenCanvasPaintMethod::InitBitmap()
 {
     RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
-    bitmap_.Build(width_, height_, bitmapFormat);
+    bool ret = bitmap_.Build(width_, height_, bitmapFormat);
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "The width and height exceed the limit size.");
+        return;
+    }
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     bitmapSize_ = bitmap_.ComputeByteSize();
     rsCanvas_ = std::make_unique<RSCanvas>();
@@ -101,7 +109,11 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     CHECK_NULL_VOID(pixelMap);
     auto rsBitmapFormat = Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
     auto rsBitmap = std::make_shared<RSBitmap>();
-    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat, pixelMap->GetRowStride());
+    bool ret = rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat, pixelMap->GetRowStride());
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "The width and height exceed the limit size.");
+        return;
+    }
     rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
 
     // Step2: Create Image and draw it, using gpu or cpu

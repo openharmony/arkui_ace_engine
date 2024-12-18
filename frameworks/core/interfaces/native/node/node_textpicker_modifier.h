@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ void SetSelectedInternal(
 void ProcessCascadeSelected(
     const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues);
 void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam);
+void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TEXT_PICKER_MODIFIER_H

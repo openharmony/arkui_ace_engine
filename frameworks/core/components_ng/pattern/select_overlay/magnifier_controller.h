@@ -92,6 +92,8 @@ public:
     {
         hostViewPort_ = viewPort;
     }
+
+    RectF GetViewPort(const RefPtr<FrameNode>& host);
 private:
     MagnifierParams params_;
     bool visible_ = false;

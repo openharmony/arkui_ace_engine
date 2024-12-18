@@ -93,8 +93,11 @@ bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
 {
     uint32_t bottom;
-    if (systemSafeArea_.bottom_.IsValid()) {
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
         bottom = systemSafeArea_.bottom_.start;
+        ACE_SCOPED_TRACE("calc keyboardRect use systemSafeArea_.bottom_");
     } else {
         bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
     }
@@ -103,6 +106,7 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
         return false;
     }
     keyboardInset_ = inset;
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateKeyboardSafeArea %s", inset.ToString().c_str());
     return true;
 }
 
@@ -118,7 +122,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
         res = res.Combine(systemSafeArea_).Combine(navSafeArea_);
     }
-    if (keyboardSafeAreaEnabled_ && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
+        return res;
+    }
+    if ((keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE ||
+        keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET) && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
     }
     return res;
@@ -168,10 +176,13 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(KeyBoardAvoidMode value)
     if (keyboardAvoidMode_ == value) {
         return false;
     }
+    if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE || value == KeyBoardAvoidMode::NONE) {
+        keyboardOffset_ = 0.0f;
+    }
     keyboardAvoidMode_ = value;
     keyboardSafeAreaEnabled_ = keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE
         || keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET;
-    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
+    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardAvoidMode_);
     return true;
 }
 
@@ -259,9 +270,14 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
     return result;
 }
 
-float SafeAreaManager::GetKeyboardOffset() const
+float SafeAreaManager::GetKeyboardOffset(bool withoutProcess) const
 {
-    if (keyboardSafeAreaEnabled_) {
+    if (withoutProcess) {
+        return keyboardOffset_;
+    }
+    if (keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE ||
+        keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET ||
+        keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
         return 0.0f;
     }
     return keyboardOffset_;

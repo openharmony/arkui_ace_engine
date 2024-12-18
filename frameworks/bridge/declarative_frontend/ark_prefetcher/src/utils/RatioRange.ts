@@ -22,6 +22,7 @@ class RangeEdge {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class RatioRange {
   readonly start: RangeEdge;
   readonly end: RangeEdge;

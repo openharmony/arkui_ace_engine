@@ -59,6 +59,7 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
+bool SystemProperties::cacheNavigationNodeEnable_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
@@ -72,6 +73,7 @@ bool SystemProperties::imageFrameworkEnable_ = true;
 bool SystemProperties::debugAutoUIEnabled_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
+float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
@@ -150,6 +152,11 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
+bool SystemProperties::GetCacheNavigationNodeEnable()
+{
+    return cacheNavigationNodeEnable_;
+}
+
 bool SystemProperties::GetGridCacheEnabled()
 {
     return gridCacheEnabled_;
@@ -213,5 +220,25 @@ double SystemProperties::GetSrollableVelocityScale()
 double SystemProperties::GetSrollableFriction()
 {
     return 0.0;
+}
+
+double SystemProperties::GetScrollableDistance()
+{
+    return 0.0;
+}
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
+
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
+}
+
+bool SystemProperties::GetResourceDecoupling()
+{
+    return true;
 }
 } // namespace OHOS::Ace

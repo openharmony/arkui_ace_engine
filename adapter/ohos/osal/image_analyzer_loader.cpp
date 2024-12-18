@@ -63,6 +63,10 @@ ImageAnalyzerInstance ImageAnalyzerLoader::CreateImageAnalyzer()
         return {};
     }
     auto engine = OHOS::Ace::EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnalyzer Create engine null.");
+        return {};
+    }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
     return { createImageAnalyzerInstance_(env), [lib = shared_from_this(),

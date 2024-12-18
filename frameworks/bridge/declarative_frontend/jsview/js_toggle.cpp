@@ -87,6 +87,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSToggle>::StaticMethod("borderRadius", &JSToggle::JsRadius);
+    JSClass<JSToggle>::StaticMethod("border", &JSToggle::JsBorder);
     JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -348,9 +349,8 @@ NG::PaddingPropertyF JSToggle::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSToggle::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (info[0]->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
         CommonCalcDimension commonCalcDimension;
@@ -375,9 +375,8 @@ NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (left.has_value() && left.value().IsNonNegative()) {
         padding.left = NG::CalcLength(left.value());
     }
@@ -472,6 +471,20 @@ void JSToggle::JsRadius(const JSCallbackInfo& info)
         JSButton::JsRadius(info);
     } else {
         JSViewAbstract::JsBorderRadius(info);
+    }
+}
+
+void JSToggle::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    CalcDimension borderRadius;
+    auto valueRadius = object->GetProperty("radius");
+    if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        JSButton::JsRadius(valueRadius);
     }
 }
 } // namespace OHOS::Ace::Framework

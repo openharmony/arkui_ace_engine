@@ -68,11 +68,6 @@ public:
     }
 
 private:
-    ContentClipMode GetDefaultContentClip() const override
-    {
-        return ContentClipMode::BOUNDARY;
-    }
-
     RefPtr<ScrollContentModifier> scrollContentModifier_;
     void PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 

@@ -1597,7 +1597,6 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
 
     ImageModelNG::SetImageInterpolation(frameNode, ImageInterpolation::HIGH);
     EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::HIGH);
-    EXPECT_EQ(imagePattern->GetImageInterpolation(), string("HIGH"));
 
     auto imageInterpolation = ImageModelNG::GetInterpolation(frameNode);
     EXPECT_EQ(imageInterpolation, ImageInterpolation::HIGH);
@@ -1954,5 +1953,99 @@ HWTEST_F(ImageTestOneNg, ImageModelNGFailedTest001, TestSize.Level1)
     ImageModelNGFailedTest001_Properties02(image);
     ImageModelNGFailedTest001_Properties03(image);
     frameNode->MarkModifyDone();
+}
+
+/**
+ * @tc.name: ImageImageInterpolation001
+ * @tc.desc: Test ImageGetImageInterpolation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ImageImageInterpolation001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
+    image.SetSyncMode(true);
+    image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    image.SetBorderRadius(frameNode, IMAGE_SOURCEINFO_HEIGHT);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.cases: case1. ImageInterpolation LOW.
+     */
+    image.SetImageInterpolation(ImageInterpolation::LOW);
+
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::LOW);
+
+    /**
+     * @tc.cases: case2. ImageInterpolation MEDIUM.
+     */
+    image.SetImageInterpolation(ImageInterpolation::MEDIUM);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::MEDIUM);
+
+    /**
+     * @tc.cases: case3. ImageInterpolation HIGH.
+     */
+    image.SetImageInterpolation(ImageInterpolation::HIGH);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::HIGH);
+}
+
+/**
+ * @tc.name: ImageDynamicRangeMode 001
+ * @tc.desc: Test ImageDynamicRangeMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
+    image.SetSyncMode(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.cases: case1. DynamicRangeMode HIGH.
+     */
+    image.SetDynamicRangeMode(DynamicRangeMode::HIGH);
+
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::HIGH);
+
+    /**
+     * @tc.cases: case2. DynamicRangeMode CONSTRAINT.
+     */
+    image.SetDynamicRangeMode(DynamicRangeMode::CONSTRAINT);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::CONSTRAINT);
+
+    /**
+     * @tc.cases: case2. DynamicRangeMode STANDARD.
+     */
+    image.SetDynamicRangeMode(DynamicRangeMode::STANDARD);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::STANDARD);
 }
 } // namespace OHOS::Ace::NG

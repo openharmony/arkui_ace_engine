@@ -21,10 +21,10 @@
 #include "native_type.h"
 #include "resource.h"
 
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
 #include "pixelmap_native_impl.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -137,6 +137,9 @@ struct ArkUI_AccessibilityValue {
     ArkUI_OptionalInt min;
     ArkUI_OptionalInt max;
     ArkUI_OptionalInt current;
+    ArkUI_OptionalInt rangeMin;
+    ArkUI_OptionalInt rangeMax;
+    ArkUI_OptionalInt rangeCurrent;
     ArkUI_OptionalCharPtr text;
 };
 
@@ -154,6 +157,15 @@ struct ArkUI_CustomSpanDrawInfo {
     float optionsLineTop;
     float optionsLineBottom;
     float optionsBaseLine;
+};
+
+struct ArkUI_CustomProperty {
+    char* value;
+};
+
+struct ArkUI_ActiveChildrenInfo {
+    ArkUI_NodeHandle* nodeList;
+    int32_t nodeCount;
 };
 
 #ifdef __cplusplus

@@ -26,6 +26,12 @@ class WaterFlowSegmentLayoutBase : public WaterFlowLayoutBase {
     DECLARE_ACE_TYPE(WaterFlowSegmentLayoutBase, WaterFlowLayoutBase);
 
 protected:
+    void InitEnv(LayoutWrapper* host)
+    {
+        wrapper_ = host;
+        props_ = DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty());
+    }
+
     /**
      * @brief init member variables for segmented WaterFlow with section info.
      *
@@ -37,11 +43,12 @@ protected:
         const std::vector<PaddingPropertyF>& margins, const SizeF& frameSize);
 
     /**
-     * @brief Check if Sections info align with actual children
+     * @brief Check if Sections info align with actual children and if internal data structures are consistent.
      */
-    static bool IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
+    static bool IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
 
     LayoutWrapper* wrapper_ {};
+    RefPtr<WaterFlowLayoutProperty> props_;
     Axis axis_ = Axis::VERTICAL;
     // [segmentIdx, [crossIdx, item's width]]
     std::vector<std::vector<float>> itemsCrossSize_;
@@ -62,12 +69,7 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetCanOverScroll(bool value) override
-    {
-        overScroll_ = value;
-    }
-
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
 
 private:
     /**
@@ -76,6 +78,13 @@ private:
      * @param frameSize of WaterFlow component.
      */
     void Init(const SizeF& frameSize);
+
+    /**
+     * @brief check if any items in view have changed height.
+     *
+     * @return index of the first dirty item. -1 if no dirty item found.
+     */
+    int32_t CheckDirtyItem() const;
 
     /**
      * @brief init regular WaterFlow with a single segment.
@@ -110,22 +119,20 @@ private:
      * If user has defined a size for any FlowItem, use that size instead of calling child->Measure.
      *
      * @param targetIdx index of the last FlowItem to measure.
-     * @param cacheDeadline when called during a cache layout, always measure the items and return early if deadline is
-     * reached.
+     * @param cacheDeadline when called during a cache layout, return early if deadline is reached.
+     * @param force explicitly measure items even if their heights are user-defined.
      */
-    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline);
+    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline, bool force = false);
 
     /**
      * @brief Helper to measure a single FlowItems.
      *
-     * @param props LayoutProps.
      * @param idx index of the FlowItem.
      * @param crossIdx column (when vertical) index of the target FlowItem.
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx,
-        float userDefMainSize, bool isCache) const;
+    RefPtr<LayoutWrapper> MeasureItem(int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
@@ -154,18 +161,17 @@ private:
      */
     float SolveJumpOffset(const WaterFlowLayoutInfo::ItemInfo& item) const;
 
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
+
     RefPtr<WaterFlowSections> sections_;
 
     // WaterFlow node's main-axis length
     float mainSize_ = 0.0f;
 
     // offset to apply after a ResetAndJump
-    float postJumpOffset_ = 0.0f;
+    std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
-
-    // true if WaterFlow can be overScrolled
-    bool overScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };

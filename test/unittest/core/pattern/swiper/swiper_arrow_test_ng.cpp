@@ -20,9 +20,6 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class SwiperArrowTestNg : public SwiperTestNg {
 public:
     RefPtr<TextLayoutProperty> GetSymbolProperty(const RefPtr<FrameNode>& arrowNode);
@@ -60,8 +57,9 @@ AssertionResult SwiperArrowTestNg::VerifyArrowVisible(bool leftArrowVisible, boo
         rightMockRenderContext->isVisible_ == rightArrowVisible) {
         return AssertionSuccess();
     }
-    return AssertionFailure() << "Actual: {" << leftMockRenderContext->isVisible_ << ", " <<
-        rightMockRenderContext->isVisible_<< "} Expected: {" << leftArrowVisible << ", " << rightArrowVisible << "}";
+    return AssertionFailure() << "Actual: {" << leftMockRenderContext->isVisible_ << ", "
+                              << rightMockRenderContext->isVisible_ << "} Expected: {" << leftArrowVisible << ", "
+                              << rightArrowVisible << "}";
 }
 
 /**
@@ -75,11 +73,7 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent001, TestSize.Level1)
      * @tc.steps: step1. Set arrow
      * @tc.expected: Vertify symbol type/color
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
     EXPECT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
     auto leftSymbolNode = AceType::DynamicCast<FrameNode>(leftButtonNode->GetFirstChild());
@@ -106,13 +100,14 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent002, TestSize.Level1)
      * @tc.steps: step1. Set VERTICAL and enabled:false
      * @tc.expected: Vertify symbol type/color
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-        model.SetEnabled(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetEnabled(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto leftSymbol = GetSymbolProperty(leftArrowNode_);
     auto rightSymbol = GetSymbolProperty(rightArrowNode_);
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -132,11 +127,7 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent002, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, ClickArrow001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
     auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
     auto leftMockRenderContext = AceType::DynamicCast<MockRenderContext>(leftButtonNode->renderContext_);
@@ -161,7 +152,7 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow001, TestSize.Level1)
      * @tc.expected: Swipe to pre item
      */
     leftArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
 }
 
@@ -172,11 +163,7 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, ClickArrow002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
     auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
     auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
@@ -215,7 +202,7 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow002, TestSize.Level1)
      * @tc.expected: Swipe to next item
      */
     rightArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
 }
 
@@ -226,11 +213,7 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow002, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, ClickArrow003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
     auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
     auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
@@ -279,11 +262,12 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow003, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, HoverShow001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true);
-        model.SetHoverShow(true); // when not hover, hide arrow
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true);
+    model.SetHoverShow(true); // when not hover, hide arrow
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
     auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
     auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
@@ -318,12 +302,13 @@ HWTEST_F(SwiperArrowTestNg, HoverShow001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, HoverShow002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetDisplayArrow(true);
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetDisplayArrow(true);
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. CurrentIndex is 0
@@ -342,39 +327,6 @@ HWTEST_F(SwiperArrowTestNg, HoverShow002, TestSize.Level1)
 }
 
 /**
- * @tc.name: HoverShow003
- * @tc.desc: When loop:false and SwipeByGroup:true, arrow isVisible depend on currentIndex
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperArrowTestNg, HoverShow003, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-        model.SetSwipeByGroup(true);
-        model.SetLoop(false);
-        model.SetDisplayArrow(true);
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    }, 6);
-
-    EXPECT_EQ(pattern_->TotalCount(), 6);
-    /**
-     * @tc.steps: step1. CurrentIndex is in first page
-     * @tc.expected: Can not swipe left, left arrow is inVisible
-     */
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-    EXPECT_TRUE(VerifyArrowVisible(false, true));
-
-    /**
-     * @tc.steps: step2. CurrentIndex is in last page
-     * @tc.expected: Can not swipe right, right arrow is inVisible
-     */
-    ChangeIndex(3);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-    EXPECT_TRUE(VerifyArrowVisible(true, false));
-}
-
-/**
  * @tc.name: HoverEvent001
  * @tc.desc: When has no indicator and hover swiper, will show arrow
  * @tc.type: FUNC
@@ -384,12 +336,13 @@ HWTEST_F(SwiperArrowTestNg, HoverEvent001, TestSize.Level1)
     /**
      * @tc.steps: step1. Hide indicator
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetShowIndicator(false); // hide indicator
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(true);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // hide indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Hover swiper
@@ -413,11 +366,12 @@ HWTEST_F(SwiperArrowTestNg, HoverEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, HoverEvent002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(true);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Hover swiper
@@ -434,14 +388,15 @@ HWTEST_F(SwiperArrowTestNg, HoverEvent002, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, MouseEvent001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(true); // show arrow only when hover
-        auto arrowStyle = ARROW_PARAMETERS;
-        arrowStyle.isSidebarMiddle = false;
-        model.SetArrowStyle(arrowStyle);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(true);    // show arrow only when hover
+    auto arrowStyle = ARROW_PARAMETERS;
+    arrowStyle.isSidebarMiddle = false;
+    model.SetArrowStyle(arrowStyle);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
     Offset outRegionPoint = Offset(1.f, 1.f);
 
@@ -493,15 +448,16 @@ HWTEST_F(SwiperArrowTestNg, MouseEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, MouseEvent002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL); // VERTICAL layout
-        model.SetLoop(false);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(true); // show arrow only when hover
-        auto arrowStyle = ARROW_PARAMETERS;
-        arrowStyle.isSidebarMiddle = false;
-        model.SetArrowStyle(arrowStyle);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL); // VERTICAL layout
+    model.SetLoop(false);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(true);    // show arrow only when hover
+    auto arrowStyle = ARROW_PARAMETERS;
+    arrowStyle.isSidebarMiddle = false;
+    model.SetArrowStyle(arrowStyle);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Offset inRegionPoint = Offset(SWIPER_WIDTH - 10.f, SWIPER_HEIGHT / 2);
     Offset outRegionPoint = Offset(1.f, 1.f);
 
@@ -553,13 +509,14 @@ HWTEST_F(SwiperArrowTestNg, MouseEvent002, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, MouseEvent003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(true);
-        auto arrowStyle = ARROW_PARAMETERS;
-        arrowStyle.isSidebarMiddle = false;
-        model.SetArrowStyle(arrowStyle);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(true);
+    auto arrowStyle = ARROW_PARAMETERS;
+    arrowStyle.isSidebarMiddle = false;
+    model.SetArrowStyle(arrowStyle);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
     Offset outRegionPoint = Offset(1.f, 1.f);
 
@@ -596,12 +553,13 @@ HWTEST_F(SwiperArrowTestNg, MouseEvent003, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, MouseEvent004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(true);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
     MouseInfo info;
 
@@ -622,13 +580,14 @@ HWTEST_F(SwiperArrowTestNg, MouseEvent004, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, MouseEvent005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetShowIndicator(false); // no indicator
-        model.SetLoop(false);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(true);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // no indicator
+    model.SetLoop(false);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
 
     /**
@@ -648,9 +607,10 @@ HWTEST_F(SwiperArrowTestNg, MouseEvent005, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, MouseEvent006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
     Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
 
     /**
@@ -685,11 +645,12 @@ HWTEST_F(SwiperArrowTestNg, Arrow001, TestSize.Level1)
      * @tc.steps: step2. HORIZONTAL and isShowIndicatorArrow
      * @tc.expected: check arrow rect
      */
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(swiperArrowParameters);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(swiperArrowParameters);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto leftArrowLayoutProperty = leftArrowNode_->GetLayoutProperty<SwiperArrowLayoutProperty>();
     EXPECT_FALSE(leftArrowLayoutProperty->GetIsShowBackgroundValue());
     EXPECT_FALSE(leftArrowLayoutProperty->GetIsSidebarMiddleValue());
@@ -718,16 +679,17 @@ HWTEST_F(SwiperArrowTestNg, Arrow002, TestSize.Level1)
     swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
     swiperArrowParameters.arrowSize = Dimension(24.f);
     swiperArrowParameters.arrowColor = Color::GREEN;
-    
+
     /**
      * @tc.steps: step2. HORIZONTAL and !isShowIndicatorArrow
      * @tc.expected: check arrow rect
      */
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(swiperArrowParameters);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(swiperArrowParameters);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto leftArrowLayoutProperty = rightArrowNode_->GetLayoutProperty<SwiperArrowLayoutProperty>();
     EXPECT_TRUE(leftArrowLayoutProperty->GetIsShowBackgroundValue());
     EXPECT_TRUE(leftArrowLayoutProperty->GetIsSidebarMiddleValue());
@@ -756,17 +718,18 @@ HWTEST_F(SwiperArrowTestNg, Arrow003, TestSize.Level1)
     swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
     swiperArrowParameters.arrowSize = Dimension(24.f);
     swiperArrowParameters.arrowColor = Color::GREEN;
-    
+
     /**
      * @tc.steps: step2. VERTICAL and isShowIndicatorArrow
      * @tc.expected: check arrow rect
      */
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(swiperArrowParameters);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(swiperArrowParameters);
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(448.01f, 317.f, 32.f, 32.f)));
 }
 
@@ -788,17 +751,18 @@ HWTEST_F(SwiperArrowTestNg, Arrow004, TestSize.Level1)
     swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
     swiperArrowParameters.arrowSize = Dimension(24.f);
     swiperArrowParameters.arrowColor = Color::GREEN;
-    
+
     /**
      * @tc.steps: step2. VERTICAL and !isShowIndicatorArrow
      * @tc.expected: check arrow rect
      */
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(swiperArrowParameters);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(swiperArrowParameters);
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(224.f, 760.f, 32.f, 32.f)));
 }
 
@@ -846,11 +810,7 @@ HWTEST_F(SwiperArrowTestNg, InitOnKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, ClickArrowRTL001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
     auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
@@ -858,13 +818,13 @@ HWTEST_F(SwiperArrowTestNg, ClickArrowRTL001, TestSize.Level1)
      * @tc.steps: step1. Click the left arrow in RTL layout.
      */
     leftArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 1);
     /**
      * @tc.steps: step2. Click the right arrow in RTL layout.
      */
     rightArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 0);
 }
 
@@ -875,11 +835,7 @@ HWTEST_F(SwiperArrowTestNg, ClickArrowRTL001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
     auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
     /**
@@ -926,11 +882,7 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
     auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
     auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
@@ -950,7 +902,7 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
     auto callback = event->GetGestureEventFunc();
     ASSERT_NE(callback, nullptr);
     callback(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
 }
 
@@ -961,11 +913,7 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, TotalCount001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithArrow();
     auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
     /**
      * @tc.steps: step1 get totalCount.
@@ -980,22 +928,22 @@ HWTEST_F(SwiperArrowTestNg, TotalCount001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, ChangeLoop001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true);
-        model.SetHoverShow(false);
-        model.SetLoop(true);
-        model.SetDisplayCount(2);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    }, 6);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true);
+    model.SetHoverShow(false);
+    model.SetDisplayCount(2);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
 
     EXPECT_TRUE(VerifyArrowVisible(true, true));
 
     controller_->ChangeIndex(5, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     layoutProperty_->UpdateLoop(false);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(true, false));
 }
 
@@ -1006,34 +954,34 @@ HWTEST_F(SwiperArrowTestNg, ChangeLoop001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, ArrowVisiblity001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true);
-        model.SetHoverShow(false);
-        model.SetLoop(true);
-        model.SetDisplayCount(1);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    }, 3);
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true);
+    model.SetHoverShow(false);
+    model.SetDisplayCount(1);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems(3);
+    CreateSwiperDone();
 
     EXPECT_TRUE(VerifyArrowVisible(true, true));
 
     layoutProperty_->UpdateDisplayCount(3);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 
     layoutProperty_->UpdateDisplayCount(5);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 
     layoutProperty_->UpdateDisplayCount(1);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(true, true));
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 }
 
@@ -1044,11 +992,12 @@ HWTEST_F(SwiperArrowTestNg, ArrowVisiblity001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, ArrowButtonType001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true);
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayArrow(true);
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
     ASSERT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);

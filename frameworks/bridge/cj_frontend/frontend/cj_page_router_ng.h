@@ -79,9 +79,10 @@ protected:
 
     bool OnPageReady(const RefPtr<NG::FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, uint64_t cardId = 0);
-    static bool OnPopPage(bool needShowNext, bool needTransition);
+    bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
+    void UpdateSrcPage();
 
     std::list<WeakPtr<NG::FrameNode>> pageRouterStack_;
 

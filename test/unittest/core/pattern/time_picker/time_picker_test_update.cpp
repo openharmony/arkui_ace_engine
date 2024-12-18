@@ -1827,6 +1827,6 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest004, TestSize.Level1)
     EXPECT_EQ(ret, FONT_VALUE_VP);
 
     ret = timepickerModel.ConvertFontScaleValue(FONT_VALUE_NOMARL);
-    EXPECT_EQ(ret, FONT_VALUE_NOMARL / 10);
+    EXPECT_EQ(ret, FONT_VALUE_NOMARL);
 }
 } // namespace OHOS::Ace::NG

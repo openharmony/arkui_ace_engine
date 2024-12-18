@@ -34,7 +34,7 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
 
 public:
     explicit GridIrregularLayoutAlgorithm(GridLayoutInfo info, bool overScroll = false)
-        : GridLayoutBaseAlgorithm(std::move(info)), info_(gridLayoutInfo_), overScroll_(overScroll) {};
+        : GridLayoutBaseAlgorithm(std::move(info)), overScroll_(overScroll) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
 
@@ -145,9 +145,17 @@ private:
 
     bool IsIrregularLine(int32_t lineIndex) const override;
 
+    /**
+     * @brief post delayed task to preload GridItems in cache range.
+     */
     void PreloadItems(int32_t cacheCnt);
+    /**
+     * @brief immediately create & measure GridItems in cache range.
+     */
+    void SyncPreloadItems(int32_t cacheCnt);
 
-    GridLayoutInfo& info_;
+    void AdaptToChildMainSize(RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize);
+
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
@@ -158,6 +166,8 @@ private:
 
     bool enableSkip_ = true;
     bool overScroll_ = false;
+
+    SizeF frameSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };

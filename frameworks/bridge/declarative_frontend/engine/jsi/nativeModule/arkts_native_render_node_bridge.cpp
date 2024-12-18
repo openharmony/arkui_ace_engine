@@ -201,6 +201,14 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
         panda::NumberRef::New(vm, static_cast<double>(PipelineBase::Px2VpWithCurrentDensity(context.width)))
     };
     auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfSize);
+
+    Local<JSValueRef> valuesOfSizeInPixel[] = {
+        panda::NumberRef::New(vm, static_cast<double>(context.height)),
+        panda::NumberRef::New(vm, static_cast<double>(context.width))
+    };
+    auto sizeInPixelObj =
+        panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfSizeInPixel);
+
     auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
     OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
     napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
@@ -210,8 +218,8 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
     }
 
     auto jsCanvasVal = NapiValueToLocalValue(jsCanvas);
-    Local<JSValueRef> values[] = { sizeObj, jsCanvasVal };
-    const char* keys[] = { "size", "canvas" };
+    Local<JSValueRef> values[] = { sizeObj, sizeInPixelObj, jsCanvasVal };
+    const char* keys[] = { "size", "sizeInPixel", "canvas" };
     auto contextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     contextObj->SetNativePointerFieldCount(vm, 1);
     JSValueWrapper valueWrapper = contextObj;

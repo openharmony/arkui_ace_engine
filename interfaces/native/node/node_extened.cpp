@@ -51,7 +51,7 @@ void NodeAddExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType
 
 int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData)
 {
-    if (!node) {
+    if (!node || !CheckIsCNode(node)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (eventType <= 0) {
@@ -86,7 +86,7 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW) {
         NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW, targetId, userData);
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     if (node->type == ARKUI_NODE_CUSTOM_SPAN) {
         impl->getExtendedAPI()->registerCustomSpanAsyncEvent(
             node->uiNodeHandle, eventType, reinterpret_cast<void*>(node));
@@ -115,10 +115,10 @@ void NodeRemoveExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventT
 
 void UnregisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType)
 {
-    if (node == nullptr || !node->extraCustomData) {
+    if (node == nullptr || !node->extraCustomData || !CheckIsCNode(node)) {
         return;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     
     auto resultValue = impl->getExtendedAPI()->unregisterCustomNodeAsyncEvent(node->uiNodeHandle, eventType);
     if (resultValue == -1) {
@@ -204,7 +204,7 @@ void HandleCustomEvent(ArkUI_NodeCustomEvent* event)
 
 int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
 {
-    if (!nodePtr || !eventReceiver) {
+    if (!nodePtr || !eventReceiver || !CheckIsCNode(nodePtr)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!nodePtr->customEventListeners) {
@@ -222,7 +222,7 @@ int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceive
 int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
     void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
 {
-    if (!nodePtr || !eventReceiver || !nodePtr->customEventListeners) {
+    if (!nodePtr || !eventReceiver || !nodePtr->customEventListeners || !CheckIsCNode(nodePtr)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
@@ -240,10 +240,10 @@ int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
 
 int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)
 {
-    if (node == nullptr) {
+    if (node == nullptr || !CheckIsCNode(node)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     impl->getExtendedAPI()->setMeasureWidth(node->uiNodeHandle, width > 0 ? width : 0);
     impl->getExtendedAPI()->setMeasureHeight(node->uiNodeHandle, height > 0 ? height : 0);
     return ERROR_CODE_NO_ERROR;
@@ -251,10 +251,10 @@ int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)
 
 int32_t SetLayoutPosition(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
-    if (node == nullptr) {
+    if (node == nullptr || !CheckIsCNode(node)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     impl->getExtendedAPI()->setX(node->uiNodeHandle, positionX);
     impl->getExtendedAPI()->setY(node->uiNodeHandle, positionY);
     return ERROR_CODE_NO_ERROR;
@@ -262,10 +262,10 @@ int32_t SetLayoutPosition(ArkUI_NodeHandle node, int32_t positionX, int32_t posi
 
 int32_t GetLayoutConstraint(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* layoutConstraint)
 {
-    if (node == nullptr || layoutConstraint == nullptr) {
+    if (node == nullptr || layoutConstraint == nullptr || !CheckIsCNode(node)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     // data size
     ArkUI_Int32 data[6];
     impl->getExtendedAPI()->getLayoutConstraint(node->uiNodeHandle, data);
@@ -290,7 +290,7 @@ ArkUI_IntSize GetMeasuredSize(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return size;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     size.width = impl->getExtendedAPI()->getMeasureWidth(node->uiNodeHandle);
     size.height = impl->getExtendedAPI()->getMeasureHeight(node->uiNodeHandle);
     return size;
@@ -302,7 +302,7 @@ ArkUI_IntOffset GetLayoutPosition(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return offset;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     offset.x = impl->getExtendedAPI()->getX(node->uiNodeHandle);
     offset.y = impl->getExtendedAPI()->getY(node->uiNodeHandle);
     return offset;
@@ -310,10 +310,10 @@ ArkUI_IntOffset GetLayoutPosition(ArkUI_NodeHandle node)
 
 int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 {
-    if (node == nullptr || constraint == nullptr) {
+    if (node == nullptr || constraint == nullptr || !CheckIsCNode(node)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     // data size
     ArkUI_Float32 data[6];
     //minWidth
@@ -334,10 +334,10 @@ int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 
 int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
-    if (node == nullptr) {
+    if (node == nullptr || !CheckIsCNode(node)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     //layout data size
     float data[2];
     //positionX
@@ -353,8 +353,21 @@ uint32_t GetTotalChildCount(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return 0;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, true);
+}
+
+ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    const auto* impl = GetFullImpl();
+    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(node);
+    if (attachNode) {
+        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
+    }
+    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
+    impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
+    return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
 }
 
 ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
@@ -362,13 +375,9 @@ ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
     if (node == nullptr) {
         return nullptr;
     }
-    auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position, true);
-    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
-    if (attachNode) {
-        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
-    }
-    return nullptr;
+    const auto* impl = GetFullImpl();
+    auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position, true);
+    return GetArkUINode(attachNode);
 }
 
 ArkUI_NodeHandle GetFirstChild(ArkUI_NodeHandle node)
@@ -376,13 +385,9 @@ ArkUI_NodeHandle GetFirstChild(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return nullptr;
     }
-    auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle, true);
-    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
-    if (attachNode) {
-        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
-    }
-    return nullptr;
+    const auto* impl = GetFullImpl();
+    auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle, true);
+    return GetArkUINode(attachNode);
 }
 
 ArkUI_NodeHandle GetLastChild(ArkUI_NodeHandle node)
@@ -390,13 +395,9 @@ ArkUI_NodeHandle GetLastChild(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return nullptr;
     }
-    auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle, true);
-    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
-    if (attachNode) {
-        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
-    }
-    return nullptr;
+    const auto* impl = GetFullImpl();
+    auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle, true);
+    return GetArkUINode(attachNode);
 }
 
 ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node)
@@ -404,13 +405,9 @@ ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return nullptr;
     }
-    auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle, true);
-    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
-    if (attachNode) {
-        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
-    }
-    return nullptr;
+    const auto* impl = GetFullImpl();
+    auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle, true);
+    return GetArkUINode(attachNode);
 }
 
 ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node)
@@ -418,13 +415,9 @@ ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return nullptr;
     }
-    auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle, true);
-    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
-    if (attachNode) {
-        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
-    }
-    return nullptr;
+    const auto* impl = GetFullImpl();
+    auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle, true);
+    return GetArkUINode(attachNode);
 }
 
 ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
@@ -432,7 +425,7 @@ ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return nullptr;
     }
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getParent(node->uiNodeHandle);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
@@ -444,7 +437,7 @@ ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
 int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    auto* impl = GetFullImpl();
+    const auto* impl = GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->clearChildren(parentNode->uiNodeHandle);
     return ERROR_CODE_NO_ERROR;
 }

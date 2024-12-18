@@ -57,11 +57,6 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
     {
         drawCallback_ = drawCallback;
@@ -109,6 +104,18 @@ public:
     void SetLabel(const std::string& label)
     {
         label_ = label;
+    }
+
+    void OnAttachToMainTree() override
+    {
+        CHECK_NULL_VOID(renderNodeModifier_);
+        renderNodeModifier_->UpdateIsDetached(false);
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        CHECK_NULL_VOID(renderNodeModifier_);
+        renderNodeModifier_->UpdateIsDetached(true);
     }
 
 private:

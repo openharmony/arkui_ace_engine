@@ -1764,7 +1764,7 @@ HWTEST_F(SelectOverlayManagerTestNg, MountNodeToRoot, TestSize.Level1)
      */
     auto content = SelectContentOverlayManager(root_);
     bool animation = true;
-    content.MountNodeToRoot(root_, animation);
+    content.MountNodeToRoot(root_, animation, NodeType::HANDLE);
     EXPECT_EQ(content.selectionHoldId_, -1);
 }
 
@@ -2172,6 +2172,7 @@ HWTEST_F(SelectOverlayManagerTestNg, ClickAndSwitchToHandleMode, TestSize.Level1
     TouchEventInfo info("");
     TouchLocationInfo location(1);
     location.SetLocalLocation(Offset(0.0f, 0.0f));
+    location.touchType_ = TouchType::UP;
     info.changedTouches_ = { location };
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -2179,7 +2180,7 @@ HWTEST_F(SelectOverlayManagerTestNg, ClickAndSwitchToHandleMode, TestSize.Level1
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->selectContentManager_ = content;
     holder->allowSwitchMode_ = true;
-    selectOverlayPattern->HandleTouchDownEvent(info);
+    selectOverlayPattern->HandleTouchEvent(info);
     EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::OVERLAY);
 }
 } // namespace OHOS::Ace::NG

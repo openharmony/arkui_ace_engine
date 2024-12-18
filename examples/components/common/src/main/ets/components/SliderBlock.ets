@@ -12,8 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { BlockTag } from '../model/BlockTag';
+import { tagDesRule } from '../utils';
+import { formatDate } from '../utils/timeUtil';
 import { Block } from './Block';
+
+enum Mode {
+  ONE = '1',
+  TWO = '2',
+};
 
 @Component
 export struct SliderBlock {
@@ -23,12 +30,16 @@ export struct SliderBlock {
   @Link value: number;
   @Prop min: number = 0;
   @Prop max: number = 100;
+  @State listSliderTagsTemp: Array<BlockTag> = [];
+  @StorageLink('Block') listSliderTags: Array<BlockTag> = [];
 
   build() {
-    Column({ space: 8 }) {
+    Column({ space: 0 }) {
       Block({ title: this.title, isEnabled: $isEnabled }) {
         Row({ space: 0 }) {
-          Text(`${this.value}`).fontSize(16).width(56)
+          Text(`${this.value}`)
+            .fontSize(16)
+            .width(28)
           Slider({
             value: this.value,
             min: this.min,
@@ -40,10 +51,29 @@ export struct SliderBlock {
             .enabled(this.isEnabled)
             .showSteps(true)
             .width('80%')
-            .onChange((value: number) => {
-              this.value = Math.floor(value)
+            .onChange((value: number, mode: SliderChangeMode) => {
+              this.value = value
+              if (mode.toString() === Mode.TWO) {
+                setTimeout(() => {
+                  let time = formatDate(new Date(Date.now()))
+                  this.listSliderTagsTemp.push(new BlockTag(time, tagDesRule(this.title, value.toString())))
+                  if (AppStorage.get('Block')) {
+                    this.listSliderTags = this.listSliderTags.concat(this.listSliderTagsTemp);
+                    this.listSliderTagsTemp = [];
+                  } else {
+                    if (this.listSliderTagsTemp) {
+                      this.listSliderTags = this.listSliderTags.concat(this.listSliderTagsTemp);
+                    }
+                    if (this.listSliderTags) {
+                      this.listSliderTagsTemp = [];
+                    }
+                  }
+                }, 200)
+              }
             })
-        }.width('100%')
+        }
+        .margin({ left: 16 })
+        .width('100%')
       }
     }
   }

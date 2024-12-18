@@ -50,7 +50,7 @@ public:
     void SetSticky(V2::StickyStyle stickyStyle) override;
     void SetContentStartOffset(float startOffset) override;
     void SetContentEndOffset(float endOffset) override;
-    void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) override;
+    void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
@@ -81,7 +81,9 @@ public:
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetShowCached(FrameNode* frameNode, bool show);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static bool GetShowCached(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
@@ -110,7 +112,7 @@ public:
     static float GetListSpace(FrameNode* frameNode);
     static void SetListSpace(FrameNode* frameNode, const Dimension& space);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
-    static void SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign);
+    static void SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
@@ -133,8 +135,16 @@ public:
     static int32_t GetInitialIndex(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
+    static void SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove);
+    static void SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart);
+    static void SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter);
+    static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
+    static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
+    static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
 private:
     void AddDragFrameNodeToManager() const;
+    static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

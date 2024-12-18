@@ -68,6 +68,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
     border_ = bubbleLayoutAlgorithm->GetBorder();
     dumpInfo_ = bubbleLayoutAlgorithm->GetDumpInfo();
+    arrowBuildPlacement_ = bubbleLayoutAlgorithm->GetArrowBuildPlacement();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -93,7 +94,7 @@ void BubblePattern::AddPipelineCallBack()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
@@ -104,6 +105,7 @@ void BubblePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto pipelineContext = host->GetContextRefPtr();
@@ -111,28 +113,12 @@ void BubblePattern::OnAttachToFrameNode()
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
-                                              const OffsetF& oldOrigin, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
-        // Not handle first change
-        if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
-            return;
-        }
-
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        AnimationOption option;
-        option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
-        AnimationUtils::Animate(
-            option,
-            [weakPipeline = WeakPtr<PipelineContext>(pipelineContext), weakPopup = popupNodeWk]() {
-                auto popup = weakPopup.Upgrade();
-                CHECK_NULL_VOID(popup);
-                auto pipeline = weakPipeline.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                popup->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-                pipeline->FlushUITasks();
-            });
-        pipelineContext->FlushPipelineImmediately();
+        auto popupNode = popupNodeWk.Upgrade();
+        CHECK_NULL_VOID(popupNode);
+        popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
@@ -156,7 +142,7 @@ void BubblePattern::OnAttachToFrameNode()
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
@@ -217,7 +203,7 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
             return;
         }
         if (HasOnWillDismiss()) {
-            auto pipelineNg = PipelineContext::GetCurrentContext();
+            auto pipelineNg = host->GetContextRefPtr();
             CHECK_NULL_VOID(pipelineNg);
             auto overlayManager = pipelineNg->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
@@ -274,6 +260,7 @@ void BubblePattern::ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& but
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
     isHover_ = isHover;
     auto hoverColor = theme->GetButtonHoverColor();
     auto backgroundColor = theme->GetButtonBackgroundColor();
@@ -328,6 +315,9 @@ void BubblePattern::RegisterButtonOnTouch()
 
 void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode)
 {
+    if (info.GetTouches().empty()) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -384,7 +374,9 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
 
 void BubblePattern::PopBubble()
 {
-    auto pipelineNg = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -393,7 +385,6 @@ void BubblePattern::PopBubble()
         return;
     }
     popupInfo.markNeedUpdate = true;
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
@@ -715,13 +706,13 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
             break;
         }
         default: {
-            auto pipelineNg = PipelineContext::GetCurrentContext();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto pipelineNg = host->GetContextRefPtr();
             CHECK_NULL_VOID(pipelineNg);
             auto overlayManager = pipelineNg->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->HideAllPopups();
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
@@ -736,12 +727,13 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 
 void BubblePattern::OnWindowHide()
 {
-    auto pipelineNg = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideAllPopups();
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);

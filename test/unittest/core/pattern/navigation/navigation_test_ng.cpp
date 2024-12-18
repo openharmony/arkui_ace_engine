@@ -512,15 +512,16 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0017, TestSize.Level1)
     auto child = FrameNode::CreateFrameNode("navigationContent", 345, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child);
 
-    navigation->CheckCanHandleBack();
+    bool isEntry = false;
+    navigation->CheckCanHandleBack(isEntry);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->CheckCanHandleBack();
+    navigation->CheckCanHandleBack(isEntry);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
     auto child2 = FrameNode::CreateFrameNode("navigationContent", 346, AceType::MakeRefPtr<ButtonPattern>());
     navigationContentNode->children_.push_back(child2);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    navigation->CheckCanHandleBack();
+    navigation->CheckCanHandleBack(isEntry);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
 }
 
@@ -1165,6 +1166,9 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     auto navDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    auto navDestinationBPattern = navDestinationB->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationBPattern, nullptr);
+    navDestinationBPattern->SetNavigationNode(navigationNode);
     navigationStack->Add("B", navDestinationB);
     pattern->OnModifyDone();
     pattern->MarkNeedSyncWithJsStack();
@@ -1184,6 +1188,9 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() {
             return AceType::MakeRefPtr<NavDestinationPattern>();
         });
+    auto navDestinationCPattern = navDestinationC->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationBPattern, nullptr);
+    navDestinationCPattern->SetNavigationNode(navigationNode);
     auto layoutPropertyC = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationC->GetLayoutProperty());
     EXPECT_NE(layoutPropertyC, nullptr);
     layoutPropertyC->UpdateHideTitleBar(true);

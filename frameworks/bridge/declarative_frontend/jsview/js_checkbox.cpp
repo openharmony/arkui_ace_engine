@@ -37,26 +37,21 @@ namespace OHOS::Ace {
 namespace {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 }
-std::unique_ptr<CheckBoxModel> CheckBoxModel::instance_ = nullptr;
-std::mutex CheckBoxModel::mutex_;
 
 CheckBoxModel* CheckBoxModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::CheckBoxModelNG());
+    static NG::CheckBoxModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::CheckBoxModelNG());
-            } else {
-                instance_.reset(new Framework::CheckBoxModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::CheckBoxModelNG instance;
+        return &instance;
+    } else {
+        static Framework::CheckBoxModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 
@@ -368,9 +363,8 @@ bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF&
 
 NG::PaddingProperty JSCheckbox::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (info[0]->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
         CommonCalcDimension commonCalcDimension;
@@ -395,9 +389,8 @@ NG::PaddingProperty JSCheckbox::GetPadding(const std::optional<CalcDimension>& t
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
             padding.left =

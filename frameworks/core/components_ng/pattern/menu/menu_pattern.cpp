@@ -23,18 +23,16 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -49,22 +47,16 @@ namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
-constexpr int32_t STACK_EXPAND_DISAPPEAR_DURATION = 300;
+constexpr int32_t OTHER_MENUITEM_OPACITY_DELAY = 50;
+constexpr int32_t OTHER_MENUITEM_OPACITY_DURATION = 100;
+constexpr int32_t MENU_OPACITY_DURATION = 150;
+constexpr Dimension BLUR_RADIUS = 20.0_vp;
 constexpr int32_t HALF_FOLD_HOVER_DURATION = 1000;
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
-constexpr double MOUNT_MENU_OPACITY = 0.4f;
+constexpr double MAIN_MENU_OPACITY = 0.4f;
 
-constexpr double VELOCITY = 0.0f;
-constexpr double MASS = 1.0f;
-constexpr double STIFFNESS = 228.0f;
-constexpr double DAMPING = 22.0f;
-constexpr double STACK_MENU_DAMPING = 26.0f;
-const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
 const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
@@ -72,6 +64,7 @@ const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
+constexpr double HALF = 2.0;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -185,44 +178,41 @@ void MenuPattern::OnAttachToFrameNode()
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
     InitTheme(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
-    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
-                                              const OffsetF& oldOrigin, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
-        // Not handle first change
-        if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
-            return;
+        auto menuNode = menuNodeWk.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        if (!warpperPattern->IsHide()) {
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        AnimationOption option;
-        option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
-        AnimationUtils::Animate(
-            option,
-            [weakPipeline = WeakPtr<PipelineContext>(pipelineContext), weakMenu = menuNodeWk]() {
-                auto menu = weakMenu.Upgrade();
-                CHECK_NULL_VOID(menu);
-                auto menuPattern = menu->GetPattern<MenuPattern>();
-                CHECK_NULL_VOID(menuPattern);
-                auto menuWarpper = menuPattern->GetMenuWrapper();
-                CHECK_NULL_VOID(menuWarpper);
-                auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
-                CHECK_NULL_VOID(warpperPattern);
-                if (!warpperPattern->IsHide()) {
-                    auto pipeline = weakPipeline.Upgrade();
-                    CHECK_NULL_VOID(pipeline);
-                    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-                    pipeline->FlushUITasks();
-                }
-            });
-        pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+
+    auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto menuPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWrapper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(wrapperPattern);
+        wrapperPattern->SetHasFoldModeChangedTransition(true);
+    };
+    foldDisplayModeChangedCallbackId_ =
+        pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
 }
 
 int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
@@ -257,6 +247,12 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
+
+    if (foldDisplayModeChangedCallbackId_.has_value()) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
 }
 
 void MenuPattern::OnModifyDone()
@@ -390,8 +386,6 @@ void MenuPattern::UpdateSelectIndex(int32_t index)
 
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
-    RecordItemsAndGroups();
-
     // determine menu type based on sibling menu count
     auto count = FindSiblingMenuCount();
     if (count > 0) {
@@ -443,6 +437,9 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
     }
     if (!needHideAfterTouch_) {
         // not click hide menu if needn't hide after touch
+        return;
+    }
+    if (info.GetTouches().empty()) {
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
@@ -530,7 +527,9 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = true;
             itemPattern->SetIndex(index);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto pattern = DynamicCast<FrameNode>(child)->GetPattern<MenuItemGroupPattern>();
+            auto childItemNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(childItemNode);
+            auto pattern = childItemNode->GetPattern<MenuItemGroupPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->ModifyDivider();
             auto itemGroupNode = AceType::DynamicCast<UINode>(child);
@@ -539,7 +538,7 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             UpdateMenuItemChildren(itemGroupNode);
             isNeedDivider_ = false;
             auto accessibilityProperty =
-                DynamicCast<FrameNode>(child)->GetAccessibilityProperty<AccessibilityProperty>();
+                childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
@@ -570,14 +569,14 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         CHECK_NULL_VOID(childNode);
         if (i == 0) {
-            auto props = childNode->GetPaintProperty<OptionPaintProperty>();
+            auto props = childNode->GetPaintProperty<MenuItemPaintProperty>();
             CHECK_NULL_VOID(props);
             props->UpdateNeedDivider(false);
             auto focusHub = childNode->GetOrCreateFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetIsDefaultFocus(true);
         }
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         optionPattern->UpdateText(params.at(i).text);
         optionPattern->UpdateIcon(params.at(i).icon, params.at(i).symbolIcon);
@@ -585,9 +584,12 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
         childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     for (size_t i = updateCount; i < paramCount; i++) {
-        auto optionNode = OptionView::CreateSelectOption(params.at(i), i);
+        auto optionNode = MenuView::CreateSelectOption(params.at(i), i);
+        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        optionPattern->SetIsSelectOption(true);
         if (i == 0) {
-            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
+            auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
             props->UpdateNeedDivider(false);
         }
         MountOption(optionNode);
@@ -603,13 +605,13 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto rootMenuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
     CHECK_NULL_VOID(rootMenuPattern);
     // copy menu pattern properties to rootMenu
@@ -696,7 +698,9 @@ void MenuPattern::HideStackMenu() const
     AnimationOption option;
     option.SetOnFinishEvent(
         [weak = WeakClaim(RawPtr(wrapper)), subMenuWk = WeakClaim(RawPtr(host))] {
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto subMenu = subMenuWk.Upgrade();
+            CHECK_NULL_VOID(subMenu);
+            auto pipeline = subMenu->GetContextWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
@@ -723,7 +727,7 @@ void MenuPattern::HideStackMenu() const
     }
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapper->GetFirstChild());
     CHECK_NULL_VOID(menuNode);
-    ShowStackExpandDisappearAnimation(menuNode, host, option);
+    ShowStackMenuDisappearAnimation(menuNode, host, option);
 }
 
 void MenuPattern::HideSubMenu()
@@ -850,7 +854,7 @@ void MenuPattern::MountOption(const RefPtr<FrameNode>& option)
 {
     auto column = GetMenuColumn();
     CHECK_NULL_VOID(column);
-    auto pattern = option->GetPattern<OptionPattern>();
+    auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenu(GetHost());
     AddOptionNode(option);
@@ -967,10 +971,10 @@ void MenuPattern::ResetScrollTheme(const RefPtr<FrameNode>& host)
 
 void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -996,6 +1000,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 
 void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     MenuPattern::InitTheme(host);
     // inner menu applies shadow in OnModifyDone(), where it can determine if it's a DesktopMenu or a regular menu
 
@@ -1004,9 +1009,10 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         // if user defined padding exists, skip applying default padding
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     // apply default padding from theme on inner menu
     PaddingProperty padding;
     padding.SetEdges(CalcLength(theme->GetOutPadding()));
@@ -1086,7 +1092,7 @@ Offset MenuPattern::GetTransformCenter() const
     }
 }
 
-void MenuPattern::ShowPreviewMenuScaleAnimation()
+void MenuPattern::ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay)
 {
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
@@ -1103,72 +1109,115 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
     auto previewPosition = previewGeometryNode->GetFrameOffset();
     OffsetF previewOriginPosition = GetPreviewOriginOffset();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto springMotionResponse = menuTheme->GetSpringMotionResponse();
-    auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
-    auto delay = isHoverImageTarget ? menuTheme->GetHoverImageDelayDuration() : 0;
-
     previewRenderContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
-    AnimationOption scaleOption = AnimationOption();
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+
+    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(
+        -1.0, [menuWrapperPattern, previewOriginPosition, previewPosition](float rate) {
+            CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
+            auto previewOffset = (previewPosition - previewOriginPosition) * rate + previewOriginPosition;
+            menuWrapperPattern->SetAnimationPreviewOffset(previewOffset);
+        });
+    CHECK_NULL_VOID(animateProperty);
+    previewRenderContext->AttachNodeAnimatableProperty(animateProperty);
+    animateProperty->Set(0.0);
+
     if (isHoverImageTarget) {
-        scaleOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-    } else {
-        scaleOption.SetCurve(motion);
+        option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+        option.SetDelay(delay);
     }
-    scaleOption.SetDelay(delay);
-    AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition]() {
+
+    AnimationUtils::Animate(option, [previewRenderContext, previewPosition, animateProperty]() {
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+        CHECK_NULL_VOID(animateProperty);
+        animateProperty->Set(1.0);
+    });
+}
+
+void MenuPattern::ShowPreviewMenuScaleAnimation(
+    const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay)
+{
+    CHECK_NULL_VOID(menuTheme);
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto menuPosition = host->GetPaintRectOffset();
+    auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
+    renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
+    renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
+
+    auto callback = [menuWrapperPattern, originOffset = originOffset_, menuPosition, scaleFrom = menuAnimationScale](
+                        float rate) {
+        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
+        menuWrapperPattern->SetAnimationMenuOffset((menuPosition - originOffset) * rate + originOffset);
+        menuWrapperPattern->SetAnimationMenuScale((1.0 - scaleFrom) * rate + scaleFrom);
+    };
+    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
+    CHECK_NULL_VOID(animateProperty);
+    renderContext->AttachNodeAnimatableProperty(animateProperty);
+    animateProperty->Set(0.0);
+
+    if (isShowHoverImage_) {
+        option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+        option.SetDelay(delay);
+    }
+
+    AnimationUtils::Animate(option, [renderContext, menuPosition, animateProperty]() {
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+        CHECK_NULL_VOID(animateProperty);
+        animateProperty->Set(1.0);
     });
 }
 
 void MenuPattern::ShowPreviewMenuAnimation()
 {
     CHECK_NULL_VOID(isFirstShow_ && previewMode_ != MenuPreviewMode::NONE);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    MenuView::CalcHoverScaleInfo(host);
-    ShowPreviewMenuScaleAnimation();
 
-    MenuView::ShowPixelMapAnimation(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
-    auto menuPosition = host->GetPaintRectOffset();
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = menuWrapper->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
+
     auto springMotionResponse = menuTheme->GetSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
-
-    renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
-
-    renderContext->UpdatePosition(
-        OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
-
     auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration() : 0;
-    ShowMenuOpacityAnimation(menuTheme, renderContext, delay);
 
-    AnimationOption scaleOption = AnimationOption();
+    AnimationOption option = AnimationOption();
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-    scaleOption.SetCurve(motion);
-    scaleOption.SetDelay(delay);
-    AnimationUtils::Animate(scaleOption, [renderContext, menuPosition]() {
-        if (renderContext) {
-            renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
-            renderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        }
-    });
+    option.SetCurve(motion);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    MenuView::CalcHoverScaleInfo(host);
+    InitPreviewMenuAnimationInfo(menuTheme);
+
+    // customPreview position animation
+    ShowPreviewPositionAnimation(option, delay);
+
+    // menu position and scale animation
+    ShowPreviewMenuScaleAnimation(menuTheme, option, delay);
+
+    // image and hoverScale animation
+    MenuView::ShowPixelMapAnimation(host);
+    ShowMenuOpacityAnimation(menuTheme, host->GetRenderContext(), delay);
     isFirstShow_ = false;
 }
 
@@ -1209,61 +1258,95 @@ void MenuPattern::ShowMenuAppearAnimation()
     isMenuShow_ = false;
 }
 
-void MenuPattern::ShowStackExpandMenu()
+void MenuPattern::ShowStackMenuAppearAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!isSubMenuShow_) {
         return;
     }
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto menuWarpper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWarpper);
     auto menuWrapperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto outterMenu = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(outterMenu);
+    auto mainMenu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(mainMenu);
 
-    auto [originOffset, endOffset] = GetMenuOffset(outterMenu, true);
-    auto outterMenuContext = outterMenu->GetRenderContext();
-    CHECK_NULL_VOID(outterMenuContext);
-
-    renderContext->UpdatePosition(
+    auto [originOffset, endOffset] = GetMenuOffset(mainMenu);
+    auto mainMenuContext = mainMenu->GetRenderContext();
+    ShowStackMenuAppearOpacityAndBlurAnimation(mainMenuContext);
+    auto subMenuContext = host->GetRenderContext();
+    CHECK_NULL_VOID(subMenuContext);
+    subMenuContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(originOffset.GetX()), Dimension(originOffset.GetY())));
 
-    AnimationOption opacityOption = AnimationOption();
-    opacityOption.SetCurve(Curves::FRICTION);
-    opacityOption.SetDuration(STACK_EXPAND_DISAPPEAR_DURATION);
-    AnimationUtils::Animate(opacityOption, [renderContext, outterMenuContext]() {
-        if (renderContext) {
-            renderContext->UpdateOpacity(1.0f);
-        }
-        if (outterMenuContext) {
-            outterMenuContext->UpdateOpacity(MOUNT_MENU_OPACITY);
-        }
-    });
-
     AnimationOption translateOption = AnimationOption();
-    translateOption.SetCurve(STACK_MENU_CURVE);
-    AnimationUtils::Animate(translateOption, [renderContext, menuPosition = endOffset, outterMenuContext]() {
-        if (renderContext) {
-            renderContext->UpdatePosition(
+    translateOption.SetCurve(MAIN_MENU_ANIMATION_CURVE);
+    AnimationUtils::Animate(translateOption, [subMenuContext, menuPosition = endOffset, mainMenuContext]() {
+        if (subMenuContext) {
+            subMenuContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         }
-        if (outterMenuContext) {
-            outterMenuContext->UpdateTransformScale(VectorF(MOUNT_MENU_FINAL_SCALE, MOUNT_MENU_FINAL_SCALE));
+        if (mainMenuContext) {
+            mainMenuContext->UpdateTransformScale(VectorF(MOUNT_MENU_FINAL_SCALE, MOUNT_MENU_FINAL_SCALE));
         }
     });
     ShowArrowRotateAnimation();
     isSubMenuShow_ = false;
 }
 
-std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
+void MenuPattern::ShowStackMenuAppearOpacityAndBlurAnimation(const RefPtr<RenderContext>& mainMenuContext) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto otherMenuItemContext = GetOtherMenuItemContext(host);
+    // separated animation param for first item and other items
+    auto scroll = host->GetFirstChild();
+    CHECK_NULL_VOID(scroll);
+    auto subInnerMenu = scroll->GetFirstChild();
+    CHECK_NULL_VOID(subInnerMenu);
+
+    auto titleNode = DynamicCast<FrameNode>(subInnerMenu->GetFirstChild());
+    CHECK_NULL_VOID(titleNode);
+    auto titleContext = titleNode->GetRenderContext();
+    CHECK_NULL_VOID(titleContext);
+    titleContext->UpdateOpacity(1.0f);
+
+    for (auto menuItemContext : otherMenuItemContext) {
+        menuItemContext->UpdateOpacity(0.0f);
+    }
+
+    AnimationOption opacityOption = AnimationOption();
+    opacityOption.SetCurve(Curves::FRICTION);
+    opacityOption.SetDelay(OTHER_MENUITEM_OPACITY_DELAY);
+    opacityOption.SetDuration(OTHER_MENUITEM_OPACITY_DURATION);
+    AnimationUtils::Animate(opacityOption, [otherMenuItemContext]() {
+        for (auto menuItemContext : otherMenuItemContext) {
+            menuItemContext->UpdateOpacity(1.0f);
+        }
+    });
+
+    auto scrollContext = AceType::DynamicCast<FrameNode>(scroll)->GetRenderContext();
+    CHECK_NULL_VOID(scrollContext);
+    scrollContext->UpdateBackBlur(Dimension(BLUR_RADIUS), {{0, 0}});
+    auto subMenuContext = host->GetRenderContext();
+    CHECK_NULL_VOID(subMenuContext);
+    subMenuContext->UpdateOpacity(0.0f);
+    CHECK_NULL_VOID(mainMenuContext);
+    mainMenuContext->UpdateOpacity(1.0f);
+    opacityOption.SetDuration(MENU_OPACITY_DURATION);
+    AnimationUtils::Animate(opacityOption, [mainMenuContext, subMenuContext, scrollContext]() {
+        subMenuContext->UpdateOpacity(1.0f);
+        mainMenuContext->UpdateOpacity(MAIN_MENU_OPACITY);
+        scrollContext->UpdateBackBlur(0.0_vp, {{0, 0}});
+    });
+}
+
+std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& mainMenu,
     bool isNeedRestoreNodeId) const
 {
-    CHECK_NULL_RETURN(outterMenu, std::make_pair(OffsetF(), OffsetF()));
-    auto scroll = outterMenu->GetFirstChild();
+    CHECK_NULL_RETURN(mainMenu, std::make_pair(OffsetF(), OffsetF()));
+    auto scroll = mainMenu->GetFirstChild();
     CHECK_NULL_RETURN(scroll, std::make_pair(OffsetF(), OffsetF()));
     auto innerMenu = scroll->GetFirstChild();
     CHECK_NULL_RETURN(innerMenu, std::make_pair(OffsetF(), OffsetF()));
@@ -1308,7 +1391,15 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, bool isNe
         auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_RETURN(menuItemPattern, menuItemInfo);
         if (menuItem->GetId() == menuItemPattern->GetClickMenuItemId()) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, menuItemInfo);
+            auto pipeline = host->GetContextWithCheck();
+            CHECK_NULL_RETURN(pipeline, menuItemInfo);
+            auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL;
             auto offset = menuItem->GetPaintRectOffset();
+            if (isContainerModal) {
+                offset -= OffsetF(0.0f, static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()));
+            }
             menuItemInfo.originOffset = offset - OffsetF(PADDING.ConvertToPx(), PADDING.ConvertToPx());
             auto menuItemFrameSize = menuItem->GetGeometryNode()->GetFrameSize();
             menuItemInfo.endOffset = menuItemInfo.originOffset + OffsetF(0.0f, menuItemFrameSize.Height());
@@ -1325,13 +1416,13 @@ void MenuPattern::ShowArrowRotateAnimation() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto subImageNode = GetImageNode(host);
+    auto subImageNode = GetArrowNode(host);
     CHECK_NULL_VOID(subImageNode);
     auto subImageContext = subImageNode->GetRenderContext();
     CHECK_NULL_VOID(subImageContext);
     subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
     AnimationOption option = AnimationOption();
-    option.SetCurve(MENU_ANIMATION_CURVE);
+    option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
     AnimationUtils::Animate(option, [subImageContext]() {
         if (subImageContext) {
             subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, SEMI_CIRCLE_ANGEL, 0.0f));
@@ -1339,7 +1430,7 @@ void MenuPattern::ShowArrowRotateAnimation() const
     });
 }
 
-RefPtr<FrameNode> MenuPattern::GetImageNode(const RefPtr<FrameNode>& host) const
+RefPtr<FrameNode> MenuPattern::GetArrowNode(const RefPtr<FrameNode>& host) const
 {
     auto scroll = host->GetFirstChild();
     CHECK_NULL_RETURN(scroll, nullptr);
@@ -1353,18 +1444,50 @@ RefPtr<FrameNode> MenuPattern::GetImageNode(const RefPtr<FrameNode>& host) const
     return image;
 }
 
-void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+std::vector<RefPtr<RenderContext>> MenuPattern::GetOtherMenuItemContext(const RefPtr<FrameNode>& subMenuNode) const
+{
+    CHECK_NULL_RETURN(subMenuNode, {});
+    auto scroll = subMenuNode->GetFirstChild();
+    CHECK_NULL_RETURN(scroll, {});
+    auto subInnerMenu = scroll->GetFirstChild();
+    CHECK_NULL_RETURN(subInnerMenu, {});
+    std::vector<RefPtr<RenderContext>> otherMenuItemContext;
+    auto children = subInnerMenu->GetChildren();
+    if (children.empty()) {
+        LOGW("children is empty.");
+        return {};
+    }
+    auto child = children.begin();
+    for (advance(child, 1); child != children.end(); ++child) {
+        auto menuItem = DynamicCast<FrameNode>(*child);
+        CHECK_NULL_RETURN(menuItem, {});
+        auto menuItemContext = menuItem->GetRenderContext();
+        otherMenuItemContext.emplace_back(menuItemContext);
+    }
+    return otherMenuItemContext;
+}
+
+void MenuPattern::ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
     const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const
 {
-    CHECK_NULL_VOID(menuNode);
-    CHECK_NULL_VOID(subMenuNode);
+    auto otherMenuItemContext = GetOtherMenuItemContext(subMenuNode);
+    option.SetCurve(Curves::FRICTION);
+    option.SetDuration(OTHER_MENUITEM_OPACITY_DURATION);
+    AnimationUtils::Animate(option, [otherMenuItemContext]() {
+        for (auto menuItemContext : otherMenuItemContext) {
+            menuItemContext->UpdateOpacity(0.0f);
+        }
+    });
 
+    CHECK_NULL_VOID(menuNode);
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, true);
+    CHECK_NULL_VOID(subMenuNode);
     auto subMenuPos = subMenuNode->GetPaintRectOffset();
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
-    option.SetCurve(STACK_MENU_CURVE);
-    AnimationUtils::Animate(option, [menuNode, menuPosition, subMenuNode]() {
+    option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
+    auto subImageNode = GetArrowNode(subMenuNode);
+    AnimationUtils::Animate(option, [menuNode, menuPosition, subMenuNode, subImageNode]() {
         auto menuContext = menuNode->GetRenderContext();
         auto subMenuContext = subMenuNode->GetRenderContext();
         if (subMenuContext) {
@@ -1374,20 +1497,28 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
         if (menuContext) {
             menuContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
         }
+        if (subImageNode) {
+            auto subImageContext = subImageNode->GetRenderContext();
+            if (subImageContext) {
+                subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+            }
+        }
     });
 
-    option.SetCurve(MENU_ANIMATION_CURVE);
-    auto subImageNode = GetImageNode(subMenuNode);
-    AnimationUtils::Animate(option, [subImageNode]() {
-        CHECK_NULL_VOID(subImageNode);
-        auto subImageContext = subImageNode->GetRenderContext();
-        CHECK_NULL_VOID(subImageContext);
-        subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-    });
+    ShowStackMenuDisappearOpacityAndBlurAnimation(menuNode, subMenuNode, option);
+}
 
+void MenuPattern::ShowStackMenuDisappearOpacityAndBlurAnimation(const RefPtr<FrameNode>& menuNode,
+    const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const
+{
+    auto scroll = subMenuNode->GetFirstChild();
+    CHECK_NULL_VOID(scroll);
+    auto scrollContext = AceType::DynamicCast<FrameNode>(scroll)->GetRenderContext();
+    CHECK_NULL_VOID(scrollContext);
+    scrollContext->UpdateBackBlur(Dimension(BLUR_RADIUS), {{0, 0}});
     option.SetCurve(Curves::FRICTION);
-    option.SetDuration(STACK_EXPAND_DISAPPEAR_DURATION);
-    AnimationUtils::Animate(option, [menuNode, subMenuNode]() {
+    option.SetDuration(MENU_OPACITY_DURATION);
+    AnimationUtils::Animate(option, [menuNode, subMenuNode, scrollContext]() {
         auto menuContext = menuNode->GetRenderContext();
         auto subMenuContext = subMenuNode->GetRenderContext();
         if (subMenuContext) {
@@ -1395,6 +1526,9 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
         }
         if (menuContext) {
             menuContext->UpdateOpacity(1.0f);
+        }
+        if (scrollContext) {
+            scrollContext->UpdateBackBlur(0.0_vp, {{0, 0}});
         }
     }, option.GetOnFinishEvent());
 }
@@ -1439,7 +1573,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 {
     ShowPreviewMenuAnimation();
     ShowMenuAppearAnimation();
-    ShowStackExpandMenu();
+    ShowStackMenuAppearAnimation();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto menuPosition = host->GetPaintRectOffset();
@@ -1449,7 +1583,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
 
     UpdateClipPath(dirty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -1479,7 +1613,9 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
 {
     Dimension defaultDimension(0);
     BorderRadiusProperty radius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, radius);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, radius);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, radius);
@@ -1604,7 +1740,8 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
 void MenuPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     auto menuTheme = pipeline->GetTheme<SelectTheme>();
@@ -1622,7 +1759,7 @@ void MenuPattern::OnColorConfigurationUpdate()
 
     auto optionNode = menuPattern->GetOptions();
     for (const auto& child : optionNode) {
-        auto optionsPattern = child->GetPattern<OptionPattern>();
+        auto optionsPattern = child->GetPattern<MenuItemPattern>();
         optionsPattern->SetFontColor(menuTheme->GetFontColor());
 
         child->MarkModifyDone();
@@ -1736,12 +1873,22 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
         CHECK_NULL_VOID(pattern);
         pattern->OnIntItemPressed(index, press);
     }
+    HandleNextPressed(parent, index, press, hover);
+    HandlePrevPressed(parent, index, press);
+}
+
+void MenuPattern::HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover)
+{
+    CHECK_NULL_VOID(parent);
     RefPtr<UINode> nextNode = nullptr;
-    if (parent->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
-        nextNode = GetForEachMenuItem(parent, true);
+    const auto childrenSize = parent->GetChildren().size();
+    auto syntaxNode = GetSyntaxNode(parent);
+    if (index == static_cast<int32_t>(childrenSize - 1) && syntaxNode) {
+        nextNode = GetForEachMenuItem(syntaxNode, true);
+    } else if (parent->GetTag() == V2::JS_IF_ELSE_ETS_TAG && index == static_cast<int32_t>(childrenSize - 1)) {
+        nextNode = GetOutsideForEachMenuItem(parent, true);
     } else {
-        const size_t size = parent->GetChildren().size();
-        if (size == 0 || index >= static_cast<int32_t>(size - 1)) {
+        if (index >= static_cast<int32_t>(childrenSize - 1)) {
             return;
         }
         nextNode = parent->GetChildAtIndex(index + 1);
@@ -1751,46 +1898,79 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
         nextNode = GetForEachMenuItem(nextNode, true);
     }
     CHECK_NULL_VOID(nextNode);
-    if (!InstanceOf<FrameNode>(nextNode)) {
-        LOGW("next menuNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());
-        return;
+    if (nextNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG) {
+        nextNode = GetIfElseMenuItem(nextNode, true);
     }
+    CHECK_NULL_VOID(nextNode);
     if (nextNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
         auto pattern = DynamicCast<FrameNode>(nextNode)->GetPattern<MenuItemGroupPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->OnExtItemPressed(press, true);
-    } else {
+    }
+    if (nextNode->GetTag() == V2::MENU_ITEM_ETS_TAG) {
         auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         // need save needDivider property due to some items shoud not have divide in not pressed state
         hover ? props->UpdateHover(press) : props->UpdatePress(press);
         nextNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void MenuPattern::HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press)
+{
+    CHECK_NULL_VOID(parent);
+    RefPtr<UINode> prevNode = nullptr;
     if (index > 0) {
-        auto prevNode = parent->GetChildAtIndex(index - 1);
+        prevNode = parent->GetChildAtIndex(index - 1);
         CHECK_NULL_VOID(prevNode);
-        if (!InstanceOf<FrameNode>(prevNode)) {
-            LOGW("prev menuNode is not a frameNode! type = %{public}s", prevNode->GetTag().c_str());
-            return;
+        if (prevNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
+            prevNode = GetForEachMenuItem(prevNode, false);
         }
-        if (prevNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto pattern = DynamicCast<FrameNode>(prevNode)->GetPattern<MenuItemGroupPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnExtItemPressed(press, false);
+    } else {
+        auto syntaxNode = GetSyntaxNode(parent);
+        if (parent->GetParent()->GetChildIndex(parent) == 0 && syntaxNode) {
+            prevNode = GetForEachMenuItem(syntaxNode, false);
         }
+        if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG && parent->GetParent()->GetChildIndex(parent) == 0 &&
+            parent->GetParent()->GetTag() == V2::JS_IF_ELSE_ETS_TAG) { // the first item in first group in ifElse
+            prevNode = GetOutsideForEachMenuItem(parent->GetParent(), false);
+        }
+        if (parent->GetParent()->GetChildIndex(parent) > 0 &&
+            parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) { // not first group in menu
+            prevNode = GetOutsideForEachMenuItem(parent, false);
+        }
+    }
+    CHECK_NULL_VOID(prevNode);
+    if (prevNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG) {
+        prevNode = GetIfElseMenuItem(prevNode, false);
+    }
+    CHECK_NULL_VOID(prevNode);
+    if (prevNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        auto preFrameNode = DynamicCast<FrameNode>(prevNode);
+        CHECK_NULL_VOID(preFrameNode);
+        auto pattern = preFrameNode->GetPattern<MenuItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnExtItemPressed(press, false);
     }
 }
 
 RefPtr<UINode> MenuPattern::GetForEachMenuItem(const RefPtr<UINode>& parent, bool next)
 {
     CHECK_NULL_RETURN(parent, nullptr);
-    if (parent->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
-        auto forEachNode = AceType::DynamicCast<UINode>(parent->GetParent());
+    if (parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
+        auto nextSyntax = next ? parent->GetFirstChild() : parent->GetLastChild();
+        CHECK_NULL_RETURN(nextSyntax, nullptr);
+        return next ? nextSyntax->GetFirstChild() : nextSyntax->GetLastChild();
+    }
+    auto node = GetSyntaxNode(parent);
+    CHECK_NULL_RETURN(node, nullptr);
+    auto forEachNode = AceType::DynamicCast<UINode>(node->GetParent());
+    if (node->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
         CHECK_NULL_RETURN(forEachNode, nullptr);
-        auto syntIndex = forEachNode->GetChildIndex(parent);
-        const size_t size = forEachNode->GetChildren().size();
+        auto syntIndex = forEachNode->GetChildIndex(node);
+        const auto& children = forEachNode->GetChildren();
         if (next) {
-            if (size > 0 && syntIndex < static_cast<int32_t>(size - 1)) { // next is inside forEach
+            if (syntIndex < static_cast<int32_t>(children.size() - 1)) { // next is inside forEach
                 auto nextSyntax = forEachNode->GetChildAtIndex(syntIndex + 1);
                 CHECK_NULL_RETURN(nextSyntax, nullptr);
                 return nextSyntax->GetFirstChild();
@@ -1801,16 +1981,11 @@ RefPtr<UINode> MenuPattern::GetForEachMenuItem(const RefPtr<UINode>& parent, boo
             if (syntIndex > 0) { // prev is inside forEach
                 auto prevSyntax = forEachNode->GetChildAtIndex(syntIndex - 1);
                 CHECK_NULL_RETURN(prevSyntax, nullptr);
-                return prevSyntax->GetFirstChild();
+                return prevSyntax->GetLastChild();
             } else { // prev is before forEach
                 return GetOutsideForEachMenuItem(forEachNode, false);
             }
         }
-    }
-    if (parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
-        auto nextSyntax = next? parent->GetFirstChild(): parent->GetLastChild();
-        CHECK_NULL_RETURN(nextSyntax, nullptr);
-        return nextSyntax->GetFirstChild();
     }
     return nullptr;
 }
@@ -1821,12 +1996,35 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
     CHECK_NULL_RETURN(parentForEachNode, nullptr);
     auto forEachIndex = parentForEachNode->GetChildIndex(forEachNode);
     int32_t shift = next ? 1 : -1;
-    const size_t size = parentForEachNode->GetChildren().size();
-    if (size > 0 && (forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(size - 1)) {
+    const auto& children = parentForEachNode->GetChildren();
+    if ((forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(children.size() - 1)) {
         return parentForEachNode->GetChildAtIndex(forEachIndex + shift);
     } else {
         return nullptr;
     }
+}
+
+RefPtr<UINode> MenuPattern::GetSyntaxNode(const RefPtr<UINode>& parent)
+{
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto node = parent;
+    while (node) {
+        if (node->GetTag() == V2::MENU_ETS_TAG) {
+            return nullptr;
+        }
+        if (node->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+            return node;
+        }
+        node = node->GetParent();
+    }
+    return nullptr;
+}
+
+RefPtr<UINode> MenuPattern::GetIfElseMenuItem(const RefPtr<UINode>& parent, bool next)
+{
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto nextItem = next ? parent->GetFirstChild() : parent->GetLastChild();
+    return nextItem;
 }
 
 bool MenuPattern::IsMenuScrollable() const
@@ -1846,5 +2044,133 @@ bool MenuPattern::IsMenuScrollable() const
 void MenuPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("MenuType", static_cast<int32_t>(GetMenuType()));
+}
+
+OffsetF MenuPattern::GetPreviewMenuAnimationOffset(
+    const OffsetF& previewCenter, const SizeF& previewSize, float scale) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, OffsetF());
+    auto size = geometryNode->GetFrameSize();
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, OffsetF());
+    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
+
+    auto space = TARGET_SPACE.ConvertToPx();
+    auto menuWidth = size.Width();
+    auto menuHeight = size.Height();
+
+    auto top = previewCenter.GetY() - previewSize.Height() * scale / HALF;
+    auto bottom = previewCenter.GetY() + previewSize.Height() * scale / HALF;
+    auto left = previewCenter.GetX() - previewSize.Width() * scale / HALF;
+    auto right = previewCenter.GetX() + previewSize.Width() * scale / HALF;
+
+    switch (placement) {
+        case Placement::TOP:
+            return OffsetF(previewCenter.GetX() - menuWidth / HALF, top - space - menuHeight);
+        case Placement::TOP_LEFT:
+            return OffsetF(left, top - space - menuHeight);
+        case Placement::TOP_RIGHT:
+            return OffsetF(right - menuWidth, top - space - menuHeight);
+        case Placement::BOTTOM:
+            return OffsetF(previewCenter.GetX() - menuWidth / HALF, bottom + space);
+        case Placement::BOTTOM_LEFT:
+            return OffsetF(left, bottom + space);
+        case Placement::BOTTOM_RIGHT:
+            return OffsetF(right - menuWidth, bottom + space);
+        case Placement::LEFT:
+            return OffsetF(left - space - menuWidth, previewCenter.GetY() - menuHeight / HALF);
+        case Placement::LEFT_TOP:
+            return OffsetF(left - space - menuWidth, top);
+        case Placement::LEFT_BOTTOM:
+            return OffsetF(left - space - menuWidth, bottom - menuHeight);
+        case Placement::RIGHT:
+            return OffsetF(right + space, previewCenter.GetY() - menuHeight / HALF);
+        case Placement::RIGHT_TOP:
+            return OffsetF(right + space, top);
+        case Placement::RIGHT_BOTTOM:
+            return OffsetF(right + space, bottom - menuHeight);
+        default:
+            return OffsetF(left, bottom + space);
+    }
+}
+
+void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme)
+{
+    CHECK_NULL_VOID(menuTheme);
+
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto hasTransition = menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect();
+    if (hasTransition) {
+        disappearOffset_ = endOffset_;
+        return;
+    }
+    
+    auto preview = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(preview);
+    auto previewGeometryNode = preview->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+
+    auto scaleBefore = GetPreviewBeforeAnimationScale();
+    auto appearScale = LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+    auto disappearScale = 1.0;
+
+    if (previewMode_ == MenuPreviewMode::IMAGE) {
+        auto imagePattern = preview->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        auto imageRawSize = imagePattern->GetRawImageSize();
+        auto isOriginSizeGreater = previewSize.IsPositive() && imageRawSize.IsPositive() && imageRawSize > previewSize;
+        if (isOriginSizeGreater) {
+            appearScale *= imageRawSize.Width() / previewSize.Width();
+        }
+
+        disappearScale = targetSize_.Width() / previewSize.Width();
+    }
+
+    OffsetF previewCenter = GetPreviewOriginOffset() + OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
+    if (isShowHoverImage_) {
+        auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
+        CHECK_NULL_VOID(previewPattern);
+        appearScale = previewPattern->GetHoverImageScaleTo();
+        appearScale = LessOrEqual(appearScale, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : appearScale;
+
+        disappearScale = previewPattern->GetHoverImageScaleFrom();
+        disappearScale =
+            LessNotEqual(disappearScale, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : disappearScale;
+
+        previewSize =
+            SizeF(previewPattern->GetHoverImageAfterScaleWidth(), previewPattern->GetHoverImageAfterScaleHeight());
+        auto clipEndWidth = previewPattern->GetStackAfterScaleActualWidth();
+        auto clipEndHeight = previewPattern->GetStackAfterScaleActualHeight();
+        previewCenter = GetPreviewOriginOffset() + OffsetF(clipEndWidth / HALF, clipEndHeight / HALF);
+    }
+
+    originOffset_ = GetPreviewMenuAnimationOffset(previewCenter, previewSize, appearScale);
+    disappearOffset_ = GetPreviewMenuAnimationOffset(previewCenter, previewSize, disappearScale);
+}
+
+void MenuPattern::UpdateMenuPathParams(std::optional<MenuPathParams> pathParams)
+{
+    pathParams_ = pathParams;
+    auto wrapperNode = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapperNode);
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestPathRender();
+}
+
+void MenuPattern::OnDetachFromMainTree()
+{
+    auto wrapperNode = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapperNode);
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestPathRender();
 }
 } // namespace OHOS::Ace::NG

@@ -30,10 +30,10 @@ ohos_unittest("clip_board_test") {
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
-    "//third_party/googletest:gmock_main",
   ]
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }

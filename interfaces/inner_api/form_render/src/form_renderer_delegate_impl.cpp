@@ -97,14 +97,14 @@ int32_t FormRendererDelegateImpl::OnFormLinkInfoUpdate(const std::vector<std::st
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateImpl::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+int32_t FormRendererDelegateImpl::OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!getRectRelativeToWindowHandler_) {
         HILOG_ERROR("getRectRelativeToWindowHandler_ is null");
         return ERR_INVALID_DATA;
     }
-    getRectRelativeToWindowHandler_(top, left);
+    getRectRelativeToWindowHandler_(parentRectInfo);
     return ERR_OK;
 }
 
@@ -117,6 +117,7 @@ void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
 
 void FormRendererDelegateImpl::SetActionEventHandler(std::function<void(const std::string&)>&& listener)
 {
+    HILOG_INFO("EventHandle - SetActionEventHandler");
     actionEventHandler_ = std::move(listener);
 }
 
@@ -143,7 +144,8 @@ void FormRendererDelegateImpl::SetFormLinkInfoUpdateHandler(
     formLinkInfoUpdateHandler_ = std::move(listener);
 }
 
-void FormRendererDelegateImpl::SetGetRectRelativeToWindowHandler(std::function<void(int32_t&, int32_t&)>&& listener)
+void FormRendererDelegateImpl::SetGetRectRelativeToWindowHandler(
+    std::function<void(AccessibilityParentRectInfo& parentRectInfo)>&& listener)
 {
     getRectRelativeToWindowHandler_ = std::move(listener);
 }

@@ -69,17 +69,17 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
         style.backgroundColor.has_value() || style.backgroundRadius.has_value());
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
-    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode));
+    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
 }
 
 void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style)
 {
     style.groupId = frameNode->GetId();
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
-        style.backgroundColor.has_value() || style.backgroundRadius.has_value());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+        style.backgroundColor.has_value() || style.backgroundRadius.has_value(), frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
-    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode));
+    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
 }
 
 void ImageSpanView::Create()

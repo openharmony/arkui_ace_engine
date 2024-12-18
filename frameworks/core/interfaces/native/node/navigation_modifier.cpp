@@ -36,6 +36,20 @@ void ResetHideToolBar(ArkUINodeHandle node)
     NavigationModelNG::SetHideToolBar(frameNode, false, false);
 }
 
+void SetEnableModeChangeAnimation(ArkUINodeHandle node, ArkUI_Bool isEnable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableModeChangeAnimation(frameNode, isEnable);
+}
+
+void ResetEnableModeChangeAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableModeChangeAnimation(frameNode, true);
+}
+
 void SetMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -372,6 +386,21 @@ void ResetNavigationRecoverable(ArkUINodeHandle node)
     NavigationModelNG::SetRecoverable(frameNode, false);
 }
 
+void SetEnableDragBar(ArkUINodeHandle node, ArkUI_Bool enableDragBar)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableDragBar(frameNode, enableDragBar);
+}
+
+void ResetEnableDragBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // default value of navigation's enableDragBar is false
+    NavigationModelNG::SetEnableDragBar(frameNode, false);
+}
+
 
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
@@ -379,6 +408,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
     static const ArkUINavigationModifier modifier = {
         SetHideToolBar,
         ResetHideToolBar,
+        SetEnableModeChangeAnimation,
+        ResetEnableModeChangeAnimation,
         SetHideNavBar,
         ResetHideNavBar,
         SetTitleMode,
@@ -411,6 +442,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         SetNavMenuItemSymbol,
         SetNavigationRecoverable,
         ResetNavigationRecoverable,
+        SetEnableDragBar,
+        ResetEnableDragBar,
     };
 
     return &modifier;
@@ -421,6 +454,8 @@ const CJUINavigationModifier* GetCJUINavigationModifier()
     static const CJUINavigationModifier modifier = {
         SetHideToolBar,
         ResetHideToolBar,
+        SetEnableModeChangeAnimation,
+        ResetEnableModeChangeAnimation,
         SetHideNavBar,
         ResetHideNavBar,
         SetTitleMode,

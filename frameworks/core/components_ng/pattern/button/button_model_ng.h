@@ -44,12 +44,15 @@ public:
     void Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) override;
     void CreateWithChild(const CreateWithPara& para) override;
     void Padding(const PaddingProperty& paddingNew, const Edge& paddingOld) override;
-    void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
+    void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override;
     void BackgroundColor(const Color& color, const bool& colorFlag) override;
     void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) override;
     void SetBorderRadius(const Dimension& radius) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
+    void SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
+        const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+        const std::optional<Dimension>& radiusBottomEnd) override;
     void ResetBorderRadius() override;
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
@@ -85,6 +88,7 @@ public:
     static void ApplyTheme(FrameNode* frameNode, ButtonStyleMode buttonStyle, ButtonRole buttonRole);
     static void SetLabelWithCheck(FrameNode* frameNode, const char* label);
     static void SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel);
+    static void GetAutoDisable(FrameNode* frameNode, bool autoDisable);
 
 private:
     static void CreateWithLabel(const std::string& label);

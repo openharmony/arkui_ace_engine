@@ -30,166 +30,17 @@
 #include "frameworks/core/accessibility/accessibility_utils.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
+#include "adapter/ohos/osal/js_accessibility_manager.h"
+#include "js_third_provider_interaction_operation_test.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Accessibility;
 
 namespace OHOS::Ace {
 int32_t g_mockErrorCode = -1;
-
 std::string TEST_CONTENT_STR = "testForFindByText";
-constexpr int32_t MAX_TEST_ELEMENT_COUNT = 10;
-constexpr int32_t TEST_PARAMETER_OFFSET1 = 1;
-constexpr int32_t TEST_PARAMETER_OFFSET2 = 2;
-constexpr int32_t TEST_PARAMETER_OFFSET3 = 3;
-constexpr int32_t SPECIAL_CURSOR_POSTION = 100;
-
-class ProviderMockResult {
-    public:
-        ProviderMockResult()
-        {
-            for (int32_t i = 0; i < MAX_TEST_ELEMENT_COUNT; i++) {
-                ArkUI_AccessibilityElementInfo tempElementInfo;
-                tempElementInfo.SetElementId(i);
-                tempElementInfo.SetContents(TEST_CONTENT_STR);
-                elementInfosList_.push_back(tempElementInfo);
-            }
-
-            focusElementInfo_.SetElementId(
-                MAX_TEST_ELEMENT_COUNT + TEST_PARAMETER_OFFSET1);
-            nextFocusElementInfo_.SetElementId(
-                MAX_TEST_ELEMENT_COUNT + TEST_PARAMETER_OFFSET2);
-
-            originActionArguments_.emplace("action0", "1");
-            originActionArguments_.emplace("action1", "2");
-            cursorPosition_ = MAX_TEST_ELEMENT_COUNT + TEST_PARAMETER_OFFSET3;
-        }
-        ~ProviderMockResult() = default;
-
-        void Reset()
-        {
-            elementId_ = 0;
-            mode_ = static_cast<int32_t>(ARKUI_ACCESSIBILITY_NATIVE_SEARCH_MODE_PREFETCH_CURRENT);
-            requestId_ = 0;
-            focusType_ = ARKUI_ACCESSIBILITY_NATIVE_FOCUS_TYPE_INVALID;
-            direction_ = ARKUI_ACCESSIBILITY_NATIVE_DIRECTION_INVALID;
-            action_ = ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_INVALID;
-            receiveClear_ = false;
-            errorCode_ = 0;
-            injectResult_ = 0;
-            injectActionResult_ = 0;
-        }
-
-    public:
-        int64_t elementId_;
-        int32_t mode_;
-        int32_t requestId_;
-        std::vector<ArkUI_AccessibilityElementInfo> elementInfosList_;
-        ArkUI_AccessibilityFocusType focusType_;
-        ArkUI_AccessibilityElementInfo focusElementInfo_;
-        ArkUI_AccessibilityElementInfo nextFocusElementInfo_;
-        ArkUI_AccessibilityFocusMoveDirection direction_;
-        ArkUI_Accessibility_ActionType action_;
-        std::map<std::string, std::string> originActionArguments_;
-        std::map<std::string, std::string> resultActionArguments_;
-        int32_t cursorPosition_;
-        bool receiveClear_;
-
-        bool registerResult_;
-
-        int32_t errorCode_;
-        int32_t injectResult_ = 0;
-        int32_t injectActionResult_ = 0;
-        ArkUI_AccessibilityElementInfo elementInfo_;
-};
-
-class MockOhAccessibilityProvider : public AccessibilityProvider {
-    DECLARE_ACE_TYPE(MockOhAccessibilityProvider, AccessibilityProvider);
-public:
-    MockOhAccessibilityProvider() = default;
-    int32_t FindAccessibilityNodeInfosById(
-        const int64_t elementId, const int32_t mode, const int32_t requestId,
-        std::vector<ArkUI_AccessibilityElementInfo>& infos) override
-    {
-        providerMockResult_.elementId_ = elementId;
-        providerMockResult_.mode_ = mode;
-        providerMockResult_.requestId_ = requestId;
-
-        infos = providerMockResult_.elementInfosList_;
-        return providerMockResult_.injectResult_;
-    }
-    int32_t FindAccessibilityNodeInfosByText(
-        const int64_t elementId, std::string text, const int32_t requestId,
-        std::vector<ArkUI_AccessibilityElementInfo>& infos) override
-    {
-        providerMockResult_.elementId_ = elementId;
-        providerMockResult_.requestId_ = requestId;
-
-        std::string textStr(text);
-        for (const auto &elementInfo: providerMockResult_.elementInfosList_) {
-            if (elementInfo.GetContents() == textStr) {
-                infos.push_back(elementInfo);
-            }
-        }
-
-        return providerMockResult_.injectResult_;
-    }
-    int32_t FindFocusedAccessibilityNode(
-        const int64_t elementId, int32_t focusType, const int32_t requestId,
-        ArkUI_AccessibilityElementInfo& elementInfo) override
-    {
-        elementInfo = providerMockResult_.focusElementInfo_;
-        return providerMockResult_.injectResult_;
-    }
-    int32_t FindNextFocusAccessibilityNode(
-        const int64_t elementId, int32_t direction, const int32_t requestId,
-        ArkUI_AccessibilityElementInfo& elementInfo) override
-    {
-        elementInfo = providerMockResult_.nextFocusElementInfo_;
-        return providerMockResult_.injectResult_;
-    }
-    int32_t ExecuteAccessibilityAction(
-        const int64_t elementId, int32_t action, const int32_t requestId,
-        const std::map<std::string, std::string>& actionArguments) override
-    {
-        return providerMockResult_.injectActionResult_;
-    }
-    int32_t ClearFocusedAccessibilityNode() override
-    {
-        providerMockResult_.receiveClear_ = true;
-        return providerMockResult_.injectResult_;
-    }
-    int32_t GetAccessibilityNodeCursorPosition(
-        const int64_t elementId,
-        const int32_t requestId,
-        int32_t &cursorPosition) override
-    {
-        cursorPosition = SPECIAL_CURSOR_POSTION;
-        return providerMockResult_.injectResult_;
-    }
-    int32_t SendAccessibilityAsyncEvent(
-        const ArkUI_AccessibilityEventInfo& accessibilityEvent,
-        void (*callback)(int32_t errorCode)) override
-    {
-        return providerMockResult_.injectResult_;
-    }
-    void SendThirdAccessibilityProvider(
-        const std::weak_ptr<ThirdAccessibilityManager>& thirdAccessibilityManager)
-        override {}
-
-public:
-    void SetInjectResult(int32_t injectResult)
-    {
-        providerMockResult_.injectResult_ = injectResult;
-    }
-
-    void SetInjectActionResult(int32_t injectResult)
-    {
-        providerMockResult_.injectActionResult_ = injectResult;
-    }
-
-    ProviderMockResult providerMockResult_;
-};
 
 class MockAccessibilityElementOperatorCallback : public Accessibility::AccessibilityElementOperatorCallback {
 public:
@@ -310,7 +161,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
 
     int64_t elementId = -1;
     int32_t requestId = 2;
-    int32_t mode = 0;
+    int32_t mode = 8; // search tree
     MockAccessibilityElementOperatorCallback operatorCallback;
 
     // 1 provider abnormal, callback should receive same request id and empty infos
@@ -601,7 +452,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
         ohAccessibilityProvider, jsAccessibilityManager, frameNode);
 
-    int32_t treeId = 3;
+    int32_t treeId = 0;
     jsInteractionOperation->SetBelongTreeId(treeId);
     int32_t pageId = 4;
     frameNode->SetHostPageId(pageId);
@@ -612,7 +463,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
 
     int64_t elementId = -1;
     int32_t requestId = 2;
-    int32_t mode = 0;
+    int32_t mode = 8; // search tree
 
     MockAccessibilityElementOperatorCallback operatorCallback;
 
@@ -723,4 +574,62 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     EXPECT_EQ(g_mockErrorCode, 0);
 }
 
+/**
+ * @tc.name: FrameNodeAccessibilityVisible01
+ * @tc.desc: Test the function accessibilityVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, FrameNodeAccessibilityVisible01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = false;
+    auto pattern = frameNode->GetPattern<PagePattern>();
+    pattern->isOnShow_ = true;
+    auto pipeline = frameNode->GetContext();
+    auto overlayManager = pipeline->GetOverlayManager();
+
+    /**
+     * @tc.steps: step2. Bind keyboard.
+     */
+    auto keyboardThd = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    overlayManager->BindKeyboardWithNode(keyboardThd, frameNode->GetId());
+    overlayManager->UpdateCustomKeyboardPosition();
+    overlayManager->AvoidCustomKeyboard(1, 1.0);
+
+    /**
+     * @tc.steps: step3. create childNode.
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+    "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto nodeGeometry = frameNode->GetGeometryNode();
+    NG::RectF testRect = { 10.0f, nodeGeometry->GetFrameRect().Height() - 10.0f, 10.0f, 10.0f };
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    childNode->SetLayoutProperty(layoutProperty);
+    frameNode->AddChild(childNode);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    RefPtr<NG::PipelineContext> ngPipeline;
+    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    std::list<AccessibilityElementInfo> extensionElementInfos;
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
+        childNode->GetAccessibilityId(), 1, extensionElementInfos, ngPipeline, 1);
+    for (auto& extensionElementInfo : extensionElementInfos) {
+        if (childNode->GetAccessibilityId() == extensionElementInfo.GetAccessibilityId()) {
+            EXPECT_FALSE(childNode->GetAccessibilityVisible());
+        }
+    }
+
+    /**
+     * @tc.steps: step4. close Keyboard.
+     */
+    overlayManager->CloseKeyboard(frameNode->GetId());
+}
 } // namespace OHOS::Ace::NG

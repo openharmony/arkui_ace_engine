@@ -275,7 +275,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // notify owning ViewPU and peers of a variable assignment
   // also property/item changes to  ObservedObjects of class object type, which use compat mode
   // Date and Array are notified as if there had been an assignment.
-  protected notifyPropertyHasChangedPU() {
+  protected notifyPropertyHasChangedPU() : void {
     stateMgmtProfiler.begin('ObservedPropertyAbstractPU.notifyPropertyHasChangedPU');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
     if (this.owningView_) {
@@ -357,16 +357,14 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
-    let res = ((typeof value === 'object' && typeof value !== 'function' 
-               && !ObserveV2.IsObservedObjectV2(value) 
-               && !ObserveV2.IsMakeObserved(value))
-               // FIXME enable the check when V1-V2 interoperability is forbidden
-               // && !ObserveV2.IsProxiedObservedV2(value)) 
-      || typeof value === 'number' 
-      || typeof value === 'string' 
-      || typeof value === 'boolean' 
-      || value === undefined 
-      || value === null);
+    let res = ((typeof value === 'object' && typeof value !== 'function' &&
+      !ObserveV2.IsObservedObjectV2(value) &&
+      !ObserveV2.IsMakeObserved(value)) ||
+      typeof value === 'number' ||
+      typeof value === 'string' ||
+      typeof value === 'boolean' ||
+      value === undefined ||
+      value === null);
 
     if (!res) {
       errorReport.varValueCheckFailed({

@@ -189,9 +189,9 @@ public:
         return surfaceSize_;
     }
 
-    const OffsetF& GetLocalPosition() const
+    const OffsetF& GetSurfaceOffset() const
     {
-        return localPosition_;
+        return surfaceOffset_;
     }
 
     OffsetF GetOffsetRelativeToWindow();
@@ -324,6 +324,7 @@ public:
     }
     void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
     void EnableSecure(bool isSecure);
+    void HdrBrightness(float hdrBrightness);
 
 private:
     void OnAttachToFrameNode() override;
@@ -341,6 +342,7 @@ private:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void NativeXComponentOffset(double x, double y);
 
@@ -428,6 +430,7 @@ private:
     SizeF initSize_;
     OffsetF localPosition_;
     OffsetF globalPosition_;
+    OffsetF surfaceOffset_;
     SizeF drawSize_;
     SizeF surfaceSize_;
     RectF paintRect_;
@@ -458,6 +461,8 @@ private:
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
+    bool isEnableSecure_ = false;
+    float hdrBrightness_ = 1.0f;
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
 };

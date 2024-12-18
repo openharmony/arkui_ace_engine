@@ -198,4 +198,45 @@ HWTEST_F(WaterFlowTestNg, Clip005, TestSize.Level1)
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
     FlushLayoutTask(frameNode_);
 }
+
+/**
+ * @tc.name: WaterFlowPaintMethod001
+ * @tc.desc: Test UpdateOverlayModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowPaintMethod001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetScrollBarMode(DisplayMode::AUTO);
+    CreateWaterFlowItems();
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. not set positionMode.
+     * @tc.expected: the positionMode_ of scrollBarOverlayModifier_ is default value.
+     */
+    auto scrollBar = pattern_->GetScrollBar();
+    scrollBar->SetScrollable(true);
+
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
+        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
+    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::RIGHT);
+
+    /**
+     * @tc.steps: step3. scrollBar setting positionMode set to bottom.
+     * @tc.expected: the positionMode_ of scrollBarOverlayModifier_ is bottom.
+     */
+    pattern_->SetEdgeEffect(EdgeEffect::FADE);
+    scrollBar->SetPositionMode(PositionMode::BOTTOM);
+
+    paintMethod = pattern_->CreateNodePaintMethod();
+    paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
+        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
+    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::BOTTOM);
+}
 } // namespace OHOS::Ace::NG

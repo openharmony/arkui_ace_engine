@@ -103,6 +103,11 @@ public:
     {
         return "";
     }
+
+    virtual bool IsEnableContainerModal()
+    {
+        return false;
+    }
 private:
     WeakPtr<AceType> bindManager_;
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayHolder);

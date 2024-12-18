@@ -88,6 +88,16 @@ public:
         return isShowInDialog_;
     }
 
+    void SetIsShowInDatePickerDialog(bool isShowInDatePickerDialog)
+    {
+        isShowInDatePickerDialog_ = isShowInDatePickerDialog;
+    }
+
+    bool GetIsShowInDatePickerDialog() const
+    {
+        return isShowInDatePickerDialog_;
+    }
+
     void SetShowLunarSwitch(bool value)
     {
         showLunarSwitch_ = value;
@@ -105,6 +115,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
     void OnFontConfigurationUpdate() override;
+    void OnFontScaleConfigurationUpdate() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -558,6 +569,28 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetCurrentFocusKeyID(int32_t value)
+    {
+        focusKeyID_ = value;
+    }
+
+    int32_t GetCurrentFocusKeyID()
+    {
+        return focusKeyID_;
+    }
+
+    void SetCurrentPage(uint32_t value)
+    {
+        currentPage_ = value;
+    }
+
+    uint32_t GetCurrentPage()
+    {
+        return currentPage_;
+    }
+
+    bool NeedAdaptForAging();
+
     void SetUserDefinedOpacity(double opacity)
     {
         curOpacity_ = opacity;
@@ -599,6 +632,7 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
+    uint32_t currentPage_ = 0;
     std::unordered_map<std::string, WeakPtr<FrameNode>> allChildNode_;
     std::map<WeakPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> options_;
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
@@ -655,6 +689,7 @@ private:
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
+    bool isShowInDatePickerDialog_ = false;
 };
 } // namespace OHOS::Ace::NG
 

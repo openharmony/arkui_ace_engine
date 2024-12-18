@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextModelNG : public TextModel {
 public:
+    void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;
     void Create(const RefPtr<SpanStringBase>& spanString) override;
     void SetFont(const Font& value) override;
@@ -65,11 +66,11 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
-    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
@@ -87,8 +88,8 @@ public:
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
-    static void InitText(FrameNode* frameNode, std::string& value);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
+    static void InitText(FrameNode* frameNode, std::u16string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
@@ -129,6 +130,7 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
+    static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
@@ -137,7 +139,7 @@ public:
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Font GetFont(FrameNode* frameNode);
-    static std::string GetContent(FrameNode* frameNode);
+    static std::u16string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
     static float GetLineSpacing(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
@@ -163,19 +165,22 @@ public:
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
+    static Color GetCaretColor(FrameNode* frameNode);
+    static void ResetCaretColor(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
-    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 };
 } // namespace OHOS::Ace::NG
 

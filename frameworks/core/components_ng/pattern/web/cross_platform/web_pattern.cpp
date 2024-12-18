@@ -747,7 +747,7 @@ void WebPattern::RegistVirtualKeyBoardListener()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetVirtualKeyBoardCallback(
-        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
+        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) {
             auto webPattern = weak.Upgrade();
             CHECK_NULL_RETURN(webPattern, false);
             return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
@@ -1216,6 +1216,11 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
    // cross platform is not support now;
 }
 
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
+{
+   // cross platform is not support now;
+}
+
 void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
 {
     // cross platform is not support now;
@@ -1325,6 +1330,45 @@ void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
 }
 
 void WebPattern::StartVibraFeedback(const std::string& vibratorType)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    // cross platform is not support now;
+}
+
+std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMenuParams(
+    const WebElementType& type, const ResponseType& responseType)
+{
+    // cross platform is not support now;
+    return nullptr;
+}
+
+bool WebPattern::IsPreviewMenuNotNeedShowPreview()
+{
+    // cross platform is not support now;
+    return false;
+}
+
+bool WebPattern::NotifyStartDragTask(bool isDelayed)
+{
+    // cross platform is not support now;
+    return false;
+}
+
+void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::RemovePreviewMenuNode()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::UpdateImagePreviewParam()
 {
     // cross platform is not support now;
 }

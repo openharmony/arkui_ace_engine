@@ -359,6 +359,22 @@ void EventReport::SendEventInner(const EventInfo& eventInfo)
             EVENT_KEY_PACKAGE_NAME, packageName);
 }
 
+void EventReport::ReportDragInfo(const DragInfo& dragInfo)
+{
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::DRAG_UE,
+        dragInfo.dragBehavior,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "PNAMEID", dragInfo.pNameId,
+        "PVERSIONID", dragInfo.pVersionId,
+        "ISCROSSING", dragInfo.isCrossing,
+        "RESULT", dragInfo.result,
+        "HOSTNAME", dragInfo.hostName,
+        "SUMMARYTYPE", dragInfo.summaryType,
+        "SUMMARYNUM", dragInfo.summaryNum,
+        "ALLOW_DROP_TYPE", dragInfo.allowDropType);
+}
+
 void EventReport::ReportEventComplete(DataBase& data)
 {
     std::string eventName = "INTERACTION_COMPLETED_LATENCY";

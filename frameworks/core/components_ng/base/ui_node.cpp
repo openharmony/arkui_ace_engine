@@ -71,6 +71,9 @@ UINode::~UINode()
     if (!onMainTree_) {
         return;
     }
+    if (context_) {
+        context_->RemoveAttachedNode(this);
+    }
     onMainTree_ = false;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
@@ -81,6 +84,7 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     CHECK_NULL_VOID(context);
     context_ = context;
+    context_->RegisterAttachedNode(this);
     instanceId_ = context->GetInstanceId();
     if (updateJSInstanceCallback_) {
         updateJSInstanceCallback_(instanceId_);
@@ -94,6 +98,13 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    auto container = Container::Current();
+    if (container && !container->IsFormRender() && PipelineContext::IsPipelineDestroyed(instanceId_)) {
+        LOGE("pipeline is destruct,not allow detach");
+        return;
+    }
+#endif
     CHECK_NULL_VOID(context_);
     context_->DetachNode(Claim(this));
     context_ = nullptr;
@@ -388,7 +399,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    depth_ = -1;
+    SetDepth(1);
 }
 
 namespace {
@@ -550,6 +561,19 @@ RefPtr<FrameNode> UINode::GetParentFrameNode() const
     return nullptr;
 }
 
+RefPtr<CustomNode> UINode::GetParentCustomNode() const
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto customNode = AceType::DynamicCast<CustomNode>(parent);
+        if (customNode) {
+            return customNode;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> UINode::GetFocusParent() const
 {
     auto parentUi = GetParent();
@@ -626,24 +650,6 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
     }
 }
 
-void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
-{
-    for (const auto& uiChild : GetChildren(true)) {
-        if (uiChild && !uiChild->IsOnMainTree()) {
-            continue;
-        }
-        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
-        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
-            const auto focusHub = frameChild->GetFocusHub();
-            if (focusHub) {
-                focusNodes.emplace_back(focusHub);
-            }
-        } else {
-            uiChild->GetChildrenFocusHub(focusNodes);
-        }
-    }
-}
-
 void UINode::GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     for (const auto& uiChild : children_) {
@@ -677,8 +683,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
-    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
-    if (isOpenInvisibleFreeze) {
+    if (context && context->IsOpenInvisibleFreeze()) {
         auto parent = GetParent();
         // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
@@ -726,24 +731,24 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
-void UINode::SetFreeze(bool isFreeze)
+void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
-    if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
+    auto isNeedUpdateFreezeVaule = context->IsOpenInvisibleFreeze() || isForceUpdateFreezeVaule;
+    if (isNeedUpdateFreezeVaule && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
         OnFreezeStateChange();
-        UpdateChildrenFreezeState(isFreeze_);
+        UpdateChildrenFreezeState(isFreeze_, isForceUpdateFreezeVaule);
     }
 }
 
-void UINode::UpdateChildrenFreezeState(bool isFreeze)
+void UINode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     const auto& children = GetChildren(true);
     for (const auto& child : children) {
         if (child) {
-            child->SetFreeze(isFreeze);
+            child->SetFreeze(isFreeze, isForceUpdateFreezeVaule);
         }
     }
 }
@@ -1119,6 +1124,11 @@ PipelineContext* UINode::GetContext() const
     return context;
 }
 
+PipelineContext* UINode::GetAttachedContext() const
+{
+    return context_;
+}
+
 PipelineContext* UINode::GetContextWithCheck()
 {
     if (context_) {
@@ -1171,13 +1181,14 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
     return hitTestResult;
 }
 
-HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -1187,6 +1198,7 @@ HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLo
     }
     return hitTestResult;
 }
+
 
 int32_t UINode::FrameCount() const
 {
@@ -1412,6 +1424,9 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index, i
         // mark child as disappearing before adding to disappearingChildren_
         child->isDisappearing_ = true;
     }
+    if (DetectLoop(child, Claim(this))) {
+        return;
+    }
     disappearingChildren_.emplace_back(child, index, branchId);
 }
 
@@ -1566,11 +1581,11 @@ void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd);
+        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
         start -= static_cast<int32_t>(count);
         end -= static_cast<int32_t>(count);
     }
@@ -1743,7 +1758,7 @@ void UINode::NotifyWebPattern(bool isRegister)
     }
 }
 
-void UINode::GetContainerComponentText(std::string& text)
+void UINode::GetContainerComponentText(std::u16string& text)
 {
     for (const auto& child : GetChildren()) {
         if (InstanceOf<FrameNode>(child) && child->GetTag() == V2::TEXT_ETS_TAG) {
@@ -1752,7 +1767,7 @@ void UINode::GetContainerComponentText(std::string& text)
             CHECK_NULL_VOID(pattern);
             auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            text = layoutProperty->GetContent().value_or("");
+            text = layoutProperty->GetContent().value_or(u"");
             break;
         }
         child->GetContainerComponentText(text);

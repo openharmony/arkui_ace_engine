@@ -98,6 +98,13 @@ public:
         sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
+    void OnExtensionDetachToDisplay() override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionDetachToDisplay();
+    }
+
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
@@ -127,13 +134,17 @@ SecuritySessionWrapperImpl::~SecuritySessionWrapperImpl() {}
 void SecuritySessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     int32_t callSessionId = GetSessionId();
+    if (!taskExecutor_) {
+        LOGE("Get taskExecutor_ is nullptr, the sessionid = %{public}d", callSessionId);
+        return;
+    }
+    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     foregroundCallback_ =
         [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
         if (errcode != OHOS::Rosen::WSError::WS_OK) {
             taskExecutor->PostTask(
-                [weak, errcode, callSessionId] {
+                [weak, callSessionId] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     if (callSessionId != pattern->GetSessionId()) {
@@ -152,7 +163,7 @@ void SecuritySessionWrapperImpl::InitAllCallback()
         taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
             if (errcode != OHOS::Rosen::WSError::WS_OK) {
                 taskExecutor->PostTask(
-                    [weak, errcode, callSessionId] {
+                    [weak, callSessionId] {
                         auto pattern = weak.Upgrade();
                         CHECK_NULL_VOID(pattern);
                         if (callSessionId != pattern->GetSessionId()) {
@@ -171,7 +182,7 @@ void SecuritySessionWrapperImpl::InitAllCallback()
         taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
             if (errcode != OHOS::Rosen::WSError::WS_OK) {
                 taskExecutor->PostTask(
-                    [weak, errcode, callSessionId] {
+                    [weak, callSessionId] {
                         auto pattern = weak.Upgrade();
                         CHECK_NULL_VOID(pattern);
                         if (callSessionId != pattern->GetSessionId()) {
@@ -187,9 +198,9 @@ void SecuritySessionWrapperImpl::InitAllCallback()
             }
         };
     sessionCallbacks->transferAbilityResultFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_,
-        sessionType = sessionType_, callSessionId](int32_t code, const AAFwk::Want& want) {
+        callSessionId](int32_t code, const AAFwk::Want& want) {
             taskExecutor->PostTask(
-                [weak, code, want, sessionType, callSessionId]() {
+                [weak, code, want, callSessionId]() {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     if (callSessionId != pattern->GetSessionId()) {
@@ -296,7 +307,8 @@ void SecuritySessionWrapperImpl::InitAllCallback()
 /*********************** Begin: About session ************************************/
 void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
-    PLATFORM_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
+    PLATFORM_LOGI("The session is created with bundle = %{public}s, ability = %{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto wantPtr = std::make_shared<Want>(want);
@@ -457,6 +469,7 @@ void SecuritySessionWrapperImpl::NotifyCreate() {}
 
 void SecuritySessionWrapperImpl::NotifyForeground()
 {
+    ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -465,7 +478,7 @@ void SecuritySessionWrapperImpl::NotifyForeground()
         session_, hostWindowId, std::move(foregroundCallback_));
 }
 
-void SecuritySessionWrapperImpl::NotifyBackground()
+void SecuritySessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
@@ -512,7 +525,7 @@ void SecuritySessionWrapperImpl::OnDisconnect(bool isAbnormal)
 {
     int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, sessionType = sessionType_, isAbnormal, callSessionId]() {
+        [weak = hostPattern_, isAbnormal, callSessionId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (callSessionId != pattern->GetSessionId()) {
@@ -530,6 +543,26 @@ void SecuritySessionWrapperImpl::OnDisconnect(bool isAbnormal)
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionDisconnect");
+}
+
+void SecuritySessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+    PLATFORM_LOGI("OnExtensionDetachToDisplay");
+    int32_t callSessionId = GetSessionId();
+    taskExecutor_->PostTask(
+        [weak = hostPattern_, callSessionId]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                LOGW("[AceSecurityUiExtension]OnExtensionDetachToDisplay:: The "
+                    "callSessionId(%{public}d) is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+
+            pattern->OnExtensionDetachToDisplay();
+        },
+        TaskExecutor::TaskType::UI, "ArkUISecurityUIExtensionOnExtensionDetachToDisplay");
 }
 
 void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
@@ -568,15 +601,21 @@ void SecuritySessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX,
 void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeRegister(
     uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
 void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeDeregister()
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeUnregister();
 }
 
 void SecuritySessionWrapperImpl::TransferAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityDumpChildInfo(params, info);
 }
 /************************ End: The interface about the accessibility **************************/
 

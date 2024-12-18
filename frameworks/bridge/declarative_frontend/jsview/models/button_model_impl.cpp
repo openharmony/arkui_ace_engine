@@ -175,7 +175,8 @@ void ButtonModelImpl::Padding(const NG::PaddingProperty& paddingNew, const Edge&
     }
 }
 
-void ButtonModelImpl::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
+void ButtonModelImpl::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+    double distanceThreshold)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     CHECK_NULL_VOID(inspector);
@@ -292,7 +293,8 @@ void ButtonModelImpl::SetSize(const std::optional<Dimension>& width, const std::
 {
     if (width.has_value()) {
         SetWidth(width.value());
-    } else {
+    }
+    if (height.has_value()) {
         SetHeight(height.value());
     }
 }

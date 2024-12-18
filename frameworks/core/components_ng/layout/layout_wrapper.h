@@ -145,6 +145,9 @@ public:
 
     virtual RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
         uint32_t index, bool addToRenderTree = true, bool isCache = false) = 0;
+    /**
+     * @param isCache if false, child is added to render tree and AttachToMainTree is called.
+     */
     virtual RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) = 0;
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
@@ -263,8 +266,8 @@ protected:
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
     float GetPageCurrentOffset();
-    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand);
-    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand);
+    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace);
+    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false);
     void ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafeAreaPadding,
         const PaddingPropertyF& parentInnerSpace, const RectF& adjustingRect, ExpandEdges& rollingExpand);
 

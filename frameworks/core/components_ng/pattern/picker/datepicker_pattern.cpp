@@ -88,11 +88,13 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto height = pickerTheme->GetDividerSpacing();
     for (const auto& child : children) {
         auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
+        CHECK_NULL_RETURN(columnNode, false);
         auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
         auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
         CHECK_NULL_RETURN(datePickerColumnNode, false);
         auto columnNodeHeight = datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
+        CHECK_NULL_RETURN(buttonNode, false);
         auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
@@ -166,6 +168,8 @@ void DatePickerPattern::InitDisabled()
     CHECK_NULL_VOID(renderContext);
     if (!enabled_) {
         renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    } else {
+        renderContext->UpdateOpacity(curOpacity_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -195,6 +199,18 @@ void DatePickerPattern::UpdateCancelButtonMargin(
             ModuleDialogType::DATEPICKER_DIALOG);
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
+void DatePickerPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
+void DatePickerPattern::OnFontScaleConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
 }
 
 void DatePickerPattern::OnLanguageConfigurationUpdate()

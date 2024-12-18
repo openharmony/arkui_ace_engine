@@ -83,6 +83,8 @@ public:
     MOCK_METHOD(void, SavePixelMapToFile, (const std::string& dst), (const, override));
     MOCK_METHOD(RefPtr<PixelMap>, GetCropPixelMap, (const Rect& srcRect), (override));
     MOCK_METHOD(bool, EncodeTlv, (std::vector<uint8_t> & buff), (override));
+    MOCK_METHOD(AllocatorType, GetAllocatorType, (), (const override));
+    MOCK_METHOD(bool, IsHdr, (), (const override));
 };
 
 class WebDelegateDummy : public WebDelegate {

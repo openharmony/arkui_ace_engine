@@ -70,7 +70,8 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         }
         bool clickJudge = event->ClickJudge(localPoint);
         if (event->GetEnabled() || clickJudge) {
-            InitClickRecognizer(coordinateOffset, getEventTargetImpl, frameNode, targetComponent, event, clickJudge);
+            InitClickRecognizer(coordinateOffset, getEventTargetImpl, frameNode, targetComponent, event, clickJudge,
+                localPoint, touchRestrict.sourceType);
             result.emplace_front(clickRecognizer_);
             responseLinkResult.emplace_back(clickRecognizer_);
         }
@@ -81,12 +82,13 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
 void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, const RefPtr<FrameNode>& frameNode,
     const RefPtr<TargetComponent>& targetComponent,
-    const RefPtr<ScrollableEvent>& event, bool clickJudge)
+    const RefPtr<ScrollableEvent>& event, bool clickJudge,
+    const PointF& localPoint, SourceType source)
 {
     if (!clickRecognizer_) {
         clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
     }
-    bool isHitTestBlock = event->IsHitTestBlock();
+    bool isHitTestBlock = event->IsHitTestBlock(localPoint, source);
     clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     clickRecognizer_->SetNodeId(frameNode->GetId());

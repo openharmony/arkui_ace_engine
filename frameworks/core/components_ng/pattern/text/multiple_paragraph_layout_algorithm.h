@@ -54,9 +54,9 @@ public:
 protected:
     void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
     virtual ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
+        const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
-        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
+        const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
     virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
     virtual RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
     {
@@ -72,6 +72,8 @@ protected:
     bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
         const TextStyle& textStyle);
     OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
+    virtual void SetAdaptFontSizeStepToTextStyle(
+        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep);
     std::string SpansToString()
     {
         std::stringstream ss;
@@ -79,7 +81,7 @@ protected:
             ss << "[";
             for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
                 ss << "[" << item->interval.first << "," << item->interval.second << ":"
-                   << StringUtils::RestoreEscape(item->content) << "], ";
+                   << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << "], ";
             });
             ss << "], ";
         }
@@ -98,12 +100,12 @@ protected:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
     std::optional<TextStyle> textStyle_;
-    float indent_ = 0.0f;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;
     bool isSpanStringMode_ = false;
     bool isMarquee_ = false;
+    bool needReCreateParagraph_ = true;
 
 private:
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) = 0;
@@ -111,8 +113,8 @@ private:
     {
         return 0.0f;
     }
-    static TextDirection GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper);
-    static TextDirection GetTextDirectionByContent(const std::string& content);
+    static TextDirection GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper);
+    static TextDirection GetTextDirectionByContent(const std::u16string& content);
 
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);

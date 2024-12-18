@@ -113,6 +113,9 @@ HWTEST_F(TextInputMenuTestNg, SelectTextShowMenu003, TestSize.Level1)
         model.SetSelectionMenuHidden(false);
     });
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set start = end and menuPolicy as MenuPolicy::SHOW
@@ -344,6 +347,9 @@ HWTEST_F(TextInputMenuTestNg, SelectTextShowMenu009, TestSize.Level1)
         model.SetInputStyle(InputStyle::INLINE);
     });
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set start = end and menuPolicy as MenuPolicy::SHOW
@@ -555,6 +561,9 @@ HWTEST_F(TextInputMenuTestNg, SetTextSelection003, TestSize.Level1)
         model.SetSelectionMenuHidden(false);
     });
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call SetTextSelection with no menu
@@ -583,6 +592,9 @@ HWTEST_F(TextInputMenuTestNg, SetTextSelection004, TestSize.Level1)
         model.SetSelectionMenuHidden(false);
     });
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call HandleOnShowMenu
@@ -617,6 +629,9 @@ HWTEST_F(TextInputMenuTestNg, SetTextSelection005, TestSize.Level1)
         model.SetSelectionMenuHidden(false);
     });
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call HandleOnShowMenu
@@ -651,6 +666,9 @@ HWTEST_F(TextInputMenuTestNg, SetTextSelection006, TestSize.Level1)
         model.SetSelectionMenuHidden(false);
     });
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call HandleOnShowMenu

@@ -327,6 +327,7 @@ public:
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
+    void CheckContentNeedMeasure(const RefPtr<FrameNode>& node);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
@@ -434,7 +435,9 @@ public:
     }
 
     RefPtr<FrameNode> GetDragBarNode() const;
+    void BuildDragBar();
     void InitDragBarEvent();
+    void ClearDragBarEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
@@ -449,7 +452,16 @@ public:
     {
         return enableDragBar_;
     }
-    
+
+    void SetNavigationSize(const SizeF& size)
+    {
+        navigationSize_ = size;
+    }
+    const SizeF& GetNavigationSize() const
+    {
+        return navigationSize_;
+    }
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -505,6 +517,7 @@ private:
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void NotifyPageShow(const std::string& pageName);
+    void ProcessPageShowEvent();
     int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
@@ -536,6 +549,15 @@ private:
         NavigationTransition navigationTransition);
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
     void GetOrCreateNavDestinationUINode();
+    void CloseLongPressDialog();
+
+    void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    RefPtr<FrameNode> CreateDragBarItemNode();
+    void SetMouseStyle(MouseFormat format);
+
+    void RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
+    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -590,6 +612,7 @@ private:
     bool isCurTopNewInstance_ = false;
     RefPtr<TouchEventImpl> touchEvent_;
     bool enableDragBar_ = false;
+    SizeF navigationSize_;
 };
 
 } // namespace OHOS::Ace::NG

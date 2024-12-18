@@ -41,6 +41,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_MIN_SIZE = 2;
+constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 } // namespace
 
 void TabsPattern::OnAttachToFrameNode()
@@ -84,6 +85,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             pattern->RecordChangeEvent(currentIndex);
             auto context = tabsNode->GetContext();
             CHECK_NULL_VOID(context);
+            TAG_LOGI(
+                AceLogTag::ACE_TABS, "onChange preIndex:%{public}d, currentIndex:%{public}d", preIndex, currentIndex);
             context->AddAfterLayoutTask(
                 [currentIndex, jsEvent]() {
                     TabContentChangeEvent eventInfo(currentIndex);
@@ -142,6 +145,7 @@ void TabsPattern::RecordChangeEvent(int32_t index)
             .SetType(tabsNode->GetTag())
             .SetIndex(index)
             .SetText(tabBarText)
+            .SetHost(tabsNode)
             .SetDescription(tabsNode->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
         if (!inspectorId.empty()) {
@@ -379,7 +383,19 @@ void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFu
     auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
     CHECK_NULL_VOID(targetComponent);
     targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
-    targetComponent->SetInnerNodeGestureRecognizerJudge();
+    targetComponent->SetInnerNodeGestureRecognizerJudge(true);
+}
+
+void TabsPattern::RecoverInnerOnGestureRecognizerJudgeBegin()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
+    CHECK_NULL_VOID(targetComponent);
+    targetComponent->SetOnGestureRecognizerJudgeBegin(nullptr);
+    targetComponent->SetInnerNodeGestureRecognizerJudge(false);
 }
 
 ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
@@ -424,19 +440,25 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, nullptr);
     tabBarPattern->SetFirstFocus(true);
-
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabsLayoutProperty, nullptr);
+    auto isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG &&
         ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::RIGHT) ||
+        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT)) ||
         (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::LEFT))) {
+        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)))) {
         return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_ETS_TAG) {
         if ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::LEFT) ||
+            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)) ||
             (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
             return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
         }
         if (step == FocusStep::LEFT_END || step == FocusStep::RIGHT_END || step == FocusStep::UP_END ||
@@ -451,15 +473,13 @@ void TabsPattern::BeforeCreateLayoutWrapper()
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto tabContentNum = swiperNode->TotalChildCount();
     auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
-    auto index = tabsLayoutProperty->GetIndex().value_or(0);
-    if (index > tabContentNum - 1) {
-        index = 0;
-    }
+    UpdateIndex(tabsNode, tabBarNode, swiperNode, tabsLayoutProperty);
 
     if (isInit_) {
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -477,19 +497,54 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         isInit_ = false;
     }
 
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
     auto childrenUpdated = swiperNode->GetChildrenUpdated() != -1;
     if (childrenUpdated) {
         HandleChildrenUpdated(swiperNode, tabBarNode);
-    }
 
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    if (!childrenUpdated && !tabBarPattern->IsMaskAnimationByCreate()) {
+        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+        CHECK_NULL_VOID(tabBarPattern);
+        auto index = tabsLayoutProperty->GetIndexValue(0);
+        auto tabContentNum = swiperNode->TotalChildCount();
+        if (index >= tabContentNum) {
+            index = 0;
+        }
+        UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, index);
+    }
+}
+
+void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
+    const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty)
+{
+    if (!tabsLayoutProperty->GetIndexSetByUser().has_value()) {
         return;
     }
-    UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, index);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto indexSetByUser = tabsLayoutProperty->GetIndexSetByUser().value();
+    tabsLayoutProperty->ResetIndexSetByUser();
+    auto tabContentNum = swiperNode->TotalChildCount();
+    if (indexSetByUser >= tabContentNum) {
+        indexSetByUser = 0;
+    }
+    if (!tabsLayoutProperty->GetIndex().has_value()) {
+        UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
+    } else {
+        auto preIndex = tabsLayoutProperty->GetIndex().value();
+        if (preIndex == indexSetByUser || indexSetByUser < 0) {
+            return;
+        }
+        if (tabsPattern->GetInterceptStatus()) {
+            auto ret = tabsPattern->OnContentWillChange(preIndex, indexSetByUser);
+            if (ret.has_value() && !ret.value()) {
+                return;
+            }
+        }
+        AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
+        tabBarPattern->SetMaskAnimationByCreate(true);
+        UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
+    }
 }
 
 /**
@@ -530,6 +585,10 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
             stack.push(child);
         }
     }
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->AdjustTabBarInfo();
 }
 
 /**
@@ -547,11 +606,16 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
 void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
     const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index)
 {
+    if (index < 0) {
+        index = 0;
+    }
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
     tabBarPattern->SetClickRepeat(false);
+    tabBarPattern->UpdateSubTabBoard(index);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
+    tabBarPattern->AdjustSymbolStats(index);
     tabBarPattern->UpdateImageColor(index);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);

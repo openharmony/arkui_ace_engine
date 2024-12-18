@@ -541,7 +541,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "content");
+    EXPECT_EQ(content.value(), u"content");
 }
 
 /**
@@ -579,7 +579,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "label");
+    EXPECT_EQ(content.value(), u"label");
 }
 
 /**
@@ -629,7 +629,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "item content");
+    EXPECT_EQ(content.value(), u"item content");
     auto textRenderContext = contentNode->GetRenderContext();
     EXPECT_EQ(textRenderContext->GetOpacity(), selectTheme->GetDisabledFontColorAlpha());
 }
@@ -919,6 +919,63 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg002, TestSize.Level1)
     menuItemPattern->ShowSubMenu();
     menuItemPattern->CloseMenu();
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: MenuItemPatternTestNg003
+ * @tc.desc: Verify Submenu ShowInSubwindow params can follow outter menu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg003, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    /**
+     * @tc.steps: step1. create outter menu and set show in subwindow true
+     */
+    auto outterMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto outterMenuLayoutProps = outterMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    outterMenuLayoutProps->UpdateShowInSubWindow(true);
+    /**
+     * @tc.steps: step2. create inner menu and set show in subwindow false
+     */
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto innerMenuLayoutProps = innerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    innerMenuLayoutProps->UpdateShowInSubWindow(false);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(innerMenuNode);
+    innerMenuNode->MountToParent(outterMenuNode);
+    outterMenuNode->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+
+    /**
+     * @tc.steps: step3. call ShowSubMenu to create submenu
+     * @tc.expected: expect subMenu's showInSubwindow param is true
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->ShowSubMenu();
+    auto outterMenuPattern = outterMenuNode->GetPattern<MenuPattern>();
+
+    ASSERT_NE(outterMenuPattern->showedSubMenu_, nullptr);
+    auto subMenuLayoutProperty = outterMenuPattern->showedSubMenu_->GetLayoutProperty<MenuLayoutProperty>();
+    EXPECT_TRUE(subMenuLayoutProperty->GetShowInSubWindowValue(false));
+    /**
+     * @tc.steps: step4. clear subMenu and make outterMenu showInSubwindow param false, call ShowSubMenu again.
+     * @tc.expected: expect subMenu's showInSubwindow param is false
+     */
+    menuItemPattern->isSubMenuShowed_ = false;
+    outterMenuPattern->showedSubMenu_ = nullptr;
+    outterMenuLayoutProps->UpdateShowInSubWindow(false);
+    menuItemPattern->ShowSubMenu();
+    ASSERT_NE(outterMenuPattern->showedSubMenu_, nullptr);
+    subMenuLayoutProperty = outterMenuPattern->showedSubMenu_->GetLayoutProperty<MenuLayoutProperty>();
+    EXPECT_FALSE(subMenuLayoutProperty->GetShowInSubWindowValue(false));
 }
 
 /**

@@ -24,11 +24,11 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/drawing_forward.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
@@ -58,6 +58,7 @@ struct ImagePaintConfig {
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
+    ImageRotateOrientation orientation_ = ImageRotateOrientation::UP;
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     std::vector<ObscuredReasons> obscuredReasons_;
     ImageResizableSlice resizableSlice_;
@@ -141,12 +142,26 @@ public:
         imageDfxConfig_ = imageDfxConfig;
     }
 
+    void SetDrawCompleteCallback(std::function<void(const RenderedImageInfo&)>&& drawCompleteCallback)
+    {
+        drawCompleteCallback_ = std::move(drawCompleteCallback);
+    }
+
+    void FireDrawCompleteCallback(const RenderedImageInfo& renderedImageInfo)
+    {
+        if (drawCompleteCallback_) {
+            drawCompleteCallback_(renderedImageInfo);
+        }
+    }
+
 protected:
     bool isDrawAnimate_ = false;
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
     ImageDfxConfig imageDfxConfig_;
+    // Callback function executed after the graphics rendering is complete.
+    std::function<void(const RenderedImageInfo&)> drawCompleteCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasImage);
 };

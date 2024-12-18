@@ -372,7 +372,11 @@ void RatingPattern::FireChangeEvent()
     auto inspectorId = host->GetInspectorId().value_or("");
     Recorder::EventParamsBuilder builder;
     auto score = ss.str();
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetText(score).SetDescription(host->GetAutoEventParamValue(""));
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetText(score)
+        .SetHost(host)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     if (inspectorId.empty()) {
         return;
@@ -706,7 +710,7 @@ void RatingPattern::LoadForeground(const RefPtr<RatingLayoutProperty>& layoutPro
      * rating create again. such as the ratingScore partical update.
      * secondaryUri, backgroundUri is the same.
      */
-    ImageSourceInfo sourceInfo;
+    auto sourceInfo = ImageSourceInfo::CreateImageSourceInfoWithHost(GetHost());
     if (!layoutProperty->HasForegroundImageSourceInfo()) {
         isForegroundImageInfoFromTheme_ = true;
         sourceInfo.SetResourceId(ratingTheme->GetForegroundResourceId());
@@ -736,7 +740,7 @@ void RatingPattern::LoadSecondary(const RefPtr<RatingLayoutProperty>& layoutProp
     const RefPtr<RatingTheme>& ratingTheme, const RefPtr<IconTheme>& iconTheme)
 {
     secondaryConfig_.isSvg_ = false;
-    ImageSourceInfo sourceInfo;
+    auto sourceInfo = ImageSourceInfo::CreateImageSourceInfoWithHost(GetHost());
     if (!layoutProperty->HasSecondaryImageSourceInfo()) {
         isSecondaryImageInfoFromTheme_ = true;
         sourceInfo.SetResourceId(ratingTheme->GetSecondaryResourceId());
@@ -764,7 +768,7 @@ void RatingPattern::LoadBackground(const RefPtr<RatingLayoutProperty>& layoutPro
     const RefPtr<RatingTheme>& ratingTheme, const RefPtr<IconTheme>& iconTheme)
 {
     backgroundConfig_.isSvg_ = false;
-    ImageSourceInfo sourceInfo;
+    auto sourceInfo = ImageSourceInfo::CreateImageSourceInfoWithHost(GetHost());
     if (!layoutProperty->HasBackgroundImageSourceInfo()) {
         isBackgroundImageInfoFromTheme_ = true;
         sourceInfo.SetResourceId(ratingTheme->GetBackgroundResourceId());
@@ -900,6 +904,8 @@ void RatingPattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     // pause animation if prop is initially set to invisible
     if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         image->ControlAnimation(false);
+    } else {
+        image->ControlAnimation(true);
     }
 }
 

@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_MASK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_MASK_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkRect.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_quote.h"
@@ -34,10 +30,6 @@ public:
     SvgMask();
     ~SvgMask() override = default;
     static RefPtr<SvgNode> Create();
-    void SetBoundingBoxRectOpt(const std::optional<RectF>& boundingBoxRectOpt)
-    {
-        boundingBoxRectOpt_ = boundingBoxRectOpt;
-    }
 
 protected:
     void OnInitStyle() override;
@@ -56,13 +48,8 @@ private:
     bool isDefaultMaskContentUnits_ = true;
 
     SvgMaskAttribute maskAttr_;
-    std::optional<RectF> boundingBoxRectOpt_;
 
-#ifndef USE_ROSEN_DRAWING
-    SkRect maskBounds_;
-#else
     RSRect maskBounds_;
-#endif
     int canvasLayerCount_ = -1;
 };
 

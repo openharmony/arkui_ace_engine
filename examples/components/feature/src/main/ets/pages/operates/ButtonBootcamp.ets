@@ -14,7 +14,7 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { RadioBlock, SliderBlock, useEnabled } from 'common';
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 import promptAction from '@ohos.promptAction';
 
 @Component
@@ -22,7 +22,7 @@ export struct ButtonBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableBtnType: boolean = false;
-  @State btnType: ButtonType = ButtonType.ROUNDED_RECTANGLE;
+  @State btnType: ButtonType = ButtonType.Capsule;
   @State enableButtonStyle: boolean = false;
   @State buttonStyle: ButtonStyleMode = ButtonStyleMode.EMPHASIZED;
   @State enableControlSize: boolean = false;
@@ -34,15 +34,19 @@ export struct ButtonBootcamp {
   @State enableMaxLines: boolean = false;
   @State maxLines: number = 1;
   @State enableCustomWidth: boolean = false;
-  @State customWidth: string = '64';
+  @State customWidth: number = 64;
   @State enableCustomHeight: boolean = false;
-  @State customHeight: string = '40';
+  @State customHeight: number = 40;
   @State enableBorderRadius: boolean = false;
   @State btnBorderRadius: number = 30;
   @State enableLabelNum: boolean = false;
   @State labelNum: number = 2;
   @State enableLabelTextSize: boolean = false;
   @State labelTextSize: number = 16;
+  @State enableFontColor: boolean = false;
+  @State btnFontColor: ResourceColor = $r('sys.color.font_on_primary');
+  @State enableRole: boolean = false;
+  @State btnRole: ButtonRole = ButtonRole.NORMAL;
 
   build() {
     NavDestination() {
@@ -70,8 +74,10 @@ export struct ButtonBootcamp {
           type: useEnabled(this.enableBtnType, this.btnType),
           buttonStyle: useEnabled(this.enableButtonStyle, this.buttonStyle),
           controlSize: useEnabled(this.enableControlSize, this.controlSize),
+          role: useEnabled(this.enableRole, this.btnRole)
         }
       )
+        .fontColor(useEnabled(this.enableFontColor, this.btnFontColor))
         .stateEffect(useEnabled(this.enableStateEffect, this.stateEffect))
         .labelStyle({
           overflow: useEnabled(this.enableOverFlow, this.overflow),
@@ -87,23 +93,24 @@ export struct ButtonBootcamp {
           });
         })
     }
+
   }
 
   @Builder
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
-        RadioBlock({
-          title: '按钮类型',
-          isEnabled: $enableBtnType,
-          value: $btnType,
-          dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
-          ]
-        })
+          RadioBlock({
+            title: '按钮类型',
+            isEnabled: $enableBtnType,
+            value: $btnType,
+            dataSource: [
+              { label: '胶囊按钮', value: ButtonType.Capsule },
+              { label: '普通按钮', value: ButtonType.Normal },
+              { label: '圆形按钮', value: ButtonType.Circle },
+              { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            ]
+          })
 
         RadioBlock({
           title: '按钮样式',
@@ -197,8 +204,25 @@ export struct ButtonBootcamp {
           min: 9,
           max: 36
         })
+
+        ColorBlock({
+          title: '字体颜色',
+          isEnabled: $enableFontColor,
+          color: $btnFontColor
+        })
+
+        RadioBlock({
+          title: '设置按钮角色',
+          isEnabled: $enableRole,
+          value: $btnRole,
+          dataSource: [
+            { label: '正常按钮', value: ButtonRole.NORMAL },
+            { label: '警示按钮', value: ButtonRole.ERROR },
+          ]
+        })
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

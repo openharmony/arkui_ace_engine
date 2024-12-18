@@ -98,6 +98,7 @@ public:
     void HideOrShowCirclesAndBackArrow(FrameNodeType type, float value);
 
     void SwitchToOverlayMode();
+    void UpdateSelectMenuBg();
 
 private:
     void CreateToolBar();

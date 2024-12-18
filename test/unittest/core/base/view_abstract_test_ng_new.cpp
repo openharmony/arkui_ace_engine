@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+#include "core/components_ng/event/focus_hub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -270,8 +271,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
     ViewAbstract::SetForegroundColor(BLUE);
     ViewAbstract::SetForegroundColor(AceType::RawPtr(FRAME_NODE_REGISTER), BLUE);
     ViewAbstract::ClearWidthOrHeight(true);
-    ViewAbstract::SetUseEffect(false);
-    ViewAbstract::SetUseEffect(nullptr, false);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderGroup(nullptr, false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
@@ -905,7 +904,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
-    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
 
     auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -929,7 +928,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
      * @tc.steps: step3. Add callback again.
      * @tc.expected: callback is not null.
      */
-    OnKeyCallbackFunc onKeyCallback2 = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback2 = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback2));
     EXPECT_TRUE(callback);
     ViewStackProcessor::GetInstance()->instance = nullptr;
@@ -1453,7 +1452,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyByFrameNodeTest, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
-    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(AceType::RawPtr(node), std::move(onKeyCallback));
     auto focusHub = node->GetOrCreateFocusHub();
     auto& callback = focusHub->focusCallbackEvents_->onKeyEventCallback_;
@@ -1777,5 +1776,30 @@ HWTEST_F(ViewAbstractTestNg, SetForegroundEffectTest, TestSize.Level1)
     ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
     ViewAbstract::SetForegroundEffect(1.1f);
     ASSERT_EQ(frameNode->GetRenderContext()->GetForegroundEffect(), 1.1f);
+}
+
+/**
+ * @tc.name: ViewAbstractTest045
+ * @tc.desc: Test SetNeedFocus of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
+
+    /**
+    * @tc.steps: Set frameNode attached context null
+    * @tc.expected: do not set scop instanceId and excute lost focus to view root.
+    */
+    frameNode->DetachContext(true);
+    ViewAbstract::SetNeedFocus(AceType::RawPtr(frameNode), false);
+    EXPECT_EQ(ContainerScope::CurrentId(), -1);
 }
 } // namespace OHOS::Ace::NG

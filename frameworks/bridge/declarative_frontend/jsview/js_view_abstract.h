@@ -297,6 +297,7 @@ public:
     static bool ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent = true);
 
     // for number and string with no unit, use default dimension unit.
+    static bool ParseFlexSpaceToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
@@ -325,6 +326,7 @@ public:
     static bool ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result);
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
+    static bool ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result);
     static bool ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result);
     static bool ParseJsMediaWithBundleName(const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName,
         std::string& moduleName, int32_t& resId);
@@ -352,6 +354,7 @@ public:
     static void JsLayoutPriority(const JSCallbackInfo& info);
     static void JsPixelRound(const JSCallbackInfo& info);
     static void JsLayoutWeight(const JSCallbackInfo& info);
+    static void JsChainWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
@@ -413,6 +416,7 @@ public:
     static void JsId(const JSCallbackInfo& info);
 
     static void JsFocusable(const JSCallbackInfo& info);
+    static void JsTabStop(const JSCallbackInfo& info);
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);
@@ -426,11 +430,12 @@ public:
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
+    static void JsOnFocusAxisEvent(const JSCallbackInfo& args);
 
     static void JsObscured(const JSCallbackInfo& info);
     static void JsPrivacySensitive(const JSCallbackInfo& info);
 
-    static void JsAccessibilityGroup(bool accessible);
+    static void JsAccessibilityGroup(const JSCallbackInfo& info);
     static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
@@ -474,7 +479,7 @@ public:
      */
     static void JSBind(BindingTarget globalObj);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
-        std::function<void(const int32_t& info)>& onWillDismiss);
+        std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static RefPtr<PipelineBase> GetPipelineContext()
@@ -638,6 +643,7 @@ public:
         const std::optional<Dimension>& radiusBottomEnd);
 
 private:
+    static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result);
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
     static bool ParseResourceToDoubleByName(
         const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);

@@ -138,6 +138,8 @@ public:
     {
         return navDestinationPathInfo_;
     }
+    
+    int32_t GetNavigationNodeId() const;
 
     void SetNeedRemoveInPush(bool need)
     {
@@ -149,16 +151,29 @@ public:
         return needRemoveInPush_;
     }
 
+    void SetSystemTransitionType(NavigationSystemTransitionType type)
+    {
+        systemTransitionType_ = type;
+    }
+
+    NavigationSystemTransitionType GetSystemTransitionType() const
+    {
+        return systemTransitionType_;
+    }
+
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(bool isTransitionOut);
 
-    void InitSystemTransitionPush(bool transitionIn);
-    void StartSystemTransitionPush(bool transitionIn);
-    void SystemTransitionPushCallback(bool transitionIn);
-    void InitSystemTransitionPop(bool isTransitionIn);
-    void StartSystemTransitionPop(bool transitionIn);
-    bool SystemTransitionPopCallback();
+    void InitSystemTransitionPush(bool transitionIn) override;
+    void EndSystemTransitionPush(bool transitionIn) override;
+    void FinishSystemTransitionPush(bool transitionIn, const int32_t animationId);
+    void InitSystemTransitionPop(bool transitionIn) override;
+    void EndSystemTransitionPop(bool transitionIn) override;
+    bool SystemTransitionPopCallback(const int32_t animationId);
     void InitDialogTransition(bool isZeroY);
+    bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
+    void FinishSystemTransitionAnimationPush(RefPtr<FrameNode>& preNode, RefPtr<FrameNode>& naviagtionNode,
+        bool transitionIn, const int32_t animationId) override;
 
     void SetRecoverable(bool recoverable)
     {
@@ -190,6 +205,21 @@ public:
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
     void CleanContent();
+    bool IsNeedContentTransition();
+    bool TransitionContentInValid();
+    bool IsNeedTitleTransition();
+
+    std::string ToDumpString();
+
+    void SetNeedForceMeasure(bool need)
+    {
+        needForceMeasure_ = need;
+    }
+    bool NeedForceMeasure() const
+    {
+        return needForceMeasure_;
+    }
+
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -206,6 +236,8 @@ private:
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
     std::list<WeakPtr<UINode>> textNodeList_;
+    NavigationSystemTransitionType systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
+    bool needForceMeasure_ = false;
 };
 
 } // namespace OHOS::Ace::NG

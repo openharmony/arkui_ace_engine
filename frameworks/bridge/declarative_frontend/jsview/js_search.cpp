@@ -167,7 +167,7 @@ void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& chan
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    JsEventCallback<void(const std::string&)> onChangeEvent(
+    JsEventCallback<void(const std::u16string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     SearchModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -193,21 +193,21 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
 
 void JSSearch::Create(const JSCallbackInfo& info)
 {
-    std::optional<std::string> key;
-    std::optional<std::string> tip;
+    std::optional<std::u16string> key;
+    std::optional<std::u16string> tip;
     std::optional<std::string> src;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
-        std::string placeholder;
+        std::u16string placeholder;
         if (param->GetProperty("placeholder")->IsUndefined()) {
-            tip = "";
+            tip = u"";
         }
         if (ParseJsString(param->GetProperty("placeholder"), placeholder)) {
             tip = placeholder;
         }
-        std::string text;
+        std::u16string text;
         JSRef<JSVal> textValue = param->GetProperty("value");
         if (textValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
@@ -219,7 +219,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
                 key = text;
             }
         } else if (param->HasProperty("value") && textValue->IsUndefined()) {
-            key = "";
+            key = u"";
         } else {
             if (ParseJsString(textValue, text)) {
                 key = text;
@@ -253,7 +253,7 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -325,6 +325,13 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             }
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+        }
+        
+        auto autoDisable = param->GetProperty("autoDisable");
+        if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
+        } else {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
         }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
@@ -587,7 +594,7 @@ void JSSearch::SetInputFilter(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(errInfo));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                            const std::string& info) {
+                            const std::u16string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             PipelineContext::SetCallBackNode(node);
             func->Execute(info);
@@ -846,11 +853,19 @@ void JSSearch::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
@@ -880,18 +895,58 @@ void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetBackBorderRadius();
 }
 
+void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value, NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::u16string>("text", event.GetText());
+        object->SetPropertyObject(
+            "keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JSTextField::JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = {stringValue, dataObject};
+        func->Execute(param);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
+#endif
+    };
+    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+}
+
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+#ifdef NG_BUILD
+    CreateJsSearchCommonEvent(info);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateJsSearchCommonEvent(info);
+    } else {
+        JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+        SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    }
+#endif
 }
 
 JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const PreviewText& previewText)
 {
     JSRef<JSObject> previewTextObj = JSRef<JSObject>::New();
     previewTextObj->SetProperty<int32_t>("offset", previewText.offset);
-    previewTextObj->SetProperty<std::string>("value", previewText.value);
+    previewTextObj->SetProperty<std::u16string>("value", previewText.value);
     return JSRef<JSVal>::Cast(previewTextObj);
 }
 
@@ -902,7 +957,7 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
     auto jsChangeFunc =
         AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-                        const std::string& val, PreviewText& previewText) {
+                        const std::u16string& val, PreviewText& previewText) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
         func->Execute(val, previewText);
@@ -941,14 +996,14 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
 void JSSearch::SetOnCopy(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
     SearchModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 
 void JSSearch::SetOnCut(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
     SearchModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
@@ -969,7 +1024,7 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
 
     auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](
-                       const std::string& val, NG::TextCommonEvent& info) {
+                       const std::u16string& val, NG::TextCommonEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
@@ -1001,7 +1056,7 @@ JSRef<JSVal> JSSearch::CreateJsAboutToIMEInputObj(const InsertValueInfo& insertV
 {
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.insertOffset);
-    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.insertValue);
+    aboutToIMEInputObj->SetProperty<std::u16string>("insertValue", insertValue.insertValue);
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -1028,7 +1083,7 @@ JSRef<JSVal> JSSearch::CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValue
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("deleteOffset", deleteValueInfo.deleteOffset);
     aboutToIMEInputObj->SetProperty<int32_t>("direction", static_cast<int32_t>(deleteValueInfo.direction));
-    aboutToIMEInputObj->SetProperty<std::string>("deleteValue", deleteValueInfo.deleteValue);
+    aboutToIMEInputObj->SetProperty<std::u16string>("deleteValue", deleteValueInfo.deleteValue);
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -1184,7 +1239,7 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(theme);
@@ -1229,7 +1284,7 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);

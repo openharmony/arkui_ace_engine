@@ -15,12 +15,6 @@
 
 #include "core/components/select_popup/rosen_render_select_popup.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkMaskFilter.h"
-#include "include/core/SkRect.h"
-#include "include/effects/SkGradientShader.h"
-#endif
-
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -87,31 +81,6 @@ void RosenRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
         LOGE("Paint canvas is null");
         return;
     }
-#ifndef USE_ROSEN_DRAWING
-    SkPaint paintGradient;
-    Rect gradientRect;
-    auto interval = NormalizeToPx(optionInterval_);
-    auto yPos = isTop ? GetOptionTop() : GetOptionBottom() - NormalizeToPx(GRADIENT_HEIGHT);
-    gradientRect.SetOffset(Offset(GetOptionLeft() + interval, yPos));
-    gradientRect.SetHeight(NormalizeToPx(GRADIENT_HEIGHT));
-    gradientRect.SetWidth(GetOptionWidth() - 2 * interval);
-    SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(gradientRect.Left()), SkDoubleToScalar(gradientRect.Top()));
-    SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(gradientRect.Left()), SkDoubleToScalar(gradientRect.Bottom()));
-    SkPoint points[2] = { beginPoint, endPoint };
-    // color with red 13, green 13, and blue 13 is used for color stop (0.85) in gradient
-    SkColor colors[2] = { tvBackColor_.ChangeAlpha(0).GetValue(),
-        Color::FromRGB(13, 13, 13).ChangeAlpha(GRADIENT_END_GRADIENT).GetValue() };
-    if (isTop) {
-        colors[0] = Color::FromRGB(13, 13, 13).ChangeAlpha(GRADIENT_END_GRADIENT).GetValue();
-        colors[1] = tvBackColor_.ChangeAlpha(0).GetValue();
-    }
-    const float stopPositions[2] = { 0.0f, 0.85f };
-
-    paintGradient.setShader(
-        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kMirror));
-    canvas->drawRect(
-        { gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom() }, paintGradient);
-#else
     RSPen penGradient;
     Rect gradientRect;
     auto interval = NormalizeToPx(optionInterval_);
@@ -135,7 +104,6 @@ void RosenRenderSelectPopup::PaintGradient(RenderContext& context, bool isTop)
     canvas->AttachPen(penGradient);
     canvas->DrawRect(RSRect(gradientRect.Left(), gradientRect.Top(), gradientRect.Right(), gradientRect.Bottom()));
     canvas->DetachPen();
-#endif
 }
 
 void RosenRenderSelectPopup::Paint(RenderContext& context, const Offset& offset)
@@ -150,14 +118,6 @@ void RosenRenderSelectPopup::Paint(RenderContext& context, const Offset& offset)
             LOGE("Paint canvas is null");
             return;
         }
-#ifndef USE_ROSEN_DRAWING
-        canvas->save();
-        SkPaint paint;
-        paint.setARGB(tvBackColor_.GetAlpha(), tvBackColor_.GetRed(), tvBackColor_.GetGreen(), tvBackColor_.GetBlue());
-        auto size = GetLayoutSize();
-        canvas->drawRect(SkRect::MakeWH(size.Width(), size.Height()), paint);
-        canvas->restore();
-#else
         canvas->Save();
         RSPen pen;
         pen.SetARGB(tvBackColor_.GetAlpha(), tvBackColor_.GetRed(), tvBackColor_.GetGreen(), tvBackColor_.GetBlue());
@@ -166,7 +126,6 @@ void RosenRenderSelectPopup::Paint(RenderContext& context, const Offset& offset)
         canvas->DrawRect(RSRect(0, 0, size.Width(), size.Height()));
         canvas->DetachPen();
         canvas->Restore();
-#endif
     }
     RenderNode::Paint(context, offset);
 

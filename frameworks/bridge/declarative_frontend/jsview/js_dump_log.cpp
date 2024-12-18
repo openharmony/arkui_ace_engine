@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::Framework {
 void JSDumpLog::JSBind(BindingTarget globalObj)
@@ -67,6 +69,12 @@ void JSDumpRegister::AddListener(const JSCallbackInfo& info)
         JSRef<JSVal> argv = arr;
         cb->Call(JSRef<JSVal>(), 1, &argv);
     };
-    pipelineContext->RegisterDumpInfoListener(listenerWrapper);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->RegisterDumpInfoListener(listenerWrapper);
 }
 } // namespace OHOS::Ace::Framework

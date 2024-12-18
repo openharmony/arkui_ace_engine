@@ -17,6 +17,23 @@
 
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
+namespace {
+std::string GetAlignItemsStr(OHOS::Ace::FlexAlign alignItems)
+{
+    switch (alignItems) {
+        case OHOS::Ace::FlexAlign::CENTER:
+            return "ItemAlign.Center";
+        case OHOS::Ace::FlexAlign::STRETCH:
+            return "ItemAlign.Stretch";
+        case OHOS::Ace::FlexAlign::FLEX_END:
+            return "ItemAlign.End";
+        case OHOS::Ace::FlexAlign::FLEX_START:
+            return "ItemAlign.Start";
+        default:
+            return "Unknown";
+    }
+}
+};
 namespace OHOS::Ace::NG {
 using OHOS::Ace::V2::GridContainerUtils;
 void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -47,8 +64,13 @@ void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
     str = (static_cast<int32_t>(breakPoints.breakpoints.size()) > 1) ?
         str.substr(0, static_cast<int32_t>(str.size()) - 1).append("]") : str.append("]");
-    json->PutExtAttr("breakpoints", std::to_string(columns).c_str(), filter);
-
+    json->PutExtAttr("breakpoints", str.c_str(), filter);
+    if (breakPoints.reference == V2::BreakPointsReference::WindowSize) {
+        str.assign("WindowSize");
+    } else {
+        str.assign("ComponentSize");
+    }
+    json->PutExtAttr("reference", str.c_str(), filter);
     auto direction = GetDirection();
     if (!direction) {
         str.assign("Row");
@@ -59,6 +81,8 @@ void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     } else {
         str.assign("Unknown");
     }
-    json->PutExtAttr("direction", std::to_string(columns).c_str(), filter);
+    json->PutExtAttr("direction", str.c_str(), filter);
+    auto alignItems = GetAlignItems();
+    json->PutExtAttr("alignItems", GetAlignItemsStr(alignItems.value_or(FlexAlign::FLEX_START)).c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,7 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+constexpr Dimension TEXT_DRAG_RADIUS_2IN1 = 8.0_vp;
 constexpr Dimension TEXT_DRAG_RADIUS = 18.0_vp;
 constexpr Dimension TEXT_DRAG_OFFSET = 8.0_vp;
 constexpr Dimension TEXT_DRAG_MIN_WIDTH = 64.0_vp;
@@ -204,14 +205,12 @@ public:
         return rectsForPlaceholders_;
     }
 
-    virtual Dimension GetDragCornerRadius()
-    {
-        return TEXT_DRAG_RADIUS;
-    }
+    virtual Dimension GetDragCornerRadius();
 
     Color GetDragBackgroundColor();
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
+    virtual void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes);
     static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
         const OffsetF globalOffset, const OffsetF textStartOffset);
     static void AdjustHandlers(const RectF contentRect, RectF& leftHandler, RectF& rightHandler);
@@ -220,6 +219,7 @@ protected:
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path, float radiusRatio);
     void CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
+    static void CalculateFloatTitleOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset);
 
     void SetLastLineHeight(float lineHeight)
     {

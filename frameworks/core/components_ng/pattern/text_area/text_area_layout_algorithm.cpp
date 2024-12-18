@@ -78,7 +78,9 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.}
     if (isInlineStyle) {
-        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
+        auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+        auto paragraphData = CreateParagraphData { false, fontSize };
+        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
@@ -103,21 +105,19 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight = contentSize.Height();
     }
     // Add children height;
-    auto counterNode = pattern->GetCounterNode().Upgrade();
-    if (counterNode && !pattern->IsNormalInlineState()) {
-        auto counterSize = counterNode->GetGeometryNode()->GetFrameSize();
-        contentHeight += counterSize.Height();
+    auto counterDecorator = pattern->GetCounterDecorator();
+    if (counterDecorator && !pattern->IsNormalInlineState()) {
+        contentHeight += counterDecorator->GetDecoratorHeight();
     }
 
     auto finalWidth = 0;
     if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
-        finalWidth = LessOrEqual(contentWidth, 0) ? 0 :
-            contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY;
+        finalWidth = contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY;
         frameSize.SetWidth(finalWidth);
         frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY);
     } else {
         // The width after MeasureContent is already optimal, but the height needs to be constrained in Measure.
-        finalWidth = LessOrEqual(contentWidth, 0) ? 0 : contentWidth + pattern->GetHorizontalPaddingAndBorderSum();
+        finalWidth = contentWidth + pattern->GetHorizontalPaddingAndBorderSum();
         frameSize.SetWidth(finalWidth);
         ConstraintHeight(layoutWrapper, frameSize, contentHeight);
     }
@@ -133,19 +133,13 @@ void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, Opt
     CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto paddingAndBorder = textFieldLayoutProperty->CreatePaddingAndBorder();
     auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
     auto textFieldContentConstraint =
         CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
-        if (LessOrEqual(textFieldContentConstraint.maxSize.Height(), 0)) {
-            frameSize.SetHeight(textFieldContentConstraint.maxSize.Height());
-        } else {
-            frameSize.SetHeight(
-                textFieldContentConstraint.maxSize.Height() + paddingAndBorder.Height());
-        }
+        frameSize.SetHeight(textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
     } else {
-        frameSize.SetHeight(contentHeight + paddingAndBorder.Height());
+        frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum());
     }
 
     // Height is constrained by the CalcLayoutConstraint.
@@ -171,10 +165,9 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
 
     // Remove counterNode height.
-    auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (counterNodeLayoutWrapper && !pattern->IsNormalInlineState()) {
-        auto counterHeight = counterNodeLayoutWrapper->GetGeometryNode()->GetFrameSize().Height();
-        size.SetHeight(size.Height() - counterHeight);
+    auto counterDecorator = pattern->GetCounterDecorator();
+    if (counterDecorator && !pattern->IsNormalInlineState()) {
+        size.SetHeight(size.Height() - counterDecorator->GetDecoratorHeight());
     }
 
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
@@ -186,8 +179,9 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::TOP_CENTER;
 
-    auto offsetBase = OffsetF(
-        pattern->GetPaddingLeft() + pattern->GetBorderLeft(), pattern->GetPaddingTop() + pattern->GetBorderTop());
+    auto border = pattern->GetBorderWidthProperty();
+    auto offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),
+        pattern->GetPaddingTop() + pattern->GetBorderTop(border));
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -212,7 +206,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::u16string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     // update child position.
@@ -221,10 +215,12 @@ bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, cons
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto isInlineStyle = pattern->IsNormalInlineState();
+    auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+    auto paragraphData = CreateParagraphData { false, fontSize };
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), content, false);
+        CreateParagraph(textStyle, pattern->GetDragContents(), content, false, paragraphData);
     } else {
-        CreateParagraph(textStyle, content, false, pattern->GetNakedCharPosition());
+        CreateParagraph(textStyle, content, false, pattern->GetNakedCharPosition(), paragraphData);
     }
     return true;
 }

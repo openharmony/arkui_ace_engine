@@ -26,6 +26,7 @@ ace_unittest("menu_test_ng") {
     "menu_patternMore_test_ng.cpp",
     "menu_pattern_test_ng.cpp",
     "menu_view_test_ng.cpp",
+    "menuitem_pattern_option_test_ng.cpp",
     "menuitem_pattern_test_ng.cpp",
     "menuitem_pattern_testone_ng.cpp",
     "menuitem_test_ng.cpp",

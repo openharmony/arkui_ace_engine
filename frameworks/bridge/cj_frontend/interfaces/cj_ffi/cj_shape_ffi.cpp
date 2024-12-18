@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 
 #ifndef _NON_OHOS_
-#include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
+#include "pixel_map_impl.h"
 #endif
 
 using namespace OHOS::Ace;
@@ -172,7 +172,7 @@ void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Ptr vecValue, uint32_t column,
         LOGE("mesh array is empty");
         return;
     }
-    auto meshValue = *reinterpret_cast<std::vector<double>*>(vecValue);
+    auto meshValue = *reinterpret_cast<std::vector<float>*>(vecValue);
     ShapeModel::GetInstance()->SetBitmapMesh(meshValue, static_cast<int32_t>(column), static_cast<int32_t>(row));
 }
 

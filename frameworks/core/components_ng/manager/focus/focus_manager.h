@@ -38,6 +38,12 @@ enum class FocusActiveReason : int32_t {
     USE_API = 2,
 };
 
+enum class FocusViewStackState : int32_t {
+    IDLE = 0,
+    SHOW = 1,
+    CLOSE = 2,
+};
+
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
@@ -59,7 +65,7 @@ public:
 
     void FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep = false);
     void FocusViewHide(const RefPtr<FocusView>& focusView);
-    void FocusViewClose(const RefPtr<FocusView>& focusView);
+    void FocusViewClose(const RefPtr<FocusView>& focusView, bool isDetachFromTree = false);
 
     void FlushFocusView();
 
@@ -96,21 +102,43 @@ public:
     void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
     {
         lastFocusStateNode_ = AceType::WeakClaim(AceType::RawPtr(node));
-        isNeedTriggerScroll_ = true;
+        if (isNeedTriggerScroll_.has_value()) {
+            isNeedTriggerScroll_ = true;
+        }
     }
     RefPtr<FocusHub> GetLastFocusStateNode() const
     {
         return lastFocusStateNode_.Upgrade();
     }
 
-    void SetNeedTriggerScroll(bool isNeedTriggerScroll)
+    void SetNeedTriggerScroll(std::optional<bool> isNeedTriggerScroll)
     {
         isNeedTriggerScroll_ = isNeedTriggerScroll;
     }
+
     bool GetNeedTriggerScroll() const
     {
-        return isNeedTriggerScroll_;
+        return isNeedTriggerScroll_.value_or(false);
     }
+
+    void SetIsAutoFocusTransfer(bool isAutoFocusTransfer)
+    {
+        isAutoFocusTransfer_ = isAutoFocusTransfer;
+    }
+
+    bool IsAutoFocusTransfer() const
+    {
+        return isAutoFocusTransfer_;
+    }
+
+    bool RearrangeViewStack();
+
+    void SetFocusViewStackState(FocusViewStackState focusViewStackState)
+    {
+        focusViewStackState_ = focusViewStackState;
+    }
+
+    bool SetFocusViewRootScope(const RefPtr<FocusView>& focusView);
 
     void PaintFocusState();
 
@@ -122,6 +150,12 @@ public:
 
     void UpdateCurrentFocus(const RefPtr<FocusHub>& current, SwitchingUpdateReason reason);
     RefPtr<FocusHub> GetCurrentFocus();
+    void UpdateSwitchingEndReason(SwitchingEndReason reason)
+    {
+        if (isSwitchingFocus_.value_or(false)) {
+            endReason_ = reason;
+        }
+    }
     int32_t AddFocusListener(FocusChangeCallback&& callback);
     void RemoveFocusListener(int32_t id);
     void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub, SwitchingStartReason reason);
@@ -144,7 +178,12 @@ private:
 
     WeakPtr<FocusHub> lastFocusStateNode_;
     WeakPtr<FocusHub> currentFocus_;
-    bool isNeedTriggerScroll_ = false;
+    /**
+     * In the case of a scrollable component's sliding state, this variable will be set to nullopt to prevent the
+     * ScrollBy animation triggered by FireFocusScroll from interrupting the sliding animation of the component.
+     * In the SetLastFocusStateNode method, this variable will not be set to true until it has value.
+     */
+    std::optional<bool> isNeedTriggerScroll_ = false;
     FocusHubScopeMap focusHubScopeMap_;
 
     std::map<int32_t, FocusChangeCallback> listeners_;
@@ -156,6 +195,9 @@ private:
     std::optional<SwitchingStartReason> startReason_;
     std::optional<SwitchingEndReason> endReason_;
     std::optional<SwitchingUpdateReason> updateReason_;
+
+    bool isAutoFocusTransfer_ = true;
+    FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

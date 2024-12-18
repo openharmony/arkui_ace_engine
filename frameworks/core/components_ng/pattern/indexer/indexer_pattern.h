@@ -70,7 +70,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>(static_cast<int32_t>(fullArrayValue_.size()));
+        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>();
         return indexerLayoutAlgorithm;
     }
 
@@ -181,6 +181,7 @@ private:
     void IndexerPressInAnimation();
     void IndexerPressOutAnimation();
     int32_t GenerateAnimationId();
+    void ItemSelectedChangedAnimation();
     void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
     void FireOnSelect(int32_t selectIndex, bool fromPress);

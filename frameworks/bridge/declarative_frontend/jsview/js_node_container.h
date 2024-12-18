@@ -28,8 +28,6 @@ public:
     static JSRef<JSVal> GetCurrentContext();
     static void SetOnAppearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
     static void SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
-    static void SetOnAttachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
-    static void SetOnDetachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
     static void SetOnResizeFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
     static void SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
     static void JSBind(BindingTarget globalObj);

@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
@@ -110,7 +111,7 @@ public:
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
-    void HandleDragEvent(const PointerEvent& info) override;
+    void HandleDragEvent(const DragPointerEvent& info) override;
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
     void FireModalOnDestroy();
@@ -142,7 +143,7 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     void NotifyForeground();
-    void NotifyBackground();
+    void NotifyBackground(bool isHandleError = true);
     void NotifyDestroy();
     int32_t GetInstanceId() const;
     int32_t GetSessionId() const;
@@ -169,9 +170,15 @@ public:
     {
         curPlaceholderType_ = type;
     }
+    void PostDelayRemovePlaceholder(uint32_t delay);
+    void SetEventProxyFlag(int32_t flag);
+    void ReplacePlaceholderByContent();
+    void OnExtensionEvent(UIExtCallbackEventId eventId);
+    void OnUeaAccessibilityEventAsync();
     void OnAreaUpdated();
     bool IsModalUec();
     bool IsForeground();
+    void OnExtensionDetachToDisplay();
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
     void SetModalFlag(bool isModal)
@@ -204,6 +211,8 @@ public:
     }
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpOthers();
+    int32_t GetInstanceIdFromHost();
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -234,6 +243,11 @@ private:
     void OnModifyDone() override;
     bool CheckConstraint();
 
+    void InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -273,7 +287,15 @@ private:
     PlaceholderType GetSizeChangeReason();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
-    int32_t GetInstanceIdFromHost();
+    void ResetAccessibilityChildTreeCallback();
+    bool GetForceProcessOnKeyEventInternal() const
+    {
+        return forceProcessOnKeyEventInternal_;
+    }
+    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
+    {
+        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
+    }
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -298,6 +320,7 @@ private:
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
     RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
+    RefPtr<PlatformEventProxy> platformEventProxy_;
     ErrorMsg lastError_;
     AbilityState state_ = AbilityState::NONE;
     bool isTransferringCaller_ = false;
@@ -332,6 +355,7 @@ private:
     uint32_t focusWindowId_ = 0;
     uint32_t realHostWindowId_ = 0;
     std::string want_;
+    bool forceProcessOnKeyEventInternal_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

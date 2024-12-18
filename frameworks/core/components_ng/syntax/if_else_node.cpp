@@ -63,7 +63,8 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
 void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
 {
     branchIdChanged_ = (branchId_ != value);
-    TAG_LOGD(AceLogTag::ACE_IF, "id: %{public}d, branchIdChanged_: %{public}d", GetId(), branchIdChanged_);
+    TAG_LOGD(AceLogTag::ACE_IF, "IfElse(%{public}d).SetBranchId branchIdChanged_: %{public}d",
+        GetId(), branchIdChanged_);
     if (branchIdChanged_) {
         // collect elmtIds of all children and their children up to CustomNode object
         // these will be removed, but possibly with a delay if their is an animation

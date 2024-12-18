@@ -77,7 +77,10 @@ public:
 
     void Free() {}
 
-    virtual void Build(const int width, const int height, const BitmapFormat& format) {}
+    bool Build(const int width, const int height, const BitmapFormat& format)
+    {
+        return false;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_BITMAP_H

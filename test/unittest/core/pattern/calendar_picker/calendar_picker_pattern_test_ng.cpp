@@ -643,7 +643,7 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarDialogPatternTest030, TestSize.Lev
     const auto& calendarLayoutProperty = calendarNode->GetLayoutProperty();
     calendarLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     KeyEvent keyEventOne(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     dialogPattern->focusAreaChildID_ = 1;
     auto result = dialogPattern->HandleKeyEvent(keyEventOne);
     EXPECT_TRUE(result);
@@ -694,7 +694,7 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarDialogPatternTest032, TestSize.Lev
     const auto& calendarLayoutProperty = calendarNode->GetLayoutProperty();
     calendarLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     KeyEvent keyEventOne(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     dialogPattern->focusAreaChildID_ = 1;
     auto result = dialogPattern->HandleKeyEvent(keyEventOne);
     EXPECT_TRUE(result);

@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -73,12 +74,13 @@ struct ParsedConfig {
     std::string mcc;
     std::string mnc;
     std::string preferredLanguage;
+    std::string fontId;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
-                 preferredLanguage.empty());
+                 preferredLanguage.empty() && fontId.empty());
     }
 };
 
@@ -274,11 +276,21 @@ public:
         return resourceInfo_;
     }
 
+    std::shared_ptr<Framework::JsValue> GetJsContext();
+    void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
+
     void SetOrientation(Orientation orientation) override
     {
         CHECK_NULL_VOID(uiWindow_);
         auto dmOrientation = static_cast<Rosen::Orientation>(static_cast<uint32_t>(orientation));
         uiWindow_->SetRequestedOrientation(dmOrientation);
+    }
+
+    uint64_t GetDisplayId() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, -1);
+        return uiWindow_->GetDisplayId();
     }
 
     Orientation GetOrientation() override
@@ -384,7 +396,7 @@ public:
     double GetWindowDensity() const
     {
         if (!uiWindow_) {
-            return 0.0;
+            return 1.0;
         }
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
@@ -514,7 +526,12 @@ public:
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
         const std::string& bundle, const std::string& module);
 
-    void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
+    void BuildResConfig(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void UpdateConfiguration(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
+    void UpdateConfigurationSyncForAll(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
@@ -557,9 +574,9 @@ public:
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
-    Rect GetSessionAvoidAreaByType(uint32_t safeAreaType) override;
-
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
+
+    uint32_t GetStatusBarHeight();
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -589,7 +606,7 @@ public:
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
+        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback) override;
 
     bool GetCurPointerEventSourceType(int32_t& sourceType) override;
 
@@ -672,7 +689,7 @@ public:
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
     bool NeedFullUpdate(uint32_t limitKey);
-    void NotifyDensityUpdate();
+    void NotifyDensityUpdate(double density);
     void NotifyDirectionUpdate();
 
     void SetRegisterComponents(const std::vector<std::string>& registerComponents)
@@ -700,6 +717,20 @@ public:
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    {
+        CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
+        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+    void FireUIExtensionEventCallback(uint32_t eventId);
+    void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
+
+    bool IsFloatingWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
 
 private:

@@ -62,7 +62,7 @@ void PluginManager::UpdateConfigurationInPlugin(
         pluginThemeManager->LoadResourceThemes();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [instanceId = pluginSubContainerMap.first,
+            [instanceId = static_cast<int32_t>(pluginSubContainerMap.first),
                 weak = AceType::WeakClaim(AceType::RawPtr(pluginSubContainer))]() {
                 ContainerScope scope(instanceId);
                 auto pluginSubContainer = weak.Upgrade();

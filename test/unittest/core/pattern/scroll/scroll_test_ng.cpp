@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 void ScrollTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
@@ -41,6 +42,7 @@ void ScrollTestNg::SetUpTestSuite()
     scrollBarTheme->touchWidth_ = Dimension(DEFAULT_TOUCH_WIDTH, DimensionUnit::VP);
     scrollBarTheme->activeWidth_ = Dimension(DEFAULT_ACTIVE_WIDTH, DimensionUnit::VP);
     scrollBarTheme->normalWidth_ = Dimension(DEFAULT_NORMAL_WIDTH, DimensionUnit::VP);
+    scrollBarTheme->foregroundColor_ = Color::FromString(SCROLL_BAR_COLOR);
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
@@ -84,10 +86,10 @@ void ScrollTestNg::GetScroll()
 
 RefPtr<PaintWrapper> ScrollTestNg::CreateScrollDone(const RefPtr<FrameNode>& frameNode)
 {
-    auto paintWrapper = CreateDone(frameNode);
+    CreateDone();
     scrollBar_ = pattern_->GetScrollBar();
     scrollable_ = pattern_->GetScrollableEvent()->GetScrollable();
-    return paintWrapper;
+    return frameNode_->CreatePaintWrapper();
 }
 
 ScrollModelNG ScrollTestNg::CreateScroll()
@@ -120,7 +122,7 @@ void ScrollTestNg::CreateContentChild(int32_t childNumber)
     contentChildren_.clear();
     for (int32_t index = 0; index < childNumber; index++) {
         TextModelNG textModel;
-        textModel.Create("text");
+        textModel.Create(u"text");
         SetSize(layoutProperty_->GetAxis(), CalcLength(FILL_LENGTH), CalcLength(ITEM_MAIN_SIZE));
         contentChildren_.emplace_back(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         ViewStackProcessor::GetInstance()->Pop();

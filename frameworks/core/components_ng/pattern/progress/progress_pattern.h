@@ -121,6 +121,22 @@ public:
         return contentModifierNode_;
     }
 
+    Gradient convertGradient(Color color)
+    {
+        Gradient gradient;
+        GradientColor gradientColorEnd;
+        GradientColor gradientColorStart;
+        gradientColorEnd.SetLinearColor(LinearColor(color));
+        gradientColorStart.SetLinearColor(LinearColor(color));
+        gradientColorEnd.SetDimension(Dimension(0.0));
+        gradient.AddColor(gradientColorEnd);
+        gradientColorStart.SetDimension(Dimension(1.0));
+        gradient.AddColor(gradientColorStart);
+        return gradient;
+    }
+
+    void OnAccessibilityEvent();
+
 private:
     void InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty);
     void CalculateStrokeWidth(const SizeF& contentSize);
@@ -154,6 +170,8 @@ private:
     Color selectColor_;
     Color borderColor_;
     Color fontColor_;
+    double value_ = 0.0;
+    bool initFlag_ = false;
     ProgressType progressType_ = ProgressType::LINEAR;
     bool isTextFromUser_ = false;
     bool visibilityProp_ = true;

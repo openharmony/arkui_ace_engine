@@ -27,8 +27,12 @@ public:
     virtual bool IsImageAnalyzerSupported() = 0;
     virtual void BuildNodeFunc(
         void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData) {};
+    virtual void BuildNodeFunc(std::string uri, void* pixelMap, int frameTimestamp, void* config,
+        ImageAnalyzerInnerConfig* uiConfig, void** overlayData) {};
     virtual void UpdateImage(
         void** overlayData, void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig) {};
+    virtual void UpdateImage(void** overlayData, std::string uri, void* pixelMap, int frameTimestamp,
+        void* config, ImageAnalyzerInnerConfig* uiConfig) {};
     virtual void UpdateConfig(void** overlayData, void* config) {};
     virtual void UpdateInnerConfig(void** overlayData, ImageAnalyzerInnerConfig* config) = 0;
     virtual void Release(void** overlayData) = 0;

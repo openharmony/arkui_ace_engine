@@ -270,12 +270,13 @@ napi_value Reset(napi_env env, napi_callback_info info)
 napi_value PatternLockControllerConstructor(napi_env env, napi_callback_info info)
 {
     napi_value thisVar = nullptr;
+    napi_status status;
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     auto wrapper = new (std::nothrow) PatternLockController();
     if (wrapper == nullptr) {
         return CommonNapiUtils::CreateNull(env);
     }
-    napi_wrap(
+    status = napi_wrap(
         env, thisVar, wrapper,
         [](napi_env env, void* data, void* hint) {
             auto* wrapper = reinterpret_cast<PatternLockController*>(data);
@@ -283,6 +284,10 @@ napi_value PatternLockControllerConstructor(napi_env env, napi_callback_info inf
             wrapper = nullptr;
         },
         nullptr, nullptr);
+    if (status != napi_ok) {
+        delete wrapper;
+        return CommonNapiUtils::CreateNull(env);
+    }
     return thisVar;
 }
 

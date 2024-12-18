@@ -16,7 +16,8 @@
 #include "frameworks/core/components_ng/svg/parse/svg_image.h"
 
 #include "base/base64/base64_util.h"
-#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "core/components_ng/svg/parse/svg_constants.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 

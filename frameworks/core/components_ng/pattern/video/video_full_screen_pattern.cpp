@@ -50,7 +50,9 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenNode->InitVideoFullScreenNode(videoNode);
     // add node to root
-    auto pipelienContext = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelienContext = host->GetContext();
     CHECK_NULL_VOID(pipelienContext);
     auto rootNode = pipelienContext->GetRootElement();
     if (!rootNode) {

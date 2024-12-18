@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -238,12 +239,49 @@ public:
 
     void OnWindowHide() override;
 
-    Dimension GetTitleBarHeightBeforeMeasure() override
+    const RefPtr<NavDestinationScrollableProcessor>& GetScrollableProcessor() const
     {
-        return isHideTitlebar_ ? 0.0_vp : SINGLE_LINE_TITLEBAR_HEIGHT;
+        return scrollableProcessor_;
     }
+    void SetScrollableProcessor(const RefPtr<NavDestinationScrollableProcessor>& processor)
+    {
+        scrollableProcessor_ = processor;
+    }
+    /**
+     * Respond to the scrolling events of the internal scrolling components of NavDestination,
+     * and hide part of the titleBar&toolBar( translate up or down in Y axis ), while changing
+     * the opacity of the titleBar&toolBar.
+     */
+    void UpdateTitleAndToolBarHiddenOffset(float offset);
+    // show titleBar&toolBar immediately.
+    void ShowTitleAndToolBar();
+    // cancel the delayed task if we have started, which will show titleBar&toolBar in the feature time.
+    void CancelShowTitleAndToolBarTask();
+    // Restore the titleBar&toolBar to its original position (hide or show state).
+    void ResetTitleAndToolBarState();
 
 private:
+    struct HideBarOnSwipeContext {
+        CancelableCallback<void()> showBarTask;
+        bool isBarShowing = false;
+        bool isBarHiding = false;
+    };
+    HideBarOnSwipeContext& GetSwipeContext(bool isTitle)
+    {
+        return isTitle ? titleBarSwipeContext_ : toolBarSwipeContext_;
+    }
+    RefPtr<FrameNode> GetBarNode(const RefPtr<NavDestinationNodeBase>& nodeBase, bool isTitle);
+    bool EnableTitleBarSwipe(const RefPtr<NavDestinationNodeBase>& nodeBase);
+    bool EnableToolBarSwipe(const RefPtr<NavDestinationNodeBase>& nodeBase);
+    void UpdateBarHiddenOffset(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<FrameNode>& barNode, float offset, bool isTitle);
+    void StartHideOrShowBarInner(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        float barHeight, float curTranslate, bool isTitle, bool isHide);
+    void StopHideBarIfNeeded(float curTranslate, bool isTitle);
+    void PostShowBarDelayedTask(bool isTitle);
+    void ResetBarState(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<FrameNode>& barNode, bool isTitle);
+
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void MountTitleBar(
@@ -252,6 +290,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void CloseLongPressDialog();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -267,6 +306,10 @@ private:
 
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
+
+    RefPtr<NavDestinationScrollableProcessor> scrollableProcessor_;
+    HideBarOnSwipeContext titleBarSwipeContext_;
+    HideBarOnSwipeContext toolBarSwipeContext_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -37,7 +37,6 @@
 #include "base/web/webview/ohos_nweb/include/nweb_date_time_chooser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -158,6 +157,14 @@ public:
     AlphaType GetAlphaType() const override
     {
         return static_cast<AlphaType>(0);
+    }
+    AllocatorType GetAllocatorType() const override
+    {
+        return static_cast<AllocatorType>(0);
+    }
+    bool IsHdr() const override
+    {
+        return false;
     }
     int32_t GetRowStride() const override
     {

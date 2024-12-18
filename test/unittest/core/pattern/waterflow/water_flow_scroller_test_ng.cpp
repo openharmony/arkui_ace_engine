@@ -667,9 +667,12 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
 
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 11);
     pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 4)->IsActive());
 
     pattern_->ScrollPage(false);
     FlushLayoutTask(frameNode_);
@@ -678,10 +681,19 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
 
     pattern_->ScrollToIndex(29, true);
     FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 29)->IsActive());
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 29)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 29), 600.0f);
 }
 
 /**
@@ -972,5 +984,41 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachEnd001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(reached, 2);
     EXPECT_EQ(GetChildRect(frameNode_, 19).Bottom(), WATER_FLOW_HEIGHT);
+}
+
+/**
+ * @tc.name: ScrollAnimation001
+ * @tc.desc: Test ScrollToIndex with animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ScrollAnimation001, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().SetTicks(1);
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, true);
+    CreateItemsInRepeat(50, [](int32_t i){return 100.0f;});
+    CreateDone();
+
+    pattern_->ScrollToIndex(48, true, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 49);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= 49; i++) {
+        ASSERT_TRUE(GetChildFrameNode(frameNode_, i));
+    }
+
+    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= 15; i++) {
+        ASSERT_TRUE(GetChildFrameNode(frameNode_, i));
+    }
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,7 @@ export class NavPushPathHelper {
         }
         return new Promise((resolve, reject) => {
             navPushPathHelperApi.silentInstall(moduleName, () => {
+                navPushPathHelperApi.initRouteMap();
                 this.navPathStack_?.pushPath(info, optionParam);
                 resolve();
             },
@@ -53,6 +54,7 @@ export class NavPushPathHelper {
         }
         return new Promise((resolve, reject) => {
             navPushPathHelperApi.silentInstall(moduleName, () => {
+                navPushPathHelperApi.initRouteMap();
                 this.navPathStack_?.pushDestination(info, optionParam)
                 .then(resolve).catch(reject);
             }, (error) => {
@@ -71,6 +73,7 @@ export class NavPushPathHelper {
         }
         return new Promise((resolve, reject) => {
             navPushPathHelperApi.silentInstall(moduleName, () => {
+                navPushPathHelperApi.initRouteMap();
                 this.navPathStack_?.pushPathByName(name, param, onPop, optionParam);
                 resolve();
             }, (error) => {
@@ -89,6 +92,7 @@ export class NavPushPathHelper {
         }
         return new Promise((resolve, reject) => {
             navPushPathHelperApi.silentInstall(moduleName, () => {
+                navPushPathHelperApi.initRouteMap();
                 this.navPathStack_?.pushDestinationByName(name, param, onPop, optionParam)
                 .then(resolve).catch(reject);
             }, (error) => {
@@ -107,6 +111,7 @@ export class NavPushPathHelper {
         }
         return new Promise((resolve, reject) => {
             navPushPathHelperApi.silentInstall(moduleName, () => {
+                navPushPathHelperApi.initRouteMap();
                 this.navPathStack_?.replacePath(info, optionParam);
                 resolve();
             }, (error) => {
@@ -125,6 +130,8 @@ export class NavPushPathHelper {
         }
         return new Promise((resolve, reject) => {
             navPushPathHelperApi.silentInstall(moduleName, () => {
+                hilog.info(0x3900, tag, `silentInstall success`);
+                navPushPathHelperApi.initRouteMap();
                 this.navPathStack_?.replacePathByName(name, param, optionParam);
                 resolve();
             }, (error) => {

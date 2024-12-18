@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 
 using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
-using LoadPageByBufferCallback = std::function<bool(
-    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::function<void(const std::string&, int32_t)>&)>;
+using LoadPageByBufferCallback = std::function<bool(const std::shared_ptr<std::vector<uint8_t>>& content,
+    const std::function<void(const std::string&, int32_t)>&, const std::string& contentName)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId, const std::string&)>;
 using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
 using RestoreFullPathInfoCallback = std::function<void(std::unique_ptr<JsonValue>)>;
@@ -230,7 +230,11 @@ protected:
     }
 
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
+    std::pair<int32_t, RefPtr<FrameNode>> FindPageInStackByRouteName(
+        const std::string& name, bool needIgnoreBegin = false);
     int32_t FindPageInRestoreStack(const std::string& url);
+
+    void SetPageInfoRouteName(const RefPtr<EntryPageInfo>& info);
 
     void LoadOhmUrl(const RouterPageInfo& target);
     void PushOhmUrl(const RouterPageInfo& target);
@@ -245,6 +249,8 @@ protected:
     void BackToIndexCheckAlert(int32_t index, const std::string& params);
     void StartClean();
     void CleanPageOverlay();
+
+    void UpdateSrcPage();
 
     enum class RestorePageDestination : int32_t {
         TOP = 0,         // restore page to pageRouterStack_'s top
@@ -273,7 +279,7 @@ protected:
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, int64_t cardId = 0);
-    static bool OnPopPage(bool needShowNext, bool needTransition);
+    bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 

@@ -40,6 +40,9 @@ enum class InstanceIdGenReason : uint32_t {
 
 class ACE_EXPORT ContainerScope {
 public:
+    template<typename T>
+    explicit ContainerScope(T) = delete;
+
     explicit ContainerScope(int32_t id)
     {
         UpdateCurrent(id);

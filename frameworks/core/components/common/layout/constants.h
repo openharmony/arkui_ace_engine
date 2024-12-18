@@ -309,6 +309,21 @@ enum class TextDecoration {
     INHERIT,
 };
 
+namespace StringUtils {
+inline std::string ToString(const TextDecoration& textDecoration)
+{
+    static const LinearEnumMapNode<TextDecoration, std::string> table[] = {
+        { TextDecoration::NONE, "NONE" },
+        { TextDecoration::UNDERLINE, "UNDERLINE" },
+        { TextDecoration::OVERLINE, "OVERLINE" },
+        { TextDecoration::LINE_THROUGH, "LINE_THROUGH" },
+        { TextDecoration::INHERIT, "INHERIT" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDecoration);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 enum class TextDecorationStyle {
     SOLID,
     DOUBLE,
@@ -357,6 +372,22 @@ enum class ImageFit {
     COVER_TOP_LEFT,
 };
 
+namespace StringUtils {
+inline std::string ToString(const ImageFit& imageFit)
+{
+    static const LinearEnumMapNode<ImageFit, std::string> table[] = {
+        { ImageFit::FILL, "FILL" }, { ImageFit::CONTAIN, "CONTAIN" }, { ImageFit::COVER, "COVER" },
+        { ImageFit::FITWIDTH, "FITWIDTH" }, { ImageFit::FITHEIGHT, "FITHEIGHT" }, { ImageFit::NONE, "NONE" },
+        { ImageFit::SCALE_DOWN, "SCALE_DOWN" }, { ImageFit::TOP_LEFT, "TOP_LEFT" },  { ImageFit::TOP, "TOP" },
+        { ImageFit::TOP_END, "TOP_END" }, { ImageFit::START, "START" }, { ImageFit::CENTER, "CENTER" },
+        { ImageFit::END, "END" }, { ImageFit::BOTTOM_START, "BOTTOM_START" }, { ImageFit::BOTTOM, "BOTTOM" },
+        { ImageFit::BOTTOM_END, "BOTTOM_END" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), imageFit);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 enum class DynamicRangeMode {
     HIGH = 0,
     CONSTRAINT,
@@ -368,6 +399,14 @@ enum class AIImageQuality {
     LOW,
     NORMAL,
     HIGH,
+};
+
+enum class ImageRotateOrientation {
+    AUTO = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3,
+    LEFT = 4,
 };
 
 enum class ImageRenderMode {
@@ -464,14 +503,19 @@ enum class KeyDirection {
 };
 
 enum class PixelRoundPolicy {
+    ALL_FORCE_ROUND = 0,
     FORCE_CEIL_START = 1,
     FORCE_FLOOR_START = 1 << 1,
-    FORCE_CEIL_TOP = 1 << 2,
-    FORCE_FLOOR_TOP = 1 << 3,
-    FORCE_CEIL_END = 1 << 4,
-    FORCE_FLOOR_END = 1 << 5,
-    FORCE_CEIL_BOTTOM = 1 << 6,
-    FORCE_FLOOR_BOTTOM = 1 << 7,
+    NO_FORCE_ROUND_START = 1 << 2,
+    FORCE_CEIL_TOP = 1 << 3,
+    FORCE_FLOOR_TOP = 1 << 4,
+    NO_FORCE_ROUND_TOP = 1 << 5,
+    FORCE_CEIL_END = 1 << 6,
+    FORCE_FLOOR_END = 1 << 7,
+    NO_FORCE_ROUND_END = 1 << 8,
+    FORCE_CEIL_BOTTOM = 1 << 9,
+    FORCE_FLOOR_BOTTOM = 1 << 10,
+    NO_FORCE_ROUND_BOTTOM = 1 << 11,
 };
 
 enum class PixelRoundCalcPolicy {
@@ -853,6 +897,7 @@ enum class KeyBoardAvoidMode : int32_t {
     RESIZE = 1,
     OFFSET_WITH_CARET = 2,
     RESIZE_WITH_CARET = 3,
+    NONE = 4,
 };
 
 enum class SwipeActionState : uint32_t {

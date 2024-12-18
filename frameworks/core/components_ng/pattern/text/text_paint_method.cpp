@@ -60,14 +60,10 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto textOverflow = layoutProperty->GetTextOverflow();
-    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (pManager->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
-            textContentModifier_->StartTextRace();
-        } else {
-            textContentModifier_->StopTextRace();
-        }
-    } else {
-        textContentModifier_->StopTextRace();
+    textContentModifier_->StopTextRace();
+    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
+        pManager->GetLongestLineWithIndent() > paintWrapper->GetContentSize().Width()) {
+        textContentModifier_->StartTextRace();
     }
 
     // Privacy masking.
@@ -131,7 +127,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto contentRect = textPattern->GetTextContentRect();
     std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
-        auto rects = pManager->GetParagraphsRects(selection.GetTextStart(), selection.GetTextEnd());
+        auto rects = pManager->GetTextBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
         selectedRects = CalculateSelectedRect(rects, contentRect.Width());
     }
     textOverlayModifier_->SetContentRect(contentRect);
@@ -155,13 +151,22 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 }
 
 std::vector<RectF> TextPaintMethod::CalculateSelectedRect(
-    const std::vector<std::pair<std::vector<RectF>, TextDirection>>& selectedRects, float contentWidth)
+    const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& selectedRects, float contentWidth)
 {
+    const float blankWidth = TextBase::GetSelectedBlankLineWidth();
     std::vector<RectF> result;
+    float lastLineBottom = -1.0f;
     for (const auto& info : selectedRects) {
         auto rects = info.first;
-        TextBase::CalculateSelectedRect(rects, contentWidth, info.second);
+        TextBase::CalculateSelectedRectEx(rects, lastLineBottom);
+        auto textAlign = TextBase::CheckTextAlignByDirection(info.second.align, info.second.direction);
+        for (auto& rect : rects) {
+            TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);
+        }
         result.insert(result.end(), rects.begin(), rects.end());
+        if (!result.empty()) {
+            lastLineBottom = result.back().Bottom();
+        }
     }
     return result;
 }

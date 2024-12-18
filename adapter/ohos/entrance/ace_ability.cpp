@@ -218,9 +218,15 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         CapabilityRegistry::Register();
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
-        AceApplicationInfo::GetInstance().SetApiTargetVersion(abilityContext->GetApplicationInfo()->apiTargetVersion);
-        AceApplicationInfo::GetInstance().SetAppVersionName(abilityContext->GetApplicationInfo()->versionName);
-        AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
+        auto applicationInfo = abilityContext->GetApplicationInfo();
+        if (applicationInfo) {
+            AceApplicationInfo::GetInstance().SetApiTargetVersion(applicationInfo->apiTargetVersion);
+            AceApplicationInfo::GetInstance().SetAppVersionName(applicationInfo->versionName);
+            AceApplicationInfo::GetInstance().SetAppVersionCode(applicationInfo->versionCode);
+        } else {
+            LOGE("ability start set application info failed,it may cause exception");
+            return;
+        }
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         ImageFileCache::GetInstance().SetImageCacheFilePath(cacheDir);
@@ -238,6 +244,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
          "and apiReleaseType: %{public}s, useNewPipe: %{public}d",
         apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
+    CHECK_NULL_VOID(window);
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
     OHOS::sptr<AceWindowListener> aceWindowListener = new AceWindowListener(self);
     // register surface change callback and window mode change callback

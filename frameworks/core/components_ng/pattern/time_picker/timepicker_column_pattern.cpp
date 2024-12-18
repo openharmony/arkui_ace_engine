@@ -151,7 +151,7 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
     if (timePickerRowPattern->GetIsEnableHaptic()) {
         isEnableHaptic_ = true;
         if (!hapticController_) {
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = parentNode->GetContext();
             CHECK_NULL_VOID(context);
             context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
@@ -203,6 +203,9 @@ void TimePickerColumnPattern::ParseTouchListener()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->OnTouchDown();
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
@@ -290,6 +293,9 @@ RefPtr<TouchEventImpl> TimePickerColumnPattern::CreateItemTouchEventListener()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto isToss = pattern->GetTossStatus();
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss == true) {
                 pattern->touchBreak_ = true;
@@ -413,7 +419,7 @@ void TimePickerColumnPattern::InitTextFontFamily()
     CHECK_NULL_VOID(stackNode);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = parentNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
@@ -471,7 +477,8 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
     }
-    for (uint32_t index = 0; index < showOptionCount; index++) {
+    auto actualOptionCount = showOptionCount < child.size() ? showOptionCount : child.size();
+    for (uint32_t index = 0; index < actualOptionCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
@@ -489,7 +496,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if ((NotLoopOptions() || !wheelModeEnabled_) && !virtualIndexValidate) {
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
         } else {
             auto optionValue = timePickerRowPattern->GetOptionsValue(host, optionIndex);
             textLayoutProperty->UpdateContent(optionValue);
@@ -1386,7 +1393,9 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
             CHECK_NULL_VOID(column);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->RequestFrame();
     }

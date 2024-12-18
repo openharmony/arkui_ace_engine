@@ -152,6 +152,11 @@ bool IsWindowRectResizeEnabled()
     return (system::GetParameter("persist.ace.windowresize.enabled", "true") == "true");
 }
 
+bool IsCacheNavigationNodeEnable()
+{
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
+}
+
 bool IsHookModeEnabled()
 {
 #ifdef PREVIEW
@@ -354,6 +359,12 @@ bool IsFaultInjectEnabled()
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
 }
 
+double ReadScrollableDistance()
+{
+    auto ret = system::GetParameter("persist.scrollable.distance", "");
+    return StringUtils::StringToDouble(ret);
+}
+
 std::pair<float, float> GetPercent()
 {
     std::vector<double> result;
@@ -363,6 +374,12 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
+int32_t GetPageCountProp()
+{
+    float pageCount = std::atof(system::GetParameter("persist.ace.cachedcount.page_count", "1.0").c_str());
+    return pageCount > 0.0f ? pageCount : 0.0f;
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -370,6 +387,7 @@ bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
@@ -423,6 +441,7 @@ bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
+float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
@@ -433,6 +452,7 @@ float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThre
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
+double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -737,6 +757,11 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
+bool SystemProperties::GetCacheNavigationNodeEnable()
+{
+    return cacheNavigationNodeEnable_;
+}
+
 bool SystemProperties::GetGridCacheEnabled()
 {
     return gridCacheEnabled_;
@@ -821,6 +846,7 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
 
 float SystemProperties::GetDefaultResolution()
 {
+    // always return density of main screen, don't use this interface unless you need density when no window exists
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
@@ -885,7 +911,7 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
     if (std::regex_match(foldTypeProp, FOLD_TYPE_REGEX)) {
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
-        auto type = std::stoi(foldScreenTypeStr);
+        auto type = StringUtils::StringToInt(foldScreenTypeStr);
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
@@ -910,5 +936,20 @@ double SystemProperties::GetSrollableFriction()
 {
     auto ret = system::GetParameter("persist.scrollable.friction", "");
     return StringUtils::StringToDouble(ret);
+}
+
+double SystemProperties::GetScrollableDistance()
+{
+    return scrollableDistance_;
+}
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
+
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
 }
 } // namespace OHOS::Ace

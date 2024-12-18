@@ -27,6 +27,7 @@ void DomGridRow::SetParentGridInfo(const RefPtr<GridContainerInfo>& parent)
 {
     if (columnType_ != GridColumnType::NONE) {
         auto info = GridSystemManager::GetInstance().GetInfoByType(columnType_);
+        CHECK_NULL_VOID(info);
         gridContainerInfo_ = info->GetParent();
         boxComponent_->SetGridLayoutInfo(gridContainerInfo_);
     } else {

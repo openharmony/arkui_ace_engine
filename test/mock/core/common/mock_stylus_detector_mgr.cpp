@@ -16,34 +16,6 @@
 #include "core/common/stylus/stylus_detector_mgr.h"
 
 namespace OHOS::Ace {
-int32_t StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler)
-{
-    return 0;
-}
-
-int32_t StylusDetectorMgr::StylusDetectorCallBack::SetText(int32_t nodeId, void* data,
-    RefPtr<TaskExecutor> taskScheduler, std::shared_ptr<IAceStylusCallback> callback)
-{
-    return 0;
-}
-
-int32_t StylusDetectorMgr::StylusDetectorCallBack::GetText(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler,
-    std::shared_ptr<IAceStylusCallback> callback)
-{
-    return 0;
-}
-
-int32_t StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
-    const CommandType& command, void* data, std::shared_ptr<IAceStylusCallback> callback)
-{
-    return 0;
-}
-
-bool StylusDetectorMgr::StylusDetectorCallBack::OnDetectorSync(const CommandType& command)
-{
-    return false;
-}
-
 StylusDetectorMgr* StylusDetectorMgr::GetInstance()
 {
     static StylusDetectorMgr instance;

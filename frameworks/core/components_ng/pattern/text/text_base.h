@@ -86,17 +86,16 @@ public:
         startOffset_ = startOffset;
     }
 
+    void CancelGestureSelection()
+    {
+        DoTextSelectionTouchCancel();
+        ResetGestureSelection();
+    }
+
     void EndGestureSelection()
     {
-        if (!isStarted_) {
-            return;
-        }
         OnTextGenstureSelectionEnd();
-        start_ = -1;
-        end_ = -1;
-        isStarted_ = false;
-        startOffset_.Reset();
-        isSelecting_ = false;
+        ResetGestureSelection();
     }
 
     void DoGestureSelection(const TouchEventInfo& info);
@@ -109,7 +108,25 @@ protected:
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
     virtual void OnTextGenstureSelectionEnd() {}
     virtual void DoTextSelectionTouchCancel() {}
+    int32_t GetSelectingFingerId()
+    {
+        return selectingFingerId_;
+    }
+
+    bool IsGestureSelectingText()
+    {
+        return isSelecting_;
+    }
 private:
+    void ResetGestureSelection()
+    {
+        start_ = -1;
+        end_ = -1;
+        isStarted_ = false;
+        startOffset_.Reset();
+        isSelecting_ = false;
+        selectingFingerId_ = -1;
+    }
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;
     int32_t end_ = -1;
@@ -117,6 +134,7 @@ private:
     bool isSelecting_ = false;
     Dimension minMoveDistance_ = 5.0_vp;
     Offset startOffset_;
+    int32_t selectingFingerId_ = -1;
 };
 
 class TextBase : public SelectOverlayClient {
@@ -222,9 +240,14 @@ public:
     virtual void OnHandleAreaChanged() {}
     virtual void SetIsTextDraggable(bool isTextDraggable = true) {}
     static void SetSelectionNode(const SelectedByMouseInfo& info);
-    static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
+    static int32_t GetGraphemeClusterLength(const std::u16string& text, int32_t extend, bool checkPrev = false);
     static void CalculateSelectedRect(
         std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
+    static float GetSelectedBlankLineWidth();
+    static void CalculateSelectedRectEx(std::vector<RectF>& selectedRect, float lastLineBottom);
+    static bool UpdateSelectedBlankLineRect(RectF& rect, float blankWidth, TextAlign textAlign, float longestLine);
+    static void SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect, std::map<float, RectF>& lineGroup);
+    static TextAlign CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction);
 
     static void RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point);
     static bool HasRenderTransform(const RefPtr<FrameNode>& targetNode);
@@ -232,11 +255,11 @@ public:
     {
         return false;
     }
-
+    static std::u16string ConvertStr8toStr16(const std::string& value);
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
-    std::vector<std::string> dragContents_;
+    std::vector<std::u16string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     RectF contentRect_;
     Dimension avoidKeyboardOffset_ = 24.0_vp;

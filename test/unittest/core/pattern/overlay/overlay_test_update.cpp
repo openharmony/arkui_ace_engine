@@ -427,7 +427,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest004, TestSize.Level1)
     auto textval2 = textLayoutProperty->GetTextOverflow();
     auto textval3 = textLayoutProperty->GetEllipsisMode();
     auto textval4 = textLayoutProperty->GetTextColorValue(Color::BLACK);
-    EXPECT_EQ(textval1, TextDirection::RTL);
+    EXPECT_EQ(textval1, TextDirection::AUTO);
     EXPECT_EQ(textval2, TextOverflow::ELLIPSIS);
     EXPECT_EQ(textval3, EllipsisMode::TAIL);
     EXPECT_EQ(textval4, Color::RED);
@@ -1696,7 +1696,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest029, TestSize.Level1)
      * @tc.steps: step3. Test GetTextMaxHeight.
      */
     auto textMaxHeight = pattern->GetTextMaxHeight();
-    EXPECT_EQ(textMaxHeight, 0);
+    EXPECT_EQ(textMaxHeight, 832);
 }
 
 /**
@@ -1957,6 +1957,8 @@ HWTEST_F(OverlayTestUpdate, ToastTest034, TestSize.Level1)
     ASSERT_NE(toastContext, nullptr);
     EXPECT_TRUE(pattern->IsDefaultToast());
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
+    toastContext->UpdateOffset({pattern->GetOffsetX(toastNode->CreateLayoutWrapper()),
+        pattern->GetOffsetY(toastNode->CreateLayoutWrapper())});
     EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 360.0);
     EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 1280.0);
 }

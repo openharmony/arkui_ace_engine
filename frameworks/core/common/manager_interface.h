@@ -41,6 +41,7 @@ public:
     virtual bool HasKeyboard() const { return false; } // include uiExtension
     virtual bool GetNeedToRequestKeyboard() {return true;}
     virtual void SetNeedToRequestKeyboard(bool val) {}
+    virtual bool GetIsImeAttached() const { return false; }
 };
 
 } // namespace OHOS::Ace

@@ -20,15 +20,14 @@
 
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
+#include "securec.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-#include "base/web/webview/ohos_nweb/include/nweb.h"
-#else
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
 #endif
 #include "bridge/common/utils/engine_helper.h"
@@ -52,6 +51,12 @@ namespace {
 const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
 const std::string BUNDLE_NAME_PREFIX = "bundleName:";
 const std::string MODULE_NAME_PREFIX = "moduleName:";
+
+const int32_t SELECTION_MENU_OPTION_PARAM_INDEX = 3;
+const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
+const int32_t PARAM_ZERO = 0;
+const int32_t PARAM_ONE = 1;
+const int32_t PARAM_TWO = 2;
 
 void EraseSpace(std::string& data)
 {
@@ -820,9 +825,14 @@ public:
     {
         if (eventResult_) {
             bool result = true;
-            if (args.Length() == 1 && args[0]->IsBoolean()) {
-                result = args[0]->ToBoolean();
+            bool stopPropagation = true;
+            if (args.Length() == PARAM_ONE && args[PARAM_ZERO]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
                 eventResult_->SetGestureEventResult(result);
+            } else if (args.Length() == PARAM_TWO && args[PARAM_ZERO]->IsBoolean() && args[PARAM_ONE]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+                stopPropagation = args[PARAM_ONE]->ToBoolean();
+                eventResult_->SetGestureEventResult(result, stopPropagation);
             }
         }
     }
@@ -1225,6 +1235,10 @@ public:
             return;
         }
         auto statusCode = args[0]->ToNumber<int32_t>();
+        if (statusCode == -1) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "SetResponseCode: arg value is not supported!");
+        }
+
         response_->SetStatusCode(statusCode);
     }
 
@@ -1533,12 +1547,41 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("getSourceType", &JSContextMenuParam::GetSourceType);
         JSClass<JSContextMenuParam>::CustomMethod("getInputFieldType", &JSContextMenuParam::GetInputFieldType);
         JSClass<JSContextMenuParam>::CustomMethod("getMediaType", &JSContextMenuParam::GetMediaType);
+        JSClass<JSContextMenuParam>::CustomMethod("getPreviewWidth", &JSContextMenuParam::GetPreviewWidth);
+        JSClass<JSContextMenuParam>::CustomMethod("getPreviewHeight", &JSContextMenuParam::GetPreviewHeight);
         JSClass<JSContextMenuParam>::Bind(globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
+    }
+
+    void UpdatePreviewSize()
+    {
+        if (previewWidth_ >= 0 && previewHeight_ >= 0) {
+            return;
+        }
+        if (param_) {
+            int32_t x = 0;
+            int32_t y = 0;
+            param_->GetImageRect(x, y, previewWidth_, previewHeight_);
+        }
+    }
+
+    void GetPreviewWidth(const JSCallbackInfo& args)
+    {
+        auto ret = JSVal(ToJSValue(previewWidth_));
+        auto descriptionRef = JSRef<JSVal>::Make(ret);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetPreviewHeight(const JSCallbackInfo& args)
+    {
+        auto ret = JSVal(ToJSValue(previewHeight_));
+        auto descriptionRef = JSRef<JSVal>::Make(ret);
+        args.SetReturnValue(descriptionRef);
     }
 
     void SetParam(const ContextMenuEvent& eventInfo)
     {
         param_ = eventInfo.GetParam();
+        UpdatePreviewSize();
     }
 
     void GetXCoord(const JSCallbackInfo& args)
@@ -1689,6 +1732,10 @@ private:
     }
 
     RefPtr<WebContextMenuParam> param_;
+
+    int32_t previewWidth_ = -1;
+
+    int32_t previewHeight_ = -1;
 };
 
 class JSContextMenuResult : public Referenced {
@@ -1924,6 +1971,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
     JSClass<JSWeb>::StaticMethod("overScrollMode", &JSWeb::OverScrollMode);
+    JSClass<JSWeb>::StaticMethod("blurOnKeyboardHideMode", &JSWeb::BlurOnKeyboardHideMode);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
@@ -1960,6 +2008,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
+    JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2148,6 +2197,44 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
+    JSRef<JSArray> certsArr = JSRef<JSArray>::New();
+    for (uint8_t i = 0; i < certChainDerData.size(); i++) {
+        if (i == UINT8_MAX) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
+            break;
+        }
+
+        void *data = nullptr;
+        napi_value buffer = nullptr;
+        napi_value item = nullptr;
+        napi_status status = napi_create_arraybuffer(env, certChainDerData[i].size(), &data, &buffer);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
+            continue;
+        }
+        int retCode = memcpy_s(data, certChainDerData[i].size(),
+                               certChainDerData[i].data(), certChainDerData[i].size());
+        if (retCode != 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
+            continue;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, certChainDerData[i].size(), buffer, 0, &item);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create typed array failed, status = %{public}d.", status);
+            continue;
+        }
+        JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
+        certsArr->SetValueAt(i, cert);
+    }
+    obj->SetPropertyObject("certChainData", certsArr);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -3175,6 +3262,119 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOnContextMenuShow(jsCallback);
 }
 
+void ParseBindSelectionMenuParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
+    if (onDisappearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
+                            node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+
+    auto onAppearValue = menuOptions->GetProperty("onAppear");
+    if (onAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc),
+                         node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+}
+
+void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args,
+    NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    auto menuOptions = JSRef<JSObject>::Cast(args);
+    ParseBindSelectionMenuParam(info, menuOptions, menuParam);
+
+    auto preview = menuOptions->GetProperty("preview");
+    if (!preview->IsFunction()) {
+        return;
+    }
+    auto menuType = menuOptions->GetProperty("menuType");
+    bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
+    if (isPreviewMenu) {
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
+        CHECK_NULL_VOID(previewBuilderFunc);
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
+                               node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("BindSelectionMenuPreviwer");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+}
+
+void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
+{
+    if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX || !info[0]->IsNumber() || !info[1]->IsObject() ||
+        !info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
+        return;
+    }
+    if (info[0]->ToNumber<int32_t>() != static_cast<int32_t>(WebElementType::IMAGE) ||
+        info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>() !=
+        static_cast<int32_t>(ResponseType::LONG_PRESS)) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "WebElementType or WebResponseType param err");
+        return;
+    }
+    WebElementType elementType = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());
+    ResponseType responseType =
+        static_cast<ResponseType>(info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>());
+
+    // Builder
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "BindSelectionMenu menu builder param err");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    std::function<void()> menuBuilder = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                                         node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BindSelectionMenu");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+    };
+
+    std::function<void()> previewBuilder = nullptr;
+    NG::MenuParam menuParam;
+    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
+        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
+    }
+
+    if (responseType != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isShow = true;
+    WebModel::GetInstance()->SetNewDragStyle(true);
+    auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
+        elementType, responseType, menuBuilder, previewBuilder, menuParam);
+    WebModel::GetInstance()->SetPreviewSelectionMenu(previewSelectionMenuParam);
+}
+
 void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -3421,6 +3621,23 @@ void JSWeb::OverScrollMode(int overScrollMode)
             break;
     }
     WebModel::GetInstance()->SetOverScrollMode(mode);
+}
+
+void JSWeb::BlurOnKeyboardHideMode(int blurOnKeyboardHideMode)
+{
+    auto mode = BlurOnKeyboardHideMode::SILENT;
+    switch (blurOnKeyboardHideMode) {
+        case 0:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+        case 1:
+            mode = BlurOnKeyboardHideMode::BLUR;
+            break;
+        default:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+    }
+    WebModel::GetInstance()->SetBlurOnKeyboardHideMode(mode);
 }
 
 void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)
@@ -3822,7 +4039,7 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         auto webNode = node.Upgrade();
         CHECK_NULL_VOID(webNode);
-        ContainerScope scope(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -4128,17 +4345,17 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOnDataResubmitted(uiCallback);
 }
 
-Media::PixelFormat GetPixelFormat(NWeb::ImageColorType colorType)
+Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
 {
     Media::PixelFormat pixelFormat;
     switch (colorType) {
-        case NWeb::ImageColorType::COLOR_TYPE_UNKNOWN:
+        case NG::TransImageColorType::COLOR_TYPE_UNKNOWN:
             pixelFormat = Media::PixelFormat::UNKNOWN;
             break;
-        case NWeb::ImageColorType::COLOR_TYPE_RGBA_8888:
+        case NG::TransImageColorType::COLOR_TYPE_RGBA_8888:
             pixelFormat = Media::PixelFormat::RGBA_8888;
             break;
-        case NWeb::ImageColorType::COLOR_TYPE_BGRA_8888:
+        case NG::TransImageColorType::COLOR_TYPE_BGRA_8888:
             pixelFormat = Media::PixelFormat::BGRA_8888;
             break;
         default:
@@ -4148,20 +4365,20 @@ Media::PixelFormat GetPixelFormat(NWeb::ImageColorType colorType)
     return pixelFormat;
 }
 
-Media::AlphaType GetAlphaType(NWeb::ImageAlphaType alphaType)
+Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
 {
     Media::AlphaType imageAlphaType;
     switch (alphaType) {
-        case NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN:
+        case NG::TransImageAlphaType::ALPHA_TYPE_UNKNOWN:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
             break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_OPAQUE:
+        case NG::TransImageAlphaType::ALPHA_TYPE_OPAQUE:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
             break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+        case NG::TransImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
             break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+        case NG::TransImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
             break;
         default:
@@ -4183,8 +4400,8 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     Media::InitializationOptions opt;
     opt.size.width = static_cast<int32_t>(width);
     opt.size.height = static_cast<int32_t>(height);
-    opt.pixelFormat = GetPixelFormat(NWeb::ImageColorType(colorType));
-    opt.alphaType = GetAlphaType(NWeb::ImageAlphaType(alphaType));
+    opt.pixelFormat = GetPixelFormat(NG::TransImageColorType(colorType));
+    opt.alphaType = GetAlphaType(NG::TransImageAlphaType(alphaType));
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     if (pixelMap == nullptr) {
@@ -4664,9 +4881,12 @@ void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                             const BaseEventInfo* info) {
+        int32_t instanceId = Container::CurrentIdSafely();
         auto webNode = node.Upgrade();
-        CHECK_NULL_VOID(webNode);
-        ContainerScope scope(webNode->GetInstanceId());
+        if (webNode) {
+            instanceId = webNode->GetInstanceId();
+        }
+        ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedDataInfo>(info);
         func->Execute(*eventInfo);

@@ -13,12 +13,6 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-#include <map>
-#include <mutex>
-#include <set>
-#include <vector>
-
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
@@ -26,13 +20,12 @@
 #include "base/utils/utils.h"
 #include "bridge/common/media_query/media_queryer.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
 constexpr int32_t TWO_ARGS = 2;
+constexpr int32_t DEFAULT_INSTANCE_ID = -1;
 }
 
 using namespace OHOS::Ace::Framework;
@@ -121,6 +114,7 @@ public:
     {
         MediaQueryer queryer;
         for (auto& listener : copyListeners) {
+            OHOS::Ace::ContainerScope scope(listener->GetInstanceId());
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
             std::set<napi_ref> delayDeleteCallbacks;
@@ -158,12 +152,6 @@ public:
 
     static napi_value On(napi_env env, napi_callback_info info)
     {
-        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
-        if (!jsEngine) {
-            return nullptr;
-        }
-        jsEngine->RegisterMediaUpdateCallback(NapiCallback);
-
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
@@ -181,6 +169,11 @@ public:
             napi_close_handle_scope(env, scope);
             return nullptr;
         }
+        auto jsEngine = listener->GetJsEngine();
+        if (!jsEngine) {
+            return nullptr;
+        }
+        jsEngine->RegisterMediaUpdateCallback(NapiCallback);
         auto iter = listener->FindCbList(cb);
         if (iter != listener->cbList_.end()) {
             napi_close_handle_scope(env, scope);
@@ -277,6 +270,16 @@ public:
         napi_set_named_property(env, result, funName, funcValue);
     }
 
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
+    int32_t GetInstanceId()
+    {
+        return instanceId_;
+    }
+
 private:
     void CleanListenerSet()
     {
@@ -306,7 +309,7 @@ private:
             env_ = env;
         }
         napi_close_handle_scope(env, scope);
-        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
+        auto jsEngine = GetJsEngine();
         if (!jsEngine) {
             return;
         }
@@ -323,6 +326,16 @@ private:
         CHECK_NULL_RETURN(listener, nullptr);
         listener->Initialize(env, thisVar);
         return listener;
+    }
+
+    RefPtr<Framework::JsEngine> GetJsEngine()
+    {
+        if (GetInstanceId() == DEFAULT_INSTANCE_ID) {
+            TAG_LOGW(AceLogTag::ACE_MEDIA_QUERY, "matchMediaSync executes in non-UI context");
+            return EngineHelper::GetCurrentEngineSafely();
+        } else {
+            return EngineHelper::GetEngine(GetInstanceId());
+        }
     }
 
     static size_t ParseArgs(napi_env& env, napi_callback_info& info, napi_value& thisVar, napi_value& cb)
@@ -355,6 +368,7 @@ private:
 
     napi_env env_ = nullptr;
     std::list<napi_ref> cbList_;
+    int32_t instanceId_ = DEFAULT_INSTANCE_ID;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static napi_env delayDeleteEnv_;
     static std::set<napi_ref>* delayDeleteCallbacks_;
@@ -394,6 +408,7 @@ static napi_value JSMatchMediaSync(napi_env env, napi_callback_info info)
     MediaQueryListener* listener = new MediaQueryListener(matchResult, conditionStr);
     napi_value result = nullptr;
     listener->NapiSerializer(env, result);
+    listener->SetInstanceId(Container::CurrentIdSafely());
     return result;
 }
 

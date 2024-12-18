@@ -82,6 +82,11 @@ public:
         ostream_ = std::move(file);
     }
 
+    void SetSeparator(std::string separator)
+    {
+        separator_ = separator;
+    }
+
     const std::unique_ptr<std::ostream>& GetDumpFile() const
     {
         return ostream_;
@@ -156,11 +161,14 @@ public:
     static const size_t MIN_JSON_LENGTH = 4;
     static const size_t END_POS_TWO = 2;
     static const size_t END_POS_THREE = 3;
+    int CompressString(const char* in_str, size_t in_len, std::string& out_str, int level);
+    void OutPutByCompress();
 
 private:
     std::vector<std::string> description_;
     std::unique_ptr<std::ostream> ostream_ { nullptr };
     std::string result_;
+    std::string separator_ = "\n";
     int32_t depth_ = -1;
     ACE_DISALLOW_MOVE(DumpLog);
 };

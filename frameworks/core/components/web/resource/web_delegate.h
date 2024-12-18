@@ -63,6 +63,8 @@ typedef struct WindowsSurfaceInfoTag {
     EGLSurface surface;
 } WindowsSurfaceInfo;
 
+typedef NWeb::NativeArkWebOnJavaScriptProxyCallback NativeMethodCallback;
+
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -274,6 +276,7 @@ public:
     int GetMediaType() const override;
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
+    void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -582,6 +585,7 @@ public:
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
+    void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
@@ -619,6 +623,48 @@ public:
 
 private:
     uint8_t theme_flags_ = static_cast<uint8_t>(NWeb::SystemThemeFlags::NONE);
+};
+
+class NWebKeyboardEventImpl : public OHOS::NWeb::NWebKeyboardEvent {
+public:
+    NWebKeyboardEventImpl(
+        int32_t keyCode, int32_t action, int32_t unicode, bool enableCapsLock,
+        std::vector<int32_t> pressedCodes)
+        : keyCode_(keyCode), action_(action), unicode_(unicode), enableCapsLock_(enableCapsLock),
+        pressedCodes_(pressedCodes) {}
+    ~NWebKeyboardEventImpl() = default;
+
+    int32_t GetKeyCode() override
+    {
+        return keyCode_;
+    }
+
+    int32_t GetAction() override
+    {
+        return action_;
+    }
+
+    int32_t GetUnicode() override
+    {
+        return unicode_;
+    }
+
+    bool IsEnableCapsLock() override
+    {
+        return enableCapsLock_;
+    }
+
+    std::vector<int32_t> GetPressKeyCodes() override
+    {
+        return pressedCodes_;
+    }
+
+private:
+    int32_t keyCode_ = 0;
+    int32_t action_ = 0;
+    uint32_t unicode_ = 0;
+    bool enableCapsLock_ = false;
+    std::vector<int32_t> pressedCodes_ {};
 };
 
 class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
@@ -732,6 +778,7 @@ public:
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateBackgroundColor(const int backgroundColor);
     void UpdateInitialScale(float scale);
+    void UpdateLayoutMode(WebLayoutMode mode);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -775,6 +822,7 @@ public:
     void UpdateOverlayScrollbarEnabled(bool isEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
+    void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
@@ -802,6 +850,7 @@ public:
         const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
+    bool SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent);
     void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
@@ -827,6 +876,7 @@ public:
     bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
+    void GestureBackBlur();
     void OnWebviewHide();
     void OnWebviewShow();
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
@@ -909,6 +959,7 @@ public:
     void SuggestionSelected(int32_t index);
     void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
+    bool IsDragging();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
     std::string tempDir_;
@@ -947,6 +998,7 @@ public:
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
+    bool IsCurrentFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -1007,13 +1059,14 @@ public:
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoByFocusMove(
         int64_t accessibilityId, int32_t direction);
-    void SetAccessibilityState(bool state);
+    void SetAccessibilityState(bool state, bool isDelayed);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void ScaleGestureChange(double scale, double centerX, double centerY);
+    void ScaleGestureChangeV2(int type, double scale, double originScale, double centerX, double centerY);
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     // Backward
     void Backward();
@@ -1078,6 +1131,17 @@ public:
         return taskExecutor_;
     }
 
+    bool GetAccessibilityVisible(int64_t accessibilityId);
+
+    void SetTransformHint(uint32_t rotation);
+
+    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
+
+    void RegisterNativeArkJSFunction(const std::string& objName,
+        const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh);
+
+    void UnRegisterNativeArkJSFunction(const std::string& objName);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1099,7 +1163,6 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
     void LoadUrl(const std::string& url, const std::map<std::string, std::string>& httpHeaders);
-    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
     void Refresh();
@@ -1162,6 +1225,7 @@ private:
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
     void UnregisterAvoidAreaChangeListener(int32_t instanceId);
     void OnSafeInsetsChange();
+    void EnableHardware();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1288,6 +1352,7 @@ private:
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
+    bool isEnableHardwareComposition_ = false;
 #endif
 };
 

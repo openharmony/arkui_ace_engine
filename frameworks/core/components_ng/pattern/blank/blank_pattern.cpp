@@ -119,4 +119,14 @@ void BlankPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     auto blankMin = blankProperty->GetMinSize().value_or(Dimension());
     json->Put("min", blankMin.ToString().c_str());
 }
+
+void BlankPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto blankProperty = GetLayoutProperty<BlankLayoutProperty>();
+    CHECK_NULL_VOID(blankProperty);
+    auto blankMin = blankProperty->GetMinSize().value_or(Dimension());
+    if (blankMin != Dimension(0.0, blankMin.Unit())) {
+        json->Put("Min", blankMin.ToString().c_str());
+    }
+}
 } // namespace OHOS::Ace::NG

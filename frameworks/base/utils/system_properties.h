@@ -365,6 +365,8 @@ public:
         return buildTraceEnable_;
     }
 
+    static bool GetCacheNavigationNodeEnable();
+
     static bool GetAccessibilityEnabled()
     {
         return accessibilityEnabled_;
@@ -583,6 +585,11 @@ public:
         return brightUpPercent_;
     }
 
+    static float GetPageCount()
+    {
+        return pageCount_;
+    }
+
     static bool IsOpIncEnable();
 
     static float GetDragStartDampingRatio();
@@ -599,6 +606,12 @@ public:
 
     static double GetSrollableFriction();
 
+    static double GetScrollableDistance();
+
+    static bool IsNeedResampleTouchPoints();
+
+    static bool IsNeedSymbol();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -606,6 +619,7 @@ private:
     static std::atomic<bool> layoutTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
@@ -663,6 +677,7 @@ private:
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
+    static float pageCount_;
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
@@ -670,6 +685,7 @@ private:
     static float fontWeightScale_;
     static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
+    static double scrollableDistance_;
 };
 
 } // namespace OHOS::Ace

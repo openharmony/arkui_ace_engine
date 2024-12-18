@@ -93,10 +93,6 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     if (SystemProperties::GetSvgMode() <= 0) {
         return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, src.GetFillColor());
     }
-#ifdef NG_BUILD
-    LOGE("NG SvgDom not support!");
-    return nullptr;
-#else
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, src);
     if (!svgDom_) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
@@ -114,22 +110,22 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
             return context->NormalizeToPx(value);
         });
     return svgDom_;
-#endif
 }
 
-std::pair<SizeF, int32_t> DrawingImageData::Parse() const
+ImageCodec DrawingImageData::Parse() const
 {
     auto rsData = GetRSData();
     CHECK_NULL_RETURN(rsData, {});
     SizeF imageSize;
+    ImageRotateOrientation orientation = ImageRotateOrientation::UP;
     if (ImageSource::IsAstc(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize())) {
-        ImageSource::Size astcSize = ImageSource::GetASTCInfo(
-            static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
+        ImageSource::Size astcSize =
+            ImageSource::GetASTCInfo(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
         imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
-        return { imageSize, ASTC_FRAME_COUNT };
+        return { imageSize, ASTC_FRAME_COUNT, ImageRotateOrientation::UP };
     }
 
-    RSDataWrapper* wrapper = new RSDataWrapper{rsData};
+    RSDataWrapper* wrapper = new RSDataWrapper { rsData };
     auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
     if (!skData) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
@@ -145,16 +141,24 @@ std::pair<SizeF, int32_t> DrawingImageData::Parse() const
         return {};
     }
     switch (codec->getOrigin()) {
-        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
-        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
         case SkEncodedOrigin::kRightBottom_SkEncodedOrigin:
+        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
+            // right-handed 90°
+            orientation = ImageRotateOrientation::RIGHT;
+            break;
         case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
-            imageSize.SetSizeT(SizeF(codec->dimensions().fHeight, codec->dimensions().fWidth));
+        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
+            // left-handed 90°
+            orientation = ImageRotateOrientation::LEFT;
+            break;
+        case SkEncodedOrigin::kBottomRight_SkEncodedOrigin:
+            orientation = ImageRotateOrientation::DOWN;
             break;
         default:
-            imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));
+            orientation = ImageRotateOrientation::UP;
     }
-    return { imageSize, codec->getFrameCount() };
+    imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));
+    return { imageSize, codec->getFrameCount(), orientation };
 }
 
 std::string DrawingImageData::ToString() const

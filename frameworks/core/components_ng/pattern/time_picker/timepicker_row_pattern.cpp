@@ -189,6 +189,8 @@ void TimePickerRowPattern::InitDisabled()
     CHECK_NULL_VOID(renderContext);
     if (!enabled_) {
         renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    } else {
+        renderContext->UpdateOpacity(curOpacity_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -451,6 +453,12 @@ void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool
 }
 
 void TimePickerRowPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
+void TimePickerRowPattern::OnFontScaleConfigurationUpdate()
 {
     CHECK_NULL_VOID(closeDialogEvent_);
     closeDialogEvent_();
@@ -1209,9 +1217,24 @@ bool TimePickerRowPattern::CheckFocusID(int32_t childSize)
     if (focusKeyID_ > childSize - 1) {
         focusKeyID_ = childSize - 1;
         return false;
-    } else if (focusKeyID_ < 0) {
-        focusKeyID_ = 0;
-        return false;
+    }
+    if (NeedAdaptForAging() && !GetIsShowInDatePickerDialog()) {
+        if (GetCurrentPage() == 1) {
+            if (focusKeyID_ < 1) {
+                focusKeyID_ = 1;
+                return false;
+            }
+        } else {
+            if (focusKeyID_ != 0) {
+                focusKeyID_ = 0;
+                return false;
+            }
+        }
+    } else {
+        if (focusKeyID_ < 0) {
+            focusKeyID_ = 0;
+            return false;
+        }
     }
     return true;
 }
@@ -1319,5 +1342,21 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
         layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     host->MarkModifyDone();
+}
+
+bool TimePickerRowPattern::NeedAdaptForAging()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

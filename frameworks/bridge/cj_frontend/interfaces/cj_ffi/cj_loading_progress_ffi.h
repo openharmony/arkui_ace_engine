@@ -23,5 +23,6 @@
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkLoadingProgressCreate();
 CJ_EXPORT void FfiOHOSAceFrameworkLoadingProgressSetColor(uint32_t progressColor);
+CJ_EXPORT void FfiOHOSAceFrameworkLoadingProgressSetEnableLoading(bool enable);
 };
 #endif

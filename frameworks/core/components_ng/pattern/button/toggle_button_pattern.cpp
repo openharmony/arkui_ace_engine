@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
 #include "core/components/toggle/toggle_theme.h"
@@ -54,6 +55,7 @@ void ToggleButtonPattern::InitParameters()
 void ToggleButtonPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
+    CheckLocalizedBorderRadiuses();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -176,6 +178,9 @@ void ToggleButtonPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
             buttonPattern->isTouchPreventDefault_ = info.IsPreventDefault();
         }
@@ -309,6 +314,11 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        layoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        layoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -325,7 +335,7 @@ void ToggleButtonPattern::InitButtonAndText()
     if (textLayoutProperty->HasFontSize()) {
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
-    layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));
+    layoutProperty->UpdateLabel(UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u"")));
     if (!textLayoutProperty->GetTextColor().has_value()) {
         textLayoutProperty->UpdateTextColor(textColor_);
     }

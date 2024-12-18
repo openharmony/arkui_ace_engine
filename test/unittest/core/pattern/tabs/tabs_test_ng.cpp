@@ -29,6 +29,7 @@ namespace {}
 void TabsTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
@@ -51,7 +52,6 @@ void TabsTestNg::SetUpTestSuite()
     tabTheme->subTabBarPressedColor_ = Color::GREEN;
     tabTheme->bottomTabSymbolOn_ = Color::BLUE;
     tabTheme->bottomTabIconOff_ = Color::BLACK;
-    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
 
 void TabsTestNg::TearDownTestSuite()
@@ -81,7 +81,7 @@ void TabsTestNg::TearDown()
 
     dividerNode_ = nullptr;
     dividerRenderProperty_ = nullptr;
-    ClearOldNodes(); // Each testcase will create new list at begin
+    ClearOldNodes(); // Each testCase will create new list at begin
 }
 
 void TabsTestNg::GetTabs()
@@ -147,7 +147,8 @@ RefPtr<PaintWrapper> TabsTestNg::CreateTabsDone(TabsModelNG model)
 {
     model.Pop();
     frameNode_->ProcessOffscreenTask();
-    return CreateDone();
+    CreateDone();
+    return frameNode_->CreatePaintWrapper();
 }
 
 void TabsTestNg::CreateTabContents(int32_t itemNumber)
@@ -203,16 +204,16 @@ void TabsTestNg::SwipeToWithoutAnimation(int32_t index)
 {
     swiperController_->SwipeToWithoutAnimation(index);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void TabsTestNg::HandleClick(Offset offset, int32_t index)
 {
     GestureEvent info;
     info.SetLocalLocation(offset);
-    tabBarPattern_->HandleClick(info, index);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), index);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void TabsTestNg::HandleMouseEvent(MouseAction action, Offset location)
@@ -632,7 +633,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     Offset offset(1, 1);
     info.SetLocalLocation(offset);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->HandleClick(info, 0);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), 0);
     EXPECT_TRUE(swiperPattern_->IsDisableSwipe());
     EXPECT_TRUE(swiperPattern_->customAnimationToIndex_.has_value());
 

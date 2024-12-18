@@ -18,8 +18,11 @@ ace_unittest("date_picker_test_ng") {
   sources = [
     "date_picker_column_test_ng.cpp",
     "date_picker_order_test.cpp",
+    "date_picker_test_four.cpp",
     "date_picker_test_ng.cpp",
+    "date_picker_test_ng_add.cpp",
     "date_picker_test_one.cpp",
+    "date_picker_test_three.cpp",
     "date_picker_test_two.cpp",
     "date_picker_test_update.cpp",
   ]

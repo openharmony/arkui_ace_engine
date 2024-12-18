@@ -81,6 +81,10 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
+  enableModeChangeAnimation(value: boolean): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, EnableModeChangeAnimationModifier.identity, EnableModeChangeAnimationModifier, value);
+    return this;
+  }
   hideTitleBar(isHide: boolean, animated?: boolean): NavigationAttribute {
     let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
     if (!isUndefined(isHide) && !isNull(isHide)) {
@@ -188,6 +192,11 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   }
   recoverable(value: boolean | undefined): NavigationAttribute {
     modifierWithKey(this._modifiersWithKeys, NavigationRecoverableModifier.identity, NavigationRecoverableModifier, value);
+    return this;
+  }
+
+  enableDargBar(value: boolean | undefined): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
     return this;
   }
 }
@@ -423,6 +432,21 @@ class NavigationHideTitleBarModifier extends ModifierWithKey<ArkNavHideTitleBarO
   }
 }
 
+class EnableModeChangeAnimationModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableModeChangeAnimation');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableModeChangeAnimation(node);
+    } else {
+      getUINativeModule().navigation.setEnableModeChangeAnimation(node, this.value);
+    }
+  }
+}
+
 class HideNavBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -467,6 +491,21 @@ class NavigationRecoverableModifier extends ModifierWithKey<boolean | undefined>
       getUINativeModule().navigation.resetRecoverable(node);
     } else {
       getUINativeModule().navigation.setRecoverable(node, this.value);
+    }
+  }
+}
+
+class NavigationEnableDragBarModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableDragBar');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableDragBar(node);
+    } else {
+      getUINativeModule().navigation.setEnableDragBar(node, this.value);
     }
   }
 }

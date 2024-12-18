@@ -39,11 +39,12 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
+const auto MASK_COUNT = 2;
 }
 
 void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
@@ -208,14 +209,16 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(swiperNode);
     auto myIndex = swiperNode->GetChildFlatIndex(tabContentId).second;
 
-    tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
-    tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex);
+    auto newTabBar = tabBarPattern->IsNewTabBar(columnNode->GetId());
+    tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex, newTabBar);
+    tabBarPattern->AddTabBarItemId(columnNode->GetId(), myIndex, newTabBar);
+    tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex, newTabBar);
     auto labelStyle = tabContentPattern->GetLabelStyle();
     tabBarPattern->SetLabelStyle(columnNode->GetId(), labelStyle);
     auto iconStyle = tabContentPattern->GetIconStyle();
-    tabBarPattern->SetIconStyle(iconStyle, myIndex);
+    tabBarPattern->SetIconStyle(iconStyle, myIndex, newTabBar);
     auto symbol = tabContentPattern->GetSymbol();
-    tabBarPattern->SetSymbol(symbol, myIndex);
+    tabBarPattern->SetSymbol(symbol, myIndex, newTabBar);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto renderContext = columnNode->GetRenderContext();
@@ -227,8 +230,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     if (tabBarStyle != TabBarStyle::SUBTABBATSTYLE) {
         indicatorStyle.marginTop = 0.0_vp;
     }
-    tabBarPattern->SetSelectedMode(selectedMode, myIndex);
-    tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex);
+    tabBarPattern->SetSelectedMode(selectedMode, myIndex, newTabBar);
+    tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex, newTabBar);
 
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
@@ -243,12 +246,14 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
         if (!oldColumnNode) {
-            columnNode->MountToParent(tabBarNode, myIndex);
+            auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+            columnNode->MountToParent(tabBarNode, index);
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::CUSTOM_BUILDER);
+        tabBarPattern->SetIsExecuteBuilder(true);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
     }
@@ -267,10 +272,15 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     } else {
         auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
         layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
-            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
+            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
     }
 
-    bool isFrameNode = false;
+    bool isFrameNode = tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode();
+    if (isFrameNode) {
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::COMPONENT_CONTENT);
+    } else {
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::NORMAL);
+    }
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         if (tabBarParam.GetSymbol().has_value()) {
             iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -279,8 +289,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
         }
-        if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode()) {
-            isFrameNode = true;
+        if (isFrameNode) {
             textNode = tabContentPattern->FireCustomStyleNode();
         } else {
             textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -288,12 +297,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(iconNode);
-        columnNode->MountToParent(tabBarNode, position);
+        auto index = std::clamp(position, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+        columnNode->MountToParent(tabBarNode, index);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
     } else {
-        if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode()) {
-            isFrameNode = true;
+        if (isFrameNode) {
             auto builderNode = tabContentPattern->FireCustomStyleNode();
             columnNode->ReplaceChild(AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back()), builderNode);
         }
@@ -318,7 +327,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    int32_t indicator = swiperLayoutProperty->GetIndexValue(0);
+    int32_t indicator = 0;
+    if (tabLayoutProperty->GetIndexSetByUser().has_value()) {
+        indicator = tabLayoutProperty->GetIndexSetByUser().value();
+    } else if (swiperLayoutProperty->GetIndex().has_value()) {
+        indicator = swiperLayoutProperty->GetIndex().value();
+    }
     int32_t totalCount = swiperPattern->TotalCount();
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
@@ -356,8 +370,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         textLayoutProperty->UpdateContent(tabBarParam.GetText());
         textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    }
-    if (!isFrameNode) {
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     }
@@ -443,7 +455,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
-    tabBarPattern->AddTabBarItemType(columnNode->GetId(), false);
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 

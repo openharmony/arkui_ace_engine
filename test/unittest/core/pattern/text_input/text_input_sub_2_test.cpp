@@ -39,7 +39,7 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor007, TestSize.Level1)
         model.SetMaxLength(10);
         model.SetMaxLines(5);
         model.SetFontSize(Dimension(20));
-        model.SetShowError("error", false);
+        model.SetShowError(u"error", false);
 
     /**
      * @tc.step: step1. Set UnderlineColor is null
@@ -395,7 +395,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill001, TestSize.Level1)
      * As if model.SetType ACE_USER_NAME, isPopup is true, MockContainer::RequestAutoFill return false.
      */
     TextFieldModelNG model;
-    model.CreateTextInput("", "");
+    model.CreateTextInput(u"", u"");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::USER_NAME);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -437,7 +437,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill002, TestSize.Level1)
      * As if model.SetType ACE_NEW_PASSWORD, isPopup is true, MockContainer::RequestAutoFill return false.
      */
     TextFieldModelNG model;
-    model.CreateTextInput("", "");
+    model.CreateTextInput(u"", u"");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::NEW_PASSWORD);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -475,7 +475,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill002, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, OnAttachToMainTree001, TestSize.Level1)
 {
     TextFieldModelNG model;
-    model.CreateTextInput("placeholder", "text");
+    model.CreateTextInput(u"placeholder", u"text");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::USER_NAME);
 
@@ -509,4 +509,53 @@ HWTEST_F(TextFieldUXTest, OnAttachToMainTree001, TestSize.Level1)
     auto containerNodeIter_2 = textFieldManager->textFieldInfoMap_.find(parrent_currentId);
     EXPECT_FALSE(containerNodeIter_2 == textFieldManager->textFieldInfoMap_.end());
 }
+
+/**
+ * @tc.name: OnCut001
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnCut001, TestSize.Level1)
+{
+    TextFieldModelNG model;
+    model.CreateTextInput(u"placeholder", u"text");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pattern->OnAttachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
+
+    pattern->OnDetachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), 0);
+}
+
+/**
+ * @tc.name: OnCut002
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnCut002, TestSize.Level1)
+{
+    TextFieldModelNG model;
+    model.CreateTextInput(u"placeholder", u"text");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pattern->OnAttachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
+
+    pattern->OnDetachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), 0);
+}
+
 } // namespace OHOS::Ace::NG

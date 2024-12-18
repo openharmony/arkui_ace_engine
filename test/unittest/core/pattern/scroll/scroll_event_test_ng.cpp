@@ -15,6 +15,7 @@
 
 #include "scroll_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ScrollEventTestNg : public ScrollTestNg {
@@ -293,7 +294,7 @@ HWTEST_F(ScrollEventTestNg, HandleDrag001, TestSize.Level1)
 
     Offset startOffset = Offset();
     float dragDelta = -10.f;
-    float velocityDelta = -90;
+    float velocityDelta = -200;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
     EXPECT_TRUE(Position(dragDelta));
@@ -317,7 +318,7 @@ HWTEST_F(ScrollEventTestNg, HandleDrag002, TestSize.Level1)
 
     Offset startOffset = Offset();
     float dragDelta = 10.f;
-    float velocityDelta = 90;
+    float velocityDelta = 200;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
     EXPECT_TRUE(Position(dragDelta - HORIZONTAL_SCROLLABLE_DISTANCE));
@@ -1233,7 +1234,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     auto dragDistance = viewPortLength * 0.5 - 1;
     auto dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
-    auto predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    auto predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(predictSnapOffset.value(), 0);
 
@@ -1243,7 +1244,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     dragDistance = viewPortLength * 0.5 * 5;
     dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD * 5;
-    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);
@@ -1254,7 +1255,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     dragDistance = viewPortLength * 0.5;
     dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
-    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);
@@ -1265,7 +1266,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
      */
     dragDistance = viewPortLength * 0.5 - 1;
     dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD;
-    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed);
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);
@@ -1452,6 +1453,77 @@ HWTEST_F(ScrollEventTestNg, EnablePaging004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EnablePaging005
+ * @tc.desc: Test enablePaging
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, EnablePaging005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and set enablePaging true.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    CreateContent();
+    CreateScrollDone();
+    auto viewPortLength = pattern_->GetMainContentSize();
+
+    /**
+     * @tc.steps: step2. dragSpeed larger than threshold
+     * @tc.expected: Trigger snap animation only once
+     */
+    DragStart(frameNode_, Offset());
+    DragUpdate(-10);
+    DragEnd(-SCROLL_PAGING_SPEED_THRESHOLD - 1);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(TickPosition(-viewPortLength));
+    EXPECT_TRUE(pattern_->IsScrollableStopped());
+
+    /**
+     * @tc.steps: step3. Set the difference between the offset and the limit point to 0.01
+     * @tc.expected: Not trigger snap animation
+     */
+    pattern_->currentOffset_ = -viewPortLength + 0.01f;
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_TRUE(pattern_->IsScrollableStopped());
+}
+
+/**
+ * @tc.name: EnablePaging006
+ * @tc.desc: Test enablePaging amd onDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, EnablePaging006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and set enablePaging true.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    ScrollState state = ScrollState::IDLE;
+    auto didEvent = [&state](Dimension, Dimension, ScrollState value) {
+        state = value;
+    };
+    model.SetOnDidScroll(std::move(didEvent));
+    CreateContent();
+    CreateScrollDone();
+    /**
+     * @tc.steps: step2. dragSpeed larger than threshold
+     * @tc.expected: Trigger snap animation
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragStart(frameNode_, Offset());
+    DragUpdate(-10);
+    DragEnd(-SCROLL_PAGING_SPEED_THRESHOLD - 1);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(state, ScrollState::FLING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(state, ScrollState::IDLE);
+}
+
+/**
  * @tc.name: CAPIScrollPage001
  * @tc.desc: Test CAPI ScrollPage
  * @tc.type: FUNC
@@ -1482,5 +1554,199 @@ HWTEST_F(ScrollEventTestNg, CAPIScrollPage001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.f);
+}
+
+/**
+ * @tc.name: OnScrollStartStop001
+ * @tc.desc: Test OnScrollStart and OnScrollStart in fling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnScrollStartStop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    ScrollModelNG model = CreateScroll();
+    int32_t isScrollStartCalled = 0;
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() {
+        isScrollStartCalled++;
+    };
+    model.SetOnScrollStart(std::move(scrollStart));
+    int32_t isScrollStopCalled = 0;
+    int32_t stopHasStart = 0;
+    OnScrollStopEvent scrollStop = [&isScrollStopCalled, &isScrollStartCalled, &stopHasStart]() {
+        if (isScrollStartCalled - isScrollStopCalled == 1) {
+            stopHasStart ++;
+        }
+        isScrollStopCalled++;
+    };
+    model.SetOnScrollStop(std::move(scrollStop));
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. Trigger fling and velocity = 200.
+     * @tc.expected: isScrollStopCalled should be true.
+     */
+    
+    pattern_->Fling(200.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 1);
+    EXPECT_EQ(stopHasStart, 1);
+
+    /**
+     * @tc.steps: step2. Trigger fling and velocity = 20.
+     * @tc.expected: isScrollStopCalled should be true.
+     */
+    isScrollStartCalled = 0;
+    isScrollStopCalled = 0;
+    stopHasStart = 0;
+    pattern_->Fling(20.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 1);
+    EXPECT_EQ(stopHasStart, 1);
+}
+
+/**
+ * @tc.name: OnScrollStartStop002
+ * @tc.desc: Test OnScrollStart and OnScrollStart in fling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnScrollStartStop002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    ScrollModelNG model = CreateScroll();
+    int32_t isScrollStartCalled = 0;
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() {
+        isScrollStartCalled++;
+    };
+    model.SetOnScrollStart(std::move(scrollStart));
+    int32_t isScrollStopCalled = 0;
+    int32_t stopHasStart = 0;
+    OnScrollStopEvent scrollStop = [&isScrollStopCalled, &isScrollStartCalled, &stopHasStart]() {
+        if (isScrollStartCalled - isScrollStopCalled == 1) {
+            stopHasStart++;
+        }
+        isScrollStopCalled++;
+    };
+    model.SetOnScrollStop(std::move(scrollStop));
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. Trigger fling and velocity = 200 in fling animation.
+     * @tc.expected: Trigger fling animation and isScrollStopCalled should be true.
+     */
+    DragStart(frameNode_, Offset());
+    DragEnd(-241.f);
+    pattern_->Fling(241.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isScrollStartCalled, 2);
+    EXPECT_EQ(isScrollStopCalled, 2);
+    EXPECT_EQ(stopHasStart, 2);
+
+    /**
+     * @tc.steps: step2. Trigger fling and velocity = 20 in fling animation.
+     * @tc.expected: Not trigger fling animation and isScrollStopCalled should be true.
+     */
+    isScrollStartCalled = 0;
+    isScrollStopCalled = 0;
+    stopHasStart = 0;
+    DragStart(frameNode_, Offset());
+    DragEnd(-200.f);
+    pattern_->Fling(20.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 1);
+    EXPECT_EQ(stopHasStart, 1);
+}
+
+/**
+ * @tc.name: OnScrollStartStop003
+ * @tc.desc: Test OnScrollStart and OnScrollStart in fling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnScrollStartStop003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    ScrollModelNG model = CreateScroll();
+    int32_t isScrollStartCalled = 0;
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() {
+        isScrollStartCalled++;
+    };
+    model.SetOnScrollStart(std::move(scrollStart));
+    int32_t isScrollStopCalled = 0;
+    int32_t stopHasStart = 0;
+    OnScrollStopEvent scrollStop = [&isScrollStopCalled, &isScrollStartCalled, &stopHasStart]() {
+        if (isScrollStartCalled - isScrollStopCalled == 1) {
+            stopHasStart ++;
+        }
+        isScrollStopCalled++;
+    };
+    model.SetOnScrollStop(std::move(scrollStop));
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. Trigger fling and velocity = 200 in spring animation.
+     * @tc.expected: Trigger fling animation and isScrollStopCalled should be true.
+     */
+    DragStart(frameNode_, Offset());
+    DragUpdate(-100.f);
+    DragEnd(-200.f);
+    pattern_->Fling(200.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 1);
+    EXPECT_EQ(stopHasStart, 1);
+
+    /**
+     * @tc.steps: step2. Trigger fling and velocity = 20 in spring animation.
+     * @tc.expected: Not trigger fling animation and isScrollStopCalled should be true.
+     */
+    isScrollStartCalled = 0;
+    isScrollStopCalled = 0;
+    stopHasStart = 0;
+    DragStart(frameNode_, Offset());
+    DragEnd(-200.f);
+    pattern_->Fling(20.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 1);
+    EXPECT_EQ(stopHasStart, 1);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(scrollBar_->GetForegroundColor(), Color::FromString(SCROLL_BAR_COLOR));
+
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto theme = themeManager->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->foregroundColor_ = Color::FromString("#FFFFFFFF");
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_EQ(scrollBar_->GetForegroundColor(), Color::FromString("#FFFFFFFF"));
 }
 } // namespace OHOS::Ace::NG

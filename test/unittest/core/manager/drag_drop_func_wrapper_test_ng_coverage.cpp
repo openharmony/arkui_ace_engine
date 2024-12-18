@@ -72,7 +72,7 @@ void DragDropFuncWrapperTestNgCoverage::TearDownTestCase()
  */
 HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage001, TestSize.Level1)
 {
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     std::string extraParams = "test";
     int32_t currentPointerId = 1;
     int32_t containerId = 100;
@@ -96,7 +96,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage001
  */
 HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage002, TestSize.Level1)
 {
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     std::string extraParams = "test";
     int32_t currentPointerId = 1;
     int32_t invalidContainerId = -1;

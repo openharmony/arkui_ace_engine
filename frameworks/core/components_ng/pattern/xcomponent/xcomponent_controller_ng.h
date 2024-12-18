@@ -50,7 +50,7 @@ public:
 
     void GetSurfaceSize(float& surfaceWidth, float& surfaceHeight) override;
 
-    void GetLocalLocation(float& offsetX, float& offsetY) override;
+    void GetSurfaceOffset(float& offsetX, float& offsetY) override;
 
     void SetPattern(const RefPtr<XComponentPattern>& pattern);
 

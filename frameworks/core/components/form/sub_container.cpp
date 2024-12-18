@@ -174,128 +174,12 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     }
 
     cardType_ = cardType;
-    if (cardType_ == FrontendType::ETS_CARD) {
-        frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
-        onFormVisibleCallback_();
-    } else if (cardType_ == FrontendType::JS_CARD) {
-        frontend_ = AceType::MakeRefPtr<CardFrontend>();
-        frontend_->AddFormVisiableCallback(onFormVisibleCallback_);
-    } else {
+    if (cardType_ != FrontendType::ETS_CARD && cardType_ != FrontendType::JS_CARD) {
         LOGE("Run Card failed, card type unknown");
         return;
     }
-    frontend_->Initialize(cardType_, taskExecutor_);
-    frontend_->ResetPageLoadState();
-    LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
-    RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-    std::vector<std::string> basePaths;
-    basePaths.push_back("assets/js/" + module + "/");
-    basePaths.emplace_back("assets/js/share/");
-    basePaths.emplace_back("");
-    basePaths.emplace_back("js/");
-    basePaths.emplace_back("ets/");
-    if (assetManagerImpl) {
-        frontend_->SetAssetManager(assetManagerImpl);
-        assetManager_ = assetManagerImpl;
-        auto assetProvider = CreateAssetProviderImpl(path, basePaths);
-        if (assetProvider) {
-            LOGI("push card asset provider to queue.");
-            assetManagerImpl->PushBack(std::move(assetProvider));
-        }
-    }
-    if (formSrc.compare(0, 2, "./") == 0) {       // 2:length of "./"
-        frontend_->SetFormSrc(formSrc.substr(2)); // 2:length of "./"
-    } else {
-        frontend_->SetFormSrc(formSrc);
-    }
-    LOGI("RunCard formSrc = %{public}s", formSrc.c_str());
-    frontend_->SetCardWindowConfig(GetWindowConfig());
-    auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
-    window->SetFormWindowId(nodeId_);
-    window->SetId(instanceId_);
-    windowId_ = nodeId_;
-    if (cardType_ == FrontendType::ETS_CARD) { // ETS Card : API9 only support New Pipeline
-        pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
-            std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
-    } else { // JS Card : API9 only support Old Pipeline
-        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-            std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
-    }
-    ContainerScope scope(instanceId_);
-    density_ = outSidePipelineContext_.Upgrade()->GetDensity();
-    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
-    pipelineContext_->SetEventManager(eventManager);
-    ProcessSharedImage(imageDataMap);
-    UpdateRootElementSize();
-    pipelineContext_->SetIsJsCard(true); // JSCard & eTSCard both use this flag
-    if (cardType_ == FrontendType::ETS_CARD) {
-        pipelineContext_->SetIsFormRender(true); // only eTSCard use this flag
-    }
 
-    ResourceInfo cardResourceInfo;
-    ResourceConfiguration resConfig;
-    resConfig.SetDensity(density_);
-    cardResourceInfo.SetThemeId(THEME_ID_DEFAULT);
-    cardResourceInfo.SetPackagePath(path);
-    cardResourceInfo.SetResourceConfiguration(resConfig);
-    auto cardThemeManager = pipelineContext_->GetThemeManager();
-    if (!cardThemeManager) {
-        cardThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-        pipelineContext_->SetThemeManager(cardThemeManager);
-    }
-    if (cardThemeManager) {
-        // Init resource, load theme map, do not parse yet.
-        cardThemeManager->InitResource(cardResourceInfo);
-        cardThemeManager->LoadSystemTheme(cardResourceInfo.GetThemeId());
-        auto weakTheme = AceType::WeakClaim(AceType::RawPtr(cardThemeManager));
-        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(assetManagerImpl));
-        taskExecutor_->PostTask(
-            [weakTheme, weakAsset]() {
-                auto themeManager = weakTheme.Upgrade();
-                if (themeManager == nullptr) {
-                    LOGE("themeManager or aceView is null!");
-                    return;
-                }
-                themeManager->ParseSystemTheme();
-                themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
-                themeManager->LoadCustomTheme(weakAsset.Upgrade());
-            },
-            TaskExecutor::TaskType::UI, "ArkUIFormLoadTheme");
-    }
-
-    auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
-        auto container = weak.Upgrade();
-        CHECK_NULL_VOID(container);
-
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto form = container->GetFormPattern();
-            CHECK_NULL_VOID(form);
-            form->OnActionEvent(action);
-        } else {
-            auto form = AceType::DynamicCast<FormElement>(container->GetFormElement().Upgrade());
-            CHECK_NULL_VOID(form);
-            form->OnActionEvent(action);
-        }
-    };
-    pipelineContext_->SetActionEventHandler(actionEventHandler);
-
-    auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
-    taskExecutor_->PostTask(
-        [weakContext]() {
-            auto context = weakContext.Upgrade();
-            if (context == nullptr) {
-                LOGE("RunCard PostTask Task failed, context is nullptr");
-                return;
-            }
-            context->SetupRootElement();
-        },
-        TaskExecutor::TaskType::UI, "ArkUIFormSetupRootElement");
-
-    frontend_->AttachPipelineContext(pipelineContext_);
-    frontend_->SetLoadCardCallBack(outSidePipelineContext_);
-    frontend_->SetRunningCardId(nodeId_);
-    frontend_->SetDensity(density_);
-    UpdateSurfaceSize();
+    InitFrontend(path, module, imageDataMap, formSrc, cardType_);
 
     if (cardType_ == FrontendType::ETS_CARD) { // ETS Card : API9 only support NG-Host & NG-eTSCard
         if (Container::IsCurrentUseNewPipeline()) {
@@ -314,39 +198,43 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
             return;
         }
     } else if (cardType_ == FrontendType::JS_CARD) {
-        // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto pattern = formPattern_.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
-            frontend_->RunPage("", data);
-            if (onFormLoadCallback_) {
-                onFormLoadCallback_();
-            }
-            return;
-        }
-
-        auto form = AceType::DynamicCast<FormElement>(GetFormElement().Upgrade());
-        if (!form) {
-            LOGE("set draw delegate could not get form element");
-            return;
-        }
-        auto renderNode = form->GetRenderNode();
-        if (!renderNode) {
-            LOGE("set draw delegate could not get render node");
-            return;
-        }
-        auto formRender = AceType::DynamicCast<RenderForm>(renderNode);
-        if (!formRender) {
-            LOGE("set draw delegate could not get render form");
-            return;
-        }
-        pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
-
-        frontend_->RunPage("", data);
+        RunJSCard(data);
     } else {
         LOGE("SubContainer::RunCard card type error");
     }
+}
+
+void SubContainer::RunJSCard(const std::string& data)
+{
+    // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pattern = formPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
+        frontend_->RunPage("", data);
+        if (onFormLoadCallback_) {
+            onFormLoadCallback_();
+        }
+        return;
+    }
+
+    auto form = AceType::DynamicCast<FormElement>(GetFormElement().Upgrade());
+    if (!form) {
+        LOGE("set draw delegate could not get form element");
+        return;
+    }
+    auto renderNode = form->GetRenderNode();
+    if (!renderNode) {
+        LOGE("set draw delegate could not get render node");
+        return;
+    }
+    auto formRender = AceType::DynamicCast<RenderForm>(renderNode);
+    if (!formRender) {
+        LOGE("set draw delegate could not get render form");
+        return;
+    }
+    pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
+    frontend_->RunPage("", data);
 }
 
 void SubContainer::RunSameCard()
@@ -510,4 +398,152 @@ bool SubContainer::Dump(const std::vector<std::string>& params)
     }
     return false;
 }
+
+void SubContainer::InitFrontend(const std::string &path, const std::string &module,
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap, const std::string &formSrc,
+    const FrontendType &cardType)
+{
+    cardType_ = cardType;
+    if (cardType_ == FrontendType::ETS_CARD) {
+        frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
+        onFormVisibleCallback_();
+    } else if (cardType_ == FrontendType::JS_CARD) {
+        frontend_ = AceType::MakeRefPtr<CardFrontend>();
+        frontend_->AddFormVisiableCallback(onFormVisibleCallback_);
+    }
+    frontend_->Initialize(cardType_, taskExecutor_);
+    frontend_->ResetPageLoadState();
+    LOGI("run card path:%{private}s, module:%{private}s", path.c_str(), module.c_str());
+
+    auto assetManager = GetAssetManager(path, module);
+
+    if (formSrc.compare(0, 2, "./") == 0) {        // 2:length of "./"
+        frontend_->SetFormSrc(formSrc.substr(2));  // 2:length of "./"
+    } else {
+        frontend_->SetFormSrc(formSrc);
+    }
+    LOGI("RunCard formSrc = %{public}s", formSrc.c_str());
+    frontend_->SetCardWindowConfig(GetWindowConfig());
+
+    auto &&window = std::make_unique<FormWindow>(outSidePipelineContext_);
+    window->SetFormWindowId(nodeId_);
+    window->SetId(instanceId_);
+    windowId_ = nodeId_;
+    if (cardType_ == FrontendType::ETS_CARD) {  // ETS Card : API9 only support New Pipeline
+        pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
+    } else {  // JS Card : API9 only support Old Pipeline
+        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
+    }
+
+    InitCardThemeManager(path, instanceId_, module, imageDataMap, assetManager);
+
+    InitPipelineContext();
+
+    frontend_->AttachPipelineContext(pipelineContext_);
+    frontend_->SetLoadCardCallBack(outSidePipelineContext_);
+    frontend_->SetRunningCardId(nodeId_);
+    frontend_->SetDensity(density_);
+    UpdateSurfaceSize();
+}
+
+void SubContainer::InitPipelineContext()
+{
+    auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto form = container->GetFormPattern();
+            CHECK_NULL_VOID(form);
+            form->OnActionEvent(action);
+        } else {
+            auto form = AceType::DynamicCast<FormElement>(container->GetFormElement().Upgrade());
+            CHECK_NULL_VOID(form);
+            form->OnActionEvent(action);
+        }
+    };
+    pipelineContext_->SetActionEventHandler(actionEventHandler);
+
+    auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    taskExecutor_->PostTask(
+        [weakContext]() {
+            auto context = weakContext.Upgrade();
+            if (context == nullptr) {
+                LOGE("RunCard PostTask Task failed, context is nullptr");
+                return;
+            }
+            context->SetupRootElement();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIFormSetupRootElement");
+}
+
+RefPtr<AssetManager> SubContainer::GetAssetManager(const std::string &path, const std::string &module)
+{
+    RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+    std::vector<std::string> basePaths;
+    basePaths.push_back("assets/js/" + module + "/");
+    basePaths.emplace_back("assets/js/share/");
+    basePaths.emplace_back("");
+    basePaths.emplace_back("js/");
+    basePaths.emplace_back("ets/");
+    if (assetManagerImpl) {
+        frontend_->SetAssetManager(assetManagerImpl);
+        assetManager_ = assetManagerImpl;
+        auto assetProvider = CreateAssetProviderImpl(path, basePaths);
+        if (assetProvider) {
+            LOGI("push card asset provider to queue.");
+            assetManagerImpl->PushBack(std::move(assetProvider));
+        }
+    }
+    return assetManagerImpl;
+}
+
+void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanceId, const std::string &module,
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap, RefPtr<AssetManager> assetManager)
+{
+    ContainerScope scope(instanceId_);
+    density_ = outSidePipelineContext_.Upgrade()->GetDensity();
+    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
+    pipelineContext_->SetEventManager(eventManager);
+    ProcessSharedImage(imageDataMap);
+    UpdateRootElementSize();
+    pipelineContext_->SetIsJsCard(true);  // JSCard & eTSCard both use this flag
+    if (cardType_ == FrontendType::ETS_CARD) {
+        pipelineContext_->SetIsFormRender(true);  // only eTSCard use this flag
+    }
+
+    ResourceInfo cardResourceInfo;
+    ResourceConfiguration resConfig;
+    resConfig.SetDensity(density_);
+    cardResourceInfo.SetThemeId(THEME_ID_DEFAULT);
+    cardResourceInfo.SetPackagePath(path);
+    cardResourceInfo.SetResourceConfiguration(resConfig);
+    auto cardThemeManager = pipelineContext_->GetThemeManager();
+    if (!cardThemeManager) {
+        cardThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+        pipelineContext_->SetThemeManager(cardThemeManager);
+    }
+    if (cardThemeManager) {
+        // Init resource, load theme map, do not parse yet.
+        cardThemeManager->InitResource(cardResourceInfo);
+        cardThemeManager->LoadSystemTheme(cardResourceInfo.GetThemeId());
+        auto weakTheme = AceType::WeakClaim(AceType::RawPtr(cardThemeManager));
+        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(assetManager));
+        taskExecutor_->PostTask(
+            [weakTheme, weakAsset]() {
+                auto themeManager = weakTheme.Upgrade();
+                if (themeManager == nullptr) {
+                    LOGE("themeManager or aceView is null!");
+                    return;
+                }
+                themeManager->ParseSystemTheme();
+                themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
+                themeManager->LoadCustomTheme(weakAsset.Upgrade());
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFormLoadTheme");
+    }
+}
+
 } // namespace OHOS::Ace

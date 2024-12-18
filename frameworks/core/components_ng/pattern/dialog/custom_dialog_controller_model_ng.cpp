@@ -49,7 +49,10 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     };
 
     auto executor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
+    if (!executor) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
+        return;
+    }
     auto task = ParseOpenDialogTask(
         currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
@@ -97,6 +100,8 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
             TAG_LOGE(AceLogTag::ACE_DIALOG, "fail to show dialog.");
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "Controller/%{public}d create dialog node/%{public}d successfully.",
+            dialogProperties.controllerId.value_or(-1), dialog->GetId());
         dialogs.emplace_back(dialog);
     };
     return task;
@@ -196,7 +201,8 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const Wea
             dialogs.pop_back();
         }
         if (dialogs.empty()) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "Dialog map is empty.");
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Controller%{public}d dialog map is empty.",
+                dialogProperties.controllerId.value_or(-1));
             return;
         }
         CHECK_NULL_VOID(dialog);

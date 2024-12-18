@@ -23,6 +23,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
@@ -44,6 +45,7 @@ constexpr float CUSTOM_ANIMATION_DURATION = 1000.0;
 constexpr uint32_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
+constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
@@ -55,6 +57,26 @@ const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
+
+ScrollablePattern::~ScrollablePattern()
+{
+    UnRegister2DragDropManager();
+    if (AnimateRunning()) {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+        auto scrollable = GetScrollable();
+        if (scrollable) {
+            auto nodeId = scrollable->GetNodeId();
+            auto nodeTag = scrollable->GetNodeTag();
+            AceAsyncTraceEnd(nodeId,
+                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
+            AceAsyncTraceEnd(
+                nodeId, (TRAILING_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
+        }
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->UnRegisterNestScrollableNode(AceType::WeakClaim(this));
+    }
+}
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 {
@@ -111,13 +133,16 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->GetFadingEdge().value_or(false)) {
+    bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(false);
+    if (!hasFadingEdge) {
         paint->SetOverlayRenderContext(overlayRenderContext);
-        paint->SetFadingInfo(false, false);
+        paint->SetFadingInfo(false, false, prevHasFadingEdge_);
+        prevHasFadingEdge_ = hasFadingEdge;
         return;
     }
+    prevHasFadingEdge_ = hasFadingEdge;
     auto isFadingTop = !IsAtTop();
-    auto isFadingBottom = !IsAtBottom();
+    auto isFadingBottom = IsFadingBottom();
     float paddingBeforeContent = 0.0f;
     float paddingAfterContent = 0.0f;
     auto& padding = geometryNode->GetPadding();
@@ -146,8 +171,8 @@ void ScrollablePattern::UpdateFadeInfo(
     } else {
         percentFading = fadingEdgeLength.ConvertToPx() / fadeFrameSize;
     }
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading), startPercent_,
-        endPercent_); // 0.5: Half
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, true, (percentFading > 0.5f ? 0.5f : percentFading),
+        startPercent_, endPercent_); // 0.5: Half
 }
 
 void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -224,7 +249,7 @@ RefPtr<InputEventHub> ScrollablePattern::GetInputHub()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateInputEventHub();
 }
 
@@ -480,56 +505,25 @@ void ScrollablePattern::OnScrollEnd()
     SelectOverlayScrollNotifier::NotifyOnScrollEnd(WeakClaim(this));
 }
 
-void ScrollablePattern::AttachAnimatableProperty(RefPtr<Scrollable> scrollable)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto property = scrollable->GetFrictionProperty();
-    renderContext->AttachNodeAnimatableProperty(property);
-
-    property = scrollable->GetSpringProperty();
-    renderContext->AttachNodeAnimatableProperty(property);
-    property = scrollable->GetSnapProperty();
-    renderContext->AttachNodeAnimatableProperty(property);
-}
-
 void ScrollablePattern::AddScrollEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
     if (scrollableEvent_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
-    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->HandleScrollImpl(static_cast<float>(offset), source);
-    };
-    auto scrollable = MakeRefPtr<Scrollable>(std::move(scrollCallback), GetAxis());
-    scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->SetNodeTag(host->GetTag());
-    scrollable->Initialize(host->GetContextRefPtr());
-    AttachAnimatableProperty(scrollable);
-    SetHandleScrollCallback(scrollable);
-    SetOverScrollCallback(scrollable);
-    SetIsReverseCallback(scrollable);
-    SetOnScrollStartRec(scrollable);
-    SetOnScrollEndRec(scrollable);
-    SetScrollEndCallback(scrollable);
-    SetRemainVelocityCallback(scrollable);
-    SetDragEndCallback(scrollable);
-    SetStartSnapAnimationCallback(scrollable);
-    SetNeedScrollSnapToSideCallback(scrollable);
-    SetDragFRCSceneCallback(scrollable);
-    SetOnContinuousSliding(scrollable);
-    SetPanActionEndEvent(scrollable);
-    scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
+    auto scrollable = CreateScrollable();
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
+    scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
+        auto pattern = weakScroll.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0.0f);
+        float nestedVelocity = pattern->GetNestedScrollVelocity();
+        if (std::abs(nestedVelocity) > std::abs(pattern->GetCurrentVelocity())) {
+            return nestedVelocity;
+        }
+        return pattern->GetCurrentVelocity();
+    });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     InitTouchEvent(gestureHub);
     RegisterWindowStateChangedCallback();
@@ -537,9 +531,6 @@ void ScrollablePattern::AddScrollEvent()
         InitScrollBarClickEvent();
     }
     InitRatio();
-    if (friction_ != -1) {
-        scrollable->SetUnstaticFriction(friction_);
-    }
 }
 
 void ScrollablePattern::SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable)
@@ -584,7 +575,7 @@ void ScrollablePattern::SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireAndCleanScrollingListener();
-        pattern->OnScrollStartRecursiveInner(position, pattern->GetVelocity());
+        pattern->OnScrollStartRecursiveInner(weak, position, pattern->GetVelocity());
     };
     scrollable->SetOnScrollStartRec(std::move(scrollStart));
 }
@@ -641,11 +632,10 @@ void ScrollablePattern::SetDragEndCallback(const RefPtr<Scrollable>& scrollable)
 void ScrollablePattern::SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);
-    auto startSnapAnimationCallback = [weak = WeakClaim(this)](
-                                          float snapDelta, float snapVelocity, float dragDistance) -> bool {
+    auto startSnapAnimationCallback = [weak = WeakClaim(this)](SnapAnimationOptions snapAnimationOptions) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->StartSnapAnimation(snapDelta, snapVelocity, dragDistance);
+        return pattern->StartSnapAnimation(snapAnimationOptions);
     };
     scrollable->SetStartSnapAnimationCallback(std::move(startSnapAnimationCallback));
 }
@@ -688,14 +678,47 @@ void ScrollablePattern::SetOnContinuousSliding(const RefPtr<Scrollable>& scrolla
     });
 }
 
-void ScrollablePattern::SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable)
+void ScrollablePattern::SetGetSnapTypeCallback(const RefPtr<Scrollable>& scrollable)
 {
     CHECK_NULL_VOID(scrollable);
-    scrollable->AddPanActionEndEvent([weak = WeakClaim(this)](GestureEvent& info) {
+    scrollable->SetGetSnapTypeCallback([weak = WeakClaim(this)]() -> SnapType {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->FireObserverOnPanActionEnd(info);
+        CHECK_NULL_RETURN(pattern, SnapType::NONE_SNAP);
+        return pattern->GetSnapType();
     });
+}
+
+RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->HandleScrollImpl(static_cast<float>(offset), source);
+    };
+    auto scrollable = MakeRefPtr<Scrollable>(std::move(scrollCallback), GetAxis());
+    scrollable->SetNodeId(host->GetAccessibilityId());
+    scrollable->SetNodeTag(host->GetTag());
+    scrollable->Initialize(host);
+    SetHandleScrollCallback(scrollable);
+    SetOverScrollCallback(scrollable);
+    SetIsReverseCallback(scrollable);
+    SetOnScrollStartRec(scrollable);
+    SetOnScrollEndRec(scrollable);
+    SetScrollEndCallback(scrollable);
+    SetRemainVelocityCallback(scrollable);
+    SetDragEndCallback(scrollable);
+    SetStartSnapAnimationCallback(scrollable);
+    SetNeedScrollSnapToSideCallback(scrollable);
+    SetDragFRCSceneCallback(scrollable);
+    SetOnContinuousSliding(scrollable);
+    SetGetSnapTypeCallback(scrollable);
+    scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
+    if (friction_ != -1) {
+        scrollable->SetUnstaticFriction(friction_);
+    }
+    return scrollable;
 }
 
 void ScrollablePattern::InitRatio()
@@ -705,6 +728,20 @@ void ScrollablePattern::InitRatio()
     CHECK_NULL_VOID(scrollable);
     if (!ratio_.has_value()) {
         ratio_ = scrollable->GetRatio();
+    }
+}
+
+void ScrollablePattern::StopScrollAnimation()
+{
+    StopScrollable();
+}
+
+void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
+{
+    if (GetNestedScrolling() && !NearZero(GetNestedScrollVelocity())) {
+        auto child = GetScrollOriginChild();
+        CHECK_NULL_VOID(child);
+        child->StopScrollAnimation();
     }
 }
 
@@ -874,12 +911,12 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->OnScrollEnd();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
-    auto startSnapMotionCallback = [weak = WeakClaim(this)](float delta, float velocity, float dragDistance) -> bool {
+    auto startSnapAnimationCallback = [weak = WeakClaim(this)](SnapAnimationOptions snapAnimationOptions) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->StartSnapAnimation(delta, velocity, dragDistance);
+        return pattern->StartSnapAnimation(snapAnimationOptions);
     };
-    scrollBar_->SetStartSnapMotionCallback(std::move(startSnapMotionCallback));
+    scrollBar_->SetStartSnapAnimationCallback(std::move(startSnapAnimationCallback));
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1028,13 +1065,6 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         auto barColor = property->GetScrollBarColor();
         if (barColor) {
             scrollBar_->SetForegroundColor(barColor.value());
-        } else {
-            auto pipelineContext = GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-            CHECK_NULL_VOID(theme);
-            scrollBar_->SetForegroundColor(theme->GetForegroundColor());
-            scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
         }
     }
 }
@@ -1065,7 +1095,9 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 
     // outer scrollbar
     if (scrollBarProxy_) {
-        estimatedHeight_ = estimatedHeight - (GetAxis() == Axis::VERTICAL ? viewPort.Height() : viewPort.Width());
+        auto height = (GetAxis() == Axis::VERTICAL ? viewPort.Height() : viewPort.Width());
+        auto estimatedHeightItem = estimatedHeight - height;
+        estimatedHeight_ = (estimatedHeightItem < 0 ? 0 : estimatedHeightItem);
         barOffset_ = -offset;
         scrollBarProxy_->NotifyScrollBar();
     }
@@ -1079,49 +1111,63 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
     }
 }
 
+void ScrollablePattern::ScrollEndCallback(bool nestedScroll, float velocity)
+{
+    if (nestedScroll) {
+        OnScrollEndRecursiveInner(velocity);
+    } else {
+        OnScrollEnd();
+    }
+}
+
 void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
     CHECK_NULL_VOID(scrollBarProxy);
-    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
+    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
-            if (!pattern || pattern->GetAxis() == Axis::NONE) {
-                return false;
+            CHECK_NULL_RETURN(pattern && pattern->GetAxis() != Axis::NONE, false);
+            if (!nestedScroll) {
+                return pattern->UpdateCurrentOffset(offset, source);
             }
-            return pattern->UpdateCurrentOffset(offset, source);
+            pattern->HandleScroll(offset, source, NestedState::GESTURE, 0.0f);
         }
         return true;
     };
-    auto scrollStartCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+    auto scrollStartCallback = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->StopScrollableAndAnimate();
         // no source == SCROLL_FROM_START for ScrollBar
-        pattern->OnScrollStartCallback();
+        if (nestedScroll) {
+            pattern->OnScrollStartRecursiveInner(weak, offset, pattern->GetVelocity());
+        } else {
+            pattern->OnScrollStartCallback();
+        }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
-    auto scrollEndCallback = [weak = WeakClaim(this)]() {
+    auto scrollEndCallback = [weak = WeakClaim(this)](bool nestedScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnScrollEnd();
+        pattern->ScrollEndCallback(nestedScroll, pattern->GetVelocity());
     };
-    auto startSnapMotionCallback = [weak = WeakClaim(this)](float delta, float velocity, float dragDistance) -> bool {
+    auto startSnapAnimationCallback = [weak = WeakClaim(this)](SnapAnimationOptions snapAnimationOptions) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->StartSnapAnimation(delta, velocity, dragDistance);
+        return pattern->StartSnapAnimation(snapAnimationOptions);
     };
     auto scrollbarFRcallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         return pattern->NotifyFRCSceneInfo(CUSTOM_SCROLL_BAR_SCENE, velocity, sceneStatus);
     };
-
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         return pattern->ScrollPage(reverse, smooth);
     };
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
-        std::move(scrollEndCallback), std::move(startSnapMotionCallback), std::move(scrollbarFRcallback),
+        std::move(scrollEndCallback), std::move(startSnapAnimationCallback), std::move(scrollbarFRcallback),
         std::move(scrollPageCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
@@ -1256,25 +1302,7 @@ void ScrollablePattern::ScrollTo(float position)
 void ScrollablePattern::AnimateTo(
     float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
-    float currVelocity = 0.0f;
-    if (!IsScrollableStopped()) {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID(scrollable);
-        currVelocity = -scrollable->GetCurrentVelocity();
-        scrollAbort_ = true;
-        StopScrollable();
-    }
-    if (!isAnimationStop_) {
-        currVelocity = GetCurrentVelocity();
-        scrollAbort_ = true;
-        StopAnimation(springAnimation_);
-        StopAnimation(curveAnimation_);
-    }
-    if (animator_ && !animator_->IsStopped()) {
-        scrollAbort_ = true;
-        animator_->Stop();
-    }
+    StopScrollableAndAnimate();
     if (NearEqual(position, GetTotalOffset())) {
         return;
     }
@@ -1311,7 +1339,9 @@ void ScrollablePattern::OnAnimateFinish()
     }
     if (animateToTraceFlag_) {
         animateToTraceFlag_ = false;
-        AceAsyncTraceEnd(host->GetId(), TRAILING_ANIMATION);
+        AceAsyncTraceEnd(host->GetAccessibilityId(),
+            (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
+                .c_str());
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
 }
@@ -1323,11 +1353,6 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
         InitSpringOffsetProperty();
         CHECK_NULL_VOID(springOffsetProperty_);
     }
-    scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
-        auto pattern = weakScroll.Upgrade();
-        CHECK_NULL_RETURN(pattern, 0.0f);
-        return pattern->GetCurrentVelocity();
-    });
 
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
@@ -1366,11 +1391,6 @@ void ScrollablePattern::PlayCurveAnimation(
         InitCurveOffsetProperty();
         CHECK_NULL_VOID(curveOffsetProperty_);
     }
-    scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
-        auto pattern = weakScroll.Upgrade();
-        CHECK_NULL_RETURN(pattern, 0.0f);
-        return pattern->GetCurrentVelocity();
-    });
     isAnimationStop_ = false;
     SetAnimateCanOverScroll(canOverScroll);
     curveOffsetProperty_->Set(GetTotalOffset());
@@ -1395,6 +1415,8 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, 0.0f);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
     uint64_t currentVsync = context->GetVsyncTime();
     uint64_t diff = currentVsync - lastVsyncTime_;
     if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
@@ -1407,9 +1429,8 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
     }
     if (NearEqual(offset, lastPosition_, 1.0) && !animateToTraceFlag_) {
         animateToTraceFlag_ = true;
-        auto host = GetHost();
-        auto id = host ? host->GetId() : 0;
-        AceAsyncTraceBegin(id, TRAILING_ANIMATION);
+        auto id = host->GetAccessibilityId();
+        AceAsyncTraceBegin(id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") + host->GetTag()).c_str());
     }
     auto delta = useTotalOffset_ ? GetTotalOffset() - offset : lastPosition_ - offset;
     lastVsyncTime_ = currentVsync;
@@ -1431,7 +1452,11 @@ void ScrollablePattern::InitSpringOffsetProperty()
         }
         bool stopAnimation = false;
         auto delta = pattern->GetScrollDelta(offset, stopAnimation);
-        if (!pattern->UpdateCurrentOffset(delta, SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
+        auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
+        if (pattern->GetLastSnapTargetIndex() >= 0) {
+            source = SCROLL_FROM_ANIMATION;
+        }
+        if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }
     };
@@ -1457,6 +1482,7 @@ void ScrollablePattern::InitCurveOffsetProperty()
             stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_) {
                 pattern->isAnimateOverScroll_ = false;
+                pattern->isScrollToOverAnimation_  = true;
                 auto pauseVelocity = -pattern->currentVelocity_;
                 auto context = pattern->GetContext();
                 CHECK_NULL_VOID(context);
@@ -1586,6 +1612,8 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select start");
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
+    mouseOffsetX -= info.GetOffsetX();
+    mouseOffsetY -= info.GetOffsetY();
     SuggestOpIncGroup(true);
     if (!IsItemSelected(info)) {
         ClearMultiSelect();
@@ -1919,7 +1947,7 @@ void ScrollablePattern::ProcessSpringEffect(float velocity, bool needRestart)
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
     auto isOutOfBoundary = OutBoundaryCallback();
     if (!isOutOfBoundary && !GetCanOverScroll()) {
-        OnScrollEnd();
+        OnScrollEndRecursiveInner(velocity);
         return;
     }
     CHECK_NULL_VOID(scrollableEvent_);
@@ -2013,7 +2041,7 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
         return { 0, true };
     }
     auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, GetVelocity());
-    offset = IsReverse() ? -result.remain : result.remain;
+    offset = result.remain;
     if (NearZero(offset)) {
         SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent));
         return { 0, false };
@@ -2162,6 +2190,9 @@ ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t sour
 
 bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result)
 {
+    if (state != NestedState::GESTURE && state != NestedState::CHILD_CHECK_OVER_SCROLL) {
+        return false;
+    }
     auto overOffsets = GetOverScrollOffset(offset);
     auto backOverOffset = Negative(offset) ? overOffsets.start : overOffsets.end;
     float selfOffset = 0.0f;
@@ -2214,7 +2245,11 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
                      "source:%d, nestedState:%d, canOverScroll:%u, id:%d, tag:%s",
         initOffset, offset, source, state, GetCanOverScroll(),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    UpdateNestedScrollVelocity(offset, state);
     bool moved = HandleScrollImpl(offset, source);
+    if (!moved && source == SCROLL_FROM_AXIS) {
+        SetScrollableCurrentPos(-GetTotalOffset());
+    }
     NotifyMoved(moved);
     return result;
 }
@@ -2296,7 +2331,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
             ProcessSpringEffect(velocity, true);
             return true;
         }
-        OnScrollEnd();
+        OnScrollEndRecursiveInner(velocity);
         return false;
     }
     if (parent && InstanceOf<ScrollablePattern>(parent)) {
@@ -2342,25 +2377,30 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
     mainDelta = -context->NormalizeToPx(scrollRes.offset);
 }
 
-void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
+void ScrollablePattern::OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
-    OnScrollStartRecursiveInner(position, velocity);
+    OnScrollStartRecursiveInner(child, position, velocity);
     SetNestedScrolling(true);
+    SetScrollOriginChild(child);
 }
 
-void ScrollablePattern::OnScrollStartRecursiveInner(float position, float velocity)
+void ScrollablePattern::OnScrollStartRecursiveInner(
+    WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
     SetIsNestedInterrupt(false);
     HandleScrollImpl(position, SCROLL_FROM_START);
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
     if (parent && nestedScroll.NeedParent()) {
-        parent->OnScrollStartRecursive(position, GetVelocity());
+        parent->OnScrollStartRecursive(child, position, GetVelocity());
     }
 }
 
 void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
+    if (!IsScrollableStopped() && !GetNestedScrolling()) {
+        return;
+    }
     OnScrollEndRecursiveInner(velocity);
     SetNestedScrolling(false);
     CheckRestartSpring(false);
@@ -2381,15 +2421,13 @@ void ScrollablePattern::SetNestedScrolling(bool nestedScrolling)
 
 void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& velocity)
 {
-    if (!IsScrollableStopped() && !GetNestedScrolling()) {
-        return;
-    }
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
+    if (!isScrollToOverAnimation_ && parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    isScrollToOverAnimation_ = false;
     SetIsNestedInterrupt(false);
 }
 
@@ -2458,26 +2496,14 @@ void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 
 void ScrollablePattern::Fling(double flingVelocity)
 {
-    if (!IsScrollableStopped()) {
-        scrollAbort_ = true;
-        StopScrollable();
-    }
-    if (!isAnimationStop_) {
-        scrollAbort_ = true;
-        StopAnimation(springAnimation_);
-        StopAnimation(curveAnimation_);
-    }
-    if (animator_ && !animator_->IsStopped()) {
-        scrollAbort_ = true;
-        animator_->Stop();
-    }
+    StopScrollableAndAnimate();
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     CHECK_NULL_VOID(scrollable);
     if (IsOutOfBoundary()) {
         scrollable->HandleOverScroll(flingVelocity);
     } else {
-        FireOnScrollStart();
+        OnScrollStartRecursiveInner(WeakClaim(this), 0.f, flingVelocity);
         scrollable->StartScrollAnimation(0.0f, flingVelocity);
     }
     auto pipeline = GetContext();
@@ -2502,6 +2528,7 @@ void ScrollablePattern::FireOnScrollStart()
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop());
     }
+    RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
@@ -2516,6 +2543,7 @@ void ScrollablePattern::FireOnScrollStart()
     }
     StopScrollBarAnimatorByProxy();
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    isScrolling_ = true;
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
@@ -2549,62 +2577,67 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
 
 void ScrollablePattern::FireObserverOnTouch(const TouchEventInfo& info)
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onTouchEvent) {
-            auto touchInfo = info;
-            (*observer.onTouchEvent)(touchInfo);
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto touchInfo = info;
+    auto observer = positionController_->GetObserver();
+    if (observer.onTouchEvent) {
+        (*observer.onTouchEvent)(touchInfo);
     }
-}
-
-void ScrollablePattern::FireObserverOnPanActionEnd(GestureEvent& info)
-{
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onPanActionEndEvent) {
-            observer.onPanActionEndEvent(info);
-        }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnTouchEvent(touchInfo);
     }
 }
 
 void ScrollablePattern::FireObserverOnReachStart()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onReachStartEvent) {
-            observer.onReachStartEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onReachStartEvent) {
+        observer.onReachStartEvent();
+    }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnReachEvent(false);
     }
 }
 
 void ScrollablePattern::FireObserverOnReachEnd()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onReachEndEvent) {
-            observer.onReachEndEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onReachEndEvent) {
+        observer.onReachEndEvent();
+    }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnReachEvent(true);
     }
 }
 
 void ScrollablePattern::FireObserverOnScrollStart()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onScrollStartEvent) {
-            observer.onScrollStartEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onScrollStartEvent) {
+        observer.onScrollStartEvent();
+    }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnScrollStartEvent();
     }
 }
 
 void ScrollablePattern::FireObserverOnScrollStop()
 {
-    if (positionController_) {
-        auto observer = positionController_->GetObserver();
-        if (observer.onScrollStopEvent) {
-            observer.onScrollStopEvent();
-        }
+    CHECK_NULL_VOID(positionController_);
+    auto observer = positionController_->GetObserver();
+    if (observer.onScrollStopEvent) {
+        observer.onScrollStopEvent();
+    }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnScrollStopEvent();
     }
 }
 
@@ -2612,12 +2645,17 @@ void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
 {
     OnScrollEvent onScroll = [weak = WeakClaim(this)](Dimension dimension, ScrollState state) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->positionController_) {
-            auto observer = pattern->positionController_->GetObserver();
-            if (observer.onDidScrollEvent) {
-                observer.onDidScrollEvent(dimension, state, pattern->IsAtTop(), pattern->IsAtBottom());
-            }
+        CHECK_NULL_VOID(pattern && pattern->positionController_);
+        auto source = pattern->ConvertScrollSource(pattern->scrollSource_);
+        bool isAtTop = pattern->IsAtTop();
+        bool isAtBottom = pattern->IsAtBottom();
+        auto observer = pattern->positionController_->GetObserver();
+        if (observer.onDidScrollEvent) {
+            observer.onDidScrollEvent(dimension, source, isAtTop, isAtBottom);
+        }
+        auto obsMgr = pattern->positionController_->GetObserverManager();
+        if (obsMgr) {
+            obsMgr->HandleOnDidScrollEvent(dimension, source, isAtTop, isAtBottom);
         }
     };
     FireOnScroll(finalOffset, onScroll);
@@ -2652,12 +2690,15 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
     if (!scrollStop_) {
         return;
     }
+    auto pipeline = host->GetContext();
+    RecordScrollEvent(Recorder::EventType::SCROLL_STOP);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     if (!GetScrollAbort()) {
         if (host != nullptr) {
             host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
+        isScrolling_ = false;
         FireObserverOnScrollStop();
         if (onScrollStop) {
             ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
@@ -2665,13 +2706,13 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             onScrollStop();
             AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
             SetScrollSource(SCROLL_FROM_NONE);
+            SetLastSnapTargetIndex(-1);
         }
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             scrollBar->ScheduleDisappearDelayTask();
         }
         StartScrollBarAnimatorByProxy();
-        auto pipeline = host->GetContext();
         if (pipeline && pipeline->GetTaskExecutor() && pipeline->GetTHPExtraManager()) {
             auto taskExecutor = pipeline->GetTaskExecutor();
             const uint32_t delay = 100; // 100: ms
@@ -2687,12 +2728,39 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     }
+    if (pipeline) {
+        pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
+    }
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-    AceAsyncTraceEnd(
-        0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
-            .c_str());
+    AceAsyncTraceEnd(host->GetAccessibilityId(),
+        (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
     SetScrollAbort(false);
+}
+
+void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
+{
+    if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_SCROLL)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto offset = GetTotalOffset();
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventCategory(Recorder::EventCategory::CATEGORY_SCROLL)
+        .SetEventType(eventType)
+        .SetId(host->GetInspectorIdValue(""))
+        .SetType(host->GetHostTag())
+        .SetHost(host)
+        .SetExtra(Recorder::KEY_CURRENT_OFFSET, std::to_string(offset))
+        .SetDescription(host->GetAutoEventParamValue(""));
+    if (eventType == Recorder::EventType::SCROLL_START) {
+        scrollStartOffset_ = GetTotalOffset();
+    } else if (eventType == Recorder::EventType::SCROLL_STOP) {
+        auto distance = offset - scrollStartOffset_;
+        builder.SetExtra(Recorder::KEY_DISTANCE, std::to_string(distance));
+    }
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 float ScrollablePattern::FireOnWillScroll(float offset) const
@@ -3081,7 +3149,8 @@ void ScrollablePattern::InitScrollBarMouseEvent()
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+        if (info.GetButton() == MouseButton::LEFT_BUTTON &&
+            (info.GetAction() == MouseAction::PRESS || info.GetAction() == MouseAction::MOVE)) {
             pattern->isMousePressed_ = true;
         } else {
             pattern->isMousePressed_ = false;
@@ -3134,9 +3203,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
             pattern->OnAnimateStop();
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            AceAsyncTraceEnd(
-                host->GetId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
-                                   std::string(" ") + host->GetTag()).c_str());
+            AceAsyncTraceEnd(host->GetAccessibilityId(),
+                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") +
+                    host->GetTag()).c_str());
         });
     }
 
@@ -3165,8 +3234,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->Init();
         fixedVelocityMotion_->SetVelocity(velocity);
     }
-    AceAsyncTraceBegin(host->GetId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
-        std::string(" ") + host->GetTag()).c_str());
+    AceAsyncTraceBegin(
+        host->GetAccessibilityId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
+                                        std::string(" ") + host->GetTag()).c_str());
     animator_->PlayMotion(fixedVelocityMotion_);
     FireOnScrollStart();
 }
@@ -3743,6 +3813,87 @@ void ScrollablePattern::CheckScrollBarOff()
     auto displayMode = paintProperty->GetScrollBarMode().value_or(GetDefaultScrollBarDisplayMode());
     if (displayMode == DisplayMode::OFF) {
         SetScrollBar(DisplayMode::OFF);
+    }
+}
+
+void ScrollablePattern::UpdateNestedScrollVelocity(float offset, NestedState state)
+{
+    if (state == NestedState::GESTURE) {
+        return;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    uint64_t currentVsync = pipeline->GetVsyncTime();
+    uint64_t diff = currentVsync - nestedScrollTimestamp_;
+    if (diff >= MAX_VSYNC_DIFF_TIME || diff <= MIN_DIFF_VSYNC) {
+        diff = DEFAULT_VSYNC_DIFF_TIME;
+    }
+    nestedScrollVelocity_ = (offset / diff) * MILLOS_PER_NANO_SECONDS;
+    nestedScrollTimestamp_ = currentVsync;
+}
+
+float ScrollablePattern::GetNestedScrollVelocity()
+{
+    if (NearZero(nestedScrollVelocity_)) {
+        return 0.0f;
+    }
+    uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
+    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
+    if (diff >= MAX_VSYNC_DIFF_TIME) {
+        nestedScrollVelocity_ = 0.0f;
+    }
+    return nestedScrollVelocity_;
+}
+
+void ScrollablePattern::OnColorConfigurationUpdate()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
+    if (paintProperty) {
+        auto barColor = paintProperty->GetScrollBarColor();
+        if (barColor) {
+            scrollBar_->SetForegroundColor(barColor.value());
+            return;
+        }
+    }
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
+    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+}
+
+SizeF ScrollablePattern::GetViewSizeMinusPadding()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto viewSize = geometryNode->GetFrameSize();
+    MinusPaddingToSize(padding, viewSize);
+    return viewSize;
+}
+
+void ScrollablePattern::StopScrollableAndAnimate()
+{
+    if (!IsScrollableStopped()) {
+        scrollAbort_ = true;
+        StopScrollable();
+    }
+    if (!isAnimationStop_) {
+        scrollAbort_ = true;
+        StopAnimation(springAnimation_);
+        StopAnimation(curveAnimation_);
+    }
+    if (animator_ && !animator_->IsStopped()) {
+        scrollAbort_ = true;
+        animator_->Stop();
     }
 }
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,7 @@ class MenuItemAccessibilityProperty : public AccessibilityProperty {
     DECLARE_ACE_TYPE(MenuItemAccessibilityProperty, AccessibilityProperty);
 
 public:
-    MenuItemAccessibilityProperty() = default;
+    MenuItemAccessibilityProperty(bool isOption = false) : isOption_(isOption) {}
 
     ~MenuItemAccessibilityProperty() override = default;
 
@@ -37,6 +37,8 @@ public:
     void SetSpecificSupportAction() override;
 
 private:
+    bool isOption_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

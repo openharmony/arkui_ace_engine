@@ -156,21 +156,6 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode003, TestSize.Level1)
 }
 
 /**
- * @tc.name: progressColor001
- * @tc.desc: Test progressColor
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshLayoutTestNg, progressColor001, TestSize.Level1)
-{
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
-    RefreshModelNG model = CreateRefresh();
-    model.SetProgressColor(Color::RED);
-    CreateDone();
-    auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-    EXPECT_EQ(progressPaintProperty->GetColor().value(), Color::RED);
-}
-
-/**
  * @tc.name: AttrRefreshing001
  * @tc.desc: Test attr refreshing in low version
  * @tc.type: FUNC

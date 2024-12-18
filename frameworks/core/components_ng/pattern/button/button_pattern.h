@@ -86,10 +86,6 @@ public:
         CHECK_NULL_RETURN(host, false);
         auto isNeedAdjust = layoutProperty->HasAspectRatio() &&
                layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-            isNeedAdjust = layoutProperty->HasAspectRatio() &&
-                layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE) != ButtonType::CIRCLE;
-        }
 
         return isNeedAdjust;
     }
@@ -138,9 +134,6 @@ public:
         CHECK_NULL_VOID(buttonTheme);
         auto textStyle = buttonTheme->GetTextStyle();
         auto buttonType = layoutProperty->GetType().value_or(ButtonType::CAPSULE);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-            buttonType = layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
-        }
         json->PutExtAttr("type", host->GetTag() == "Toggle" ? "ToggleType.Button" :
             ConvertButtonTypeToString(buttonType).c_str(), filter);
         json->PutExtAttr("fontSize",
@@ -162,15 +155,8 @@ public:
         json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
 
         auto optionJson = JsonUtil::Create(true);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-            optionJson->Put(
-                "type",
-                ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE)).c_str());
-        } else {
-            optionJson->Put(
-                "type",
-                ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
-        }
+        optionJson->Put(
+            "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
 
         optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
         json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
@@ -185,9 +171,12 @@ public:
         CHECK_NULL_VOID(layoutProperty);
         auto fontFamilyVector =
             layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
-        std::string fontFamily = fontFamilyVector.at(0);
-        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-            fontFamily += ',' + fontFamilyVector.at(i);
+        std::string fontFamily;
+        if (!fontFamilyVector.empty()) {
+            fontFamily = fontFamilyVector.at(0);
+            for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+                fontFamily += ',' + fontFamilyVector.at(i);
+            }
         }
         json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
         auto fontJsValue = JsonUtil::Create(true);
@@ -297,6 +286,8 @@ public:
         return result;
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+
     void SetLocalLocation(const Offset& localLocation)
     {
         localLocation_ = localLocation;
@@ -369,11 +360,6 @@ public:
     }
 
 protected:
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -385,6 +371,7 @@ protected:
     void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
+    void CheckLocalizedBorderRadiuses();
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);

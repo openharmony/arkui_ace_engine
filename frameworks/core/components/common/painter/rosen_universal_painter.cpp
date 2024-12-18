@@ -15,69 +15,24 @@
 
 #include "core/components/common/painter/rosen_universal_painter.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkPaint.h"
-#include "include/core/SkRRect.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 namespace OHOS::Ace {
 
-#ifndef USE_ROSEN_DRAWING
-void RosenUniversalPainter::DrawHoverBackground(
-    SkCanvas* canvas, const Rect& paintRect, uint32_t hoverBackgroundColor, double borderRadius)
-#else
 void RosenUniversalPainter::DrawHoverBackground(
     RSCanvas* canvas, const Rect& paintRect, uint32_t hoverBackgroundColor, double borderRadius)
-#endif
 {
     RRect paintRRect = RRect::MakeRRect(paintRect, borderRadius, borderRadius);
     RosenUniversalPainter::DrawRRectBackground(canvas, paintRRect, hoverBackgroundColor, 1.0);
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenUniversalPainter::DrawRRectBackground(
-    SkCanvas* canvas, const RRect& paintRRect, uint32_t backgroundColor, double dipScale)
-#else
 void RosenUniversalPainter::DrawRRectBackground(
     RSCanvas* canvas, const RRect& paintRRect, uint32_t backgroundColor, double dipScale)
-#endif
 {
     if (!canvas) {
         LOGE("canvas is null.");
         return;
     }
-#ifndef USE_ROSEN_DRAWING
-    SkPaint skPaint;
-
-    skPaint.setAntiAlias(true);
-    skPaint.setStyle(SkPaint::Style::kFill_Style);
-    skPaint.setColor(backgroundColor);
-
-    auto paintRect = paintRRect.GetRect();
-    auto corner = paintRRect.GetCorner();
-    SkRect skRect = SkRect::MakeXYWH(paintRect.Left(), paintRect.Top(), paintRect.Width(), paintRect.Height());
-    SkVector fRadii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-    fRadii[SkRRect::kUpperLeft_Corner].set(
-        SkDoubleToScalar(std::max(RosenUniversalPainter::NormalizeToPx(corner.topLeftRadius.GetX(), dipScale), 0.0)),
-        SkDoubleToScalar(std::max(RosenUniversalPainter::NormalizeToPx(corner.topLeftRadius.GetY(), dipScale), 0.0)));
-    fRadii[SkRRect::kUpperRight_Corner].set(
-        SkDoubleToScalar(std::max(RosenUniversalPainter::NormalizeToPx(corner.topRightRadius.GetX(), dipScale), 0.0)),
-        SkDoubleToScalar(std::max(RosenUniversalPainter::NormalizeToPx(corner.topRightRadius.GetY(), dipScale), 0.0)));
-    fRadii[SkRRect::kLowerRight_Corner].set(
-        SkDoubleToScalar(
-            std::max(RosenUniversalPainter::NormalizeToPx(corner.bottomRightRadius.GetX(), dipScale), 0.0)),
-        SkDoubleToScalar(
-            std::max(RosenUniversalPainter::NormalizeToPx(corner.bottomRightRadius.GetY(), dipScale), 0.0)));
-    fRadii[SkRRect::kLowerLeft_Corner].set(
-        SkDoubleToScalar(std::max(RosenUniversalPainter::NormalizeToPx(corner.bottomLeftRadius.GetX(), dipScale), 0.0)),
-        SkDoubleToScalar(
-            std::max(RosenUniversalPainter::NormalizeToPx(corner.bottomLeftRadius.GetY(), dipScale), 0.0)));
-    SkRRect skRRect;
-    skRRect.setRectRadii(skRect, fRadii);
-    canvas->drawRRect(skRRect, skPaint);
-#else
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(backgroundColor);
@@ -111,7 +66,6 @@ void RosenUniversalPainter::DrawRRectBackground(
     canvas->AttachBrush(brush);
     canvas->DrawRoundRect(roundRect);
     canvas->DetachBrush();
-#endif
 }
 
 double RosenUniversalPainter::NormalizeToPx(const Dimension& dimension, double scale)

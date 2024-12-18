@@ -69,7 +69,10 @@ void RadioPattern::SetBuilderState()
 
 void RadioPattern::UpdateIndicatorType()
 {
-    auto radioPaintProperty = GetHost()->GetPaintProperty<RadioPaintProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto radioPaintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(radioPaintProperty);
     auto radioIndicatorType = radioPaintProperty->GetRadioIndicator().value_or(0);
     if (radioIndicatorType == static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
         LoadBuilder();
@@ -289,6 +292,9 @@ void RadioPattern::InitTouchEvent()
         CHECK_NULL_VOID(radioPattern);
         if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
             radioPattern->isTouchPreventDefault_ = info.IsPreventDefault();
+        }
+        if (info.GetTouches().empty()) {
+            return;
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             radioPattern->OnTouchDown();

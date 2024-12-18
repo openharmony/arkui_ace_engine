@@ -241,8 +241,9 @@ HWTEST_F(MenuItemPatternTestOneNg, RecordChangeEvent001, TestSize.Level1)
     auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
 
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     menuItemPattern->RecordChangeEvent();
 
     ASSERT_EQ(!Recorder::EventRecorder::Get().IsComponentRecordEnable(), false);
@@ -486,7 +487,7 @@ HWTEST_F(MenuItemPatternTestOneNg, HandleOnChange001, TestSize.Level1)
     pattern->HandleOnChange();
 
     auto onChange = hub->GetOnChange();
-    ASSERT_EQ(onChange, nullptr);
+    ASSERT_NE(onChange, nullptr);
 }
 
 /**
@@ -687,7 +688,7 @@ HWTEST_F(MenuItemPatternTestOneNg, UpdateSymbolIcon001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "label");
+    EXPECT_EQ(content.value(), u"label");
 
     ImageSourceInfo imageSourceInfo;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = [](const WeakPtr<NG::FrameNode>& node) {};

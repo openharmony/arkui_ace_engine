@@ -15,6 +15,9 @@
 
 #include "core/components_ng/image_provider/image_loading_context.h"
 
+#include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
@@ -70,7 +73,8 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 ImageLoadingContext::ImageLoadingContext(
     const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
-      imageDfxConfig_(imageDfxConfig)
+      imageDfxConfig_(imageDfxConfig),
+      usePreload_(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN))
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
     src_.SetImageDfxConfig(imageDfxConfig_);
@@ -185,6 +189,7 @@ void ImageLoadingContext::OnDataLoading()
         }
         return;
     }
+    src_.SetImageDfxConfig(GetImageDfxConfig());
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
 }
 
@@ -220,7 +225,8 @@ bool ImageLoadingContext::Downloadable()
 
 void ImageLoadingContext::DownloadImage()
 {
-    if (NotifyReadyIfCacheHit()) {
+    // If the preload module is not used for downloading the image, check the cache.
+    if (!usePreload_ && NotifyReadyIfCacheHit()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit the Cache, not need DownLoad.", src_.GetSrc().c_str());
         return;
     }
@@ -229,8 +235,7 @@ void ImageLoadingContext::DownloadImage()
 
 void ImageLoadingContext::PerformDownload()
 {
-    ACE_SCOPED_TRACE("PerformDownload [%d]-[%lld], src: [%s]", imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_), src_.GetSrc().c_str());
+    ACE_SCOPED_TRACE("PerformDownload %s", imageDfxConfig_.ToStringWithSrc().c_str());
     DownloadCallback downloadCallback;
     downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](
                                            const std::string&& imageData, bool async, int32_t instanceId) {
@@ -282,13 +287,7 @@ void ImageLoadingContext::CacheDownloadedImage()
 
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE,
-        "Download image successfully, nodeId = %{public}d, accessId = %{public}lld, srcInfo = %{private}s, ImageData "
-        "length=%{public}zu",
-        imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_), GetSrc().ToString().c_str(),
-        imageData.size());
-    ACE_SCOPED_TRACE("DownloadImageSuccess [%d]-[%lld], [%zu], src: [%s]", imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_), imageData.size(), src_.GetSrc().c_str());
+    ACE_SCOPED_TRACE("DownloadImageSuccess %s, [%zu]", imageDfxConfig_.ToStringWithSrc().c_str(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
         return;
@@ -300,7 +299,11 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
         FailCallback("After download successful, imageObject Create fail");
         return;
     }
-    downloadedUrlData_ = imageData;
+    // Save the downloaded data only if the preload module is not used for downloading the URL.
+    // The data will be written to the cache after successful decoding.
+    if (!usePreload_) {
+        downloadedUrlData_ = imageData;
+    }
     DataReadyCallback(imageObj);
 }
 
@@ -389,7 +392,9 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage)
 {
     canvasImage_ = canvasImage;
-    CacheDownloadedImage();
+    if (!usePreload_) {
+        CacheDownloadedImage();
+    }
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 
@@ -397,10 +402,9 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, %{public}s",
+        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, [%{public}d]-[%{public}lld]",
-        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_));
     if (Downloadable()) {
         ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());
     }
@@ -510,7 +514,18 @@ void ImageLoadingContext::MakeCanvasImage(
 
 SizeF ImageLoadingContext::GetImageSize() const
 {
-    return imageObj_ ? imageObj_->GetImageSize() : SizeF(-1.0, -1.0);
+    CHECK_NULL_RETURN(imageObj_, SizeF(-1.0, -1.0));
+    auto imageSize = imageObj_->GetImageSize();
+    auto orientation = imageObj_->GetOrientation();
+    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
+        return {imageSize.Height(), imageSize.Width()};
+    }
+    return imageSize;
+}
+
+SizeF ImageLoadingContext::GetOriginImageSize() const
+{
+    return imageObj_ ? imageObj_->GetImageSize() : SizeF(-1, -1);
 }
 
 ImageFit ImageLoadingContext::GetImageFit() const

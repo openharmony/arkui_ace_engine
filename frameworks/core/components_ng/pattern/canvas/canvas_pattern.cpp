@@ -40,12 +40,23 @@ void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void CanvasPattern::AttachRenderContext()
 {
+    isAttached_ = true;
     FireOnContext2DAttach();
 }
 
 void CanvasPattern::DetachRenderContext()
 {
-    FireOnContext2DDetach();
+    if (isAttached_) {
+        isAttached_ = false;
+        FireOnContext2DDetach();
+    }
+}
+
+void CanvasPattern::OnAttachToMainTree()
+{
+    if (paintMethod_) {
+        paintMethod_->SetHostCustomNodeName();
+    }
 }
 
 void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
@@ -697,6 +708,7 @@ void CanvasPattern::UpdateTextAlign(TextAlign align)
 #else
     paintMethod_->PushTask<SetTextAlignOp>(align);
 #endif
+    paintMethod_->SetMeasureTextAlign(align);
 }
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
@@ -709,6 +721,7 @@ void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 #else
     paintMethod_->PushTask<SetTextBaselineOp>(baseline);
 #endif
+    paintMethod_->SetMeasureTextBaseline(baseline);
 }
 
 void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
@@ -737,6 +750,7 @@ void CanvasPattern::UpdateStrokeColor(const Color& color)
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
+    CHECK_NULL_VOID(gradient);
 #ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeGradient(gradientObj);
@@ -757,6 +771,7 @@ void CanvasPattern::UpdateFontWeight(FontWeight weight)
 #else
     paintMethod_->PushTask<SetFontWeightOp>(weight);
 #endif
+    paintMethod_->SetMeasureFontWeight(weight);
 }
 
 void CanvasPattern::UpdateFontStyle(FontStyle style)
@@ -769,6 +784,7 @@ void CanvasPattern::UpdateFontStyle(FontStyle style)
 #else
     paintMethod_->PushTask<SetFontStyleOp>(style);
 #endif
+    paintMethod_->SetMeasureFontStyle(style);
 }
 
 void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
@@ -781,6 +797,7 @@ void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 #else
     paintMethod_->PushTask<SetFontFamiliesOp>(families);
 #endif
+    paintMethod_->SetMeasureFontFamilies(families);
 }
 
 void CanvasPattern::UpdateFontSize(const Dimension& size)
@@ -793,6 +810,7 @@ void CanvasPattern::UpdateFontSize(const Dimension& size)
 #else
     paintMethod_->PushTask<SetFontSizeOp>(size);
 #endif
+    paintMethod_->SetMeasureFontSize(size);
 }
 
 void CanvasPattern::UpdateFillColor(const Color& color)
@@ -809,6 +827,7 @@ void CanvasPattern::UpdateFillColor(const Color& color)
 
 void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
+    CHECK_NULL_VOID(gradient);
 #ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillGradient(gradientObj);
@@ -1202,6 +1221,7 @@ void CanvasPattern::Reset()
 #endif
     paintMethod_->ResetTransformMatrix();
     paintMethod_->ResetLineDash();
+    paintMethod_->ResetMeasureTextState();
     SetTextDirection(TextDirection::INHERIT);
 }
 
@@ -1250,5 +1270,17 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("CanvasPaint", paintMethod_->GetDumpInfo().c_str());
     CHECK_NULL_VOID(contentModifier_);
     json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
+}
+
+void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    auto jsonMethod = JsonUtil::Create();
+    paintMethod_->GetSimplifyDumpInfo(jsonMethod);
+    json->PutRef("CanvasPaint", std::move(jsonMethod));
+    CHECK_NULL_VOID(contentModifier_);
+    auto arrayModifier = JsonUtil::Create();
+    contentModifier_->GetSimplifyDumpInfo(arrayModifier);
+    json->PutRef("CanvasModifier", std::move(arrayModifier));
 }
 } // namespace OHOS::Ace::NG

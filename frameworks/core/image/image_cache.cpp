@@ -88,6 +88,30 @@ void ImageCache::CacheImgObj(const std::string& key, const RefPtr<ImageObject>& 
         key, imgObj, cacheImgObjList_, imgObjCache_, imgObjCapacity_);
 }
 
+void ImageCache::ClearCacheImgObj(const std::string& key)
+{
+    ACE_SCOPED_TRACE("ClearCacheImgObj key:%s", key.c_str());
+    {
+        std::scoped_lock lock(imgObjMutex_);
+        auto iter = imgObjCache_.find(key);
+        if (iter != imgObjCache_.end()) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "Attempting to clear imageObjCache for key: %{public}s.", key.c_str());
+            cacheImgObjList_.erase(iter->second);
+            imgObjCache_.erase(iter);
+        }
+    }
+
+    {
+        std::scoped_lock lock(imgObjMutex_);
+        auto iter = imgObjCacheNG_.find(key);
+        if (iter != imgObjCacheNG_.end()) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "Attempting to clear imageObjCacheNG for key: %{public}s.", key.c_str());
+            cacheImgObjListNG_.erase(iter->second);
+            imgObjCacheNG_.erase(iter);
+        }
+    }
+}
+
 RefPtr<ImageObject> ImageCache::GetCacheImgObj(const std::string& key)
 {
     std::scoped_lock lock(imgObjMutex_);

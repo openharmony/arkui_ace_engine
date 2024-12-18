@@ -23,7 +23,7 @@ class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttri
 // @ts-ignore
 if (globalThis.RemoteWindow !== undefined) {
   // @ts-ignore
-  globalThis.RemoteWindow.attributeModifier = function (modifier: ArkComponent): void: void {
+  globalThis.RemoteWindow.attributeModifier = function (modifier: ArkComponent): void {
     attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
       return new ArkRemoteWindowComponent(nativePtr);
     }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

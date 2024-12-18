@@ -25,18 +25,18 @@
 namespace OHOS::Ace::NG {
 struct DividerInfo {
     float constrainStrokeWidth = 0.0f;
+    float mainSize = 0.0f;
     float crossSize = 0.0f;
+    float mainPadding = 0.0f;
+    float crossPadding = 0.0f;
     float startMargin = 0.0f;
     float endMargin = 0.0f;
     float space = 0.0f;
-    float mainPadding = 0.0f;
-    float crossPadding = 0.0f;
-    bool isVertical = true;
+    float laneGutter = 0.0f;
     int32_t lanes = 1;
     int32_t totalItemCount = 0;
     Color color = Color::TRANSPARENT;
-    float laneGutter = 0.0f;
-    float mainSize = 0.0f;
+    bool isVertical = true;
 };
 
 class ACE_EXPORT ListPaintMethod : public ScrollablePaintMethod {
@@ -79,9 +79,9 @@ public:
         totalItemCount_ = totalItemCount;
     }
 
-    void SetDirection(bool isReverse)
+    void SetDirection(bool isRTL)
     {
-        isReverse_ = isReverse;
+        isRTL_ = isRTL;
     }
 
     void SetContentModifier(const RefPtr<ListContentModifier>& modify)
@@ -89,9 +89,13 @@ public:
         listContentModifier_ = modify;
     }
 
-    void SetItemsPosition(const PositionMap& positionMap, const std::set<int32_t>& pressedItem)
+    void SetItemsPosition(const PositionMap& positionMap, const PositionMap& cachedPositionMap,
+        const std::set<int32_t>& pressedItem)
     {
         itemPosition_ = positionMap;
+        for (auto& [index, pos] : cachedPositionMap) {
+            itemPosition_[index] = pos;
+        }
         if (!pressedItem.empty()) {
             for (auto& child : itemPosition_) {
                 if (pressedItem.find(child.second.id) != pressedItem.end()) {
@@ -129,11 +133,6 @@ public:
     }
 
 private:
-    ContentClipMode GetDefaultContentClip() const override
-    {
-        return ContentClipMode::CONTENT_ONLY;
-    }
-
     V2::ItemDivider divider_;
     int32_t lanes_ = 1;
     int32_t totalItemCount_ = 0;
@@ -146,7 +145,7 @@ private:
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
-    bool isReverse_ = false;
+    bool isRTL_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

@@ -54,8 +54,6 @@ RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
 
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     uint32_t directNum = panGestureOption->GetDirection().type;
     double distanceNumber = panGestureOption->GetDistance();
     int32_t fingersNumber = panGestureOption->GetFingers();
@@ -113,8 +111,9 @@ void PanRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s",
-        node ? node->GetTag().c_str() : "null");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "Pan accepted, tag = %{public}s, averageDistance is x %{public}f, y %{public}f",
+        node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
     // only report the pan gesture starting for touch event
@@ -187,12 +186,13 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    extraInfo_ = "";
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
 
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d down, state: %{public}d", event.touchEventId,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d down, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
     fingers_ = newFingers_;
     distance_ = newDistance_;
@@ -200,13 +200,17 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (direction_.type == PanDirection::NONE) {
         auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, node tag = %{public}s, id = %{public}s",
-            node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, "
+            "node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
+            node ? node->GetTag().c_str() : "null",
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
+        extraInfo_ += "direction is NONE.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
+        extraInfo_ += "mouse event is not allowed.";
         return;
     }
     if (!IsInAttachedNode(event)) {
@@ -238,6 +242,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    extraInfo_ = "";
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -245,18 +250,20 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d axis start, state:%{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d axis start, state:%{public}d",
         event.touchEventId, event.id, refereeState_);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
 
     if (fingers_ != AXIS_PAN_FINGERS) {
+        extraInfo_ += "fingers does not meet the requirements of the axis event.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (direction_.type == PanDirection::NONE) {
+        extraInfo_ += "direction is NONE in axis case.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -279,9 +286,10 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
         "Id:%{public}d, pan %{public}d up, state: %{public}d, currentFingers: %{public}d, fingers: %{public}d",
         event.touchEventId, event.id, refereeState_, currentFingers_, fingers_);
+    extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
@@ -289,12 +297,15 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    // In CrossPlatform, MOVE point has sampled, but the UP point is original coordinate,
+    // and participating in the Velocity calculation may cause abnormal rates
+    if (currentFingers_ == fingers_ && SystemProperties::IsNeedResampleTouchPoints()) {
         UpdateTouchPointInVelocityTracker(event);
-    } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
+    } else if (currentFingers_ > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
+
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&
@@ -329,7 +340,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d axis end, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d axis end, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
     if (event.isRotationEvent) {
@@ -427,12 +438,12 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     bool isShiftKeyPressed = false;
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {
         isShiftKeyPressed =
-            pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_RIGHT);
+            event.HasKey(KeyCode::KEY_SHIFT_LEFT) || event.HasKey(KeyCode::KEY_SHIFT_RIGHT);
         hasDifferentDirectionGesture = pipeline->HasDifferentDirectionGesture();
     }
     delta_ = event.ConvertToOffset(isShiftKeyPressed, hasDifferentDirectionGesture);
@@ -504,13 +515,13 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d cancel", event.touchEventId, event.id);
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
@@ -523,7 +534,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan axis cancel", event.touchEventId);
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan axis cancel", event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -631,7 +642,9 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
         judgeDistance = mouseDistance_;
     }
-    if (judgeDistance == 0.0 && direction_.type != PanDirection::NONE) {
+    // when version >= 14, if distance_ = 0, panGesture will accept when receive Down event
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
@@ -694,7 +707,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     NGGestureRecognizer::Transform(
         localPoint, GetAttachedNode(), false, isPostEventResult_, touchPoint.postEventNodeId);
     info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
-    info.SetPointerId(touchPoint.id);
+    info.SetPointerId(inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.id : lastTouchEvent_.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
     info.SetIsInterpolated(touchPoint.isInterpolated);
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
@@ -815,7 +828,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -852,7 +865,7 @@ void PanRecognizer::ChangeDirection(const PanDirection& direction)
 {
     if (direction_.type != direction.type) {
         auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
             static_cast<int32_t>(direction_.type), static_cast<int32_t>(direction.type),
             node ? node->GetTag().c_str() : "null");
         direction_.type = direction.type;
@@ -892,7 +905,8 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
     oss << "direction: " << direction_.type << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "distance: " << distance_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }

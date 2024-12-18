@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SheetView {
 public:
-    static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<FrameNode> builder,
+    static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
         RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> CreateScrollNode();
 
@@ -40,6 +40,7 @@ private:
     static RefPtr<FrameNode> BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
+    static void SetTitleColumnMinSize(RefPtr<LayoutProperty> layoutProperty, const NG::SheetStyle& sheetStyle);
 };
 } // namespace OHOS::Ace::NG
 

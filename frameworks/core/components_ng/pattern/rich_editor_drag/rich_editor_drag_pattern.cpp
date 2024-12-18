@@ -58,6 +58,11 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     return dragNode;
 }
 
+void RichEditorDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)
+{
+    width = NearZero(info_->maxSelectedWidth) ? contentRect.Width() : info_->maxSelectedWidth;
+}
+
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren)
 {
@@ -78,6 +83,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto textPattern = hostNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, nullptr);
     auto placeholderIndex = textPattern->GetPlaceHolderIndex();
+    CHECK_NULL_RETURN(imageChildren.size() <= placeholderIndex.size(), nullptr);
     auto rectsForPlaceholders = textPattern->GetRectsForPlaceholders();
 
     size_t index = 0;

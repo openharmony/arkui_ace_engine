@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 #ifndef ACE_UNITTEST
@@ -39,12 +40,21 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     SetFontSize(DEFAULT_FONT_SIZE);
     // The default value of TextAlign is TextAlign::START.
     SetDefaultTextAlign();
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        isPathChanged_ = false;
+        isPath2dChanged_ = false;
+    }
 }
 
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
+    static constexpr uint32_t suggestSize = 100000;
     tasks_.emplace_back(task);
+    if (tasks_.size() >= suggestSize && tasks_.size() % suggestSize == 0) {
+        TAG_LOGI(AceLogTag::ACE_CANVAS, "[%{public}s] Canvas task size: %{public}zu", customNodeName_.c_str(),
+            tasks_.size());
+    }
     CHECK_EQUAL_VOID(needMarkDirty_, false);
     needMarkDirty_ = false;
     auto host = frameNode_.Upgrade();
@@ -65,7 +75,7 @@ bool CanvasPaintMethod::HasTask() const
 void CanvasPaintMethod::FlushTask()
 {
 #ifndef USE_FAST_TASKPOOL
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
+    ACE_SCOPED_TRACE("Canvas tasks count: %zu.", tasks_.size());
     for (auto& task : tasks_) {
         task(*this);
     }
@@ -134,8 +144,17 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     }
 
     if (HasShadow()) {
-        RSRect rec = RSRect(
-            canvasImage.dx, canvasImage.dy, canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+        auto tempPixelMap = pixelMap->GetPixelMapSharedPtr();
+        CHECK_NULL_VOID(tempPixelMap);
+        RSRect rec;
+        if (canvasImage.flag == DrawImageType::THREE_PARAMS &&
+            apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+            rec = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
+        } else {
+            rec = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+        }
         RSPath path;
         path.AddRect(rec);
         PaintImageShadow(path, state_.shadow, &imageBrush_, nullptr,
@@ -360,7 +379,12 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap
         return false;
     }
     currentBitmap.Free();
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmapFormat format;
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        format = { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
+    } else {
+        format = { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    }
     currentBitmap.Build(lastLayoutSize_.Width(), lastLayoutSize_.Height(), format);
 
     RSCanvas currentCanvas;
@@ -413,5 +437,26 @@ std::string CanvasPaintMethod::GetDumpInfo()
     std::string skew = "SKEW: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_X)) + ", " +
                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + "; ";
     return trans.append(scale).append(skew);
+}
+
+void CanvasPaintMethod::SetHostCustomNodeName()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto customNode = frameNode->GetParentCustomNode();
+    CHECK_NULL_VOID(customNode);
+    customNodeName_ = customNode->GetJSViewName();
+}
+
+void CanvasPaintMethod::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(rsCanvas_);
+    auto matrix = rsCanvas_->GetTotalMatrix();
+    json->Put("Trans",
+        (std::to_string(matrix.Get(RSMatrix::TRANS_X)) + "," + std::to_string(matrix.Get(RSMatrix::TRANS_Y))).c_str());
+    json->Put("Scale",
+        (std::to_string(matrix.Get(RSMatrix::SCALE_X)) + "," + std::to_string(matrix.Get(RSMatrix::SCALE_Y))).c_str());
+    json->Put("Skew",
+        (std::to_string(matrix.Get(RSMatrix::SKEW_X)) + "," + std::to_string(matrix.Get(RSMatrix::SKEW_Y))).c_str());
 }
 } // namespace OHOS::Ace::NG

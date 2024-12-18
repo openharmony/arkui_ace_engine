@@ -22,7 +22,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/layout_constraint.h"
 
@@ -61,6 +60,18 @@ enum class ScrollPagingStatus {
     INVALID,
     // enablePaging is true
     VALID,
+};
+
+enum class SnapType {
+    SCROLL_SNAP = 0,
+    LIST_SNAP,
+    NONE_SNAP
+};
+
+enum class SnapDirection {
+    FORWARD = 0,
+    BACKWARD,
+    NONE
 };
 
 // use in dumpInfo, excluding events truggered per frame,
@@ -440,6 +451,14 @@ enum class ScrollSource {
     SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 };
 
+struct SnapAnimationOptions {
+    float snapDelta = 0.f;
+    float animationVelocity = 0.f;
+    float dragDistance = 0.f;
+    SnapDirection snapDirection = SnapDirection::NONE;
+    bool fromScrollBar = false;
+};
+
 // app tail animation
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
@@ -450,7 +469,7 @@ constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
-using OnDidScrollEvent = std::function<void(Dimension, ScrollState, bool, bool)>;
+using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -462,13 +481,12 @@ using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, List
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using StartSnapMotionCallback = std::function<bool(float delta, float velocity, float dragDistance)>;
+using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
-    GestureEventFunc onPanActionEndEvent;
     OnReachEvent onReachStartEvent;
     OnReachEvent onReachEndEvent;
     OnScrollStartEvent onScrollStartEvent;

@@ -628,9 +628,15 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             scrollBar->ProcessFrictionMotion(value);
         });
     }
-    if (startSnapMotionCallback_) {
-        CHECK_NULL_VOID(!startSnapMotionCallback_(
-            CalcPatternOffset(frictionMotion_->GetFinalPosition()), -velocity, CalcPatternOffset(GetDragOffset())));
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = CalcPatternOffset(frictionMotion_->GetFinalPosition()),
+        .animationVelocity = -velocity,
+        .dragDistance = CalcPatternOffset(GetDragOffset()),
+        .fromScrollBar = true,
+    };
+    if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {
+        isDriving_ = false;
+        return;
     }
 
     if (!frictionController_) {

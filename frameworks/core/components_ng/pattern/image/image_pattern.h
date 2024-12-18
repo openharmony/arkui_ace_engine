@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/offset.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
@@ -139,9 +140,22 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
-        isImageQualityChange_ = (imageQuality_ != imageQuality);
+        isImageReloadNeeded_ = isImageReloadNeeded_  | (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
+
+    void SetOrientation(ImageRotateOrientation orientation)
+    {
+        isOrientationChange_ = (userOrientation_ != orientation);
+        userOrientation_ = orientation;
+    }
+
+    ImageRotateOrientation GetOrientation()
+    {
+        return userOrientation_;
+    }
+
+    void UpdateOrientation();
 
     AIImageQuality GetImageQuality()
     {
@@ -151,39 +165,6 @@ public:
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
-    }
-
-    void SetImageInterpolation(ImageInterpolation value)
-    {
-        interpolation_ = value;
-    }
-
-    std::string GetImageInterpolation()
-    {
-        switch (interpolation_) {
-            case ImageInterpolation::LOW:
-                return "LOW";
-            case ImageInterpolation::MEDIUM:
-                return "MEDIUM";
-            case ImageInterpolation::HIGH:
-                return "HIGH";
-            default:
-                return "NONE";
-        }
-    }
-
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
-    {
-        switch (dynamicMode) {
-            case DynamicRangeMode::HIGH:
-                return "HIGH";
-            case DynamicRangeMode::CONSTRAINT:
-                return "CONSTRAINT";
-            case DynamicRangeMode::STANDARD:
-                return "STANDARD";
-            default:
-                return "STANDARD";
-        }
     }
 
     std::string GetImageFitStr(ImageFit value);
@@ -213,10 +194,27 @@ public:
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpLayoutInfo();
+    void DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpImageFit(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpFitOriginalSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpSourceSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAutoResize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
     void DumpLayoutInfo(std::unique_ptr<JsonValue>& json);
     void DumpRenderInfo();
+    inline void DumpRenderMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageRepeat(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageColorFilter(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpDynamicRangeMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpMatchTextDirection(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpSmoothEdge(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpResizable(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpInterpolation(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpOtherInfo();
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -383,11 +381,25 @@ public:
     {
         isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
+
+    void SetRenderedImageInfo(const RenderedImageInfo& renderedImageInfo)
+    {
+        renderedImageInfo_ = renderedImageInfo;
+    }
+
+    // Sets the decoding format for the external domain.
+    // Note: Only NV21, RGBA_8888, RGBA_1010102, YCBCR_P010, YCRCB_P010 format is supported at this time.
+    void SetExternalDecodeFormat(PixelFormat externalDecodeFormat);
+
+    PixelFormat GetExternalDecodeFormat()
+    {
+        return externalDecodeFormat_;
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     bool isShow_ = true;
-    bool gifAnimation_ = false;
     RefPtr<ImageOverlayModifier> overlayMod_;
     RefPtr<ImageContentModifier> contentMod_;
 
@@ -413,11 +425,6 @@ private:
 
     void OnModifyDone() override;
     void UpdateGestureAndDragWhenModify();
-
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -450,7 +457,6 @@ private:
 
     void TriggerFirstVisibleAreaChange();
 
-    void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -510,6 +516,7 @@ private:
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
+    RenderedImageInfo renderedImageInfo_;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
@@ -532,16 +539,22 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     ImageDfxConfig imageDfxConfig_;
     ImageDfxConfig altImageDfxConfig_;
+    bool enableDrag_ = false;
 
     std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
-    bool isImageQualityChange_ = false;
+    PixelFormat externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    // Flag indicating whether the image needs to be reloaded due to parameter changes.
+    bool isImageReloadNeeded_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
     Color selectedColor_;
     float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
@@ -563,6 +576,7 @@ private:
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;
+    bool isOrientationChange_ = false;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;

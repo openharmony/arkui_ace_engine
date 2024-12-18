@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 // padding:12 space:8 size:8
 Offset FIRST_POINT = Offset(16.f, 16.f);
@@ -52,7 +51,7 @@ void SwiperIndicatorTestNg::MouseClickIndicator(SourceType sourceType, Offset ho
     gestureEvent.SetSourceDevice(sourceType);
     indicatorPattern->isRepeatClicked_ = false;
     indicatorPattern->HandleClick(gestureEvent);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperIndicatorTestNg::TouchClickIndicator(SourceType sourceType, Offset touchPoint)
@@ -65,7 +64,7 @@ void SwiperIndicatorTestNg::TouchClickIndicator(SourceType sourceType, Offset to
     gestureEvent.SetSourceDevice(sourceType);
     gestureEvent.SetLocalLocation(touchPoint);
     indicatorPattern->HandleClick(gestureEvent);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperIndicatorTestNg::LongPressIndicator(Offset startPoint, Offset endPoint)
@@ -78,7 +77,7 @@ void SwiperIndicatorTestNg::LongPressIndicator(Offset startPoint, Offset endPoin
 
     indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::MOVE, endPoint));
     indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, endPoint));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -88,9 +87,10 @@ void SwiperIndicatorTestNg::LongPressIndicator(Offset startPoint, Offset endPoin
  */
 HWTEST_F(SwiperIndicatorTestNg, OnIndicatorChangeEvent001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto firstTextNode = AceType::DynamicCast<FrameNode>(indicatorNode_->GetFirstChild());
     auto lastTextNode = AceType::DynamicCast<FrameNode>(indicatorNode_->GetLastChild());
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
@@ -100,29 +100,29 @@ HWTEST_F(SwiperIndicatorTestNg, OnIndicatorChangeEvent001, TestSize.Level1)
      * @tc.steps: step1. Default
      * @tc.expected: text is "1/4"
      */
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "1");
-    EXPECT_EQ(lastTextLayoutProperty->GetContentValue(), "/4");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"1");
+    EXPECT_EQ(lastTextLayoutProperty->GetContentValue(), u"/4");
 
     /**
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Change firstText
      */
     ShowNext();
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "2");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"2");
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Change firstText
      */
     ShowPrevious();
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"1");
 
     /**
      * @tc.steps: step4. Call ChangeIndex
      * @tc.expected: Change firstText
      */
     ChangeIndex(3);
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "4");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"4");
 }
 
 /**
@@ -132,7 +132,7 @@ HWTEST_F(SwiperIndicatorTestNg, OnIndicatorChangeEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.steps: step1. Click item(index:1)
@@ -164,47 +164,13 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleMouseClick002
- * @tc.desc: Test SwiperIndicator HandleMouseClick when SwipeByGroup is true
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-        model.SetSwipeByGroup(true);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    }, 6);
-    EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
-
-    /**
-     * @tc.steps: step1. Click item(index:1)
-     * @tc.expected: Swipe to item(index:3)
-     */
-    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-
-    /**
-     * @tc.steps: step2. Click item(index:0)
-     * @tc.expected: Swipe to item(index:0)
-     */
-    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-}
-
-/**
  * @tc.name: HandleTouchClick001
  * @tc.desc: Test SwiperIndicator HandleTouchClick
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleTouchClick001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.steps: step1. Click item(index:1)
@@ -235,7 +201,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleTouchClick001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleLongPress001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.steps: step1. Touch and move right
@@ -261,7 +227,10 @@ HWTEST_F(SwiperIndicatorTestNg, SetDotIndicatorStyle001, TestSize.Level1)
 {
     SwiperParameters swiperParameters;
     swiperParameters.colorVal = Color(Color::BLUE);
-    CreateWithItem([swiperParameters](SwiperModelNG model) { model.SetDotIndicatorStyle(swiperParameters); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDotIndicatorStyle(swiperParameters);
+    CreateSwiperItems();
+    CreateSwiperDone();
     ASSERT_EQ(pattern_->swiperParameters_->colorVal, swiperParameters.colorVal);
 }
 
@@ -274,7 +243,10 @@ HWTEST_F(SwiperIndicatorTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
 {
     SwiperDigitalParameters digitalParameters;
     digitalParameters.fontColor = Color(Color::GREEN);
-    CreateWithItem([digitalParameters](SwiperModelNG model) { model.SetDigitIndicatorStyle(digitalParameters); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDigitIndicatorStyle(digitalParameters);
+    CreateSwiperItems();
+    CreateSwiperDone();
     ASSERT_EQ(pattern_->swiperDigitalParameters_->fontColor, digitalParameters.fontColor);
 }
 
@@ -285,7 +257,7 @@ HWTEST_F(SwiperIndicatorTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->indicatorId_.reset();
     float translate = 0.1f;
 
@@ -311,7 +283,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation001,
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
@@ -330,7 +302,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002,
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperInitIndicator006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
@@ -350,9 +322,10 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperInitIndicator006, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
     auto eventHub = indicatorNode->GetEventHub<EventHub>();
@@ -370,7 +343,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternCheckMarkDirtyNodeForRenderIndicator001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
 
     /**
@@ -391,7 +364,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternCheckMarkDirtyNodeForRenderIndicato
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     GestureEvent info;
     TouchLocationInfo touchLocationInfo("down", 0);
@@ -416,7 +389,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, Tes
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto displayCount = pattern_->GetLayoutProperty<SwiperLayoutProperty>()->GetDisplayCount().value_or(1);
     auto childrenSize = pattern_->RealTotalCount();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
@@ -452,7 +425,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom002, Tes
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->stopIndicatorAnimation_ = false;
     pattern_->itemPosition_.clear();
     float translate = 0.1f;
@@ -474,9 +447,10 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation003,
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTouchBottom001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(4));
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
 
@@ -503,9 +477,10 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTouchBottom001, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     indicatorPattern->GetMouseClickIndex();
@@ -521,24 +496,27 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex001, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-    });
-    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
     /**
      * @tc.steps: step1. call no mirror func.
      */
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    MouseClickIndicator(SourceType::MOUSE, Offset(72.f, 16.f));
+    indicatorPattern->hoverPoint_ = PointF(72.f, 16.f);
     indicatorPattern->GetMouseClickIndex();
     EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
+
     /**
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks();
+    indicatorPattern->hoverPoint_ = PointF(16.f, 16.f);
     indicatorPattern->GetMouseClickIndex();
-    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
 }
 
 /**
@@ -548,32 +526,27 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 3);
 
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 5);
 
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, 7);
-    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
-    EXPECT_EQ(pattern_->currentIndex_, 5);
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 4);
 
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 7);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 11);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 13);
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
@@ -583,19 +556,16 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.L
     EXPECT_EQ(pattern_->currentIndex_, 12);
 
     pattern_->ChangeIndex(0, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 0);
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -1);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     EXPECT_EQ(pattern_->currentIndex_, -4);
 
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -9);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     EXPECT_EQ(pattern_->currentIndex_, -12);
@@ -610,7 +580,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0014, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(paintProperty_);
@@ -626,7 +596,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0014, TestSize.Level
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0017, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(paintProperty_);
@@ -644,7 +614,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0017, TestSize.Level
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternCheckMarkDirtyNodeForRenderIndicator002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
     float additionalOffset = -1.0f;
     indicatorPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 0.0f, 0.0f }));
@@ -667,7 +637,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternCheckMarkDirtyNodeForRenderIndicato
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->stopIndicatorAnimation_ = false;
     pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 0.0f, 0.0f }));
     float translate = 0.1f;
@@ -700,7 +670,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation004,
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0018, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(paintProperty_);
@@ -720,7 +690,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0018, TestSize.Level
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0019, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
@@ -742,7 +712,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0019, TestSize.Level
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0020, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     GestureEvent info;
     info.mainDelta_ = 1.0f;
@@ -763,100 +733,5 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0020, TestSize.Level
     touchEventInfo.touches_.front().localLocation_.SetX(2.0f);
     indicatorPattern->dragStartPoint_.SetX(1.0f);
     EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
-}
-
-/**
- * @tc.name: SwiperPatternDisplayIndicatorTotalCount001
- * @tc.desc: DisplayIndicatorTotalCount when SwipeByGroup is false and loop is false
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-        model.SetSwipeByGroup(false);
-        model.SetLoop(false);
-    }, 6);
-    EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = 14;
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 4);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-}
-
-/**
- * @tc.name: SwiperPatternDisplayIndicatorTotalCount002
- * @tc.desc: DisplayIndicatorTotalCount when SwipeByGroup is true
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(4);
-        model.SetSwipeByGroup(true);
-        model.SetLoop(false);
-    }, 6);
-    EXPECT_EQ(pattern_->TotalCount(), 8);
-    int32_t settingApiVersion = 14;
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-}
-
-/**
- * @tc.name: CalculateGroupTurnPageRate001
- * @tc.desc: Test SwiperPattern CalculateGroupTurnPageRate
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(2);
-        model.SetSwipeByGroup(true);
-        model.SetLoop(true);
-    });
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, 4);
-
-    float additionalOffset = 0.0f;
-    pattern_->contentMainSize_ = SWIPER_WIDTH;
-
-    pattern_->UpdateCurrentOffset(-120.0f);
-    FlushLayoutTask(frameNode_);
-
-    auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(additionalOffset);
-    EXPECT_EQ(groupTurnPageRate, -0.25f);
-}
-
-/**
- * @tc.name: UpdateFocusable001
- * @tc.desc: Test UpdateFocusable
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, UpdateFocusable001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {}, 3);
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, 3);
-
-    auto indicatorFocusHub = indicatorNode_->GetOrCreateFocusHub();
-    EXPECT_TRUE(indicatorFocusHub->GetFocusable());
-    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "auto");
-
-    frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(indicatorFocusHub->GetFocusable());
-
-    frameNode_->RemoveChildAtIndex(0);
-    frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->TotalCount(), 0);
-
-    FlushLayoutTask(indicatorNode_);
-    EXPECT_FALSE(indicatorFocusHub->GetFocusable());
-    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "no");
 }
 } // namespace OHOS::Ace::NG

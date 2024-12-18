@@ -14,6 +14,10 @@
  */
 
 import curves from '@ohos.curves';
+import { LengthMetrics, SegmentButton, SegmentButtonOptions } from '@kit.ArkUI';
+import { BlockTag } from '../model/BlockTag';
+import { MyFullDrawModifier } from '../model/DrawFullModifier';
+
 
 @Builder
 function IconButton(icon: Resource, action: () => void) {
@@ -35,7 +39,15 @@ export struct Drawer {
   @Link showParameters: boolean
   @BuilderParam content: () => void;
   @BuilderParam parameters: () => void;
-  @Consume('router') router: NavPathStack
+  @Consume('router') router: NavPathStack;
+  @State tabSelectedIndexes: number[] = [0];
+  @State tabOptions: SegmentButtonOptions = SegmentButtonOptions.tab({
+    buttons: [{ text: '参数列表' }, { text: '日志' }],
+    textPadding: { top: 8, bottom: 8 },
+  });
+  @StorageProp('Block') listBlockTags: Array<BlockTag> = [];
+  @State dividerHeight: number = 1;
+  @State circleModifier: DrawModifier = new MyFullDrawModifier();
 
   build() {
     Column() {
@@ -65,25 +77,78 @@ export struct Drawer {
 
       if (this.showParameters) {
         Column() {
-          Row() {
-            Text('参数列表')
-              .fontSize($r('sys.float.ohos_id_text_size_headline7'))
-              .fontWeight(FontWeight.Bold)
+          Stack() {
+            SegmentButton({ options: this.tabOptions, selectedIndexes: $tabSelectedIndexes })
+              .width(250)
 
-            Blank()
+            Row() {
+              IconButton($r('sys.media.ohos_ic_public_close'), () => {
+                animateTo({ curve: curves.interpolatingSpring(0, 1, 328, 36) }, () => {
+                  this.showParameters = false;
+                });
+              })
+            }
+            .height('100%')
+            .position({ right: 8 })
+            .alignItems(VerticalAlign.Center)
+          }
+          .width('100%')
+          .height(56)
+          .margin({ bottom: 12, top: 8 })
 
-            IconButton($r('sys.media.ohos_ic_public_close'), () => {
-              animateTo({ curve: curves.interpolatingSpring(0, 1, 328, 36) }, () => {
-                this.showParameters = false;
-              });
+          if (this.tabSelectedIndexes[0] === 0) {
+            this.parameters()
+          } else {
+            Stack() {
+              List() {
+                ForEach(this.listBlockTags, (item: BlockTag) => {
+                  ListItem() {
+                    Column({ space: 12 }) {
+                      Row() {
+                        Text(item.time)
+                          .fontSize($r('sys.float.Body_S'))
+                          .fontWeight(FontWeight.Medium)
+                          .fontColor($r('sys.color.font_secondary'))
+                      }
+                      .justifyContent(FlexAlign.Start)
+                      .width('100%')
+
+                      Row() {
+                        Text(item.description)
+                          .fontSize($r('sys.float.Body_L'))
+                          .fontWeight(FontWeight.Medium)
+                          .fontColor($r('sys.color.font_primary'))
+                          .maxLines(2)
+                      }
+                      .align(Alignment.Top)
+                      .width('100%')
+                    }
+                    .margin({ top: 12 })
+                    .padding({ start: LengthMetrics.vp(24), bottom: LengthMetrics.vp(12) })
+                    .width('100%')
+                    .justifyContent(FlexAlign.Start)
+                  }
+                  .drawModifier(this.circleModifier)
+                }, (item: string) => JSON.stringify(item))
+              }
+              .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                console.info(`Ace: List on area change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
+                this.dividerHeight = (newValue.height as number) + 16
+                console.info('Ace: on area change, dividerHeight is' + this.dividerHeight)
+              })
+              .width('100%')
+              .zIndex(2)
+              .align(Alignment.Start)
+            }
+            .width('100%')
+            .onDisAppear(() => {
+              AppStorage.setOrCreate('Block', []);
             })
-          }.width('100%').height(56)
-
-          this.parameters()
+          }
         }
         .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
         .borderRadius({ topLeft: 30, topRight: 30 })
-        .constraintSize({ maxWidth: 480, maxHeight: '70%', minHeight: '40%' })
+        .constraintSize({ maxWidth: 480, maxHeight: '60%', minHeight: '40%' })
         .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
         .padding({
           left: 16,
@@ -95,8 +160,12 @@ export struct Drawer {
         .width('100%')
       }
     }
+    .align(Alignment.Top)
     .height('100%')
     .width('100%')
+    .onAppear(() => {
+      AppStorage.setOrCreate('Block', []);
+    })
   }
 }
 

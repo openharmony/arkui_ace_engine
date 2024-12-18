@@ -141,13 +141,7 @@ void ImageAnimatorPattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& image
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     imageFrameNode->MarkModifyDone();
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto imagePattern = AceType::DynamicCast<ImagePattern>(imageFrameNode->GetPattern());
-    CHECK_NULL_VOID(imagePattern);
-    auto image = imagePattern->GetCanvasImage();
-    CHECK_NULL_VOID(image);
-    if (!image->IsStatic()) {
-        image->ControlAnimation(true);
-    }
+    ControlAnimatedImageAnimation(imageFrameNode, true);
 }
 
 void ImageAnimatorPattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index)
@@ -252,7 +246,7 @@ void ImageAnimatorPattern::GenerateCachedImages()
 
 bool ImageAnimatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config)
 {
-    DisablePreAnimatedImageAnimation(nowImageIndex_);
+    DisablePreAnimatedImageAnimation(static_cast<uint32_t>(nowImageIndex_));
     if (!isLayouted_) {
         isLayouted_ = true;
         if (fixedSize_ && images_.size()) {
@@ -292,9 +286,9 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
     }
 }
 
-void ImageAnimatorPattern::DisablePreAnimatedImageAnimation(int32_t index)
+void ImageAnimatorPattern::DisablePreAnimatedImageAnimation(uint32_t index)
 {
-    if (index >= static_cast<int32_t>(images_.size())) {
+    if (index >= static_cast<uint32_t>(images_.size())) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator get index error, index: %{public}d, size: %{public}zu", index,
             images_.size());
         return;
@@ -305,14 +299,7 @@ void ImageAnimatorPattern::DisablePreAnimatedImageAnimation(int32_t index)
     }
     if (cacheImageIter != cacheImages_.end()) {
         auto cacheImageNode = cacheImageIter->imageNode;
-        CHECK_NULL_VOID(cacheImageNode);
-        auto imagePattern = AceType::DynamicCast<ImagePattern>(cacheImageNode->GetPattern());
-        CHECK_NULL_VOID(imagePattern);
-        auto image = imagePattern->GetCanvasImage();
-        CHECK_NULL_VOID(image);
-        if (!image->IsStatic()) {
-            image->ControlAnimation(false);
-        }
+        ControlAnimatedImageAnimation(cacheImageNode, false);
     }
 }
 
@@ -611,14 +598,22 @@ void ImageAnimatorPattern::EnableFirstAnimatedImageAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    auto children = host->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ControlAnimatedImageAnimation(imageFrameNode, true);
+}
+void ImageAnimatorPattern::ControlAnimatedImageAnimation(const RefPtr<FrameNode>& imageFrameNode, bool play)
+{
     CHECK_NULL_VOID(imageFrameNode);
     auto imagePattern = AceType::DynamicCast<ImagePattern>(imageFrameNode->GetPattern());
     CHECK_NULL_VOID(imagePattern);
     auto image = imagePattern->GetCanvasImage();
     CHECK_NULL_VOID(image);
     if (!image->IsStatic()) {
-        image->ControlAnimation(true);
+        image->ControlAnimation(play);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,20 @@ NavToolbarNode::NavToolbarNode(const std::string& tag, int32_t nodeId)
     : FrameNode(tag, nodeId, MakeRefPtr<NavToolbarPattern>())
 {}
 
+NavToolbarNode::~NavToolbarNode()
+{
+    auto pipeline = GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto toolBarPattern = GetPattern<NavToolbarPattern>();
+    CHECK_NULL_VOID(toolBarPattern);
+    auto toolBarDialog = toolBarPattern->GetDialogNode();
+    if (toolBarDialog) {
+        overlayManager->CloseDialog(toolBarDialog);
+    }
+}
+
 RefPtr<NavToolbarNode> NavToolbarNode::GetOrCreateToolbarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {

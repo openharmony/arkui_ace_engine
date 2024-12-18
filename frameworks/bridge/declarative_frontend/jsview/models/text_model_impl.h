@@ -27,6 +27,7 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT TextModelImpl : public TextModel {
 public:
     void Create(const std::string& content) override;
+    void Create(const std::u16string& content) override;
     void Create(const RefPtr<SpanStringBase>& spanString) override {}
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
@@ -65,11 +66,11 @@ public:
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
-    void SetOnClick(std::function<void(BaseEventInfo*)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo*)>&& click, double distanceThreshold) override;
     void ClearOnClick() override {};
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetOnCopy(std::function<void(const std::string&)>&& func) override {};
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func) override {};
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge(bool clip) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};

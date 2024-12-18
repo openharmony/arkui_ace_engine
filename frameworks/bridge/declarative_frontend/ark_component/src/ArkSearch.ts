@@ -119,13 +119,14 @@ class SearchSearchButtonModifier extends ModifierWithKey<ArkSearchButton> {
       getUINativeModule().search.resetSearchButton(node);
     } else {
       getUINativeModule().search.setSearchButton(node, this.value.value,
-        this.value.fontSize, this.value.fontColor);
+        this.value.fontSize, this.value.fontColor, this.value.autoDisable);
     }
   }
   checkObjectDiff(): boolean {
     return this.stageValue.value !== this.value.value ||
       !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
+      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
+      !isBaseOrResourceEqual(this.stageValue.autoDisable, this.value.autoDisable);
   }
 }
 
@@ -500,8 +501,8 @@ class SearchOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) =>
   }
 }
 
-class SearchOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType, event: SubmitEvent) => void> {
-  constructor(value: (enterKey: EnterKeyType, event: SubmitEvent) => void) {
+class SearchOnSubmitModifier extends ModifierWithKey<(info: string, event?: SubmitEvent) => void> {
+  constructor(value: (info: string, event?: SubmitEvent) => void) {
     super(value);
   }
   static identity = Symbol('searchOnSubmit');
@@ -721,6 +722,23 @@ class SearchEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
   }
 }
 
+class SearchEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().search.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: string;
   placeholder?: ResourceStr;
@@ -793,7 +811,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchOnCutModifier, callback);
     return this;
   }
-  onSubmit(callback: (value: string) => void): SearchAttribute {
+  onSubmit(callback: (value: string, event?: SubmitEvent) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnSubmitModifier.identity,
       SearchOnSubmitModifier, callback);
     return this;
@@ -817,6 +835,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchButton.value = value;
     searchButton.fontColor = option?.fontColor;
     searchButton.fontSize = option?.fontSize;
+    searchButton.autoDisable = option?.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
@@ -943,6 +962,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
       SearchEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
     return this;
   }
 }

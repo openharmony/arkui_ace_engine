@@ -27,7 +27,6 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
     void* nativeEngine, bool isReload = false);
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj);
-void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj);
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine);
 void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode);
 

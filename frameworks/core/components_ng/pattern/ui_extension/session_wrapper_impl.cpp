@@ -65,7 +65,6 @@ constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
-constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 } // namespace
 
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
@@ -107,6 +106,13 @@ public:
         sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
+    void OnExtensionDetachToDisplay() override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionDetachToDisplay();
+    }
+
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
         auto sessionWrapper = sessionWrapper_.Upgrade();
@@ -134,8 +140,12 @@ SessionWrapperImpl::~SessionWrapperImpl() {}
 void SessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     int32_t callSessionId = GetSessionId();
+    if (!taskExecutor_) {
+        LOGE("Get taskExecutor_ is nullptr, the sessionid = %{public}d", callSessionId);
+        return;
+    }
+    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId]
         (OHOS::Rosen::WSError errcode) {
         if (errcode == OHOS::Rosen::WSError::WS_OK) {
@@ -315,9 +325,9 @@ void SessionWrapperImpl::InitAllCallback()
         return avoidArea;
     };
     sessionCallbacks->notifyExtensionEventFunc_ =
-        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t event) {
-        taskExecutor->PostDelayedTask(
-            [weak, callSessionId]() {
+        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t eventId) {
+        taskExecutor->PostTask(
+            [weak, callSessionId, eventId]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (callSessionId != pattern->GetSessionId()) {
@@ -327,9 +337,14 @@ void SessionWrapperImpl::InitAllCallback()
                         callSessionId, pattern->GetSessionId());
                         return;
                 }
-                pattern->OnAreaUpdated();
+                pattern->OnExtensionEvent(static_cast<UIExtCallbackEventId>(eventId));
             },
-            TaskExecutor::TaskType::UI, REMOVE_PLACEHOLDER_DELAY_TIME, "ArkUIUIExtensionEventCallback");
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
+    };
+    sessionCallbacks->getStatusBarHeightFunc_ = [instanceId = instanceId_]() -> uint32_t {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_RETURN(container, 0);
+        return container->GetStatusBarHeight();
     };
 }
 /************************************************ End: Initialization *************************************************/
@@ -349,7 +364,9 @@ Rosen::SessionViewportConfig ConvertToRosenSessionViewportConfig(const SessionVi
 
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
-    UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
+    ContainerScope scope(instanceId_);
+    UIEXT_LOGI("The session is created with bundle = %{public}s, ability = %{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
@@ -400,7 +417,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     SessionViewportConfig sessionViewportConfig;
     sessionViewportConfig.isDensityFollowHost_ = pattern->GetDensityDpi();
     sessionViewportConfig.density_ = context->GetCurrentDensity();
-    sessionViewportConfig.displayId_ = 0;
+    sessionViewportConfig.displayId_ = container->GetCurrentDisplayId();
     sessionViewportConfig.orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation());
     sessionViewportConfig.transform_ = context->GetTransformHint();
     pattern->SetSessionViewportConfig(sessionViewportConfig);
@@ -452,6 +469,21 @@ bool SessionWrapperImpl::IsSessionValid()
 int32_t SessionWrapperImpl::GetSessionId() const
 {
     return session_ ? session_->GetPersistentId() : 0;
+}
+
+int32_t SessionWrapperImpl::GetInstanceIdFromHost() const
+{
+    auto pattern = hostPattern_.Upgrade();
+    if (pattern == nullptr) {
+        UIEXT_LOGW("UIExtension pattern is null, session wrapper get instanceId from host return fail.");
+        return INSTANCE_ID_UNDEFINED;
+    }
+    auto instanceId = pattern->GetInstanceIdFromHost();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("SessionWrapper instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
 }
 
 const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
@@ -581,6 +613,7 @@ int32_t SessionWrapperImpl::GetWindowSceneId()
 
 void SessionWrapperImpl::NotifyForeground()
 {
+    ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -604,13 +637,29 @@ void SessionWrapperImpl::NotifyForeground()
         session_, hostWindowId, std::move(foregroundCallback_));
 }
 
-void SessionWrapperImpl::NotifyBackground()
+void SessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d.", session_->GetPersistentId());
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
-        session_, std::move(backgroundCallback_));
+    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d, isHandleError = %{public}d.",
+        session_->GetPersistentId(), isHandleError);
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, std::move(backgroundCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, nullptr);
+    }
 }
+
+void SessionWrapperImpl::OnReleaseDone()
+{
+    CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("OnReleaseDone, persistentid = %{public}d.", session_->GetPersistentId());
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestructionDone(session_);
+    session_ = nullptr;
+}
+
 void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
@@ -705,6 +754,27 @@ void SessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
 }
 
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+    UIEXT_LOGI("OnExtensionDetachToDisplay");
+    int32_t callSessionId = GetSessionId();
+    taskExecutor_->PostTask(
+        [weak = hostPattern_, callSessionId]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "OnExtensionDetachToDisplay: The callSessionId(%{public}d)"
+                    " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+
+            pattern->OnExtensionDetachToDisplay();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnExtensionDetachToDisplay");
+}
+
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)
 {
     int32_t callSessionId = GetSessionId();
@@ -768,7 +838,8 @@ WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
 void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
 {
     CHECK_NULL_VOID(session_);
-    ContainerScope scope(instanceId_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     displayAreaWindow_ = pipeline->GetCurrentWindowRect();
@@ -834,29 +905,46 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
+    CHECK_NULL_RETURN(taskExecutor_, false);
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto curWindow = pipeline->GetCurrentWindowRect();
-    if (displayAreaWindow_ != curWindow && needWaitLayout && taskExecutor_) {
+    int64_t curTime = GetCurrentTimestamp();
+    if (displayAreaWindow_ != curWindow && needWaitLayout) {
         UIEXT_LOGI("OccupiedArea wait layout, displayAreaWindow: %{public}s, curWindow = %{public}s",
             displayAreaWindow_.ToString().c_str(), curWindow.ToString().c_str());
         taskExecutor_->PostDelayedTask(
-            [info, weak = AceType::WeakClaim(this)] {
+            [info, weak = AceType::WeakClaim(this), curTime] {
                 auto session = weak.Upgrade();
                 if (session) {
-                    session->InnerNotifyOccupiedAreaChangeInfo(info);
+                    session->InnerNotifyOccupiedAreaChangeInfo(info, true, curTime);
                 }
             },
             TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChangeDelay");
     }
-    InnerNotifyOccupiedAreaChangeInfo(info);
+
+    taskExecutor_->PostTask(
+        [info, weak = AceType::WeakClaim(this), curTime] {
+            auto session = weak.Upgrade();
+            if (session) {
+                session->InnerNotifyOccupiedAreaChangeInfo(info, false, curTime);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUecAreaChange");
     return true;
 }
 
 bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
-    sptr<Rosen::OccupiedAreaChangeInfo> info) const
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime)
 {
+    if (isWaitTask && occupiedAreaTime < lastOccupiedAreaTime_) {
+        UIEXT_LOGW("OccupiedArea has been executed last time, persistentid = %{public}d.",
+            GetSessionId());
+        return false;
+    }
+
+    lastOccupiedAreaTime_ = occupiedAreaTime;
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);

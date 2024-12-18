@@ -195,12 +195,15 @@ protected:
     JSRenderImage* UnwrapNapiImage(const EcmaVM* vm, const JSRef<JSObject> jsObject);
 
 protected:
+    bool isJudgeSpecialValue_ = false;
     RefPtr<RenderingContext2DModel> renderingContext2DModel_;
     bool anti_ = false;
 
     RefPtr<AceType> offscreenPattern_;
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+
+    int32_t apiVersion_ = 0;
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);

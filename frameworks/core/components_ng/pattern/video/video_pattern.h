@@ -106,6 +106,8 @@ public:
         return loop_;
     }
 
+    void SetSurfaceBackgroundColor(Color color);
+
     virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
@@ -159,6 +161,7 @@ public:
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
     void ResetMediaPlayer();
+    void ResetMediaPlayerOnBg();
 
     void EnableDrag();
     void SetIsStop(bool isStop)
@@ -241,6 +244,7 @@ public:
     RefPtr<VideoPattern> GetTargetVideoPattern();
     void EnableAnalyzer(bool enable);
     void SetImageAnalyzerConfig(void* config);
+    void StartUpdateImageAnalyzer();
     void SetImageAIOptions(void* options);
     bool GetAnalyzerState();
     void UpdateAnalyzerState(bool isCreated)
@@ -264,14 +268,14 @@ public:
     {
         return isPrepared_;
     }
-
+    static void RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
+        const std::string& videoSrc, int32_t instanceId);
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
 
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
-    void RegisterMediaPlayerEvent();
 
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
@@ -295,6 +299,21 @@ private:
 
     // Set properties for media player.
     void PrepareMediaPlayer();
+    void SetStartImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetPausetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetStopImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetSeekToImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetRequestFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetExitFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetResetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+
     void SetMethodCall();
 
     bool SetSourceForMediaPlayer();
@@ -314,7 +333,7 @@ private:
     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
     void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
 
-    void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
+    void OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnCompletion();
     void OnSliderChange(float posTime, int32_t mode);
 
@@ -359,7 +378,6 @@ private:
     bool IsSupportImageAnalyzer();
     bool ShouldUpdateImageAnalyzer();
     void StartImageAnalyzer();
-    void StartUpdateImageAnalyzer();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();

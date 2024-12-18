@@ -1549,4 +1549,110 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     overlayManager->DeleteMenu(targetId);
     EXPECT_TRUE(overlayManager->menuMap_.empty());
 }
+
+/**
+ * @tc.name: GetFrameChildByIndex001
+ * @tc.desc: Test GetFrameChildByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, GetFrameChildByIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create empty builder.
+     */
+
+    auto builderFunc = []() -> RefPtr<UINode> { return nullptr; };
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> { return nullptr; };
+
+    /**
+     * @tc.steps: step3. excute OnBindSheet funtion.
+     * @tc.expected: GetFrameChildByIndex is return and modalStack_ is empty.
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
+    EXPECT_TRUE(overlayManager->modalList_.empty());
+
+    /**
+     * @tc.steps: step4. create not empty builder.
+     */
+    auto builderFunc_new = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    auto buildTitleNodeFunc_new = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step5. excute OnBindSheet funtion.
+     * @tc.expected: GetFrameChildByIndex is not return and modalStack_ is not empty.
+     */
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_new), std::move(buildTitleNodeFunc_new),
+        sheetStyle, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    EXPECT_FALSE(overlayManager->modalList_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+}
+
+/**
+ * @tc.name: GetFirstFrameNodeOfBuilder001
+ * @tc.desc: Test GetFirstFrameNodeOfBuilder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, GetFirstFrameNodeOfBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create builder.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto buildTitleNodeFunc = nullptr;
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+
+    /**
+     * @tc.steps: step2. create sheetNode.
+     * @tc.expected: sheetNode is not empty.
+     */
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, buildTitleNodeFunc, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step3. excute GetFirstFrameNodeOfBuilder function.
+     * @tc.expected: not return nullptr.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetContent = sheetPattern->GetFirstFrameNodeOfBuilder();
+    EXPECT_NE(sheetContent, nullptr);
+}
 } // namespace OHOS::Ace::NG

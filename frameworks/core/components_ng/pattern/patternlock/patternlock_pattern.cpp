@@ -52,8 +52,9 @@ void PatternLockPattern::OnModifyDone()
     InitFocusEvent();
     InitMouseEvent();
     InitAccessibilityHoverEvent();
+    InitSkipUnselectedPoint();
     if (isInitVirtualNode_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto patternLock = weak.Upgrade();
@@ -227,6 +228,21 @@ void PatternLockPattern::ModifyAccessibilityVirtualNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
+std::string PatternLockPattern::ReplacePlaceHolder(const std::string& str, int32_t number)
+{
+    std::string result = str;
+    std::string numberStr = std::to_string(number);
+
+    size_t pos = result.find("%d");
+    if (pos != std::string::npos) {
+        result.replace(pos, 2, numberStr); // 2: "%d" length
+    } else {
+        result = str + numberStr;
+    }
+
+    return result;
+}
+
 void PatternLockPattern::UpdateAccessibilityTextNode(
     RefPtr<FrameNode> frameNode, float handleCircleRadius, int32_t x, int32_t y)
 {
@@ -238,8 +254,12 @@ void PatternLockPattern::UpdateAccessibilityTextNode(
     float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (x + 1) - 1);
     float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (y + 1) - 1);
     int32_t index = y * PATTERN_LOCK_COL_COUNT + x + 1;
-    std::string message = Localization::GetInstance()->GetEntryLetters("patternlock.accessibilitypasspoint");
-    std::string text = message + std::to_string(index);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(patternLockTheme);
+    auto message = patternLockTheme->GetPassPointTxt();
+    std::string text = ReplacePlaceHolder(message, index);
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -394,7 +414,7 @@ void PatternLockPattern::AddPassPointToChoosePoint(
 
 void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
 {
-    if (choosePoint_.empty()) {
+    if (choosePoint_.empty() || skipUnselectedPoint_) {
         return;
     }
     passPointCount_ = 0;
@@ -861,5 +881,16 @@ OffsetF PatternLockPattern::GetTouchOffsetToNode()
         offset = offset / windowScale;
     }
     return offset;
+}
+
+void PatternLockPattern::InitSkipUnselectedPoint()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(patternLockPaintProperty);
+    if (patternLockPaintProperty->HasSkipUnselectedPoint()) {
+        skipUnselectedPoint_ = patternLockPaintProperty->GetSkipUnselectedPointValue();
+    }
 }
 } // namespace OHOS::Ace::NG

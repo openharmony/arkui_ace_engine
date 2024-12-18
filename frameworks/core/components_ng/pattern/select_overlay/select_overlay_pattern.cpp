@@ -126,6 +126,7 @@ void SelectOverlayPattern::InitMouseEvent()
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
 {
+    CHECK_NULL_VOID(info_);
     if (info_->onClose) {
         info_->onClose(closedByGlobalTouchEvent_);
         closedByGlobalTouchEvent_ = false;
@@ -246,7 +247,7 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& info)
     if (info_->onClick) {
         info_->onClick(info, isFirstHandleTouchDown_);
     }
-    if (!info_->isSingleHandle || clickConsumeBySimulate_) {
+    if (!info_->isSingleHandle) {
         return;
     }
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -277,13 +278,8 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (IsCustomMenu()) {
         MenuWrapperPattern::OnTouchEvent(info);
     }
-    if (changedPoint.GetTouchType() == TouchType::UP && isSimulateOnClick_) {
-        isSimulateOnClick_ = false;
-        GestureEvent gestureEvent;
-        gestureEvent.SetGlobalLocation(changedPoint.GetGlobalLocation());
-        gestureEvent.SetLocalLocation(changedPoint.GetLocalLocation());
-        HandleOnClick(gestureEvent);
-        clickConsumeBySimulate_ = true;
+    if (changedPoint.GetTouchType() == TouchType::UP) {
+        SwitchHandleToOverlayMode(false);
     }
 }
 
@@ -298,15 +294,6 @@ void SelectOverlayPattern::HandleTouchDownEvent(const TouchEventInfo& info)
         isFirstHandleTouchDown_ = true;
     } else if (secondHandleRegion_.IsInRegion(point)) {
         isSecondHandleTouchDown_ = true;
-    }
-    clickConsumeBySimulate_ = false;
-    if ((isFirstHandleTouchDown_ || isSecondHandleTouchDown_) && info_->enableHandleLevel &&
-        info_->handleLevelMode == HandleLevelMode::EMBED) {
-        auto host = DynamicCast<SelectOverlayNode>(GetHost());
-        if (host) {
-            isSimulateOnClick_ = true;
-            host->SwitchToOverlayMode();
-        }
     }
 }
 
@@ -345,11 +332,11 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
     }
     isFirstHandleTouchDown_ = false;
     isSecondHandleTouchDown_ = false;
+    SwitchHandleToOverlayMode(true);
 }
 
 void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
 {
-    isSimulateOnClick_ = false;
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
@@ -610,6 +597,16 @@ void SelectOverlayPattern::UpdateSelectMenuInfo(std::function<void(SelectMenuInf
     }
 }
 
+void SelectOverlayPattern::UpdateAncestorViewPort(const std::optional<RectF>& ancestorViewPort) const
+{
+    if (info_->ancestorViewPort != ancestorViewPort) {
+        info_->ancestorViewPort = ancestorViewPort;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
 void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden, bool noAnimation)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -711,11 +708,13 @@ void SelectOverlayPattern::HiddenHandle()
     }
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    firstHandleRegion_.Reset();
-    secondHandleRegion_.Reset();
-    std::vector<DimensionRect> responseRegion;
-    host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
-    host->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMNONE);
+    if (overlayMode_ == SelectOverlayMode::HANDLE_ONLY) {
+        firstHandleRegion_.Reset();
+        secondHandleRegion_.Reset();
+        std::vector<DimensionRect> responseRegion;
+        host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+        host->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMNONE);
+    }
     host->GetOrCreateGestureEventHub()->RemoveClickEvent(clickEvent_);
     host->GetOrCreateGestureEventHub()->RemovePanEvent(panEvent_);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -759,7 +758,7 @@ bool SelectOverlayPattern::CheckIfNeedHandle()
 
 float SelectOverlayPattern::GetHandleDiameter()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, 0.0f);
@@ -787,6 +786,39 @@ void SelectOverlayPattern::OnDpiConfigurationUpdate()
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
+    host->UpdateToolBar(true, true);
+}
+
+void SelectOverlayPattern::SwitchHandleToOverlayMode(bool afterRender)
+{
+    if (!info_->enableHandleLevel || info_->handleLevelMode != HandleLevelMode::EMBED) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = DynamicCast<SelectOverlayNode>(host);
+    CHECK_NULL_VOID(overlayNode);
+    auto switchTask = [weak = WeakClaim(AceType::RawPtr(overlayNode))]() {
+        auto overlayNode = weak.Upgrade();
+        CHECK_NULL_VOID(overlayNode);
+        if (overlayNode) {
+            overlayNode->SwitchToOverlayMode();
+        }
+    };
+    if (afterRender) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterRenderTask(switchTask);
+    } else {
+        switchTask();
+    }
+}
+
+void SelectOverlayPattern::OnColorConfigurationUpdate()
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateSelectMenuBg();
     host->UpdateToolBar(true, true);
 }
 } // namespace OHOS::Ace::NG

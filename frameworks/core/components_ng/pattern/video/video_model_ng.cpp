@@ -78,6 +78,7 @@ void VideoModelNG::SetProgressRate(double progressRate)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateProgressRate(progressRate);
 }
 
@@ -99,6 +100,7 @@ void VideoModelNG::SetMuted(bool muted)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateMuted(muted);
 }
 
@@ -107,6 +109,7 @@ void VideoModelNG::SetAutoPlay(bool autoPlay)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateAutoPlay(autoPlay);
 }
 
@@ -125,7 +128,17 @@ void VideoModelNG::SetLoop(bool loop)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateLoop(loop);
+}
+
+void VideoModelNG::SetSurfaceBackgroundColor(Color color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetSurfaceBackgroundColor(color);
 }
 
 void VideoModelNG::SetOnStart(VideoEventFunc&& onStart)
@@ -220,13 +233,12 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
 
 void VideoModelNG::AddDragFrameNodeToManager() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(frameNode);
-
     dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
 
@@ -234,6 +246,7 @@ void VideoModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
 {
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateAutoPlay(autoPlay);
 }
 
@@ -251,13 +264,23 @@ void VideoModelNG::SetMuted(FrameNode* frameNode, bool muted)
 {
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateMuted(muted);
+}
+
+void VideoModelNG::SetSurfaceBackgroundColor(FrameNode* frameNode, Color color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetSurfaceBackgroundColor(color);
 }
 
 void VideoModelNG::SetLoop(FrameNode* frameNode, bool loop)
 {
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateLoop(loop);
 }
 
@@ -266,6 +289,7 @@ void VideoModelNG::EnableAnalyzer(bool enable)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->EnableAnalyzer(enable);
 }
 
@@ -274,6 +298,7 @@ void VideoModelNG::SetImageAnalyzerConfig(void* config)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->SetImageAnalyzerConfig(config);
 }
 

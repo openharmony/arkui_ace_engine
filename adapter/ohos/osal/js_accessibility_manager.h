@@ -35,6 +35,10 @@ namespace OHOS::NWeb {
 class NWebAccessibilityNodeInfo;
 } // namespace OHOS::NWeb::NWebAccessibilityNodeInfo
 
+namespace OHOS::Ace::NG {
+    class TransitionalNodeInfo;
+}
+
 namespace OHOS::Ace::Framework {
 
 struct SearchParameter {
@@ -45,6 +49,7 @@ struct SearchParameter {
 };
 
 struct CommonProperty {
+    int32_t innerWindowId = -1;
     int32_t windowId = 0;
     int32_t windowLeft = 0;
     int32_t windowTop = 0;
@@ -83,6 +88,13 @@ struct AccessibilityActionParam {
 struct ActionParam {
     Accessibility::ActionType action;
     std::map<std::string, std::string> actionArguments;
+};
+
+enum class DumpMode {
+    TREE,
+    NODE,
+    HANDLE_EVENT,
+    HOVER_TEST
 };
 
 class JsAccessibilityManager : public AccessibilityNodeManager,
@@ -163,7 +175,8 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void FocusMoveSearch(const int64_t elementId, const int32_t direction, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
-
+    bool IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>& node, NG::WindowSceneInfo& windowSceneInfo);
+    void UpdateElementInfoInnerWindowId(Accessibility::AccessibilityElementInfo& info, const int64_t& elementId);
     void ExecuteAction(const int64_t accessibilityId, const ActionParam& param, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     bool ClearCurrentFocus();
@@ -251,6 +264,8 @@ public:
         int64_t hostElementId,
         const std::vector<std::string>& params,
         std::vector<std::string>& info) override;
+
+    void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -457,7 +472,7 @@ private:
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
     bool CheckDumpHandleEventParams(const std::vector<std::string> &params);
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
-        const RefPtr<PipelineBase>& mainContext);
+        const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,
@@ -497,10 +512,10 @@ private:
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
-    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node,
+    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         Accessibility::AccessibilityElementInfo& nodeInfo, int32_t treeId);
 
-    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node,
+    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         const CommonProperty& commonProperty, Accessibility::AccessibilityElementInfo& nodeInfo,
         const RefPtr<NG::WebPattern>& webPattern);
 
@@ -517,7 +532,11 @@ private:
     void NotifySetChildTreeIdAndWinId(int64_t elementId, const int32_t treeId, const int32_t childWindowId);
 
     bool CheckIsChildElement(
-        int64_t &elementId, const std::vector<std::string>& params, std::vector<std::string>& info);
+        int64_t &elementId,
+        const std::vector<std::string>& params,
+        std::vector<std::string>& info,
+        DumpMode mode,
+        int64_t &rootId);
 
     bool NeedRegisterChildTree(uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId);
 
@@ -558,6 +577,7 @@ private:
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
+    uint32_t parentWebWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;

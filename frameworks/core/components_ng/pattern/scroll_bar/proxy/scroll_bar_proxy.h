@@ -27,10 +27,10 @@ namespace OHOS::Ace::NG {
 class ScrollablePattern;
 struct ScrollableNodeInfo {
     WeakPtr<ScrollablePattern> scrollableNode;
-    std::function<bool(double, int32_t source)> onPositionChanged;
-    std::function<bool(double, int32_t source)> scrollStartCallback;
-    std::function<void()> scrollEndCallback;
-    StartSnapMotionCallback startSnapMotionCallback;
+    std::function<bool(double, int32_t source, bool)> onPositionChanged;
+    std::function<bool(double, int32_t source, bool)> scrollStartCallback;
+    std::function<void(bool)> scrollEndCallback;
+    StartSnapAnimationCallback startSnapAnimationCallback;
     ScrollBarFRCallback scrollbarFRcallback;
     std::function<void(bool, bool smooth)> scrollPageCallback;
 
@@ -91,6 +91,8 @@ public:
      */
     bool NotifySnapScroll(float delta, float velocity, float barScrollableDistance, float dragDistance) const;
 
+    bool NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const;
+
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
     void NotifyScrollBarNode(float distance, int32_t source) const;
@@ -100,10 +102,7 @@ public:
         scrollSnapTrigger_ = scrollSnapTrigger;
     }
 
-    bool IsScrollSnapTrigger() const
-    {
-        return scrollSnapTrigger_;
-    }
+    bool IsScrollSnapTrigger() const;
 
     void ScrollPage(bool reverse, bool smooth);
 
@@ -118,7 +117,7 @@ public:
         return scorllableNode_;
     }
 
-    bool IsNestScroller();
+    bool IsNestScroller() const;
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.

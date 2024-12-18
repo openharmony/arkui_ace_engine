@@ -18,14 +18,16 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
-#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowLayoutBase : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(WaterFlowLayoutBase, LayoutAlgorithm);
 
 public:
-    virtual void SetCanOverScroll(bool canOverScroll) = 0;
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        overScroll_ = canOverScroll;
+    }
 
     virtual void StartCacheLayout()
     { /* callback when cache layout starts */
@@ -37,23 +39,47 @@ public:
      * @param deadline of the preload task. Return early if deadline is reached.
      * @return true if the item is actually created and appended in lane.
      */
-    virtual bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) = 0;
+    virtual bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) = 0;
+
     virtual void EndCacheLayout()
     { /* callback when cache layout ends */
     }
 
 protected:
+    bool CanOverScroll() const
+    {
+        return overScroll_;
+    }
+
     /**
      * @brief Register an IdleTask to preload (create/measure/layout) items in cache range.
      */
     void PreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
 
+    /**
+     * @brief immediately create & measure items in cache range.
+     * need sync load to display cache items on screen.
+     */
+    void SyncPreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
+
     static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
 
+    void UpdateOverlay(LayoutWrapper* layoutWrapper);
+
 private:
+    /**
+     * @brief immediately create / measure a cache item during LayoutTask
+     */
+    virtual void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) = 0;
+
+    /**
+     * @param force true if force to preload all items in cache range.
+     */
     static std::list<int32_t> GeneratePreloadList(
-        const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount);
+        const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount, bool force);
     static void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+
+    bool overScroll_ = false;
 };
 
 enum class WaterFlowLayoutMode { TOP_DOWN = 0, SLIDING_WINDOW = 1 };

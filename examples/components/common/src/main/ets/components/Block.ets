@@ -12,30 +12,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { BlockTag } from '../model/BlockTag';
 
 @Component
 export struct Block {
   @Prop title: string;
   @Link isEnabled: boolean;
   @BuilderParam content: () => void;
+  @State listBlockTags: Array<BlockTag> = [];
+  @State listBlockTagsTemp: Array<BlockTag> = [];
 
   build() {
-    Column({ space: 8 }) {
+    Column() {
       Row() {
         Text(this.title)
-          .fontSize($r('sys.float.ohos_id_text_size_sub_title3'))
-          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+          .fontSize($r('sys.float.Body_M'))
+          .fontColor($r('sys.color.font_secondary'))
+          .fontWeight(FontWeight.Medium)
         Blank()
         Toggle({
           type: ToggleType.Switch,
           isOn: this.isEnabled
         }).onChange((enabled) => {
-          this.isEnabled = enabled
+          this.isEnabled = enabled;
         })
-      }.width('100%')
+      }
+      .padding({ left: 8, right: 8 })
+      .width('100%')
 
       this.content()
     }
+    .margin({ top: 6 })
+    .width('100%')
   }
 }
 

@@ -36,8 +36,8 @@ void AlertDialogModelNG::SetOnCancel(std::function<void()>&& eventFunc, DialogPr
     arg.onCancel = eventFunc;
 }
 
-void AlertDialogModelNG::SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
-    DialogProperties& arg)
+void AlertDialogModelNG::SetOnWillDismiss(std::function<void(const int32_t& info,
+    const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg)
 {
     arg.onWillDismiss = std::move(onWillDismissFunc);
 }

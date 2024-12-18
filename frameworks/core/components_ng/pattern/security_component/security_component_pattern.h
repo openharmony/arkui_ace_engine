@@ -87,6 +87,8 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     SecurityComponentRegisterStatus regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     std::timed_mutex regMutex_;
     int32_t scId_ = -1;
@@ -99,6 +101,8 @@ protected:
     void OnTouch(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
+    bool IsFontColorSet();
+    void OnColorConfigurationUpdate() override;
     void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
@@ -122,7 +126,7 @@ private:
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
     void DoTriggerOnclick(int32_t result);
-    void DelayReleaseNode(RefPtr<FrameNode>& node);
+    void DelayReleaseNode(uint64_t index);
     std::function<int32_t(int32_t)> CreateFirstUseDialogCloseFunc(
         RefPtr<FrameNode>& frameNode, RefPtr<PipelineContext>& pipeline, const std::string& taskName);
 #endif

@@ -31,6 +31,7 @@ public:
     ~PixelMapOhos() override = default;
     static PixelFormat PixelFormatConverter(Media::PixelFormat pixelFormat);
     static AlphaType AlphaTypeConverter(Media::AlphaType alphaType);
+    static AllocatorType AllocatorTypeConverter(Media::AllocatorType allocatorType);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
     bool GetPixelsVec(std::vector<uint8_t>& data) const override;
@@ -40,6 +41,8 @@ public:
     int32_t GetRowStride() const override;
     int32_t GetRowBytes() const override;
     int32_t GetByteCount() const override;
+    AllocatorType GetAllocatorType() const override;
+    bool IsHdr() const override;
     void* GetPixelManager() const override;
     void* GetRawPixelMapPtr() const override;
     std::string GetId() override;

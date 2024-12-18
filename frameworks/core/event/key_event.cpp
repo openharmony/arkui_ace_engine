@@ -72,7 +72,6 @@ const std::unordered_map<KeyCode, char> KEYBOARD_SYMBOLS = {
     { KeyCode::KEY_NUMPAD_MULTIPLY, '*' },
     { KeyCode::KEY_NUMPAD_SUBTRACT, '-' },
     { KeyCode::KEY_NUMPAD_ADD, '+' },
-    { KeyCode::KEY_NUMPAD_DOT, '.' },
     { KeyCode::KEY_NUMPAD_COMMA, ',' },
     { KeyCode::KEY_NUMPAD_EQUALS, '=' },
 };
@@ -146,8 +145,12 @@ std::string KeyEvent::ConvertCodeToString() const
         }
         return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_0));
     }
-    if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
-        return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
+    if (numLock) {
+        if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
+            return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
+        } else if (code == KeyCode::KEY_NUMPAD_DOT) {
+            return std::string(1, '.');
+        }
     }
     if (IsLetterKey()) {
         int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);

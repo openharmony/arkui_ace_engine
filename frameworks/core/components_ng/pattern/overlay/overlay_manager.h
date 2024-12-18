@@ -223,6 +223,13 @@ public:
     {
         maskNodeIdMap_[dialogId] = maskId;
     }
+
+    void SetModalDialogDisplayId(uint64_t displayId)
+    {
+        if (displayId != -1ULL) {
+            dialogDisplayId_ = displayId;
+        }
+    }
     bool isMaskNode(int32_t maskId);
     int32_t GetMaskNodeIdWithDialogId(int32_t dialogId);
 
@@ -236,13 +243,14 @@ public:
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
-    bool RemoveAllModalInOverlay();
+    bool RemoveAllModalInOverlay(bool isRouterTransition = true);
     bool RemoveAllModalInOverlayByStack();
     bool RemoveAllModalInOverlayByList();
     bool OnRemoveAllModalInOverlayByList();
     void AfterRemoveAllModalInOverlayByList();
     bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -506,6 +514,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
+    static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
@@ -627,10 +637,11 @@ public:
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
+    BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
-        const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -648,7 +659,7 @@ private:
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack);
     void SaveSheePageNode(
-        const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
+        const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
     bool CheckTargetIdIsValid(int32_t targetId);
     RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
@@ -688,7 +699,7 @@ private:
      *   @return     true if process is successful
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
-
+    void ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper);
     // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
     // 2. end show animation: overlay node get focus;
@@ -707,7 +718,7 @@ private:
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
-    void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
+    void ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
@@ -805,6 +816,7 @@ private:
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
+    RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -830,6 +842,7 @@ private:
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
+    uint64_t dialogDisplayId_ = 0;
     bool hasPixelMap_ { false };
     bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };

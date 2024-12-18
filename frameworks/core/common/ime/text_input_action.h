@@ -50,7 +50,6 @@ struct KeyBoardInfo {
 
 // For convenience of convert int value from Java
 TextInputAction CastToTextInputAction(int32_t value);
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_IME_TEXT_INPUT_ACTION_H

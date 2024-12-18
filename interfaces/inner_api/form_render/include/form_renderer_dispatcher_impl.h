@@ -51,6 +51,8 @@ public:
      */
     void SetAllowUpdate(bool allowUpdate) override;
     bool IsAllowUpdate();
+    void SetVisible(bool isVisible);
+    bool IsVisible();
 
     void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;
@@ -65,6 +67,10 @@ private:
     std::weak_ptr<FormRenderer> formRenderer_;
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool allowUpdate_ = true;
+    bool isVisible_ = true;
+    static std::recursive_mutex globalLock_;
+    void HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width, float height,
+        uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth);
 };
 } // namespace Ace
 } // namespace OHOS

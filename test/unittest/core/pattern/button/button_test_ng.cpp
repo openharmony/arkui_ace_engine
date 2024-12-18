@@ -62,6 +62,7 @@ constexpr float BUTTON_ONLY_HAS_WIDTH_VALUE = 100.0f;
 const SizeF BUTTON_SIZE(BUTTON_WIDTH, BUTTON_HEIGHT);
 const SizeF TEXT_SIZE(TEXT_WIDTH, TEXT_HEIGHT);
 const std::string CREATE_VALUE = "Hello World";
+const std::u16string CREATE_U16VALUE = u"Hello World";
 const std::string BUTTON_VALUE = "Test";
 const std::string TEST_RESULT = "result_ok";
 const std::string TEST_RESULT_CAPSULE = "capsule";
@@ -586,7 +587,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest006, TestSize.Level1)
     auto textLayoutProp = text->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProp, nullptr);
 
-    EXPECT_EQ(textLayoutProp->GetContent(), CREATE_VALUE);
+    EXPECT_EQ(textLayoutProp->GetContent(), CREATE_U16VALUE);
     EXPECT_EQ(textLayoutProp->GetFontSize(), BUTTON_FONT_SIZE_VALUE);
     EXPECT_EQ(textLayoutProp->GetFontWeight(), BUTTON_BOLD_FONT_WEIGHT_VALUE);
     EXPECT_EQ(textLayoutProp->GetTextColor(), FONT_COLOR);

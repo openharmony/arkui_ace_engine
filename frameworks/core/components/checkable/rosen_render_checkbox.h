@@ -31,19 +31,6 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
 
 private:
-#ifndef USE_ROSEN_DRAWING
-    void DrawCheck(SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
-    void DrawActiveBorder(SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint) const;
-    void DrawPartSelect(
-        SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint, const SkPaint& shadowPaint) const;
-    void DrawUnselected(SkCanvas* canvas, const Offset& origin, uint32_t paintColor, SkPaint& paint) const;
-    void SetUIStatus(SkCanvas* canvas, const Offset& paintOffset, SkPaint& strokePaint, SkPaint& shadowPaint);
-    void DrawBorder(SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const Size& paintSize) const;
-    void DrawAnimationOffToOn(
-        SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
-    void DrawAnimationOnToOff(
-        SkCanvas* canvas, const Offset& origin, const SkPaint& paint, const SkPaint& shadowPaint) const;
-#else
     void DrawCheck(RSCanvas* canvas, const Offset& origin, const RSPen& pen,
         const RSPen& shadowPen) const;
     void DrawActiveBorder(
@@ -59,7 +46,6 @@ private:
         const RSPen& shadowPen) const;
     void DrawAnimationOnToOff(RSCanvas* canvas, const Offset& origin, const RSPen& pen,
         const RSPen& shadowPen) const;
-#endif
     void DrawFocusBorder(RenderContext& context, const Offset& offset);
     void DrawTouchBoard(const Offset& offset, RenderContext& context);
     void DrawHoverBoard(const Offset& offset, RenderContext& context);

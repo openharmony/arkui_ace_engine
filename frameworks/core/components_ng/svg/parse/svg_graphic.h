@@ -21,11 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing_forward.h"
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkPaint.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
@@ -45,25 +41,14 @@ public:
 protected:
     void OnGraphicFill()
     {
-#ifndef USE_ROSEN_DRAWING
-        if (skCanvas_) {
-            auto smoothEdge = GetSmoothEdge();
-            if (GreatNotEqual(smoothEdge, 0.0f)) {
-                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge, false);
-                auto tmpFillPaint = fillPaint_;
-                tmpFillPaint.setMaskFilter(filter);
-                skCanvas_->drawPath(path_, tmpFillPaint);
-                tmpFillPaint.setMaskFilter(nullptr);
-            } else {
-                skCanvas_->drawPath(path_, fillPaint_);
-            }
-        }
-#else
         if (rsCanvas_) {
             auto smoothEdge = GetSmoothEdge();
             if (SystemProperties::GetDebugEnabled()) {
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
                     path_.ConvertToSVGString().c_str(), smoothEdge);
+            }
+            if (!path_.IsValid()) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
@@ -81,30 +66,18 @@ protected:
                 rsCanvas_->DetachBrush();
             }
         }
-#endif
     }
 
     void OnGraphicStroke()
     {
-#ifndef USE_ROSEN_DRAWING
-        if (skCanvas_) {
-            auto smoothEdge = GetSmoothEdge();
-            if (GreatNotEqual(smoothEdge, 0.0f)) {
-                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge, false);
-                auto tmpStrokePaint = strokePaint_;
-                tmpStrokePaint.setMaskFilter(filter);
-                skCanvas_->drawPath(path_, tmpStrokePaint);
-                tmpStrokePaint.setMaskFilter(nullptr);
-            } else {
-                skCanvas_->drawPath(path_, strokePaint_);
-            }
-        }
-#else
         if (rsCanvas_) {
             auto smoothEdge = GetSmoothEdge();
             if (SystemProperties::GetDebugEnabled()) {
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
                     path_.ConvertToSVGString().c_str(), smoothEdge);
+            }
+            if (!path_.IsValid()) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
@@ -122,7 +95,6 @@ protected:
                 rsCanvas_->DetachPen();
             }
         }
-#endif
     }
 
     // rect line polygon path circle ellipse
@@ -148,15 +120,9 @@ protected:
     void SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& gradient, std::vector<RSScalar> pos,
         std::vector<RSColorQuad> colors);
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath path_;
-    SkPaint fillPaint_;
-    SkPaint strokePaint_;
-#else
     RSRecordingPath path_;
     RSBrush fillBrush_;
     RSPen strokePen_;
-#endif
     FillState fillState_;
 
 private:

@@ -23,6 +23,9 @@
 #include "test/mock/core/render/mock_media_player.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
+#include "test/mock/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/base/mock_task_executor.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
@@ -103,6 +106,7 @@ void MovingphotoTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->rootNode_ = FrameNode::CreateFrameNodeWithTree(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<VideoTheme>()));
+    MockImageAnalyzerManager::SetUp();
 }
 
 void MovingphotoTestNg::TearDownTestSuite()
@@ -230,7 +234,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
     auto onErrorEvent = []() {};
     movingphoto.SetOnError(onErrorEvent);
 
-    auto frameNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::MOVING_PHOTO_ETS_TAG);
     auto movingPhotoEventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     EXPECT_TRUE(movingPhotoEventHub != nullptr);
@@ -774,7 +778,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest017, TestSize.Level1)
      */
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
-    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
@@ -804,7 +808,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest018, TestSize.Level1)
      */
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
-    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
@@ -863,7 +867,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest020, TestSize.Level1)
      */
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
-    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
@@ -894,7 +898,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest021, TestSize.Level1)
      */
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
-    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
@@ -927,7 +931,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest022, TestSize.Level1)
      */
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
-    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
@@ -944,8 +948,8 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest022, TestSize.Level1)
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
 
     movingphotoPattern->AutoPlayPeriod(100, 5000);
-    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, oldAutoPlayPeriodStartTime_);
-    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 100);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 5000);
 
     movingphotoPattern->AutoPlayPeriod(100, 500);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 100);
@@ -968,7 +972,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest023, TestSize.Level1)
      */
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
-    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
@@ -1009,7 +1013,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest024, TestSize.Level1)
      */
     MovingPhotoModelNG movingphoto;
     movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
-    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(movingphotoNode, nullptr);
     auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingphotoPattern, nullptr);
@@ -1021,6 +1025,199 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest024, TestSize.Level1)
     movingphotoPattern->UpdateCurrentDateModified(100);
     EXPECT_EQ(movingphotoPattern->GetCurrentDateModified(), 100);
     EXPECT_EQ(movingphotoPattern->currentDateModified_, 100);
+}
+
+/**
+ * @tc.name: ShouldUpdateImageAnalyzer001
+ * @tc.desc: Test ShouldUpdateImageAnalyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, ShouldUpdateImageAnalyzer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    EXPECT_TRUE(frameNode);
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+    auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+
+    EXPECT_FALSE(movingphotoPattern->ShouldUpdateImageAnalyzer());
+}
+
+/**
+ * @tc.name: SetImageAIOptions001
+ * @tc.desc: Test SetImageAIOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, SetImageAIOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+
+    EXPECT_EQ(movingphotoPattern->imageAnalyzerManager_, nullptr);
+    movingphotoPattern->SetImageAIOptions(nullptr);
+    EXPECT_NE(movingphotoPattern->imageAnalyzerManager_, nullptr);
+
+    movingphotoPattern->EnableAnalyzer(true);
+    auto imageAnalyzerManager = movingphotoPattern->imageAnalyzerManager_;
+    movingphotoPattern->SetImageAIOptions(nullptr);
+    EXPECT_EQ(movingphotoPattern->imageAnalyzerManager_, imageAnalyzerManager);
+}
+
+/**
+ * @tc.name: StartImageAnalyzer001
+ * @tc.desc: Test StartImageAnalyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, StartImageAnalyzer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    EXPECT_TRUE(frameNode);
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+    auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+
+    auto imageAnalyzerManager =
+        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::MOVINGPHOTO);
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
+    movingphotoPattern->imageAnalyzerManager_ = imageAnalyzerManager;
+    movingphotoPattern->EnableAnalyzer(true);
+
+    movingphotoPattern->StartImageAnalyzer();
+
+    imageAnalyzerManager->SetOverlayCreated(true);
+
+    movingphotoPattern->StartImageAnalyzer();
+    EXPECT_TRUE(movingphotoPattern->isEnableAnalyzer_);
+}
+
+/**
+ * @tc.name: StartUpdateImageAnalyzer001
+ * @tc.desc: Test StartUpdateImageAnalyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, StartUpdateImageAnalyzer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    EXPECT_TRUE(frameNode);
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    auto imageAnalyzerManager =
+        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::MOVINGPHOTO);
+    movingphotoPattern->imageAnalyzerManager_ = imageAnalyzerManager;
+    movingphotoPattern->EnableAnalyzer(true);
+
+    imageAnalyzerManager->SetOverlayCreated(false);
+
+    movingphotoPattern->StartUpdateImageAnalyzer();
+    EXPECT_FALSE(movingphotoPattern->isContentSizeChanged_);
+
+    movingphotoPattern->isContentSizeChanged_ = false;
+    imageAnalyzerManager->SetOverlayCreated(true);
+
+    movingphotoPattern->StartUpdateImageAnalyzer();
+    EXPECT_TRUE(movingphotoPattern->isContentSizeChanged_);
+
+    movingphotoPattern->isContentSizeChanged_ = true;
+    movingphotoPattern->StartUpdateImageAnalyzer();
+    EXPECT_TRUE(movingphotoPattern->isContentSizeChanged_);
+}
+
+/**
+ * @tc.name: UpdateAnalyzerUIConfig001
+ * @tc.desc: Test UpdateAnalyzerUIConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, UpdateAnalyzerUIConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    EXPECT_TRUE(frameNode);
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+    auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    movingphotoPattern->UpdateAnalyzerUIConfig(geometryNode);
+
+    auto imageAnalyzerManager =
+        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::MOVINGPHOTO);
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
+    movingphotoPattern->imageAnalyzerManager_ = imageAnalyzerManager;
+    movingphotoPattern->EnableAnalyzer(true);
+
+    movingphotoPattern->UpdateAnalyzerUIConfig(geometryNode);
+    EXPECT_TRUE(movingphotoPattern->isEnableAnalyzer_);
+}
+
+/**
+ * @tc.name: RefreshMovingPhoto001
+ * @tc.desc: Test RefreshMovingPhoto
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, RefreshMovingPhoto001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    EXPECT_TRUE(frameNode);
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+    auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    movingphotoPattern->RefreshMovingPhoto();
+
+    EXPECT_FALSE(movingphotoPattern->isRefreshMovingPhoto_);
 }
 
 } //namespace OHOS::Ace::NG

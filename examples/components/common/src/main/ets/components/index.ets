@@ -20,3 +20,6 @@ export * from './IconBlock';
 export * from './RadioBlock';
 
 export * from './SliderBlock';
+
+export * from './Drawer';
+

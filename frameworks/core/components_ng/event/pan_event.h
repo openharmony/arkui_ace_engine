@@ -70,7 +70,7 @@ class ACE_FORCE_EXPORT PanEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(PanEventActuator, GestureEventActuator)
 public:
     PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
-        float distance, bool isOverrideDistance = false);
+        float distance);
     ~PanEventActuator() override = default;
 
     void ReplacePanEvent(const RefPtr<PanEvent>& panEvent)
@@ -112,6 +112,11 @@ public:
     {
         CHECK_NULL_VOID(panRecognizer_);
         panRecognizer_->SetIsAllowMouse(isAllowMouse);
+    }
+
+    bool IsPanEventEmpty() const
+    {
+        return panEvents_.empty();
     }
 
 private:

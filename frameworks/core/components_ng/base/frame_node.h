@@ -78,6 +78,12 @@ struct CacheVisibleRectResult {
     RectF innerBoundaryRect = RectF();
 };
 
+struct CacheMatrixInfo {
+    Matrix4 revertMatrix = Matrix4::CreateIdentity();
+    Matrix4 localMatrix = Matrix4::CreateIdentity();
+    RectF paintRectWithTransform;
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -106,7 +112,7 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
-    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
+    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
     FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
@@ -145,6 +151,8 @@ public:
     }
 
     void OnInspectorIdUpdate(const std::string& id) override;
+
+    void OnAutoEventParamUpdate(const std::string& value) override;
 
     void UpdateGeometryTransition() override;
 
@@ -247,6 +255,16 @@ public:
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
+    }
+
+    void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
 
     void CleanVisibleAreaInnerCallback()
@@ -368,8 +386,12 @@ public:
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
 
-    HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
+    HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
+        TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
+
+    void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+        const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
+        TouchRestrict& touchRestrict);
 
     void AnimateHoverEffect(bool isHovered) const;
 
@@ -399,6 +421,8 @@ public:
     void ChangeSensitiveStyle(bool isSensitive);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -453,8 +477,6 @@ public:
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
 
     RectF GetPaintRectToWindowWithTransform();
-
-    OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -532,7 +554,8 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
+        std::vector<RectF>* regionList = nullptr);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -671,6 +694,9 @@ public:
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
+    // some developer use translate to make Grid drag animation, using old function can't find accurate child. 
+    // new function will ignore child's position and translate properties.
+    RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
@@ -775,7 +801,8 @@ public:
         int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override;
     void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
@@ -975,7 +1002,7 @@ public:
     // this flag will be used to refresh the transform matrix cache if it's dirty
     void NotifyTransformInfoChanged()
     {
-        isLocalRevertMatrixAvailable_ = false;
+        isTransformNotChanged_ = false;
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -1021,7 +1048,7 @@ public:
 
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
-    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
+    CacheMatrixInfo& GetOrRefreshMatrixFromCache(bool forceRefresh = false);
 
     // apply the matrix to the given point specified by dst
     static void MapPointTo(PointF& dst, Matrix4& matrix);
@@ -1093,14 +1120,16 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void OnForegroundColorUpdate(const Color& value);
-
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
-    void AddCustomProperty(const std::string& key, const std::string& value);
-    void RemoveCustomProperty(const std::string& key);
+    void AddCustomProperty(const std::string& key, const std::string& value) override;
+    void RemoveCustomProperty(const std::string& key) override;
+
+    void AddExtraCustomProperty(const std::string& key, void* extraData);
+    void* GetExtraCustomProperty(const std::string& key) const;
+    void RemoveExtraCustomProperty(const std::string& key);
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1117,6 +1146,20 @@ public:
     bool GetExposeInnerGestureFlag() const
     {
         return exposeInnerGestureFlag_;
+    }
+
+    RefPtr<UINode> GetCurrentPageRootNode() override;
+
+    std::list<RefPtr<FrameNode>> GetActiveChildren();
+
+    void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+    void OnPropertyChangeMeasure() const;
+
+    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
+    {
+        if (visibleAreaChangeTriggerReason_ != triggerReason) {
+            visibleAreaChangeTriggerReason_ = triggerReason;
+        }
     }
 
 protected:
@@ -1343,9 +1386,9 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();
     // this is just used for the hit test process of event handling, do not used for other purpose
-    Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
+    CacheMatrixInfo cacheMatrixInfo_;
     // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
-    bool isLocalRevertMatrixAvailable_ = false;
+    bool isTransformNotChanged_ = false;
     bool isFind_ = false;
 
     bool isRestoreInfoUsed_ = false;
@@ -1364,9 +1407,11 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
+
+    std::unordered_map<std::string, void*> extraCustomPropertyMap_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
@@ -1386,6 +1431,7 @@ private:
     std::optional<RectF> syncedFramePaintRect_;
 
     int32_t childrenUpdatedFrom_ = -1;
+    VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
 
     friend class RosenRenderContext;
     friend class RenderContext;

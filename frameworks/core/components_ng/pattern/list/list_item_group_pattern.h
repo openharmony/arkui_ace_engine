@@ -61,6 +61,8 @@ struct ListMainSizeValues {
     std::optional<float> layoutStartMainPos;
     std::optional<float> layoutEndMainPos;
     float referencePos = 0.0f;
+    float contentStartOffset = 0.0f;
+    float contentEndOffset = 0.0f;
     bool forward = true;
     bool backward = false;
 };
@@ -298,20 +300,21 @@ public:
     void ClearCachedItemPosition();
     void CalculateItemStartIndex();
     bool NeedCacheForward(const LayoutWrapper* listWrapper) const;
-    std::pair<int32_t, int32_t> UpdateCachedIndex(bool outOfView, int32_t forwardCache, int32_t backwardCache);
+    CachedIndexInfo UpdateCachedIndex(bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache);
     int32_t UpdateCachedIndexForward(bool outOfView, bool show, int32_t cacheCount);
     int32_t UpdateCachedIndexBackward(bool outOfView, bool show, int32_t cacheCount);
     std::pair<int32_t, int32_t> UpdateCachedIndexOmni(int32_t forwardCache, int32_t backwardCache);
     void UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show);
+    void UpdateActiveChildRange(bool show);
+    void SyncItemsToCachedItemPosition();
+    void SetRecache(bool value)
+    {
+        reCache_ = value;
+    }
     void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
         int32_t backwardCached, ListMainSizeValues listSizeValues);
 
 private:
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
@@ -346,6 +349,7 @@ private:
     std::set<int32_t> pressedItem_;
     bool layouted_ = false;
 
+    bool reCache_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
     ListItemGroupLayoutAlgorithm::PositionMap cachedItemPosition_;

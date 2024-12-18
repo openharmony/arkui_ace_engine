@@ -36,8 +36,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto toolbarLayoutAlgorithm = MakeRefPtr<ToolbarLayoutAlgorithm>();
-        return toolbarLayoutAlgorithm;
+        return MakeRefPtr<ToolbarLayoutAlgorithm>();
     }
 
     bool IsAtomicNode() const override
@@ -61,6 +60,16 @@ public:
     void OnColorConfigurationUpdate() override;
 
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
+
+    RefPtr<FrameNode> GetDialogNode()
+    {
+        return dialogNode_;
+    }
+
+    void SetToolBarItemDialogNode(const RefPtr<FrameNode>& dialogNode)
+    {
+        dialogNode_ = dialogNode;
+    }
 
 private:
     void OnModifyDone() override;

@@ -21,6 +21,30 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 
 namespace OHOS::Ace::NG {
+bool UpdateColumnWidth(const RefPtr<FrameNode>& frameNode, const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(frameNode && columnInfo, false);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (Positive(pipeline->GetRootWidth())) {
+        return false;
+    }
+
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_RETURN(currentId >= MIN_SUBCONTAINER_ID, false);
+    auto subwindowManager = SubwindowManager::GetInstance();
+    CHECK_NULL_RETURN(subwindowManager, false);
+    auto parentContainerId = subwindowManager->GetParentContainerId(currentId);
+    auto subwindow = subwindowManager->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subwindow, false);
+    auto width = subwindow->GetRect().Width();
+    CHECK_NULL_RETURN(Positive(width), false);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, false);
+    parent->BuildColumnWidth(width);
+    return true;
+}
+
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -63,8 +87,11 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // constraint min width base on grid column
         auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
         CHECK_NULL_VOID(columnInfo);
-        CHECK_NULL_VOID(columnInfo->GetParent());
-        columnInfo->GetParent()->BuildColumnWidth();
+        auto columnParent = columnInfo->GetParent();
+        CHECK_NULL_VOID(columnParent);
+        if (!UpdateColumnWidth(node, columnInfo)) {
+            columnParent->BuildColumnWidth();
+        }
         auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
         childConstraint.minSize.SetWidth(minWidth);
 
@@ -174,20 +201,32 @@ void MultiMenuLayoutAlgorithm::UpdateEmbeddedPercentReference(LayoutWrapper* lay
 void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
 {
-    float contentHeight = 0.0f;
-    float contentWidth = childConstraint.selfIdealSize.Width().value();
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
-        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        contentHeight += childSize.Height();
-    }
-    layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
-    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-
     auto node = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(node);
     auto pattern = node->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
+
+    float contentHeight = 0.0f;
+    float contentWidth = childConstraint.selfIdealSize.Width().value();
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!child) {
+            TAG_LOGW(AceLogTag::ACE_MENU, "child is null in MultiMenu");
+            continue;
+        }
+        auto resetLayoutConstraint = ResetLayoutConstraintMinWidth(child, childConstraint);
+        if (pattern->IsEmbedded() && (resetLayoutConstraint.minSize.Width() > resetLayoutConstraint.maxSize.Width())) {
+            resetLayoutConstraint.minSize.SetWidth(resetLayoutConstraint.maxSize.Width());
+        }
+        child->Measure(resetLayoutConstraint);
+        auto childGeometryNode = child->GetGeometryNode();
+        CHECK_NULL_VOID(childGeometryNode);
+        auto childHeight = std::max(childGeometryNode->GetMarginFrameSize().Height(),
+            childGeometryNode->GetContentSize().Height());
+        contentHeight += childHeight;
+    }
+    layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    
     // Stack or Embedded submenu must follow parent width
     if (pattern->IsStackSubmenu() || pattern->IsEmbedded()) {
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -219,8 +258,15 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
     float maxWidth = 0.0f;
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(node, maxWidth);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(pattern, maxWidth);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childConstraint = ResetLayoutConstraintMinWidth(child, layoutConstraint);
+        if (pattern->IsEmbedded() && (childConstraint.minSize.Width() > childConstraint.maxSize.Width())) {
+            childConstraint.minSize.SetWidth(childConstraint.maxSize.Width());
+        }
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());

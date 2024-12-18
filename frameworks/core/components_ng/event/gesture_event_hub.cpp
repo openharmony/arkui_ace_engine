@@ -477,11 +477,27 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double dista
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
         auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
         auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+    }
+}
+
+void GestureEventHub::SetNodeClickDistance(double distanceThreshold)
+{
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+    } else {
+        auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
     }
 }
 
@@ -538,11 +554,10 @@ void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJud
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
 }
 
-void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent, double distanceThreshold)
+void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
-    clickEventActuator_->AddDistanceThreshold(distanceThreshold);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
@@ -609,6 +624,12 @@ template<typename T>
 const RefPtr<T> GestureEventHub::GetAccessibilityRecognizer()
 {
     for (const auto& recognizer : gestureHierarchy_) {
+        const auto& re = AccessibilityRecursionSearchRecognizer<T>(recognizer);
+        if (re != nullptr) {
+            return re;
+        }
+    }
+    for (const auto& recognizer : modifierGestureHierarchy_) {
         const auto& re = AccessibilityRecursionSearchRecognizer<T>(recognizer);
         if (re != nullptr) {
             return re;
@@ -936,6 +957,13 @@ void GestureEventHub::AddGesture(const RefPtr<NG::Gesture>& gesture)
     recreateGesture_ = true;
 }
 
+void GestureEventHub::ClearGesture()
+{
+    gestures_.clear();
+    backupGestures_.clear();
+    recreateGesture_ = true;
+}
+
 void GestureEventHub::AttachGesture(const RefPtr<NG::Gesture>& gesture)
 {
     modifierGestures_.emplace_back(gesture);
@@ -1213,6 +1241,19 @@ void GestureEventHub::CleanNodeRecognizer()
 bool GestureEventHub::WillRecreateGesture() const
 {
     return recreateGesture_;
+}
+
+bool GestureEventHub::IsGestureEmpty() const
+{
+    return gestures_.empty();
+}
+
+bool GestureEventHub::IsPanEventEmpty() const
+{
+    if (panEventActuator_) {
+        return panEventActuator_->IsPanEventEmpty();
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

@@ -268,12 +268,10 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
      */
     auto formRendererDispatcher = formRenderer->formRendererDispatcherImpl_;
     EXPECT_TRUE(formRendererDispatcher);
-    OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0);
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr;
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
-        type, rsTransaction)).WillOnce(Return());
+        _, _)).WillOnce(Return());
     formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_EQ(onSurfaceChangeEventKey, CHECK_KEY);
@@ -282,7 +280,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
-        type, rsTransaction)).WillOnce(Return());
+        _, _)).WillOnce(Return());
     onSurfaceChangeEventKey = "";
     formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
     std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -401,14 +399,15 @@ HWTEST_F(FormRenderTest, FormRenderTest007, TestSize.Level1)
  */
 HWTEST_F(FormRenderTest, FormRenderTest008, TestSize.Level1)
 {
-    int32_t top = 50;
-    int32_t left = 50;
-    auto fun = [](int32_t&, int32_t&) {};
+    AccessibilityParentRectInfo parentRectInfo;
+    parentRectInfo.top = 50;
+    parentRectInfo.left = 50;
+    auto fun = [](AccessibilityParentRectInfo&) {};
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     renderDelegate->SetGetRectRelativeToWindowHandler(nullptr);
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_INVALID_DATA);
     renderDelegate->SetGetRectRelativeToWindowHandler(fun);
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_OK);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_OK);
 }
 
 /**
@@ -580,12 +579,13 @@ HWTEST_F(FormRenderTest, FormRenderTest015, TestSize.Level1)
     EXPECT_TRUE(formRenderer);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    int32_t top = 0;
-    int32_t left = 0;
-    formRenderer->GetRectRelativeToWindow(top, left);
+    AccessibilityParentRectInfo parentRectInfo;
+    parentRectInfo.top = 0;
+    parentRectInfo.left = 0;
+    formRenderer->GetRectRelativeToWindow(parentRectInfo);
     formRenderer->formRendererDelegate_ = renderDelegate;
     EXPECT_TRUE(formRenderer->formRendererDelegate_);
-    formRenderer->GetRectRelativeToWindow(top, left);
+    formRenderer->GetRectRelativeToWindow(parentRectInfo);
 }
 
 /**
@@ -804,6 +804,34 @@ HWTEST_F(FormRenderTest, FormRenderTest022, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(2)).
         WillOnce(Return(rsNode));
     formRenderer->OnSurfaceDetach();
+}
+
+/**
+* @tc.name: FormRenderTest023
+* @tc.desc: test SetVisibleChange
+* @tc.type: FUNC
+*/
+HWTEST_F(FormRenderTest, FormRenderTest023, TestSize.Level1)
+{
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest023");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(formRendererGroup);
+    OHOS::AAFwk::Want want;
+    want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
+    want.SetParam(FORM_RENDERER_ALLOW_UPDATE, false);
+    want.SetParam(FORM_RENDER_STATE, true);
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    want.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate->AsObject());
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formRendererGroup->AddForm(want, formJsInfo);
+    auto formRenderer = formRendererGroup->formRenderer_;
+    EXPECT_TRUE(formRenderer);
+    formRenderer->SetVisibleChange(true);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+    formRenderer->SetVisibleChange(true);
 }
 
 } // namespace OHOS::Ace

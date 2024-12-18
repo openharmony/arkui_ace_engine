@@ -1262,7 +1262,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest017, TestSize.Level1)
     marqueeLayoutProperty->UpdateFontColor(Color(2));
     frameNode->SetLayoutProperty(marqueeLayoutProperty);
     pattern->OnModifyDone();
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), "test");
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), u"test");
     EXPECT_EQ(textLayoutProperty->GetFontSize().value(), Dimension(2.0));
     EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), Ace::FontWeight::W200);
     EXPECT_EQ(textLayoutProperty->GetFontFamily().value(), fontFamily);
@@ -1326,7 +1326,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest018, TestSize.Level1)
     align.horizontal_ = 0.0f;
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     end = pattern->CalculateEnd();
-    expect = (2 + 5) * 0.5 * -1;
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 
     /**
@@ -1334,7 +1334,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest018, TestSize.Level1)
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     end = pattern->CalculateEnd();
-    expect = (2 + 5) * 0.5;
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 
     /**
@@ -1344,7 +1344,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest018, TestSize.Level1)
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
     end = pattern->CalculateEnd();
-    expect = -1 * 2 + padding.right.value_or(0);
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 
     /**
@@ -1352,7 +1352,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest018, TestSize.Level1)
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     end = pattern->CalculateEnd();
-    expect = 5 + padding.right.value_or(0);
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(end, expect);
 }
 
@@ -1401,9 +1401,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest019, TestSize.Level1)
      */
     pattern->StartMarqueeAnimation();
     auto renderContext = frameChild1->GetRenderContext();
-    TranslateOptions temp = renderContext->GetTransformTranslate().value();
-    TranslateOptions result { 3.5f, 0.0f, 0.0f };
-    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+    auto temp = renderContext->GetShowingTranslateProperty().GetX();
+    EXPECT_EQ(temp, 0.0f);
 
     /**
      * @tc.steps: step4. Call StartMarqueeAnimation again with isFormRender_ is true.
@@ -1411,8 +1410,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest019, TestSize.Level1)
      */
     MockPipelineContext::GetCurrent()->SetIsFormRender(true);
     pattern->StartMarqueeAnimation();
-    temp = renderContext->GetTransformTranslate().value();
-    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+    temp = renderContext->GetShowingTranslateProperty().GetX();
+    EXPECT_EQ(temp, 0.0f);
 }
 
 /**
@@ -1471,7 +1470,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest020, TestSize.Level1)
     align.horizontal_ = 0.0f;
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     start = pattern->CalculateStart();
-    expect = (2 + 5) * 0.5;
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 
     /**
@@ -1479,7 +1478,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest020, TestSize.Level1)
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     start = pattern->CalculateStart();
-    expect = (2 + 5) * 0.5 * -1;
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 
     /**
@@ -1489,7 +1488,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest020, TestSize.Level1)
     marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
     marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
     start = pattern->CalculateStart();
-    expect = 5 + padding.right.value_or(0);
+    expect = 2 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 
     /**
@@ -1497,7 +1496,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest020, TestSize.Level1)
      */
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
     start = pattern->CalculateStart();
-    expect = -2 + padding.right.value_or(0);
+    expect = -5 - padding.left.value_or(0);
     EXPECT_EQ(start, expect);
 }
 

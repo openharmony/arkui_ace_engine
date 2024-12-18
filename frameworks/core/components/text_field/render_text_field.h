@@ -45,7 +45,7 @@
 #include "core/pipeline/base/render_node.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
-#include "commonlibrary/c_utils/base/include/refbase.h"
+#include "refbase.h"
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;

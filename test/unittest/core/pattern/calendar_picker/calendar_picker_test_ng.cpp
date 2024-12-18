@@ -298,15 +298,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest004, TestSize.Level1)
     pickerPattern->SetDate(json->ToString());
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -342,15 +342,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest005, TestSize.Level1)
 
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -386,15 +386,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest006, TestSize.Level1)
 
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -2580,7 +2580,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     dialogPattern->isFocused_ = true;
     dialogPattern->isCalendarFirstFocused_ = false;
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     EXPECT_TRUE(dialogPattern->isCalendarFirstFocused_);
 
@@ -2588,14 +2588,14 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     dialogPattern->isFocused_ = false;
     dialogPattern->isCalendarFirstFocused_ = false;
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     eventHub->ProcessOnKeyEventInternal(keyEventTwo1);
 
     KeyEvent keyEventTwo2(KeyCode::KEY_TAB, KeyAction::UP);
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     dialogPattern->isFocused_ = true;
     dialogPattern->isCalendarFirstFocused_ = true;
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     eventHub->ProcessOnKeyEventInternal(keyEventTwo2);
 
     KeyEvent keyEventTwo3(KeyCode::KEY_TAB, KeyAction::UP);
@@ -2761,13 +2761,13 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
     EXPECT_FALSE(dialogPattern->HandleKeyEvent(keyEventOne));
 
     KeyEvent keyEventLeftOne(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 2;
+    dialogPattern->focusAreaID_ = 3;
     dialogPattern->focusAreaChildID_ = 2;
     dialogPattern->HandleKeyEvent(keyEventLeftOne);
     EXPECT_EQ(dialogPattern->focusAreaChildID_, 0);
 
     KeyEvent keyEventLeftTwo(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 2;
+    dialogPattern->focusAreaID_ = 3;
     dialogPattern->focusAreaChildID_ = 3;
     dialogPattern->HandleKeyEvent(keyEventLeftTwo);
     EXPECT_EQ(dialogPattern->focusAreaChildID_, 2);
@@ -2785,7 +2785,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
     EXPECT_EQ(dialogPattern->focusAreaChildID_, 3);
 
     KeyEvent keyEventEnter(KeyCode::KEY_ENTER, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 2;
+    dialogPattern->focusAreaID_ = 3;
     EXPECT_FALSE(dialogPattern->HandleKeyEvent(keyEventEnter));
 
     KeyEvent keyEventCall(KeyCode::KEY_CALL, KeyAction::DOWN);

@@ -14,6 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
+/// <reference path="../../state_mgmt/src/lib/common/utils.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule(): any {
   if (arkUINativeModule) {
@@ -149,6 +150,9 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
+  if (Utils.isApiVersionEQAbove(14)) {
+    return false;
+  }
   return (stageValue.bundleName === value.bundleName) &&
     (stageValue.moduleName === value.moduleName) &&
     (stageValue.id === value.id) &&
@@ -1075,7 +1079,9 @@ class BorderModifier extends ModifierWithKey<ArkBorder> {
         this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
         this.value.arkWidth.start, this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
         this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart, this.value.arkRadius.bottomEnd,
-        isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
+        isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius,
+        this.value.arkDashGap.start, this.value.arkDashGap.end, this.value.arkDashWidth.start, this.value.arkDashWidth.end
+      );
     }
   }
 
@@ -1717,8 +1723,8 @@ class RenderFitModifier extends ModifierWithKey<number> {
   }
 }
 
-class UseEffectModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class UseEffectModifier extends ModifierWithKey<ArkUseEffect> {
+  constructor(value: ArkUseEffect) {
     super(value);
   }
   static identity: Symbol = Symbol('useEffect');
@@ -1726,7 +1732,7 @@ class UseEffectModifier extends ModifierWithKey<boolean> {
     if (reset) {
       getUINativeModule().common.resetUseEffect(node);
     } else {
-      getUINativeModule().common.setUseEffect(node, this.value);
+      getUINativeModule().common.setUseEffect(node, this.value.useEffect, this.value.effectType);
     }
   }
 }
@@ -1760,6 +1766,96 @@ class OnClickModifier extends ModifierWithKey<ClickCallback> {
       getUINativeModule().common.resetOnClick(node);
     } else {
       getUINativeModule().common.setOnClick(node, this.value);
+    }
+  }
+}
+
+declare type DragStartCallback = (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo;
+class DragStartModifier extends ModifierWithKey<DragStartCallback> {
+  constructor(value: DragStartCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragStart(node);
+    } else {
+      getUINativeModule().common.setOnDragStart(node, this.value);
+    }
+  }
+}
+
+declare type DragEnterCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragEnterModifier extends ModifierWithKey<DragEnterCallback> {
+  constructor(value: DragEnterCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragEnter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnter(node);
+    } else {
+      getUINativeModule().common.setOnDragEnter(node, this.value);
+    }
+  }
+}
+
+declare type DragMoveCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragMoveModifier extends ModifierWithKey<DragMoveCallback> {
+  constructor(value: DragMoveCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragMove(node);
+    } else {
+      getUINativeModule().common.setOnDragMove(node, this.value);
+    }
+  }
+}
+
+declare type DragLeaveCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragLeaveModifier extends ModifierWithKey<DragLeaveCallback> {
+  constructor(value: DragLeaveCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragLeave');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragLeave(node);
+    } else {
+      getUINativeModule().common.setOnDragLeave(node, this.value);
+    }
+  }
+}
+
+declare type DropCallback = (event?: DragEvent, extraParams?: string) => void;
+class DropModifier extends ModifierWithKey<DropCallback> {
+  constructor(value: DropCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDrop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDrop(node);
+    } else {
+      getUINativeModule().common.setOnDrop(node, this.value);
+    }
+  }
+}
+
+declare type DragEndCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragEndModifier extends ModifierWithKey<DragEndCallback> {
+  constructor(value: DragEndCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragEnd');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnd(node);
+    } else {
+      getUINativeModule().common.setOnDragEnd(node, this.value);
     }
   }
 }
@@ -1998,6 +2094,21 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
   }
 }
 
+declare type FocusAxisEventCallback = (event: FocusAxisEvent) => void;
+class OnFocusAxisEventModifier extends ModifierWithKey<FocusAxisEventCallback> {
+  constructor(value: FocusAxisEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onFocusAxisEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyEvent(node);
+    } else {
+      getUINativeModule().common.setOnKeyEvent(node, this.value);
+    }
+  }
+}
+
 class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   constructor(value: MotionPathOptions) {
     super(value);
@@ -2163,6 +2274,16 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('focusable');
   applyPeer(node: KNode, reset: boolean): void {
     getUINativeModule().common.setFocusable(node, this.value);
+  }
+}
+
+class TabStopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    getUINativeModule().common.setTabStop(node, this.value);
   }
 }
 
@@ -3212,7 +3333,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   setNodePtr(nodePtr: KNode) {
+    if (nodePtr === this.nativePtr) {
+      return;
+    }
     this.nativePtr = nodePtr;
+    this._weakPtr = (nodePtr !== undefined && nodePtr !== null) ? getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr) : undefined;
   }
 
   setInstanceId(instanceId: number): void {
@@ -3610,6 +3735,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom;
         }
     }
+  }
     if (!isUndefined(value?.color) && value?.color !== null) {
       if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
         arkBorder.arkColor.leftColor = value.color;
@@ -3653,6 +3779,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
         }
     }
+  }
     if (!isUndefined(value?.style) && value?.style !== null) {
       let arkBorderStyle = new ArkBorderStyle();
       if (arkBorderStyle.parseBorderStyle(value.style)) {
@@ -3680,6 +3807,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkDashGap.right = (value.dashGap as EdgeWidths).right;
         arkBorder.arkDashGap.top = (value.dashGap as EdgeWidths).top;
         arkBorder.arkDashGap.bottom = (value.dashGap as EdgeWidths).bottom;
+        arkBorder.arkDashGap.start = (value.dashGap as LocalizedEdgeWidths).start;
+        arkBorder.arkDashGap.end = (value.dashGap as LocalizedEdgeWidths).end;
       }
     }
     if (!isUndefined(value?.dashWidth) && value?.dashWidth !== null) {
@@ -3693,6 +3822,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkDashWidth.right = (value.dashWidth as EdgeWidths).right;
         arkBorder.arkDashWidth.top = (value.dashWidth as EdgeWidths).top;
         arkBorder.arkDashWidth.bottom = (value.dashWidth as EdgeWidths).bottom;
+        arkBorder.arkDashWidth.start = (value.dashWidth as EdgeWidths).start;
+        arkBorder.arkDashWidth.end = (value.dashWidth as EdgeWidths).end;
       }
     }
     modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
@@ -3765,11 +3896,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onFocusAxisEvent(event: (event?: FocusAxisEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
+    return this;
+  }
+
   focusable(value: boolean): this {
     if (typeof value === 'boolean') {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
     } else {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, undefined);
+    }
+    return this;
+  }
+
+  tabStop(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, undefined);
     }
     return this;
   }
@@ -3932,8 +4077,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  useEffect(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, value);
+  useEffect(value: boolean, type: EffectType = EffectType.DEFAULT): this {
+    let useEffectObj = new ArkUseEffect();
+    useEffectObj.useEffect = value;
+    useEffectObj.effectType = type;
+    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, useEffectObj);
     return this;
   }
 
@@ -4211,27 +4359,33 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragStartModifier.identity, DragStartModifier, event);
+    return this;
   }
 
   onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragEnterModifier.identity, DragEnterModifier, event);
+    return this;
   }
 
   onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragMoveModifier.identity, DragMoveModifier, event);
+    return this;
   }
 
   onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragLeaveModifier.identity, DragLeaveModifier, event);
+    return this;
   }
 
   onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+    return this;
   }
 
   onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, DragEndModifier.identity, DragEndModifier, event);
+    return this;
   }
 
   onPreDrag(event: (preDragStatus: PreDragStatus) => void): this {
@@ -4729,40 +4883,40 @@ class UIGestureEvent {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
         getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
-          tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
+          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
         break;
       }
       case CommonGestureType.LONG_PRESS_GESTURE: {
         let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
         getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
-          longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+          longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
           longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.PAN_GESTURE: {
         let panGesture: PanGestureHandler = gesture as PanGestureHandler;
         getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
-          panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+          panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
           panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.SWIPE_GESTURE: {
         let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
         getUINativeModule().common.addSwipeGesture(this._nodePtr, priority, mask, swipeGesture.gestureTag,
-          swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
+          swipeGesture.allowedTypes, swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
         break;
       }
       case CommonGestureType.PINCH_GESTURE: {
         let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
         getUINativeModule().common.addPinchGesture(this._nodePtr, priority, mask, pinchGesture.gestureTag,
-          pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+          pinchGesture.allowedTypes, pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
           pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.ROTATION_GESTURE: {
         let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
         getUINativeModule().common.addRotationGesture(this._nodePtr, priority, mask, rotationGesture.gestureTag,
-          rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+          rotationGesture.allowedTypes, rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
           rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
           rotationGesture.onActionCancelCallback);
         break;
@@ -4802,40 +4956,40 @@ function addGestureToGroup(gesture: any, gestureGroupPtr: any) {
   switch (gesture.gestureType) {
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
-      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag,
+      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag, tapGesture.allowedTypes,
         tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.LONG_PRESS_GESTURE: {
       let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
-      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag,
+      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag, longPressGesture.allowedTypes,
         longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
         longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {
       let panGesture: PanGestureHandler = gesture as PanGestureHandler;
-      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag,
+      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag, panGesture.allowedTypes,
         panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
         panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
       let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
-      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag,
+      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag, swipeGesture.allowedTypes,
         swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PINCH_GESTURE: {
       let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
-      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag,
+      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag, pinchGesture.allowedTypes,
         pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
         pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.ROTATION_GESTURE: {
       let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
-      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag,
+      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag, rotationGesture.allowedTypes,
         rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
         rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
         rotationGesture.onActionCancelCallback, gestureGroupPtr);

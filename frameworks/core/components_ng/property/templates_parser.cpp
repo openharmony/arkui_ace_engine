@@ -67,7 +67,7 @@ double ConvertVirtualSize(const std::string& val, const DimensionUnit& unit, dou
             ret = ret / FULL_PERCENT * size;
             break;
         case DimensionUnit::VP: {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
+            auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
             if (pipelineContext) {
                 ret = pipelineContext->NormalizeToPx(Dimension(ret, DimensionUnit::VP));
             } else {

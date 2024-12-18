@@ -182,6 +182,16 @@ public:
         currentOverlongType_ = targetOverlongType_;
     }
 
+    void SetNeedUpdate(bool needUpdate)
+    {
+        needUpdate_ = needUpdate;
+    }
+
+    void SetIsAutoPlay(bool isAutoPlay)
+    {
+        isAutoPlay_ = isAutoPlay;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
     void InitOverlongSelectedIndex(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
@@ -203,12 +213,13 @@ private:
     void UpdateSelectedCenterXOnDrag(const LinearVector<float>& itemHalfSizes);
     void UpdateUnselectedCenterXOnDrag();
     int32_t CalcTargetIndexOnDrag() const;
-    std::pair<float, float> CalcLongPointEndCenterXWithBlack(int32_t index, const LinearVector<float>& itemHalfSizes);
+    std::pair<float, float> CalcLongPointEndCenterXWithBlack(size_t index, const LinearVector<float>& itemHalfSizes);
     float GetMoveRateOnAllMove() const;
     int32_t GetBlackPointsAnimationDuration() const;
     void AdjustTargetStatus(int32_t targetPageIndex);
     std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
     OverlongType RevertOverlongType(OverlongType overlongType) const;
+    void StopBlackAnimation();
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
@@ -244,6 +255,8 @@ private:
     bool keepStatus_ = false;
     bool blackPointsAnimEnd_ = true;
     bool isHorizontalAndRTL_ = false;
+    bool needUpdate_ = true;
+    bool isAutoPlay_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

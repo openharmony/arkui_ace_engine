@@ -58,6 +58,26 @@ public:
         src_ = src;
     }
 
+    const std::string& GetBundleName()
+    {
+        return bundleName_;
+    }
+
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    const std::string& GetModuleName()
+    {
+        return moduleName_;
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+
     std::string SliceToString()
     {
         std::string str;
@@ -152,6 +172,8 @@ public:
     std::optional<BorderImageEdge> borderImageEnd_;
 private:
     std::string src_;
+    std::string bundleName_;
+    std::string moduleName_;
     BorderImageEdge borderImageLeft_;
     BorderImageEdge borderImageTop_;
     BorderImageEdge borderImageRight_;

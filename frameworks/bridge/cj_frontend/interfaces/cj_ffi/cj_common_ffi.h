@@ -113,6 +113,13 @@ struct CJOffset {
     double yOffset;
 };
 
+struct CJRectResult {
+    double x;
+    double y;
+    double width;
+    double height;
+};
+
 struct CJTouchInfo {
     uint8_t type;
     int32_t fingerId;

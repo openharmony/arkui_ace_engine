@@ -56,6 +56,7 @@ void WindowSceneLayoutManager::Init()
 
 bool WindowSceneLayoutManager::IsNodeDirty(const RefPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node, false);
     auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_RETURN(context, false);
     auto rsNode = context->GetRSNode();
@@ -75,8 +76,8 @@ bool WindowSceneLayoutManager::IsNodeVisible(const RefPtr<FrameNode>& node)
     bool opaque = (opacityVal - 0.0f) > std::numeric_limits<float>::epsilon();
     bool ret = isVisible && opaque;
     if (isCoreDebugEnable_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "winId:%{public}d name:%{public}s frameNodeId:%{public}d"
-            "isVisible:%{public}d opaque:%{public}f ret:%{public}d", GetWindowId(node),
+        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "winId:%{public}d name:%{public}s frameNodeId:%{public}d "
+            "isVisible:%{public}d opaque:%{public}f ret:%{public}u", GetWindowId(node),
             GetWindowName(node).c_str(), node->GetId(), isVisible, opacityVal, ret);
     }
     return ret;
@@ -85,7 +86,7 @@ bool WindowSceneLayoutManager::IsNodeVisible(const RefPtr<FrameNode>& node)
 int32_t WindowSceneLayoutManager::GetNodeZIndex(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, ZINDEX_DEFAULT_VALUE);
-    auto context = node->GetRenderContext();
+    auto context = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
     CHECK_NULL_RETURN(context, ZINDEX_DEFAULT_VALUE);
     return context->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
 }
@@ -211,6 +212,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     res.uiParams_[windowId] = std::move(uiParam);
 }
 
+// once return false: need sync position; else not sync
 bool WindowSceneLayoutManager::NoNeedSyncScenePanelGlobalPosition(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
@@ -278,17 +280,20 @@ bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& n
 }
 
 void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-    bool isAncestorRecent, bool isAncestorDirty, bool notSyncPosition)
+    bool isParentRecent, bool isParentDirty, bool isParentNotSyncPosition)
 {
     CHECK_NULL_VOID(rootNode);
     auto parentType = rootNode->GetWindowPatternType();
     for (auto& weakNode : rootNode->GetFrameChildren()) {
+        bool isAncestorRecent = isParentRecent;
+        bool isAncestorDirty = isParentDirty;
+        bool notSyncPosition = isParentNotSyncPosition;
         auto node = weakNode.Upgrade();
         // when current layer is invisible, no need traverse next
         if (!node || !IsNodeVisible(node)) {
             continue;
         }
-        // once delete in recent, need update Zorder
+        // once delete in recent, need update zorder
         uint32_t currentZorder = res.zOrderCnt_;
         if (WindowSceneHelper::IsWindowPattern(node)) {
             currentZorder = std::max(res.zOrderCnt_, static_cast<uint32_t>(GetNodeZIndex(node)));
@@ -299,15 +304,16 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
             res.zOrderCnt_ = currentZorder++; // keep last zorder as current zorder
         }
         notSyncPosition = (notSyncPosition || NoNeedSyncScenePanelGlobalPosition(node));
-
         // process recent and child node
-        if (isAncestorRecent || IsRecentContainerState(node)) {
-            isAncestorRecent = true;
-        } else {
+        if (!isAncestorRecent) {
             if (isAncestorDirty || IsNodeDirty(node)) {
                 isAncestorDirty = true;
                 UpdateGeometry(node, rootNode, WindowSceneHelper::IsTransformScene(parentType));
             }
+        }
+        // only scenepanel can change recent state
+        if (IsRecentContainerState(node)) {
+            isAncestorRecent = true;
         }
         // only window pattern but not transform scene need sync info
         if (hasWindowSession) {
@@ -356,7 +362,7 @@ uint32_t WindowSceneLayoutManager::GetWindowId(const RefPtr<FrameNode>& node)
 
     auto type = static_cast<WindowPatternType>(node->GetWindowPatternType());
     switch (type) {
-        case WindowPatternType::DEFAULT:
+        case WindowPatternType::DEFAULT: // fallthrough
         case WindowPatternType::TRANSFORM_SCENE:
             return 0; // invalid window Id
         case WindowPatternType::PANEL_SCENE:
@@ -433,9 +439,9 @@ void WindowSceneLayoutManager::DumpFlushInfo(uint64_t screenId, TraverseResult& 
         return;
     }
     for (auto& [winId, uiParam] : res.uiParams_) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "DumpFlushInfo screenId:%{public}" PRIu64 " windowId:%{public}d"
-            " name:%{public}s rect:%{public}s, scaleX:%{public}f, scaleY:%{public}f, transX:%{public}f"
-            " transY:%{public}f pivotX:%{public}f, pivotY:%{public}f zOrder:%{public}u, interactive:%{public}d",
+        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "DumpFlushInfo screenId:%{public}" PRIu64 " windowId:%{public}d "
+            "name:%{public}s rect:%{public}s, scaleX:%{public}f, scaleY:%{public}f, transX:%{public}f "
+            "transY:%{public}f pivotX:%{public}f, pivotY:%{public}f zOrder:%{public}u, interactive:%{public}d",
             screenId, winId, uiParam.sessionName_.c_str(), uiParam.rect_.ToString().c_str(), uiParam.scaleX_,
             uiParam.scaleY_, uiParam.transX_, uiParam.transY_,
             uiParam.pivotX_, uiParam.pivotY_, uiParam.zOrder_, uiParam.interactive_);

@@ -60,18 +60,20 @@ constexpr float HALF = 0.5f;
 // harder it is to maintain
 struct GridLayoutInfo {
     /**
-     * @param regular running regular/irregular layout. For compatibility.
-     * Because in regular we used to add starting lines that are above viewport.
+     * @param prune
+     * @if true, try eliminate lines that are above viewport.
+     * @else trust startMainLineIndex_ to determine the viewport.
      *
-     * @return height of all lines in viewport.
+     * @return height in view range.
      */
-    float GetTotalHeightOfItemsInView(float mainGap, bool regular = true) const;
+    float GetTotalHeightOfItemsInView(float mainGap, bool prune = false) const;
+
+    using HeightMapIt = std::map<int32_t, float>::const_iterator;
     /**
      * @brief skip starting lines that are outside viewport in LayoutIrregular
      *
      * @return [iterator to the first line in view, offset of that first line]
      */
-    using HeightMapIt = std::map<int32_t, float>::const_iterator;
     std::pair<HeightMapIt, float> SkipLinesAboveView(float mainGap) const;
 
     void UpdateStartIndexByStartLine()
@@ -141,13 +143,6 @@ struct GridLayoutInfo {
      * @brief set up jumpIndex_ and align_ to jump to the bottom edge of content.
      */
     void PrepareJumpToBottom();
-
-    /**
-     * @brief optimized function (early exit) to compare total height to [other].
-     * @param other height to compare to.
-     * @return true if total height is less than [other].
-     */
-    bool HeightSumSmaller(float other, float mainGap) const;
 
     /**
      * @return height sum of lines in range [startLine, endLine).
@@ -362,6 +357,10 @@ struct GridLayoutInfo {
     MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
     void ClearHeightsFromMatrix(int32_t lineIdx);
 
+    void UpdateDefaultCachedCount();
+
+    int32_t FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex) const;
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -421,6 +420,9 @@ struct GridLayoutInfo {
     std::map<int32_t, bool> irregularLines_;
 
     bool clearStretch_ = false;
+
+    // default cached count
+    int32_t defCachedCount_ = 1;
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;

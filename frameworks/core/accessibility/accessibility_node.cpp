@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 namespace OHOS::Ace {
+using ChartValue = std::unordered_map<std::string, std::vector<std::pair<std::string, double>>>;
 namespace {
 
 const char ACCESSIBILITY_VALUE[] = "value";
@@ -459,4 +460,497 @@ void AccessibilityNode::OnFocusChange(bool isFocus)
     focusChangeEventId_(json->ToString());
 }
 
+void AccessibilityNode::SetWindowId(uint32_t windowId)
+{
+    windowId_ = windowId;
+}
+
+uint32_t AccessibilityNode::GetWindowId() const
+{
+    return windowId_;
+}
+
+void AccessibilityNode::SetIsRootNode(bool isRootNode)
+{
+    isRootNode_ = isRootNode;
+}
+
+bool AccessibilityNode::IsRootNode() const
+{
+    return isRootNode_;
+}
+
+void AccessibilityNode::ResetChildList(std::list<RefPtr<AccessibilityNode>>& children)
+{
+    children_.clear();
+    children_.swap(children);
+}
+
+const std::list<RefPtr<AccessibilityNode>> AccessibilityNode::GetChildList() const
+{
+    return children_;
+}
+
+NodeId AccessibilityNode::GetParentId() const
+{
+    auto parentNode = parentNode_.Upgrade();
+    return parentNode ? parentNode->GetNodeId() : -1;
+}
+
+RefPtr<AccessibilityNode> AccessibilityNode::GetParentNode() const
+{
+    return parentNode_.Upgrade();
+}
+
+const std::string& AccessibilityNode::GetTag() const
+{
+    return tag_;
+}
+
+void AccessibilityNode::SetTag(const std::string& tag)
+{
+    tag_ = tag;
+}
+
+int32_t AccessibilityNode::GetPageId() const
+{
+    return pageId_;
+}
+
+void AccessibilityNode::SetPageId(int32_t pageId)
+{
+    pageId_ = pageId;
+}
+
+const EventMarker& AccessibilityNode::GetAccessibilityEventMarker() const
+{
+    return onAccessibilityEventId_;
+}
+
+const EventMarker& AccessibilityNode::GetClickEventMarker() const
+{
+    return onClickId_;
+}
+
+const EventMarker& AccessibilityNode::GetLongPressEventMarker() const
+{
+    return onLongPressId_;
+}
+
+const EventMarker& AccessibilityNode::GetSetTextEventMarker() const
+{
+    return onSetTextId_;
+}
+
+const EventMarker& AccessibilityNode::GetFocusEventMarker() const
+{
+    return onFocusId_;
+}
+
+const EventMarker& AccessibilityNode::GetBlurEventMarker() const
+{
+    return onBlurId_;
+}
+
+NodeId AccessibilityNode::GetNodeId() const
+{
+    return nodeId_;
+}
+
+const std::string& AccessibilityNode::GetText() const
+{
+    return text_;
+}
+
+void AccessibilityNode::SetText(const std::string& text)
+{
+    text_ = text;
+}
+
+const std::string& AccessibilityNode::GetHintText() const
+{
+    return hintText_;
+}
+
+void AccessibilityNode::SetHintText(const std::string& hintText)
+{
+    hintText_ = hintText;
+}
+
+const std::vector<int32_t>& AccessibilityNode::GetChildIds() const
+{
+    return childIds_;
+}
+
+void AccessibilityNode::SetChildIds(const std::vector<int32_t>& ids)
+{
+    childIds_ = ids;
+}
+
+double AccessibilityNode::GetWidth() const
+{
+    return rect_.Width();
+}
+
+void AccessibilityNode::SetWidth(double width)
+{
+    rect_.SetWidth(width);
+}
+
+double AccessibilityNode::GetHeight() const
+{
+    return rect_.Height();
+}
+
+void AccessibilityNode::SetHeight(double height)
+{
+    rect_.SetHeight(height);
+}
+
+double AccessibilityNode::GetLeft() const
+{
+    return rect_.Left();
+}
+
+void AccessibilityNode::SetLeft(double left)
+{
+    return rect_.SetLeft(left);
+}
+
+double AccessibilityNode::GetTop() const
+{
+    return rect_.Top();
+}
+
+void AccessibilityNode::SetTop(double top)
+{
+    return rect_.SetTop(top);
+}
+
+bool AccessibilityNode::GetCheckedState() const
+{
+    return isChecked_;
+}
+
+void AccessibilityNode::SetCheckedState(bool state)
+{
+    isChecked_ = state;
+}
+
+bool AccessibilityNode::GetEnabledState() const
+{
+    return isEnabled_;
+}
+
+void AccessibilityNode::SetEnabledState(bool state)
+{
+    isEnabled_ = state;
+}
+
+bool AccessibilityNode::GetEditable() const
+{
+    return isEditable_;
+}
+
+void AccessibilityNode::SetEditable(bool editable)
+{
+    isEditable_ = editable;
+}
+
+bool AccessibilityNode::GetFocusedState() const
+{
+    return isFocused_;
+}
+
+void AccessibilityNode::SetFocusedState(bool state)
+{
+    isFocused_ = state;
+    OnFocusChange(isFocused_);
+}
+
+bool AccessibilityNode::GetAccessibilityFocusedState() const
+{
+    return isAccessibilityFocused_;
+}
+
+void AccessibilityNode::SetAccessibilityFocusedState(bool state)
+{
+    isAccessibilityFocused_ = state;
+}
+
+bool AccessibilityNode::GetSelectedState() const
+{
+    return isSelected_;
+}
+
+void AccessibilityNode::SetSelectedState(bool state)
+{
+    isSelected_ = state;
+}
+
+bool AccessibilityNode::GetCheckableState() const
+{
+    return isCheckable_;
+}
+
+void AccessibilityNode::SetCheckableState(bool state)
+{
+    isCheckable_ = state;
+}
+
+bool AccessibilityNode::GetClickableState() const
+{
+    return isClickable_;
+}
+
+void AccessibilityNode::SetClickableState(bool state)
+{
+    isClickable_ = state;
+    SetSupportAction(AceAction::ACTION_CLICK, state);
+}
+
+bool AccessibilityNode::GetFocusableState() const
+{
+    return isFocusable_;
+}
+
+void AccessibilityNode::SetFocusableState(bool state)
+{
+    isFocusable_ = state;
+}
+
+bool AccessibilityNode::GetScrollableState() const
+{
+    return isScrollable_;
+}
+
+void AccessibilityNode::SetScrollableState(bool state)
+{
+    isScrollable_ = state;
+}
+
+bool AccessibilityNode::GetLongClickableState() const
+{
+    return isLongClickable_;
+}
+
+void AccessibilityNode::SetLongClickableState(bool state)
+{
+    isLongClickable_ = state;
+    SetSupportAction(AceAction::ACTION_LONG_CLICK, state);
+}
+
+bool AccessibilityNode::GetIsMultiLine() const
+{
+    return isMultiLine_;
+}
+
+void AccessibilityNode::SetIsMultiLine(bool multiLine)
+{
+    isMultiLine_ = multiLine;
+}
+
+bool AccessibilityNode::GetIsPassword() const
+{
+    return isPassword_;
+}
+
+void AccessibilityNode::SetIsPassword(bool isPassword)
+{
+    isPassword_ = isPassword;
+}
+
+void AccessibilityNode::AddSupportAction(AceAction action)
+{
+    supportActions_ |= (1UL << static_cast<uint32_t>(action));
+}
+
+void AccessibilityNode::SetSupportAction(AceAction action, bool isEnable)
+{
+    isEnable ? supportActions_ |= (1UL << static_cast<uint32_t>(action))
+                : supportActions_ &= (~(0UL)) ^ (1UL << static_cast<uint32_t>(action));
+}
+
+const std::string& AccessibilityNode::GetAccessibilityLabel() const
+{
+    return accessibilityLabel_;
+}
+
+void AccessibilityNode::SetAccessibilityLabel(const std::string& label)
+{
+    accessibilityLabel_ = label;
+}
+
+const std::string& AccessibilityNode::GetAccessibilityHint() const
+{
+    return accessibilityHint_;
+}
+
+void AccessibilityNode::SetAccessibilityHint(const std::string& hint)
+{
+    accessibilityHint_ = hint;
+}
+
+const std::string& AccessibilityNode::GetImportantForAccessibility() const
+{
+    return importantForAccessibility_;
+}
+
+void AccessibilityNode::SetImportantForAccessibility(const std::string& importance)
+{
+    importantForAccessibility_ = importance;
+}
+
+size_t AccessibilityNode::GetMaxTextLength() const
+{
+    return maxTextLength_;
+}
+
+void AccessibilityNode::SetMaxTextLength(size_t length)
+{
+    maxTextLength_ = length;
+}
+
+int32_t AccessibilityNode::GetTextSelectionStart() const
+{
+    return textSelectionStart_;
+}
+
+void AccessibilityNode::SetTextSelectionStart(int32_t start)
+{
+    textSelectionStart_ = start;
+}
+
+int32_t AccessibilityNode::GetTextSelectionEnd() const
+{
+    return textSelectionEnd_;
+}
+
+void AccessibilityNode::SetTextSelectionEnd(int32_t end)
+{
+    textSelectionEnd_ = end;
+}
+
+const std::string& AccessibilityNode::GetErrorText() const
+{
+    return errorText_;
+}
+
+void AccessibilityNode::SetErrorText(const std::string& errorText)
+{
+    errorText_ = errorText;
+}
+
+const std::string& AccessibilityNode::GetJsComponentId() const
+{
+    return jsComponentId_;
+}
+
+void AccessibilityNode::SetJsComponentId(const std::string& jsComponentId)
+{
+    jsComponentId_ = jsComponentId;
+}
+
+bool AccessibilityNode::GetAccessible() const
+{
+    return accessible_;
+}
+
+void AccessibilityNode::SetAccessible(bool accessible)
+{
+    accessible_ = accessible;
+}
+
+AccessibilityValue AccessibilityNode::GetAccessibilityValue() const
+{
+    return accessibilityValue_;
+}
+
+void AccessibilityNode::SetAccessibilityValue(double cur, double min, double max)
+{
+    accessibilityValue_.current = cur;
+    accessibilityValue_.min = min;
+    accessibilityValue_.max = max;
+}
+
+const std::unique_ptr<ChartValue>& AccessibilityNode::GetChartValue() const
+{
+    return chartValue_;
+}
+
+void AccessibilityNode::PutChartValue(
+    const std::string& groupName, const std::vector<std::pair<std::string, double>>& values)
+{
+    if (!chartValue_) {
+        chartValue_ = std::make_unique<ChartValue>();
+    }
+
+    auto result = chartValue_->try_emplace(groupName, values);
+    if (!result.second) {
+        result.first->second = values;
+    }
+}
+
+std::string AccessibilityNode::GetInputType() const
+{
+    return inputType_;
+}
+
+AceTextCategory AccessibilityNode::GetTextInputType() const
+{
+    return textInputType_;
+}
+
+void AccessibilityNode::SetTextInputType(AceTextCategory type)
+{
+    textInputType_ = type;
+}
+
+const AceCollectionInfo& AccessibilityNode::GetCollectionInfo() const
+{
+    return collectionInfo_;
+}
+
+void AccessibilityNode::SetCollectionInfo(const AceCollectionInfo& collectionInfo)
+{
+    collectionInfo_ = collectionInfo;
+}
+
+const AceCollectionItemInfo& AccessibilityNode::GetCollectionItemInfo() const
+{
+    return collectionItemInfo_;
+}
+
+void AccessibilityNode::SetCollectionItemInfo(const AceCollectionItemInfo& collectionItemInfo)
+{
+    collectionItemInfo_ = collectionItemInfo;
+}
+
+bool AccessibilityNode::GetShown() const
+{
+    return shown_;
+}
+
+bool AccessibilityNode::GetVisible() const
+{
+    return visible_;
+}
+
+void AccessibilityNode::SetVisible(bool visible)
+{
+    visible_ = visible;
+}
+
+const Rect& AccessibilityNode::GetRect() const
+{
+    return rect_;
+}
+
+void AccessibilityNode::SetRect(const Rect& rect)
+{
+    isValidRect_ = rect.IsValid();
+    if (isValidRect_) {
+        rect_ = rect;
+    }
+}
 } // namespace OHOS::Ace

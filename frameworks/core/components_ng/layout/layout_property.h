@@ -62,6 +62,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     const std::optional<LayoutConstraintF>& GetLayoutConstraint() const
@@ -156,12 +158,14 @@ public:
 
     void UpdateLayoutWeight(float value);
 
-    void UpdatePixelRound(uint8_t value)
+    void UpdateChainWeight(const LayoutWeightPair& value);
+
+    void UpdatePixelRound(uint16_t value)
     {
         pixelRoundFlag_ = value;
     }
 
-    uint8_t GetPixelRound() const {
+    uint16_t GetPixelRound() const {
         return pixelRoundFlag_;
     }
 
@@ -336,7 +340,9 @@ public:
 
     static void UpdateAllGeometryTransition(const RefPtr<UINode>& parent);
 
-    std::pair<bool, bool> GetPercentSensitive();
+    // the returned value represents whether to compare percent reference when comparing old and new layout constrains.
+    // the first of returned value represents width, and the second of returned value represents height.
+    virtual std::pair<bool, bool> GetPercentSensitive();
     std::pair<bool, bool> UpdatePercentSensitive(bool width, bool height);
     bool ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
         const std::optional<LayoutConstraintF>& preContentConstraint);
@@ -353,16 +359,6 @@ public:
         return needPositionLocalizedEdges_;
     }
 
-    void UpdatNeedMarkAnchorPosition(bool needMarkAnchorPosition)
-    {
-        needMarkAnchorPosition_ = needMarkAnchorPosition;
-    }
-
-    bool IsMarkAnchorPosition() const
-    {
-        return needMarkAnchorPosition_;
-    }
-
     void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
     {
         needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
@@ -371,6 +367,16 @@ public:
     bool IsOffsetLocalizedEdges() const
     {
         return needOffsetLocalizedEdges_;
+    }
+
+    void ResetMarkAnchorStart()
+    {
+        markAnchorStart_.reset();
+    }
+
+    void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
+    {
+        markAnchorStart_ = markAnchorStart;
     }
 
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
@@ -385,6 +391,9 @@ public:
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
+    void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
+
+    virtual void OnPropertyChangeMeasure() {}
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
@@ -401,6 +410,7 @@ private:
     void ConstraintContentByBorder();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding();
+    bool DecideMirror();
 
     const std::string PixelRoundToJsonValue() const;
 
@@ -432,6 +442,7 @@ private:
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
     std::optional<RectF> layoutRect_;
+    std::optional<Dimension> markAnchorStart_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 
@@ -439,7 +450,7 @@ private:
 
     bool usingPosition_ = true;
 
-    uint8_t pixelRoundFlag_  = 0;
+    uint16_t pixelRoundFlag_  = 0;
 
     bool isOverlayNode_ = false;
     Dimension overlayOffsetX_;
@@ -448,7 +459,6 @@ private:
     bool heightPercentSensitive_ = false;
     bool widthPercentSensitive_ = false;
     bool needPositionLocalizedEdges_ = false;
-    bool needMarkAnchorPosition_ = false;
     bool needOffsetLocalizedEdges_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);

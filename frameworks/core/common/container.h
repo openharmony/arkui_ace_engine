@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -59,13 +60,14 @@ using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
+using NonPointerEventCallback = std::function<bool(const NonPointerEvent&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(const PointerEvent&, const DragEventAction&,
+using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
 
@@ -197,11 +199,6 @@ public:
     virtual FoldStatus GetCurrentFoldStatus();
 
     virtual NG::SafeAreaInsets GetKeyboardSafeArea()
-    {
-        return {};
-    }
-
-    virtual Rect GetSessionAvoidAreaByType(uint32_t safeAreaType)
     {
         return {};
     }
@@ -385,6 +382,11 @@ public:
         return context ? context->GetWindow() : nullptr;
     }
 
+    virtual uint64_t GetDisplayId() const
+    {
+        return -1;
+    }
+
     virtual bool IsUseStageModel() const
     {
         return false;
@@ -453,6 +455,7 @@ public:
     }
 
     virtual void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange = { false, false }) {}
+
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -497,7 +500,7 @@ public:
 
     virtual bool GetCurPointerEventInfo(
         int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -531,22 +534,61 @@ public:
         return nullptr;
     }
 
+    /*
+     *this interface is just use before api12(not include api12),after api12 when you judge version,use
+     *LessThanAPITargetVersion(PlatformVersion version)
+     */
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContext() &&
+                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+                   : LessThanAPITargetVersion(version);
     }
 
+    /*
+     *this interface is just use before api12(not include api12),after api12 when you judge version,use
+     *GreatOrEqualAPITargetVersion(PlatformVersion version)
+     */
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContext() &&
+                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+                   : GreatOrEqualAPITargetVersion(version);
+    }
+
+    /*
+     *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
+     */
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
+    {
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
+                             static_cast<int32_t>(version)
+                   : LessThanAPITargetVersion(version);
+    }
+
+    /*
+     *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
+     */
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
+    {
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
+                             static_cast<int32_t>(version)
+                   : GreatOrEqualAPITargetVersion(version);
     }
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        CHECK_NULL_RETURN(container, false);
+        if (!container) {
+            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+            return apiTargetVersion < static_cast<int32_t>(version);
+        }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
@@ -560,6 +602,15 @@ public:
         }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion >= static_cast<int32_t>(version);
+    }
+
+    static int32_t GetCurrentApiTargetVersion()
+    {
+        auto container = Current();
+        if (!container) {
+            return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+        }
+        return container->GetApiTargetVersion();
     }
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
@@ -608,6 +659,25 @@ public:
         return false;
     }
 
+    virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
+    {
+        return Rect();
+    }
+
+    virtual bool IsFloatingWindow() const
+    {
+        return false;
+    }
+
+    void SetCurrentDisplayId(uint64_t displayId)
+    {
+        currentDisplayId_ = displayId;
+    }
+
+    uint64_t GetCurrentDisplayId() const
+    {
+        return currentDisplayId_;
+    }
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
@@ -642,6 +712,7 @@ private:
     int32_t apiTargetVersion_ = 0;
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
+    uint64_t currentDisplayId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

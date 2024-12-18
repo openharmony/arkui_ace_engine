@@ -83,6 +83,7 @@ template("ace_core_source_set") {
       # animation
       "animation/animatable_data.cpp",
       "animation/animatable_properties.cpp",
+      "animation/animation_pub.cpp",
       "animation/animation_util.cpp",
       "animation/animator.cpp",
       "animation/animator_group.cpp",
@@ -127,6 +128,7 @@ template("ace_core_source_set") {
       "common/font_loader.cpp",
       "common/font_manager.cpp",
       "common/frontend.cpp",
+      "common/key_event_manager.cpp",
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/resource_manager.cpp",
@@ -232,12 +234,14 @@ template("ace_core_source_set") {
       "gestures/timeout_gesture.cpp",
 
       # event
+      "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
-      "event/event_convertor.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/resample_algo.cpp",
+      "event/touch_event.cpp",
 
       # focus
       "focus/focus_node.cpp",
@@ -269,6 +273,7 @@ template("ace_core_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text
@@ -298,6 +303,10 @@ template("ace_core_source_set") {
 
     if (defined(config.hdc_register_support) && config.hdc_register_support) {
       sources += [ "common/hdc_register.cpp" ]
+    }
+
+    if (ohos_indep_compiler_enable) {
+      include_dirs = indep_compile_includes
     }
 
     configs = [ "$ace_root:ace_config" ]
@@ -669,6 +678,7 @@ template("ace_core_ng_source_set") {
       # animation
       "animation/animatable_data.cpp",
       "animation/animatable_properties.cpp",
+      "animation/animation_pub.cpp",
       "animation/animation_util.cpp",
       "animation/animator.cpp",
       "animation/animator_group.cpp",
@@ -710,6 +720,7 @@ template("ace_core_ng_source_set") {
       "common/font_loader.cpp",
       "common/font_manager.cpp",
       "common/frontend.cpp",
+      "common/key_event_manager.cpp",
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/resource_manager.cpp",
@@ -729,12 +740,14 @@ template("ace_core_ng_source_set") {
       "common/window.cpp",
 
       # event
+      "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
-      "event/event_convertor.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/resample_algo.cpp",
+      "event/touch_event.cpp",
 
       # gestures
       "gestures/click_recognizer.cpp",
@@ -836,6 +849,7 @@ template("ace_core_ng_source_set") {
       "components/picker/picker_data.cpp",
       "components/picker/picker_theme.cpp",
       "components/scroll/scrollable.cpp",
+      "components/svg/svg_transform.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/blur_style_theme.cpp",
       "components/theme/icon_theme.cpp",
@@ -860,6 +874,7 @@ template("ace_core_ng_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text
@@ -884,7 +899,6 @@ template("ace_core_ng_source_set") {
         "components/common/properties/scroll_bar.cpp",
         "components/custom_paint/rosen_render_offscreen_canvas.cpp",
         "components/declaration/common/event.cpp",
-        "components/svg/svg_transform.cpp",
         "components/video/resource/ext_surface.cpp",
         "components/video/resource/ext_texture.cpp",
         "components/video/resource/resource.cpp",
@@ -941,9 +955,6 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
-    if (is_arkui_x) {
-      deps -= [ "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform" ]
-    }
 
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]

@@ -683,6 +683,40 @@ class TextSelectableModifier extends ModifierWithKey<TextSelectableMode> {
   }
 }
 
+class TextCaretColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textCaretColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetCaretColor(node);
+    } else {
+      getUINativeModule().text.setCaretColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().text.setSelectedBackgroundColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
   constructor(value: TextDataDetectorConfig) {
     super(value);
@@ -769,6 +803,23 @@ class TextHalfLeadingModifier extends ModifierWithKey<boolean> {
       getUINativeModule().text.resetHalfLeading(node);
     } else {
       getUINativeModule().text.setHalfLeading(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().text.setEnableHapticFeedback(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -930,6 +981,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextSelectableModifier.identity, TextSelectableModifier, value);
     return this;
   }
+  caretColor(value: ResourceColor): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextCaretColorModifier.identity, TextCaretColorModifier, value);
+    return this;
+  }
+  selectedBackgroundColor(value: ResourceColor): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextSelectedBackgroundColorModifier.identity,
+      TextSelectedBackgroundColorModifier, value);
+    return this;
+  }
   ellipsisMode(value: EllipsisMode): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
     return this;
@@ -960,6 +1020,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   halfLeading(value: boolean): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity,
       TextHalfLeadingModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextEnableHapticFeedbackModifier.identity, TextEnableHapticFeedbackModifier, value);
     return this;
   }
 }

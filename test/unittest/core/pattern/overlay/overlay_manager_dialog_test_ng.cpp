@@ -878,7 +878,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest001, TestSize.Level1)
      * @tc.steps3: Set the onWillDismiss property.
      * @tc.expected:  return value are as expected.
      */
-    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    std::function<void(int32_t, int32_t)> onWillDismiss1 = [](int32_t reason, int32_t instanceId) {};
     auto pattern = overlay->GetPattern();
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
     dialogPattern->SetOnWillDismiss(onWillDismiss1);

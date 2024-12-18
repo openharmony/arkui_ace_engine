@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
+#include <limits>
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -34,26 +35,20 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<ButtonModel> ButtonModel::instance_ = nullptr;
-std::mutex ButtonModel::mutex_;
-
 ButtonModel* ButtonModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ButtonModelNG());
+    static NG::ButtonModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ButtonModelNG());
-            } else {
-                instance_.reset(new Framework::ButtonModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ButtonModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ButtonModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 
@@ -179,7 +174,10 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 
 void JSButton::SetType(const JSCallbackInfo& info)
 {
-    int32_t value = 1;
+    int32_t value = static_cast<int32_t>(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        value = static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE);
+    }
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }
@@ -452,13 +450,14 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
-        NG::CalcLength(0.0) };
+    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
+        std::nullopt, std::nullopt };
     if (isLabelButton_) {
         auto buttonTheme = GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(buttonTheme, padding);
         auto defaultPadding = buttonTheme->GetPadding();
         padding = { NG::CalcLength(defaultPadding.Left()), NG::CalcLength(defaultPadding.Right()),
-            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()) };
+            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()), std::nullopt, std::nullopt };
     }
     if (info[0]->IsObject()) {
         CommonCalcDimension commonCalcDimension;
@@ -551,7 +550,12 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick));
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    }
+    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick), distanceThreshold);
 }
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
@@ -631,8 +635,13 @@ void JSButton::JsRadius(const JSRef<JSVal>& jsValue)
         std::optional<CalcDimension> radiusTopRight;
         std::optional<CalcDimension> radiusBottomLeft;
         std::optional<CalcDimension> radiusBottomRight;
-        ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
-        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        if (ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight)) {
+            ButtonModel::GetInstance()->SetLocalizedBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        } else {
+            ButtonModel::GetInstance()->SetBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        }
     } else {
         ButtonModel::GetInstance()->ResetBorderRadius();
     }

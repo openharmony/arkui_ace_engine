@@ -16,12 +16,15 @@
 #ifndef OHOS_ACE_FRAMEWORK_CJ_VIEW_ABSTRACT_FFI_H
 #define OHOS_ACE_FRAMEWORK_CJ_VIEW_ABSTRACT_FFI_H
 
+#include "cj_transitioneffect.h"
+
+#include "bridge/cj_frontend/cppview/view_abstract.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components/common/properties/color.h"
 #include "core/common/container.h"
-#include "cj_transitioneffect.h"
+#include "core/components/common/properties/color.h"
 
 using VectorMenuValuePtr = void*;
 using VectorStringPtr = void*;
@@ -45,7 +48,7 @@ static RefPtr<T> GetTheme()
     CHECK_NULL_RETURN(themeManager, nullptr);
     return themeManager->GetTheme<T>();
 }
-}
+} // namespace OHOS::Ace::Framework
 
 extern "C" {
 struct NativeRectangle {
@@ -221,8 +224,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMargins(CJEdge params);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetPadding(double padding, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetPaddings(CJEdge params);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetForegroundBlurStyle(int32_t blurStyle);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetForegroundBlurStyleOption(int32_t blurStyle,
-                                                                           CJForegroundBlurStyle options);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetForegroundBlurStyleOption(
+    int32_t blurStyle, CJForegroundBlurStyle options);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetForegroundColor(char* strategy);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetForegroundResourceColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundColor(uint32_t color);
@@ -317,9 +320,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractPop();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOverlay(const char* title, int32_t align, double x, double y);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bindPopupParams);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByFuncKey(
-    int32_t value, int32_t *keysArray, int64_t size, void (*callback)(void));
+    int32_t value, int32_t* keysArray, int64_t size, void (*callback)(void));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
-    const char* value, int32_t *keysArray, int64_t size, void (*callback)(void));
+    const char* value, int32_t* keysArray, int64_t size, void (*callback)(void));
 
 struct CJBindCustomPopup {
     bool isShow;
@@ -412,26 +415,23 @@ struct CJContentCoverOptions {
     NativeOptionCallBack onWillDisappear;
 };
 CJ_EXPORT void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJContentCoverOptions options);
+
+CJ_EXPORT ExternalString FFIGetResourceString(NativeResourceObject obj);
+CJ_EXPORT ExternalString FFIGetResourceMedia(NativeResourceObject obj);
+CJ_EXPORT uint32_t FFIGetResourceColor(NativeResourceObject obj);
+CJ_EXPORT RetDimension FFIGetResourceDimension(NativeResourceObject obj);
+CJ_EXPORT double FFIGetResourceDouble(NativeResourceObject obj);
+CJ_EXPORT int32_t FFIGetResourceInt32(NativeResourceObject obj);
+CJ_EXPORT uint32_t FFIGetResourceUInt32(NativeResourceObject obj);
+CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
+CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
+CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
 }
 
 namespace OHOS::Ace {
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000
-};
 bool ParseCjMedia(int64_t id, ResourceType type, const std::string& params, std::string& result);
 bool ParseCjString(int64_t id, ResourceType type, const std::string& params, std::string& result);
-bool ParseCjString(
-    int64_t id, ResourceType type, int64_t count, const std::string& plural, std::string& result);
+bool ParseCjString(int64_t id, ResourceType type, int64_t count, const std::string& plural, std::string& result);
 bool ParseCjDimension(int64_t id, Dimension& result);
 bool ParseColorById(int64_t id, Color& color);
 void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& result);

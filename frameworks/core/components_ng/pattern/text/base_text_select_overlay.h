@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_callback.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -152,7 +153,7 @@ public:
     }
 
     // common virtual methods.
-    virtual RectF GetVisibleContentRect();
+    virtual RectF GetVisibleContentRect(bool isGlobal = false);
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
     virtual std::vector<std::string> GetPasteMimeTypes()
@@ -237,7 +238,8 @@ public:
     }
     bool IsTouchAtHandle(const TouchEventInfo& info);
     bool IsClickAtHandle(const GestureEvent& info);
-    bool HasUnsupportedTransform();
+    bool HasUnsupportedTransform(bool checkScale = false);
+    bool CheckUnsupportedTransformMatrix(const RefPtr<RenderContext> context, bool checkScale);
     bool CheckSwitchToMode(HandleLevelMode mode) override;
 
     void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
@@ -252,6 +254,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
     bool GetClipHandleViewPort(RectF& rect);
+    bool CalculateClippedRect(RectF& rect);
     void MarkOverlayDirty();
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void UpdateHandleColor();
@@ -259,6 +262,16 @@ public:
     {
         return std::nullopt;
     }
+    void AddAvoidKeyboardCallback(bool isCustomKeyboard);
+    void RemoveAvoidKeyboardCallback();
+
+    bool IsEnableContainerModal() override
+    {
+        return enableContainerModal_;
+    }
+    bool IsHiddenHandle();
+
+    bool IsHandleVisible(bool isFirst);
 
 protected:
     RectF MergeSelectedBoxes(
@@ -276,8 +289,7 @@ protected:
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
     bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
-    virtual RectF GetFirstHandleLocalPaintRect();
-    virtual RectF GetSecondHandleLocalPaintRect();
+    virtual RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex);
     virtual void CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect);
     bool IsAncestorNodeStartAnimation(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
@@ -297,14 +309,24 @@ protected:
     {
         originalMenuIsShow_ = IsCurrentMenuVisibile();
     }
-    virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
+    virtual void UpdateMenuWhileAncestorNodeChanged(
+        bool shouldHideMenu, bool shouldShowMenu, FrameNodeChangeInfoFlag extraFlag);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
-    bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
+    static bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
+    static bool GetScrollableClipContentRect(const RefPtr<FrameNode>& node, RectF& rect);
+    static std::pair<ContentClipMode, std::optional<ContentClip>> GetScrollableClipInfo(const RefPtr<FrameNode>& node);
     virtual bool IsClipHandleWithViewPort()
     {
         return false;
     }
     void ApplySelectAreaWithKeyboard(RectF& selectArea);
+    bool IsHandleInParentSafeAreaPadding();
+    bool IsHandleInParentSafeAreaPadding(const RectF& firstRect, const RectF& secondRect);
+    bool CheckHandleIsInSafeAreaPadding(const RefPtr<FrameNode>& node, const RectF& handle);
+    void CheckEnableContainerModal()
+    {
+        enableContainerModal_ = true;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -335,6 +357,7 @@ private:
     bool hasRegisterListener_ = false;
     RectF globalPaintRect_;
     bool originalMenuIsShow_ = true;
+    bool enableContainerModal_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -60,6 +60,7 @@ void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std
 void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::string& countryOrRegion,
     const std::string& script, const std::string& keywordsAndValues)
 {
+    std::unique_lock<std::shared_mutex> lock(localeTagMutex_);
     language_ = language;
     countryOrRegion_ = countryOrRegion;
     script_ = script;

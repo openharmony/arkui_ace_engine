@@ -138,7 +138,7 @@ int32_t OH_ArkUI_NodeAdapter_GetAllItems(ArkUI_NodeAdapterHandle handle, ArkUI_N
     }
     *items = new ArkUI_NodeHandle[*size] {};
     for (uint32_t i = 0; i < *size; i++) {
-        (*items[i]) = reinterpret_cast<ArkUI_NodeHandle>(fullImpl->getExtendedAPI()->getAttachNodePtr(innerNodes[i]));
+        (*items)[i] = reinterpret_cast<ArkUI_NodeHandle>(fullImpl->getExtendedAPI()->getAttachNodePtr(innerNodes[i]));
     }
     delete[] innerNodes;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;

@@ -31,17 +31,8 @@
 namespace OHOS::Ace {
 FolderStackModel* FolderStackModel::GetInstance()
 {
-#ifdef NG_BUILD
     static NG::FolderStackModelNG instance;
     return &instance;
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::FolderStackModelNG instance;
-        return &instance;
-    } else {
-        return nullptr;
-    }
-#endif
 }
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {

@@ -17,14 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/search/search_gesture_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::NG {
-using ChangeAndSubmitEvent = std::function<void(const std::string)>;
+using ChangeAndSubmitEvent = std::function<void(const std::u16string)>;
 class SearchEventHub : public EventHub {
     DECLARE_ACE_TYPE(SearchEventHub, EventHub)
 
@@ -33,9 +35,29 @@ public:
 
     ~SearchEventHub() override = default;
 
-    void SetOnSubmit(ChangeAndSubmitEvent&& submitEvent)
+    void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& func)
     {
-        submitEvent_ = std::move(submitEvent);
+        onSubmit_ = std::move(func);
+    }
+
+    void FireOnSubmit(const std::u16string& value, NG::TextFieldCommonEvent& event)
+    {
+        if (onSubmit_) {
+            event.SetText(value);
+            onSubmit_(value, event);
+        }
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                builder.SetId(host->GetInspectorIdValue(""))
+                    .SetType(host->GetHostTag())
+                    .SetDescription(host->GetAutoEventParamValue(""))
+                    .SetHost(host);
+            }
+            builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(UtfUtils::Str16ToStr8(value));
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        }
     }
 
     void SetOnChange(ChangeAndSubmitEvent&& changeEvent)
@@ -43,67 +65,50 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
-    void UpdateSubmitEvent(const std::string& value) const
-    {
-        if (submitEvent_) {
-            submitEvent_(value);
-        }
-        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-            Recorder::EventParamsBuilder builder;
-            auto host = GetFrameNode();
-            if (host) {
-                auto id = host->GetInspectorIdValue("");
-                builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
-            }
-            builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
-            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
-        }
-    }
+    void UpdateChangeEvent(const std::u16string& value) const;
 
-    void UpdateChangeEvent(const std::string& value) const;
-
-    void SetOnCopy(std::function<void(const std::string&)>&& func)
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func)
     {
         onCopy_ = std::move(func);
     }
 
-    void FireOnCopy(const std::string& value)
+    void FireOnCopy(const std::u16string& value)
     {
         if (onCopy_) {
             onCopy_(value);
         }
     }
 
-    void SetOnCut(std::function<void(const std::string&)>&& func)
+    void SetOnCut(std::function<void(const std::u16string&)>&& func)
     {
         onCut_ = std::move(func);
     }
 
-    void FireOnCut(const std::string& value)
+    void FireOnCut(const std::u16string& value)
     {
         if (onCut_) {
             onCut_(value);
         }
     }
 
-    void SetOnPaste(std::function<void(const std::string&)>&& func)
+    void SetOnPaste(std::function<void(const std::u16string&)>&& func)
     {
         onPaste_ = std::move(func);
     }
 
-    void FireOnPaste(const std::string& value)
+    void FireOnPaste(const std::u16string& value)
     {
         if (onPaste_) {
             onPaste_(value);
         }
     }
 
-    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+    void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func)
     {
         onPasteWithEvent_ = std::move(func);
     }
 
-    void FireOnPasteWithEvent(const std::string& value, NG::TextCommonEvent& event)
+    void FireOnPasteWithEvent(const std::u16string& value, NG::TextCommonEvent& event)
     {
         if (onPasteWithEvent_) {
             onPasteWithEvent_(value, event);
@@ -121,14 +126,14 @@ public:
     }
 
 private:
-    ChangeAndSubmitEvent submitEvent_;
     ChangeAndSubmitEvent changeEvent_;
     ChangeAndSubmitEvent onValueChangeEvent_;
 
-    std::function<void(const std::string&)> onCopy_;
-    std::function<void(const std::string&)> onCut_;
-    std::function<void(const std::string&)> onPaste_;
-    std::function<void(const std::string&, NG::TextCommonEvent&)> onPasteWithEvent_;
+    std::function<void(const std::u16string&)> onCopy_;
+    std::function<void(const std::u16string&)> onCut_;
+    std::function<void(const std::u16string&)> onPaste_;
+    std::function<void(const std::u16string&, NG::TextCommonEvent&)> onPasteWithEvent_;
+    std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)> onSubmit_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchEventHub);
 };

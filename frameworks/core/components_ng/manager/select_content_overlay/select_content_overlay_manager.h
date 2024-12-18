@@ -33,6 +33,10 @@ struct LegacyManagerCallbacks {
     std::function<void()> selectionResetCallback;
 };
 
+enum class NodeType {
+    HANDLE, TOUCH_MENU, HANDLE_WITH_MENU, RIGHT_CLICK_MENU
+};
+
 class ACE_EXPORT SelectContentOverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(SelectContentOverlayManager, AceType);
 
@@ -90,6 +94,11 @@ public:
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
     void MarkHandleDirtyNode(PropertyChangeFlag flag);
+    bool IsHiddenHandle();
+    void ConvertHandleRelativeToParent(SelectHandleInfo& info);
+    void ConvertRectRelativeToParent(RectF& rect);
+    void RevertRectRelativeToRoot(RectF& rect);
+    OffsetF GetContainerModalOffset();
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
@@ -103,7 +112,7 @@ private:
     bool CloseInternal(int32_t holderId, bool animation, CloseReason reason);
     void DestroySelectOverlayNode(const RefPtr<FrameNode>& node);
     void DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node);
-    void MountNodeToRoot(const RefPtr<FrameNode>& overlayNode, bool animation);
+    void MountNodeToRoot(const RefPtr<FrameNode>& overlayNode, bool animation, NodeType nodeType);
     void MountNodeToCaller(const RefPtr<FrameNode>& overlayNode, bool animation);
     std::function<void()> MakeMenuCallback(OptionMenuActionId actionId, const SelectOverlayInfo& info);
     SelectOverlayInfo BuildSelectOverlayInfo(int32_t requestCode);
@@ -121,6 +130,8 @@ private:
     void NotifySelectOverlayShow(bool isCreated);
     std::list<RefPtr<UINode>>::const_iterator FindSelectOverlaySlot(
         const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children);
+    RefPtr<FrameNode> GetContainerModalRoot();
+    void UpdateSelectOverlayInfoInternal(SelectOverlayInfo& overlayInfo);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

@@ -85,25 +85,24 @@ RefPtr<CanvasImage> AnimatedImage::Create(
 
 AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url)
     : cacheKey_(std::move(url)), duration_(GenerateDuration(codec)), iteration_(GenerateIteration(codec))
-{
-    PostPlayTask(0, iteration_);
-}
+{}
 
 AnimatedImage::~AnimatedImage() = default;
 
 void AnimatedImage::PostPlayTask(uint32_t idx, int iteration)
 {
-    if (iteration == 0) {
-        animationState_ = false;
-        return;
-    }
     if (idx == static_cast<uint32_t>(duration_.size())) {
         iteration--;
         idx = 0;
     }
+    if (iteration == 0) {
+        animationState_ = false;
+        return;
+    }
     RenderFrame(idx);
     animationState_ = true;
     currentIdx_ = idx;
+    iteration_ = iteration;
     currentTask_.Reset([weak = WeakClaim(this), idx, iteration] {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
@@ -144,7 +143,9 @@ void AnimatedImage::ControlAnimation(bool play)
 {
     if (play && !animationState_) {
         PostPlayTask(currentIdx_, iteration_);
-    } else {
+        return;
+    }
+    if (!play && animationState_) {
         auto result = currentTask_.Cancel();
         if (result) {
             animationState_ = false;

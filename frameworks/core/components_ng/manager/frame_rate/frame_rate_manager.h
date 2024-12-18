@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t UI_ANIMATION_FRAME_RATE_TYPE = 2;
 constexpr int32_t DISPLAY_SYNC_FRAME_RATE_TYPE = 3;
 constexpr int32_t ACE_COMPONENT_FRAME_RATE_TYPE = 4;
+constexpr int32_t ANIMATION_STATE_FIRST_FRAME = 0x1000;
 
 class FrameRateManager : public virtual AceType {
     DECLARE_ACE_TYPE(FrameRateManager, AceType);
@@ -44,7 +45,7 @@ public:
 
     void UpdateNodeRate(int32_t nodeId, int32_t rate);
 
-    void SetAnimateRate(int32_t rate);
+    void SetAnimateRate(int32_t rate, bool hasFirstFrameAnimation);
 
     void SetDisplaySyncRate(int32_t displaySyncRate);
 
@@ -57,6 +58,7 @@ private:
     bool isRateChanged_ = false;
     int32_t displaySyncRate_ = 0;
     int32_t animateRate_ = 0;
+    bool hasFirstFrameAnimation_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameRateManager);
 };

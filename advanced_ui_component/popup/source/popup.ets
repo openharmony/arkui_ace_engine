@@ -362,12 +362,23 @@ export struct PopupComponent {
 
   private getMessageMaxWeight(): number | undefined {
     let textMaxWeight: number | undefined = undefined;
-    let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
+    let defaultDisplaySync: display.Display | undefined = undefined;
+    try {
+      defaultDisplaySync = display.getDefaultDisplaySync()
+    } catch (error) {
+      console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+      return textMaxWeight = 400
+    }
     if (this.showClose || this.showClose === void (0)) {
       if (px2vp(defaultDisplaySync.width) > 400) {
         textMaxWeight = 400
       } else {
-        textMaxWeight = px2vp(defaultDisplaySync.width)
+        if (defaultDisplaySync.width != 0) {
+          textMaxWeight = px2vp(defaultDisplaySync.width)
+        } else {
+          // The previewer does not support the display interface to use abnormal values
+          textMaxWeight = -1
+        }
       }
       textMaxWeight -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2))
       textMaxWeight -= this.theme.windows.padding.end.value
@@ -391,7 +402,12 @@ export struct PopupComponent {
   }
 
   private getButtonTextMargin(): LocalizedMargin {
-    return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value) }
+    if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+      (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+      return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value) }
+    } else {
+      return { top: LengthMetrics.vp(0), bottom: LengthMetrics.vp(0) }
+    }
   }
 
   private getButtonTextPadding(): LocalizedPadding {
@@ -507,11 +523,23 @@ export struct PopupComponent {
     let applyMaxWidth: number | undefined = undefined;
     let applyMaxHeight: number | undefined = undefined;
     let applyMaxSize: ConstraintSizeOptions | undefined = undefined;
-    let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
+    let defaultDisplaySync: display.Display | undefined = undefined;
+    try {
+      defaultDisplaySync = display.getDefaultDisplaySync()
+    } catch (error) {
+      console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+      this.messageMaxWeight = 400
+      return applyMaxSize = { maxWidth: 400, maxHeight: 480 }
+    }
     if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
     } else {
-      applyMaxWidth = px2vp(defaultDisplaySync.width)
+      if (defaultDisplaySync.width != 0) {
+        applyMaxWidth = px2vp(defaultDisplaySync.width)
+      } else {
+        // The previewer does not support the display interface to use abnormal values
+        applyMaxWidth = -1
+      }
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480
@@ -533,6 +561,7 @@ export struct PopupComponent {
           .margin(this.getIconMargin())
           .fillColor(this.getIconFillColor())
           .borderRadius(this.getIconBorderRadius())
+          .draggable(false)
       }
       if (this.title.text !== '' && this.title.text !== void (0)) {
         Column() {
@@ -557,6 +586,7 @@ export struct PopupComponent {
                   .width(this.getCloseButtonImageWidth())
                   .height(this.getCloseButtonImageHeight())
                   .fillColor(this.getCloseButtonFillColor())
+                  .draggable(false)
               }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
@@ -603,7 +633,7 @@ export struct PopupComponent {
           .scrollBar(BarState.Auto)
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
-
+          .edgeEffect(EdgeEffect.Spring)
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
@@ -624,8 +654,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.firstButtonBackgroundColor = this.getButtonHoverColor()
-                }
-                else {
+                } else {
                   this.firstButtonBackgroundColor = this.getButtonBackgroundColor()
                 }
               })
@@ -654,8 +683,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.secondButtonBackgroundColor = this.getButtonHoverColor()
-                }
-                else {
+                } else {
                   this.secondButtonBackgroundColor = this.getButtonBackgroundColor()
                 }
               })
@@ -675,9 +703,11 @@ export struct PopupComponent {
         }
         .direction(this.popupDirection)
         .layoutWeight(this.getLayoutWeight())
-      }
-      else {
+      } else {
         Column() {
+          Flex().height(0).onAreaChange((_, rect) => {
+            this.titleHeight = rect.height as number
+           })
           Row() {
             Scroll() {
               Text(this.getMessageText())
@@ -692,6 +722,7 @@ export struct PopupComponent {
             }
             .direction(this.popupDirection)
             .layoutWeight(this.getLayoutWeight())
+            .edgeEffect(EdgeEffect.Spring)
             .align(Alignment.TopStart)
             .padding(this.getMessagePadding())
             .scrollBar(BarState.Auto)
@@ -716,8 +747,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
-                }
-                else {
+                } else {
                   this.closeButtonBackgroundColor = this.getCloseButtonBackgroundColor()
                 }
               })
@@ -751,8 +781,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.firstButtonBackgroundColor = this.getButtonHoverColor()
-                }
-                else {
+                } else {
                   this.firstButtonBackgroundColor = this.getButtonBackgroundColor()
                 }
               })
@@ -781,8 +810,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.secondButtonBackgroundColor = this.getButtonHoverColor()
-                }
-                else {
+                } else {
                   this.secondButtonBackgroundColor = this.getButtonBackgroundColor()
                 }
               })

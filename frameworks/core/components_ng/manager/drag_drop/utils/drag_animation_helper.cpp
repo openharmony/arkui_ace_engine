@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -96,7 +97,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto gatherNodeCenter = frameNode->GetPaintRectCenter();
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
     bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
@@ -107,14 +108,10 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
         [gatherNodeCenter, gatherNodeChildrenInfo, calcResult]() mutable {
             for (const auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
-                CHECK_NULL_VOID(imageNode);
-                auto imageContext = imageNode->GetRenderContext();
-                CHECK_NULL_VOID(imageContext);
                 auto curPos = child.offset + OffsetF(child.halfWidth, child.halfHeight);
                 auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, calcResult);
-                imageContext->UpdatePosition(OffsetT<Dimension>(
-                    Dimension(child.offset.GetX() + offset.GetX()),
-                    Dimension(child.offset.GetY() + offset.GetY())));
+                offset += child.offset;
+                DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, offset);
             }
         });
 }
@@ -139,11 +136,12 @@ void DragAnimationHelper::PlayGatherNodeOpacityAnimation(const RefPtr<OverlayMan
 
 void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEventActuator>& actuator)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Play gather animation before lifting");
     CHECK_NULL_VOID(actuator);
     if (!actuator->IsNeedGather()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
@@ -157,6 +155,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();
+    actuator->InitGatherNodesPosition(gatherNodeChildrenInfo);
     pipeline->FlushSyncGeometryNodeTasks();
     manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);
@@ -218,8 +217,9 @@ void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>
 void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode,
     const RefPtr<OverlayManager>& overlayManager)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Play gather animation");
     CHECK_NULL_VOID(frameNode);
-    auto gatherNodeCenter = frameNode->GetPaintRectCenter();
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
     CHECK_NULL_VOID(overlayManager);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
     BorderRadiusProperty borderRadius;
@@ -259,16 +259,19 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
 
 void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (!dragDropManager->IsShowBadgeAnimation()) {
-        return;
-    }
     CHECK_NULL_VOID(textNode);
     auto textNodeContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textNodeContext);
+    auto windowScale = dragDropManager->GetWindowScale();
+    auto badgeScale = GreatNotEqual(windowScale, 0.0f) ? BADGE_ANIMATION_SCALE / windowScale : BADGE_ANIMATION_SCALE;
+    if (!dragDropManager->IsShowBadgeAnimation()) {
+        textNodeContext->UpdateTransformScale({ badgeScale, badgeScale });
+        return;
+    }
     textNodeContext->UpdateTransformScale({ 0.0f, 0.0f });
     RefPtr<Curve> interpolatingSpring = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 628.0f, 40.0f);
     CHECK_NULL_VOID(interpolatingSpring);
@@ -278,8 +281,8 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
     textOption.SetDelay(BADGE_ANIMATION_DELAY);
     AnimationUtils::Animate(
         textOption,
-        [textNodeContext]() mutable {
-            textNodeContext->UpdateTransformScale({ BADGE_ANIMATION_SCALE, BADGE_ANIMATION_SCALE });
+        [textNodeContext, badgeScale]() mutable {
+            textNodeContext->UpdateTransformScale({ badgeScale, badgeScale });
         },
         textOption.GetOnFinishEvent());
 
@@ -310,7 +313,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(menuPattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -319,13 +322,13 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     auto badgeNumber = frameNode->GetDragPreviewOption().GetCustomerBadgeNumber();
     auto childSize = badgeNumber.has_value() ? static_cast<size_t>(badgeNumber.value()) :
                                         manager->GetGatherNodeChildrenInfo().size() + 1;
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Badge node number %{public}d, children count %{public}d",
+        badgeNumber.value_or(-1), static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()));
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipeline, badgeLength);
+    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipelineContext, badgeLength);
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     textNode->MarkModifyDone();
@@ -335,7 +338,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(textNode);
     }
-    pipeline->FlushSyncGeometryNodeTasks();
+    pipelineContext->FlushSyncGeometryNodeTasks();
 }
 
 void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(

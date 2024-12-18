@@ -529,8 +529,7 @@ HWTEST_F(MenuPaintTestNg, MenuPaintClipMenuTestNg027, TestSize.Level1)
 {
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     std::string pathStr = layoutAlgorithm->CalculateMenuPath(nullptr, true);
-    std::string expectedStr = "Z";
-    EXPECT_EQ(pathStr.substr(pathStr.length() - 1, 1), expectedStr);
+    EXPECT_EQ(pathStr.length(), 0);
 }
 
 /**

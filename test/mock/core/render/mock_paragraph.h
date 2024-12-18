@@ -88,7 +88,13 @@ public:
         LineMetrics lineMetrics;
         return lineMetrics;
     }
-    
+
+    RectF GetPaintRegion(float x, float y) override
+    {
+        RectF rect;
+        return rect;
+    }
+
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override
     {
         return true;

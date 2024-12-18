@@ -18,6 +18,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -34,7 +35,7 @@ using DragNotifyMsg = OHOS::Ace::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using StopDragCallback = std::function<void()>;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 1;
+constexpr int32_t SOURCE_TOOL_PEN = 2;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
@@ -118,12 +119,13 @@ bool ConfirmCurPointerEventInfo(
     };
     int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(dragAction->pointer, dragAction->x, dragAction->y,
-        dragAction->sourceType, sourceTool, std::move(stopDragCallback));
+        dragAction->sourceType, sourceTool, dragAction->displayId, std::move(stopDragCallback));
     if (dragAction->sourceType == SOURCE_TYPE_MOUSE) {
         dragAction->pointer = MOUSE_POINTER_ID;
     } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         dragAction->pointer = PEN_POINTER_ID;
     }
+    dragAction->toolType = sourceTool;
     return getPointSuccess;
 }
 
@@ -132,9 +134,6 @@ void EnvelopedDragData(
 {
     auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
     CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    dragAction->displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
 
     std::vector<ShadowInfoCore> shadowInfos;
     GetShadowInfoArray(dragAction, shadowInfos);
@@ -172,7 +171,8 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(), dragAction->sourceType,
-        recordSize, pointerId, dragAction->x, dragAction->y, dragAction->displayId, windowId, true, false, summary };
+        recordSize, pointerId, dragAction->toolType, dragAction->x, dragAction->y, dragAction->displayId, windowId,
+        true, false, summary };
 }
 
 void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -286,7 +286,7 @@ void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPoint
 }
 
 void DragDropFuncWrapper::DecideWhetherToStopDragging(
-    const PointerEvent& pointerEvent, const std::string& extraParams, int32_t currentPointerId, int32_t containerId)
+    const DragPointerEvent& pointerEvent, const std::string& extraParams, int32_t currentPointerId, int32_t containerId)
 {
     auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
     CHECK_NULL_VOID(pipelineContext);
@@ -424,7 +424,7 @@ void DragDropFuncWrapper::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonVa
 
 std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
@@ -449,13 +449,14 @@ float DragDropFuncWrapper::RadiusToSigma(float radius)
 std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     const std::optional<BlurStyleOption>& blurStyleOp)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
         LOGW("cannot find theme of blurStyle, create blurStyle failed");
         return std::nullopt;
     }
+    CHECK_NULL_RETURN(blurStyleOp, std::nullopt);
     ThemeColorMode colorMode = blurStyleOp->colorMode;
     if (blurStyleOp->colorMode == ThemeColorMode::SYSTEM) {
         colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
@@ -476,7 +477,9 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
 
 [[maybe_unused]] double DragDropFuncWrapper::GetScaleWidth(int32_t containerId)
 {
-    auto pipeline = Container::GetContainer(containerId)->GetPipelineContext();
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, -1.0f);
+    auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, -1.0f);
     return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
 }
@@ -518,5 +521,190 @@ std::string DragDropFuncWrapper::GetAnonyString(const std::string &fullString)
             .append(fullString, strLen - PLAINTEXT_LENGTH, PLAINTEXT_LENGTH);
     }
     return anonyStr;
+}
+
+// returns a node's offset relative to window plus half of self rect size(w, h)
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// ancestor will NOT check boundary of window scene
+OffsetF DragDropFuncWrapper::GetPaintRectCenter(const RefPtr<FrameNode>& frameNode, bool checkWindowBoundary)
+{
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    context->GetPointTransformRotate(pointNode);
+    auto parent = frameNode->GetAncestorNodeOfFrame();
+    while (parent) {
+        if (checkWindowBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        pointNode.SetX(offset.GetX() + pointNode.GetX());
+        pointNode.SetY(offset.GetY() + pointNode.GetY());
+        renderContext->GetPointTransformRotate(pointNode);
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return OffsetF(pointNode.GetX(), pointNode.GetY());
+}
+
+// check if expand subwindow
+bool DragDropFuncWrapper::IsExpandDisplay(const RefPtr<PipelineBase>& context)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    if (theme->GetExpandDisplay()) {
+        return true;
+    }
+    auto containerId = pipeline->GetInstanceId();
+    containerId = containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId;
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsFreeMultiWindow();
+}
+
+OffsetF DragDropFuncWrapper::GetCurrentWindowOffset(const RefPtr<PipelineBase>& context)
+{
+    if (!IsExpandDisplay(context)) {
+        return OffsetF();
+    }
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, OffsetF());
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, OffsetF());
+    auto windowOffset = window->GetCurrentWindowRect().GetOffset();
+    return OffsetF(windowOffset.GetX(), windowOffset.GetY());
+}
+
+OffsetF DragDropFuncWrapper::GetPaintRectCenterToScreen(const RefPtr<FrameNode>& frameNode)
+{
+    auto offset = GetPaintRectCenter(frameNode);
+    CHECK_NULL_RETURN(frameNode, offset);
+    offset += GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    return offset;
+}
+
+OffsetF DragDropFuncWrapper::GetFrameNodeOffsetToScreen(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto offset = frameNode->GetPositionToWindowWithTransform();
+    offset += GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    return offset;
+}
+
+RectF DragDropFuncWrapper::GetPaintRectToScreen(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RectF());
+    RectF rect = frameNode->GetTransformRectRelativeToWindow();
+    rect += GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    return rect;
+}
+
+void DragDropFuncWrapper::UpdateNodePositionToScreen(const RefPtr<FrameNode>& frameNode, OffsetF offset)
+{
+    CHECK_NULL_VOID(frameNode);
+    offset -= GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    UpdateNodePositionToWindow(frameNode, offset);
+}
+
+void DragDropFuncWrapper::UpdateNodePositionToWindow(const RefPtr<FrameNode>& frameNode, OffsetF offset)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    RefPtr<FrameNode> parentNode = frameNode->GetAncestorNodeOfFrame(true);
+    if (parentNode) {
+        offset -= parentNode->GetPositionToWindowWithTransform();
+    }
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+}
+
+void DragDropFuncWrapper::UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode,
+    const RefPtr<FrameNode>& frameNode, float width, float height)
+{
+    CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintRectCenter = GetPaintRectCenterToScreen(frameNode);
+    auto offset = paintRectCenter - OffsetF(width / 2.0f, height / 2.0f);
+    UpdateNodePositionToScreen(targetNode, offset);
+}
+
+void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event)
+{
+    event.rawPointerEvent = touchPoint.pointerEvent;
+    event.pointerEventId = touchPoint.touchEventId;
+    event.pointerId = touchPoint.id;
+    event.windowX = touchPoint.x;
+    event.windowY = touchPoint.y;
+    event.displayX = touchPoint.screenX;
+    event.displayY = touchPoint.screenY;
+    event.deviceId = touchPoint.deviceId;
+    event.x = event.windowX;
+    event.y = event.windowY;
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : touchPoint.pressedKeyCodes_) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
+    GetPointerEventAction(touchPoint, event);
+}
+
+void DragDropFuncWrapper::GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event)
+{
+    auto orgAction = touchPoint.type;
+    switch (orgAction) {
+        case TouchType::CANCEL:
+            event.action = PointerAction::CANCEL;
+            break;
+        case TouchType::DOWN:
+            event.action = PointerAction::DOWN;
+            break;
+        case TouchType::MOVE:
+            event.action = PointerAction::MOVE;
+            break;
+        case TouchType::UP:
+            event.action = PointerAction::UP;
+            break;
+        case TouchType::PULL_MOVE:
+            event.action = PointerAction::PULL_MOVE;
+            break;
+        case TouchType::PULL_UP:
+            event.action = PointerAction::PULL_UP;
+            break;
+        case TouchType::PULL_IN_WINDOW:
+            event.action = PointerAction::PULL_IN_WINDOW;
+            break;
+        case TouchType::PULL_OUT_WINDOW:
+            event.action = PointerAction::PULL_OUT_WINDOW;
+            break;
+        default:
+            event.action = PointerAction::UNKNOWN;
+            break;
+    }
+}
+
+RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByKey(const RefPtr<FrameNode>& root, const std::string& key)
+{
+    std::queue<RefPtr<UINode>> elements;
+    elements.push(root);
+    RefPtr<UINode> inspectorElement;
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        if (key == current->GetInspectorId().value_or("")) {
+            return AceType::DynamicCast<FrameNode>(current);
+        }
+
+        const auto& children = current->GetChildren();
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

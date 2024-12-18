@@ -159,7 +159,8 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0021, TestSize.Level1)
     parent->isOnAnimation_ = true;
     auto onBackButtonEvent = [](GestureEvent&) -> bool {return true;};
     navDestination->backButtonEvent_ = onBackButtonEvent;
-    parent->CheckCanHandleBack();
+    bool isEntry = false;
+    parent->CheckCanHandleBack(isEntry);
     bool isPop = true;
     EXPECT_TRUE(parent->isOnAnimation_);
     pattern->TransitionWithAnimation(preNavDestination, navDestination, isPop);
@@ -955,7 +956,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0035, TestSize.Level1)
 
     layoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
-    titleLayoutProperty->propContent_ = "content";
+    titleLayoutProperty->propContent_ = u"content";
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
     ASSERT_EQ(layoutProperty->propTitleBarParentType_.value(), TitleBarParentType::NAVBAR);
     ASSERT_EQ(layoutProperty->propTitleMode_.value(), NavigationTitleMode::FREE);
@@ -1543,7 +1544,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0043, TestSize.Level1)
     algorithm->isInitialTitle_ = true;
     auto temp = title->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(temp, nullptr);
-    temp->propContent_ = "content";
+    temp->propContent_ = u"content";
     algorithm->LayoutTitle(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty, 40);
     ASSERT_FALSE(algorithm->isInitialTitle_);
 

@@ -195,7 +195,7 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     uint32_t i = 0;
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
-        if (i >= showCount) {
+        if (i >= showCount || i >= currentOffset_.size()) {
             break;
         }
         auto childGeometryNode = child->GetGeometryNode();

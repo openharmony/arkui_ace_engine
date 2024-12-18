@@ -31,7 +31,9 @@ void NavigatorModelImpl::Create()
 void NavigatorModelImpl::SetType(NavigatorType value)
 {
     auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    navigator->SetType(value);
+    if (navigator) {
+        navigator->SetType(value);
+    }
 }
 
 void NavigatorModelImpl::SetActive(bool active)

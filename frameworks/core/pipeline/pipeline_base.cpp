@@ -129,7 +129,7 @@ double PipelineBase::GetCurrentDensity()
     }
     CHECK_NULL_RETURN(pipelineContext, SystemProperties::GetDefaultResolution());
     double wmDensity = pipelineContext->GetWindowDensity();
-    if (GreatNotEqual(wmDensity, 0.0)) {
+    if (GreatNotEqual(wmDensity, 1.0)) {
         return wmDensity;
     }
     return pipelineContext->GetDensity();
@@ -186,7 +186,9 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 
 void PipelineBase::RequestFrame()
 {
-    window_->RequestFrame();
+    if (window_) {
+        window_->RequestFrame();
+    }
 }
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
@@ -502,6 +504,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     // the first param is the key word of dump.
     if (params[0] == "-memory") {
         MemoryMonitor::GetInstance().Dump();
+        DumpUIExt();
         return true;
     }
     if (params[0] == "-jscrash") {
@@ -519,6 +522,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     ContainerScope scope(instanceId_);
     if (params[0] == "-frontend") {
         DumpFrontend();
+        DumpUIExt();
         return true;
     }
     return OnDumpInfo(params);
@@ -566,20 +570,39 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
     return CloseImplicitAnimation();
 }
 
-std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
+std::string PipelineBase::GetUnexecutedFinishCount() const
+{
+    std::string finishCountToString;
+    for (const auto& element : finishCount_) {
+        finishCountToString += std::to_string(element) + " ";
+    }
+    return "[ " + finishCountToString + "]";
+}
+
+std::function<void()> PipelineBase::GetWrappedAnimationCallback(
+    const AnimationOption& option, const std::function<void()>& finishCallback, const std::optional<int32_t>& count)
 {
     if (!IsFormRender() && !finishCallback) {
         return nullptr;
     }
     auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
     finishFunctions_.emplace(finishPtr);
+
+    // When the animateTo or keyframeAnimateTo has finishCallback and iteration is not infinite,
+    // count needs to be saved.
+    if (count.has_value() && option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+        finishCount_.emplace(count.value());
+    }
     auto wrapFinishCallback = [weak = AceType::WeakClaim(this),
-                                  finishWeak = std::weak_ptr<std::function<void()>>(finishPtr)]() {
+                                  finishWeak = std::weak_ptr<std::function<void()>>(finishPtr), count]() {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
         auto finishPtr = finishWeak.lock();
         CHECK_NULL_VOID(finishPtr);
         context->finishFunctions_.erase(finishPtr);
+        if (count.has_value() && !context->finishFunctions_.count(finishPtr)) {
+            context->finishCount_.erase(count.value());
+        }
         if (!(*finishPtr)) {
             if (context->IsFormRender()) {
                 TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
@@ -652,10 +675,10 @@ void PipelineBase::OpenImplicitAnimation(
 }
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallback)
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback, count);
     if (IsFormRender()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
@@ -703,11 +726,6 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         gsVsyncCallback_();
     }
 
-    if (delaySurfaceChange_) {
-        delaySurfaceChange_ = false;
-        OnSurfaceChanged(width_, height_, type_, rsTransaction_);
-    }
-
     FlushVsync(nanoTimestamp, frameCount);
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
@@ -745,7 +763,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 #endif
     }
     double keyboardHeight = keyboardArea.Height();
-    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, true)) {
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance, forceChange);
@@ -765,7 +783,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
             return;
         }
     }
-    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, false)) {
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
@@ -834,6 +852,89 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+bool PipelineBase::FireUIExtensionEventValid()
+{
+    if (!uiExtensionEventCallback_ || !IsFocusWindowIdSetted()) {
+        return false;
+    }
+    return true;
+}
+
+void PipelineBase::SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback)
+{
+    ACE_FUNCTION_TRACE();
+    uiExtensionEventCallback_ = callback;
+}
+
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    ACE_SCOPED_TRACE("AddUIExtensionCallbackEvent event[%u]", static_cast<uint32_t>(eventId));
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
+void PipelineBase::FireAllUIExtensionEvents()
+{
+    if (!FireUIExtensionEventValid() || uiExtensionEvents_.empty()) {
+        return;
+    }
+    std::vector<uint32_t> eventIds;
+    for (auto it = uiExtensionEvents_.begin(); it != uiExtensionEvents_.end();) {
+        eventIds.push_back(static_cast<uint32_t>(it->eventId));
+        if (!it->repeat) {
+            it = uiExtensionEvents_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto id : eventIds) {
+        FireUIExtensionEventInner(id);
+    }
+}
+
+void PipelineBase::FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId)
+{
+    if (!FireUIExtensionEventValid()) {
+        return;
+    }
+    FireUIExtensionEventInner(static_cast<uint32_t>(eventId));
+}
+
+void PipelineBase::FireUIExtensionEventInner(uint32_t eventId)
+{
+    auto callback = uiExtensionEventCallback_;
+    callback(eventId);
+}
+
+void PipelineBase::SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback)
+{
+    ACE_FUNCTION_TRACE();
+    accessibilityCallback_ = callback;
+}
+
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
+    ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
+    accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+}
+
+void PipelineBase::FireAccessibilityEvents()
+{
+    if (!accessibilityCallback_ || accessibilityEvents_.empty()) {
+        return;
+    }
+    decltype(accessibilityEvents_) events;
+    std::swap(accessibilityEvents_, events);
+    for (auto &event : events) {
+        FireAccessibilityEventInner(static_cast<uint32_t>(event.eventId), event.parameter);
+    }
+}
+
+void PipelineBase::FireAccessibilityEventInner(uint32_t event, int64_t parameter)
+{
+    auto callback = accessibilityCallback_;
+    callback(event, parameter);
+}
+
 void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
 {
     if (callback) {
@@ -846,45 +947,6 @@ void PipelineBase::SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t s
     if (callback) {
         jsFormVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
     }
-}
-
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
-{
-    if (!callback || pointId < 0) {
-        return;
-    }
-
-    etsCardTouchEventCallback_[pointId] = std::move(callback);
-}
-
-void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point,
-    SerializedGesture& serializedGesture)
-{
-    if (point.id < 0) {
-        return;
-    }
-
-    auto iter = etsCardTouchEventCallback_.find(point.id);
-    if (iter == etsCardTouchEventCallback_.end()) {
-        return;
-    }
-    if (iter->second) {
-        iter->second(point, serializedGesture);
-    }
-}
-
-void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t pointId)
-{
-    if (pointId < 0) {
-        return;
-    }
-
-    auto iter = etsCardTouchEventCallback_.find(pointId);
-    if (iter == etsCardTouchEventCallback_.end()) {
-        return;
-    }
-
-    etsCardTouchEventCallback_.erase(iter);
 }
 
 void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
@@ -930,11 +992,12 @@ void PipelineBase::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
-    etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "pipeline destroyed, has %{public}zu finish callbacks not executed",
-        finishFunctions_.size());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "pipeline destroyed, has %{public}zu finish callbacks not executed, finish count is %{public}s",
+        finishFunctions_.size(), GetUnexecutedFinishCount().c_str());
     finishFunctions_.clear();
+    finishCount_.clear();
     animationOption_ = {};
     {
         // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker

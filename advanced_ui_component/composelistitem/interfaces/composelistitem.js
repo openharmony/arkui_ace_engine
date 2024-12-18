@@ -1,46 +1,47 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const hilog = requireNapi('hilog');
 export var IconType;
-(function (h11) {
-    h11[h11["BADGE"] = 1] = "BADGE";
-    h11[h11["NORMAL_ICON"] = 2] = "NORMAL_ICON";
-    h11[h11["SYSTEM_ICON"] = 3] = "SYSTEM_ICON";
-    h11[h11["HEAD_SCULPTURE"] = 4] = "HEAD_SCULPTURE";
-    h11[h11["APP_ICON"] = 5] = "APP_ICON";
-    h11[h11["PREVIEW"] = 6] = "PREVIEW";
-    h11[h11["LONGITUDINAL"] = 7] = "LONGITUDINAL";
-    h11[h11["VERTICAL"] = 8] = "VERTICAL";
+(function (h10) {
+    h10[h10['BADGE'] = 1] = 'BADGE';
+    h10[h10['NORMAL_ICON'] = 2] = 'NORMAL_ICON';
+    h10[h10['SYSTEM_ICON'] = 3] = 'SYSTEM_ICON';
+    h10[h10['HEAD_SCULPTURE'] = 4] = 'HEAD_SCULPTURE';
+    h10[h10['APP_ICON'] = 5] = 'APP_ICON';
+    h10[h10['PREVIEW'] = 6] = 'PREVIEW';
+    h10[h10['LONGITUDINAL'] = 7] = 'LONGITUDINAL';
+    h10[h10['VERTICAL'] = 8] = 'VERTICAL';
 })(IconType || (IconType = {}));
 var FontSizeScaleLevel;
-(function (y11) {
-    y11[y11["LEVEL1"] = 1.75] = "LEVEL1";
-    y11[y11["LEVEL2"] = 2] = "LEVEL2";
-    y11[y11["LEVEL3"] = 3.2] = "LEVEL3";
+(function (g10) {
+    g10[g10['LEVEL1'] = 1.75] = 'LEVEL1';
+    g10[g10['LEVEL2'] = 2] = 'LEVEL2';
+    g10[g10['LEVEL3'] = 3.2] = 'LEVEL3';
 })(FontSizeScaleLevel || (FontSizeScaleLevel = {}));
 var ItemHeight;
-(function (x11) {
-    x11[x11["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
-    x11[x11["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
-    x11[x11["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
-    x11[x11["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
-    x11[x11["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
+(function (f10) {
+    f10[f10['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
+    f10[f10['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
+    f10[f10['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
+    f10[f10['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
+    f10[f10['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
 })(ItemHeight || (ItemHeight = {}));
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
@@ -70,13 +71,18 @@ const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
-const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
-const ACCESSIBILITY_LEVEL_NO = 'no';
+const RIGHT_ONLY_IMAGE_WIDTH = '54vp';
+const RIGHT_ONLY_ICON_WIDTH = '40vp';
+const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
+const RIGHT_ONLY_RADIO_WIDTH = '30vp';
+const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
+const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
+const ACCESSIBILITY_LEVEL_AUTO = 'auto';
+const RESOURCE_TYPE_SYMBOL = 40000;
 const ICON_SIZE_MAP = new Map([
     [IconType.BADGE, BADGE_SIZE],
     [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -87,95 +93,120 @@ const ICON_SIZE_MAP = new Map([
     [IconType.LONGITUDINAL, LONGITUDINAL_SIZE],
     [IconType.VERTICAL, VERTICAL_SIZE]
 ]);
-
-class ContentItemStruct extends ViewPU {
-    constructor(a11, b11, c11, d11 = -1, e11 = undefined, f11) {
-        super(a11, c11, d11, f11);
-        if (typeof e11 === "function") {
-            this.paramsGenerator_ = e11;
+class Util {
+    static isSymbolResource(d10) {
+        if (!Util.isResourceType(d10)) {
+            return false;
         }
-        this.__iconStyle = new SynchedPropertySimpleOneWayPU(b11.iconStyle, this, "iconStyle");
-        this.__icon = new SynchedPropertyObjectOneWayPU(b11.icon, this, "icon");
-        this.__primaryText = new SynchedPropertyObjectOneWayPU(b11.primaryText, this, "primaryText");
-        this.__secondaryText = new SynchedPropertyObjectOneWayPU(b11.secondaryText, this, "secondaryText");
-        this.__description = new SynchedPropertyObjectOneWayPU(b11.description, this, "description");
-        this.__itemRowSpace = new ObservedPropertySimplePU(NORMAL_ITEM_ROW_SPACE, this, "itemRowSpace");
-        this.__leftWidth = new SynchedPropertySimpleOneWayPU(b11.leftWidth, this, "leftWidth");
-        this.__primaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColor");
-        this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
-        this.__descriptionColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColor");
-        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(b11.fontSizeScale, this, "fontSizeScale");
-        this.__parentDirection = new SynchedPropertySimpleOneWayPU(b11.parentDirection, this, "parentDirection");
-        this.__itemDirection = new SynchedPropertySimpleOneWayPU(b11.itemDirection, this, "itemDirection");
-        this.setInitiallyProvidedValue(b11);
-        this.declareWatch("iconStyle", this.onPropChange);
-        this.declareWatch("icon", this.onPropChange);
-        this.declareWatch("primaryText", this.onPropChange);
-        this.declareWatch("secondaryText", this.onPropChange);
-        this.declareWatch("description", this.onPropChange);
+        let e10 = d10;
+        return e10.type === RESOURCE_TYPE_SYMBOL;
+    }
+    static isResourceType(c10) {
+        if (!c10) {
+            return false;
+        }
+        if (typeof c10 === 'string' || typeof c10 === 'undefined') {
+            return false;
+        }
+        return true;
+    }
+}
+class ContentItemStruct extends ViewPU {
+    constructor(w9, x9, y9, z9 = -1, a10 = undefined, b10) {
+        super(w9, y9, z9, b10);
+        if (typeof a10 === 'function') {
+            this.paramsGenerator_ = a10;
+        }
+        this.__iconStyle = new SynchedPropertySimpleOneWayPU(x9.iconStyle, this, 'iconStyle');
+        this.__icon = new SynchedPropertyObjectOneWayPU(x9.icon, this, 'icon');
+        this.__symbolStyle = new SynchedPropertyObjectOneWayPU(x9.symbolStyle, this, 'symbolStyle');
+        this.__primaryText = new SynchedPropertyObjectOneWayPU(x9.primaryText, this, 'primaryText');
+        this.__secondaryText = new SynchedPropertyObjectOneWayPU(x9.secondaryText, this, 'secondaryText');
+        this.__description = new SynchedPropertyObjectOneWayPU(x9.description, this, 'description');
+        this.__itemRowSpace = new ObservedPropertySimplePU(NORMAL_ITEM_ROW_SPACE, this, 'itemRowSpace');
+        this.__leftWidth = new SynchedPropertySimpleOneWayPU(x9.leftWidth, this, 'leftWidth');
+        this.__primaryTextColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'primaryTextColor');
+        this.__secondaryTextColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'secondaryTextColor');
+        this.__descriptionColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'descriptionColor');
+        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(x9.fontSizeScale, this, 'fontSizeScale');
+        this.__parentDirection = new SynchedPropertySimpleOneWayPU(x9.parentDirection, this, 'parentDirection');
+        this.__itemDirection = new SynchedPropertySimpleOneWayPU(x9.itemDirection, this, 'itemDirection');
+        this.setInitiallyProvidedValue(x9);
+        this.declareWatch('iconStyle', this.onPropChange);
+        this.declareWatch('icon', this.onPropChange);
+        this.declareWatch('symbolStyle', this.onPropChange);
+        this.declareWatch('primaryText', this.onPropChange);
+        this.declareWatch('secondaryText', this.onPropChange);
+        this.declareWatch('description', this.onPropChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(z10) {
-        if (z10.iconStyle === undefined) {
+    setInitiallyProvidedValue(v9) {
+        if (v9.iconStyle === undefined) {
             this.__iconStyle.set(null);
         }
-        if (z10.icon === undefined) {
+        if (v9.icon === undefined) {
             this.__icon.set(null);
         }
-        if (z10.primaryText === undefined) {
+        if (v9.symbolStyle === undefined) {
+            this.__symbolStyle.set(null);
+        }
+        if (v9.primaryText === undefined) {
             this.__primaryText.set(null);
         }
-        if (z10.secondaryText === undefined) {
+        if (v9.secondaryText === undefined) {
             this.__secondaryText.set(null);
         }
-        if (z10.description === undefined) {
+        if (v9.description === undefined) {
             this.__description.set(null);
         }
-        if (z10.itemRowSpace !== undefined) {
-            this.itemRowSpace = z10.itemRowSpace;
+        if (v9.itemRowSpace !== undefined) {
+            this.itemRowSpace = v9.itemRowSpace;
         }
-        if (z10.leftWidth === undefined) {
+        if (v9.leftWidth === undefined) {
             this.__leftWidth.set(LEFT_PART_WIDTH);
         }
-        if (z10.primaryTextColor !== undefined) {
-            this.primaryTextColor = z10.primaryTextColor;
+        if (v9.primaryTextColor !== undefined) {
+            this.primaryTextColor = v9.primaryTextColor;
         }
-        if (z10.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = z10.secondaryTextColor;
+        if (v9.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = v9.secondaryTextColor;
         }
-        if (z10.descriptionColor !== undefined) {
-            this.descriptionColor = z10.descriptionColor;
+        if (v9.descriptionColor !== undefined) {
+            this.descriptionColor = v9.descriptionColor;
         }
     }
-    updateStateVars(y10) {
-        this.__iconStyle.reset(y10.iconStyle);
-        this.__icon.reset(y10.icon);
-        this.__primaryText.reset(y10.primaryText);
-        this.__secondaryText.reset(y10.secondaryText);
-        this.__description.reset(y10.description);
-        this.__leftWidth.reset(y10.leftWidth);
-        this.__fontSizeScale.reset(y10.fontSizeScale);
-        this.__parentDirection.reset(y10.parentDirection);
-        this.__itemDirection.reset(y10.itemDirection);
+    updateStateVars(u9) {
+        this.__iconStyle.reset(u9.iconStyle);
+        this.__icon.reset(u9.icon);
+        this.__symbolStyle.reset(u9.symbolStyle);
+        this.__primaryText.reset(u9.primaryText);
+        this.__secondaryText.reset(u9.secondaryText);
+        this.__description.reset(u9.description);
+        this.__leftWidth.reset(u9.leftWidth);
+        this.__fontSizeScale.reset(u9.fontSizeScale);
+        this.__parentDirection.reset(u9.parentDirection);
+        this.__itemDirection.reset(u9.itemDirection);
     }
-    purgeVariableDependenciesOnElmtId(x10) {
-        this.__iconStyle.purgeDependencyOnElmtId(x10);
-        this.__icon.purgeDependencyOnElmtId(x10);
-        this.__primaryText.purgeDependencyOnElmtId(x10);
-        this.__secondaryText.purgeDependencyOnElmtId(x10);
-        this.__description.purgeDependencyOnElmtId(x10);
-        this.__itemRowSpace.purgeDependencyOnElmtId(x10);
-        this.__leftWidth.purgeDependencyOnElmtId(x10);
-        this.__primaryTextColor.purgeDependencyOnElmtId(x10);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(x10);
-        this.__descriptionColor.purgeDependencyOnElmtId(x10);
-        this.__fontSizeScale.purgeDependencyOnElmtId(x10);
-        this.__parentDirection.purgeDependencyOnElmtId(x10);
-        this.__itemDirection.purgeDependencyOnElmtId(x10);
+    purgeVariableDependenciesOnElmtId(t9) {
+        this.__iconStyle.purgeDependencyOnElmtId(t9);
+        this.__icon.purgeDependencyOnElmtId(t9);
+        this.__symbolStyle.purgeDependencyOnElmtId(t9);
+        this.__primaryText.purgeDependencyOnElmtId(t9);
+        this.__secondaryText.purgeDependencyOnElmtId(t9);
+        this.__description.purgeDependencyOnElmtId(t9);
+        this.__itemRowSpace.purgeDependencyOnElmtId(t9);
+        this.__leftWidth.purgeDependencyOnElmtId(t9);
+        this.__primaryTextColor.purgeDependencyOnElmtId(t9);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(t9);
+        this.__descriptionColor.purgeDependencyOnElmtId(t9);
+        this.__fontSizeScale.purgeDependencyOnElmtId(t9);
+        this.__parentDirection.purgeDependencyOnElmtId(t9);
+        this.__itemDirection.purgeDependencyOnElmtId(t9);
     }
     aboutToBeDeleted() {
         this.__iconStyle.aboutToBeDeleted();
         this.__icon.aboutToBeDeleted();
+        this.__symbolStyle.aboutToBeDeleted();
         this.__primaryText.aboutToBeDeleted();
         this.__secondaryText.aboutToBeDeleted();
         this.__description.aboutToBeDeleted();
@@ -193,88 +224,94 @@ class ContentItemStruct extends ViewPU {
     get iconStyle() {
         return this.__iconStyle.get();
     }
-    set iconStyle(w10) {
-        this.__iconStyle.set(w10);
+    set iconStyle(s9) {
+        this.__iconStyle.set(s9);
     }
     get icon() {
         return this.__icon.get();
     }
-    set icon(v10) {
-        this.__icon.set(v10);
+    set icon(r9) {
+        this.__icon.set(r9);
+    }
+    get symbolStyle() {
+        return this.__symbolStyle.get();
+    }
+    set symbolStyle(q9) {
+        this.__symbolStyle.set(q9);
     }
     get primaryText() {
         return this.__primaryText.get();
     }
-    set primaryText(u10) {
-        this.__primaryText.set(u10);
+    set primaryText(p9) {
+        this.__primaryText.set(p9);
     }
     get secondaryText() {
         return this.__secondaryText.get();
     }
-    set secondaryText(t10) {
-        this.__secondaryText.set(t10);
+    set secondaryText(o9) {
+        this.__secondaryText.set(o9);
     }
     get description() {
         return this.__description.get();
     }
-    set description(s10) {
-        this.__description.set(s10);
+    set description(n9) {
+        this.__description.set(n9);
     }
     get itemRowSpace() {
         return this.__itemRowSpace.get();
     }
-    set itemRowSpace(r10) {
-        this.__itemRowSpace.set(r10);
+    set itemRowSpace(m9) {
+        this.__itemRowSpace.set(m9);
     }
     get leftWidth() {
         return this.__leftWidth.get();
     }
-    set leftWidth(q10) {
-        this.__leftWidth.set(q10);
+    set leftWidth(l9) {
+        this.__leftWidth.set(l9);
     }
     get primaryTextColor() {
         return this.__primaryTextColor.get();
     }
-    set primaryTextColor(p10) {
-        this.__primaryTextColor.set(p10);
+    set primaryTextColor(k9) {
+        this.__primaryTextColor.set(k9);
     }
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
-    set secondaryTextColor(o10) {
-        this.__secondaryTextColor.set(o10);
+    set secondaryTextColor(j9) {
+        this.__secondaryTextColor.set(j9);
     }
     get descriptionColor() {
         return this.__descriptionColor.get();
     }
-    set descriptionColor(n10) {
-        this.__descriptionColor.set(n10);
+    set descriptionColor(i9) {
+        this.__descriptionColor.set(i9);
     }
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-    set fontSizeScale(w11) {
-        this.__fontSizeScale.set(w11);
+    set fontSizeScale(h9) {
+        this.__fontSizeScale.set(h9);
     }
     get parentDirection() {
         return this.__parentDirection.get();
     }
-    set parentDirection(v11) {
-        this.__parentDirection.set(v11);
+    set parentDirection(g9) {
+        this.__parentDirection.set(g9);
     }
     get itemDirection() {
         return this.__itemDirection.get();
     }
-    set itemDirection(u11) {
-        this.__itemDirection.set(u11);
+    set itemDirection(f9) {
+        this.__itemDirection.set(f9);
     }
-    onWillApplyTheme(m10) {
-        this.primaryTextColor = m10.colors.fontPrimary;
-        this.secondaryTextColor = m10.colors.fontSecondary;
-        this.descriptionColor = m10.colors.fontTertiary;
+    onWillApplyTheme(e9) {
+        this.primaryTextColor = e9.colors.fontPrimary;
+        this.secondaryTextColor = e9.colors.fontSecondary;
+        this.descriptionColor = e9.colors.fontTertiary;
     }
     onPropChange() {
-        if (this.icon == null && this.iconStyle == null) {
+        if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
             this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
         }
         else {
@@ -284,45 +321,93 @@ class ContentItemStruct extends ViewPU {
     aboutToAppear() {
         this.onPropChange();
     }
-    createIcon(v9 = null) {
-        this.observeComponentCreation2((x9, y9) => {
+    createIcon(n8 = null) {
+        this.observeComponentCreation2((o8, p8) => {
             If.create();
-            if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
+            if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c10, d10) => {
+                    this.observeComponentCreation2((q8, r8) => {
                         If.create();
-                        if (this.iconStyle <= IconType.PREVIEW) {
+                        if (this.symbolStyle != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((k10, l10) => {
-                                    Image.create(this.icon);
-                                    Image.objectFit(ImageFit.Contain);
-                                    Image.width(ICON_SIZE_MAP.get(this.iconStyle));
-                                    Image.height(ICON_SIZE_MAP.get(this.iconStyle));
-                                    Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(false);
-                                    Image.draggable(false);
-                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.flexShrink(0);
-                                }, Image);
+                                this.observeComponentCreation2((c9, d9) => {
+                                    SymbolGlyph.create();
+                                    SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
+                                    SymbolGlyph.fontSize(ICON_SIZE_MAP.get(this.iconStyle));
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                                    SymbolGlyph.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                    SymbolGlyph.focusable(false);
+                                    SymbolGlyph.draggable(false);
+                                    SymbolGlyph.flexShrink(0);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else if (this.icon != null) {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((s8, t8) => {
+                                    If.create();
+                                    if (Util.isSymbolResource(ObservedObject.GetRawObject(this.icon))) {
+                                        this.ifElseBranchUpdateFunction(0, () => {
+                                            this.observeComponentCreation2((a9, b9) => {
+                                                SymbolGlyph.create(this.icon);
+                                                SymbolGlyph.fontSize(ICON_SIZE_MAP.get(this.iconStyle));
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                SymbolGlyph.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                SymbolGlyph.focusable(false);
+                                                SymbolGlyph.draggable(false);
+                                                SymbolGlyph.flexShrink(0);
+                                            }, SymbolGlyph);
+                                        });
+                                    }
+                                    else {
+                                        this.ifElseBranchUpdateFunction(1, () => {
+                                            this.observeComponentCreation2((u8, v8) => {
+                                                If.create();
+                                                if (this.iconStyle <= IconType.PREVIEW) {
+                                                    this.ifElseBranchUpdateFunction(0, () => {
+                                                        this.observeComponentCreation2((y8, z8) => {
+                                                            Image.create(this.icon);
+                                                            Image.objectFit(ImageFit.Contain);
+                                                            Image.width(ICON_SIZE_MAP.get(this.iconStyle));
+                                                            Image.height(ICON_SIZE_MAP.get(this.iconStyle));
+                                                            Image.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                            Image.focusable(false);
+                                                            Image.draggable(false);
+                                                            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                            Image.flexShrink(0);
+                                                        }, Image);
+                                                    });
+                                                }
+                                                else {
+                                                    this.ifElseBranchUpdateFunction(1, () => {
+                                                        this.observeComponentCreation2((w8, x8) => {
+                                                            Image.create(this.icon);
+                                                            Image.objectFit(ImageFit.Contain);
+                                                            Image.constraintSize({
+                                                                minWidth: SPECIAL_ICON_SIZE,
+                                                                maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
+                                                                minHeight: SPECIAL_ICON_SIZE,
+                                                                maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
+                                                            });
+                                                            Image.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                            Image.focusable(false);
+                                                            Image.draggable(false);
+                                                            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                            Image.flexShrink(0);
+                                                        }, Image);
+                                                    });
+                                                }
+                                            }, If);
+                                            If.pop();
+                                        });
+                                    }
+                                }, If);
+                                If.pop();
                             });
                         }
                         else {
-                            this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((g10, h10) => {
-                                    Image.create(this.icon);
-                                    Image.objectFit(ImageFit.Contain);
-                                    Image.constraintSize({
-                                        minWidth: SPECIAL_ICON_SIZE,
-                                        maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
-                                        minHeight: SPECIAL_ICON_SIZE,
-                                        maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
-                                    });
-                                    Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(false);
-                                    Image.draggable(false);
-                                    Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.flexShrink(0);
-                                }, Image);
+                            this.ifElseBranchUpdateFunction(2, () => {
                             });
                         }
                     }, If);
@@ -336,8 +421,8 @@ class ContentItemStruct extends ViewPU {
         }, If);
         If.pop();
     }
-    createText(y8 = null) {
-        this.observeComponentCreation2((t9, u9) => {
+    createText(a8 = null) {
+        this.observeComponentCreation2((l8, m8) => {
             Column.create({ space: TEXT_COLUMN_SPACE });
             Column.flexShrink(1);
             Column.margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
@@ -346,30 +431,26 @@ class ContentItemStruct extends ViewPU {
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((r9, s9) => {
+        this.observeComponentCreation2((j8, k8) => {
             Text.create(this.primaryText);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColor));
-            Text.maxLines(TEXT_MAX_LINE);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
-            Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((k9, l9) => {
+        this.observeComponentCreation2((f8, g8) => {
             If.create();
             if (this.secondaryText != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((p9, q9) => {
+                    this.observeComponentCreation2((h8, i8) => {
                         Text.create(this.secondaryText);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
-                        Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
-                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                 });
@@ -380,18 +461,16 @@ class ContentItemStruct extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((d9, e9) => {
+        this.observeComponentCreation2((b8, c8) => {
             If.create();
             if (this.description != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i9, j9) => {
+                    this.observeComponentCreation2((d8, e8) => {
                         Text.create(this.description);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColor));
-                        Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
-                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                 });
@@ -412,25 +491,25 @@ class ContentItemStruct extends ViewPU {
     }
     getItemSpace() {
         if (this.isColumnDirection()) {
-            return LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            return LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
         }
         return LengthMetrics.vp(this.itemRowSpace);
     }
     initialRender() {
-        this.observeComponentCreation2((w8, x8) => {
+        this.observeComponentCreation2((y7, z7) => {
             Flex.create({
                 space: { main: this.getItemSpace() },
                 direction: this.itemDirection,
                 justifyContent: FlexAlign.Start,
                 alignItems: this.isColumnDirection() ? ItemAlign.Start : ItemAlign.Center,
             });
+            Flex.height(this.itemDirection === FlexDirection.Column ? 'auto' : undefined);
             Flex.margin({
                 end: this.isParentColumnDirection() ?
                 LengthMetrics.vp(0) :
                 LengthMetrics.vp(16)
             });
             Flex.padding({ start: LengthMetrics.vp(LISTITEM_PADDING) });
-            Flex.width(this.isParentColumnDirection() ? undefined : this.leftWidth);
             Flex.flexShrink(this.isParentColumnDirection() ? 0 : 1);
         }, Flex);
         this.createIcon.bind(this)();
@@ -443,139 +522,145 @@ class ContentItemStruct extends ViewPU {
 }
 class CreateIconParam {
 }
-
 class OperateItemStruct extends ViewPU {
-    constructor(p8, q8, r8, s8 = -1, t8 = undefined, u8) {
-        super(p8, r8, s8, u8);
-        if (typeof t8 === "function") {
-            this.paramsGenerator_ = t8;
+    constructor(s7, t7, u7, v7 = -1, w7 = undefined, x7) {
+        super(s7, u7, v7, x7);
+        if (typeof w7 === 'function') {
+            this.paramsGenerator_ = w7;
         }
-        this.__arrow = new SynchedPropertyObjectOneWayPU(q8.arrow, this, "arrow");
-        this.__icon = new SynchedPropertyObjectOneWayPU(q8.icon, this, "icon");
-        this.__subIcon = new SynchedPropertyObjectOneWayPU(q8.subIcon, this, "subIcon");
-        this.__button = new SynchedPropertyObjectOneWayPU(q8.button, this, "button");
-        this.__switch = new SynchedPropertyObjectOneWayPU(q8.switch, this, "switch");
-        this.__checkBox = new SynchedPropertyObjectOneWayPU(q8.checkBox, this, "checkBox");
-        this.__radio = new SynchedPropertyObjectOneWayPU(q8.radio, this, "radio");
-        this.__image = new SynchedPropertyObjectOneWayPU(q8.image, this, "image");
-        this.__text = new SynchedPropertyObjectOneWayPU(q8.text, this, "text");
-        this.__switchState = new ObservedPropertySimplePU(false, this, "switchState");
-        this.__radioState = new ObservedPropertySimplePU(false, this, "radioState");
-        this.__checkBoxState = new ObservedPropertySimplePU(false, this, "checkBoxState");
-        this.__rightWidth = new SynchedPropertySimpleOneWayPU(q8.rightWidth, this, "rightWidth");
-        this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
-        this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, "hoveringColor");
-        this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, "activedColor");
-        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(q8.parentCanFocus, this, "parentCanFocus");
-        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(q8.parentCanTouch, this, "parentCanTouch");
-        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(q8.parentIsHover, this, "parentIsHover");
-        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(q8.parentCanHover, this, "parentCanHover");
-        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(q8.parentIsActive, this, "parentIsActive");
-        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(q8.parentFrontColor, this, "parentFrontColor");
-        this.__parentDirection = new SynchedPropertySimpleTwoWayPU(q8.parentDirection, this, "parentDirection");
-        this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, "rowSpace");
-        this.setInitiallyProvidedValue(q8);
-        this.declareWatch("arrow", this.onPropChange);
-        this.declareWatch("icon", this.onPropChange);
-        this.declareWatch("subIcon", this.onPropChange);
-        this.declareWatch("button", this.onPropChange);
-        this.declareWatch("switch", this.onPropChange);
-        this.declareWatch("checkBox", this.onPropChange);
-        this.declareWatch("radio", this.onPropChange);
-        this.declareWatch("image", this.onPropChange);
-        this.declareWatch("text", this.onPropChange);
+        this.__arrow = new SynchedPropertyObjectOneWayPU(t7.arrow, this, 'arrow');
+        this.__icon = new SynchedPropertyObjectOneWayPU(t7.icon, this, 'icon');
+        this.__subIcon = new SynchedPropertyObjectOneWayPU(t7.subIcon, this, 'subIcon');
+        this.__button = new SynchedPropertyObjectOneWayPU(t7.button, this, 'button');
+        this.__switch = new SynchedPropertyObjectOneWayPU(t7.switch, this, 'switch');
+        this.__checkBox = new SynchedPropertyObjectOneWayPU(t7.checkBox, this, 'checkBox');
+        this.__radio = new SynchedPropertyObjectOneWayPU(t7.radio, this, 'radio');
+        this.__image = new SynchedPropertyObjectOneWayPU(t7.image, this, 'image');
+        this.__symbolStyle = new SynchedPropertyObjectOneWayPU(t7.symbolStyle, this, 'symbolStyle');
+        this.__text = new SynchedPropertyObjectOneWayPU(t7.text, this, 'text');
+        this.__switchState = new ObservedPropertySimplePU(false, this, 'switchState');
+        this.__radioState = new ObservedPropertySimplePU(false, this, 'radioState');
+        this.__checkBoxState = new ObservedPropertySimplePU(false, this, 'checkBoxState');
+        this.__rightWidth = new SynchedPropertySimpleOneWayPU(t7.rightWidth, this, 'rightWidth');
+        this.__secondaryTextColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'secondaryTextColor');
+        this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, 'hoveringColor');
+        this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, 'activedColor');
+        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(t7.parentCanFocus, this, 'parentCanFocus');
+        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(t7.parentCanTouch, this, 'parentCanTouch');
+        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(t7.parentIsHover, this, 'parentIsHover');
+        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(t7.parentCanHover, this, 'parentCanHover');
+        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(t7.parentIsActive, this, 'parentIsActive');
+        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(t7.parentFrontColor, this, 'parentFrontColor');
+        this.__parentDirection = new SynchedPropertySimpleTwoWayPU(t7.parentDirection, this, 'parentDirection');
+        this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, 'rowSpace');
+        this.setInitiallyProvidedValue(t7);
+        this.declareWatch('arrow', this.onPropChange);
+        this.declareWatch('icon', this.onPropChange);
+        this.declareWatch('subIcon', this.onPropChange);
+        this.declareWatch('button', this.onPropChange);
+        this.declareWatch('switch', this.onPropChange);
+        this.declareWatch('checkBox', this.onPropChange);
+        this.declareWatch('radio', this.onPropChange);
+        this.declareWatch('image', this.onPropChange);
+        this.declareWatch('symbolStyle', this.onPropChange);
+        this.declareWatch('text', this.onPropChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(o8) {
-        if (o8.arrow === undefined) {
+    setInitiallyProvidedValue(r7) {
+        if (r7.arrow === undefined) {
             this.__arrow.set(null);
         }
-        if (o8.icon === undefined) {
+        if (r7.icon === undefined) {
             this.__icon.set(null);
         }
-        if (o8.subIcon === undefined) {
+        if (r7.subIcon === undefined) {
             this.__subIcon.set(null);
         }
-        if (o8.button === undefined) {
+        if (r7.button === undefined) {
             this.__button.set(null);
         }
-        if (o8.switch === undefined) {
+        if (r7.switch === undefined) {
             this.__switch.set(null);
         }
-        if (o8.checkBox === undefined) {
+        if (r7.checkBox === undefined) {
             this.__checkBox.set(null);
         }
-        if (o8.radio === undefined) {
+        if (r7.radio === undefined) {
             this.__radio.set(null);
         }
-        if (o8.image === undefined) {
+        if (r7.image === undefined) {
             this.__image.set(null);
         }
-        if (o8.text === undefined) {
+        if (r7.symbolStyle === undefined) {
+            this.__symbolStyle.set(null);
+        }
+        if (r7.text === undefined) {
             this.__text.set(null);
         }
-        if (o8.switchState !== undefined) {
-            this.switchState = o8.switchState;
+        if (r7.switchState !== undefined) {
+            this.switchState = r7.switchState;
         }
-        if (o8.radioState !== undefined) {
-            this.radioState = o8.radioState;
+        if (r7.radioState !== undefined) {
+            this.radioState = r7.radioState;
         }
-        if (o8.checkBoxState !== undefined) {
-            this.checkBoxState = o8.checkBoxState;
+        if (r7.checkBoxState !== undefined) {
+            this.checkBoxState = r7.checkBoxState;
         }
-        if (o8.rightWidth === undefined) {
+        if (r7.rightWidth === undefined) {
             this.__rightWidth.set(RIGHT_PART_WIDTH);
         }
-        if (o8.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = o8.secondaryTextColor;
+        if (r7.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = r7.secondaryTextColor;
         }
-        if (o8.hoveringColor !== undefined) {
-            this.hoveringColor = o8.hoveringColor;
+        if (r7.hoveringColor !== undefined) {
+            this.hoveringColor = r7.hoveringColor;
         }
-        if (o8.activedColor !== undefined) {
-            this.activedColor = o8.activedColor;
+        if (r7.activedColor !== undefined) {
+            this.activedColor = r7.activedColor;
         }
-        if (o8.rowSpace !== undefined) {
-            this.rowSpace = o8.rowSpace;
+        if (r7.rowSpace !== undefined) {
+            this.rowSpace = r7.rowSpace;
         }
     }
-    updateStateVars(n8) {
-        this.__arrow.reset(n8.arrow);
-        this.__icon.reset(n8.icon);
-        this.__subIcon.reset(n8.subIcon);
-        this.__button.reset(n8.button);
-        this.__switch.reset(n8.switch);
-        this.__checkBox.reset(n8.checkBox);
-        this.__radio.reset(n8.radio);
-        this.__image.reset(n8.image);
-        this.__text.reset(n8.text);
-        this.__rightWidth.reset(n8.rightWidth);
+    updateStateVars(q7) {
+        this.__arrow.reset(q7.arrow);
+        this.__icon.reset(q7.icon);
+        this.__subIcon.reset(q7.subIcon);
+        this.__button.reset(q7.button);
+        this.__switch.reset(q7.switch);
+        this.__checkBox.reset(q7.checkBox);
+        this.__radio.reset(q7.radio);
+        this.__image.reset(q7.image);
+        this.__symbolStyle.reset(q7.symbolStyle);
+        this.__text.reset(q7.text);
+        this.__rightWidth.reset(q7.rightWidth);
     }
-    purgeVariableDependenciesOnElmtId(m8) {
-        this.__arrow.purgeDependencyOnElmtId(m8);
-        this.__icon.purgeDependencyOnElmtId(m8);
-        this.__subIcon.purgeDependencyOnElmtId(m8);
-        this.__button.purgeDependencyOnElmtId(m8);
-        this.__switch.purgeDependencyOnElmtId(m8);
-        this.__checkBox.purgeDependencyOnElmtId(m8);
-        this.__radio.purgeDependencyOnElmtId(m8);
-        this.__image.purgeDependencyOnElmtId(m8);
-        this.__text.purgeDependencyOnElmtId(m8);
-        this.__switchState.purgeDependencyOnElmtId(m8);
-        this.__radioState.purgeDependencyOnElmtId(m8);
-        this.__checkBoxState.purgeDependencyOnElmtId(m8);
-        this.__rightWidth.purgeDependencyOnElmtId(m8);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(m8);
-        this.__hoveringColor.purgeDependencyOnElmtId(m8);
-        this.__activedColor.purgeDependencyOnElmtId(m8);
-        this.__parentCanFocus.purgeDependencyOnElmtId(m8);
-        this.__parentCanTouch.purgeDependencyOnElmtId(m8);
-        this.__parentIsHover.purgeDependencyOnElmtId(m8);
-        this.__parentCanHover.purgeDependencyOnElmtId(m8);
-        this.__parentIsActive.purgeDependencyOnElmtId(m8);
-        this.__parentFrontColor.purgeDependencyOnElmtId(m8);
-        this.__parentDirection.purgeDependencyOnElmtId(m8);
-        this.__rowSpace.purgeDependencyOnElmtId(m8);
+    purgeVariableDependenciesOnElmtId(p7) {
+        this.__arrow.purgeDependencyOnElmtId(p7);
+        this.__icon.purgeDependencyOnElmtId(p7);
+        this.__subIcon.purgeDependencyOnElmtId(p7);
+        this.__button.purgeDependencyOnElmtId(p7);
+        this.__switch.purgeDependencyOnElmtId(p7);
+        this.__checkBox.purgeDependencyOnElmtId(p7);
+        this.__radio.purgeDependencyOnElmtId(p7);
+        this.__image.purgeDependencyOnElmtId(p7);
+        this.__symbolStyle.purgeDependencyOnElmtId(p7);
+        this.__text.purgeDependencyOnElmtId(p7);
+        this.__switchState.purgeDependencyOnElmtId(p7);
+        this.__radioState.purgeDependencyOnElmtId(p7);
+        this.__checkBoxState.purgeDependencyOnElmtId(p7);
+        this.__rightWidth.purgeDependencyOnElmtId(p7);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(p7);
+        this.__hoveringColor.purgeDependencyOnElmtId(p7);
+        this.__activedColor.purgeDependencyOnElmtId(p7);
+        this.__parentCanFocus.purgeDependencyOnElmtId(p7);
+        this.__parentCanTouch.purgeDependencyOnElmtId(p7);
+        this.__parentIsHover.purgeDependencyOnElmtId(p7);
+        this.__parentCanHover.purgeDependencyOnElmtId(p7);
+        this.__parentIsActive.purgeDependencyOnElmtId(p7);
+        this.__parentFrontColor.purgeDependencyOnElmtId(p7);
+        this.__parentDirection.purgeDependencyOnElmtId(p7);
+        this.__rowSpace.purgeDependencyOnElmtId(p7);
     }
     aboutToBeDeleted() {
         this.__arrow.aboutToBeDeleted();
@@ -586,6 +671,7 @@ class OperateItemStruct extends ViewPU {
         this.__checkBox.aboutToBeDeleted();
         this.__radio.aboutToBeDeleted();
         this.__image.aboutToBeDeleted();
+        this.__symbolStyle.aboutToBeDeleted();
         this.__text.aboutToBeDeleted();
         this.__switchState.aboutToBeDeleted();
         this.__radioState.aboutToBeDeleted();
@@ -608,151 +694,157 @@ class OperateItemStruct extends ViewPU {
     get arrow() {
         return this.__arrow.get();
     }
-    set arrow(l8) {
-        this.__arrow.set(l8);
+    set arrow(o7) {
+        this.__arrow.set(o7);
     }
     get icon() {
         return this.__icon.get();
     }
-    set icon(k8) {
-        this.__icon.set(k8);
+    set icon(n7) {
+        this.__icon.set(n7);
     }
     get subIcon() {
         return this.__subIcon.get();
     }
-    set subIcon(j8) {
-        this.__subIcon.set(j8);
+    set subIcon(m7) {
+        this.__subIcon.set(m7);
     }
     get button() {
         return this.__button.get();
     }
-    set button(i8) {
-        this.__button.set(i8);
+    set button(l7) {
+        this.__button.set(l7);
     }
     get switch() {
         return this.__switch.get();
     }
-    set switch(h8) {
-        this.__switch.set(h8);
+    set switch(k7) {
+        this.__switch.set(k7);
     }
     get checkBox() {
         return this.__checkBox.get();
     }
-    set checkBox(g8) {
-        this.__checkBox.set(g8);
+    set checkBox(j7) {
+        this.__checkBox.set(j7);
     }
     get radio() {
         return this.__radio.get();
     }
-    set radio(f8) {
-        this.__radio.set(f8);
+    set radio(i7) {
+        this.__radio.set(i7);
     }
     get image() {
         return this.__image.get();
     }
-    set image(e8) {
-        this.__image.set(e8);
+    set image(h7) {
+        this.__image.set(h7);
+    }
+    get symbolStyle() {
+        return this.__symbolStyle.get();
+    }
+    set symbolStyle(g7) {
+        this.__symbolStyle.set(g7);
     }
     get text() {
         return this.__text.get();
     }
-    set text(d8) {
-        this.__text.set(d8);
+    set text(f7) {
+        this.__text.set(f7);
     }
     get switchState() {
         return this.__switchState.get();
     }
-    set switchState(c8) {
-        this.__switchState.set(c8);
+    set switchState(e7) {
+        this.__switchState.set(e7);
     }
     get radioState() {
         return this.__radioState.get();
     }
-    set radioState(b8) {
-        this.__radioState.set(b8);
+    set radioState(d7) {
+        this.__radioState.set(d7);
     }
     get checkBoxState() {
         return this.__checkBoxState.get();
     }
-    set checkBoxState(a8) {
-        this.__checkBoxState.set(a8);
+    set checkBoxState(c7) {
+        this.__checkBoxState.set(c7);
     }
     get rightWidth() {
         return this.__rightWidth.get();
     }
-    set rightWidth(z7) {
-        this.__rightWidth.set(z7);
+    set rightWidth(b7) {
+        this.__rightWidth.set(b7);
     }
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
-    set secondaryTextColor(y7) {
-        this.__secondaryTextColor.set(y7);
+    set secondaryTextColor(a7) {
+        this.__secondaryTextColor.set(a7);
     }
     get hoveringColor() {
         return this.__hoveringColor.get();
     }
-    set hoveringColor(x7) {
-        this.__hoveringColor.set(x7);
+    set hoveringColor(z6) {
+        this.__hoveringColor.set(z6);
     }
     get activedColor() {
         return this.__activedColor.get();
     }
-    set activedColor(w7) {
-        this.__activedColor.set(w7);
+    set activedColor(y6) {
+        this.__activedColor.set(y6);
     }
     get parentCanFocus() {
         return this.__parentCanFocus.get();
     }
-    set parentCanFocus(v7) {
-        this.__parentCanFocus.set(v7);
+    set parentCanFocus(x6) {
+        this.__parentCanFocus.set(x6);
     }
     get parentCanTouch() {
         return this.__parentCanTouch.get();
     }
-    set parentCanTouch(u7) {
-        this.__parentCanTouch.set(u7);
+    set parentCanTouch(w6) {
+        this.__parentCanTouch.set(w6);
     }
     get parentIsHover() {
         return this.__parentIsHover.get();
     }
-    set parentIsHover(t7) {
-        this.__parentIsHover.set(t7);
+    set parentIsHover(v6) {
+        this.__parentIsHover.set(v6);
     }
     get parentCanHover() {
         return this.__parentCanHover.get();
     }
-    set parentCanHover(s7) {
-        this.__parentCanHover.set(s7);
+    set parentCanHover(u6) {
+        this.__parentCanHover.set(u6);
     }
     get parentIsActive() {
         return this.__parentIsActive.get();
     }
-    set parentIsActive(r7) {
-        this.__parentIsActive.set(r7);
+    set parentIsActive(t6) {
+        this.__parentIsActive.set(t6);
     }
     get parentFrontColor() {
         return this.__parentFrontColor.get();
     }
-    set parentFrontColor(q7) {
-        this.__parentFrontColor.set(q7);
+    set parentFrontColor(s6) {
+        this.__parentFrontColor.set(s6);
     }
     get parentDirection() {
         return this.__parentDirection.get();
     }
-    set parentDirection(t11) {
-        this.__parentDirection.set(t11);
+    set parentDirection(r6) {
+        this.__parentDirection.set(r6);
     }
     get rowSpace() {
         return this.__rowSpace.get();
     }
-    set rowSpace(p7) {
-        this.__rowSpace.set(p7);
+    set rowSpace(q6) {
+        this.__rowSpace.set(q6);
     }
-    onWillApplyTheme(o7) {
-        this.secondaryTextColor = o7.colors.fontSecondary;
-        this.hoveringColor = o7.colors.interactiveHover;
-        this.activedColor = o7.colors.interactiveActive;
+    onWillApplyTheme(p6) {
+        this.secondaryTextColor = p6.colors.fontSecondary;
+        this.hoveringColor = p6.colors.interactiveHover;
+        this.activedColor = p6.colors.interactiveActive;
     }
     onPropChange() {
         if (this.switch != null) {
@@ -764,8 +856,8 @@ class OperateItemStruct extends ViewPU {
         if (this.checkBox != null) {
             this.checkBoxState = this.checkBox.isCheck;
         }
-        if ((this.button == null && this.image == null && this.icon != null && this.text != null) ||
-            (this.button == null && this.image == null && this.icon == null && this.arrow != null && this.text != null)) {
+        if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
+            ((this.icon != null) || (this.icon == null && this.arrow != null))) {
             this.rowSpace = SPECICAL_ROW_SPACE;
         }
         else {
@@ -775,30 +867,30 @@ class OperateItemStruct extends ViewPU {
     aboutToAppear() {
         this.onPropChange();
     }
-    createButton(z6 = null) {
-        this.observeComponentCreation2((h7, i7) => {
+    createButton(h6 = null) {
+        this.observeComponentCreation2((m6, n6) => {
             Button.createWithChild();
             Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Button.hitTestBehavior(HitTestMode.Block);
-            Button.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Button.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_activated_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Button.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_activated_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.constraintSize({
                 minHeight: BUTTON_SIZE
             });
-            Button.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onHover((c1) => {
+            Button.onHover((o6) => {
                 this.parentCanHover = false;
-                if (c1 && this.parentFrontColor === this.hoveringColor) {
+                if (o6 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!c1) {
+                if (!o6) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -806,15 +898,18 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
+            Button.accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((f7, g7) => {
+        this.observeComponentCreation2((k6, l6) => {
             Row.create();
             Row.padding({
                 left: TEXT_SAFE_MARGIN,
                 right: TEXT_SAFE_MARGIN
             });
         }, Row);
-        this.observeComponentCreation2((d7, e7) => {
+        this.observeComponentCreation2((i6, j6) => {
             Text.create(this.button?.text);
             Text.focusable(true);
         }, Text);
@@ -822,23 +917,23 @@ class OperateItemStruct extends ViewPU {
         Row.pop();
         Button.pop();
     }
-    createIcon(m6, n6 = null) {
-        this.observeComponentCreation2((s6, t6) => {
+    createIcon(s5, t5 = null) {
+        this.observeComponentCreation2((e6, f6) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.hitTestBehavior(HitTestMode.Block);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
             Button.width(OPERATEITEM_ICON_CLICKABLE_SIZE);
-            Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onHover((x6) => {
+            Button.onHover((g6) => {
                 this.parentCanHover = false;
-                if (x6 && this.parentFrontColor === this.hoveringColor) {
+                if (g6 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!x6) {
+                if (!g6) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -846,42 +941,113 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
-            Button.onClick(m6.icon?.action);
+            Button.onClick(s5.icon?.action);
+            Button.accessibilityLevel(s5.icon?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(getAccessibilityText(s5.icon?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(s5.icon?.accessibilityDescription ?? ''));
             Button.flexShrink(0);
         }, Button);
-        this.observeComponentCreation2((q6, r6) => {
-            Image.create(m6.icon?.value);
-            Image.height(OPERATEITEM_ICONLIKE_SIZE);
-            Image.width(OPERATEITEM_ICONLIKE_SIZE);
-            Image.focusable(true);
-            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Image.draggable(false);
-        }, Image);
+        this.observeComponentCreation2((u5, v5) => {
+            If.create();
+            if (s5.icon?.symbolStyle) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((c6, d6) => {
+                        SymbolGlyph.create();
+                        SymbolGlyph.attributeModifier.bind(this)(s5.icon?.symbolStyle);
+                        SymbolGlyph.fontSize(OPERATEITEM_ICONLIKE_SIZE);
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                        SymbolGlyph.focusable(true);
+                        SymbolGlyph.draggable(false);
+                    }, SymbolGlyph);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((w5, x5) => {
+                        If.create();
+                        if (Util.isSymbolResource(s5.icon?.value)) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((a6, b6) => {
+                                    SymbolGlyph.create(s5.icon?.value);
+                                    SymbolGlyph.fontSize(OPERATEITEM_ICONLIKE_SIZE);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((y5, z5) => {
+                                    Image.create(s5.icon?.value);
+                                    Image.height(OPERATEITEM_ICONLIKE_SIZE);
+                                    Image.width(OPERATEITEM_ICONLIKE_SIZE);
+                                    Image.focusable(true);
+                                    Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                    Image.draggable(false);
+                                }, Image);
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                });
+            }
+        }, If);
+        If.pop();
         Button.pop();
     }
-    createImage(i6 = null) {
-        this.observeComponentCreation2((k6, l6) => {
-            Image.create(this.image);
-            Image.height(OPERATEITEM_IMAGE_SIZE);
-            Image.width(OPERATEITEM_IMAGE_SIZE);
-            Image.draggable(false);
-            Image.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-        }, Image);
+    createImage(l5 = null) {
+        this.observeComponentCreation2((m5, n5) => {
+            If.create();
+            if (Util.isSymbolResource(ObservedObject.GetRawObject(this.image))) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((q5, r5) => {
+                        SymbolGlyph.create(this.image);
+                        SymbolGlyph.fontSize(OPERATEITEM_IMAGE_SIZE);
+                        SymbolGlyph.draggable(false);
+                        SymbolGlyph.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+                    }, SymbolGlyph);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((o5, p5) => {
+                        Image.create(this.image);
+                        Image.height(OPERATEITEM_IMAGE_SIZE);
+                        Image.width(OPERATEITEM_IMAGE_SIZE);
+                        Image.draggable(false);
+                        Image.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+                    }, Image);
+                });
+            }
+        }, If);
+        If.pop();
     }
-    createText(e6 = null) {
-        this.observeComponentCreation2((g6, h6) => {
+    createSymbol(i5 = null) {
+        this.observeComponentCreation2((j5, k5) => {
+            SymbolGlyph.create();
+            SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
+            SymbolGlyph.fontSize(OPERATEITEM_IMAGE_SIZE);
+            SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+            SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+            SymbolGlyph.draggable(false);
+            SymbolGlyph.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
+        }, SymbolGlyph);
+    }
+    createText(f5 = null) {
+        this.observeComponentCreation2((g5, h5) => {
             Text.create(this.text);
             Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
             Text.draggable(false);
             Text.flexShrink(1);
-            Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
         }, Text);
         Text.pop();
     }
-    createArrow(s5 = null) {
-        this.observeComponentCreation2((x5, y5) => {
+    createArrow(r4 = null) {
+        this.observeComponentCreation2((c5, d5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
@@ -893,15 +1059,15 @@ class OperateItemStruct extends ViewPU {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((c6) => {
+            Button.onHover((e5) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                this.parentCanHover = false;
-                if (c6) {
+                if (e5) {
+                    this.parentCanHover = false;
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!c6) {
+                else {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -910,20 +1076,63 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(this.arrow?.action);
+            Button.accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((v5, w5) => {
-            Image.create(this.arrow?.value);
-            Image.height(OPERATEITEM_ICONLIKE_SIZE);
-            Image.width(OPERATEITEM_ARROW_WIDTH);
-            Image.focusable(true);
-            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Image.draggable(false);
-            Image.matchTextDirection(true);
-        }, Image);
+        this.observeComponentCreation2((s4, t4) => {
+            If.create();
+            if (this.arrow?.symbolStyle) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((a5, b5) => {
+                        SymbolGlyph.create();
+                        SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
+                        SymbolGlyph.fontSize(OPERATEITEM_ARROW_WIDTH);
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                        SymbolGlyph.focusable(true);
+                        SymbolGlyph.draggable(false);
+                    }, SymbolGlyph);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((u4, v4) => {
+                        If.create();
+                        if (Util.isSymbolResource(this.arrow?.value)) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((y4, z4) => {
+                                    SymbolGlyph.create(this.arrow?.value);
+                                    SymbolGlyph.fontSize(OPERATEITEM_ARROW_WIDTH);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((w4, x4) => {
+                                    Image.create(this.arrow?.value);
+                                    Image.height(OPERATEITEM_ICONLIKE_SIZE);
+                                    Image.width(OPERATEITEM_ARROW_WIDTH);
+                                    Image.focusable(true);
+                                    Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                    Image.draggable(false);
+                                    Image.matchTextDirection(true);
+                                }, Image);
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                });
+            }
+        }, If);
+        If.pop();
         Button.pop();
     }
-    createRadio(j5 = null) {
-        this.observeComponentCreation2((l5, m5) => {
+    createRadio(n4 = null) {
+        this.observeComponentCreation2((o4, p4) => {
             Radio.create({ value: '', group: '' });
             Radio.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Radio.checked(this.radioState);
@@ -935,12 +1144,13 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Radio.hitTestBehavior(HitTestMode.Block);
-            Radio.onHover((q5) => {
+            Radio.flexShrink(0);
+            Radio.onHover((q4) => {
                 this.parentCanHover = false;
-                if (q5 && this.parentFrontColor === this.hoveringColor) {
+                if (q4 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!q5) {
+                if (!q4) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -948,10 +1158,13 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
+            Radio.accessibilityLevel(this.radio?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Radio.accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''));
+            Radio.accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''));
         }, Radio);
     }
-    createCheckBox(a5 = null) {
-        this.observeComponentCreation2((c5, d5) => {
+    createCheckBox(j4 = null) {
+        this.observeComponentCreation2((k4, l4) => {
             Checkbox.create();
             Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Checkbox.select(this.checkBoxState);
@@ -963,12 +1176,13 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
-            Checkbox.onHover((h5) => {
+            Checkbox.flexShrink(0);
+            Checkbox.onHover((m4) => {
                 this.parentCanHover = false;
-                if (h5 && this.parentFrontColor === this.hoveringColor) {
+                if (m4 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!h5) {
+                if (!m4) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -976,11 +1190,14 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
+            Checkbox.accessibilityLevel(this.checkBox?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Checkbox.accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''));
+            Checkbox.accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''));
         }, Checkbox);
         Checkbox.pop();
     }
-    createSwitch(n4 = null) {
-        this.observeComponentCreation2((t4, u4) => {
+    createSwitch(d4 = null) {
+        this.observeComponentCreation2((g4, h4) => {
             Row.create();
             Row.margin({ end: LengthMetrics.vp(SWITCH_PADDING) });
             Row.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
@@ -989,12 +1206,12 @@ class OperateItemStruct extends ViewPU {
             Row.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Row.onHover((y4) => {
+            Row.onHover((i4) => {
                 this.parentCanHover = false;
-                if (y4 && this.parentFrontColor === this.hoveringColor) {
+                if (i4 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!y4) {
+                if (!i4) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1003,19 +1220,22 @@ class OperateItemStruct extends ViewPU {
                 }
             });
         }, Row);
-        this.observeComponentCreation2((q4, r4) => {
+        this.observeComponentCreation2((e4, f4) => {
             Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
             Toggle.onChange(this.switch?.onChange);
             Toggle.onClick(() => {
                 this.switchState = !this.switchState;
             });
             Toggle.hitTestBehavior(HitTestMode.Block);
+            Toggle.accessibilityLevel(this.switch?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Toggle.accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''));
+            Toggle.accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''));
         }, Toggle);
         Toggle.pop();
         Row.pop();
     }
-    createTextArrow(v3 = null) {
-        this.observeComponentCreation2((g4, h4) => {
+    createTextArrow(v2 = null) {
+        this.observeComponentCreation2((a4, b4) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
             Button.labelStyle({
@@ -1023,7 +1243,7 @@ class OperateItemStruct extends ViewPU {
             });
             Button.backgroundColor(Color.Transparent);
             Button.constraintSize({ minHeight: TEXT_ARROW_HEIGHT });
-            Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Button.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
@@ -1035,15 +1255,15 @@ class OperateItemStruct extends ViewPU {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((a1) => {
+            Button.onHover((c4) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                this.parentCanHover = false;
-                if (a1) {
+                if (c4) {
+                    this.parentCanHover = false;
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!a1) {
+                else {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1052,72 +1272,153 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(this.arrow?.action);
+            Button.accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO);
+            Button.accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`);
+            Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((e4, f4) => {
+        this.observeComponentCreation2((w2, x2) => {
             If.create();
             if (this.parentDirection === FlexDirection.Column) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((n11, o11) => {
+                    this.observeComponentCreation2((y3, z3) => {
                         Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
                         Flex.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Flex);
-                    this.observeComponentCreation2((l11, m11) => {
+                    this.observeComponentCreation2((w3, x3) => {
                         Text.create(this.text);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
                             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
                         });
-                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((j11, k11) => {
-                        Image.create(this.arrow?.value);
-                        Image.height(OPERATEITEM_ICONLIKE_SIZE);
-                        Image.width(OPERATEITEM_ARROW_WIDTH);
-                        Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.focusable(false);
-                        Image.draggable(false);
-                        Image.matchTextDirection(true);
-                    }, Image);
+                    this.observeComponentCreation2((m3, n3) => {
+                        If.create();
+                        if (this.arrow?.symbolStyle) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((u3, v3) => {
+                                    SymbolGlyph.create();
+                                    SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
+                                    SymbolGlyph.fontSize(OPERATEITEM_ARROW_WIDTH);
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                                    SymbolGlyph.focusable(false);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((o3, p3) => {
+                                    If.create();
+                                    if (Util.isSymbolResource(this.arrow?.value)) {
+                                        this.ifElseBranchUpdateFunction(0, () => {
+                                            this.observeComponentCreation2((s3, t3) => {
+                                                SymbolGlyph.create(this.arrow?.value);
+                                                SymbolGlyph.fontSize(OPERATEITEM_ARROW_WIDTH);
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                SymbolGlyph.focusable(false);
+                                                SymbolGlyph.draggable(false);
+                                            }, SymbolGlyph);
+                                        });
+                                    }
+                                    else {
+                                        this.ifElseBranchUpdateFunction(1, () => {
+                                            this.observeComponentCreation2((q3, r3) => {
+                                                Image.create(this.arrow?.value);
+                                                Image.height(OPERATEITEM_ICONLIKE_SIZE);
+                                                Image.width(OPERATEITEM_ARROW_WIDTH);
+                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                Image.focusable(false);
+                                                Image.draggable(false);
+                                                Image.matchTextDirection(true);
+                                            }, Image);
+                                        });
+                                    }
+                                }, If);
+                                If.pop();
+                            });
+                        }
+                    }, If);
+                    If.pop();
                     Flex.pop();
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((b7, j7) => {
+                    this.observeComponentCreation2((k3, l3) => {
                         Row.create({ space: SPECICAL_ROW_SPACE });
                         Row.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Row);
-                    this.observeComponentCreation2((v6, a7) => {
+                    this.observeComponentCreation2((i3, j3) => {
                         Text.create(this.text);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
                             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
                         });
-                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((o6, u6) => {
-                        Image.create(this.arrow?.value);
-                        Image.height(OPERATEITEM_ICONLIKE_SIZE);
-                        Image.width(OPERATEITEM_ARROW_WIDTH);
-                        Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.focusable(false);
-                        Image.draggable(false);
-                        Image.matchTextDirection(true);
-                    }, Image);
+                    this.observeComponentCreation2((y2, z2) => {
+                        If.create();
+                        if (this.arrow?.symbolStyle) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((g3, h3) => {
+                                    SymbolGlyph.create();
+                                    SymbolGlyph.attributeModifier.bind(this)(this.arrow?.symbolStyle);
+                                    SymbolGlyph.fontSize(OPERATEITEM_ARROW_WIDTH);
+                                    SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                    SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                                    SymbolGlyph.focusable(false);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((a3, b3) => {
+                                    If.create();
+                                    if (Util.isSymbolResource(this.arrow?.value)) {
+                                        this.ifElseBranchUpdateFunction(0, () => {
+                                            this.observeComponentCreation2((e3, f3) => {
+                                                SymbolGlyph.create(this.arrow?.value);
+                                                SymbolGlyph.fontSize(OPERATEITEM_ARROW_WIDTH);
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                SymbolGlyph.focusable(false);
+                                                SymbolGlyph.draggable(false);
+                                            }, SymbolGlyph);
+                                        });
+                                    }
+                                    else {
+                                        this.ifElseBranchUpdateFunction(1, () => {
+                                            this.observeComponentCreation2((c3, d3) => {
+                                                Image.create(this.arrow?.value);
+                                                Image.height(OPERATEITEM_ICONLIKE_SIZE);
+                                                Image.width(OPERATEITEM_ARROW_WIDTH);
+                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                Image.focusable(false);
+                                                Image.draggable(false);
+                                                Image.matchTextDirection(true);
+                                            }, Image);
+                                        });
+                                    }
+                                }, If);
+                                If.pop();
+                            });
+                        }
+                    }, If);
+                    If.pop();
                     Row.pop();
                 });
             }
@@ -1126,77 +1427,82 @@ class OperateItemStruct extends ViewPU {
         Button.pop();
     }
     getFlexOptions() {
-        let n5 = { alignItems: ItemAlign.Center };
+        let u2 = { alignItems: ItemAlign.Center };
         if (this.parentDirection === FlexDirection.Column) {
-            n5.justifyContent = FlexAlign.SpaceBetween;
+            u2.justifyContent = FlexAlign.SpaceBetween;
         }
         else {
-            n5.space = { main: LengthMetrics.vp(this.rowSpace) };
-            n5.justifyContent = FlexAlign.End;
+            u2.space = { main: LengthMetrics.vp(this.rowSpace) };
+            u2.justifyContent = FlexAlign.End;
         }
-        return n5;
+        return u2;
     }
     initialRender() {
-        this.observeComponentCreation2((t3, u3) => {
+        this.observeComponentCreation2((s2, t2) => {
             Flex.create(this.getFlexOptions());
             Flex.width(this.parentDirection === FlexDirection.Column ? undefined : this.rightWidth);
         }, Flex);
-        this.observeComponentCreation2((b3, c3) => {
+        this.observeComponentCreation2((o2, p2) => {
             If.create();
             if (this.button != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.createButton.bind(this)();
                 });
             }
-            else if (this.image != null) {
+            else if (this.symbolStyle != null) {
                 this.ifElseBranchUpdateFunction(1, () => {
+                    this.createSymbol.bind(this)();
+                });
+            }
+            else if (this.image != null) {
+                this.ifElseBranchUpdateFunction(2, () => {
                     this.createImage.bind(this)();
                 });
             }
             else if (this.icon != null && this.text != null) {
-                this.ifElseBranchUpdateFunction(2, () => {
+                this.ifElseBranchUpdateFunction(3, () => {
                     this.createText.bind(this)();
-                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
+                    this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon', { icon: () => (this['__icon'] ? this['__icon'] : this['icon']) }));
                 });
             }
             else if (this.arrow != null && this.text == null) {
-                this.ifElseBranchUpdateFunction(3, () => {
+                this.ifElseBranchUpdateFunction(4, () => {
                     this.createArrow.bind(this)();
                 });
             }
             else if (this.arrow != null && this.text != null) {
-                this.ifElseBranchUpdateFunction(4, () => {
+                this.ifElseBranchUpdateFunction(5, () => {
                     this.createTextArrow.bind(this)();
                 });
             }
             else if (this.text != null) {
-                this.ifElseBranchUpdateFunction(5, () => {
+                this.ifElseBranchUpdateFunction(6, () => {
                     this.createText.bind(this)();
                 });
             }
             else if (this.radio != null) {
-                this.ifElseBranchUpdateFunction(6, () => {
+                this.ifElseBranchUpdateFunction(7, () => {
                     this.createRadio.bind(this)();
                 });
             }
             else if (this.checkBox != null) {
-                this.ifElseBranchUpdateFunction(7, () => {
+                this.ifElseBranchUpdateFunction(8, () => {
                     this.createCheckBox.bind(this)();
                 });
             }
             else if (this.switch != null) {
-                this.ifElseBranchUpdateFunction(8, () => {
+                this.ifElseBranchUpdateFunction(9, () => {
                     this.createSwitch.bind(this)();
                 });
             }
             else if (this.icon != null) {
-                this.ifElseBranchUpdateFunction(9, () => {
-                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
-                    this.observeComponentCreation2((g3, h3) => {
+                this.ifElseBranchUpdateFunction(10, () => {
+                    this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon', { icon: () => (this['__icon'] ? this['__icon'] : this['icon']) }));
+                    this.observeComponentCreation2((q2, r2) => {
                         If.create();
                         if (this.subIcon != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__subIcon"] ? this["__subIcon"] : this["subIcon"]) }));
+                                this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon', { icon: () => (this['__subIcon'] ? this['__subIcon'] : this['subIcon']) }));
                             });
                         }
                         else {
@@ -1208,7 +1514,7 @@ class OperateItemStruct extends ViewPU {
                 });
             }
             else {
-                this.ifElseBranchUpdateFunction(10, () => {
+                this.ifElseBranchUpdateFunction(11, () => {
                 });
             }
         }, If);
@@ -1219,133 +1525,165 @@ class OperateItemStruct extends ViewPU {
         this.updateDirtyElements();
     }
 }
-export class ComposeListItem extends ViewPU {
-    constructor(t2, u2, v2, w2 = -1, x2 = undefined, y2) {
-        super(t2, v2, w2, y2);
-        if (typeof x2 === "function") {
-            this.paramsGenerator_ = x2;
+function getAccessibilityText(j2) {
+    try {
+        let n2 = '';
+        if (typeof j2 === 'string') {
+            n2 = j2;
         }
-        this.__contentItem = new SynchedPropertyObjectOneWayPU(u2.contentItem, this, "contentItem");
-        this.__operateItem = new SynchedPropertyObjectOneWayPU(u2.operateItem, this, "operateItem");
-        this.__frontColor = new ObservedPropertyObjectPU(Color.Transparent.toString(), this, "frontColor");
-        this.__borderSize = new ObservedPropertySimplePU(0, this, "borderSize");
-        this.__canFocus = new ObservedPropertySimplePU(false, this, "canFocus");
-        this.__canTouch = new ObservedPropertySimplePU(true, this, "canTouch");
-        this.__canHover = new ObservedPropertySimplePU(true, this, "canHover");
-        this.__isHover = new ObservedPropertySimplePU(true, this, "isHover");
-        this.__itemHeight = new ObservedPropertySimplePU(ItemHeight.FIRST_HEIGHT, this, "itemHeight");
-        this.__isActive = new ObservedPropertySimplePU(false, this, "isActive");
-        this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, "hoveringColor");
-        this.__touchDownColor = new ObservedPropertyObjectPU('#1a000000', this, "touchDownColor");
-        this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, "activedColor");
-        this.__focusOutlineColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "focusOutlineColor");
-        this.__fontSizeScale = new ObservedPropertySimplePU(1, this, "fontSizeScale");
-        this.__containerDirection = new ObservedPropertySimplePU(FlexDirection.Row, this, "containerDirection");
-        this.__contentItemDirection = new ObservedPropertySimplePU(FlexDirection.Row, this, "contentItemDirection");
-        this.__containerPadding = new ObservedPropertyObjectPU(undefined, this, "containerPadding");
-        this.__textArrowLeftSafeOffset = new ObservedPropertySimplePU(0, this, "textArrowLeftSafeOffset");
+        else {
+            n2 = getContext().resourceManager.getStringSync(j2);
+        }
+        return n2;
+    }
+    catch (k2) {
+        let l2 = k2.code;
+        let m2 = k2.message;
+        hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${l2}, message: ${m2}`);
+        return '';
+    }
+}
+export class ComposeListItem extends ViewPU {
+    constructor(b2, c2, d2, e2 = -1, f2 = undefined, g2) {
+        super(b2, d2, e2, g2);
+        if (typeof f2 === 'function') {
+            this.paramsGenerator_ = f2;
+        }
+        this.__contentItem = new SynchedPropertyObjectOneWayPU(c2.contentItem, this, 'contentItem');
+        this.__operateItem = new SynchedPropertyObjectOneWayPU(c2.operateItem, this, 'operateItem');
+        this.__frontColor = new ObservedPropertyObjectPU(Color.Transparent.toString(), this, 'frontColor');
+        this.__borderSize = new ObservedPropertySimplePU(0, this, 'borderSize');
+        this.__canFocus = new ObservedPropertySimplePU(false, this, 'canFocus');
+        this.__canTouch = new ObservedPropertySimplePU(true, this, 'canTouch');
+        this.__canHover = new ObservedPropertySimplePU(true, this, 'canHover');
+        this.__isHover = new ObservedPropertySimplePU(true, this, 'isHover');
+        this.__itemHeight = new ObservedPropertySimplePU(ItemHeight.FIRST_HEIGHT, this, 'itemHeight');
+        this.__isActive = new ObservedPropertySimplePU(false, this, 'isActive');
+        this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, 'hoveringColor');
+        this.__touchDownColor = new ObservedPropertyObjectPU('#1a000000', this, 'touchDownColor');
+        this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, 'activedColor');
+        this.__focusOutlineColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'focusOutlineColor');
+        this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
+        this.__containerDirection = new ObservedPropertySimplePU(FlexDirection.Row, this, 'containerDirection');
+        this.__contentItemDirection = new ObservedPropertySimplePU(FlexDirection.Row, this, 'contentItemDirection');
+        this.__containerPadding = new ObservedPropertyObjectPU(undefined, this, 'containerPadding');
+        this.__textArrowLeftSafeOffset = new ObservedPropertySimplePU(0, this, 'textArrowLeftSafeOffset');
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
-        this.__accessibilityTextBuilder = new ObservedPropertySimplePU('', this, "accessibilityTextBuilder");
-        this.setInitiallyProvidedValue(u2);
-        this.declareWatch("contentItem", this.onPropChange);
-        this.declareWatch("operateItem", this.onPropChange);
-        this.declareWatch("fontSizeScale", this.onFontSizeScaleChange);
+        this.callbackId = undefined;
+        this.__accessibilityTextBuilder = new ObservedPropertySimplePU('', this, 'accessibilityTextBuilder');
+        this.envCallback = {
+            onConfigurationUpdated: (i2) => {
+                this.fontSizeScale = this.decideFontSizeScale();
+            },
+            onMemoryLevel: (h2) => {
+            }
+        };
+        this.setInitiallyProvidedValue(c2);
+        this.declareWatch('contentItem', this.onPropChange);
+        this.declareWatch('operateItem', this.onPropChange);
+        this.declareWatch('fontSizeScale', this.onFontSizeScaleChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(s2) {
-        if (s2.contentItem === undefined) {
+    setInitiallyProvidedValue(a2) {
+        if (a2.contentItem === undefined) {
             this.__contentItem.set(null);
         }
-        if (s2.operateItem === undefined) {
+        if (a2.operateItem === undefined) {
             this.__operateItem.set(null);
         }
-        if (s2.frontColor !== undefined) {
-            this.frontColor = s2.frontColor;
+        if (a2.frontColor !== undefined) {
+            this.frontColor = a2.frontColor;
         }
-        if (s2.borderSize !== undefined) {
-            this.borderSize = s2.borderSize;
+        if (a2.borderSize !== undefined) {
+            this.borderSize = a2.borderSize;
         }
-        if (s2.canFocus !== undefined) {
-            this.canFocus = s2.canFocus;
+        if (a2.canFocus !== undefined) {
+            this.canFocus = a2.canFocus;
         }
-        if (s2.canTouch !== undefined) {
-            this.canTouch = s2.canTouch;
+        if (a2.canTouch !== undefined) {
+            this.canTouch = a2.canTouch;
         }
-        if (s2.canHover !== undefined) {
-            this.canHover = s2.canHover;
+        if (a2.canHover !== undefined) {
+            this.canHover = a2.canHover;
         }
-        if (s2.isHover !== undefined) {
-            this.isHover = s2.isHover;
+        if (a2.isHover !== undefined) {
+            this.isHover = a2.isHover;
         }
-        if (s2.itemHeight !== undefined) {
-            this.itemHeight = s2.itemHeight;
+        if (a2.itemHeight !== undefined) {
+            this.itemHeight = a2.itemHeight;
         }
-        if (s2.isActive !== undefined) {
-            this.isActive = s2.isActive;
+        if (a2.isActive !== undefined) {
+            this.isActive = a2.isActive;
         }
-        if (s2.hoveringColor !== undefined) {
-            this.hoveringColor = s2.hoveringColor;
+        if (a2.hoveringColor !== undefined) {
+            this.hoveringColor = a2.hoveringColor;
         }
-        if (s2.touchDownColor !== undefined) {
-            this.touchDownColor = s2.touchDownColor;
+        if (a2.touchDownColor !== undefined) {
+            this.touchDownColor = a2.touchDownColor;
         }
-        if (s2.activedColor !== undefined) {
-            this.activedColor = s2.activedColor;
+        if (a2.activedColor !== undefined) {
+            this.activedColor = a2.activedColor;
         }
-        if (s2.focusOutlineColor !== undefined) {
-            this.focusOutlineColor = s2.focusOutlineColor;
+        if (a2.focusOutlineColor !== undefined) {
+            this.focusOutlineColor = a2.focusOutlineColor;
         }
-        if (s2.fontSizeScale !== undefined) {
-            this.fontSizeScale = s2.fontSizeScale;
+        if (a2.fontSizeScale !== undefined) {
+            this.fontSizeScale = a2.fontSizeScale;
         }
-        if (s2.containerDirection !== undefined) {
-            this.containerDirection = s2.containerDirection;
+        if (a2.containerDirection !== undefined) {
+            this.containerDirection = a2.containerDirection;
         }
-        if (s2.contentItemDirection !== undefined) {
-            this.contentItemDirection = s2.contentItemDirection;
+        if (a2.contentItemDirection !== undefined) {
+            this.contentItemDirection = a2.contentItemDirection;
         }
-        if (s2.containerPadding !== undefined) {
-            this.containerPadding = s2.containerPadding;
+        if (a2.containerPadding !== undefined) {
+            this.containerPadding = a2.containerPadding;
         }
-        if (s2.textArrowLeftSafeOffset !== undefined) {
-            this.textArrowLeftSafeOffset = s2.textArrowLeftSafeOffset;
+        if (a2.textArrowLeftSafeOffset !== undefined) {
+            this.textArrowLeftSafeOffset = a2.textArrowLeftSafeOffset;
         }
-        if (s2.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = s2.isFollowingSystemFontScale;
+        if (a2.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = a2.isFollowingSystemFontScale;
         }
-        if (s2.maxFontScale !== undefined) {
-            this.maxFontScale = s2.maxFontScale;
+        if (a2.maxFontScale !== undefined) {
+            this.maxFontScale = a2.maxFontScale;
         }
-        if (s2.accessibilityTextBuilder !== undefined) {
-            this.accessibilityTextBuilder = s2.accessibilityTextBuilder;
+        if (a2.callbackId !== undefined) {
+            this.callbackId = a2.callbackId;
+        }
+        if (a2.accessibilityTextBuilder !== undefined) {
+            this.accessibilityTextBuilder = a2.accessibilityTextBuilder;
+        }
+        if (a2.envCallback !== undefined) {
+            this.envCallback = a2.envCallback;
         }
     }
-    updateStateVars(r2) {
-        this.__contentItem.reset(r2.contentItem);
-        this.__operateItem.reset(r2.operateItem);
+    updateStateVars(z1) {
+        this.__contentItem.reset(z1.contentItem);
+        this.__operateItem.reset(z1.operateItem);
     }
-    purgeVariableDependenciesOnElmtId(q2) {
-        this.__contentItem.purgeDependencyOnElmtId(q2);
-        this.__operateItem.purgeDependencyOnElmtId(q2);
-        this.__frontColor.purgeDependencyOnElmtId(q2);
-        this.__borderSize.purgeDependencyOnElmtId(q2);
-        this.__canFocus.purgeDependencyOnElmtId(q2);
-        this.__canTouch.purgeDependencyOnElmtId(q2);
-        this.__canHover.purgeDependencyOnElmtId(q2);
-        this.__isHover.purgeDependencyOnElmtId(q2);
-        this.__itemHeight.purgeDependencyOnElmtId(q2);
-        this.__isActive.purgeDependencyOnElmtId(q2);
-        this.__hoveringColor.purgeDependencyOnElmtId(q2);
-        this.__touchDownColor.purgeDependencyOnElmtId(q2);
-        this.__activedColor.purgeDependencyOnElmtId(q2);
-        this.__focusOutlineColor.purgeDependencyOnElmtId(q2);
-        this.__fontSizeScale.purgeDependencyOnElmtId(q2);
-        this.__containerDirection.purgeDependencyOnElmtId(q2);
-        this.__contentItemDirection.purgeDependencyOnElmtId(q2);
-        this.__containerPadding.purgeDependencyOnElmtId(q2);
-        this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(q2);
-        this.__accessibilityTextBuilder.purgeDependencyOnElmtId(q2);
+    purgeVariableDependenciesOnElmtId(y1) {
+        this.__contentItem.purgeDependencyOnElmtId(y1);
+        this.__operateItem.purgeDependencyOnElmtId(y1);
+        this.__frontColor.purgeDependencyOnElmtId(y1);
+        this.__borderSize.purgeDependencyOnElmtId(y1);
+        this.__canFocus.purgeDependencyOnElmtId(y1);
+        this.__canTouch.purgeDependencyOnElmtId(y1);
+        this.__canHover.purgeDependencyOnElmtId(y1);
+        this.__isHover.purgeDependencyOnElmtId(y1);
+        this.__itemHeight.purgeDependencyOnElmtId(y1);
+        this.__isActive.purgeDependencyOnElmtId(y1);
+        this.__hoveringColor.purgeDependencyOnElmtId(y1);
+        this.__touchDownColor.purgeDependencyOnElmtId(y1);
+        this.__activedColor.purgeDependencyOnElmtId(y1);
+        this.__focusOutlineColor.purgeDependencyOnElmtId(y1);
+        this.__fontSizeScale.purgeDependencyOnElmtId(y1);
+        this.__containerDirection.purgeDependencyOnElmtId(y1);
+        this.__contentItemDirection.purgeDependencyOnElmtId(y1);
+        this.__containerPadding.purgeDependencyOnElmtId(y1);
+        this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(y1);
+        this.__accessibilityTextBuilder.purgeDependencyOnElmtId(y1);
     }
     aboutToBeDeleted() {
         this.__contentItem.aboutToBeDeleted();
@@ -1374,132 +1712,135 @@ export class ComposeListItem extends ViewPU {
     get contentItem() {
         return this.__contentItem.get();
     }
-    set contentItem(p2) {
-        this.__contentItem.set(p2);
+    set contentItem(x1) {
+        this.__contentItem.set(x1);
     }
     get operateItem() {
         return this.__operateItem.get();
     }
-    set operateItem(o2) {
-        this.__operateItem.set(o2);
+    set operateItem(w1) {
+        this.__operateItem.set(w1);
     }
     get frontColor() {
         return this.__frontColor.get();
     }
-    set frontColor(n2) {
-        this.__frontColor.set(n2);
+    set frontColor(v1) {
+        this.__frontColor.set(v1);
     }
     get borderSize() {
         return this.__borderSize.get();
     }
-    set borderSize(m2) {
-        this.__borderSize.set(m2);
+    set borderSize(u1) {
+        this.__borderSize.set(u1);
     }
     get canFocus() {
         return this.__canFocus.get();
     }
-    set canFocus(l2) {
-        this.__canFocus.set(l2);
+    set canFocus(t1) {
+        this.__canFocus.set(t1);
     }
     get canTouch() {
         return this.__canTouch.get();
     }
-    set canTouch(k2) {
-        this.__canTouch.set(k2);
+    set canTouch(s1) {
+        this.__canTouch.set(s1);
     }
     get canHover() {
         return this.__canHover.get();
     }
-    set canHover(j2) {
-        this.__canHover.set(j2);
+    set canHover(r1) {
+        this.__canHover.set(r1);
     }
     get isHover() {
         return this.__isHover.get();
     }
-    set isHover(i2) {
-        this.__isHover.set(i2);
+    set isHover(q1) {
+        this.__isHover.set(q1);
     }
     get itemHeight() {
         return this.__itemHeight.get();
     }
-    set itemHeight(h2) {
-        this.__itemHeight.set(h2);
+    set itemHeight(p1) {
+        this.__itemHeight.set(p1);
     }
     get isActive() {
         return this.__isActive.get();
     }
-    set isActive(g2) {
-        this.__isActive.set(g2);
+    set isActive(o1) {
+        this.__isActive.set(o1);
     }
     get hoveringColor() {
         return this.__hoveringColor.get();
     }
-    set hoveringColor(f2) {
-        this.__hoveringColor.set(f2);
+    set hoveringColor(n1) {
+        this.__hoveringColor.set(n1);
     }
     get touchDownColor() {
         return this.__touchDownColor.get();
     }
-    set touchDownColor(e2) {
-        this.__touchDownColor.set(e2);
+    set touchDownColor(m1) {
+        this.__touchDownColor.set(m1);
     }
     get activedColor() {
         return this.__activedColor.get();
     }
-    set activedColor(d2) {
-        this.__activedColor.set(d2);
+    set activedColor(l1) {
+        this.__activedColor.set(l1);
     }
     get focusOutlineColor() {
         return this.__focusOutlineColor.get();
     }
-    set focusOutlineColor(c2) {
-        this.__focusOutlineColor.set(c2);
+    set focusOutlineColor(k1) {
+        this.__focusOutlineColor.set(k1);
     }
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-    set fontSizeScale(f5) {
-        this.__fontSizeScale.set(f5);
+    set fontSizeScale(j1) {
+        this.__fontSizeScale.set(j1);
     }
     get containerDirection() {
         return this.__containerDirection.get();
     }
-    set containerDirection(e5) {
-        this.__containerDirection.set(e5);
+    set containerDirection(i1) {
+        this.__containerDirection.set(i1);
     }
     get contentItemDirection() {
         return this.__contentItemDirection.get();
     }
-    set contentItemDirection(w4) {
-        this.__contentItemDirection.set(w4);
+    set contentItemDirection(h1) {
+        this.__contentItemDirection.set(h1);
     }
     get containerPadding() {
         return this.__containerPadding.get();
     }
-    set containerPadding(v4) {
-        this.__containerPadding.set(v4);
+    set containerPadding(g1) {
+        this.__containerPadding.set(g1);
     }
     get textArrowLeftSafeOffset() {
         return this.__textArrowLeftSafeOffset.get();
     }
-    set textArrowLeftSafeOffset(o4) {
-        this.__textArrowLeftSafeOffset.set(o4);
+    set textArrowLeftSafeOffset(f1) {
+        this.__textArrowLeftSafeOffset.set(f1);
     }
     get accessibilityTextBuilder() {
         return this.__accessibilityTextBuilder.get();
     }
-    set accessibilityTextBuilder(t15) {
-        this.__accessibilityTextBuilder.set(t15);
+    set accessibilityTextBuilder(e1) {
+        this.__accessibilityTextBuilder.set(e1);
     }
-    onWillApplyTheme(b2) {
-        this.hoveringColor = b2.colors.interactiveHover;
-        this.touchDownColor = b2.colors.interactivePressed;
-        this.activedColor = b2.colors.interactiveActive;
-        this.focusOutlineColor = b2.colors.interactiveFocus;
+    onWillApplyTheme(d1) {
+        this.hoveringColor = d1.colors.interactiveHover;
+        this.touchDownColor = d1.colors.interactivePressed;
+        this.activedColor = d1.colors.interactiveActive;
+        this.focusOutlineColor = d1.colors.interactiveFocus;
     }
     onPropChange() {
+        this.containerDirection = this.decideContainerDirection();
+        this.contentItemDirection = this.decideContentItemDirection();
         if (this.contentItem === undefined) {
             if (this.operateItem?.image !== undefined ||
+                this.operateItem?.symbolStyle !== undefined ||
                 this.operateItem?.icon !== undefined ||
                 this.operateItem?.subIcon !== undefined) {
                 this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
@@ -1530,37 +1871,72 @@ export class ComposeListItem extends ViewPU {
         if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle) >= this.itemHeight) {
             this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle) + SAFE_LIST_PADDING;
         }
-        this.accessibilityTextBuilder = `
-          ${this.contentItem?.primaryText ?? ''}
-          ${this.contentItem?.secondaryText ?? ''}
-          ${this.contentItem?.description ?? ''}
-          ${this.operateItem?.text ?? ''}
-        `;
-    }
-    aboutToAppear() {
-        this.onPropChange();
-    }
-    calculatedLeftWidth() {
-        if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-            return RIGHT_CONTENT_NULL_LEFTWIDTH;
-        }
-        else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-            return LEFT_ONLY_ARROW_WIDTH;
+        if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
+            this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+      `;
         }
         else {
-            return LEFT_PART_WIDTH;
+            this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+        ${getAccessibilityText(this.operateItem?.text ?? '')}
+      `;
+        }
+    }
+    aboutToAppear() {
+        this.fontSizeScale = this.decideFontSizeScale();
+        this.onPropChange();
+        try {
+            this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+        }
+        catch (a1) {
+            let b1 = a1.code;
+            let c1 = a1.message;
+            hilog.error(0x3900, 'Ace', `ComposeListItem Faild to get environment param error: ${b1}, ${c1}`);
+        }
+    }
+    aboutToDisappear() {
+        if (this.callbackId) {
+            this.getUIContext()
+                .getHostContext()
+            ?.getApplicationContext()
+            ?.off('environment', this.callbackId);
+            this.callbackId = void (0);
         }
     }
     calculatedRightWidth() {
-        if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-            return RIGHT_CONTENT_NULL_RIGHTWIDTH;
-        }
-        else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-            return RIGHT_ONLY_ARROW_WIDTH;
-        }
-        else {
+        if (this.operateItem?.text || this.operateItem?.button) {
             return RIGHT_PART_WIDTH;
         }
+        if (this.operateItem?.switch) {
+            return RIGHT_ONLY_SWITCH_WIDTH;
+        }
+        else if (this.operateItem?.checkbox) {
+            return RIGHT_ONLY_CHECKBOX_WIDTH;
+        }
+        else if (this.operateItem?.radio) {
+            return RIGHT_ONLY_RADIO_WIDTH;
+        }
+        else if (this.operateItem?.icon) {
+            if (this.operateItem?.subIcon) {
+                return RIGHT_ICON_SUB_ICON_WIDTH;
+            }
+            return RIGHT_ONLY_ICON_WIDTH;
+        }
+        else if (this.operateItem?.symbolStyle) {
+            return RIGHT_ONLY_IMAGE_WIDTH;
+        }
+        else if (this.operateItem?.image) {
+            return RIGHT_ONLY_IMAGE_WIDTH;
+        }
+        else if (this.operateItem?.arrow) {
+            return RIGHT_ONLY_ARROW_WIDTH;
+        }
+        return RIGHT_CONTENT_NULL_RIGHTWIDTH;
     }
     decideContentItemDirection() {
         if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 &&
@@ -1575,6 +1951,9 @@ export class ComposeListItem extends ViewPU {
         }
         if (this.operateItem?.button) {
             return FlexDirection.Column;
+        }
+        else if (this.operateItem?.symbolStyle) {
+            return FlexDirection.Row;
         }
         else if (this.operateItem?.image) {
             return FlexDirection.Row;
@@ -1601,20 +1980,20 @@ export class ComposeListItem extends ViewPU {
         this.contentItemDirection = this.decideContentItemDirection();
         if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
             this.containerPadding = {
-                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             };
         }
         else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
             this.containerPadding = {
-                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             };
         }
         else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1) {
             this.containerPadding = {
-                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             };
         }
         else {
@@ -1628,15 +2007,15 @@ export class ComposeListItem extends ViewPU {
         if (this.containerDirection === FlexDirection.Row) {
             return LengthMetrics.vp(0);
         }
-        let j4 = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
-        if (this.contentItem?.icon && j4 && j4 <= HEADSCULPTURE_SIZE) {
-            return LengthMetrics.vp(j4 + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+        let z = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
+        if (this.contentItem?.icon && z && z <= HEADSCULPTURE_SIZE) {
+            return LengthMetrics.vp(z + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
         }
         return LengthMetrics.vp(LISTITEM_PADDING - this.textArrowLeftSafeOffset);
     }
     getMainSpace() {
         if (this.containerDirection === FlexDirection.Column) {
-            return LengthMetrics.resource(this.isSingleLine() ? { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            return LengthMetrics.resource(this.isSingleLine() ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
         }
         return LengthMetrics.vp(0);
     }
@@ -1661,38 +2040,25 @@ export class ComposeListItem extends ViewPU {
         }
         return Math.min(this.maxFontScale, this.getUIContext().getHostContext()?.config.fontSizeScale ?? 1);
     }
-    onMeasureSize(u1, v1, z2) {
-        this.fontSizeScale = this.decideFontSizeScale();
-        let w3 = { height: 0, width: 0 };
-        v1.forEach((y3) => {
-            let i4 = y3.measure(z2);
-            w3.width = i4.width;
-            w3.height = i4.height;
-        });
-        return w3;
-    }
     initialRender() {
-        this.observeComponentCreation2((z1, a2) => {
+        this.observeComponentCreation2((x, y) => {
             Stack.create();
+            Stack.width('100%');
+            Stack.accessibilityGroup(true);
             Stack.accessibilityText(this.accessibilityTextBuilder);
             Stack.padding({
                 left: STACK_PADDING,
                 right: STACK_PADDING
             });
         }, Stack);
-        this.observeComponentCreation2((r1, s1) => {
+        this.observeComponentCreation2((u, v) => {
             Flex.create(this.getFlexOptions());
+            Flex.height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined);
             Flex.constraintSize({
                 minHeight: this.itemHeight
             });
             Flex.focusable(true);
-            Flex.borderRadius({
-                "id": -1,
-                "type": 10002,
-                params: ['sys.float.ohos_id_corner_radius_default_m'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-            });
+            Flex.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Flex.backgroundColor(ObservedObject.GetRawObject(this.frontColor));
             Flex.onFocus(() => {
                 this.canFocus = true;
@@ -1700,62 +2066,49 @@ export class ComposeListItem extends ViewPU {
             Flex.onBlur(() => {
                 this.canFocus = false;
             });
-            Flex.onHover((y1) => {
-                this.isHover = y1;
+            Flex.onHover((w) => {
+                this.isHover = w;
                 if (this.canHover) {
-                    this.frontColor = y1 ? this.hoveringColor :
+                    this.frontColor = w ? this.hoveringColor :
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
             });
-            ViewStackProcessor.visualState("focused");
+            ViewStackProcessor.visualState('focused');
             Flex.border({
-                radius: {
-                    "id": -1,
-                    "type": 10002,
-                    params: ['sys.float.ohos_id_corner_radius_default_m'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
-                },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: ITEM_BORDER_SHOWN,
                 color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
-            ViewStackProcessor.visualState("normal");
+            ViewStackProcessor.visualState('normal');
             Flex.border({
-                radius: {
-                    "id": -1,
-                    "type": 10002,
-                    params: ['sys.float.ohos_id_corner_radius_default_m'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
-                },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: ITEM_BORDER_SHOWN,
                 color: Color.Transparent
             });
-            ViewStackProcessor.visualState("pressed");
+            ViewStackProcessor.visualState('pressed');
             Flex.backgroundColor(ObservedObject.GetRawObject(this.touchDownColor));
             ViewStackProcessor.visualState();
             Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
         }, Flex);
-        this.observeComponentCreation2((g1, h1) => {
+        this.observeComponentCreation2((o, p) => {
             If.create();
             if (this.contentItem === null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((l1, m1) => {
-                            if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { },
-                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 939, col: 11 });
-                                ViewPU.create(n1);
-                                let z = () => {
+                        this.observeComponentCreation2((q, r) => {
+                            if (r) {
+                                let s = new ContentItemStruct(this, {}, undefined, q, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1122, col: 11 });
+                                ViewPU.create(s);
+                                let t = () => {
                                     return {};
                                 };
-                                n1.paramsGenerator_ = z;
+                                s.paramsGenerator_ = t;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(l1, {});
+                                this.updateStateVarsOfChildByElmtId(q, {});
                             }
-                        }, { name: "ContentItemStruct" });
+                        }, { name: 'ContentItemStruct' });
                     }
                 });
             }
@@ -1765,55 +2118,54 @@ export class ComposeListItem extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((v, w) => {
+        this.observeComponentCreation2((i, j) => {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((d, o) => {
-                            if (o) {
-                                let p = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((k, l) => {
+                            if (l) {
+                                let m = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
+                                    symbolStyle: this.contentItem?.symbolStyle,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
                                     description: this.contentItem?.description,
-                                    leftWidth: this.calculatedLeftWidth(),
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, d, () => { },
-                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 942, col: 11 });
-                                ViewPU.create(p);
-                                let t = () => {
+                                }, undefined, k, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1125, col: 11 });
+                                ViewPU.create(m);
+                                let n = () => {
                                     return {
                                         icon: this.contentItem?.icon,
+                                        symbolStyle: this.contentItem?.symbolStyle,
                                         iconStyle: this.contentItem?.iconStyle,
                                         primaryText: this.contentItem?.primaryText,
                                         secondaryText: this.contentItem?.secondaryText,
                                         description: this.contentItem?.description,
-                                        leftWidth: this.calculatedLeftWidth(),
                                         fontSizeScale: this.fontSizeScale,
                                         parentDirection: this.containerDirection,
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                p.paramsGenerator_ = t;
+                                m.paramsGenerator_ = n;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(d, {
+                                this.updateStateVarsOfChildByElmtId(k, {
                                     icon: this.contentItem?.icon,
+                                    symbolStyle: this.contentItem?.symbolStyle,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
                                     description: this.contentItem?.description,
-                                    leftWidth: this.calculatedLeftWidth(),
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection
                                 });
                             }
-                        }, { name: "ContentItemStruct" });
+                        }, { name: 'ContentItemStruct' });
                     }
                 });
             }
@@ -1823,11 +2175,11 @@ export class ComposeListItem extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((f, g) => {
+        this.observeComponentCreation2((a, b) => {
             If.create();
             if (this.operateItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((r, s) => {
+                    this.observeComponentCreation2((g, h) => {
                         __Common__.create();
                         __Common__.flexShrink(0);
                         __Common__.onFocus(() => {
@@ -1839,9 +2191,9 @@ export class ComposeListItem extends ViewPU {
                         __Common__.padding({ start: this.getOperateOffset() });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((l, m) => {
-                            if (m) {
-                                let n = new OperateItemStruct(this, {
+                        this.observeComponentCreation2((c, d) => {
+                            if (d) {
+                                let e = new OperateItemStruct(this, {
                                     icon: this.operateItem?.icon,
                                     subIcon: this.operateItem?.subIcon,
                                     button: this.operateItem?.button,
@@ -1849,6 +2201,7 @@ export class ComposeListItem extends ViewPU {
                                     checkBox: this.operateItem?.checkbox,
                                     radio: this.operateItem?.radio,
                                     image: this.operateItem?.image,
+                                    symbolStyle: this.operateItem?.symbolStyle,
                                     text: this.operateItem?.text,
                                     arrow: this.operateItem?.arrow,
                                     parentCanFocus: this.__canFocus,
@@ -1859,10 +2212,9 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.__containerDirection,
-                                }, undefined, l, () => { },
-                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 956, col: 11 });
-                                ViewPU.create(n);
-                                let a = () => {
+                                }, undefined, c, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1138, col: 11 });
+                                ViewPU.create(e);
+                                let f = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -1871,6 +2223,7 @@ export class ComposeListItem extends ViewPU {
                                         checkBox: this.operateItem?.checkbox,
                                         radio: this.operateItem?.radio,
                                         image: this.operateItem?.image,
+                                        symbolStyle: this.operateItem?.symbolStyle,
                                         text: this.operateItem?.text,
                                         arrow: this.operateItem?.arrow,
                                         parentCanFocus: this.canFocus,
@@ -1883,10 +2236,10 @@ export class ComposeListItem extends ViewPU {
                                         parentDirection: this.containerDirection
                                     };
                                 };
-                                n.paramsGenerator_ = a;
+                                e.paramsGenerator_ = f;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(l, {
+                                this.updateStateVarsOfChildByElmtId(c, {
                                     icon: this.operateItem?.icon,
                                     subIcon: this.operateItem?.subIcon,
                                     button: this.operateItem?.button,
@@ -1894,12 +2247,13 @@ export class ComposeListItem extends ViewPU {
                                     checkBox: this.operateItem?.checkbox,
                                     radio: this.operateItem?.radio,
                                     image: this.operateItem?.image,
+                                    symbolStyle: this.operateItem?.symbolStyle,
                                     text: this.operateItem?.text,
                                     arrow: this.operateItem?.arrow,
                                     rightWidth: this.calculatedRightWidth()
                                 });
                             }
-                        }, { name: "OperateItemStruct" });
+                        }, { name: 'OperateItemStruct' });
                     }
                     __Common__.pop();
                 });

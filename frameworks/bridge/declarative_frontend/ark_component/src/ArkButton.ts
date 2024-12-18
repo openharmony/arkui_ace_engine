@@ -41,6 +41,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   applyContent: WrappedBuilder<[ButtonConfiguration]>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+    this._needDiff = false;
   }
   allowChildCount(): number {
     return 1;

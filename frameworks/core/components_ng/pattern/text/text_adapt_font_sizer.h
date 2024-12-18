@@ -30,17 +30,24 @@ class PipelineContext;
 class TextAdaptFontSizer : public virtual AceType {
     DECLARE_ACE_TYPE(TextAdaptFontSizer, AceType);
 public:
+    virtual bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true)
+    {
+        return false;
+    }
     virtual bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) = 0;
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true)
+    {
+        return false;
+    }
     virtual RefPtr<Paragraph> GetParagraph() const = 0;
     virtual void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) = 0;
-
-    bool AdaptMaxFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+    bool AdaptMaxFontSize(TextStyle& textStyle, const std::u16string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    bool AdaptMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+    bool AdaptMinFontSize(TextStyle& textStyle, const std::u16string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    virtual bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    virtual bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::u16string& content,
+        const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
     {
         return false;
     }

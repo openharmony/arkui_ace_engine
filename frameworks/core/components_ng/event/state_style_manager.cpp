@@ -65,6 +65,7 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
             if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
                 auto frameNode = stateStyleMgr->GetFrameNode();
+                CHECK_NULL_VOID(frameNode);
                 TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Move out of node pressed region: %{public}s",
                     frameNode->GetTag().c_str());
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
@@ -81,11 +82,13 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
 
 void StateStyleManager::HandleTouchDown()
 {
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
 #ifdef IS_RELEASE_VERSION
-    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s", GetFrameNode()->GetTag().c_str());
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s", node->GetTag().c_str());
 #else
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s/%{public}d",
-        GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
+        node->GetTag().c_str(), node->GetId());
 #endif
     HandleScrollingParent();
     if (!hasScrollingParent_) {
@@ -102,12 +105,14 @@ void StateStyleManager::HandleTouchDown()
 
 void StateStyleManager::HandleTouchUp()
 {
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
 #ifdef IS_RELEASE_VERSION
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchUp or Cancel event node: %{public}s",
-        GetFrameNode()->GetTag().c_str());
+        node->GetTag().c_str());
 #else
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchUp or Cancel event node: %{public}s/%{public}d",
-        GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
+        node->GetTag().c_str(), node->GetId());
 #endif
     if (IsPressedStatePending()) {
         DeletePressStyleTask();
@@ -136,9 +141,11 @@ void StateStyleManager::FireStateFunc(bool isReset)
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, node is %{public}s/%{public}d, "
         "reset is %{public}d", node->GetTag().c_str(), nodeId, isReset);
 #endif
+    auto uiNode = DynamicCast<UINode>(node);
+    CHECK_NULL_VOID(uiNode);
     RefPtr<CustomNodeBase> customNode;
-    GetCustomNode(customNode, node);
-    if (!customNode) {
+    GetCustomNode(customNode, uiNode);
+    if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
         TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
         return;
     }
@@ -146,53 +153,68 @@ void StateStyleManager::FireStateFunc(bool isReset)
     customNode->FireNodeUpdateFunc(nodeId);
 }
 
-void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode,
-    RefPtr<FrameNode>& node)
+void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node)
 {
     auto nodeId = node->GetId();
-    if (AceType::InstanceOf<CustomNodeBase>(node)) {
-        customNode = DynamicCast<CustomNodeBase>(node);
-        if (customNode && customNode->FireHasNodeUpdateFunc(nodeId)) {
-            TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Find customNode by self: %{public}s",
-                customNode->GetJSViewName().c_str());
+    while (node) {
+        if (GetCustomNodeFromNavgation(node, customNode, nodeId)) {
             return;
         }
-    }
-    auto parent = node->GetParent();
-    while (parent) {
-        if (AceType::InstanceOf<NavDestinationGroupNode>(parent)) {
-            auto navDestinationGroupNode = DynamicCast<NavDestinationGroupNode>(parent);
-            CHECK_NULL_VOID(navDestinationGroupNode);
-            customNode = navDestinationGroupNode->GetNavDestinationCustomNode();
-            if (customNode && customNode->FireHasNodeUpdateFunc(nodeId)) {
-                TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Find customNode from Navgation: %{public}s",
-                    customNode->GetJSViewName().c_str());
-                return;
-            }
-        }
 
-        auto parentFrameNode = DynamicCast<FrameNode>(parent);
+        auto parentFrameNode = DynamicCast<FrameNode>(node);
         auto parentPattern = parentFrameNode ? parentFrameNode->GetPattern<PopupBasePattern>() : nullptr;
         if (parentFrameNode && InstanceOf<PopupBasePattern>(parentPattern)) {
-            parent = ElementRegister::GetInstance()->GetUINodeById(parentPattern->GetTargetId());
+            auto elementRegister = ElementRegister::GetInstance();
+            CHECK_NULL_VOID(elementRegister);
+            node = elementRegister->GetUINodeById(parentPattern->GetTargetId());
             continue;
         }
 
-        if (AceType::InstanceOf<CustomNodeBase>(parent)) {
-            customNode = DynamicCast<CustomNodeBase>(parent);
-            if (customNode && customNode->FireHasNodeUpdateFunc(nodeId)) {
-                TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Find customNode from parent: %{public}s",
-                    customNode->GetJSViewName().c_str());
-                return;
-            }
+        if (GetCustomNodeFromSelf(node, customNode, nodeId)) {
+            return;
         }
-        parent = parent->GetParent();
+        node = node->GetParent();
     }
+}
+
+bool StateStyleManager::GetCustomNodeFromSelf(RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId)
+{
+    if (node && AceType::InstanceOf<CustomNodeBase>(node)) {
+        auto customNodeBase = DynamicCast<CustomNodeBase>(node);
+        if (customNodeBase && customNodeBase->FireHasNodeUpdateFunc(nodeId)) {
+            customNode = customNodeBase;
+            TAG_LOGI(
+                AceLogTag::ACE_STATE_STYLE, "Find customNode by self: %{public}s", customNode->GetJSViewName().c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
+bool StateStyleManager::GetCustomNodeFromNavgation(
+    RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId)
+{
+    while (node && AceType::InstanceOf<NavDestinationGroupNode>(node)) {
+        auto navDestinationGroupNode = DynamicCast<NavDestinationGroupNode>(node);
+        CHECK_NULL_RETURN(navDestinationGroupNode, false);
+        auto navDestinationCustomNode = navDestinationGroupNode->GetNavDestinationCustomNode();
+        CHECK_NULL_RETURN(navDestinationCustomNode, false);
+        if (navDestinationCustomNode->FireHasNodeUpdateFunc(nodeId)) {
+            customNode = navDestinationCustomNode;
+            TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Find customNode from Navgation: %{public}s",
+                customNode->GetJSViewName().c_str());
+            return true;
+        }
+        auto customParent = DynamicCast<CustomNode>(navDestinationCustomNode);
+        CHECK_NULL_RETURN(navDestinationCustomNode, false);
+        node = customParent->GetParent();
+    }
+    return false;
 }
 
 void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -216,7 +238,7 @@ void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
 
 void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

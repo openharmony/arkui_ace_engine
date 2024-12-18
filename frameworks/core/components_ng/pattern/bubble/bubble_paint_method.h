@@ -120,6 +120,11 @@ public:
         innerBorderWidth_ = innerBorderWidth.ConvertToPx();
     }
 
+    void SetArrowBuildPlacement(const Placement arrowBuildPlacement)
+    {
+        arrowBuildPlacement_ = arrowBuildPlacement;
+    }
+
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -186,6 +191,7 @@ private:
     bool showArrow_ = false;
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
+    Placement arrowBuildPlacement_ = Placement::BOTTOM;
     // Get from theme
     Border border_;
     Edge padding_;

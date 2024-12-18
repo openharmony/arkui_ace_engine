@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,53 @@
 
 #include "core/components_ng/render/adapter/rosen/drawing_painter.h"
 
+#include "render/rs_pixel_map_shader.h"
+
 namespace OHOS::Ace::NG {
+namespace {
+void ProcessTexCoords(RSPoint* texsPoint, int32_t row, int32_t column, float width, float height)
+{
+    const auto dx = width / static_cast<float>(column);
+    const auto dy = height / static_cast<float>(row);
+
+    RSPoint* texsPit = texsPoint;
+    float y = 0;
+    for (int i = 0; i <= row; i++) {
+        if (i == row) {
+            y = height;
+        }
+        float x = 0;
+        for (int j = 0; j < column; j++) {
+            texsPit->Set(x, y);
+            ++texsPit;
+            x += dx;
+        }
+        texsPit->Set(width, y);
+        ++texsPit;
+        y += dy;
+    }
+}
+
+void ProcessIndices(uint16_t* indices, int32_t row, int32_t column)
+{
+    uint16_t* dexIndices = indices;
+    int indexIndices = 0;
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < column; j++) {
+            *(dexIndices++) = indexIndices;
+            *(dexIndices++) = indexIndices + column + 1;
+            *(dexIndices++) = indexIndices + column + 2; // 2 means the third index of the triangle
+
+            *(dexIndices++) = indexIndices;
+            *(dexIndices++) = indexIndices + column + 2; // 2 means the third index of the triangle
+            *(dexIndices++) = indexIndices + 1;
+
+            ++indexIndices;
+        }
+        ++indexIndices;
+    }
+}
+} // namespace
 void DrawingPainter::DrawPath(
     RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty)
 {
@@ -151,5 +197,31 @@ SizeF DrawingPainter::GetPathSize(const std::string& commands)
 
     auto rect = path.GetBounds();
     return SizeF(rect.GetRight(), rect.GetBottom());
+}
+
+void DrawingPainter::DrawPixelMapMesh(
+    RSCanvas& canvas, int32_t row, int32_t column, const std::vector<float>& mesh, const RefPtr<PixelMap>& pixelMap)
+{
+    if (column == 0 || row == 0) {
+        return;
+    }
+    const int vertCounts = (column + 1) * (row + 1);
+    int32_t size = 6; // triangle * 2
+    const int indexCount = column * row * size;
+    const float* vertices = mesh.data();
+    Rosen::Drawing::Vertices::Builder builder(Rosen::Drawing::VertexMode::TRIANGLES_VERTEXMODE, vertCounts, indexCount,
+        Rosen::Drawing::BuilderFlags::HAS_TEXCOORDS_BUILDER_FLAG);
+    if (memcpy_s(builder.Positions(), vertCounts * sizeof(RSPoint), vertices, vertCounts * sizeof(RSPoint)) != 0) {
+        return;
+    }
+
+    ProcessTexCoords(builder.TexCoords(), row, column, static_cast<float>(pixelMap->GetWidth()),
+        static_cast<float>(pixelMap->GetHeight()));
+    ProcessIndices(builder.Indices(), row, column);
+
+    auto shader = RSShaderEffect::CreateExtendShader(std::make_shared<Rosen::RSPixelMapShader>(
+        pixelMap->GetPixelMapSharedPtr(), RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), RSMatrix()));
+    canvas.GetMutableBrush().SetShaderEffect(shader);
+    canvas.DrawVertices(*builder.Detach(), RSBlendMode::MODULATE);
 }
 } // namespace OHOS::Ace::NG

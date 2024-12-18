@@ -18,6 +18,11 @@
 #include "core/components_ng/pattern/search/search_event_hub.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr float MAX_FONT_SCALE = 2.0f;
+} // namespace
+
 RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 {
     auto host = GetHost();
@@ -35,7 +40,13 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->UpdateSubmitEvent(GetTextValue());
+    // Enter key type callback
+    TextFieldCommonEvent event;
+    eventHub->FireOnSubmit(GetTextUtf16Value(), event);
+    // If the developer wants to keep editing, editing will not stop
+    if (event.IsKeepEditable()) {
+        return;
+    }
     CloseKeyboard(forceCloseKeyboard);
     if (HasFocus()) {
         FocusHub::LostFocusToViewRoot();
@@ -70,6 +81,7 @@ void SearchTextFieldPattern::ApplyNormalTheme()
 
 bool SearchTextFieldPattern::IsTextEditableForStylus() const
 {
+    CHECK_NULL_RETURN(!HasCustomKeyboard(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -91,7 +103,7 @@ bool SearchTextFieldPattern::IsTextEditableForStylus() const
 
 void SearchTextFieldPattern::ProcessSelection()
 {
-    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
+    auto textWidth = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     if (SelectOverlayIsOn()) {
         needToRefreshSelectOverlay_ = textWidth > 0;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
@@ -138,5 +150,14 @@ int32_t SearchTextFieldPattern::GetRequestKeyboardId()
     auto searchHost = host->GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(searchHost, -1);
     return searchHost->GetId();
+}
+
+float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
+{
+    if (fontSize.Unit() == DimensionUnit::FP) {
+        return fontSize.ConvertToPxDistribute(0, MAX_FONT_SCALE);
+    } else {
+        return fontSize.ConvertToPx();
+    }
 }
 } // namespace OHOS::Ace::NG

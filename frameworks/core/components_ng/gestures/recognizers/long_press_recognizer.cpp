@@ -57,17 +57,9 @@ void LongPressRecognizer::OnAccepted()
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
     refereeState_ = RefereeState::SUCCEED;
-    if (onLongPress_ && !touchPoints_.empty()) {
-        TouchEvent trackPoint = touchPoints_.begin()->second;
-        PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-            isPostEventResult_, trackPoint.postEventNodeId);
-        LongPressInfo info(trackPoint.id);
-        info.SetTimeStamp(time_);
-        info.SetScreenLocation(trackPoint.GetScreenOffset());
-        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        onLongPress_(info);
+    if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
+        std::chrono::nanoseconds nanoseconds(GetSysTimestamp());
+        time_ = TimeStamp(nanoseconds);
     }
 
     UpdateFingerListInfo();
@@ -90,7 +82,7 @@ void LongPressRecognizer::OnRejected()
 
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     if (!callback_) {
         return;
@@ -111,19 +103,22 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
 
     if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Mouse left button is disabled for long press recognizer");
+        extraInfo_ += "Reject: mouse left button disabled.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (!IsInAttachedNode(event)) {
+        extraInfo_ += "Reject: not in attached node.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -144,6 +139,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         curDuration = 0;
     }
     if ((touchRestrict_.forbiddenType & TouchRestrict::LONG_PRESS) == TouchRestrict::LONG_PRESS) {
+        extraInfo_ += "Reject: long press forbidden.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -161,6 +157,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         } else {
             DeadlineTimer(curDuration, false);
         }
+    } else {
+        PrintCurrentFingersInfo();
     }
 
     ThumbnailTimer(thumbnailDeadline);
@@ -168,9 +166,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
@@ -196,6 +194,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             firstInputTime_.reset();
         }
     } else {
+        extraInfo_ += "Reject: received up but not succeed.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
@@ -211,6 +210,8 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
     if (offset.GetDistance() > MAX_THRESHOLD) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress move over max threshold");
+        extraInfo_ += "Reject: move over max threshold.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -221,7 +222,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
         event.touchEventId, event.id, static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;
@@ -236,8 +237,10 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
             "LongPressRecognizer touchPoints size not equal 0, not send cancel callback.");
+        extraInfo_ += "Reject: received cancel and succeed.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     } else {
+        extraInfo_ += "Reject: received cancel but not succeed.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
@@ -255,12 +258,16 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
         auto dragEventActuator = GetDragEventActuator();
         CHECK_NULL_VOID(dragEventActuator);
         if (dragEventActuator->IsDragUserReject()) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Drag long press reject because of user's reject");
+            extraInfo_ += "Reject: user reject.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
     }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press reject as judge result is reject");
+        extraInfo_ += "Reject: judge reject.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
             auto dragEventActuator = GetDragEventActuator();
@@ -274,7 +281,7 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
 
 void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this), isCatchMode]() {
@@ -309,7 +316,7 @@ void LongPressRecognizer::DoRepeat()
 
 void LongPressRecognizer::StartRepeatTimer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
@@ -325,7 +332,7 @@ void LongPressRecognizer::StartRepeatTimer()
 
 double LongPressRecognizer::ConvertPxToVp(double offset) const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, offset);
 
     double vpOffset = context->ConvertPxToVp(Dimension(offset, DimensionUnit::PX));
@@ -377,7 +384,7 @@ void LongPressRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     timer_.Cancel();
     deadlineTimer_.Cancel();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
 }
@@ -402,7 +409,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     onAction_ = std::move(curr->onAction_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -434,9 +441,27 @@ RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
     oss << "duration: " << duration_ << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "repeat: " << repeat_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
+}
+
+void LongPressRecognizer::PrintCurrentFingersInfo() const
+{
+    std::string log = "Fingers number = ";
+    log += std::to_string(GetValidFingersCount());
+    log += " fingers_ = ";
+    log += std::to_string(fingers_);
+    log += ". ";
+    for (const auto& iter : touchPoints_) {
+        log += "Event id = ";
+        log += std::to_string(iter.first);
+        log += ", event type = ";
+        log += std::to_string(static_cast<int32_t>(iter.second.type));
+        log += "; ";
+    }
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Finger info : %{public}s", log.c_str());
 }
 
 GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()

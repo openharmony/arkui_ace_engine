@@ -67,8 +67,9 @@ void RotationRecognizer::OnRejected()
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d down, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d down, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -104,7 +105,7 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation axis start, state: %{public}d", event.touchEventId,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation axis start, state: %{public}d", event.touchEventId,
         refereeState_);
     lastAxisEvent_ = event;
     touchPoints_[event.id] = TouchEvent();
@@ -123,15 +124,17 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d up, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d up, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS &&
         refereeState_ != RefereeState::SUCCEED) {
+        extraInfo_ += "activeFinger size not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
     }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "refereeState is not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -156,7 +159,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation axis end, state: %{public}d", event.touchEventId,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation axis end, state: %{public}d", event.touchEventId,
         refereeState_);
     // if rotation recognizer received another axisEvent, no need to active.
     if (!event.isRotationEvent) {
@@ -264,8 +267,9 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d cancel", event.touchEventId, event.id);
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "receive cancel event.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -282,7 +286,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation axis cancel", event.touchEventId);
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation axis cancel", event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -426,8 +430,19 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recogn
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
+}
+
+RefPtr<GestureSnapshot> RotationRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "angle: " << angle_ << ", "
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
+    info->customInfo = oss.str();
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

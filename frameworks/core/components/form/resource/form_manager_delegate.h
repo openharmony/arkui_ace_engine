@@ -52,7 +52,7 @@ public:
     using OnFormUpdateCallback =
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormLinkInfoUpdateCallback = std::function<void(const std::vector<std::string>&)>;
-    using OnGetRectRelativeToWindowCallback = std::function<void(int32_t&, int32_t&)>;
+    using OnGetRectRelativeToWindowCallback = std::function<void(AccessibilityParentRectInfo& parentRectInfo)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
     using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
@@ -76,6 +76,13 @@ public:
         RECYCLED,
         RECOVERING,
         RECOVERED,
+    };
+
+    struct NotifySurfaceChangeFailedRecord {
+        bool isfailed = false;
+        float expectedWidth = 0.0f;
+        float expectedHeight = 0.0f;
+        float expectedBorderWidth = 0.0f;
     };
 
     FormManagerDelegate() = delete;
@@ -114,7 +121,7 @@ public:
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
-    void OnGetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
@@ -158,6 +165,7 @@ private:
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
     void HandleEnableFormCallback(const bool enable);
     void SetGestureInnerFlag();
+    void CheckWhetherSurfaceChangeFailed();
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
@@ -179,9 +187,14 @@ private:
     bool isDynamic_ = true;
     std::mutex accessibilityChildTreeRegisterMutex_;
     std::mutex recycleMutex_;
+    std::mutex surfaceChangeFailedRecordMutex_;
     RecycleStatus recycleStatus_ = RecycleStatus::RECOVERED;
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;
+    NotifySurfaceChangeFailedRecord notifySurfaceChangeFailedRecord_;
 #ifdef OHOS_STANDARD_SYSTEM
+    void SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo);
+    void OnRouterActionEvent(const std::string& action);
+    void OnCallActionEvent(const std::string& action);
     int64_t runningCardId_ = -1;
     std::string runningCompId_;
     AAFwk::Want wantCache_;

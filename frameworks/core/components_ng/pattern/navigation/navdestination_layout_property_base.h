@@ -26,6 +26,39 @@
 
 namespace OHOS::Ace::NG {
 
+/**
+ * Used for titleBar and toolBar's animation.
+ *  1. NONE is used for non-animated scenes.
+ *  2. TRANSLATE_ZERO & TRANSLATE_HEIGHT are used for animated scenes.
+ *
+ * Taking NavDestination in STANDARD mode as example, there are several scenarios as follows:
+ *                              +=========+
+ *                              |  title  |
+ *                              +=========+
+ *    +-------------+         +-------------+
+ *    | +=========+ |         | +---------+ |
+ *    | |  title  | |         | |         | |
+ *    | +=========+ |   <=>   | |         | |
+ *    | +---------+ |         | | content | |
+ *    | |         | |         | |         | |
+ *    | | content | |         | |         | |
+ *    | |         | |         | |         | |
+ *    | +---------+ |         | +---------+ |
+ *    +-------------+         +-------------+
+ *   <TRANSLATE_ZERO>        <TRANSLATE_HEIGHT>
+ *
+ * 1. hide titleBar animation:
+ *    from TRANSLATE_ZERO to TRANSLATE_HEIGHT
+ *
+ * 2. show titleBar animation:
+ *    from TRANSLATE_HEIGHT to TRANSLATE_ZERO
+ */
+enum class BarTranslateState {
+    NONE = 0,
+    TRANSLATE_ZERO = 1,
+    TRANSLATE_HEIGHT = 2,
+};
+
 class ACE_EXPORT NavDestinationLayoutPropertyBase : public LayoutProperty {
     DECLARE_ACE_TYPE(NavDestinationLayoutPropertyBase, LayoutProperty);
 
@@ -39,8 +72,10 @@ public:
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propHideTitleBar_ = CloneHideTitleBar();
         copy->propIsAnimatedTitleBar_ = CloneIsAnimatedTitleBar();
+        copy->propTitleBarTranslateState_ = CloneTitleBarTranslateState();
         copy->propHideToolBar_ = CloneHideToolBar();
         copy->propIsAnimatedToolBar_ = CloneIsAnimatedToolBar();
+        copy->propToolBarTranslateState_ = CloneToolBarTranslateState();
         return copy;
     }
 
@@ -49,8 +84,10 @@ public:
         LayoutProperty::Reset();
         ResetHideTitleBar();
         ResetIsAnimatedTitleBar();
+        ResetTitleBarTranslateState();
         ResetHideToolBar();
         ResetIsAnimatedToolBar();
+        ResetToolBarTranslateState();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
@@ -58,15 +95,20 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreLayoutSafeArea, SafeAreaExpandOpts, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedToolBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarTranslateState, BarTranslateState, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToolBarTranslateState, BarTranslateState, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void UpdateBaseLayoutProperty(const NavDestinationLayoutPropertyBase* layoutProperty)
     {
+        CHECK_NULL_VOID(layoutProperty);
         LayoutProperty::UpdateLayoutProperty(layoutProperty);
         propHideTitleBar_ = layoutProperty->GetHideTitleBar();
         propIsAnimatedTitleBar_ = layoutProperty->GetIsAnimatedTitleBar();
+        propTitleBarTranslateState_ = layoutProperty->GetTitleBarTranslateState();
         propHideToolBar_ = layoutProperty->GetHideToolBar();
         propIsAnimatedToolBar_ = layoutProperty->GetIsAnimatedToolBar();
+        propToolBarTranslateState_ = layoutProperty->GetToolBarTranslateState();
     }
 };
 

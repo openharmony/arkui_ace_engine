@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/image/pixel_map.h"
 #include "base/thread/task_executor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -54,6 +55,7 @@ public:
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
+    SizeF GetOriginImageSize() const;
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
@@ -99,14 +101,9 @@ public:
     void OnDataReady();
 
     // Needed to restore the relevant containerId from the originating thread
-    int32_t GetContainerId()
+    int32_t GetContainerId() const
     {
         return containerId_;
-    }
-
-    void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
-    {
-        dynamicMode_ = dynamicMode;
     }
 
     void SetIsHdrDecoderNeed(bool isHdrDecoderNeed)
@@ -119,11 +116,6 @@ public:
         return isHdrDecoderNeed_;
     }
 
-    DynamicRangeMode GetDynamicRangeMode()
-    {
-        return dynamicMode_;
-    }
-
     void SetImageQuality(AIImageQuality imageQuality)
     {
         imageQuality_ = imageQuality;
@@ -132,6 +124,16 @@ public:
     AIImageQuality GetImageQuality()
     {
         return imageQuality_;
+    }
+
+    void SetPhotoDecodeFormat(PixelFormat photoDecodeFormat)
+    {
+        photoDecodeFormat_ = photoDecodeFormat;
+    }
+
+    PixelFormat GetPhotoDecodeFormat()
+    {
+        return photoDecodeFormat_;
     }
 
     void FinishMearuse()
@@ -204,10 +206,10 @@ private:
     const int32_t containerId_ {0};
 
     bool isHdrDecoderNeed_ = false;
+    PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
     bool syncLoad_ = false;
 
-    DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
 
     RectF srcRect_;
@@ -219,6 +221,8 @@ private:
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
     ImageDfxConfig imageDfxConfig_;
+    // If the API version is greater or equal than 14, use the preload module to download the URL.
+    const bool usePreload_ = false;
 
     ImageFit imageFit_ = ImageFit::COVER;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;

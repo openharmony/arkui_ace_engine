@@ -39,9 +39,19 @@ void ScrollableModelNG::SetScrollBarColor(const std::string& value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value));
 }
 
+void ScrollableModelNG::ResetScrollBarColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+}
+
 void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+}
+
+void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
 }
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
@@ -259,5 +269,21 @@ void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeR
 void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, rect), frameNode);
+}
+
+bool ScrollableModelNG::GetFadingEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
+}
+
+float ScrollableModelNG::GetFadingEdgeLength(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE.Value());
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE.Value());
+    return paintProperty->GetFadingEdgeLength().value_or(DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE).Value();
 }
 } // namespace OHOS::Ace::NG

@@ -14,7 +14,10 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkGridComponent extends ArkComponent implements GridAttribute {
+
+import { ArkScrollable } from "./ArkScrollable";
+
+class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -32,7 +35,6 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
       modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, undefined);
       modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
     }
-    return this;
   }
   columnsTemplate(value: string): this {
     modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
@@ -68,8 +70,9 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
   onScrollIndex(event: (first: number, last: number) => void): this {
     throw new Error('Method not implemented.');
   }
-  cachedCount(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, value);
+  cachedCount(count: number, show?: boolean): GridAttribute {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
   editMode(value: boolean): this {
@@ -114,20 +117,6 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
   }
   onItemDrop(event: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void): this {
     throw new Error('Method not implemented.');
-  }
-  edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this {
-    let effect: ArkGridEdgeEffect = new ArkGridEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, GridEdgeEffectModifier.identity, GridEdgeEffectModifier, effect);
-    return this;
-  }
-  fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
-    let fadingEdge: ArkFadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, GridFadingEdgeModifier.identity, GridFadingEdgeModifier, fadingEdge);
-    return this;
   }
   nestedScroll(value: NestedScrollOptions): this {
     modifierWithKey(this._modifiersWithKeys, GridNestedScrollModifier.identity, GridNestedScrollModifier, value);
@@ -333,8 +322,8 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class GridCachedCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class GridCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions> {
+  constructor(value: ArkScrollableCacheOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('gridCachedCount');
@@ -342,7 +331,7 @@ class GridCachedCountModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().grid.resetCachedCount(node);
     } else {
-      getUINativeModule().grid.setCachedCount(node, this.value);
+      getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
@@ -358,43 +347,6 @@ class GridMultiSelectableModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().grid.setMultiSelectable(node, this.value);
     }
-  }
-}
-
-class GridEdgeEffectModifier extends ModifierWithKey<ArkGridEdgeEffect> {
-  constructor(value: ArkGridEdgeEffect) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridEdgeEffect');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetEdgeEffect(node);
-    } else {
-      getUINativeModule().grid.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
-class GridFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
-  constructor(value: ArkFadingEdge) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridFadingEdge');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetFadingEdge(node);
-    } else {
-      getUINativeModule().grid.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
   }
 }
 

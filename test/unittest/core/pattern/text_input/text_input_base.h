@@ -47,6 +47,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -102,7 +103,9 @@ constexpr int32_t WORD_LIMIT_RETURN = 2;
 constexpr int32_t BEYOND_LIMIT_RETURN = 4;
 constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const std::string HELLO_TEXT = "hello";
+const std::u16string HELLO_TEXT_U16 = u"hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
@@ -122,11 +125,11 @@ const OHOS::Ace::DisplayMode DEFAULT_DISPLAY_MODE = OHOS::Ace::DisplayMode::AUTO
 const TextInputAction DEFAULT_ENTER_KEY_TYPE = TextInputAction::BEGIN;
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
-const PreviewTextInfo PREVIEW_ONE = {"ni", {-1, -1}};
-const PreviewTextInfo PREVIEW_TWO = {"你", {-1, -1}};
-const PreviewTextInfo PREVIEW_THR = {"hello", {0, 5}};
-const PreviewTextInfo PREVIEW_FOR = {"ab", {0, 2}};
-const PreviewTextInfo PREVIEW_BAD_DATA = {"bad", {0, -1}};
+const PreviewTextInfo PREVIEW_ONE = {u"ni", {-1, -1}};
+const PreviewTextInfo PREVIEW_TWO = {u"你", {-1, -1}};
+const PreviewTextInfo PREVIEW_THR = {u"hello", {0, 5}};
+const PreviewTextInfo PREVIEW_FOR = {u"ab", {0, 2}};
+const PreviewTextInfo PREVIEW_BAD_DATA = {u"bad", {0, -1}};
 const TextOverflow OVERFLOW_ELLIPSIS = TextOverflow::ELLIPSIS;
 const TextOverflow OVERFLOW_MARQUEE = TextOverflow::MARQUEE;
 const TextOverflow OVERFLOW_DEFAULT = TextOverflow::DEFAULT;

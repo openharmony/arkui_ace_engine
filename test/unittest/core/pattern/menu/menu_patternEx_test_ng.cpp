@@ -382,7 +382,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg007, TestSize.Level1)
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
     ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
+    EXPECT_EQ(textProperty->GetContent().value(), u"content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
@@ -395,7 +395,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg007, TestSize.Level1)
     auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(labelProperty, nullptr);
     ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
+    EXPECT_EQ(labelProperty->GetContent().value(), u"label");
     ASSERT_TRUE(labelProperty->GetFontSize().has_value());
     EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
@@ -510,7 +510,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg009, TestSize.Level1)
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
     ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
+    EXPECT_EQ(textProperty->GetContent().value(), u"content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
@@ -523,7 +523,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg009, TestSize.Level1)
     auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(labelProperty, nullptr);
     ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
+    EXPECT_EQ(labelProperty->GetContent().value(), u"label");
     ASSERT_TRUE(labelProperty->GetFontSize().has_value());
     EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
@@ -582,7 +582,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg010, TestSize.Level1)
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
     ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
+    EXPECT_EQ(textProperty->GetContent().value(), u"content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
     EXPECT_EQ(textProperty->GetFontWeight().value(), FontWeight::REGULAR);
@@ -651,13 +651,13 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg012, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -699,13 +699,13 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg013, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -763,13 +763,13 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg015, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE_NEW.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -811,13 +811,13 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg016, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = params.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -860,13 +860,13 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg017, TestSize.Level1)
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         ASSERT_NE(childNode, nullptr);
-        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        auto optionPattern = childNode->GetPattern<MenuItemPattern>();
         ASSERT_NE(optionPattern, nullptr);
         ASSERT_NE(optionPattern->text_, nullptr);
         auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
         ASSERT_NE(textProps, nullptr);
         auto param = CREATE_VALUE_NEW.at(i);
-        EXPECT_EQ(textProps->GetContent().value_or(""), param.text);
+        EXPECT_EQ(textProps->GetContent().value_or(u""), StringUtils::Str8ToStr16(param.text));
         if (param.icon.empty()) {
             ASSERT_EQ(optionPattern->icon_, nullptr);
         } else {
@@ -1142,6 +1142,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg024, TestSize.Level1)
     menuPattern->SetParentMenuItem(menuItem);
     menuPattern->RemoveParentHoverStyle();
     auto itemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
     EXPECT_FALSE(itemPattern->IsSubMenuShowed());
     menuPattern->type_ = MenuType::SUB_MENU;
     menuPattern->RemoveParentHoverStyle();
@@ -1221,6 +1222,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg026, TestSize.Level1)
     menuPattern->SetShowedSubMenu(menuNode);
     menuPattern->HideSubMenu();
     auto itemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
     EXPECT_FALSE(itemPattern->IsSubMenuShowed());
     ASSERT_EQ(menuPattern->GetShowedSubMenu(), nullptr);
 }
@@ -1291,7 +1293,8 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg028, TestSize.Level1)
      * @tc.steps: step2. create option pattern.
      * @tc.expected: option bg color meet expectations
      */
-    auto optionPattern = AceType::MakeRefPtr<OptionPattern>(0);
+    auto optionPattern = AceType::MakeRefPtr<MenuItemPattern>(true, 0);
+    ASSERT_NE(optionPattern, nullptr);
     EXPECT_EQ(optionPattern->GetBgColor(), Color::TRANSPARENT);
 }
 
@@ -1793,7 +1796,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg039, TestSize.Level1)
     foreachchildNode->MountToParent(foreachNode);
     auto menuPatternEx = MenuNode2->GetPattern<MenuPattern>();
     menuPatternEx->type_ = MenuType::CONTEXT_MENU;
-    menuPatternEx->OnItemPressed(foreachNode, -1, false);
+    menuPatternEx->OnItemPressed(foreachNode, 1, false);
     EXPECT_EQ(parentNode->GetTag(), V2::JS_SYNTAX_ITEM_ETS_TAG);
 }
 
@@ -1883,6 +1886,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg042, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
     auto testInfo = menuPattern->GetMenuItemInfo(child, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     menuItemPattern->SetClickMenuItemId(child->GetId());
@@ -1911,7 +1915,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg043, TestSize.Level1)
     child->MountToParent(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
-    auto menuItemPattern = child->GetPattern<MenuItemPattern>();
     auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     /**

@@ -473,6 +473,7 @@ void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString
         if (param == "false" || param == "end") {
             param = "0.000000";
         }
+        errno = 0;
         char* end = nullptr;
         float value = strtof(param.c_str(), &end);
         if (end == param.c_str() || errno == ERANGE) {

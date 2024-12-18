@@ -27,10 +27,6 @@
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/render_node.h"
 
-#ifndef USE_ROSEN_DRAWING
-class SkCanvas;
-#endif
-
 namespace OHOS::Ace {
 namespace {
 
@@ -155,13 +151,8 @@ protected:
     virtual bool HandleMouseEvent(const MouseEvent& event) override;
     virtual void PaintFocus(
         const Offset& offset, double rrectRadius, const Size& boardSize, RenderContext& context) {}
-#ifndef USE_ROSEN_DRAWING
-    virtual void PaintFocus(
-        const Offset& offset, double rrectRadius, const Size& boardSize, SkCanvas* canvas) {}
-#else
     virtual void PaintFocus(
         const Offset& offset, double rrectRadius, const Size& boardSize, RSCanvas* canvas) {}
-#endif
     static void ConstrainScore(double& score, double lowerBoundary, double upperBoundary);
 
     void SetRatingEvent(OperationEvent operationEvent)

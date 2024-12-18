@@ -36,6 +36,12 @@ namespace NG {
 class SecurityUIExtensionProxy;
 class UIExtensionProxy;
 
+struct InnerModalUIExtensionConfig {
+    bool isAsyncModalBinding = false;
+    bool isModal = true;
+    bool isDensityFollowHost = false;
+};
+
 struct UIExtensionConfig {
     RefPtr<OHOS::Ace::WantWrap> wantWrap = nullptr;
     RefPtr<NG::FrameNode> placeholderNode = nullptr;
@@ -55,8 +61,6 @@ public:
         bool transferringCaller = false, bool densityDpi = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
-    // for DynamicComponent
-    virtual void Create();
     virtual void Create(const NG::UIExtensionConfig& config) {}
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime);
@@ -64,6 +68,10 @@ public:
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
     virtual void SetAdaptiveWidth(bool state);
     virtual void SetAdaptiveHeight(bool state);
+    virtual std::string GetUiExtensionType(NG::SessionType sessionType)
+    {
+        return "";
+    }
 
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);

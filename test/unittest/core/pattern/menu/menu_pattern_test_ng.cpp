@@ -1263,7 +1263,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg076, TestSize.Level1)
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     menuPattern->OnItemPressed(parent, 5, false);
     EXPECT_EQ(parent->GetTag(), V2::JS_FOR_EACH_ETS_TAG);
-    menuPattern->OnItemPressed(parent, 0, false);
+    menuPattern->OnItemPressed(parent, 1, false);
     EXPECT_EQ(parent->GetChildAtIndex(1)->GetTag(), V2::JS_FOR_EACH_ETS_TAG);
     menuPattern->OnItemPressed(parent, 3, false);
     EXPECT_EQ(parent->GetChildAtIndex(4)->GetTag(), V2::MENU_ITEM_GROUP_ETS_TAG);
@@ -1426,6 +1426,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg081, TestSize.Level1)
     auto menuItem1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItem1, nullptr);
     auto menuItemPattern = menuItem1->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
     auto menuItem2 = FrameNode::CreateFrameNode("", 4, AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItem2, nullptr);
@@ -1576,7 +1577,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg086, TestSize.Level1)
 
 /**
  * @tc.name: MenuPatternTest087
- * @tc.desc: Test ShowStackExpandDisappearAnimation.
+ * @tc.desc: Test ShowStackMenuDisappearAnimation.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg087, TestSize.Level1)
@@ -1610,7 +1611,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg087, TestSize.Level1)
     auto children = subMenuNode->GetChildren();
     const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
         AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-    menuPattern->ShowStackExpandDisappearAnimation(menuNode, subMenuNode, animationOption);
+    menuPattern->ShowStackMenuDisappearAnimation(menuNode, subMenuNode, animationOption);
     EXPECT_FALSE(animationOption.curve_->IsEqual(MENU_ANIMATION_CURVE));
 }
 
@@ -1632,6 +1633,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg088, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
     menuItemPattern->SetClickMenuItemId(child->GetId());
     auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
     EXPECT_TRUE(testInfo.isFindTargetId);

@@ -39,6 +39,11 @@ void TextModelImpl::Create(const std::string& content)
     textComponent->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::Create(const std::u16string& content)
+{
+    Create(UtfUtils::Str16ToStr8(content));
+}
+
 void TextModelImpl::SetFont(const Font& value) {}
 
 void TextModelImpl::SetFontSize(const Dimension& value)
@@ -275,7 +280,7 @@ void TextModelImpl::OnSetAlign()
     }
 }
 
-void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click)
+void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click, double distanceThreshold)
 {
     auto clickId = EventMarker(std::move(click));
     auto gesture = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();

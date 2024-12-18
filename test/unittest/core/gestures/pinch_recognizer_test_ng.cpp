@@ -595,44 +595,6 @@ HWTEST_F(PinchRecognizerTestNg, PinchGestureCreateRecognizerTest001, TestSize.Le
 }
 
 /**
- * @tc.name: PinchRecognizerTest008
- * @tc.desc: Test PinchRecognizer function: IsCtrlBeingPressed
- * @tc.type: FUNC
- */
-HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PinchRecognizer.
-     */
-    RefPtr<PinchRecognizer> pinchRecognizer =
-        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
-    ASSERT_NE(pinchRecognizer, nullptr);
-
-    /**
-     * @tc.steps: step2. use IsCtrlBeingPressed with no setting.
-     * @tc.expect: IsCtrlBeingPressed return false.
-     */
-    EXPECT_FALSE(pinchRecognizer->IsCtrlBeingPressed());
-
-    /**
-     * @tc.steps: step3. create keyEvent and Set KeyEvent to pipeline.
-     * @tc.expect: Set KeyCode KEY_CTRL_LEFT or KEY_CTRL_RIGHT , return True.
-     */
-    KeyEvent keyEvent;
-    keyEvent.code = KeyCode::KEY_CTRL_LEFT;
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<KeyCode> keyCodes { KeyCode::KEY_CTRL_LEFT };
-    eventManager->SetPressedKeyCodes(keyCodes);
-    context->SetEventManager(eventManager);
-    EXPECT_TRUE(pinchRecognizer->IsCtrlBeingPressed());
-    keyEvent.code = KeyCode::KEY_CTRL_RIGHT;
-    EXPECT_TRUE(pinchRecognizer->IsCtrlBeingPressed());
-}
-
-/**
  * @tc.name: PinchRecognizerTest009
  * @tc.desc: Test PinchRecognizer function: HandleTouchDownEvent
  * @tc.type: FUNC
@@ -663,12 +625,11 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest009, TestSize.Level1)
     AxisEvent axisEvent;
 
     /**
-     * @tc.steps: step3.1. axisEvent NearZero and IsCtrlBeingPressed() is false.
+     * @tc.steps: step3.1. axisEvent NearZero.
      * @tc.expect: pinchRecognizer.disposal_ is not equal to GestureDisposal::REJECT.
      */
     axisEvent.pinchAxisScale = 0.0;
     pinchRecognizer->HandleTouchDownEvent(axisEvent);
-    EXPECT_TRUE(pinchRecognizer->IsCtrlBeingPressed());
     EXPECT_NE(pinchRecognizer->disposal_, GestureDisposal::REJECT);
 
     /**
@@ -947,7 +908,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleTouchMoveEventTest001, Test
     pinchRecognizer->isPinchEnd_ = false;
 
     /**
-     * @tc.steps: step3.1. axisEvent NearZero and IsCtrlBeingPressed() is false.
+     * @tc.steps: step3.1. axisEvent NearZero.
      * @tc.expect: pinchRecognizer->disposal_ is equal to GestureDisposal::REJECT.
      */
     axisEvent.pinchAxisScale = 0.0;
@@ -1027,7 +988,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleTouchMoveEventTest002, Test
     pinchRecognizer->isPinchEnd_ = false;
 
     /**
-     * @tc.steps: step3.1. axisEvent NearZero and IsCtrlBeingPressed() is false.
+     * @tc.steps: step3.1. axisEvent NearZero.
      * @tc.expect: pinchRecognizer->disposal_ is equal to GestureDisposal::REJECT.
      */
     auto context = PipelineContext::GetCurrentContext();
@@ -1287,7 +1248,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest011, TestSize.Level1)
     pinchRecognizer->isPinchEnd_ = false;
 
     /**
-     * @tc.steps: step3.1. axisEvent NearZero and IsCtrlBeingPressed() is false.
+     * @tc.steps: step3.1. axisEvent NearZero.
      * @tc.expect: pinchRecognizer->disposal_ is equal to GestureDisposal::REJECT.
      */
     axisEvent.pinchAxisScale = 0.0;

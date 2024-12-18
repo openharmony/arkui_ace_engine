@@ -70,6 +70,11 @@ public:
         targetIndex_ = targetIndex;
     }
 
+    void SetFocusIndex(std::optional<int32_t> focusIndex)
+    {
+        focusIndex_ = focusIndex;
+    }
+
     void SetVisibleItemPosition(std::map<int32_t, ItemInfo> visibleItemPosition)
     {
         visibleItemPosition_ = visibleItemPosition;
@@ -85,11 +90,6 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
-    void SetLastFontScale(float lastFontScale)
-    {
-        lastFontScale_ = lastFontScale;
-    }
-
 private:
     void MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     void MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
@@ -101,6 +101,7 @@ private:
     void MeasureVisibleItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureTargetIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureJumpIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
+    void MeasureFocusIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureWithOffset(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void AdjustPosition(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint,
         int32_t startIndex, int32_t endIndex, float startPos, float endPos);
@@ -142,6 +143,7 @@ private:
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     std::optional<float> maxHeight_;
     std::optional<float> defaultHeight_;
     bool isBarAdaptiveHeight_ = false;
@@ -149,10 +151,6 @@ private:
     bool canOverScroll_ = false;
     Dimension leftAndRightMargin_ = 0.0_vp;
     Dimension indicatorStyleMarginTop_ = 0.0_vp;
-    float fontscale_ = 0.0f;
-    float lastFontScale_ = 0.0f;
-    std::optional<float> thirdLargeFontHeight_;
-    float thirdLargeFontSizeScale_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

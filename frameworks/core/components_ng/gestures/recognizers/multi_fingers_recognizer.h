@@ -57,11 +57,12 @@ public:
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         lastPointEvent_.reset();
+        backupTouchPointsForSucceedBlock_.reset();
     }
 
     void CleanRecognizerState() override;
 
-    int32_t GetValidFingersCount()
+    int32_t GetValidFingersCount() const
     {
         return std::count_if(touchPoints_.begin(), touchPoints_.end(),
             [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
@@ -72,10 +73,28 @@ public:
         return static_cast<int32_t>(touchPoints_.size());
     }
 
+    void SetTouchPointsForSucceedBlock()
+    {
+        backupTouchPointsForSucceedBlock_ = touchPoints_;
+    }
+
+    void ResetTouchPointsForSucceedBlock()
+    {
+        backupTouchPointsForSucceedBlock_.reset();
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
+    }
+
+    void RemoveUnsupportEvent(int32_t touchId) override
+    {
+        if (touchPoints_.empty() || touchPoints_.find(touchId) == touchPoints_.end()) {
+            return;
+        }
+        touchPoints_.erase(touchId);
     }
 
     void UpdateTouchPointWithAxisEvent(const AxisEvent& event);
@@ -92,6 +111,7 @@ protected:
         currentFingers_ = 0;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
+        backupTouchPointsForSucceedBlock_.reset();
     }
 
     bool IsNeedResetStatus();
@@ -101,11 +121,14 @@ protected:
         return std::find(activeFingers_.begin(), activeFingers_.end(), touchId) != activeFingers_.end();
     }
 
+    std::string DumpGestureInfo() const;
+
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;
     std::list<int32_t> activeFingers_;
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
     int32_t fingers_ = 1;
+    std::optional<std::map<int32_t, TouchEvent>> backupTouchPointsForSucceedBlock_;
 };
 
 } // namespace OHOS::Ace::NG

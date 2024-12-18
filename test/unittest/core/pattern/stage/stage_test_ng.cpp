@@ -300,7 +300,7 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
      * @tc.steps: step3. PopPage.
      * @tc.expected: Expected no child failed.
      */
-    EXPECT_FALSE(stageManager.PopPage());
+    EXPECT_FALSE(stageManager.PopPage(nullptr));
 
     /**
      * @tc.steps: step4. Push a Page into StageManager.
@@ -329,13 +329,16 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
      * @tc.steps: step7. PopPage with different parameters.
      * @tc.expected: removeChild meets expectations .
      */
-    stageManager.PopPage(false, false);
+    stageManager.SetSrcPage(fourthNode);
+    stageManager.PopPage(thirdNode, false, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 3);
-    stageManager.PopPage(false, false);
+    stageManager.SetSrcPage(thirdNode);
+    stageManager.PopPage(secondNode, false, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 2);
 
     // children.size() < 2
-    stageManager.PopPage(false, false);
+    stageManager.SetSrcPage(secondNode);
+    stageManager.PopPage(firstNode, false, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 1);
 }
 
@@ -371,6 +374,7 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      * @tc.expected: Children length is less than the current index and return false
      */
     stageManager.PushPage(firstNode);
+    stageManager.SetSrcPage(firstNode);
     EXPECT_FALSE(stageManager.PopPageToIndex(1));
 
     /**
@@ -378,6 +382,7 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      * @tc.expected: Children length is equal to the current index and return true
      */
     stageManager.PushPage(secondNode);
+    stageManager.SetSrcPage(secondNode);
     EXPECT_TRUE(stageManager.PopPageToIndex(1));
 
     /**
@@ -386,10 +391,12 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      */
     stageManager.PushPage(thirdNode);
     stageManager.PushPage(fourthNode);
+    stageManager.SetSrcPage(fourthNode);
     stageManager.PopPageToIndex(1);
-    EXPECT_EQ(stageNode->GetChildren().size(), 3);
-    stageManager.PopPageToIndex(0);
     EXPECT_EQ(stageNode->GetChildren().size(), 2);
+    stageManager.SetSrcPage(secondNode);
+    stageManager.PopPageToIndex(0);
+    EXPECT_EQ(stageNode->GetChildren().size(), 1);
 
     /**
      * @tc.steps: step6. Add third child node and recall PopPageToIndex.
@@ -397,6 +404,7 @@ HWTEST_F(StageTestNg, StageManagerTest002, TestSize.Level1)
      */
     stageManager.PushPage(thirdNode);
     stageManager.PushPage(fourthNode);
+    stageManager.SetSrcPage(fourthNode);
     EXPECT_TRUE(stageManager.PopPageToIndex(1, false, false));
 }
 
@@ -555,7 +563,6 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
      * @tc.steps: step3. Create outPageNode and inPageNode.
      */
     auto pipeline = PipelineContext::GetCurrentContext();
-    stageManager.StopPageTransition();
     const auto& children = stageManager.stageNode_->GetChildren();
     bool needTransition = true;
     auto pageNode = children.back();
@@ -578,6 +585,7 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
      * @tc.steps: step4. Call StartTransition.
      * @tc.expected: Start Successful.
      */
+    stageManager.SetSrcPage(outPageNode);
     stageManager.StartTransition(outPageNode, inPageNode, RouteType::NONE);
     inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     EXPECT_EQ(stageManager.srcPageNode_, outPageNode);
@@ -613,7 +621,7 @@ HWTEST_F(StageTestNg, StageManagerTest007, TestSize.Level1)
      * @tc.steps: step3. PopPage.
      * @tc.expected: Expected no child failed.
      */
-    EXPECT_FALSE(stageManager.PopPage());
+    EXPECT_FALSE(stageManager.PopPage(nullptr));
 
     /**
      * @tc.steps: step4. Push a Page into StageManager.
@@ -642,8 +650,9 @@ HWTEST_F(StageTestNg, StageManagerTest007, TestSize.Level1)
      * @tc.steps: step7. PopPage with different parameters.
      * @tc.expected: removeChild meets expectations .
      */
-    bool bResult = stageManager.PopPage(true, true);
-    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+    stageManager.SetSrcPage(fourthNode);
+    bool bResult = stageManager.PopPage(thirdNode, true, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 3);
     EXPECT_TRUE(bResult);
 }
 
@@ -676,7 +685,7 @@ HWTEST_F(StageTestNg, StageManagerTest008, TestSize.Level1)
      * @tc.steps: step3. PopPage.
      * @tc.expected: Expected no child failed.
      */
-    EXPECT_FALSE(stageManager.PopPage());
+    EXPECT_FALSE(stageManager.PopPage(nullptr));
 
     /**
      * @tc.steps: step4. Push a Page into StageManager.
@@ -705,11 +714,12 @@ HWTEST_F(StageTestNg, StageManagerTest008, TestSize.Level1)
      * @tc.steps: step7. PopPage with different parameters.
      * @tc.expected: removeChild meets expectations .
      */
-    bool bResult = stageManager.PopPage(true, true);
-    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+    stageManager.SetSrcPage(fourthNode);
+    bool bResult = stageManager.PopPage(thirdNode, true, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 3);
     EXPECT_TRUE(bResult);
-
-    stageManager.PopPage(true, false);
+    stageManager.SetSrcPage(thirdNode);
+    stageManager.PopPage(secondNode, true, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 2);
 }
 
@@ -742,7 +752,7 @@ HWTEST_F(StageTestNg, StageManagerTest009, TestSize.Level1)
      * @tc.steps: step3. PopPage.
      * @tc.expected: Expected no child failed.
      */
-    EXPECT_FALSE(stageManager.PopPage());
+    EXPECT_FALSE(stageManager.PopPage(nullptr));
 
     /**
      * @tc.steps: step4. Push a Page into StageManager.
@@ -771,7 +781,8 @@ HWTEST_F(StageTestNg, StageManagerTest009, TestSize.Level1)
      * @tc.steps: step7. PopPage with different parameters.
      * @tc.expected: removeChild meets expectations .
      */
-    bool bResult = stageManager.PopPage(true, false);
+    stageManager.SetSrcPage(fourthNode);
+    bool bResult = stageManager.PopPage(thirdNode, true, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 3);
     EXPECT_TRUE(bResult);
 }
@@ -805,7 +816,7 @@ HWTEST_F(StageTestNg, StageManagerTest010, TestSize.Level1)
      * @tc.steps: step3. PopPage.
      * @tc.expected: Expected no child failed.
      */
-    EXPECT_FALSE(stageManager.PopPage());
+    EXPECT_FALSE(stageManager.PopPage(nullptr));
 
     /**
      * @tc.steps: step4. Push a Page into StageManager.
@@ -1081,21 +1092,10 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
     EXPECT_NE(pattern->GetTopTransition(), nullptr);
 
     /**
-     * @tc.steps: step4. Calling the TriggerPageTransition function and StopPageTransition function.
-     * @tc.expected: Attribute pageTransitionFinish_ not nullptr.
-     */
-    pattern->TriggerPageTransition(PageTransitionType::NONE, FLAG_FUNC);
-    pattern->StopPageTransition();
-    EXPECT_EQ(flag, 1);
-
-    /**
      * @tc.steps: step5. SetUserCallback and recall TriggerPageTransition and StopPageTransition.
      */
     effect->SetUserCallback([](RouteType routeType, const float& value) {});
     pattern->SetPageTransitionFunc(std::move(FLAG_FUNC));
-    pattern->TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
-    pattern->StopPageTransition();
-    EXPECT_EQ(flag, 3);
     /**
      * @tc.steps: step6.change some params ,recall TriggerPageTransition and StopPageTransition.
      * @tc.expected: The FLAG_FUNC call times meets expectation.
@@ -1103,9 +1103,6 @@ HWTEST_F(StageTestNg, PagePatternTest005, TestSize.Level1)
     auto innerEffect = pattern->FindPageTransitionEffect(PageTransitionType::ENTER_POP);
     ASSERT_NE(effect, nullptr);
     innerEffect->animationOption_.delay = -1;
-    pattern->TriggerPageTransition(PageTransitionType::ENTER_POP, FLAG_FUNC);
-    pattern->StopPageTransition();
-    EXPECT_EQ(flag, 5);
     /**
      * @tc.steps: step7.Calling the ClearPageTransitionEffect function.
      * @tc.expected: The GetTopTransition function returns a nullptr.
@@ -1172,7 +1169,6 @@ HWTEST_F(StageTestNg, PagePatternTest007, TestSize.Level1)
     FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
         "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
     pattern->frameNode_ = FRAME_NODE;
-    pattern->StopPageTransition();
     EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
 
     /**
@@ -1232,7 +1228,6 @@ HWTEST_F(StageTestNg, PagePatternTest008, TestSize.Level1)
     FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
         "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
     pattern->frameNode_ = FRAME_NODE;
-    pattern->StopPageTransition();
     EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
 
     /**
@@ -1473,9 +1468,8 @@ HWTEST_F(StageTestNg, PagePatternTest010, TestSize.Level1)
 {
     const auto& pageNode = ViewStackProcessor::GetInstance()->GetPageNode();
     auto pattern = pageNode->GetPattern<PagePattern>();
-    pattern->isPageInTransition_ = true;
     auto result = pattern->OnBackPressed();
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 }
 
 /**

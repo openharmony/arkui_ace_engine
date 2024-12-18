@@ -16,6 +16,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/event/event_constants.h"
+#include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -35,6 +37,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_engine.h"
@@ -63,17 +66,9 @@
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
-constexpr uint64_t ONE_S_IN_NS = 1 * 1000 * 1000 * 1000;
-constexpr uint64_t INTERPOLATION_THRESHOLD = 100 * 1000 * 1000; // 100ms
-constexpr int32_t INDEX_X = 0;
-constexpr int32_t INDEX_Y = 1;
-constexpr int32_t INDEX_TIME = 2;
-constexpr int32_t INDEX_X_SLOPE = 2;
-constexpr int32_t INDEX_Y_SLOPE = 3;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
-constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 5;
 constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
@@ -85,19 +80,40 @@ constexpr int32_t MAX_MISS_COUNT = 3;
 
 namespace OHOS::Ace::NG {
 
+std::unordered_set<int32_t> PipelineContext::aliveInstanceSet_;
+
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId, platformResRegister)
 {
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    PipelineContext::aliveInstanceSet_.emplace(instanceId);
+#endif
     window_->OnHide();
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    PipelineContext::aliveInstanceSet_.emplace(instanceId);
+#endif
     window_->OnHide();
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
@@ -375,272 +391,6 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-std::tuple<float, float, float, float> PipelineContext::LinearInterpolation(
-    const std::tuple<float, float, uint64_t>& history, const std::tuple<float, float, uint64_t>& current,
-    const uint64_t nanoTimeStamp)
-{
-    if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
-        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    if (std::get<INDEX_TIME>(current) <= std::get<INDEX_TIME>(history)) {
-        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    if (std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history) > INTERPOLATION_THRESHOLD) {
-        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    if (nanoTimeStamp < std::get<INDEX_TIME>(history)) {
-        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    auto inputXDeltaSlope = (std::get<INDEX_X>(current) - std::get<INDEX_X>(history)) * ONE_S_IN_NS /
-                            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
-    auto inputYDeltaSlope = (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history)) * ONE_S_IN_NS /
-                            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
-    if (nanoTimeStamp < std::get<INDEX_TIME>(current)) {
-        float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(history)) /
-                      (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
-        float x = std::get<INDEX_X>(history) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
-        float y = std::get<INDEX_Y>(history) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
-        return std::make_tuple(x, y, inputXDeltaSlope, inputYDeltaSlope);
-    } else if (nanoTimeStamp > std::get<INDEX_TIME>(current)) {
-        float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(current)) /
-                      (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
-        float x = std::get<INDEX_X>(current) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
-        float y = std::get<INDEX_Y>(current) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
-        return std::make_tuple(x, y, inputXDeltaSlope, inputYDeltaSlope);
-    }
-    return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-}
-
-std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(
-    const std::vector<TouchEvent>& events, const bool isScreen)
-{
-    float avgX = 0.0f;
-    float avgY = 0.0f;
-    uint64_t avgTime = 0;
-    int32_t i = 0;
-    uint64_t lastTime = 0;
-    for (auto iter = events.begin(); iter != events.end(); iter++) {
-        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
-            if (!isScreen) {
-                avgX += iter->x;
-                avgY += iter->y;
-            } else {
-                avgX += iter->screenX;
-                avgY += iter->screenY;
-            }
-            avgTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
-            i++;
-            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
-        }
-    }
-    if (i > 0) {
-        avgX /= i;
-        avgY /= i;
-        avgTime /= static_cast<uint64_t>(i);
-    }
-    return std::make_tuple(avgX, avgY, avgTime);
-}
-
-std::tuple<float, float, float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent>& history,
-    const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen)
-{
-    if (history.empty() || current.empty()) {
-        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    uint64_t lastNanoTime = 0;
-    float x = 0.0f;
-    float y = 0.0f;
-    for (const auto& item : current) {
-        uint64_t currentNanoTime = static_cast<uint64_t>(item.time.time_since_epoch().count());
-        if (lastNanoTime < currentNanoTime) {
-            lastNanoTime = currentNanoTime;
-            x = item.x;
-            y = item.y;
-        }
-    }
-    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastNanoTime) {
-        return std::make_tuple(x, y, 0.0f, 0.0f);
-    }
-    auto historyPoint = GetAvgPoint(history, isScreen);
-    auto currentPoint = GetAvgPoint(current, isScreen);
-
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "input time is %{public}" PRIu64 "", nanoTimeStamp);
-        for (auto iter : history) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "history point x %{public}f, y %{public}f, time %{public}" PRIu64 "",
-                iter.x, iter.y, static_cast<uint64_t>(iter.time.time_since_epoch().count()));
-        }
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "historyAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "",
-            std::get<INDEX_X>(historyPoint), std::get<INDEX_Y>(historyPoint), std::get<INDEX_TIME>(historyPoint));
-        for (auto iter : current) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "current point x %{public}f, y %{public}f, time %{public}" PRIu64 "",
-                iter.x, iter.y, static_cast<uint64_t>(iter.time.time_since_epoch().count()));
-        }
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "currentAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "",
-            std::get<INDEX_X>(currentPoint), std::get<INDEX_Y>(currentPoint), std::get<INDEX_TIME>(currentPoint));
-    }
-    return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
-}
-
-bool PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
-    const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
-{
-    auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
-    auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
-    newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
-    bool ret = false;
-    if (std::get<INDEX_X>(newXy) != 0 && std::get<INDEX_Y>(newXy) != 0) {
-        newTouchEvent.x = std::get<INDEX_X>(newXy);
-        newTouchEvent.y = std::get<INDEX_Y>(newXy);
-        newTouchEvent.screenX = std::get<INDEX_X>(newScreenXy);
-        newTouchEvent.screenY = std::get<INDEX_Y>(newScreenXy);
-        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
-        newTouchEvent.time = TimeStamp(nanoseconds);
-        newTouchEvent.history = current;
-        newTouchEvent.isInterpolated = true;
-        newTouchEvent.inputXDeltaSlope = std::get<INDEX_X_SLOPE>(newXy);
-        newTouchEvent.inputYDeltaSlope = std::get<INDEX_Y_SLOPE>(newXy);
-        ret = true;
-    }
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT,
-            "Touch Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
-            PRIu64 "", newTouchEvent.id, newTouchEvent.x, newTouchEvent.y,
-            newTouchEvent.screenX, newTouchEvent.screenY,
-            static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count()));
-    }
-    return ret;
-}
-
-TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp)
-{
-    TouchEvent result;
-    uint64_t gap = UINT64_MAX;
-    for (auto iter = current.begin(); iter != current.end(); iter++) {
-        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
-        if (timeStamp == nanoTimeStamp) {
-            result = *iter;
-            return result;
-        } else if (timeStamp > nanoTimeStamp) {
-            if (timeStamp - nanoTimeStamp < gap) {
-                gap = timeStamp - nanoTimeStamp;
-                result = *iter;
-            }
-        } else {
-            if (nanoTimeStamp - timeStamp < gap) {
-                gap = nanoTimeStamp - timeStamp;
-                result = *iter;
-            }
-        }
-    }
-    return result;
-}
-
-MouseEvent PipelineContext::GetResampleMouseEvent(
-    const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp)
-{
-    auto newXy = GetMouseResampleCoord(history, current, nanoTimeStamp, false);
-    auto newScreenXy = GetMouseResampleCoord(history, current, nanoTimeStamp, true);
-    MouseEvent newMouseEvent = GetMouseLatestPoint(current, nanoTimeStamp);
-
-    if (std::get<INDEX_X>(newXy) != 0 && std::get<INDEX_Y>(newXy) != 0) {
-        newMouseEvent.x = std::get<INDEX_X>(newXy);
-        newMouseEvent.y = std::get<INDEX_Y>(newXy);
-        newMouseEvent.screenX = std::get<INDEX_X>(newScreenXy);
-        newMouseEvent.screenY = std::get<INDEX_Y>(newScreenXy);
-        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
-        newMouseEvent.time = TimeStamp(nanoseconds);
-        newMouseEvent.history = current;
-    }
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT,
-            "Mouse Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
-            PRIu64 "", newMouseEvent.id, newMouseEvent.x, newMouseEvent.y,
-            newMouseEvent.screenX, newMouseEvent.screenY,
-            static_cast<uint64_t>(newMouseEvent.time.time_since_epoch().count()));
-    }
-    return newMouseEvent;
-}
-
-std::tuple<float, float, float, float> PipelineContext::GetMouseResampleCoord(const std::vector<MouseEvent>& history,
-    const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen)
-{
-    if (history.empty() || current.empty()) {
-        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    uint64_t lastNanoTime = 0;
-    float x = 0.0f;
-    float y = 0.0f;
-    for (const auto& item : current) {
-        uint64_t currentNanoTime = static_cast<uint64_t>(item.time.time_since_epoch().count());
-        if (lastNanoTime < currentNanoTime) {
-            lastNanoTime = currentNanoTime;
-            x = item.x;
-            y = item.y;
-        }
-    }
-    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastNanoTime) {
-        return std::make_tuple(x, y, 0.0f, 0.0f);
-    }
-    auto historyPoint = GetMouseAvgPoint(history, isScreen);
-    auto currentPoint = GetMouseAvgPoint(current, isScreen);
-    return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
-}
-
-MouseEvent PipelineContext::GetMouseLatestPoint(const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp)
-{
-    MouseEvent result;
-    uint64_t gap = UINT64_MAX;
-    for (auto iter = current.begin(); iter != current.end(); iter++) {
-        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
-        if (timeStamp == nanoTimeStamp) {
-            result = *iter;
-            return result;
-        } else if (timeStamp > nanoTimeStamp) {
-            if (timeStamp - nanoTimeStamp < gap) {
-                gap = timeStamp - nanoTimeStamp;
-                result = *iter;
-            }
-        } else {
-            if (nanoTimeStamp - timeStamp < gap) {
-                gap = nanoTimeStamp - timeStamp;
-                result = *iter;
-            }
-        }
-    }
-    return result;
-}
-
-std::tuple<float, float, uint64_t> PipelineContext::GetMouseAvgPoint(
-    const std::vector<MouseEvent>& events, const bool isScreen)
-{
-    float avgX = 0.0f;
-    float avgY = 0.0f;
-    uint64_t avgTime = 0;
-    int32_t i = 0;
-    uint64_t lastTime = 0;
-    for (auto iter = events.begin(); iter != events.end(); iter++) {
-        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
-            if (!isScreen) {
-                avgX += iter->x;
-                avgY += iter->y;
-            } else {
-                avgX += iter->screenX;
-                avgY += iter->screenY;
-            }
-            avgTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
-            i++;
-            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
-        }
-    }
-    if (i > 0) {
-        avgX /= i;
-        avgY /= i;
-        avgTime /= static_cast<uint64_t>(i);
-    }
-    return std::make_tuple(avgX, avgY, avgTime);
-}
-
 void PipelineContext::FlushOnceVsyncTask()
 {
     if (onceVsyncListener_ != nullptr) {
@@ -652,11 +402,17 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushDragEvents()
 {
     auto manager = GetDragDropManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "GetDragDrapManager error, manager is nullptr");
+        dragEvents_.clear();
+        return;
+    }
     std::string extraInfo = manager->GetExtraInfo();
     std::unordered_set<int32_t> moveEventIds;
     decltype(dragEvents_) dragEvents(std::move(dragEvents_));
     if (dragEvents.empty()) {
         canUseLongPredictTask_ = true;
+        nodeToPointEvent_.clear();
         return ;
     }
     canUseLongPredictTask_ = false;
@@ -668,11 +424,11 @@ void PipelineContext::FlushDragEvents()
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     std::string extraInfo,
     const RefPtr<FrameNode>& node,
-    const std::list<PointerEvent>& pointEvent)
+    const std::list<DragPointerEvent>& pointEvent)
 {
-    std::unordered_map<int, PointerEvent> idToPoints;
+    std::unordered_map<int, DragPointerEvent> idToPoints;
     bool needInterpolation = true;
-    std::unordered_map<int32_t, PointerEvent> newIdPoints;
+    std::unordered_map<int32_t, DragPointerEvent> newIdPoints;
     for (auto iter = pointEvent.rbegin(); iter != pointEvent.rend(); ++iter) {
         idToPoints.emplace(iter->pointerId, *iter);
         idToPoints[iter->pointerId].history.insert(idToPoints[iter->pointerId].history.begin(), *iter);
@@ -692,7 +448,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
                     static_cast<uint64_t>(stamp), targetTimeStamp);
                 continue;
             }
-            PointerEvent newPointerEvent = GetResamplePointerEvent(
+            DragPointerEvent newPointerEvent = eventManager_->GetResamplePointerEvent(
                 historyPointsEventById_[idIter.first], idIter.second.history, targetTimeStamp);
             if (newPointerEvent.x != 0 && newPointerEvent.y != 0) {
                 newIdPoints[idIter.first] = newPointerEvent;
@@ -704,119 +460,30 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
 }
 
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
-    std::unordered_map<int32_t, PointerEvent> newIdPoints,
+    std::unordered_map<int32_t, DragPointerEvent> newIdPoints,
     std::string& extraInfo,
-    std::unordered_map<int, PointerEvent> &idToPoints,
+    std::unordered_map<int, DragPointerEvent> &idToPoints,
     const RefPtr<FrameNode>& node)
 {
-    std::list<PointerEvent> dragPoint;
+    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
+    std::list<DragPointerEvent> dragPoint;
     for (const auto& iter : idToPoints) {
-        lastDispatchTime_[iter.first] = GetVsyncTime();
+        auto lastDispatchTime = eventManager_->GetLastDispatchTime();
+        lastDispatchTime[iter.first] = GetVsyncTime();
+        eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
         auto it = newIdPoints.find(iter.first);
         if (it != newIdPoints.end()) {
             dragPoint.emplace_back(it->second);
+            nodeToPointEvent[node].emplace_back(it->second);
         } else {
             dragPoint.emplace_back(iter.second);
+            nodeToPointEvent[node].emplace_back(iter.second);
         }
     }
     for (auto iter = dragPoint.rbegin(); iter != dragPoint.rend(); ++iter) {
         manager->OnDragMove(*iter, extraInfo, node);
     }
-    idToDragPoints_ = std::move(idToPoints);
-}
-
-PointerEvent PipelineContext::GetResamplePointerEvent(const std::vector<PointerEvent>& history,
-    const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp)
-{
-    auto newXy = GetResamplePointerCoord(history, current, nanoTimeStamp, false);
-    PointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
-
-    if (std::get<INDEX_X>(newXy) != 0 && std::get<INDEX_Y>(newXy) != 0) {
-        newPointerEvent.x = std::get<INDEX_X>(newXy);
-        newPointerEvent.y = std::get<INDEX_Y>(newXy);
-        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
-        newPointerEvent.time = TimeStamp(nanoseconds);
-        newPointerEvent.history = current;
-    }
-    return newPointerEvent;
-}
-
-std::tuple<float, float, float, float> PipelineContext::GetResamplePointerCoord(
-    const std::vector<PointerEvent>& history, const std::vector<PointerEvent>& current,
-    const uint64_t nanoTimeStamp, const bool isScreen)
-{
-    if (history.empty() || current.empty()) {
-        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    uint64_t lastNanoTime = 0;
-    float x = 0.0f;
-    float y = 0.0f;
-    for (const auto& item : current) {
-        uint64_t currentNanoTime = static_cast<uint64_t>(item.time.time_since_epoch().count());
-        if (lastNanoTime < currentNanoTime) {
-            lastNanoTime = currentNanoTime;
-            x = item.x;
-            y = item.y;
-        }
-    }
-    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastNanoTime) {
-        return std::make_tuple(x, y, 0.0f, 0.0f);
-    }
-    auto historyPoint = GetPointerAvgPoint(history, isScreen);
-    auto currentPoint = GetPointerAvgPoint(current, isScreen);
-    return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
-}
-
-PointerEvent PipelineContext::GetPointerLatestPoint(const std::vector<PointerEvent>& current,
-    const uint64_t nanoTimeStamp)
-{
-    PointerEvent result;
-    uint64_t gap = UINT64_MAX;
-    for (auto iter = current.begin(); iter != current.end(); iter++) {
-        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
-        if (timeStamp == nanoTimeStamp) {
-            result = *iter;
-            return result;
-        } else if (timeStamp > nanoTimeStamp) {
-            if (timeStamp - nanoTimeStamp < gap) {
-                gap = timeStamp - nanoTimeStamp;
-                result = *iter;
-            }
-        } else {
-            if (nanoTimeStamp - timeStamp < gap) {
-                gap = nanoTimeStamp - timeStamp;
-                result = *iter;
-            }
-        }
-    }
-    return result;
-}
-
-std::tuple<float, float, uint64_t> PipelineContext::GetPointerAvgPoint
-    (const std::vector<PointerEvent>& events, const bool isScreen)
-{
-    float avgX = 0.0f;
-    float avgY = 0.0f;
-    uint64_t avgTime = 0;
-    int32_t i = 0;
-    uint64_t lastTime = 0;
-    for (auto iter = events.begin(); iter != events.end(); iter++) {
-        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
-            if (!isScreen) {
-                avgX += iter->x;
-                avgY += iter->y;
-            }
-            avgTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
-            i++;
-            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
-        }
-    }
-    if (i > 0) {
-        avgX /= i;
-        avgY /= i;
-        avgTime /= static_cast<uint64_t>(i);
-    }
-    return std::make_tuple(avgX, avgY, avgTime);
+    nodeToPointEvent_ = std::move(nodeToPointEvent);
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -826,6 +493,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         LOGW("Cannot flush vsync as the pipeline context is destroyed.");
         return;
     }
+    SetVsyncTime(nanoTimestamp);
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]", nanoTimestamp,
         static_cast<uint64_t>(frameCount), instanceId_);
     window_->Lock();
@@ -833,8 +501,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-    resampleTimeStamp_ = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS -\
-        compensationValue_;
+    uint64_t timeStamp = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS;
+    if (timeStamp > compensationValue_) {
+        resampleTimeStamp_ = timeStamp - compensationValue_;
+    } else {
+        LOGE("resampleTimeStamp overflow,use 0 to be default resampleTimeStamp");
+        resampleTimeStamp_ = 0;
+    }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -848,7 +521,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp);
-    SetVsyncTime(nanoTimestamp);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushDragEvents();
@@ -869,7 +541,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
-    taskScheduler_->FlushLastestFrameLayoutFinishTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
@@ -926,26 +597,60 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent(nanoTimestamp);
 #endif
-    if (!mouseEvents_.empty() || isNeedFlushMouseEvent_) {
+    if (!mouseEvents_.empty()) {
         FlushMouseEvent();
         isNeedFlushMouseEvent_ = false;
+        mouseEvents_.clear();
+    } else if (isNeedFlushMouseEvent_) {
+        FlushMouseEventVoluntarily();
+        isNeedFlushMouseEvent_ = false;
     }
+    eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
         window_->FlushAnimationStartTime(animationTimeStamp_);
         isNeedFlushAnimationStartTime_ = false;
     }
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
-    if (IsWaitFlushFinish()) {
-        FireUIExtensionFlushFinishCallback();
-        UnWaitFlushFinish();
+    window_->FlushLayoutSize(width_, height_);
+    if (IsFocusWindowIdSetted()) {
+        FireAllUIExtensionEvents();
     }
+    FireAccessibilityEvents();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
+}
+
+void PipelineContext::FlushMouseEventVoluntarily()
+{
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        return;
+    }
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(rootNode_);
+
+    MouseEvent event;
+    event.x = lastMouseEvent_->x;
+    event.y = lastMouseEvent_->y;
+    event.time = lastMouseEvent_->time;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    event.sourceType = SourceType::MOUSE;
+
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
 }
 
 void PipelineContext::FlushWindowPatternInfo()
@@ -1057,6 +762,9 @@ void PipelineContext::FlushMessages()
         LOGI("Flush message is freezed.");
         return;
     }
+    if (navigationMgr_) {
+        navigationMgr_->CacheNavigationNodeAnimation();
+    }
     window_->FlushTasks();
 }
 
@@ -1071,13 +779,20 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
     for (const auto& dirtyNode : dirtyPropertyNodes) {
         dirtyNode->ProcessPropertyDiff();
     }
-    taskScheduler_->FlushTask(triggeredByImplicitAnimation);
+    taskScheduler_->FlushTaskWithCheck(triggeredByImplicitAnimation);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        FlushNodeChangeFlag();
+    }
     window_->Unlock();
 }
 
 void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    if (IsLayouting()) {
+        taskScheduler_->AddSingleNodeToFlush(node);
+        return;
+    }
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = node->GetLayoutConstraint();
@@ -1108,6 +823,11 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
 
 void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            "Can not flush implicit animation task after layout because implicit animation is open.");
+        return;
+    }
     window_->Lock();
     taskScheduler_->FlushAfterLayoutCallbackInImplicitAnimationTask();
     window_->Unlock();
@@ -1148,8 +868,20 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
 {
     auto focusNodeHub = focusNode->GetFocusHub();
     if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
-            isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
+        auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
+        if (unfocusableParentFocusNode) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS,
+                "Request focus on %{public}s: %{public}s/%{public}d return false, unfocusable node: "
+                "%{public}s/%{public}d, focusable = %{public}d, shown = %{public}d, enabled = %{public}d",
+                isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId(),
+                unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId(),
+                unfocusableParentFocusNode->GetFocusable(), unfocusableParentFocusNode->IsShow(),
+                unfocusableParentFocusNode->IsEnabled());
+            unfocusableParentFocusNode = nullptr;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
+                isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
+        }
     }
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
@@ -1171,9 +903,11 @@ void PipelineContext::FlushRequestFocus()
             if (unfocusableParentFocusNode) {
                 TAG_LOGI(AceLogTag::ACE_FOCUS,
                     "Request focus by id on node: %{public}s/%{public}d return false, unfocusable node: "
-                    "%{public}s/%{public}d",
+                    "%{public}s/%{public}d, focusable = %{public}d, shown = %{public}d, enabled = %{public}d",
                     requestFocusNode->GetTag().c_str(), requestFocusNode->GetId(),
-                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId());
+                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId(),
+                    unfocusableParentFocusNode->GetFocusable(), unfocusableParentFocusNode->IsShow(),
+                    unfocusableParentFocusNode->IsEnabled());
                 unfocusableParentFocusNode = nullptr;
             } else {
                 TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
@@ -1202,6 +936,7 @@ void PipelineContext::FlushFocusView()
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
+        focusManager_->SetFocusViewStackState(FocusViewStackState::IDLE);
     }
 }
 
@@ -1257,7 +992,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushFrameRate()
 {
-    frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
+    frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate(), window_->HasFirstFrameAnimation());
     int32_t currAnimatorExpectedFrameRate = GetOrCreateUIDisplaySyncManager()->GetAnimatorRate();
     if (frameRateManager_->IsRateChanged() || currAnimatorExpectedFrameRate != lastAnimatorExpectedFrameRate_) {
         auto [rate, rateType] = frameRateManager_->GetExpectedRate();
@@ -1424,6 +1159,16 @@ void PipelineContext::SetupRootElement()
     AddOnAreaChangeNode(rootNode_->GetId());
 }
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask([weak = WeakClaim(this), callback]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->focusOnNodeCallback_ = callback;
+        }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
+}
+
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -1531,7 +1276,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    width_ = width;
+    height_ = height;
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -1672,30 +1418,12 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             if (!textFieldManager_) {
                 break;
             }
-            auto textFieldManager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
-            if (textFieldManager) {
-                if (textFieldManager->UsingCustomKeyboardAvoid()) {
-                    taskExecutor_->PostTask([weak = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
-                            auto manager = weak.Upgrade();
-                            CHECK_NULL_VOID(manager);
-                            manager->TriggerCustomKeyboardAvoid();
-                        }, TaskExecutor::TaskType::UI, "ArkUICustomKeyboardAvoid");
-                } else if (textFieldManager->GetLaterAvoid()) {
-                    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
-                    taskExecutor_->PostTask([weakContext = WeakClaim(this),
-                        keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
-                        positionY = textFieldManager->GetLaterAvoidPositionY(),
-                        height = textFieldManager->GetLaterAvoidHeight(),
-                        weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
-                            auto context = weakContext.Upgrade();
-                            CHECK_NULL_VOID(context);
-                            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
-                            auto manager = weakManager.Upgrade();
-                            CHECK_NULL_VOID(manager);
-                            manager->SetLaterAvoid(false);
-                        }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-                }
-            }
+            PostKeyboardAvoidTask();
+            break;
+        }
+        case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
+            SetRootRect(width, height, 0.0);
+            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -1707,6 +1435,46 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             SetRootRect(width, height, 0.0f);
         }
     }
+}
+
+void PipelineContext::PostKeyboardAvoidTask()
+{
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
+    CHECK_NULL_VOID(textFieldManager);
+    if (textFieldManager->UsingCustomKeyboardAvoid()) {
+        taskExecutor_->PostTask(
+            [weak = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+                auto manager = weak.Upgrade();
+                CHECK_NULL_VOID(manager);
+                manager->TriggerCustomKeyboardAvoid();
+            },
+            TaskExecutor::TaskType::UI, "ArkUICustomKeyboardAvoid");
+        return;
+    }
+    CHECK_NULL_VOID(textFieldManager->GetLaterAvoid());
+    auto container = Container::Current();
+    if (container) {
+        auto displayInfo = container->GetDisplayInfo();
+        if (displayInfo && textFieldManager->GetLaterOrientation() != (int32_t)displayInfo->GetRotation()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "orientation not match, clear laterAvoid");
+            textFieldManager->SetLaterAvoid(false);
+            return;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
+    taskExecutor_->PostTask(
+        [weakContext = WeakClaim(this), keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
+            positionY = textFieldManager->GetLaterAvoidPositionY(),
+            height = textFieldManager->GetLaterAvoidHeight(),
+            weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+            auto manager = weakManager.Upgrade();
+            CHECK_NULL_VOID(manager);
+            manager->SetLaterAvoid(false);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
 
 void PipelineContext::StartWindowMaximizeAnimation(
@@ -1875,8 +1643,10 @@ void PipelineContext::UpdateSizeChangeReason(
 
 void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value)
 {
-    safeAreaManager_->SetKeyBoardAvoidMode(value);
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "keyboardAvoid Mode update:%{public}d", value);
+    if (safeAreaManager_->SetKeyBoardAvoidMode(value)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "keyboardAvoid Mode update:%{public}d", value);
+    }
 }
 
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
@@ -1961,7 +1731,7 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
     auto frameNode = DynamicCast<FrameNode>(uiNode);
-
+    attachedNodeSet_.erase(RawPtr(uiNode));
     CHECK_NULL_VOID(frameNode);
 
     RemoveStoredNode(frameNode->GetRestoreId());
@@ -2038,25 +1808,20 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         float textfieldHeight = 0.0f;
         float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
             textfieldHeight = manager->GetHeight();
         }
-        if (!NearZero(keyboardOffset)) {
-            auto offsetY = keyboardPosition - safeAreaManager_->GetLastKeyboardPoistion();
-            safeAreaManager_->UpdateKeyboardOffset(keyboardOffset + offsetY);
+        if (NearZero(keyboardHeight)) {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (LessOrEqual(positionY + safeHeight + textfieldHeight, rootHeight_ - keyboardHeight)) {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (positionY + safeHeight + textfieldHeight > rootHeight_ - keyboardHeight) {
+            safeAreaManager_->UpdateKeyboardOffset(
+                -(positionY - rootHeight_ + keyboardHeight)- safeHeight - textfieldHeight);
         } else {
-            if (NearZero(keyboardHeight)) {
-                safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            } else if (LessOrEqual(positionY + safeHeight + textfieldHeight, rootHeight_ - keyboardHeight)) {
-                safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            } else if (positionY + safeHeight + textfieldHeight > rootHeight_ - keyboardHeight) {
-                safeAreaManager_->UpdateKeyboardOffset(
-                    -(positionY - rootHeight_ + keyboardHeight)- safeHeight - textfieldHeight);
-            } else {
-                safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            }
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
         safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
@@ -2081,21 +1846,18 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
 void PipelineContext::OriginalAvoidanceLogic(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    auto func = [this, keyboardHeight]() mutable {
+    auto func = [this, keyboardHeight, id = instanceId_]() mutable {
+        ContainerScope scope(id);
         safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         if (keyboardHeight > 0) {
             // add height of navigation bar
             keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
         }
-        float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float height = 0.0f;
-        if (manager) {
-            height = manager->GetHeight();
-            positionY = static_cast<float>(manager->GetClickPosition().GetY());
-        }
+        float positionY = manager ? static_cast<float>(manager->GetClickPosition().GetY()) : 0.0f;
+        float height = manager ? manager->GetHeight() : 0.0f;
         SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
-        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
         float offsetFix = (rootSize.Height() - positionYWithOffset) > 100.0f
                               ? keyboardHeight - (rootSize.Height() - positionYWithOffset) / 2.0f
@@ -2148,7 +1910,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
+        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         TAG_LOGD(
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
@@ -2156,9 +1919,14 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     if (!forceChange && (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
         NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
+        return;
+    }
+
+    if (keyboardHeight > rootHeight_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
         return;
     }
 
@@ -2168,7 +1936,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     }
 
     manager->UpdatePrevHasTextFieldPattern();
-    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2195,8 +1963,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
         float positionYWithOffset = positionY;
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() :
+            context->safeAreaManager_->GetKeyboardOffset();
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
+            keyboardOffset;
 
         auto onFocusField = manager->GetOnFocusTextField().Upgrade();
         float adjust = 0.0f;
@@ -2264,6 +2034,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
     };
     FlushUITasks();
+    FlushDirtyPropertyNodesWhenExist();
     SetIsLayouting(true);
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 
@@ -2272,6 +2043,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::FlushDirtyPropertyNodesWhenExist()
+{
+    if ((!IsDirtyLayoutNodesEmpty() || !dirtyPropertyNodes_.empty()) && !IsLayouting()) {
+        FlushUITasks();
+    }
 }
 
 bool PipelineContext::UsingCaretAvoidMode()
@@ -2294,7 +2072,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         return;
     }
     manager->UpdatePrevHasTextFieldPattern();
-    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -2302,56 +2080,12 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         rsTransaction->Begin();
     }
 #endif
-
     bool keyboardHeightChanged = NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length());
     auto weak = WeakClaim(this);
-    auto func = [weak, keyboardHeight, positionY, height, manager, keyboardHeightChanged]() mutable {
+    auto func = [weak, keyboardHeight, positionY, height, keyboardHeightChanged]() mutable {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
-        context->SetIsLayouting(false);
-        context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
-        if (keyboardHeight > 0) {
-            // add height of navigation bar
-            keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
-        }
-        SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "origin positionY: %{public}f, height %{public}f", positionY, height);
-        float caretPos = manager->GetFocusedNodeCaretRect().Top() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
-        auto onFocusField = manager->GetOnFocusTextField().Upgrade();
-        float adjust = 0.0f;
-        if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
-            auto adjustRect = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust();
-            adjust = adjustRect.Top();
-        }
-        caretPos += adjust;
-        positionY = caretPos;
-        height = manager->GetHeight();
-        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        auto newKeyboardOffset = context->CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
-        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
-            (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
-            context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
-        } else {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Calculated offset %{public}f is smaller than current"
-                "keyboardOffset, so keep current keyboardOffset", newKeyboardOffset);
-        }
-        manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
-
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
-            "rootSize.Height() %{public}f adjust: %{public}f final calculate keyboard offset is %{public}f",
-            keyboardHeight, positionY, height, rootSize.Height(), adjust,
-            context->safeAreaManager_->GetKeyboardOffset());
-        context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
-        manager->AvoidKeyBoardInNavigation();
-        // layout before scrolling textfield to safeArea, because of getting correct position
-        context->FlushUITasks();
-        bool scrollResult = manager->ScrollTextFieldToSafeArea();
-        if (scrollResult) {
-            context->FlushUITasks();
-        }
+        context->DoKeyboardAvoidFunc(keyboardHeight, positionY, height, keyboardHeightChanged);
     };
     FlushUITasks();
     SetIsLayouting(true);
@@ -2362,6 +2096,80 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY, double height,
+    bool keyboardHeightChanged)
+{
+    CHECK_NULL_VOID(safeAreaManager_);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_VOID(manager);
+    SetIsLayouting(false);
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+    if (keyboardHeight > 0) {
+        // add height of navigation bar
+        keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+    }
+    SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
+    float caretPos = manager->GetFocusedNodeCaretRect().Top() - GetRootRect().GetOffset().GetY() -
+        GetSafeAreaManager()->GetKeyboardOffsetDirectly();
+    auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+    float adjust = 0.0f;
+    if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+        adjust = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust().Top();
+        positionY = caretPos;
+        height = manager->GetHeight();
+    }
+    positionY += adjust;
+    if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
+        height = rootSize.Height() - positionY;
+    }
+    auto lastKeyboardOffset = safeAreaManager_->GetKeyboardOffsetDirectly();
+    auto newKeyboardOffset = CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize);
+    if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
+        (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
+        safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
+        manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
+        return;
+    }
+    manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
+        "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
+        "final calculate keyboard offset is %{public}f",
+        keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
+        safeAreaManager_->GetKeyboardOffset());
+    SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
+    manager->AvoidKeyBoardInNavigation();
+    // layout before scrolling textfield to safeArea, because of getting correct position
+    FlushUITasks();
+    bool scrollResult = manager->ScrollTextFieldToSafeArea();
+    if (scrollResult) {
+        FlushUITasks();
+    }
+}
+
+float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
+    float height, SizeF& rootSize)
+{
+    auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
+    CHECK_NULL_RETURN(safeAreaManager_, newKeyboardOffset);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_RETURN(manager, newKeyboardOffset);
+    auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_RETURN(onFocusField, newKeyboardOffset);
+    auto host = onFocusField->GetHost();
+    CHECK_NULL_RETURN(host, newKeyboardOffset);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
+    auto paintOffset = host->GetPaintRectOffset();
+    auto frameSize = geometryNode->GetFrameSize();
+    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
+        frameSize.Height(), rootSize);
+    return std::max(offset, newKeyboardOffset);
 }
 
 float PipelineContext::CalcAvoidOffset(float keyboardHeight, float positionY,
@@ -2431,7 +2239,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
@@ -2462,8 +2270,9 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(stageManager);
             auto lastPage = stageManager->GetLastPage();
             CHECK_NULL_VOID(lastPage);
+            bool isEntry = false;
             auto navigationGroupNode =
-                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage));
+                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage, isEntry));
             if (navigationGroupNode) {
                 result = true;
             }
@@ -2495,7 +2304,7 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     CHECK_NULL_RETURN(node, nullptr);
     const auto& children = node->GetChildren();
@@ -2513,15 +2322,21 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(childNode);
             auto topChild = navigationGroupNode->GetTopDestination();
             // find navigation from top destination
-            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild);
+            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild, isEntry);
             if (targetNodeFromDestination) {
                 return targetNodeFromDestination;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             targetNodeFromDestination = childNode;
             auto targetNavigation = AceType::DynamicCast<NavigationGroupNode>(targetNodeFromDestination);
             // check if the destination responds
-            if (targetNavigation && targetNavigation->CheckCanHandleBack()) {
+            if (targetNavigation && targetNavigation->CheckCanHandleBack(isEntry)) {
                 return targetNavigation;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             // if the destination does not responds, find navigation from navbar
             auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -2530,15 +2345,18 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             if (navigationLayoutProperty->GetHideNavBarValue(false)) {
                 return nullptr;
             }
-            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode);
+            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode, isEntry);
             if (targetNodeFromNavbar) {
                 return targetNodeFromNavbar;
             }
             return nullptr;
         }
-        auto target = FindNavigationNodeToHandleBack(child);
+        auto target = FindNavigationNodeToHandleBack(child, isEntry);
         if (target) {
             return target;
+        }
+        if (isEntry) {
+            return nullptr;
         }
     }
     return nullptr;
@@ -2546,6 +2364,14 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
+    auto containerId = Container::CurrentId();
+    auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
+    if (subWindowContainerId >= 0) {
+        auto subPipeline = GetContextByContainerId(subWindowContainerId);
+        CHECK_NULL_RETURN(subPipeline, false);
+        ContainerScope scope(subWindowContainerId);
+        subPipeline->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
+    }
     if (reason == FocusActiveReason::USE_API) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "autoFocusInactive turns to %{public}d", autoFocusInactive);
         autoFocusInactive_ = autoFocusInactive;
@@ -2609,9 +2435,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     } while (false);
 #endif
 
+    auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
-    if (point.type != TouchType::DOWN) {
-        HandleEtsCardTouchEvent(point, etsSerializedGesture);
+    if (point.type != TouchType::DOWN && formEventMgr) {
+        formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
     auto oriPoint = point;
@@ -2667,7 +2494,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
             return;
         }
 
-        HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
+        if (formEventMgr) {
+            formEventMgr->HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
+        }
 
         if (etsSerializedGesture.data.size() != 0) {
             GestureGroup rebirth(GestureMode::Exclusive);
@@ -2737,11 +2566,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
-        if (!eventManager_->GetInnerFlag()) {
+        if (!eventManager_->GetInnerFlag() && formEventMgr) {
             auto mockPoint = point;
             mockPoint.type = TouchType::CANCEL;
-            HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
-            RemoveEtsCardTouchEventCallback(mockPoint.id);
+            formEventMgr->HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
+            formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
@@ -2769,12 +2598,18 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
-        RemoveEtsCardTouchEventCallback(point.id);
+        if (formEventMgr) {
+            formEventMgr->RemoveEtsCardTouchEventCallback(point.id);
+        }
         ResetDraggingStatus(scalePoint, node);
     }
     if (scalePoint.type != TouchType::MOVE) {
-        lastDispatchTime_.erase(scalePoint.id);
-        idToTouchPoints_.erase(scalePoint.id);
+        auto lastDispatchTime = eventManager_->GetLastDispatchTime();
+        lastDispatchTime.erase(scalePoint.id);
+        eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
+        auto idToTouchPoint = eventManager_->GetIdToTouchPoint();
+        idToTouchPoint.erase(scalePoint.id);
+        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoint));
     }
 
     hasIdleTasks_ = true;
@@ -2825,10 +2660,10 @@ void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
     }
     if (!CompensateTouchMoveEventFromUnhandledEvents(event)) {
         // Compensate touch move event with all touch move Event before up has been handled.
-        auto lastEventIter = idToTouchPoints_.find(event.id);
-        if (lastEventIter != idToTouchPoints_.end()) {
-            auto iter = lastDispatchTime_.find(lastEventIter->first);
-            if (iter != lastDispatchTime_.end()) {
+        auto lastEventIter = eventManager_->GetIdToTouchPoint().find(event.id);
+        if (lastEventIter != eventManager_->GetIdToTouchPoint().end()) {
+            auto iter = eventManager_->GetLastDispatchTime().find(lastEventIter->first);
+            if (iter != eventManager_->GetLastDispatchTime().end()) {
                 ACE_SCOPED_TRACE("CompensateTouchMoveEvent last move event time: %s last dispatch time: %s",
                     std::to_string(static_cast<uint64_t>(lastEventIter->second.time.time_since_epoch().count()))
                         .c_str(),
@@ -2842,8 +2677,8 @@ void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
         }
     }
 
-    auto lastEventIter = idToTouchPoints_.find(event.id);
-    if (lastEventIter != idToTouchPoints_.end()) {
+    auto lastEventIter = eventManager_->GetIdToTouchPoint().find(event.id);
+    if (lastEventIter != eventManager_->GetIdToTouchPoint().end()) {
         ACE_SCOPED_TRACE("Finger id: %d process last move event eventId: %d", lastEventIter->first,
             lastEventIter->second.touchEventId);
     }
@@ -2853,14 +2688,7 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const Re
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsDraggingPressed(touchPoint.id)) {
-        manager->SetDraggingPressedState(false);
-    }
-    if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd(
-            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
-            "");
-    }
+    manager->ResetDraggingStatus(touchPoint);
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -2877,11 +2705,6 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
         UIObserverHandler::GetInstance().NotifyDensityChange(density_);
         PipelineBase::OnSurfaceDensityChanged(density);
     }
-}
-
-void PipelineContext::RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback)
-{
-    dumpListeners_.push_back(callback);
 }
 
 bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
@@ -3030,6 +2853,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 #endif
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
+    DumpLog::GetInstance().Print(1, "finishCount:" + GetUnexecutedFinishCount());
     if (params[0] == "-element") {
         DumpElement(params, hasJson);
     } else if (params[0] == "-navigation") {
@@ -3069,13 +2893,21 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             jsParams = std::vector<std::string>(params.begin() + 1, params.end());
         }
 
-        for (const auto& func : dumpListeners_) {
-            func(jsParams);
+        auto stageNode = stageManager_->GetStageNode();
+        CHECK_NULL_RETURN(stageNode, false);
+        auto children = stageNode->GetChildren();
+        for (const auto& pageNode : children) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
+            CHECK_NULL_RETURN(frameNode, false);
+            auto pagePattern = frameNode->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, false);
+            pagePattern->FireDumpListener(jsParams);
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
             eventManager_->DumpEvent(EventTreeType::TOUCH, hasJson);
         }
+        DumpUIExt();
     } else if (params[0] == "-postevent") {
         if (eventManager_) {
             eventManager_->DumpEvent(EventTreeType::POST_EVENT, hasJson);
@@ -3084,8 +2916,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (imageCache_) {
             imageCache_->DumpCacheInfo();
         }
+        DumpUIExt();
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+        DumpUIExt();
     } else if (params[0] == "-allelements") {
         AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -3106,13 +2940,19 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
-        auto root = JsonUtil::Create(true);
-        rootNode_->DumpSimplifyTree(0, root);
-        auto json = root->ToString();
-        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-        DumpLog::GetInstance().Print(json);
+        rootNode_->DumpTree(0);
+        DumpLog::GetInstance().OutPutByCompress();
     }
     return true;
+}
+
+void PipelineContext::DumpUIExt() const
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->DumpUIExt();
+    }
+#endif
 }
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -3194,7 +3034,7 @@ void PipelineContext::FlushTouchEvents()
         if (focusWindowId_.has_value()) {
             needInterpolation = false;
         }
-        if (needInterpolation) {
+        if (needInterpolation && SystemProperties::IsNeedResampleTouchPoints()) {
             auto targetTimeStamp = resampleTimeStamp_;
             for (const auto& idIter : idToTouchPoints) {
                 auto stamp =
@@ -3203,7 +3043,7 @@ void PipelineContext::FlushTouchEvents()
                     continue;
                 }
                 TouchEvent newTouchEvent;
-                if (GetResampleTouchEvent(
+                if (eventManager_->GetResampleTouchEvent(
                         historyPointsById_[idIter.first], idIter.second.history, targetTimeStamp, newTouchEvent)) {
                     newIdTouchPoints[idIter.first] = newTouchEvent;
                 }
@@ -3212,7 +3052,9 @@ void PipelineContext::FlushTouchEvents()
         }
         std::list<TouchEvent> touchPoints;
         for (const auto& iter : idToTouchPoints) {
-            lastDispatchTime_[iter.first] = GetVsyncTime() - compensationValue_;
+            auto lastDispatchTime = eventManager_->GetLastDispatchTime();
+            lastDispatchTime[iter.first] = GetVsyncTime() - compensationValue_;
+            eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
             auto it = newIdTouchPoints.find(iter.first);
             if (it != newIdTouchPoints.end()) {
                 touchPoints.emplace_back(it->second);
@@ -3228,7 +3070,9 @@ void PipelineContext::FlushTouchEvents()
             }
             eventManager_->DispatchTouchEvent(*iter);
         }
-        idToTouchPoints_ = std::move(idToTouchPoints);
+        auto idToTouchPoint = eventManager_->GetIdToTouchPoint();
+        idToTouchPoint = std::move(idToTouchPoints);
+        eventManager_->SetIdToTouchPoint(std::move(idToTouchPoint));
     }
 }
 
@@ -3237,12 +3081,20 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     CHECK_RUN_ON(UI);
     auto scaleEvent = point.CreateScalePoint(viewScale_);
     if (scaleEvent.type != TouchType::HOVER_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+#ifdef IS_RELEASE_VERSION
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "OnAccessibilityHoverEvent event id:%{public}d, fingerId:%{public}d,"
+            "type=%{public}d, "
+            "inject=%{public}d",
+            scaleEvent.touchEventId, scaleEvent.id, (int)scaleEvent.type, scaleEvent.isInjected);
+#else
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "OnAccessibilityHoverEvent event id:%{public}d, fingerId:%{public}d, x=%{public}f y=%{public}f "
             "type=%{public}d, "
             "inject=%{public}d",
             scaleEvent.touchEventId, scaleEvent.id, scaleEvent.x, scaleEvent.y, (int)scaleEvent.type,
             scaleEvent.isInjected);
+#endif
     }
     auto targerNode = node ? node : rootNode_;
     if (accessibilityManagerNG_ != nullptr) {
@@ -3317,9 +3169,8 @@ void PipelineContext::CancelDragIfRightBtnPressed(const MouseEvent& event)
     manager->SetIsDragCancel(false);
 }
 
-void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
 {
-    CHECK_RUN_ON(UI);
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
@@ -3330,6 +3181,12 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     lastMouseEvent_->sourceType = event.sourceType;
     lastMouseEvent_->time = event.time;
     lastMouseEvent_->touchEventId = event.touchEventId;
+}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    UpdateLastMoveEvent(event);
 
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
 #ifdef IS_RELEASE_VERSION
@@ -3351,17 +3208,27 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
     }
-
+    DispatchMouseToTouchEvent(event, node);
     CancelDragIfRightBtnPressed(event);
-    auto container = Container::Current();
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
     }
+    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
+        event.action == MouseAction::WINDOW_LEAVE) {
+        lastMouseTime_ = GetTimeFromExternalTimer();
+        CompensateMouseMoveEvent(event, node);
+    }
+    DispatchMouseEvent(event, node);
+}
 
-    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS) &&
+void PipelineContext::DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
             (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
         event.action == MouseAction::CANCEL) {
         auto touchPoint = event.CreateTouchPoint();
@@ -3375,7 +3242,70 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         auto rootOffset = GetRootRect().GetOffset();
         eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
     }
-    DispatchMouseEvent(event, node);
+}
+
+void PipelineContext::CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    if (CompensateMouseMoveEventFromUnhandledEvents(event, node)) {
+        return;
+    }
+    auto lastEventIter = nodeToMousePoints_.find(node);
+    if (lastEventIter == nodeToMousePoints_.end() || lastEventIter->second.empty()) {
+        return;
+    }
+    MouseEvent mouseEvent = lastEventIter->second.back();
+    auto iter = eventManager_->GetLastDispatchTime().find(mouseEvent.id);
+    if (iter != eventManager_->GetLastDispatchTime().end()) {
+        if (static_cast<uint64_t>(mouseEvent.time.time_since_epoch().count()) > iter->second) {
+            TouchRestrict touchRestrict { TouchRestrict::NONE };
+            touchRestrict.sourceType = event.sourceType;
+            touchRestrict.hitTestType = SourceType::MOUSE;
+            touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+            eventManager_->MouseTest(mouseEvent, node, touchRestrict);
+            eventManager_->DispatchMouseEventNG(mouseEvent);
+            eventManager_->DispatchMouseHoverEventNG(mouseEvent);
+            eventManager_->DispatchMouseHoverAnimationNG(mouseEvent);
+        }
+    }
+}
+
+bool PipelineContext::CompensateMouseMoveEventFromUnhandledEvents(
+    const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    if (mouseEvents_.empty()) {
+        return false;
+    }
+
+    auto iter = mouseEvents_.find(node);
+    if (iter == mouseEvents_.end()) {
+        return false;
+    }
+    std::vector<MouseEvent> history;
+    for (auto mouseIter = iter->second.begin(); mouseIter != iter->second.end();) {
+        if (event.id == mouseIter->id) {
+            history.emplace_back(*mouseIter);
+            mouseIter = iter->second.erase(mouseIter);
+        } else {
+            mouseIter++;
+        }
+    }
+    mouseEvents_.erase(iter);
+
+    if (history.empty()) {
+        return false;
+    }
+
+    MouseEvent lastMoveEvent(history.back());
+    lastMoveEvent.history.swap(history);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    eventManager_->MouseTest(lastMoveEvent, node, touchRestrict);
+    eventManager_->DispatchMouseEventNG(lastMoveEvent);
+    eventManager_->DispatchMouseHoverEventNG(lastMoveEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(lastMoveEvent);
+    return true;
 }
 
 void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
@@ -3406,18 +3336,6 @@ void PipelineContext::FlushMouseEvent()
     if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
         return;
     }
-    auto container = Container::Current();
-    if (container) {
-        int32_t sourceType = 0;
-        auto result = container->GetCurPointerEventSourceType(sourceType);
-        if (result) {
-            TAG_LOGI(AceLogTag::ACE_MOUSE,
-                "FlushMouseEvent: last pointer event id %{public}d sourceType:%{public}d last mouse event "
-                "time:%{public}" PRId64 " current time %{public}" PRId64 "",
-                lastMouseEvent_->touchEventId, sourceType,
-                static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
-        }
-    }
     MouseEvent event;
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
@@ -3438,10 +3356,10 @@ void PipelineContext::FlushMouseEvent()
 
 void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
 {
-    std::unordered_set<int32_t> moveEventIds;
     decltype(mouseEvents_) mouseEvents(std::move(mouseEvents_));
     if (mouseEvents.empty()) {
         canUseLongPredictTask_ = true;
+        nodeToMousePoints_.clear();
         return;
     }
     canUseLongPredictTask_ = false;
@@ -3461,10 +3379,12 @@ void PipelineContext::OnFlushMouseEvent(
     std::unordered_map<int, MouseEvent> idToMousePoints;
     bool needInterpolation = true;
     std::unordered_map<int32_t, MouseEvent> newIdMousePoints;
+    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
     for (auto iter = mouseEvents.rbegin(); iter != mouseEvents.rend(); ++iter) {
         auto scaleEvent = (*iter).CreateScaleEvent(GetViewScale());
         idToMousePoints.emplace(scaleEvent.id, scaleEvent);
         idToMousePoints[scaleEvent.id].history.insert(idToMousePoints[scaleEvent.id].history.begin(), scaleEvent);
+        nodeToMousePoints[node].emplace_back(idToMousePoints[scaleEvent.id]);
         needInterpolation = iter->action != MouseAction::MOVE ? false : true;
     }
     if (focusWindowId_.has_value()) {
@@ -3481,7 +3401,7 @@ void PipelineContext::OnFlushMouseEvent(
                     static_cast<uint64_t>(stamp), targetTimeStamp);
                 continue;
             }
-            MouseEvent newMouseEvent = GetResampleMouseEvent(
+            MouseEvent newMouseEvent = eventManager_->GetResampleMouseEvent(
                 historyMousePointsById_[idIter.first], idIter.second.history, targetTimeStamp);
             if (newMouseEvent.x != 0 && newMouseEvent.y != 0) {
                 newIdMousePoints[idIter.first] = newMouseEvent;
@@ -3501,7 +3421,9 @@ void PipelineContext::DispatchMouseEvent(
 {
     std::list<MouseEvent> mousePoints;
     for (const auto& iter : idToMousePoints) {
-        lastDispatchTime_[iter.first] = GetVsyncTime();
+        auto lastDispatchTime = eventManager_->GetLastDispatchTime();
+        lastDispatchTime[iter.first] = GetVsyncTime();
+        eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
         auto it = newIdMousePoints.find(iter.first);
         if (it != newIdMousePoints.end()) {
             mousePoints.emplace_back(it->second);
@@ -3511,84 +3433,21 @@ void PipelineContext::DispatchMouseEvent(
     }
     for (auto iter = mousePoints.rbegin(); iter != mousePoints.rend(); ++iter) {
         auto scaleEvent = iter->CreateScaleEvent(viewScale_);
-        auto touchEvent = scaleEvent.CreateTouchPoint();
-        for (auto it = mouseEvents.begin(); it != mouseEvents.end(); it++) {
-            touchEvent.history.emplace_back(it->CreateTouchPoint());
-        }
-        OnTouchEvent(touchEvent, node);
         eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     }
-    idToMousePoints_ = std::move(idToMousePoints);
 }
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass,
+    MouseStyleChangeReason reason)
 {
-    auto window = GetWindow();
-    if (window && window->IsUserSetCursor()) {
-        return false;
-    }
-    if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
-        return false;
-    }
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_RETURN(mouseStyle, false);
-    if (windowId) {
-        return mouseStyle->ChangePointerStyle(windowId, format);
-    }
-    return mouseStyle->ChangePointerStyle(GetFocusWindowId(), format);
-}
-
-bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
-{
-    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
-    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    if (event.isPreIme) {
-        return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
-    }
-
-    if (!IsSkipShortcutAndFocusMove() && DispatchTabKey(event, curFocusView)) {
-        return true;
-    } else {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Do not dispatch tab key because Web is current focus");
-    }
-    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
-}
-
-bool PipelineContext::IsSkipShortcutAndFocusMove()
-{
-    // Web component will NOT dispatch shortcut during the first event dispatch process.
-    // Web component will NOT trigger focus move during the third event dispatch process.
-    auto focusHub = focusManager_ ? focusManager_->GetCurrentFocus() : nullptr;
-    RefPtr<FrameNode> curFrameNode = focusHub ? focusHub->GetFrameNode() : nullptr;
-    return EventManager::IsSkipEventNode(curFrameNode);
-}
-
-bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
-{
-    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
-    auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
-    isTabJustTriggerOnKeyEvent_ = false;
-
-    if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
-        // Current focused on the view root scope. Tab key used to extend focus.
-        // If return true. This tab key will just trigger onKeyEvent process.
-        isTabJustTriggerOnKeyEvent_ = curFocusView->TriggerFocusMove();
-    }
-
-    // Tab key set focus state from inactive to active.
-    // If return true. This tab key will just trigger onKeyEvent process.
-    bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
-    isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
-    if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
-        return true;
-    }
-    return false;
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_RETURN(mouseStyleManager, false);
+    mouseStyleManager->SetMouseFormat(windowId, nodeId, format, isByPass, reason);
+    RequestFrame();
+    return true;
 }
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent)
@@ -3596,67 +3455,12 @@ void PipelineContext::ReDispatch(KeyEvent& keyEvent)
     CHECK_NULL_VOID(eventManager_);
     TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:%{public}d/action:%{public}d.", keyEvent.code,
         keyEvent.action);
-    // Set keyEvent coming from Redispatch
-    keyEvent.isRedispatch = true;
-
-    if (eventManager_->DispatchKeyboardShortcut(keyEvent)) {
-        return;
-    }
-
-    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
-    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    if (DispatchTabKey(keyEvent, curFocusView)) {
-        return;
-    }
-    eventManager_->DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame);
+    eventManager_->ReDispatch(keyEvent);
 }
 
-bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
-    CHECK_NULL_RETURN(eventManager_, false);
-    eventManager_->SetPressedKeyCodes(event.pressedCodes);
-
-    // onKeyPreIme
-    if (event.isPreIme) {
-        if (TriggerKeyEventDispatch(event)) {
-            return true;
-        }
-        if (!IsSkipShortcutAndFocusMove()) {
-            return eventManager_->DispatchKeyboardShortcut(event);
-        } else {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Do not dispatch keyboard shortcut because Web is current focus");
-        }
-        return false;
-    }
-
-    // process drag cancel
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        auto manager = GetDragDropManager();
-        if (manager && manager->IsMSDPDragging()) {
-            manager->SetIsDragCancel(true);
-            manager->OnDragEnd(PointerEvent(0, 0), "");
-            manager->SetIsDragCancel(false);
-            return true;
-        }
-    }
-
-    // OnKeyEvent
-    if (TriggerKeyEventDispatch(event)) {
-        return true;
-    }
-
-    // process exit overlay
-    if (event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
-        CHECK_NULL_RETURN(overlayManager_, false);
-        auto currentContainer = Container::Current();
-        if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
-            return overlayManager_->RemoveOverlayInSubwindow();
-        } else {
-            return overlayManager_->RemoveOverlay(false);
-        }
-    }
-    return false;
+    return eventManager_->OnNonPointerEvent(event);
 }
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
@@ -3729,8 +3533,51 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
+    if (!axisEventChecker_.IsAxisEventSequenceCorrect(event)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+            "AxisEvent error occurred, the currentAction is %{public}d, the preAction is %{public}d", event.action,
+            axisEventChecker_.GetPreAction());
+    }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    auto formEventMgr = this->GetFormEventManager();
+    SerializedGesture etsSerializedGesture;
+    if (event.action != AxisAction::BEGIN && formEventMgr) {
+        formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
+    }
 
+    DispatchAxisEventToDragDropManager(event, node);
+
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+        eventManager_->AxisTest(scaleEvent, node);
+        eventManager_->DispatchAxisEventNG(scaleEvent);
+    }
+    if (event.action == AxisAction::BEGIN && formEventMgr) {
+        formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
+    }
+    if (scaleEvent.action == AxisAction::BEGIN) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
+        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
+    } else if (scaleEvent.verticalAxis == 0 && scaleEvent.horizontalAxis == 0) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis End");
+        ResSchedReport::GetInstance().ResSchedDataReport("axis_off");
+    } else {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
+        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
+    }
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
+        eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
+    }
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseMoveEventForAxisEvent(mouseEvent, node);
+    if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
+        formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
+        formEventMgr->RemoveEtsCardTouchEventCallback(event.id);
+    }
+}
+
+void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node)
+{
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
     auto dragManager = GetDragDropManager();
     if (dragManager && !dragManager->IsDragged()) {
         if (event.action == AxisAction::BEGIN) {
@@ -3749,14 +3596,6 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         eventManager_->DispatchTouchEvent(scaleEvent);
         isBeforeDragHandleAxis_ = false;
     }
-
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, node);
-        eventManager_->DispatchAxisEventNG(scaleEvent);
-    }
-
-    auto mouseEvent = ConvertAxisToMouse(event);
-    OnMouseMoveEventForAxisEvent(mouseEvent, node);
 }
 
 void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
@@ -3765,16 +3604,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
         return;
     }
     CHECK_RUN_ON(UI);
-    if (!lastMouseEvent_) {
-        lastMouseEvent_ = std::make_unique<MouseEvent>();
-    }
-    lastMouseEvent_->x = event.x;
-    lastMouseEvent_->y = event.y;
-    lastMouseEvent_->button = event.button;
-    lastMouseEvent_->action = event.action;
-    lastMouseEvent_->sourceType = event.sourceType;
-    lastMouseEvent_->time = event.time;
-    lastMouseEvent_->touchEventId = event.touchEventId;
+    UpdateLastMoveEvent(event);
     auto manager = GetDragDropManager();
     if (manager) {
         manager->SetIsDragCancel(false);
@@ -3923,12 +3753,12 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d lost focus.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window: %{public}d lost focus.", windowId_);
         RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
     } else {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Window: %{public}d get focus.", windowId_);
 
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
@@ -4060,26 +3890,38 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
     RecycleManager::Notify(configurationChange);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
-        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
-        auto pipeline = weak.Upgrade();
-        CHECK_NULL_VOID(pipeline);
-        if (configurationChange.IsNeedUpdate()) {
-            auto rootNode = pipeline->GetRootElement();
-            rootNode->UpdateConfigurationUpdate(configurationChange);
-            auto overlay = weakOverlayManager.Upgrade();
-            if (overlay) {
-                overlay->ReloadBuilderNodeConfig();
+    AnimationUtils::Animate(
+        option,
+        [weak = WeakClaim(this), configurationChange,
+            weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            if (configurationChange.IsNeedUpdate() || configurationChange.iconUpdate) {
+                auto rootNode = pipeline->GetRootElement();
+                rootNode->UpdateConfigurationUpdate(configurationChange);
+                auto overlay = weakOverlayManager.Upgrade();
+                if (overlay) {
+                    overlay->ReloadBuilderNodeConfig();
+                }
             }
-        }
-        if (fullUpdate) {
-            CHECK_NULL_VOID(pipeline->stageManager_);
-            pipeline->SetIsReloading(true);
-            pipeline->stageManager_->ReloadStage();
-            pipeline->SetIsReloading(false);
-            pipeline->FlushUITasks();
-        }
-    });
+            if (fullUpdate && configurationChange.IsNeedUpdate()) {
+                CHECK_NULL_VOID(pipeline->stageManager_);
+                pipeline->SetIsReloading(true);
+                pipeline->stageManager_->ReloadStage();
+                pipeline->SetIsReloading(false);
+                pipeline->FlushUITasks();
+            }
+        },
+        [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->OnFlushReloadFinish();
+        });
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateWindowBlur();
 }
 
 void PipelineContext::Destroy()
@@ -4087,6 +3929,11 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
+    std::unordered_set<UINode*> nodeSet;
+    std::swap(nodeSet, attachedNodeSet_);
+    for (auto& node : nodeSet) {
+        node->DetachFromMainTree();
+    }
     rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
@@ -4104,6 +3951,8 @@ void PipelineContext::Destroy()
     focusManager_.Reset();
     selectOverlayManager_.Reset();
     fullScreenManager_.Reset();
+    nodeToMousePoints_.clear();
+    nodeToPointEvent_.clear();
     touchEvents_.clear();
     mouseEvents_.clear();
     dragEvents_.clear();
@@ -4118,10 +3967,18 @@ void PipelineContext::Destroy()
     if (textFieldManager_ && textFieldManager_->GetImeShow()) {
         InputMethodManager::GetInstance()->CloseKeyboardInPipelineDestroy();
     }
+    auto formEventMgr = this->GetFormEventManager();
+    if (formEventMgr) {
+        formEventMgr->ClearEtsCardTouchEventCallback();
+        formEventMgr->ClearEtsCardAxisEventCallback();
+    }
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif
     PipelineBase::Destroy();
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    PipelineContext::aliveInstanceSet_.erase(instanceId_);
+#endif
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
@@ -4150,11 +4007,13 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
     if (!CheckThreadSafe()) {
         LOGW("FlushWindowStateChangedCallback doesn't run on UI thread!");
     }
-    auto iter = onWindowStateChangedCallbacks_.begin();
-    while (iter != onWindowStateChangedCallbacks_.end()) {
+    std::set<int32_t> onWindowStateChangedCallbacks;
+    std::swap(onWindowStateChangedCallbacks, onWindowStateChangedCallbacks_);
+    auto iter = onWindowStateChangedCallbacks.begin();
+    while (iter != onWindowStateChangedCallbacks.end()) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
-            iter = onWindowStateChangedCallbacks_.erase(iter);
+            iter = onWindowStateChangedCallbacks.erase(iter);
         } else {
             if (isShow) {
                 node->OnWindowShow();
@@ -4164,6 +4023,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
+    std::swap(onWindowStateChangedCallbacks, onWindowStateChangedCallbacks_);
     HandleVisibleAreaChangeEvent(GetTimeFromExternalTimer());
     HandleSubwindow(isShow);
 }
@@ -4264,12 +4124,12 @@ void PipelineContext::RequireSummary()
     manager->RequireSummary();
 }
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
     const RefPtr<NG::FrameNode>& node)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    std::string extraInfo;
+    std::string extraInfo = manager->GetExtraInfo();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
@@ -4283,6 +4143,8 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
+        lastDragTime_ = GetTimeFromExternalTimer();
+        CompensatePointerMoveEvent(pointerEvent, node);
         manager->OnDragMoveOut(pointerEvent);
         manager->ClearSummary();
         manager->ClearExtraInfo();
@@ -4292,12 +4154,13 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->ResetPreTargetFrameNode(GetInstanceId());
-        manager->RequireSummary();
+        manager->RequireSummaryIfNecessary(pointerEvent);
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
     }
-    extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {
+        lastDragTime_ = GetTimeFromExternalTimer();
+        CompensatePointerMoveEvent(pointerEvent, node);
         manager->OnDragEnd(pointerEvent, extraInfo, node);
         return;
     }
@@ -4313,6 +4176,60 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     if (action != DragEventAction::DRAG_EVENT_MOVE) {
         manager->OnDragMove(pointerEvent, extraInfo, node);
     }
+}
+
+void PipelineContext::CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node)
+{
+    auto manager = GetDragDropManager();
+    std::string extraInfo = manager->GetExtraInfo();
+    if (CompensatePointerMoveEventFromUnhandledEvents(event, node)) {
+        return;
+    }
+    auto lastEventIter = nodeToPointEvent_.find(node);
+    if (lastEventIter == nodeToPointEvent_.end() || lastEventIter->second.empty()) {
+        return;
+    }
+    DragPointerEvent pointerEvent = lastEventIter->second.back();
+    auto iter = eventManager_->GetLastDispatchTime().find(pointerEvent.pointerEventId);
+    if (iter != eventManager_->GetLastDispatchTime().end()) {
+        if (static_cast<uint64_t>(pointerEvent.time.time_since_epoch().count()) > iter->second) {
+            manager->OnDragMove(pointerEvent, extraInfo, node);
+        }
+    }
+}
+
+bool PipelineContext::CompensatePointerMoveEventFromUnhandledEvents(
+    const DragPointerEvent& event, const RefPtr<FrameNode>& node)
+{
+    auto manager = GetDragDropManager();
+    std::string extraInfo = manager->GetExtraInfo();
+    std::vector<DragPointerEvent> history;
+    if (dragEvents_.empty()) {
+        return false;
+    }
+    
+    auto iter = dragEvents_.find(node);
+    if (iter == dragEvents_.end()) {
+        return false;
+    }
+    for (auto dragIter = iter->second.begin(); dragIter != iter->second.end();) {
+        if (event.pointerEventId == dragIter->pointerEventId) {
+            history.emplace_back(*dragIter);
+            dragIter = iter->second.erase(dragIter);
+        } else {
+            dragIter++;
+        }
+    }
+    dragEvents_.erase(iter);
+
+    if (history.empty()) {
+        return false;
+    }
+
+    auto lastePointerEvent(history.back());
+    lastePointerEvent.history.swap(history);
+    manager->OnDragMove(lastePointerEvent, extraInfo, node);
+    return true;
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)
@@ -4454,11 +4371,6 @@ void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
 }
 
-void PipelineContext::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
-{
-    taskScheduler_->AddLastestFrameLayoutFinishTask(std::move(task));
-}
-
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterRenderTask(std::move(task));
@@ -4538,6 +4450,49 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
+}
+
+void PipelineContext::EnableContainerModalGesture(bool isEnable)
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    if (!containerNode) {
+        LOGW("container node is null when set event on gesture row");
+        return;
+    }
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->EnableContainerModalGesture(isEnable);
+}
+
+bool PipelineContext::GetContainerFloatingTitleVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetFloatingTitleVisible();
+}
+
+bool PipelineContext::GetContainerCustomTitleVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetCustomTitleVisible();
+}
+
+bool PipelineContext::GetContainerControlButtonVisible()
+{
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetControlButtonVisible();
 }
 
 void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
@@ -4684,10 +4639,12 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         CHECK_NULL_VOID(window);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
-        auto cursor = static_cast<MouseFormat>(cursorValue);
-        window->SetCursor(cursor);
-        window->SetUserSetCursor(true);
-        mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
+        auto mouseFormat = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        CHECK_NULL_VOID(mouseStyleManager);
+        mouseStyleManager->SetUserSetCursor(true);
+        ChangeMouseStyle(-1, mouseFormat, GetFocusWindowId(),
+            false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     }
 }
 
@@ -4697,9 +4654,11 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(window);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
-    window->SetCursor(MouseFormat::DEFAULT);
-    window->SetUserSetCursor(false);
-    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
+    ChangeMouseStyle(-1, MouseFormat::DEFAULT, windowId > 0 ? windowId : GetFocusWindowId(),
+        false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_VOID(mouseStyleManager);
+    mouseStyleManager->SetUserSetCursor(false);
 }
 
 void PipelineContext::OpenFrontendAnimation(
@@ -4712,7 +4671,7 @@ void PipelineContext::OpenFrontendAnimation(
     if (!isReloading_ && !IsLayouting()) {
         FlushUITasks();
     }
-    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback);
     if (IsFormRender()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
@@ -4820,7 +4779,14 @@ void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyb
 {
     if (isDoKeyboardAvoidAnimate_) {
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
-        Animate(option, option.GetCurve(), func);
+        Animate(option, option.GetCurve(), func, [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_NULL_VOID(pipeline->textFieldManager_);
+            auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(pipeline->textFieldManager_);
+            CHECK_NULL_VOID(textFieldManagerNg);
+            textFieldManagerNg->OnAfterAvoidKeyboard(false);
+        });
     } else {
         func();
     }
@@ -4898,6 +4864,14 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
         return true;
     }
     return false;
+}
+
+void PipelineContext::StopWindowAnimation()
+{
+    isWindowAnimation_ = false;
+    if (taskScheduler_ && !taskScheduler_->IsPredictTaskEmpty()) {
+        RequestFrame();
+    }
 }
 
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
@@ -5297,8 +5271,8 @@ bool PipelineContext::CheckThreadSafe()
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
 {
     auto period = window_->GetVSyncPeriod();
-    if (period > 0 && static_cast<uint64_t>(recvTime_) > nanoTimestamp + MAX_MISS_COUNT * period) {
-        return recvTime_ - ((recvTime_ - nanoTimestamp) % period);
+    if (period > 0 && recvTime_ > static_cast<int64_t>(nanoTimestamp) + MAX_MISS_COUNT * period) {
+        return static_cast<uint64_t>(recvTime_ - ((recvTime_ - static_cast<int64_t>(nanoTimestamp)) % period));
     }
     return nanoTimestamp;
 }
@@ -5315,5 +5289,49 @@ bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
     }
     animationTimeStamp_ = animationTimeStamp;
     return window_->FlushAnimation(animationTimeStamp);
+}
+
+void PipelineContext::RegisterAttachedNode(UINode* uiNode)
+{
+    attachedNodeSet_.emplace(uiNode);
+}
+
+void PipelineContext::RemoveAttachedNode(UINode* uiNode)
+{
+    attachedNodeSet_.erase(uiNode);
+}
+
+ScopedLayout::ScopedLayout(PipelineContext* pipeline)
+{
+    if (!pipeline) {
+        return;
+    }
+    // save flag before measure
+    pipeline_ = pipeline;
+    isLayouting_ = pipeline_->IsLayouting();
+    pipeline_->SetIsLayouting(true);
+}
+
+ScopedLayout::~ScopedLayout()
+{
+    if (!pipeline_) {
+        return;
+    }
+    // set layout flag back
+    pipeline_->SetIsLayouting(isLayouting_);
+}
+
+std::string PipelineContext::GetBundleName()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
 }
 } // namespace OHOS::Ace::NG

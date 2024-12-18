@@ -112,7 +112,8 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void LoadChildren(bool notDetach) const;
@@ -182,7 +183,7 @@ public:
      */
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
 protected:
-    void UpdateChildrenFreezeState(bool isFreeze) override;
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void OnAttachToMainTree(bool recursive) override
     {
@@ -201,10 +202,11 @@ private:
     {
         UINode::OnDetachFromMainTree(recursive, context);
         if (builder_) {
-            for (const auto& item : builder_->GetCachedUINodeMap()) {
-                if (item.second.second != nullptr) {
-                    item.second.second->DetachFromMainTree(recursive);
-                    builder_->ProcessOffscreenNode(item.second.second, true);
+            auto tempExpiringItem = builder_->GetCachedUINodeMap();
+            for (const auto& [key, child] : tempExpiringItem) {
+                if (child.second != nullptr) {
+                    child.second->DetachFromMainTree(recursive);
+                    builder_->ProcessOffscreenNode(child.second, true);
                 }
             }
         }

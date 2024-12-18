@@ -221,6 +221,16 @@ int32_t OH_NativeXComponent::RegisterKeyEventCallback(void (*callback)(OH_Native
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
+int32_t OH_NativeXComponent::RegisterKeyEventCallbackWithResult(
+    bool (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetKeyEventCallbackWithResult(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
 int32_t OH_NativeXComponent::RegisterBlurEventCallback(void (*callback)(OH_NativeXComponent* component, void* window))
 {
     if (xcomponentImpl_ == nullptr) {

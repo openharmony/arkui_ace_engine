@@ -116,7 +116,7 @@ public:
         formLinkInfos_ = infos;
     }
 
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
 
     bool IsJsCard() const
     {
@@ -208,6 +208,8 @@ private:
         int32_t dimensionHeight);
     void SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo &info);
     void SetSkeletonEnableConfig(const RequestFormInfo &info);
+    void SetExternalRenderOpacity(double opacity);
+    bool ShouldDoSkeletonAnimation();
     void DoSkeletonAnimation();
     void UpdateFormBaseConfig(bool isDynamic);
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
@@ -219,7 +221,14 @@ private:
     bool CheckFormBundleForbidden(const std::string &bundleName);
     void DelayResetManuallyClickFlag();
     void RemoveDelayResetManuallyClickFlagTask();
+
+    void InitAddFormUpdateAndErrorCallback(int32_t instanceId);
+    void InitAddUninstallAndSurfaceNodeCallback(int32_t instanceId);
+    void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
+    void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
+    void InitOtherCallback(int32_t instanceId);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
+    void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;
@@ -252,6 +261,7 @@ private:
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
+    bool ShouldAddChildAtReuildFrame();
 };
 } // namespace NG
 } // namespace Ace

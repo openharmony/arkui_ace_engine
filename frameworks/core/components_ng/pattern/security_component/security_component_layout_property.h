@@ -52,7 +52,10 @@ public:
         value->propBackgroundBorderWidth_ = CloneBackgroundBorderWidth();
         value->propBackgroundBorderRadius_ = CloneBackgroundBorderRadius();
         value->propBackgroundType_ = CloneBackgroundType();
+        value->propTextStyle_ = CloneTextStyle();
+        value->propAlignment_ = CloneAlignment();
         value->propIsArkuiComponent_ = CloneIsArkuiComponent();
+        value->propIsFontColorSet_ = CloneIsFontColorSet();
         value->propIsTextLimitExceeded_ = CloneIsTextLimitExceeded();
         value->propTextIconLayoutDirection_ = CloneTextIconLayoutDirection();
         return value;
@@ -78,7 +81,10 @@ public:
         ResetBackgroundBorderWidth();
         ResetBackgroundBorderRadius();
         ResetBackgroundType();
+        ResetTextStyle();
+        ResetAlignment();
         ResetIsArkuiComponent();
+        ResetIsFontColorSet();
         ResetIsTextLimitExceeded();
         ResetTextIconLayoutDirection();
     }
@@ -99,9 +105,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBorderWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundType, int32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextStyle, int32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Alignment, Alignment, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsArkuiComponent, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsFontColorSet, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsTextLimitExceeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconLayoutDirection,
         SecurityComponentLayoutDirection, PROPERTY_UPDATE_MEASURE);

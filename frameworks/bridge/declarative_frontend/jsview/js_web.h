@@ -90,6 +90,7 @@ public:
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnScreenCaptureRequest(const JSCallbackInfo& args);
+    static void BindSelectionMenu(const JSCallbackInfo& info);
     static void OnContextMenuHide(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
     static void OnSearchResultReceive(const JSCallbackInfo& args);
@@ -140,6 +141,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetMetaViewport(const JSCallbackInfo& args);
     static void OverScrollMode(int overScrollMode);
+    static void BlurOnKeyboardHideMode(int blurOnKeyboardHideMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
     static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);

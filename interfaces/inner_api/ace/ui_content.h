@@ -58,6 +58,7 @@ class RSTransaction;
 class Transform;
 enum class AvoidAreaType : uint32_t;
 class AvoidArea;
+struct DecorButtonStyle;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -109,6 +110,11 @@ public:
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
     virtual UIContentErrorCode Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
+    virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage, const std::string& contentName)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
     virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
@@ -368,12 +374,6 @@ public:
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 
-    /**
-     * @description: Set UIContent callback after lastest layout finish.
-     * @param callback callback func.
-     */
-    virtual void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
-
     // Current paintSize of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
@@ -441,6 +441,28 @@ public:
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
+
+    virtual void EnableContainerModalGesture(bool isEnable) {};
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
+
+    virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {}
+    virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
+
+    virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
 };
 
 } // namespace OHOS::Ace

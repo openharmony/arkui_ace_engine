@@ -29,17 +29,6 @@ RefPtr<SvgNode> SvgLine::Create()
     return AceType::MakeRefPtr<SvgLine>();
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgLine::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    path.moveTo(ConvertDimensionToPx(lineAttr_.x1, viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(lineAttr_.y1, viewPort, SvgLengthType::VERTICAL));
-    path.lineTo(ConvertDimensionToPx(lineAttr_.x2, viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(lineAttr_.y2, viewPort, SvgLengthType::VERTICAL));
-    return path;
-}
-#else
 RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
@@ -49,7 +38,6 @@ RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
         ConvertDimensionToPx(lineAttr_.y2, viewPort, SvgLengthType::VERTICAL));
     return path;
 }
-#endif
 
 bool SvgLine::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {

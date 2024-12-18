@@ -117,9 +117,6 @@ public:
 
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
-#ifndef USE_ROSEN_DRAWING
-    void Paint(SkCanvas* skCanvas, float x, float y) override;
-#endif
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
@@ -152,6 +149,7 @@ public:
     }
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
+    RectF GetPaintRegion(float x, float y) override;
     void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override;
     void UpdateColor(size_t from, size_t to, const Color& color) override;
@@ -175,6 +173,9 @@ private:
     int32_t AdjustIndexForEmoji(int32_t index);
     bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
     void CalculateLeadingMarginOffest(float& x, float& y);
+    int32_t GetIndexWithoutPlaceHolder(int32_t index);
+    bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
+    bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE

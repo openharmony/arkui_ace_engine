@@ -23,6 +23,7 @@
 #endif
 
 #include "pixel_map.h"
+#include "datashare_result_set.h"
 
 namespace OHOS::AppExecFwk {
 class DataAbilityHelper;
@@ -56,6 +57,9 @@ public:
     int32_t ReadMovingPhotoVideo(const std::string &uri) override;
     std::string GetMovingPhotoImageUri(const std::string& uri) override;
     int64_t GetMovingPhotoDateModified(const std::string& uri) override;
+    int64_t GetMovingPhotoCoverPosition(const std::string& columnName, const std::string& value,
+        std::vector<std::string>& columns) override;
+    std::string GetMovingPhotoImagePath(const std::string& uri) override;
 
 private:
     int32_t OpenFileWithDataAbility(const std::string& uriStr, const std::string& mode);

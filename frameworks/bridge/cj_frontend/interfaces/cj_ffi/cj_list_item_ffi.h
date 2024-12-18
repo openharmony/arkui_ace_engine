@@ -28,7 +28,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkListItemSetEditable(bool flag);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSelectable(bool flag);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetOnSelect(void (*callback)(bool flag));
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSwipeAction(
-    void (*startBuilder)(), void (*endBuilder)(), void (*onIndexChange)(int32_t index), int32_t edgeEffect);
+    void (*startBuilder)(), void (*endBuilder)(), int32_t edgeEffect);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_FLEX_FFI_H
