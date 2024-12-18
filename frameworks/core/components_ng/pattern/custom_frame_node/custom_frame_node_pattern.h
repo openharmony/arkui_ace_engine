@@ -56,11 +56,6 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         auto renderNodePaintProperty = MakeRefPtr<RenderNodePaintProperty>();

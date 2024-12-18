@@ -87,6 +87,7 @@ constexpr int32_t DEFAULT_VALUE = 0;
 constexpr int32_t ID = 0;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
 const std::string HELLO_TEXT = "hello";
+const std::u16string HELLO_TEXT_U16 = u"hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
@@ -193,7 +194,7 @@ void TextInputModifyBase::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(placeHolder, text);
+    textFieldModelNG.CreateTextInput(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }
@@ -880,65 +881,6 @@ HWTEST_F(TextFieldModifyTest, DoCallback014, TestSize.Level1)
 }
 
 /**
- * @tc.name: DoCallback0015
- * @tc.desc: Test function OnModifyDone.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldModifyTest, DoCallback015, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node.
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
-     * @tc.expected: Check if return true.
-     */
-    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    accessibilityProperty->actionScrollForwardImpl_.operator()();
-    pattern_->scrollable_ = true;
-    pattern_->SetAccessibilityScrollAction();
-    accessibilityProperty->actionScrollForwardImpl_.operator()();
-    EXPECT_EQ(pattern_->textRect_.y_, 0);
-
-    pattern_->scrollable_ = true;
-    pattern_->textRect_.y_ = 50;
-    pattern_->SetAccessibilityScrollAction();
-    accessibilityProperty->actionScrollForwardImpl_.operator()();
-    EXPECT_EQ(pattern_->textRect_.y_, 50);
-}
-
-/**
- * @tc.name: DoCallback0015
- * @tc.desc: Test function OnModifyDone.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldModifyTest, DoCallback016, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node.
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.steps: step2. callback the AccessibilityActions in OnModifyDone.
-     * @tc.expected: Check if return true.
-     */
-    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    accessibilityProperty->actionScrollBackwardImpl_.operator()();
-    pattern_->scrollable_ = true;
-    pattern_->SetAccessibilityScrollAction();
-    accessibilityProperty->actionScrollBackwardImpl_.operator()();
-    EXPECT_EQ(pattern_->textRect_.y_, 0);
-    pattern_->textRect_.y_ = 52;
-    pattern_->scrollable_ = true;
-    pattern_->SetAccessibilityScrollAction();
-    accessibilityProperty->actionScrollBackwardImpl_.operator()();
-    EXPECT_EQ(pattern_->textRect_.y_, 52);
-}
-
-/**
  * @tc.name: MouseEvent001
  * @tc.desc: Test mouse event.
  * @tc.type: FUNC
@@ -1594,14 +1536,14 @@ HWTEST_F(TextFieldModifyTest, CreateFrameNode001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    auto frameNode1 = TextFieldModelNG::CreateFrameNode(ID, "", "", false);
+    auto frameNode1 = TextFieldModelNG::CreateFrameNode(ID, u"", u"", false);
     EXPECT_NE(frameNode1, nullptr);
  
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
      */
-    auto frameNode2 = TextFieldModelNG::CreateFrameNode(ID, "", HELLO_TEXT, true);
+    auto frameNode2 = TextFieldModelNG::CreateFrameNode(ID, u"", HELLO_TEXT_U16, true);
     EXPECT_NE(frameNode2, nullptr);
 }
  
@@ -1959,7 +1901,7 @@ HWTEST_F(TextFieldModifyTest, SetTextFieldText001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto pattern = frameNode->GetPattern<TextFieldPattern>();
-        model.SetTextFieldText(frameNode, HELLO_TEXT);
+        model.SetTextFieldText(frameNode, HELLO_TEXT_U16);
         auto textValue = pattern->GetTextValue();
         EXPECT_EQ(textValue, HELLO_TEXT);
     });

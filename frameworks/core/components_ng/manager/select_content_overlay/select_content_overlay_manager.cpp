@@ -531,7 +531,7 @@ void SelectContentOverlayManager::MountNodeToRoot(
         index++;
     }
     if (nodeType == NodeType::TOUCH_MENU || nodeType == NodeType::RIGHT_CLICK_MENU) {
-        slot = isMeetSpecialNode ? slot : index;
+        slot = index;
     }
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "MountNodeToRoot:%{public}s, id:%{public}d", rootNode->GetTag().c_str(),
         rootNode->GetId());

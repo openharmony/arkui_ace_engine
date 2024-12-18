@@ -448,8 +448,8 @@ private:
     void InitTextFontFamily();
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
-    void UpdateTextAccessibilityProperty(RefPtr<FrameNode>& textNode, int32_t virtualIndex,
-        std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate);
+    void UpdateTextAccessibilityProperty(
+        int32_t virtualIndex, std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate);
 
     bool isTossing_ = false;
     float localDownDistance_ = 0.0f;

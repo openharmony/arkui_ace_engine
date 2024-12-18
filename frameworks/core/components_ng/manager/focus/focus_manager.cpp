@@ -19,6 +19,15 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<FocusManager> GetCurrentFocusManager()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto focusManager = context->GetFocusManager();
+    return focusManager;
+}
+}
 
 FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
 {
@@ -368,8 +377,14 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
         return;
     }
     if (!isSwitchingWindow_) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitch end, start: %{public}d, end: %{public}d, "
-            "update: %{public}d",
+        auto lastHub = currentFocus_.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitch end, %{public}s/" SEC_PLD(%{public}d) " onBlur, "
+            "%{public}s/" SEC_PLD(%{public}d) " onFocus, "
+            "start: %{public}d, end: %{public}d, update: %{public}d",
+            lastHub ? lastHub->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(lastHub ? lastHub->GetFrameId() : -1),
+            switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(switchingFocus_ ? switchingFocus_->GetFrameId() : -1),
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
         if (switchingFocus_ &&
@@ -393,8 +408,14 @@ void FocusManager::WindowFocusMoveEnd()
 {
     isSwitchingWindow_ = false;
     if (!isSwitchingFocus_.value_or(true)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "WinFocusMove end, start: %{public}d, end: %{public}d, "
-            "update: %{public}d",
+        auto lastHub = currentFocus_.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "WinFocusMove end, %{public}s/" SEC_PLD(%{public}d) " onBlur, "
+            "%{public}s/" SEC_PLD(%{public}d) " onFocus, "
+            "start: %{public}d, end: %{public}d, update: %{public}d",
+            lastHub ? lastHub->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(lastHub ? lastHub->GetFrameId() : -1),
+            switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(switchingFocus_ ? switchingFocus_->GetFrameId() : -1),
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             endReason_.value_or(SwitchingEndReason::DEFAULT),
             updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
@@ -406,7 +427,6 @@ void FocusManager::WindowFocusMoveEnd()
 void FocusManager::FocusGuard::CreateFocusGuard(const RefPtr<FocusHub>& focusHub,
     const RefPtr<FocusManager>& focusManager, SwitchingStartReason reason)
 {
-    CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusManager);
     if (focusManager->isSwitchingFocus_.value_or(false)) {
         return;
@@ -419,14 +439,12 @@ FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub,
     SwitchingStartReason reason)
 {
     RefPtr<FocusHub> hub = focusHub;
-    if (!focusHub ||!focusHub->GetFocusManager()) {
+    if (!hub || !hub->GetFocusManager()) {
         auto curFocusView = FocusView::GetCurrentFocusView();
-        CHECK_NULL_VOID(curFocusView);
-        auto curFocusViewHub = curFocusView->GetFocusHub();
-        CHECK_NULL_VOID(curFocusViewHub);
-        hub = curFocusViewHub;
+        hub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     }
-    auto mng = hub->GetFocusManager();
+
+    auto mng = hub ? hub->GetFocusManager() : GetCurrentFocusManager();
     CreateFocusGuard(hub, mng, reason);
 }
 
@@ -456,7 +474,7 @@ void FocusManager::WindowFocus(bool isFocus)
     if (!curFocusViewHub) {
         TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
     } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request current focus view: %{public}s/%{public}d",
             curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
         if (!IsAutoFocusTransfer()) {
             SetFocusViewRootScope(curFocusView);
@@ -467,7 +485,7 @@ void FocusManager::WindowFocus(bool isFocus)
     } else {
         auto container = Container::Current();
         if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS,
+            TAG_LOGD(AceLogTag::ACE_FOCUS,
                 "Request default focus on current focus view: %{public}s/%{public}d",
                 curFocusView->GetFrameName().c_str(),
                 curFocusView->GetFrameId());
@@ -483,7 +501,7 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
             "Request focus on rootFocusHub: %{public}s/%{public}d",
             rootFocusHub->GetFrameName().c_str(),
             rootFocusHub->GetFrameId());

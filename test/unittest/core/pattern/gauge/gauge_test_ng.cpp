@@ -2011,4 +2011,36 @@ HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest001, TestSize.Level1)
     pattern_->OnSensitiveStyleChange(true);
     EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
 }
+
+/**
+ * @tc.name: GaugePrivacySensitiveTest002
+ * @tc.desc: Test OnSensitiveStyleChange maxValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GaugePattern.
+     */
+    Create(VALUE, MIN, MAX);
+    frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto valueTextId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    pattern_->maxValueTextId_ = valueTextId;
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. change privacy sensitive false and check status.
+     */
+    pattern_->OnSensitiveStyleChange(false);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
+    /**
+     * @tc.steps: step3. change privacy sensitive true and check status.
+     */
+    pattern_->OnSensitiveStyleChange(true);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
+}
 } // namespace OHOS::Ace::NG

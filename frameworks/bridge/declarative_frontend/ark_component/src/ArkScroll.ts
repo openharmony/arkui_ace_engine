@@ -129,43 +129,6 @@ class ScrollScrollableModifier extends ModifierWithKey<ScrollDirection> {
   }
 }
 
-class ScrollEdgeEffectModifier extends ModifierWithKey<ArkScrollEdgeEffect> {
-  constructor(value: ArkScrollEdgeEffect) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('edgeEffect');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scroll.resetEdgeEffect(node);
-    } else {
-      getUINativeModule().scroll.setEdgeEffect(node, this.value.value, this.value.options?.alwaysEnabled);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
-class ScrollFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
-  constructor(value: ArkFadingEdge) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('scrollFadingEdge');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scroll.resetFadingEdge(node);
-    } else {
-      getUINativeModule().scroll.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
 class ScrollScrollBarWidthModifier extends ModifierWithKey<string | number> {
   constructor(value: string | number) {
     super(value);
@@ -449,20 +412,6 @@ class ArkScrollComponent extends ArkScrollable<ScrollAttribute> implements Scrol
   }
   scrollBarWidth(value: string | number): this {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollBarWidthModifier.identity, ScrollScrollBarWidthModifier, value);
-    return this;
-  }
-  edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions): this {
-    let effect: ArkScrollEdgeEffect = new ArkScrollEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, ScrollEdgeEffectModifier.identity, ScrollEdgeEffectModifier, effect);
-    return this;
-  }
-  fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
-    let fadingEdge: ArkFadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, ScrollFadingEdgeModifier.identity, ScrollFadingEdgeModifier, fadingEdge);
     return this;
   }
   onScrollFrameBegin(callback: (offset: number, state: ScrollState) => { offsetRemain: number }): this {

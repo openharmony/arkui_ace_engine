@@ -142,7 +142,7 @@ type ElementType = {
 }
 
 // Data struct send to profiler or Inspector
-type ViewPUInfo = { componentName: string, id: number };
+type ViewPUInfo = { componentName: string, id: number, isV2?: boolean, isCompFreezeAllowed_?: boolean, isViewActive_?: boolean };
 type ObservedPropertyInfo<T> = {
   decorator: string, propertyName: string, value: any, id: number, changeId?: number, inRenderingElementId?: number,
   changedTrackPropertyName?: string | undefined,

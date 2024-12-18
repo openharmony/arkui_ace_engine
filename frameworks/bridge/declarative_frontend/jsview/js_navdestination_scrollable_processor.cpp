@@ -146,16 +146,24 @@ void JSNavDestinationScrollableProcessor::HandleOnTouchEvent(
             // If we have started the task of showing titleBar/toolBar delayed task, we need to cancel it.
             navDestPattern->CancelShowTitleAndToolBarTask();
         }
-    } else {
-        scrollInfo.isTouching = false;
-        if (!scrollInfo.isScrolling) {
-            /**
-             * When touching and scrolling stops, it is necessary to check
-             * whether the titleBar&toolBar should be restored to its original position.
-             */
-            navDestPattern->ResetTitleAndToolBarState();
-        }
+        return;
     }
+    scrollInfo.isTouching = false;
+    if (scrollInfo.isScrolling) {
+        return;
+    }
+    /**
+     * When touching and scrolling stops, it is necessary to check
+     * whether the titleBar&toolBar should be restored to its original position.
+     */
+    auto pipeline = navDestPattern->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([weakPattern = weakPattern_]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetTitleAndToolBarState();
+    });
+    pipeline->RequestFrame();
 }
 
 void JSNavDestinationScrollableProcessor::HandleOnReachEvent(WeakPtr<JSScroller> weakScroller, bool isTopEvent)
@@ -194,17 +202,25 @@ void JSNavDestinationScrollableProcessor::HandleOnScrollStopEvent(WeakPtr<JSScro
     if (it == scrollInfoMap_.end()) {
         return;
     }
-    auto navDestPattern = weakPattern_.Upgrade();
-    CHECK_NULL_VOID(navDestPattern);
     auto& scrollInfo = it->second;
     scrollInfo.isScrolling = false;
-    if (!scrollInfo.parentScroller.has_value() && !scrollInfo.isTouching) {
-        /**
-         * When touching and scrolling stops, it is necessary to check
-         * whether the titleBar&toolBar should be restored to its original position.
-         */
-        navDestPattern->ResetTitleAndToolBarState();
+    if (scrollInfo.isTouching) {
+        return;
     }
+    /**
+     * When touching and scrolling stops, it is necessary to check
+     * whether the titleBar&toolBar should be restored to its original position.
+     */
+    auto navDestPattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(navDestPattern);
+    auto pipeline = navDestPattern->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([weakPattern = weakPattern_]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetTitleAndToolBarState();
+    });
+    pipeline->RequestFrame();
 }
 
 void JSNavDestinationScrollableProcessor::HandleOnDidScrollEvent(
@@ -214,23 +230,29 @@ void JSNavDestinationScrollableProcessor::HandleOnDidScrollEvent(
     if (it == scrollInfoMap_.end()) {
         return;
     }
-    auto navDestPattern = weakPattern_.Upgrade();
-    CHECK_NULL_VOID(navDestPattern);
     auto& scrollInfo = it->second;
     if ((scrollInfo.isAtTop && isAtTop) || (scrollInfo.isAtBottom && isAtBottom)) {
         // If we have already scrolled to the top or bottom, just return.
         return;
     }
 
+    auto navDestPattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(navDestPattern);
+    auto pipeline = navDestPattern->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (scrollInfo.isScrolling) {
         auto offset = dimension.ConvertToPx() / SCROLL_RATIO;
-        if (NonPositive(offset) ||
-            !(source == ScrollSource::SCROLLER || source == ScrollSource::SCROLLER_ANIMATION)) {
+        if (!(source == ScrollSource::SCROLLER || source == ScrollSource::SCROLLER_ANIMATION) || NonPositive(offset)) {
             /**
              * We will respond to user actions by scrolling up or down. But for the scrolling triggered by developers
              * through the frontend interface, we will only respond to scrolling down.
              */
-            navDestPattern->UpdateTitleAndToolBarHiddenOffset(offset);
+            pipeline->AddAfterLayoutTask([weakPattern = weakPattern_, offset]() {
+                auto pattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->UpdateTitleAndToolBarHiddenOffset(offset);
+            });
+            pipeline->RequestFrame();
         }
     }
 
@@ -249,7 +271,12 @@ void JSNavDestinationScrollableProcessor::HandleOnDidScrollEvent(
      * immediately when the parent component also reaches the top or bottom.
      */
     if ((isChildReachTop && isParentAtTop) || (isChildReachBottom && isParentAtBottom)) {
-        navDestPattern->ShowTitleAndToolBar();
+        pipeline->AddAfterLayoutTask([weakPattern = weakPattern_]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ShowTitleAndToolBar();
+        });
+        pipeline->RequestFrame();
     }
 
     scrollInfo.isAtTop = isAtTop;
@@ -290,15 +317,22 @@ void JSNavDestinationScrollableProcessor::UpdateBindingRelation()
     }
 
     CombineIncomingScrollers();
-    BuildNewBindingRelation();
-    RemoveUnneededBindingRelation();
-
-    if (!scrollInfoMap_.empty()) {
+    // If the bindingRelation has changed or there is no bindingRelation, then we need show titleBar&toolBar again.
+    bool needShowBar = false;
+    if (BuildNewBindingRelation()) {
+        needShowBar = true;
+    }
+    if (RemoveUnneededBindingRelation()) {
+        needShowBar = true;
+    }
+    if (scrollInfoMap_.empty()) {
+        needShowBar = true;
+    }
+    if (!needShowBar) {
         return;
     }
     auto pattern = weakPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    // we need show titlBar/toolBar when there is no binding relation.
     pattern->ShowTitleAndToolBar();
 }
 
@@ -315,8 +349,9 @@ void JSNavDestinationScrollableProcessor::CombineIncomingScrollers()
     incommingScrollers_.clear();
 }
 
-void JSNavDestinationScrollableProcessor::BuildNewBindingRelation()
+bool JSNavDestinationScrollableProcessor::BuildNewBindingRelation()
 {
+    bool buildNewRelation = false;
     for (auto& scrollers : incommingNestedScrollers_) {
         auto it = scrollInfoMap_.find(scrollers.child);
         if (it != scrollInfoMap_.end()) {
@@ -335,12 +370,15 @@ void JSNavDestinationScrollableProcessor::BuildNewBindingRelation()
         info.parentScroller = scrollers.parent;
         info.needUnbind = false;
         scrollInfoMap_.emplace(scrollers.child, info);
+        buildNewRelation = true;
     }
     incommingNestedScrollers_.clear();
+    return buildNewRelation;
 }
 
-void JSNavDestinationScrollableProcessor::RemoveUnneededBindingRelation()
+bool JSNavDestinationScrollableProcessor::RemoveUnneededBindingRelation()
 {
+    bool unbindRelation = false;
     auto infoIter = scrollInfoMap_.begin();
     for (; infoIter != scrollInfoMap_.end();) {
         if (!infoIter->second.needUnbind) {
@@ -353,7 +391,9 @@ void JSNavDestinationScrollableProcessor::RemoveUnneededBindingRelation()
             jsScroller->RemoveObserver(nodeId_);
         }
         infoIter = scrollInfoMap_.erase(infoIter);
+        unbindRelation = true;
     }
+    return unbindRelation;
 }
 
 void JSNavDestinationScrollableProcessor::UnbindAllScrollers()

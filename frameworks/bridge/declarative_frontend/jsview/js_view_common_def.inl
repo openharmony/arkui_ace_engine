@@ -30,7 +30,8 @@ template<class T>
 JSRef<JSVal> ConvertToJSValue(T&& value)
 {
     using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
-    if constexpr (std::is_arithmetic_v<ValueType> || std::is_same_v<ValueType, std::string>) {
+    if constexpr (std::is_arithmetic_v<ValueType> || std::is_same_v<ValueType, std::string> ||
+        std::is_same_v<ValueType, std::u16string>) {
         return JSRef<JSVal>::Make(ToJSValue(std::forward<T>(value)));
     } else if constexpr (std::is_enum_v<ValueType>) {
         return JSRef<JSVal>::Make(ToJSValue(static_cast<std::make_signed_t<ValueType>>(value)));

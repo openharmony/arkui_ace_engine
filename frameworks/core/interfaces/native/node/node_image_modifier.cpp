@@ -562,7 +562,9 @@ int32_t GetImageDraggable(ArkUINodeHandle node)
  */
 void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length)
 {
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(node, values, units, length);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->setBorderRadius(node, values, units, length);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -584,7 +586,9 @@ void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, con
 
 void ResetImageBorderRadius(ArkUINodeHandle node)
 {
-    GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(node);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->resetBorderRadius(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -632,7 +636,9 @@ void ResetImageBorder(ArkUINodeHandle node)
         ImageModelNG::SetBackBorder(frameNode);
         return;
     }
-    GetArkUINodeModifiers()->getCommonModifier()->resetBorder(node);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->resetBorder(node);
     CalcDimension borderRadius;
     ImageModelNG::SetBorderRadius(frameNode, borderRadius);
 }
@@ -962,8 +968,8 @@ const ArkUIImageModifier* GetImageModifier()
 const CJUIImageModifier* GetCJUIImageModifier()
 {
     static const CJUIImageModifier modifier = {
-        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
-        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
+        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
+        SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
         SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
         SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
@@ -998,7 +1004,7 @@ void SetImageOnComplete(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_Y_INDEX].f32 = info.GetContentOffsetY();
         event.componentAsyncEvent.data[IMAGE_CONTENT_WIDTH_INDEX].f32 = info.GetContentWidth();
         event.componentAsyncEvent.data[IMAGE_CONTENT_HEIGHT_INDEX].f32 = info.GetContentHeight();
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }
@@ -1013,7 +1019,7 @@ void SetImageOnError(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_ERROR;
         event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
 }
@@ -1027,7 +1033,7 @@ void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_SVG_PLAY_FINISH;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onSvgPlayFinishEvent));
 }
@@ -1043,7 +1049,7 @@ void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_IMAGE_DOWNLOAD_PROGRESS;
         event.componentAsyncEvent.data[0].u32 = dlNow;
         event.componentAsyncEvent.data[1].u32 = dlTotal;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnDownloadProgress(frameNode, std::move(onDownloadProgress));
 }

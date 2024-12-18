@@ -526,7 +526,7 @@ void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_GRID_SCROLL_TO_INDEX;
         event.componentAsyncEvent.data[0].i32 = first;
         event.componentAsyncEvent.data[1].i32 = last;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     GridModelNG::SetOnScrollIndex(frameNode, std::move(onEvent));
 }

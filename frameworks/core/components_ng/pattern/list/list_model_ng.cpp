@@ -208,8 +208,18 @@ void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
 }
 
-void ListModelNG::SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign)
+void ListModelNG::SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto lastScrollSnapAlign = layoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
+    if (lastScrollSnapAlign != scrollSnapAlign) {
+        auto pattern = frameNode->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetLastSnapTargetIndex(-1);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
 }
 
@@ -694,7 +704,7 @@ int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
     return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
-void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign)
+void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
 }

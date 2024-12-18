@@ -70,11 +70,6 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    ContentClipMode GetDefaultContentClip() const override
-    {
-        return ContentClipMode::CONTENT_ONLY;
-    }
-
     RefPtr<WaterFlowContentModifier> contentModifier_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

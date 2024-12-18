@@ -68,6 +68,9 @@ private:
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool allowUpdate_ = true;
     bool isVisible_ = true;
+    static std::recursive_mutex globalLock_;
+    void HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width, float height,
+        uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth);
 };
 } // namespace Ace
 } // namespace OHOS

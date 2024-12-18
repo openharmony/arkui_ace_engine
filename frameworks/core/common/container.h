@@ -382,6 +382,11 @@ public:
         return context ? context->GetWindow() : nullptr;
     }
 
+    virtual uint64_t GetDisplayId() const
+    {
+        return -1;
+    }
+
     virtual bool IsUseStageModel() const
     {
         return false;
@@ -529,22 +534,61 @@ public:
         return nullptr;
     }
 
+    /*
+     *this interface is just use before api12(not include api12),after api12 when you judge version,use
+     *LessThanAPITargetVersion(PlatformVersion version)
+     */
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContext() &&
+                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+                   : LessThanAPITargetVersion(version);
     }
 
+    /*
+     *this interface is just use before api12(not include api12),after api12 when you judge version,use
+     *GreatOrEqualAPITargetVersion(PlatformVersion version)
+     */
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContext() &&
+                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+                   : GreatOrEqualAPITargetVersion(version);
+    }
+
+    /*
+     *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
+     */
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
+    {
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
+                             static_cast<int32_t>(version)
+                   : LessThanAPITargetVersion(version);
+    }
+
+    /*
+     *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
+     */
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
+    {
+        return static_cast<int32_t>(version) < 14
+                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
+                             static_cast<int32_t>(version)
+                   : GreatOrEqualAPITargetVersion(version);
     }
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        CHECK_NULL_RETURN(container, false);
+        if (!container) {
+            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+            return apiTargetVersion < static_cast<int32_t>(version);
+        }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
@@ -625,6 +669,15 @@ public:
         return false;
     }
 
+    void SetCurrentDisplayId(uint64_t displayId)
+    {
+        currentDisplayId_ = displayId;
+    }
+
+    uint64_t GetCurrentDisplayId() const
+    {
+        return currentDisplayId_;
+    }
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
@@ -659,6 +712,7 @@ private:
     int32_t apiTargetVersion_ = 0;
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
+    uint64_t currentDisplayId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

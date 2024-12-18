@@ -13,7 +13,6 @@
 
 import("//build/ohos.gni")
 import("//build/ohos/ace/ace_args.gni")
-import("//foundation/graphic/graphic_2d/graphic_config.gni")
 
 defines = [
   "OHOS_PLATFORM",
@@ -23,6 +22,7 @@ defines = [
 declare_args() {
   ace_engine_feature_enable_accessibility = false
   ace_engine_feature_enable_web = false
+  ace_engine_feature_enable_gpu = true
 }
 
 js_engines = []
@@ -33,7 +33,7 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-if (ace_enable_gpu) {
+if (ace_engine_feature_enable_gpu) {
   disable_gpu = false
 } else {
   disable_gpu = true

@@ -21,14 +21,14 @@ import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import common from '@ohos.app.ability.common';
 
 export enum ChipSize {
-  NORMAL = "NORMAL",
-  SMALL = "SMALL"
+  NORMAL = 'NORMAL',
+  SMALL = 'SMALL'
 }
 
 enum BreakPointsType {
-  SM = "SM",
-  MD = "MD",
-  LG = "LG"
+  SM = 'SM',
+  MD = 'MD',
+  LG = 'LG'
 }
 
 export enum AccessibilitySelectedType {
@@ -518,7 +518,7 @@ export struct ChipComponent {
   }
 
   private getCloseIconAccessibilityLevel(): string {
-    if (this.closeOptions?.accessibilityLevel) {
+    if (this.closeOptions?.accessibilityLevel === 'no' || this.closeOptions?.accessibilityLevel === 'no-hide-descendants') {
       return this.closeOptions.accessibilityLevel;
     }
     return 'yes';
@@ -575,10 +575,10 @@ export struct ChipComponent {
   }
 
   getSuffixIconAccessibilityLevel(): string {
-    if (!this.suffixIcon?.accessibilityLevel) {
-      return !this.suffixIcon?.action ? 'no' : 'yes';
+    if (this.suffixIcon?.accessibilityLevel === 'no' || this.suffixIcon?.accessibilityLevel === 'no-hide-descendants') {
+      return this.suffixIcon.accessibilityLevel;
     }
-    return this.suffixIcon.accessibilityLevel;
+    return this.suffixIcon?.action ? 'yes' : 'no';
   }
 
   getSuffixIconAccessibilityDescription(): Resource | undefined {
@@ -609,15 +609,17 @@ export struct ChipComponent {
 
   getSuffixSymbolAccessibilityLevel(): string {
     if (this.isChipActivated()) {
-      if (!this.suffixSymbolOptions?.activatedAccessibility?.accessibilityLevel) {
-        return this.suffixSymbolOptions?.action ? 'yes' : 'no';
+      if (this.suffixSymbolOptions?.activatedAccessibility?.accessibilityLevel === 'no' ||
+        this.suffixSymbolOptions?.activatedAccessibility?.accessibilityLevel === 'no-hide-descendants') {
+        return this.suffixSymbolOptions.activatedAccessibility.accessibilityLevel;
       }
-      return this.suffixSymbolOptions.activatedAccessibility.accessibilityLevel;
-    }
-    if (!this.suffixSymbolOptions?.normalAccessibility?.accessibilityLevel) {
       return this.suffixSymbolOptions?.action ? 'yes' : 'no';
     }
-    return this.suffixSymbolOptions.normalAccessibility.accessibilityLevel;
+    if (this.suffixSymbolOptions?.normalAccessibility?.accessibilityLevel === 'no' ||
+      this.suffixSymbolOptions?.normalAccessibility?.accessibilityLevel === 'no-hide-descendants') {
+      return this.suffixSymbolOptions.normalAccessibility.accessibilityLevel;
+    }
+    return this.suffixSymbolOptions?.action ? 'yes' : 'no';
   }
 
   getSuffixSymbolAccessibilityDescription(): Resource | undefined {

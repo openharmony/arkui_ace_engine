@@ -261,7 +261,7 @@ std::pair<bool, bool> FocusView::HandleDefaultFocusNode(
 
 bool FocusView::RequestDefaultFocus()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focusView: %{public}s/%{public}d.", GetFrameName().c_str(),
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on focusView: %{public}s/%{public}d.", GetFrameName().c_str(),
         GetFrameId());
     auto focusViewHub = GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, false);
@@ -295,7 +295,7 @@ bool FocusView::RequestDefaultFocus()
         auto ret = viewRootScope->RequestFocusImmediatelyInner();
         // set neverShown_ false when request focus on focus view success
         neverShown_ &= !ret;
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on root scope: %{public}s/%{public}d return: %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request rootScope: %{public}s/%{public}d ret: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
@@ -311,7 +311,7 @@ bool FocusView::RequestDefaultFocus()
     }
     // set neverShown_ false when request focus on focus view success
     neverShown_ &= !ret;
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;
 }
 

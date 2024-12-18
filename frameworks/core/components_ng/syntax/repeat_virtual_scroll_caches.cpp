@@ -96,7 +96,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, 
         const auto rangeEnd = lastActiveRanges_[0].second;
 
         if (rangeStart <= rangeEnd) {
-            return FetchMoreKeysTTypes(from, std::max(to, rangeEnd), false);
+            return FetchMoreKeysTTypes(std::min(from, rangeStart), std::max(to, rangeEnd), false);
         } else {
             const bool v1 = FetchMoreKeysTTypes(0, rangeEnd, false);
             const bool v2 = FetchMoreKeysTTypes(rangeStart, std::numeric_limits<int>::max(), false);
@@ -231,8 +231,8 @@ void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key,
     AddKeyToL1(key, shouldTriggerRecycle);
 }
 
- void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
- {
+void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
+{
     TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveKeyFromL1 key:%{public}s", key.c_str());
     activeNodeKeysInL1_.erase(key);
 
@@ -257,7 +257,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key,
     child->OnRecycle();
 }
 
-bool RepeatVirtualScrollCaches::hasTTypeChanged(uint32_t index)
+bool RepeatVirtualScrollCaches::CheckTTypeChanged(uint32_t index)
 {
     std::string oldTType;
     if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {

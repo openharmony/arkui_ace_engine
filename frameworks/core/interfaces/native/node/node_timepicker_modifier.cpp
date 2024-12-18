@@ -244,6 +244,20 @@ void ResetTimepickerDateTimeOptions(ArkUINodeHandle node)
     TimePickerModelNG::SetDateTimeOptions(frameNode, hourType, minuteType, secondType);
 }
 
+void SetTimepickerEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetTimepickerEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, true);
+}
+
 ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -365,7 +379,7 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
         ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
         ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
-        ResetTimepickerDateTimeOptions };
+        ResetTimepickerDateTimeOptions, SetTimepickerEnableHapticFeedback, ResetTimepickerEnableHapticFeedback };
 
     return &modifier;
 }
@@ -398,16 +412,17 @@ void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam)
         if (!argsPtr) {
             event.componentAsyncEvent.data[0].i32 = 0;
             event.componentAsyncEvent.data[1].i32 = 0;
+        } else {
+            auto hour = argsPtr->GetValue("hour");
+            auto minute = argsPtr->GetValue("minute");
+            if (hour && hour->IsNumber()) {
+                event.componentAsyncEvent.data[0].i32 = hour->GetInt();
+            }
+            if (minute && minute->IsNumber()) {
+                event.componentAsyncEvent.data[1].i32 = minute->GetInt();
+            }
         }
-        auto hour = argsPtr->GetValue("hour");
-        auto minute = argsPtr->GetValue("minute");
-        if (hour && hour->IsNumber()) {
-            event.componentAsyncEvent.data[0].i32 = hour->GetInt();
-        }
-        if (minute && minute->IsNumber()) {
-            event.componentAsyncEvent.data[1].i32 = minute->GetInt();
-        }
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TimePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }

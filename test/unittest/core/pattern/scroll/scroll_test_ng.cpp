@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 void ScrollTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
@@ -85,10 +86,10 @@ void ScrollTestNg::GetScroll()
 
 RefPtr<PaintWrapper> ScrollTestNg::CreateScrollDone(const RefPtr<FrameNode>& frameNode)
 {
-    auto paintWrapper = CreateDone(frameNode);
+    CreateDone();
     scrollBar_ = pattern_->GetScrollBar();
     scrollable_ = pattern_->GetScrollableEvent()->GetScrollable();
-    return paintWrapper;
+    return frameNode_->CreatePaintWrapper();
 }
 
 ScrollModelNG ScrollTestNg::CreateScroll()

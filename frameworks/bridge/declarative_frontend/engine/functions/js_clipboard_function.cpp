@@ -24,4 +24,10 @@ void JsClipboardFunction::Execute(const std::string& direction)
     JsFunction::ExecuteJS(1, params);
 }
 
+void JsClipboardFunction::Execute(const std::u16string& direction)
+{
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(direction));
+    JsFunction::ExecuteJS(1, params);
+}
 } // namespace OHOS::Ace::Framework

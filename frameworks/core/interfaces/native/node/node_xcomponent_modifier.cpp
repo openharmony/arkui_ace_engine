@@ -177,6 +177,20 @@ void ResetXComponentEnableSecure(ArkUINodeHandle node)
     XComponentModelNG::EnableSecure(frameNode, false);
 }
 
+void SetXComponentHdrBrightness(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::HdrBrightness(frameNode, hdrBrightness);
+}
+
+void ResetXComponentHdrBrightness(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::HdrBrightness(frameNode, 1.0f);
+}
+
 void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -211,10 +225,6 @@ namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
     static const ArkUIXComponentModifier modifier = {
-        nullptr, // loadXComponent
-        nullptr, // setXComponentOptions
-        nullptr, // getXComponentSurfaceId
-        nullptr, // getXComponentController
         SetXComponentEnableAnalyzer,
         ResetXComponentEnableAnalyzer,
         SetXComponentBackgroundColor,
@@ -234,6 +244,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         InitXComponent,
         SetXComponentEnableSecure,
         ResetXComponentEnableSecure,
+        SetXComponentHdrBrightness,
+        ResetXComponentHdrBrightness,
         SetXComponentRenderFit,
         ResetXComponentRenderFit,
     };

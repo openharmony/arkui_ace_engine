@@ -36,6 +36,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     pathStrokeWidth_ = paintProperty->GetPathStrokeWidth().value_or(pathStrokeWidth_);
     backgroundCircleRadius_ = paintProperty->GetActiveCircleRadius().value_or(Dimension(0.0f, DimensionUnit::VP));
     enableWaveEffect_ = paintProperty->GetEnableWaveEffect().value_or(true);
+    enableForeground_ = paintProperty->GetEnableForeground().value_or(false);
 
     patternlockModifier_->SetRegularColor(regularColor_);
     patternlockModifier_->SetSelectColor(selectedColor_);
@@ -59,6 +60,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetActiveCircleColor(LinearColor(activeCircleColor_));
     patternlockModifier_->SetActiveBackgroundRadius(backgroundCircleRadius_.ConvertToPxWithSize(sideLength_));
     patternlockModifier_->SetEnableWaveEffect(enableWaveEffect_);
+    patternlockModifier_->SetEnableForeground(enableForeground_);
     patternlockModifier_->UpdateBoundsRect();
 }
 

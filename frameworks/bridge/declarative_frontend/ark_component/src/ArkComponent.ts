@@ -14,6 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
+/// <reference path="../../state_mgmt/src/lib/common/utils.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule(): any {
   if (arkUINativeModule) {
@@ -149,6 +150,9 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
+  if (Utils.isApiVersionEQAbove(14)) {
+    return false;
+  }
   return (stageValue.bundleName === value.bundleName) &&
     (stageValue.moduleName === value.moduleName) &&
     (stageValue.id === value.id) &&
@@ -2090,6 +2094,21 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
   }
 }
 
+declare type FocusAxisEventCallback = (event: FocusAxisEvent) => void;
+class OnFocusAxisEventModifier extends ModifierWithKey<FocusAxisEventCallback> {
+  constructor(value: FocusAxisEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onFocusAxisEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyEvent(node);
+    } else {
+      getUINativeModule().common.setOnKeyEvent(node, this.value);
+    }
+  }
+}
+
 class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   constructor(value: MotionPathOptions) {
     super(value);
@@ -2258,7 +2277,7 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class tabStopModifier extends ModifierWithKey<boolean> {
+class TabStopModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -3314,7 +3333,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   setNodePtr(nodePtr: KNode) {
+    if (nodePtr === this.nativePtr) {
+      return;
+    }
     this.nativePtr = nodePtr;
+    this._weakPtr = (nodePtr !== undefined && nodePtr !== null) ? getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr) : undefined;
   }
 
   setInstanceId(instanceId: number): void {
@@ -3873,6 +3896,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onFocusAxisEvent(event: (event?: FocusAxisEvent) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
+    return this;
+  }
+
   focusable(value: boolean): this {
     if (typeof value === 'boolean') {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
@@ -3884,9 +3912,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   tabStop(value: boolean): this {
     if (typeof value === 'boolean') {
-      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, value);
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, value);
     } else {
-      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TabStopModifier.identity, TabStopModifier, undefined);
     }
     return this;
   }

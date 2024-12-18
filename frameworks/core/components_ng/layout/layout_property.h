@@ -62,6 +62,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     const std::optional<LayoutConstraintF>& GetLayoutConstraint() const
@@ -390,6 +392,8 @@ public:
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
+
+    virtual void OnPropertyChangeMeasure() {}
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);

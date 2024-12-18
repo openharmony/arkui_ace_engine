@@ -399,7 +399,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    depth_ = -1;
+    SetDepth(1);
 }
 
 namespace {
@@ -1423,6 +1423,9 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index, i
     } else {
         // mark child as disappearing before adding to disappearingChildren_
         child->isDisappearing_ = true;
+    }
+    if (DetectLoop(child, Claim(this))) {
+        return;
     }
     disappearingChildren_.emplace_back(child, index, branchId);
 }

@@ -271,9 +271,9 @@ public:
     void SetInputFilter(const std::string& inputFilter);
     const std::string& GetInputFilter() const;
 
-    void SetOnError(const std::function<void(const std::string&)>& value)
+    void SetOnError(const std::function<void(const std::string&)>&& value)
     {
-        OnError_ = value;
+        OnError_ = std::move(value);
     }
     const std::function<void(const std::string&)>& GetOnError() const
     {

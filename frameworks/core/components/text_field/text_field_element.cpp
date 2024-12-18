@@ -104,13 +104,13 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
                 sp->isNextAction_ = true;
 
                 KeyEvent keyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::UP);
-                if (!pipeline->OnKeyEvent(keyEvent)) {
+                if (!pipeline->OnNonPointerEvent(keyEvent)) {
                     LOGI("Key pressed change next focus, close keyboard");
                     sp->CloseKeyboard();
                 } else {
                     // below textfield will auto open keyboard
                     KeyEvent keyEventEnter(KeyCode::KEY_ENTER, KeyAction::UP);
-                    pipeline->OnKeyEvent(keyEventEnter);
+                    pipeline->OnNonPointerEvent(keyEventEnter);
                 }
             }
         });

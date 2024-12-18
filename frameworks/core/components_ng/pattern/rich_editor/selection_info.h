@@ -139,6 +139,7 @@ struct TextStyleResult {
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     std::vector<Shadow> textShadows;
+    std::optional<TextBackgroundStyle> textBackgroundStyle;
 };
 
 struct ImageStyleResult {
@@ -153,7 +154,7 @@ struct ResultObject {
     SpanPosition spanPosition;
     SelectSpanType type = SelectSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
-    std::string valueString;
+    std::u16string valueString;
     std::string previewText;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
@@ -179,6 +180,11 @@ public:
     ~SelectionInfo() = default;
 
     Selection GetSelection() const
+    {
+        return selection_;
+    }
+
+    Selection& GetSelectionRef()
     {
         return selection_;
     }

@@ -66,7 +66,7 @@ NavigationGroupNode::~NavigationGroupNode()
             navDestinationNode->GetPattern<NavDestinationPattern>()->SetCustomNode(nullptr);
         }
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -371,7 +371,9 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         CHECK_NULL_RETURN(navigation, false);
         // if set hideNavBar and stack size is one, return false
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
+        CHECK_NULL_RETURN(navigationLayoutProperty, false);
         auto pattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+        CHECK_NULL_RETURN(pattern, false);
         auto stack = pattern->GetNavigationStack();
         CHECK_NULL_RETURN(stack, false);
         if (navigationLayoutProperty->GetHideNavBarValue(false) && stack->GetSize() <= 1) {
@@ -513,14 +515,15 @@ void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
     auto preNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(preNode);
     if (preNavDestContentFrameNode) {
         navigationManager->UpdateRenderGroup(preNavDestContentFrameNode, false);
-        navigationManager->SetPreNodeHasAnimation(false);
+        navigationManager->SetPreNodeAnimationCached(false);
+        navigationManager->SetPreNodeNeverSet(true);
     }
     navigationManager->SetNavNodeInTransition(nullptr, nullptr);
     navigationManager->SetIsNavigationOnAnimation(false);
 }
 
 void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-    const AnimationFinishCallback finishCallback, bool isNavBar)
+    const AnimationFinishCallback finishCallback)
 {
     // this function has been override for different device type
     CHECK_NULL_VOID(preNode);
@@ -528,21 +531,15 @@ void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNod
     CHECK_NULL_VOID(preNavDestination);
     preNavDestination->InitSystemTransitionPop(false);
     if (curNode) {
-        if (isNavBar) {
-            auto navbarNode = AceType::DynamicCast<NavBarNode>(curNode);
-            CHECK_NULL_VOID(navbarNode);
-            navbarNode->InitSystemTransitionPop();
-        } else {
-            auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            CHECK_NULL_VOID(curNavDestination);
-            curNavDestination->InitSystemTransitionPop(true);
-        }
+        auto curNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(curNode);
+        CHECK_NULL_VOID(curNodeBase);
+        curNodeBase->InitSystemTransitionPop(true);
     }
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, curNode, isNavBar]() {
+        this, preNode, curNode]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start: animationId: %{public}d",
@@ -550,20 +547,14 @@ void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNod
 
             // ENTER_POP nodes animation
             if (curNode) {
-                if (isNavBar) {
-                    auto curNavBar = AceType::DynamicCast<NavBarNode>(curNode);
-                    CHECK_NULL_VOID(curNavBar);
-                    curNavBar->StartSystemTransitionPop();
-                } else {
-                    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-                    CHECK_NULL_VOID(curNavDestination);
-                    curNavDestination->StartSystemTransitionPop(true);
-                }
+                auto curNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(curNode);
+                CHECK_NULL_VOID(curNodeBase);
+                curNodeBase->EndSystemTransitionPop(true);
             }
             // EXIT_POP nodes finish animation
-            auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-            CHECK_NULL_VOID(preNavDestination);
-            preNavDestination->StartSystemTransitionPop(false);
+            auto preNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(preNode);
+            CHECK_NULL_VOID(preNodeBase);
+            preNodeBase->EndSystemTransitionPop(false);
     }, option.GetOnFinishEvent());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
@@ -612,9 +603,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
-            if (curNavDesNode) {
-                navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
-            }
+            navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
             if (preNavdestination->SystemTransitionPopCallback(animationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -622,11 +611,11 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 parent->RemoveChild(preNavDesNode);
                 parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
         };
-    CreateAnimationWithPop(preNode, curNode, callback, isNavBar);
+    CreateAnimationWithPop(preNode, curNode, callback);
 
     // clear this flag for navBar layout only
     if (isNavBar) {
@@ -639,50 +628,38 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 }
 
 void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-    const AnimationFinishCallback finishCallback, bool isNavBar)
+    const AnimationFinishCallback finishCallback)
 {
     // this function has been override for different device type
-    if (isNavBar) {
-        auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
-        CHECK_NULL_VOID(navBarNode);
-        navBarNode->SystemTransitionPushAction(true);
-    } else {
-        if (preNode) {
-            auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-            CHECK_NULL_VOID(navDestination);
-            navDestination->InitSystemTransitionPush(false);
-        }
+    if (preNode) {
+        auto preNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(preNode);
+        CHECK_NULL_VOID(preNodeBase);
+        preNodeBase->InitSystemTransitionPush(false);
     }
     if (curNode) {
-        auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-        CHECK_NULL_VOID(curNavDestination);
-        curNavDestination->InitSystemTransitionPush(true);
+        auto curNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(curNode);
+        CHECK_NULL_VOID(curNodeBase);
+        curNodeBase->InitSystemTransitionPush(true);
     }
     
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, curNode, isNavBar]() {
+        this, preNode, curNode]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
-            if (isNavBar) {
-                auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
-                CHECK_NULL_VOID(navBarNode);
-                navBarNode->StartSystemTransitionPush();
-            } else {
-                if (preNode) {
-                    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-                    CHECK_NULL_VOID(navDestination);
-                    navDestination->StartSystemTransitionPush(false);
-                }
+            if (preNode) {
+                auto preNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(preNode);
+                CHECK_NULL_VOID(preNodeBase);
+                preNodeBase->EndSystemTransitionPush(false);
             }
             // curNode
             if (curNode) {
-                auto curNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-                CHECK_NULL_VOID(curNavdestination);
-                curNavdestination->StartSystemTransitionPush(true);
+                auto curNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(curNode);
+                CHECK_NULL_VOID(curNodeBase);
+                curNodeBase->EndSystemTransitionPush(true);
             }
     }, option.GetOnFinishEvent());
     if (newPushAnimation) {
@@ -735,7 +712,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     AnimationFinishCallback callback = [weakPreNode = WeakPtr<FrameNode>(preNode),
         weakNavigation = WeakClaim(this),
         weakCurNode = WeakPtr<FrameNode>(curNode),
-        isNavBar, animationId = static_cast<int32_t>(animationId_)] {
+        animationId = static_cast<int32_t>(animationId_)] {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation end");
@@ -748,29 +725,10 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         navigation->GetAnimationId(), animationId);
                     break;
                 }
-                if (isNavBar) {
-                    auto navbar = AceType::DynamicCast<NavBarNode>(preNode);
-                    CHECK_NULL_VOID(navbar);
-                    navbar->SystemTransitionPushAction(false);
-                    bool needSetInvisible = navbar->GetTransitionType() == PageTransitionType::EXIT_PUSH;
-                    navigation->SetNeedSetInvisible(needSetInvisible);
-                    bool isInvisible = navbar->IsNodeInvisible(navigation);
-                    if (needSetInvisible && isInvisible) {
-                        preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                        preNode->SetJSViewActive(false);
-                        navigation->NotifyPageHide();
-                    }
-                    navbar->GetRenderContext()->SetOpacity(1.0f);
-                } else {
-                    auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-                    CHECK_NULL_VOID(preDestination);
-                    if (preDestination->NeedRemoveInPush()) {
-                        navigation->hideNodes_.emplace_back(std::make_pair(preDestination, true));
-                        break;
-                    }
-                    preDestination->SystemTransitionPushCallback(false, animationId);
-                    preDestination->GetRenderContext()->SetOpacity(1.0f);
-                }
+                auto preNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(preNode);
+                CHECK_NULL_VOID(preNodeBase);
+                auto navigationNode = AceType::DynamicCast<FrameNode>(navigation);
+                preNodeBase->FinishSystemTransitionAnimationPush(preNode, navigationNode, false, animationId);
                 break;
             }
             auto curNode = weakCurNode.Upgrade();
@@ -778,7 +736,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
                 navigation->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
-                curNavDestination->SystemTransitionPushCallback(true, animationId);
+                curNavDestination->FinishSystemTransitionPush(true, animationId);
             }
             navigation->RemoveDialogDestination();
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
@@ -793,7 +751,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     auto preNodeNew = TransitionAnimationIsValid(preNode, isNavBar);
     auto curNodeNew = TransitionAnimationIsValid(curNode, isNavBar);
     if (preNodeNew != nullptr || curNodeNew != nullptr) {
-        CreateAnimationWithPush(preNodeNew, curNodeNew, callback, isNavBar);
+        CreateAnimationWithPush(preNodeNew, curNodeNew, callback);
     }
 
     isOnAnimation_ = true;
@@ -801,7 +759,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     CHECK_NULL_VOID(curNavDestination);
     if (AceChecker::IsPerformanceCheckEnabled()) {
         int64_t startTime = GetSysTimestamp();
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(GetContextWithCheck());
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime,
                                          path = curNavDestination->GetNavDestinationPathInfo()]() {
@@ -887,10 +845,8 @@ void NavigationGroupNode::TransitionWithReplace(
         }
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto curNode = weakCurNode.Upgrade();
-        if (curNode) {
-            navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
-        }
-        auto context = PipelineContext::GetCurrentContext();
+        navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
     });
@@ -923,7 +879,7 @@ void NavigationGroupNode::TransitionWithReplace(
 
 void NavigationGroupNode::OnInspectorIdUpdate(const std::string& id)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);
     context->AddOrReplaceNavigationNode(id, WeakClaim(this));
     curId_ = id;
@@ -973,7 +929,7 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
 
 void NavigationGroupNode::NotifyPageHide()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -1079,9 +1035,7 @@ AnimationOption NavigationGroupNode::CreateAnimationOption(const RefPtr<Curve>& 
     option.SetCurve(curve);
     option.SetFillMode(mode);
     option.SetDuration(duration);
-    if (callback != nullptr) {
-        option.SetOnFinishEvent(callback);
-    }
+    option.SetOnFinishEvent(callback);
     return option;
 }
 
@@ -1146,7 +1100,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "parent custom node is nullptr");
     }
     bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -1223,8 +1177,9 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
         if (shallowBuilder) {
             shallowBuilder->MarkIsExecuteDeepRenderDone(false);
         }
-        if (navDestination->GetContentNode()) {
-            navDestination->GetContentNode()->Clean();
+        auto contentNode = navDestination->GetContentNode();
+        if (contentNode) {
+            contentNode->Clean();
         }
         parent->RemoveChild(navDestination);
     }
@@ -1246,8 +1201,9 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
     if (shallowBuilder) {
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
     }
-    if (navDestination->GetContentNode()) {
-        navDestination->GetContentNode()->Clean();
+    auto contentNode = navDestination->GetContentNode();
+    if (contentNode) {
+        contentNode->Clean();
     }
     contentNode_->RemoveChild(navDestination, true);
 }
@@ -1272,7 +1228,7 @@ void NavigationGroupNode::CreateAnimationWithDialogPop(const AnimationFinishCall
                 CHECK_NULL_VOID(preNode);
                 auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                 if (preNavDesNode) {
-                    preNavDesNode->StartSystemTransitionPop(false);
+                    preNavDesNode->EndSystemTransitionPop(false);
                 }
             }
 
@@ -1283,11 +1239,11 @@ void NavigationGroupNode::CreateAnimationWithDialogPop(const AnimationFinishCall
                 if (curNode->GetTag() == V2::NAVBAR_ETS_TAG) {
                     auto curNavbar = AceType::DynamicCast<NavBarNode>(curNode);
                     CHECK_NULL_VOID(curNavbar);
-                    curNavbar->StartSystemTransitionPop();
+                    curNavbar->EndSystemTransitionPop();
                 } else {
                     auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                     CHECK_NULL_VOID(curDestination);
-                    curDestination->StartSystemTransitionPop(true);
+                    curDestination->EndSystemTransitionPop(true);
                 }
             }
     }, option.GetOnFinishEvent());
@@ -1330,7 +1286,7 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 navigation->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             }
             navigation->RemoveDialogDestination();
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
         };
@@ -1358,11 +1314,11 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
                     navigation->GetNavigationMode() == NavigationMode::STACK) {
                     auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
                     CHECK_NULL_VOID(navBarNode);
-                    navBarNode->StartSystemTransitionPush();
+                    navBarNode->EndSystemTransitionPush();
                 } else {
                     auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                     CHECK_NULL_VOID(preDestination);
-                    preDestination->StartSystemTransitionPush(false);
+                    preDestination->EndSystemTransitionPush(false);
                 }
             }
             // curNode do ENTER PUSH animation
@@ -1371,7 +1327,7 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
                 CHECK_NULL_VOID(curNode);
                 auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 if (curDestination) {
-                    curDestination->StartSystemTransitionPush(true);
+                    curDestination->EndSystemTransitionPush(true);
                 }
             }
     }, option.GetOnFinishEvent());
@@ -1387,7 +1343,7 @@ void NavigationGroupNode::PreNodeFinishCallback(const RefPtr<FrameNode>& preNode
     if (preNode->GetTag() == V2::NAVBAR_ETS_TAG) {
         auto preNavbar = AceType::DynamicCast<NavBarNode>(preNode);
         CHECK_NULL_VOID(preNavbar);
-        preNavbar->SystemTransitionPushAction(false);
+        preNavbar->FinishSystemTransitionPush();
         bool needSetInvisible = preNavbar->GetTransitionType() == PageTransitionType::EXIT_PUSH;
         SetNeedSetInvisible(needSetInvisible);
         if (needSetInvisible && GetNavigationMode() == NavigationMode::STACK) {
@@ -1404,7 +1360,7 @@ void NavigationGroupNode::PreNodeFinishCallback(const RefPtr<FrameNode>& preNode
         if (preDestination && preDestination->NeedRemoveInPush()) {
             hideNodes_.emplace_back(std::make_pair(preDestination, true));
         }
-        preDestination->SystemTransitionPushCallback(false, preDestination->GetAnimationId());
+        preDestination->FinishSystemTransitionPush(false, preDestination->GetAnimationId());
     }
 }
 
@@ -1438,7 +1394,7 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
                 CHECK_NULL_VOID(curNode);
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
-                curNavDestination->SystemTransitionPushCallback(true, curNavDestination->GetAnimationId());
+                curNavDestination->FinishSystemTransitionPush(true, curNavDestination->GetAnimationId());
             }
             navigation->RemoveDialogDestination();
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
@@ -1591,7 +1547,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                 parent->RemoveChild(preNode);
                 parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
             navigation->CleanPopAnimations();
@@ -1699,10 +1655,10 @@ void NavigationGroupNode::InitPushPreList(const RefPtr<FrameNode>& preNode,
     if (isNavbarNeedAnimation&& navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         auto preNode = AceType::DynamicCast<FrameNode>(GetNavBarNode());
         CHECK_NULL_VOID(preNode);
-        auto preNavbar = AceType::DynamicCast<NavBarNode>(preNode);
-        if (preNavbar) {
+        auto preNavBar = AceType::DynamicCast<NavBarNode>(preNode);
+        if (preNavBar) {
             SetNeedSetInvisible(false);
-            preNavbar->SystemTransitionPushAction(true);
+            preNavBar->InitSystemTransitionPush(false);
             prevNavList.emplace_back(WeakPtr<FrameNode>(preNode));
         }
     }
