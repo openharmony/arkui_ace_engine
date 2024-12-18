@@ -18,19 +18,17 @@ import window from '@ohos.window'
 import common from '@ohos.app.ability.common'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
-import { SymbolGlyphModifier } from '@kit.ArkUI'
 
 export interface SelectTitleBarMenuItem {
   value: ResourceStr;
-  symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
 }
 
-const PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left')
-const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2')
-const RESOURCE_TYPE_SYMBOL: number = 40000;
+const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
+
+const PUBLIC_BACK: Resource = $r('sys.media.ohos_ic_back');
 
 const TEXT_EDITABLE_DIALOG = '18.3fp'
 const IMAGE_SIZE = '64vp'
@@ -71,10 +69,8 @@ export struct SelectTitleBar {
       Row() {
         if (!this.hidesBackButton) {
           ImageMenuItem({ item: {
-            value: '',
-            symbolStyle: new SymbolGlyphModifier(PUBLIC_BACK),
+            value: PUBLIC_BACK,
             isEnabled: true,
-            label: $r('sys.string.icon_back'),
             action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 });
         }
@@ -94,7 +90,7 @@ export struct SelectTitleBar {
                 Select(this.options)
                   .selected(this.selected)
                   .value(this.selected >= 0 && this.selected < this.options.length ?
-                  this.options[this.selected].value : '')
+                    this.options[this.selected].value : '')
                   .font({ size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')
                     : $r('sys.float.ohos_id_text_size_headline8') })
@@ -112,7 +108,7 @@ export struct SelectTitleBar {
               Select(this.options)
                 .selected(this.selected)
                 .value(this.selected >= 0 && this.selected < this.options.length ?
-                this.options[this.selected].value : '')
+                  this.options[this.selected].value : '')
                 .font({ size: this.hidesBackButton && !this.subtitle
                   ? $r('sys.float.ohos_id_text_size_headline7')
                   : $r('sys.float.ohos_id_text_size_headline8') })
@@ -181,7 +177,7 @@ export struct SelectTitleBar {
 struct CollapsibleMenuSection {
   menuItems: Array<SelectTitleBarMenuItem> = [];
   item: SelectTitleBarMenuItem = {
-    symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE),
+    value: PUBLIC_MORE,
     label: $r('sys.string.ohos_toolbar_more'),
   } as SelectTitleBarMenuItem;
   index: number = 0;
@@ -275,11 +271,12 @@ struct CollapsibleMenuSection {
             })
 
           Row() {
-            SymbolGlyph(PUBLIC_MORE)
-              .fontSize(ImageMenuItem.imageSize)
-              .draggable(false)
-              .fontColor([$r('sys.color.icon_primary')])
+            Image(PUBLIC_MORE)
+              .width(ImageMenuItem.imageSize)
+              .height(ImageMenuItem.imageSize)
               .focusable(true)
+              .draggable(false)
+              .fillColor($r('sys.color.icon_primary'))
           }
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
@@ -387,7 +384,7 @@ struct ImageMenuItem {
   systemFontScale?: number = 1;
   isPopup: boolean = false;
 
-  static readonly imageSize = '24vp'
+  static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
   static readonly buttonBorderRadius = 8
   static readonly focusBorderWidth = 2
@@ -463,33 +460,13 @@ struct ImageMenuItem {
 
   build() {
     Row() {
-      if (this.item.symbolStyle) {
-        SymbolGlyph()
-          .fontColor([$r('sys.color.font_primary')])
-          .attributeModifier(this.item.symbolStyle)
-          .fontSize(ImageMenuItem.imageSize)
-          .draggable(false)
-          .focusable(this.item?.isEnabled)
-          .key(ImageMenuItem.focusablePrefix + this.index)
-          .symbolEffect(new SymbolEffect(), false)
-      } else {
-        if (Util.isSymbolResource(this.item.value)) {
-          SymbolGlyph(this.item.value as Resource)
-            .fontColor([$r('sys.color.font_primary')])
-            .fontSize(ImageMenuItem.imageSize)
-            .draggable(false)
-            .focusable(this.item?.isEnabled)
-            .key(ImageMenuItem.focusablePrefix + this.index)
-        } else {
-          Image(this.item.value)
-            .draggable(false)
-            .width(ImageMenuItem.imageSize)
-            .height(ImageMenuItem.imageSize)
-            .focusable(this.item.isEnabled)
-            .key(ImageMenuItem.focusablePrefix + this.index)
-            .fillColor($r('sys.color.icon_primary'))
-        }
-      }
+      Image(this.item.value)
+        .draggable(false)
+        .width(ImageMenuItem.imageSize)
+        .height(ImageMenuItem.imageSize)
+        .focusable(this.item.isEnabled)
+        .key(ImageMenuItem.focusablePrefix + this.index)
+        .fillColor($r('sys.color.icon_primary'))
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
@@ -597,40 +574,14 @@ struct SelectTitleBarDialog {
   build() {
     if (this.selectTitleBarDialog) {
       Column() {
-        if (this.selectTitleDialog.symbolStyle) {
-          SymbolGlyph()
-            .fontColor([$r('sys.color.font_primary')])
-            .attributeModifier(this.selectTitleDialog.symbolStyle)
-            .fontSize(IMAGE_SIZE)
-            .draggable(false)
-            .focusable(this.selectTitleDialog.isEnabled)
-            .margin({
-              top: $r('sys.float.padding_level24'),
-              bottom: $r('sys.float.padding_level8'),
-            })
-            .symbolEffect(new SymbolEffect(), false)
-        } else if (this.selectTitleDialog.value) {
-          if (Util.isSymbolResource(this.selectTitleDialog.value)) {
-            SymbolGlyph(this.selectTitleDialog.value as Resource)
-              .fontColor([$r('sys.color.font_primary')])
-              .fontSize(IMAGE_SIZE)
-              .draggable(false)
-              .focusable(this.selectTitleDialog.isEnabled)
-              .margin({
-                top: $r('sys.float.padding_level24'),
-                bottom: $r('sys.float.padding_level8'),
-              })
-          } else {
-            Image(this.selectTitleDialog.value)
-              .width(IMAGE_SIZE)
-              .height(IMAGE_SIZE)
-              .margin({
-                top: $r('sys.float.padding_level24'),
-                bottom: $r('sys.float.padding_level8'),
-              })
-              .fillColor($r('sys.color.icon_primary'))
-          }
-        }
+        Image(this.selectTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .margin({
+            top: $r('sys.float.padding_level24'),
+            bottom: $r('sys.float.padding_level8'),
+          })
+          .fillColor($r('sys.color.icon_primary'))
         Column() {
           Text(this.selectTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
@@ -654,36 +605,10 @@ struct SelectTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        if (this.selectTitleDialog.symbolStyle) {
-          SymbolGlyph()
-            .fontColor([$r('sys.color.font_primary')])
-            .attributeModifier(this.selectTitleDialog.symbolStyle)
-            .fontSize(IMAGE_SIZE)
-            .draggable(false)
-            .focusable(this.selectTitleDialog.isEnabled)
-            .margin({
-              top: $r('sys.float.padding_level24'),
-              bottom: $r('sys.float.padding_level8'),
-            })
-            .symbolEffect(new SymbolEffect(), false)
-        } else if (this.selectTitleDialog.value) {
-          if (Util.isSymbolResource(this.selectTitleDialog.value)) {
-            SymbolGlyph(this.selectTitleDialog.value as Resource)
-              .fontColor([$r('sys.color.font_primary')])
-              .fontSize(IMAGE_SIZE)
-              .draggable(false)
-              .focusable(this.selectTitleDialog.isEnabled)
-              .margin({
-                top: $r('sys.float.padding_level24'),
-                bottom: $r('sys.float.padding_level8'),
-              })
-          } else {
-            Image(this.selectTitleDialog.value)
-              .width(IMAGE_SIZE)
-              .height(IMAGE_SIZE)
-              .fillColor($r('sys.color.icon_primary'))
-          }
-        }
+        Image(this.selectTitleDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor($r('sys.color.icon_primary'))
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
@@ -704,25 +629,5 @@ struct SelectTitleBarDialog {
     } else {
       this.maxLines = this.horizontalsScreenLines;
     }
-  }
-}
-
-class Util {
-  public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
-    if (!Util.isResourceType(resourceStr)) {
-      return false;
-    }
-    let resource = resourceStr as Resource;
-    return resource.type == RESOURCE_TYPE_SYMBOL;
-  }
-
-  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
-    if (!resource) {
-      return false;
-    }
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return false;
-    }
-    return true;
   }
 }
