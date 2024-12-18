@@ -19,6 +19,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -121,6 +122,15 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+}
+
+void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, Constants::GetVariableFontWeight(static_cast<FontWeight>(weight)));
+    TextModelNG::SetEnableVariableFontWeight(frameNode, true);
 }
 
 void SetOnClick(ArkUINodeHandle node, void* callback)
@@ -1384,6 +1394,7 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextMarqueeOptions = ResetMarqueeOptions,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
+        .setImmutableFontWeight = SetImmutableFontWeight,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
