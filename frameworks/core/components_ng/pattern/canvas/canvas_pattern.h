@@ -101,14 +101,14 @@ public:
     void Clip(const RefPtr<CanvasPath2D>& path);
     void BeginPath();
     void ClosePath();
-    void MoveTo(double x, double y);
-    void LineTo(double x, double y);
-    void Arc(const ArcParam& param);
-    void ArcTo(const ArcToParam& param);
-    void AddRect(const Rect& rect);
-    void Ellipse(const EllipseParam& param);
-    void BezierCurveTo(const BezierCurveParam& param);
-    void QuadraticCurveTo(const QuadraticCurveParam& param);
+    virtual void MoveTo(double x, double y);
+    virtual void LineTo(double x, double y);
+    virtual void Arc(const ArcParam& param);
+    virtual void ArcTo(const ArcToParam& param);
+    virtual void AddRect(const Rect& rect);
+    virtual void Ellipse(const EllipseParam& param);
+    virtual void BezierCurveTo(const BezierCurveParam& param);
+    virtual void QuadraticCurveTo(const QuadraticCurveParam& param);
 
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
