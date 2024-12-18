@@ -533,6 +533,11 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
+    void SetLayoutWeight(const LayoutWeightPair& value) override
+    {
+        ViewAbstract::SetLayoutWeight(value);
+    }
+
     void SetPixelRound(uint16_t value) override
     {
         ViewAbstract::SetPixelRound(value);

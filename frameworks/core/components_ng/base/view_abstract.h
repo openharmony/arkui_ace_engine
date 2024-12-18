@@ -125,6 +125,7 @@ public:
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
     static void SetLayoutWeight(float value);
+    static void SetLayoutWeight(const NG::LayoutWeightPair& value);
     static void SetPixelRound(uint16_t value);
     static void SetLayoutDirection(TextDirection value);
 
@@ -561,6 +562,7 @@ public:
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
     static void SetLayoutWeight(FrameNode* frameNode, float value);
+    static void SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value);
     static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
     static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
     static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
