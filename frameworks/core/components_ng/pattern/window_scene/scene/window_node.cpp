@@ -27,19 +27,11 @@ std::map<int32_t, WeakPtr<WindowNode>> g_windowNodeMap;
 }
 
 WindowNode::WindowNode(const std::string& tag,
-    int32_t nodeId, int32_t sessionId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : FrameNode(tag, nodeId, pattern, isRoot)
-{
-    sessionId_ = sessionId;
-}
-
-WindowNode::~WindowNode()
-{
-    g_windowNodeMap.erase(sessionId_);
-}
+    int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    : FrameNode(tag, nodeId, pattern, isRoot) {}
 
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
-    int32_t nodeId, int32_t sessionId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto windowNode = ElementRegister::GetInstance()->GetSpecificItemById<WindowNode>(nodeId);
     if (windowNode) {
@@ -53,29 +45,11 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
         }
     }
 
-    auto iter = g_windowNodeMap.find(sessionId);
-    if (iter != g_windowNodeMap.end()) {
-        auto node = iter->second.Upgrade();
-        if (node) {
-            return node;
-        }
-    }
-
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
-    windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, sessionId, pattern, false);
+    windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, pattern, false);
     windowNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(windowNode);
-    g_windowNodeMap.emplace(sessionId, WeakPtr<WindowNode>(windowNode));
     return windowNode;
-}
-
-void WindowNode::SetParent(const WeakPtr<UINode>& parent)
-{
-    auto prevParent = GetParent();
-    if (prevParent && prevParent != parent.Upgrade()) {
-        RemoveFromParentCleanly(Claim(this), prevParent);
-    }
-    UINode::SetParent(parent);
 }
 
 bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent)

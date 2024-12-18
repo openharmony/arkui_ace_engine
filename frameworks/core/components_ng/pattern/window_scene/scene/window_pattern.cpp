@@ -379,8 +379,11 @@ void WindowPattern::CreateASStartingWindow()
         SystemProperties::GetColorMode() == ColorMode::DARK ? Color::BLACK : Color::WHITE);
 
     auto staticNode = BuildStaticImageNode(circleIcon);
+    CHECK_NULL_VOID(staticNode);
     auto animateNode = BuildAnimateNode(eyelashRingIcon);
+    CHECK_NULL_VOID(animateNode);
     auto textNode = BuildTextNode(appNameInfo);
+    CHECK_NULL_VOID(textNode);
 
     startingWindow_->AddChild(staticNode);
     startingWindow_->AddChild(animateNode);
