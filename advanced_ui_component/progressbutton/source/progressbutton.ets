@@ -41,7 +41,7 @@ export struct ProgressButton {
   progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH;
   clickCallback: () => void = () => {};
   @Prop enable: boolean = true;
-  ProgressButtonColorOptions | undefined = undefined;
+  colorOption: ProgressButtonColorOptions | undefined = undefined;
 
   @State progressColor: ResourceColor = '#330A59F7'
   @State containerBorderColor: ResourceColor = '#330A59F7'
