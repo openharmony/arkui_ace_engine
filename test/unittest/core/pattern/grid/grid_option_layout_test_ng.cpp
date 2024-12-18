@@ -593,8 +593,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridLayout007, TestSize.Level1)
 
     // force canOverScroll to be true
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
-    pattern_->ScrollToIndex(-1, false, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(-1, false, ScrollAlign::END);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_TRUE(pattern_->lastCanOverScroll_);
@@ -865,8 +864,7 @@ HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
     CreateFixedHeightItems(30, 200.0f);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
     EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 
@@ -894,12 +892,10 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
     CreateFixedItems(50);
     CreateDone();
 
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 40);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 40);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 40);
 
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 20);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 20);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
 }
 
@@ -995,8 +991,7 @@ HWTEST_F(GridOptionLayoutTestNg, OnScrollStart001, TestSize.Level1)
     CreateGridItems(20, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
 
-    pattern_->ScrollToIndex(10, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(10, false, ScrollAlign::START);
     EXPECT_EQ(count, 0);
 
     GestureEvent info;

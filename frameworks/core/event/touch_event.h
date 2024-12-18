@@ -163,7 +163,7 @@ struct TouchRestrict final {
     SourceType sourceType = SourceType::NONE;
     SourceType hitTestType = SourceType::TOUCH;
     InputEventType inputEventType = InputEventType::TOUCH_SCREEN;
-    TouchEvent touchEvent;
+    TouchEvent touchEvent = {};
     std::list<std::string> childTouchTestList;
     // use to dump event tree
     NG::EventTreeType touchTestType = NG::EventTreeType::TOUCH;

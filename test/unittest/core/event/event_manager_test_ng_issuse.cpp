@@ -21,6 +21,74 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+
+class MouseEventTargetTest : public MouseEventTarget {
+    DECLARE_ACE_TYPE(MouseEventTargetTest, MouseEventTarget);
+
+public:
+    MouseEventTargetTest(
+        const std::string& nodeName, int32_t nodeId, bool setStopPropagation = false, int32_t expectedResult = 0)
+        : MouseEventTarget(nodeName, nodeId), expectedResult_(expectedResult)
+    {
+        SetCallback([setStopPropagation, this](MouseInfo& info) {
+            info.SetStopPropagation(setStopPropagation);
+            callbackInvokeCount_++;
+        });
+    }
+
+    int32_t GetCallbackInvokeCount() const
+    {
+        return callbackInvokeCount_;
+    }
+
+    void ResetCallbackInvokeCount()
+    {
+        callbackInvokeCount_ = 0;
+    }
+
+    int32_t GetExpectedResult() const
+    {
+        return expectedResult_;
+    }
+
+private:
+    int32_t callbackInvokeCount_ = 0;
+    int32_t expectedResult_ = 0;
+};
+
+class EventManagerDispatchMouseEventNGTest : public EventManagerTestNg {
+public:
+    static void SetUpTestSuite()
+    {
+        EventManagerTestNg::SetUpTestSuite();
+    }
+    static void TearDownTestSuite()
+    {
+        EventManagerTestNg::TearDownTestSuite();
+    }
+};
+struct MockMouseEvent {
+    MouseAction action;
+    MouseButton button;
+    bool expectedResult;
+};
+
+class APIVersionGuard final {
+public:
+    explicit APIVersionGuard(int32_t apiVersion)
+    {
+        backupApiVersion_ = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
+    }
+
+    ~APIVersionGuard()
+    {
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion_);
+    }
+
+private:
+    int32_t backupApiVersion_ = 0;
+};
 /**
  * @tc.name: MouseEventTest001
  * @tc.desc: Test DispatchMouseEventNG
@@ -41,9 +109,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest001, TestSize.Level1)
     eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(false);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
 
     /**
@@ -97,9 +163,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest002, TestSize.Level1)
     eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(true);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
 
     /**
@@ -153,9 +217,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest003, TestSize.Level1)
     eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(false);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
 
     /**
@@ -220,9 +282,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest004, TestSize.Level1)
     eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(true);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
 
     /**
@@ -285,15 +345,11 @@ HWTEST_F(EventManagerTestNg, MouseEventTest005, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(true);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
     eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
-    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) {
-        info.SetStopPropagation(false);
-    };
+    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget2->SetCallback(onMouse2);
     eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(mouseEventTarget2);
 
@@ -347,9 +403,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest006, TestSize.Level1)
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
     eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].push_back(mouseEventTarget);
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(true);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
@@ -383,15 +437,11 @@ HWTEST_F(EventManagerTestNg, MouseEventTest007, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(true);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
     eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
-    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) {
-        info.SetStopPropagation(false);
-    };
+    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget2->SetCallback(onMouse2);
     eventManager->pressMouseTestResultsMap_[MouseButton::RIGHT_BUTTON].emplace_back(mouseEventTarget2);
 
@@ -440,15 +490,11 @@ HWTEST_F(EventManagerTestNg, MouseEventTest008, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(true);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget->SetCallback(onMouse);
     eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
-    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) {
-        info.SetStopPropagation(false);
-    };
+    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget2->SetCallback(onMouse2);
     eventManager->pressMouseTestResultsMap_[MouseButton::MIDDLE_BUTTON].emplace_back(mouseEventTarget2);
 
@@ -501,16 +547,12 @@ HWTEST_F(EventManagerTestNg, MouseEventTest009, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(false);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
     eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
 
     auto mouseEventTarget2 = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID_2);
-    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) {
-        info.SetStopPropagation(true);
-    };
+    const OnMouseEventFunc onMouse2 = [](MouseInfo& info) { info.SetStopPropagation(true); };
     mouseEventTarget2->SetCallback(onMouse2);
     eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(mouseEventTarget2);
 
@@ -561,9 +603,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest010, TestSize.Level1)
         info.SetStopPropagation(false);
         return false;
     };
-    const OnMouseEventFunc onMouseRelease = [](MouseInfo& info) -> bool {
-        return false;
-    };
+    const OnMouseEventFunc onMouseRelease = [](MouseInfo& info) -> bool { return false; };
     mouseEventTarget->SetCallback(onMousePress);
 
     /**
@@ -589,16 +629,15 @@ HWTEST_F(EventManagerTestNg, MouseEventTest010, TestSize.Level1)
  * @tc.desc: Test DispatchMouseEventNG function
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, MouseEventTest011, TestSize.Level1) {
+HWTEST_F(EventManagerTestNg, MouseEventTest011, TestSize.Level1)
+{
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-        info.SetStopPropagation(false);
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) { info.SetStopPropagation(false); };
     mouseEventTarget->SetCallback(onMouse);
     eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
 
@@ -624,7 +663,8 @@ HWTEST_F(EventManagerTestNg, MouseEventTest011, TestSize.Level1) {
  * @tc.desc: Test DispatchMouseEventNG function
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, MouseEventTest012, TestSize.Level1) {
+HWTEST_F(EventManagerTestNg, MouseEventTest012, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create EventManager.
      * @tc.expected: eventManager is not null.
@@ -635,8 +675,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest012, TestSize.Level1) {
     ASSERT_NE(eventManager, nullptr);
 
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    const OnMouseEventFunc onMouse = [](MouseInfo& info) {
-    };
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
     mouseEventTarget->SetCallback(onMouse);
     eventManager->currMouseTestResults_.emplace_back(mouseEventTarget);
 
@@ -677,7 +716,8 @@ HWTEST_F(EventManagerTestNg, MouseEventTest012, TestSize.Level1) {
  * @tc.desc: Test DispatchMouseEventNG function
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, MouseEventTest013, TestSize.Level1) {
+HWTEST_F(EventManagerTestNg, MouseEventTest013, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Create EventManager.
      * @tc.expected: eventManager is not null.
@@ -786,9 +826,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest001, TestSize.Level1)
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
     mouseEventTarget->coordinateOffset_ = Offset(-100, 0);
     MouseInfo mouseInfo;
-    const OnMouseEventFunc onMouse = [&mouseInfo](MouseInfo& info) {
-        mouseInfo = info;
-    };
+    const OnMouseEventFunc onMouse = [&mouseInfo](MouseInfo& info) { mouseInfo = info; };
     mouseEventTarget->SetCallback(onMouse);
 
     /**
@@ -841,9 +879,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest002, TestSize.Level1)
     mouseEventTarget->coordinateOffset_ = Offset(-100, 0);
     mouseEventTarget->AttachFrameNode(FRAME_NODE_2);
     MouseInfo mouseInfo;
-    const OnMouseEventFunc onMouse = [&mouseInfo](MouseInfo& info) {
-        mouseInfo = info;
-    };
+    const OnMouseEventFunc onMouse = [&mouseInfo](MouseInfo& info) { mouseInfo = info; };
     mouseEventTarget->SetCallback(onMouse);
 
     /**
@@ -859,4 +895,710 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest002, TestSize.Level1)
     EXPECT_EQ(mouseInfo.GetLocalLocation().GetY(), 200.0f);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest001
+ * @tc.desc: Pressed MouseTestTarget and Current MouseTestTarget no-intersect, test mouse event dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, true, 4),  // stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false, 0), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, true, 4),  // stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, false, 0), // not stop event propagation.
+    };
+
+    /**
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ non-intersect.
+     */
+    eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, true },
+    };
+
+    /**
+     * @tc.steps: step3. Inject mock mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result.
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvent.expectedResult);
+    }
+
+    /**
+     * @tc.expected: index == 1 and index == 3 can not be invoked. other can be invoked.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
 }
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest002
+ * @tc.desc: API level greater or equal to 13, Pressed MouseTestTarget and Current MouseTestTarget no-intersect, test
+ * mouse event dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API level 13.
+     * @tc.expected: current API level equal to 13.
+     */
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN),
+        AceApplicationInfo::GetInstance().GetApiTargetVersion());
+
+    /**
+     * @tc.steps: step2. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, true, 4),  // stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false, 0), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, true, 4),  // stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, false, 0), // not stop event propagation.
+    };
+
+    /**
+     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ non-intersect.
+     */
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, true },
+    };
+
+    /**
+     * @tc.steps: step4. Inject mock mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result.
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvent.expectedResult);
+    }
+
+    /**
+     * @tc.expected: index == 0 and index == 3 can not be invoked. other can be invoked.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest003
+ * @tc.desc: Pressed MouseTestTarget and Current MouseTestTarget intersect, none one stop propagation, test mouse event
+ * dispatch. expect every one will receive mouse event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("4", 4, false, 4), // not stop event propagation.
+    };
+
+    /**
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ intersect.
+     */
+    eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[3]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step3. Inject mock mouseEvent.
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvent.expectedResult);
+    }
+
+    /**
+     * @tc.expected: In this case, every mouse targer will receive four mouse events.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest004
+ * @tc.desc: API level greater or equal to 13, Pressed MouseTestTarget and Current MouseTestTarget intersect, none one
+ * stop propagation, test mouse event dispatch. expect every one will receive mouse event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API level 13.
+     * @tc.expected: current API level equal to 13.
+     */
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN),
+        AceApplicationInfo::GetInstance().GetApiTargetVersion());
+    /**
+     * @tc.steps: step2. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, false, 4), // not stop event propagation.
+        AceType::MakeRefPtr<MouseEventTargetTest>("4", 4, false, 4), // not stop event propagation.
+    };
+
+    /**
+     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_ and currMouseTestResults_ intersect.
+     */
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[2]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[3]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step4. Inject mock mouseEvent.
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvent.expectedResult);
+    }
+
+    /**
+     * @tc.expected: In this case, every mouse targer will receive four mouse events.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest005
+ * @tc.desc: Pressed MouseTestTarget and Current MouseTestTarget intersect, Pressed MouseTestTarget stop propagation
+ * test mouse event dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, true, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, true, 0),
+        AceType::MakeRefPtr<MouseEventTargetTest>("4", 4, false, 4),
+    };
+
+    /**
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     */
+    eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[3]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step3. Inject mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result
+     */
+    for (auto i = 0; i < mockMouseEvents.size(); i++) {
+        MouseEvent event;
+        event.action = mockMouseEvents[i].action;
+        event.button = mockMouseEvents[i].button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvents[i].expectedResult) << i;
+    }
+
+    /**
+     * @tc.expected: In this case, except index == 0 can receive mouse event. other targets can not receive event.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest006
+ * @tc.desc: API level greater or equal to 13, Pressed MouseTestTarget and Current MouseTestTarget intersect, Pressed
+ * MouseTestTarget stop propagation test mouse event dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API level 13.
+     * @tc.expected: current API level equal to 13.
+     */
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN),
+        AceApplicationInfo::GetInstance().GetApiTargetVersion());
+
+    /**
+     * @tc.steps: step2. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, true, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, true, 0),
+        AceType::MakeRefPtr<MouseEventTargetTest>("4", 4, false, 4),
+    };
+
+    /**
+     * @tc.steps: step3. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     */
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[2]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[3]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step3. Inject mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result
+     */
+    for (auto i = 0; i < mockMouseEvents.size(); i++) {
+        MouseEvent event;
+        event.action = mockMouseEvents[i].action;
+        event.button = mockMouseEvents[i].button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvents[i].expectedResult) << i;
+    }
+
+    /**
+     * @tc.expected: In this case, except index == 0 can receive mouse event. other targets can not receive event.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest007
+ * @tc.desc: Pressed MouseTestTarget and Current MouseTestTarget intersect, Pressed MouseTestTarget stop propagation
+ * will case which one in pressed MouseTestTarget can not be invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, true, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, false, 0),
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("4", 4, false, 4),
+    };
+
+    /**
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     */
+    eventManager->pressMouseTestResults_.emplace_back(testCases[0]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->pressMouseTestResults_.emplace_back(testCases[2]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[0]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step3. Inject mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvent.expectedResult);
+    }
+
+    /**
+     * @tc.expected: In this case, except index == 0 can receive mouse event. other targets can not receive event.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest008
+ * @tc.desc: API level greater or equal to 13, Pressed MouseTestTarget and Current MouseTestTarget intersect, Pressed
+ * MouseTestTarget stop propagation will case which one in pressed MouseTestTarget can not be invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API level 13.
+     * @tc.expected: current API level equal to 13.
+     */
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN),
+        AceApplicationInfo::GetInstance().GetApiTargetVersion());
+
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+        AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, true, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, false, 0),
+        AceType::MakeRefPtr<MouseEventTargetTest>("3", 3, false, 4),
+        AceType::MakeRefPtr<MouseEventTargetTest>("4", 4, false, 4),
+    };
+
+    /**
+     * @tc.steps: step2. set pressMouseTestResults_ and currMouseTestResults_.
+     * @tc.expected: pressMouseTestResults_  ==  currMouseTestResults_.
+     */
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[0]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[1]);
+    eventManager->pressMouseTestResultsMap_[MouseButton::LEFT_BUTTON].emplace_back(testCases[2]);
+
+    eventManager->currMouseTestResults_.emplace_back(testCases[0]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[3]);
+    eventManager->currMouseTestResults_.emplace_back(testCases[4]);
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::MOVE, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::RELEASE, MouseButton::LEFT_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step3. Inject mouseEvent
+     * @tc.expected: pressMouseTestResults stop propagation no work for DispatchMouseEventNG result
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvent.expectedResult);
+    }
+
+    /**
+     * @tc.expected: In this case, except index == 0 can receive mouse event. other targets can not receive event.
+     */
+    for (auto i = 0; i < testCases.size(); i++) {
+        EXPECT_EQ(testCases[i]->GetCallbackInvokeCount(), testCases[i]->GetExpectedResult()) << i;
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest009
+ * @tc.desc: API level less than 13, only MouseButton::LEFT_BUTTON mouse event can dispatch to pressedTestResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API level 12.
+     * @tc.expected: current API level equal to 12.
+     */
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    ASSERT_EQ(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE), AceApplicationInfo::GetInstance().GetApiTargetVersion());
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::PRESS, MouseButton::NONE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::BACK_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::FORWARD_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::TASK_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step2. Inject mock mouse event contains MouseButton and MouseAction == MouseAction::PRESS.
+     * @tc.expected: currMouseTestResults_ equals to pressMouseTestResults_.
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+
+        std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+            AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false),
+            AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false),
+            AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, false),
+        };
+
+        /**
+         * @tc.steps: step3. Create EventManager.
+         * @tc.expected: eventManager is not null.
+         */
+        auto eventManager = AceType::MakeRefPtr<EventManager>();
+        ASSERT_NE(eventManager, nullptr);
+
+        eventManager->currMouseTestResults_.emplace_back(testCases[0]);
+        eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+        eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+
+        eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(
+            eventManager->pressMouseTestResults_ == eventManager->currMouseTestResults_, mockMouseEvent.expectedResult);
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest010
+ * @tc.desc: API level greater and equal to 13, all kinds of MouseButton event can dispatch to pressedTestResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API level 13.
+     * @tc.expected: current API level equal to 13.
+     */
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN),
+        AceApplicationInfo::GetInstance().GetApiTargetVersion());
+
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::PRESS, MouseButton::NONE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::RIGHT_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::MIDDLE_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::BACK_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::FORWARD_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::SIDE_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::EXTRA_BUTTON, true },
+        { MouseAction::PRESS, MouseButton::TASK_BUTTON, true },
+    };
+
+    /**
+     * @tc.steps: step2. Inject mock mouse event contains MouseButton and MouseAction == MouseAction::PRESS.
+     * @tc.expected: currMouseTestResults_ equals to pressMouseTestResultsMap_[button]
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+
+        std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+            AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, false),
+            AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, false),
+            AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, false),
+        };
+
+        /**
+         * @tc.steps: step3. Create EventManager.
+         * @tc.expected: eventManager is not null.
+         */
+        auto eventManager = AceType::MakeRefPtr<EventManager>();
+        ASSERT_NE(eventManager, nullptr);
+
+        eventManager->currMouseTestResults_.emplace_back(testCases[0]);
+        eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+        eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+
+        eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(eventManager->pressMouseTestResultsMap_[event.button] == eventManager->currMouseTestResults_,
+            mockMouseEvent.expectedResult);
+    }
+}
+
+/**
+ * @tc.name: EventManagerDispatchMouseEventNGTest011
+ * @tc.desc: DispatchMouseEventNG only work for five kinds(press/release/move/window_enter/window_leave) mouse action.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create mock mouse event with all kind of MouseAction.
+     */
+    const std::vector<MockMouseEvent> mockMouseEvents = {
+        { MouseAction::NONE, MouseButton::NONE_BUTTON, false },
+        { MouseAction::PRESS, MouseButton::LEFT_BUTTON, true },
+        { MouseAction::RELEASE, MouseButton::RIGHT_BUTTON, true },
+        { MouseAction::MOVE, MouseButton::MIDDLE_BUTTON, true },
+        { MouseAction::WINDOW_ENTER, MouseButton::BACK_BUTTON, true },
+        { MouseAction::WINDOW_LEAVE, MouseButton::FORWARD_BUTTON, true },
+        { MouseAction::HOVER, MouseButton::SIDE_BUTTON, false },
+        { MouseAction::HOVER_ENTER, MouseButton::EXTRA_BUTTON, false },
+        { MouseAction::HOVER_MOVE, MouseButton::TASK_BUTTON, false },
+        { MouseAction::HOVER_EXIT, MouseButton::NONE_BUTTON, false },
+        { MouseAction::PULL_DOWN, MouseButton::LEFT_BUTTON, false },
+        { MouseAction::PULL_MOVE, MouseButton::RIGHT_BUTTON, false },
+        { MouseAction::PULL_UP, MouseButton::MIDDLE_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::BACK_BUTTON, false },
+    };
+
+    /**
+     * @tc.steps: step2. traversal all kinds of MouseAction,inject mock mouse event into EventManager.
+     * @tc.expected: result of invoke DispatchMouseEventNG equal to expected result.
+     */
+    for (auto mockMouseEvent : mockMouseEvents) {
+        MouseEvent event;
+        event.action = mockMouseEvent.action;
+        event.button = mockMouseEvent.button;
+
+        std::vector<RefPtr<MouseEventTargetTest>> testCases = {
+            AceType::MakeRefPtr<MouseEventTargetTest>("0", 0, true),
+            AceType::MakeRefPtr<MouseEventTargetTest>("1", 1, true),
+            AceType::MakeRefPtr<MouseEventTargetTest>("2", 2, true),
+        };
+
+        /**
+         * @tc.steps: step3. Create eventManager.
+         * @tc.expected: eventManager not equal to nullptr.
+         */
+        auto eventManager = AceType::MakeRefPtr<EventManager>();
+        ASSERT_NE(eventManager, nullptr);
+
+        eventManager->currMouseTestResults_.emplace_back(testCases[0]);
+        eventManager->currMouseTestResults_.emplace_back(testCases[1]);
+        eventManager->currMouseTestResults_.emplace_back(testCases[2]);
+
+        auto result = eventManager->DispatchMouseEventNG(event);
+        EXPECT_EQ(result, mockMouseEvent.expectedResult) << static_cast<int32_t>(event.action);
+    }
+}
+} // namespace OHOS::Ace::NG

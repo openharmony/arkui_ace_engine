@@ -319,6 +319,25 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     return errorCode;
 }
 
+UIContentErrorCode UIContentImpl::InitializeByName(
+    OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
+{
+    return InitializeInner(window, name, storage, true);
+}
+
+UIContentErrorCode UIContentImpl::InitializeInner(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    if (window) {
+        errorCode = CommonInitialize(window, contentInfo, storage);
+        CHECK_ERROR_CODE_RETURN(errorCode);
+    }
+    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s, isNameRouter: %{public}d", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_, startUrl_.c_str(), isNamedRouter);
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
+}
+
 std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
     return AceContainer::GetContentInfo(instanceId_, type);
@@ -337,7 +356,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
         ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<Platform::ClipboardProxyImpl>());
     });
     rsWindow_ = window;
-
+    CHECK_NULL_RETURN(rsWindow_, UIContentErrorCode::NULL_WINDOW);
+    startUrl_ = contentInfo;
     AceApplicationInfo::GetInstance().SetLocale(language_, region_, script_, "");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(targetVersion_);
     SetFontMgrConfig(containerSdkPath_);

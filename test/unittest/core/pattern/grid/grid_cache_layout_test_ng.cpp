@@ -214,8 +214,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 11);
 
-    pattern_->ScrollToIndex(99, false, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(99, false, ScrollAlign::END);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 89));
     EXPECT_EQ(info.startIndex_, 90);
     const std::list<int32_t> preload = { 89, 88, 87 };
@@ -242,8 +241,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create005, TestSize.Level1)
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 11);
 
-    pattern_->ScrollToIndex(99, false, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(99, false, ScrollAlign::END);
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 88));
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 88)->IsActive());
     EXPECT_EQ(GetChildHeight(frameNode_, 88), 100);
@@ -409,8 +407,7 @@ HWTEST_F(GridCacheLayoutTestNg, Cache001, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
 
-    pattern_->ScrollToIndex(49);
-    FlushUITasks();
+    ScrollToIndex(49, false, ScrollAlign::AUTO);
     EXPECT_EQ(info.startIndex_, 39);
     // GridScroll algo currently not capable of preloading backward
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
@@ -512,8 +509,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.expected: The item(index:0) above view is active, the item(index:20) below view is active
      */
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
-    pattern_->ScrollToIndex(4, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(4, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
 
@@ -521,8 +517,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.steps: step3. Scroll down
      * @tc.expected: The item(index:4) above view is active, the item(index:24) below view is active
      */
-    pattern_->ScrollToIndex(8, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(8, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 24)->IsActive()); // th seventh row
@@ -531,8 +526,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.steps: step4. Scroll up
      * @tc.expected: The item(index:0) above view is active, the item(index:20) below view is active
      */
-    pattern_->ScrollToIndex(4, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(4, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 24)->IsActive());
@@ -541,8 +535,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
      * @tc.steps: step5. Scroll up
      * @tc.expected: The item(index:16) below view is active, no item above view
      */
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
 }

@@ -268,6 +268,14 @@ void VideoModelNG::SetMuted(FrameNode* frameNode, bool muted)
     videoPattern->UpdateMuted(muted);
 }
 
+void VideoModelNG::SetSurfaceBackgroundColor(FrameNode* frameNode, Color color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetSurfaceBackgroundColor(color);
+}
+
 void VideoModelNG::SetLoop(FrameNode* frameNode, bool loop)
 {
     CHECK_NULL_VOID(frameNode);

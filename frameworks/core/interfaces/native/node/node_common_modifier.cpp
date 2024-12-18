@@ -6779,7 +6779,7 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.focusAxisEvent.deviceId = info.GetDeviceId();
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
-        event.focusAxisEvent.keyCodesLength = pressedKeyCodes.size();
+        event.focusAxisEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
         for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
             pressKeyCodeList.push_back(static_cast<int32_t>(*it));
         }

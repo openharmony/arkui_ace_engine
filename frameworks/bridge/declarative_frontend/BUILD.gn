@@ -16,6 +16,8 @@ import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/files_to_watch.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -100,13 +102,27 @@ ark_theme_obj_path = base_output_path + "/arkTheme.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
+action("run_state_mgmt_build") {
+  script = "state_mgmt/build.py"
+  inputs = state_mgmt_release_files_to_watch
+  outputs = [ "$target_out_dir/stateMgmt.js" ]
+  args = [
+    # Paths: 1 StateMgmt root folder. 2. Folder to check need of npm install. 3. stateMgmt.js output path.
+    rebase_path("$ace_root/frameworks/bridge/declarative_frontend/state_mgmt"),
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/state_mgmt/node_modules"),
+    rebase_path("$target_out_dir"),
+    "--release",
+  ]
+}
+
 gen_obj("js_proxyclass") {
-  input = "engine/stateMgmt.js"
+  input = "$target_out_dir/stateMgmt.js"
   if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
-  snapshot_dep = []
+  snapshot_dep = [ ":run_state_mgmt_build" ]
 }
 
 gen_obj("js_enum_style") {

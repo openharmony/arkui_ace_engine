@@ -586,6 +586,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
+    "$ace_root/test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",

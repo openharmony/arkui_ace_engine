@@ -110,6 +110,25 @@ void ResetVideoOpacity(ArkUINodeHandle node)
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
+void SetVideoSurfaceBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor = Color(color);
+    if (backgroundColor != Color::TRANSPARENT) {
+        backgroundColor = Color::BLACK;
+    }
+
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, backgroundColor);
+}
+
+void ResetVideoSurfaceBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, Color::BLACK);
+}
+
 namespace NodeModifier {
 const ArkUIVideoModifier* GetVideoModifier()
 {
@@ -125,7 +144,9 @@ const ArkUIVideoModifier* GetVideoModifier()
         SetVideoMuted,
         ResetVideoMuted,
         SetVideoOpacity,
-        ResetVideoOpacity
+        ResetVideoOpacity,
+        SetVideoSurfaceBackgroundColor,
+        ResetVideoSurfaceBackgroundColor
     };
 
     return &modifier;

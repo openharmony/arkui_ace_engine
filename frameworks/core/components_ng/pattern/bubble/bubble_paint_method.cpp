@@ -224,7 +224,7 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, false);
     padding_ = popupTheme->GetPadding();
-    return popupTheme->GetPopupDoubleBorderEnable();
+    return popupTheme->GetPopupDoubleBorderEnable() && childSize_.IsPositive();
 }
 
 void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)

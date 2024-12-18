@@ -70,6 +70,7 @@ public:
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
     void OnHandleMouseEvent(const MouseInfo& event) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
+    bool IsRightButtonCustomMenuShow();
     bool IsRegisterTouchCallback() override
     {
         return true;

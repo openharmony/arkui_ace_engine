@@ -936,8 +936,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
     CHECK_NULL_RETURN(host, false);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                              ? KeyCode::KEY_DPAD_LEFT
-                              : KeyCode::KEY_DPAD_UP) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT) : KeyCode::KEY_DPAD_UP) ||
         event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (focusIndicator_ <= 0) {
             return false;
@@ -951,8 +950,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         return true;
     }
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                              ? KeyCode::KEY_DPAD_RIGHT
-                              : KeyCode::KEY_DPAD_DOWN) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT) : KeyCode::KEY_DPAD_DOWN) ||
         event.code == KeyCode::KEY_TAB) {
         if (focusIndicator_ >= host->TotalChildCount() - MASK_COUNT - 1) {
             return false;
@@ -1336,21 +1334,20 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
+    if (targetIndex_) {
+        TriggerTranslateAnimation(indicator_, targetIndex_.value());
+        targetIndex_.reset();
+    }
+
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
     }
-
     if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, true);
     }
     isFirstLayout_ = false;
-
-    if (targetIndex_) {
-        TriggerTranslateAnimation(indicator_, targetIndex_.value());
-        targetIndex_.reset();
-    }
     if (focusIndex_) {
         focusIndex_.reset();
     }
@@ -2595,14 +2592,11 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
         layoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
         return;
     }
-    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
-    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
-    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateIndicator(targetPaintRect);
     if (!changeByClick_) {
         return;
     }
+    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
+    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
     PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, targetOffset);
 }
 

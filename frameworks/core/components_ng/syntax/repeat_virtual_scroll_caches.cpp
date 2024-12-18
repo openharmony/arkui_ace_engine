@@ -96,7 +96,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, 
         const auto rangeEnd = lastActiveRanges_[0].second;
 
         if (rangeStart <= rangeEnd) {
-            return FetchMoreKeysTTypes(from, std::max(to, rangeEnd), false);
+            return FetchMoreKeysTTypes(std::min(from, rangeStart), std::max(to, rangeEnd), false);
         } else {
             const bool v1 = FetchMoreKeysTTypes(0, rangeEnd, false);
             const bool v2 = FetchMoreKeysTTypes(rangeStart, std::numeric_limits<int>::max(), false);
