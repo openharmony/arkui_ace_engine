@@ -43,7 +43,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     model.SetListItemAlign(V2::ListItemAlign::CENTER);
     model.SetCachedCount(10);
     model.SetSticky(V2::StickyStyle::HEADER);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateDone();
 
     /**
@@ -75,7 +75,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     model.SetListDirection(Axis::HORIZONTAL);
     model.SetListItemAlign(V2::ListItemAlign::END);
     model.SetSticky(V2::StickyStyle::FOOTER);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetDivider(ITEM_DIVIDER);
     CreateDone();
     json = JsonUtil::Create(true);
@@ -97,7 +97,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     model = CreateList();
     model.SetListItemAlign(V2::ListItemAlign::START);
     model.SetSticky(V2::StickyStyle::BOTH);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
     CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
@@ -111,7 +111,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
      */
     model = CreateList();
     model.SetSticky(V2::StickyStyle::NONE);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    model.SetScrollSnapAlign(ScrollSnapAlign::NONE);
     CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
@@ -837,7 +837,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction002, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     model.SetScrollEnabled(true);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     CreateDone();
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnabled());
     EXPECT_TRUE(pattern_->IsScrollSnapAlignCenter());
@@ -1022,7 +1022,7 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
@@ -1047,7 +1047,7 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback003, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
     CreateDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();

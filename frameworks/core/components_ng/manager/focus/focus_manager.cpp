@@ -441,7 +441,7 @@ FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub,
     RefPtr<FocusHub> hub = focusHub;
     if (!hub || !hub->GetFocusManager()) {
         auto curFocusView = FocusView::GetCurrentFocusView();
-        auto hub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
+        hub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     }
 
     auto mng = hub ? hub->GetFocusManager() : GetCurrentFocusManager();

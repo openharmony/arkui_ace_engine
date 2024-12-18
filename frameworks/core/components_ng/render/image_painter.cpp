@@ -228,7 +228,7 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
     uint32_t down = 1;
     uint32_t left = 2;
     uint32_t right = 3;
-    auto drawRepeatYTask = [this, &canvas, &config, &dirRepeatNum, &singleImageHeight, &imageRepeatY, &contentRect](
+    auto drawRepeatYTask = [this, &canvas, &dirRepeatNum, &singleImageHeight, &imageRepeatY, &contentRect](
                                OffsetF offsetTempY, uint32_t dir) {
         float downNum = (dir == 0) ? -1 : 1;
         for (size_t j = 0; j < dirRepeatNum[dir] && imageRepeatY; j++) {

@@ -695,6 +695,58 @@ HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabBarPatternFocusIndexChange002
+ * @tc.desc: test FocusIndexChange jumpIndex_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. FocusIndexChange index.
+     * @tc.expected: test jumpIndex_.
+     */
+    for (int index = 0; index <= TABCONTENT_NUMBER; index++) {
+        tabBarPattern_->FocusIndexChange(index);
+        EXPECT_EQ(tabBarPattern_->jumpIndex_, index);
+    }
+}
+
+/**
+ * @tc.name: TabBarPatternFocusIndexChange003
+ * @tc.desc: test FocusIndexChange targetIndex_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto itemWidth = 200.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_TRUE(tabBarPattern_->CanScroll());
+
+    /**
+     * @tc.steps: step2. FocusIndexChange index.
+     * @tc.expected: test targetIndex_.
+     */
+    tabBarPattern_->animationDuration_ = 300;
+    for (int index = 0; index <= TABCONTENT_NUMBER; index++) {
+        tabBarPattern_->FocusIndexChange(index);
+        EXPECT_EQ(tabBarPattern_->targetIndex_, index);
+    }
+}
+
+/**
  * @tc.name: TabBarPatternMaskAnimationFinish003
  * @tc.desc: test MaskAnimationFinish
  * @tc.type: FUNC

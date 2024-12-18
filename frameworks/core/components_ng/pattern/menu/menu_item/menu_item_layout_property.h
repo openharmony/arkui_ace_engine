@@ -188,6 +188,12 @@ public:
         json->PutFixedAttr("label", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        LayoutProperty::ToTreeJson(json, config);
+        json->Put(TreeKey::CONTENT, GetContent().value_or("").c_str());
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

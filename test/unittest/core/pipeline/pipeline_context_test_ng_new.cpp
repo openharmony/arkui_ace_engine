@@ -26,6 +26,29 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace NG {
+namespace {
+struct TouchTimeTestCase {
+    uint64_t vsyncTime;
+    uint64_t compensationValue;
+    std::vector<uint64_t> touchEventTimes;
+    uint32_t targetTouchEventSize;
+    uint32_t originTouchEventSize;
+};
+
+const std::vector<TouchTimeTestCase> COLLECT_TOUCH_EVENTS_TESTCASES = {
+    { AFTER_VSYNC_TIME, BEFORE_VSYNC_TIME, { BEFORE_VSYNC_TIME, DEFAULT_VSYNC_TIME }, 2, 0 },
+    { DEFAULT_VSYNC_TIME, 0, { BEFORE_VSYNC_TIME, DEFAULT_VSYNC_TIME }, 2, 0 },
+    { DEFAULT_VSYNC_TIME, 0, { DEFAULT_VSYNC_TIME, AFTER_VSYNC_TIME }, 1, 1 },
+    { DEFAULT_VSYNC_TIME, 0, { AFTER_VSYNC_TIME, AFTER_VSYNC_TIME }, 0, 2 },
+};
+
+const std::vector<TouchTimeTestCase> FLUSH_TOUCH_EVENTS_TESTCASES = {
+    { DEFAULT_VSYNC_TIME, 0, {}, 0, 0 },
+    { DEFAULT_VSYNC_TIME, 0, { BEFORE_VSYNC_TIME }, 0, 1 },
+    { DEFAULT_VSYNC_TIME, 0, { BEFORE_VSYNC_TIME, BEFORE_VSYNC_TIME }, 0, 2 },
+    { DEFAULT_VSYNC_TIME, 0, { DEFAULT_VSYNC_TIME, AFTER_VSYNC_TIME }, 1, 2 },
+};
+} // namespace
 /**
  * @tc.name: PipelineContextTestNg036
  * @tc.desc: Test RequestFocus.
@@ -922,46 +945,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg059, TestSize.Level1)
     context_->canUseLongPredictTask_ = true;
     context_->OnIdle(2);
     EXPECT_TRUE(flagCbk);
-}
-
-/**
- * @tc.name: PipelineContextTestNg062
- * @tc.desc: Test the function SetCursor.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg062, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
-
-    /**
-     * @tc.steps2: set cursor with an exceptional value.
-     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
-     */
-    context_->SetCursor(EXCEPTIONAL_CURSOR);
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
-
-    /**
-     * @tc.steps3: set cursor with a normal value.
-     * @tc.expected: context_->cursor_ is correct value.
-     */
-    context_->SetCursor(static_cast<int32_t>(MouseFormat::EAST));
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::EAST);
-
-    /**
-     * @tc.steps4: restore mouse style.
-     * @tc.expected: context_->cursor_ is MouseFormat::DEFAULT.
-     */
-    context_->RestoreDefault();
-    ASSERT_NE(context_->GetWindow(), nullptr);
-    ASSERT_EQ(context_->GetWindow()->cursor_, MouseFormat::DEFAULT);
 }
 
 /**
@@ -2071,6 +2054,71 @@ HWTEST_F(PipelineContextTestNg, PipelineOnDragEvent001, TestSize.Level1)
     DragEventAction action = DragEventAction::DRAG_EVENT_START;
     context_->OnDragEvent(dragEvent, action);
     EXPECT_NE(manager->preTargetFrameNode_, frameNode);
+}
+
+/**
+ * @tc.name: PipelineFlushTouchEvents001
+ * @tc.desc: Test the function CollectTouchEventsBeforeVsync.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    for (auto& testCase : COLLECT_TOUCH_EVENTS_TESTCASES) {
+        context_->touchEvents_.clear();
+        context_->vsyncTime_ = testCase.vsyncTime;
+        context_->compensationValue_ = testCase.compensationValue;
+        for (auto& touchTimes : testCase.touchEventTimes) {
+            TouchEvent event;
+            event.time = TimeStamp(std::chrono::nanoseconds(touchTimes));
+            context_->touchEvents_.emplace_back(event);
+        }
+        std::list<TouchEvent> touchEvents;
+        context_->CollectTouchEventsBeforeVsync(touchEvents);
+        EXPECT_EQ(touchEvents.size(), testCase.targetTouchEventSize);
+        EXPECT_EQ(context_->touchEvents_.size(), testCase.originTouchEventSize);
+    }
+}
+
+/**
+ * @tc.name: PipelineFlushTouchEvents002
+ * @tc.desc: Test the function FlushTouchEvents with normal touchEvents.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->eventManager_, nullptr);
+    context_->SetupRootElement();
+    context_->vsyncTime_ = AFTER_VSYNC_TIME;
+    context_->eventManager_->idToTouchPoints_.clear();
+
+    for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
+        context_->resampleTimeStamp_ = testCase.vsyncTime;
+        context_->compensationValue_ = testCase.compensationValue;
+        context_->touchEvents_.clear();
+        context_->historyPointsById_.clear();
+        for (auto& touchTimes : testCase.touchEventTimes) {
+            TouchEvent event;
+            event.type = TouchType::MOVE;
+            event.time = TimeStamp(std::chrono::nanoseconds(touchTimes));
+            context_->touchEvents_.emplace_back(event);
+        }
+        context_->FlushTouchEvents();
+        EXPECT_EQ(context_->historyPointsById_.size(), testCase.targetTouchEventSize);
+        auto idToTouchPoint = context_->eventManager_->GetIdToTouchPoint();
+        EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
+    }
 }
 } // namespace NG
 } // namespace OHOS::Ace

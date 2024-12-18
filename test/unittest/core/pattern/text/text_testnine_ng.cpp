@@ -48,41 +48,6 @@ HWTEST_F(TextTestNineNg, OnHandleScrolling001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RecordClickEvent001
- * @tc.desc: test text_pattern.cpp RecordSpanClickEvent function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNineNg, RecordSpanClickEvent001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto span =  AceType::MakeRefPtr<SpanItem>();
-    Recorder::EventRecorder::Get().taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(true);
-    auto mockTaskExecutor = static_cast<MockTaskExecutor>(Recorder::EventRecorder::Get().taskExecutor_);
-    EXPECT_CALL(mockTaskExecutor, PostTask).Times(0);
-    pattern->RecordSpanClickEvent(span);
-}
-
-/**
- * @tc.name: RecordClickEvent001
- * @tc.desc: test text_pattern.cpp RecordClickEvent function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNineNg, RecordClickEvent001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    Recorder::EventRecorder::Get().taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(true);
-    auto mockTaskExecutor = static_cast<MockTaskExecutor>(Recorder::EventRecorder::Get().taskExecutor_);
-    EXPECT_CALL(mockTaskExecutor, PostTask).Times(0);
-    pattern->RecordClickEvent();
-}
-
-/**
  * @tc.name: GlobalOffsetInSelectedArea001
  * @tc.desc: test text_pattern.cpp GlobalOffsetInSelectedArea function
  * @tc.type: FUNC

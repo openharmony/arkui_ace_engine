@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
@@ -33,6 +34,7 @@
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_custom_node_ext_modifier.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
@@ -204,6 +206,53 @@ ArkUINodeHandle GetNodeByViewStack()
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
 }
 
+ArkUINodeHandle GetTopNodeByViewStack()
+{
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(node, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(node);
+}
+
+ArkUINodeHandle CreateCustomNode(ArkUI_CharPtr tag)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNode(tag));
+}
+
+ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
+}
+
+void CreateNewScope()
+{
+    ViewStackModel::GetInstance()->NewScope();
+}
+
+ArkUIRSNodeHandle GetRSNodeByNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto rsNode = frameNode->GetExtraCustomProperty("RS_NODE");
+    CHECK_NULL_RETURN(rsNode, nullptr);
+    return reinterpret_cast<ArkUIRSNodeHandle>(rsNode);
+}
+
+void RegisterOEMVisualEffect(ArkUIOEMVisualEffectFuncHandle func)
+{
+    OEMVisualEffectFunc oemFunc = reinterpret_cast<OEMVisualEffectFunc>(func);
+    ViewAbstract::RegisterOEMVisualEffect(oemFunc);
+}
+
+void SetOnNodeDestroyCallback(ArkUINodeHandle node, void (*onDestroy)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onDestroyCallback = [node, onDestroy](int32_t nodeId) {
+        onDestroy(node);
+    };
+    uiNode->SetOnNodeDestroyCallback(std::move(onDestroyCallback));
+}
+
 void DisposeNode(ArkUINodeHandle node)
 {
     ViewModel::DisposeNode(node);
@@ -323,6 +372,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDragEnd,
     NodeModifier::SetOnPreDrag,
     NodeModifier::SetOnKeyPreIme,
+    NodeModifier::SetOnFocusAxisEvent,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -524,6 +574,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnDragEnd,
     NodeModifier::ResetOnPreDrag,
     NodeModifier::ResetOnKeyPreIme,
+    NodeModifier::ResetOnFocusAxisEvent,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1852,6 +1903,13 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // callContinuation
     nullptr, // setChildTotalCount
     ShowCrash,
+    GetTopNodeByViewStack,
+    CreateCustomNode,
+    GetOrCreateCustomNode,
+    GetRSNodeByNode,
+    CreateNewScope,
+    RegisterOEMVisualEffect,
+    SetOnNodeDestroyCallback,
 };
 /* clang-format on */
 
@@ -2085,7 +2143,7 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "UnmarshallStyledStringDescriptor");
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
-    SpanString* spanString = new SpanString("");
+    SpanString* spanString = new SpanString(u"");
     spanString->DecodeTlvExt(vec, spanString);
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;

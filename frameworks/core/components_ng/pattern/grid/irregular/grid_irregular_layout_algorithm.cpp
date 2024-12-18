@@ -420,7 +420,8 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
         if (lineHeightIt == info.lineHeightMap_.end()) {
             continue;
         }
-        const bool isCache = it->first < info.startMainLineIndex_ || it->first > info.endMainLineIndex_;
+        const bool isCache = !props->GetShowCachedItemsValue(false) &&
+                             (it->first < info.startMainLineIndex_ || it->first > info.endMainLineIndex_);
         const auto& row = it->second;
         for (const auto& [c, itemIdx] : row) {
             if (itemIdx < 0 || (itemIdx == 0 && (it->first > 0 || c > 0))) {
@@ -443,7 +444,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
             }
             offset += OffsetF { padding.left.value_or(0.0f), 0.0f };
             child->GetGeometryNode()->SetMarginFrameOffset(offset + alignPos);
-            if (child->CheckNeedForceMeasureAndLayout()) {
+            if (!isCache && child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();

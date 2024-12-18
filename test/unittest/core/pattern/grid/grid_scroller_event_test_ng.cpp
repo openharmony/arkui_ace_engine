@@ -538,8 +538,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 1);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 1);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -600,8 +599,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 9);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 9);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -778,8 +776,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 1);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 1);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -834,8 +831,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 10);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1011,9 +1007,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation001, 
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1068,9 +1062,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1249,9 +1241,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation001
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1305,9 +1295,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation002
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1494,8 +1482,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
      *                   three kinds of call back functions are triggered or not.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 5);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_EQ(offsetY.Value(), ITEM_MAIN_SIZE * 5);
     EXPECT_EQ(willScrollOffset.Value(), ITEM_MAIN_SIZE * 5 * 2);
@@ -1559,8 +1546,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
      *                   three kinds of call back functions are triggered or not.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 5);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -1693,8 +1679,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1
      *                   three kinds of call back functions are triggered and values are correct.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 10);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -1760,8 +1745,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1
      *                   three kinds of call back functions are triggered and values are correct.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(-ITEM_MAIN_SIZE);
-    FlushUITasks();
+    ScrollTo(-ITEM_MAIN_SIZE);
     EXPECT_FALSE(isOnScrollCallBack);
     EXPECT_FALSE(isOnWillScrollCallBack);
     EXPECT_FALSE(isOnDidScrollCallBack);

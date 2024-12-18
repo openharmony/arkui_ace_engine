@@ -1413,6 +1413,7 @@ public:
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();
     void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
+    void FireUIExtensionEventInner(uint32_t eventId);
 
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
@@ -1442,6 +1443,7 @@ public:
     void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
 
     void FireAccessibilityEvents();
+    void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
 
 protected:
     virtual bool MaybeRelease() override;

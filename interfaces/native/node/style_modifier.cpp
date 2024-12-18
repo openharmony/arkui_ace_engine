@@ -5251,7 +5251,7 @@ void ResetScrollScrollBarColor(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollScrollBarColor(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowScrollBarColor(node->uiNodeHandle);
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(node->uiNodeHandle);
     }
 }
 
@@ -8958,6 +8958,9 @@ int32_t SetAccessibilityValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     uiValue.min = ArkUIOptionalInt { valuePtr->min.isSet, valuePtr->min.value };
     uiValue.max = ArkUIOptionalInt { valuePtr->max.isSet, valuePtr->max.value };
     uiValue.current = ArkUIOptionalInt { valuePtr->current.isSet, valuePtr->current.value };
+    uiValue.rangeMin = ArkUIOptionalInt { valuePtr->rangeMin.isSet, valuePtr->rangeMin.value };
+    uiValue.rangeMax = ArkUIOptionalInt { valuePtr->rangeMax.isSet, valuePtr->rangeMax.value };
+    uiValue.rangeCurrent = ArkUIOptionalInt { valuePtr->rangeCurrent.isSet, valuePtr->rangeCurrent.value };
     uiValue.text = ArkUIOptionalCharPtr { valuePtr->text.isSet, valuePtr->text.value };
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityValue(node->uiNodeHandle, uiValue);
@@ -8973,6 +8976,9 @@ const ArkUI_AttributeItem* GetAccessibilityValue(ArkUI_NodeHandle node)
     value.min = ArkUI_OptionalInt { uiValue.min.isSet, uiValue.min.value };
     value.max = ArkUI_OptionalInt { uiValue.max.isSet, uiValue.max.value };
     value.current = ArkUI_OptionalInt { uiValue.current.isSet, uiValue.current.value };
+    value.rangeMin = ArkUI_OptionalInt { uiValue.rangeMin.isSet, uiValue.rangeMin.value };
+    value.rangeMax = ArkUI_OptionalInt { uiValue.rangeMax.isSet, uiValue.rangeMax.value };
+    value.rangeCurrent = ArkUI_OptionalInt { uiValue.rangeCurrent.isSet, uiValue.rangeCurrent.value };
     value.text = ArkUI_OptionalCharPtr { uiValue.text.isSet, uiValue.text.value };
     g_attributeItem.object = &value;
     g_attributeItem.size = NUM_0;
@@ -12027,6 +12033,7 @@ int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->resetCachedCount(node->uiNodeHandle);
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);

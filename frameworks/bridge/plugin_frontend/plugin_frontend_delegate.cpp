@@ -1262,7 +1262,7 @@ void PluginFrontendDelegate::OnPushPageSuccess(
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url, false, {}, {} });
     if (Container::IsCurrentUseNewPipeline()) {
         FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
     } else {
@@ -1445,7 +1445,7 @@ void PluginFrontendDelegate::OnReplacePageSuccess(
         pageParamMap_.erase(pageRouteStack_.back().pageId);
         pageRouteStack_.pop_back();
     }
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url, false, {}, {} });
 }
 
 void PluginFrontendDelegate::ReplacePage(

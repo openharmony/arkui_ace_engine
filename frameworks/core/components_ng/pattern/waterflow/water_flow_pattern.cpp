@@ -688,7 +688,8 @@ int32_t WaterFlowPattern::GetChildrenCount() const
 void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
-        if (footer_.Upgrade()) {
+        auto footer = footer_.Upgrade();
+        if (footer && footer->FrameCount() > 0) {
             layoutInfo_->NotifyDataChange(index - 1, count);
         } else {
             layoutInfo_->NotifyDataChange(index, count);

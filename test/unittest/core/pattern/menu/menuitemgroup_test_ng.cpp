@@ -397,7 +397,7 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg003, TestSize.Le
         auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp2);
         layoutWrapper->AppendChild(childWrapper);
     }
-    algorithm->SetItemStartIndex(-1);
+    algorithm->itemStartIndex_ = -1;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_NE(algorithm->itemPosition_.find(0), algorithm->itemPosition_.end());
     EXPECT_EQ(algorithm->itemPosition_[0].second, 50.0f);

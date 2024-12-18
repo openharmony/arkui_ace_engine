@@ -25,6 +25,7 @@
 #include "core/animation/scroll_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/event/axis_event.h"
@@ -60,13 +61,13 @@ using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ContinuousSlidingCallback = std::function<double()>;
-using StartSnapAnimationCallback =
-    std::function<bool(float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)>;
+using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using IsReverseCallback = std::function<bool()>;
 using RemainVelocityCallback = std::function<bool(float)>;
+using GetSnapTypeCallback = std::function<SnapType()>;
 
 class FrameNode;
 class PipelineContext;
@@ -92,9 +93,9 @@ public:
     static double GetVelocityScale();
     static void SetFriction(double sFriction);
 
-    void Initialize(const WeakPtr<PipelineContext>& context);
+    void Initialize(const RefPtr<FrameNode>& host);
 
-    void Initialize(PipelineContext* context);
+    void InitAxisAnimator();
 
     bool IsMotionStop() const
     {
@@ -135,11 +136,6 @@ public:
         }
     }
 
-    void SetIsList(bool isList)
-    {
-        isList_ = isList;
-    }
-
     void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
@@ -153,11 +149,6 @@ public:
     void SetScrollEndCallback(const ScrollEventCallback& scrollEndCallback)
     {
         scrollEndCallback_ = scrollEndCallback;
-    }
-
-    void SetScrollTouchUpCallback(const ScrollEventCallback& scrollTouchUpCallback)
-    {
-        scrollTouchUpCallback_ = scrollTouchUpCallback;
     }
 
     void SetUnstaticFriction(double friction)
@@ -189,6 +180,8 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
+    void ProcessAxisUpdateEvent(float mainDelta);
+    void ProcessAxisEndEvent();
     void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
     void ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus);
 
@@ -205,7 +198,7 @@ public:
         return canOverScroll_;
     }
 
-    void ProcessScrollMotionStop(bool StopFriction);
+    void ProcessScrollMotionStop();
 
     bool DispatchEvent(const TouchEvent& point) override
     {
@@ -221,11 +214,6 @@ public:
     bool HandleEvent(const AxisEvent& event) override
     {
         return false;
-    }
-
-    void SetScrollEnd(const ScrollEventCallback& scrollEnd)
-    {
-        scrollEnd_ = scrollEnd;
     }
 
     void SetRemainVelocityCallback(const RemainVelocityCallback& remainVelocityCallback)
@@ -300,7 +288,7 @@ public:
     void UpdateSpringMotion(double mainPosition, const ExtentPair& extent, const ExtentPair& initExtent);
 
     void UpdateScrollSnapStartOffset(double offset);
-    void StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity);
+    void StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity, bool fromScrollBar);
     void UpdateScrollSnapEndWithOffset(double offset);
 
     bool IsAnimationNotRunning() const;
@@ -354,11 +342,6 @@ public:
 
     void SetSlipFactor(double SlipFactor);
 
-    void ChangeMoveStatus(bool flag)
-    {
-        moved_ = flag;
-    }
-
     void SetOnScrollBegin(const ScrollBeginCallback& scrollBeginCallback)
     {
         scrollBeginCallback_ = scrollBeginCallback;
@@ -367,6 +350,11 @@ public:
     void SetOnContinuousSliding(const ContinuousSlidingCallback& continuousSlidingCallback)
     {
         continuousSlidingCallback_ = continuousSlidingCallback;
+    }
+
+    void SetGetSnapTypeCallback(const GetSnapTypeCallback& getSnapTypeCallback)
+    {
+        getSnapTypeCallback_ = getSnapTypeCallback;
     }
 
     void SetHandleScrollCallback(NestableScrollCallback&& func)
@@ -427,7 +415,7 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
-    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar);
 
     void StopSnapController()
     {
@@ -436,9 +424,24 @@ public:
         }
     }
 
+    bool IsSnapAnimationRunning()
+    {
+        return state_ == AnimationState::SNAP;
+    }
+
+    bool IsAxisAnimationRunning()
+    {
+        return axisAnimator_ && axisAnimator_->IsRunning();
+    }
+
     double GetCurrentPos() const
     {
         return currentPos_;
+    }
+
+    void SetCurrentPos(float currentPos)
+    {
+        currentPos_ = currentPos;
     }
 
     bool GetNeedScrollSnapChange() const
@@ -485,7 +488,9 @@ public:
     void StopFrictionAnimation();
     void StopSpringAnimation(bool reachFinalPosition = false);
     void StopSnapAnimation();
+    void StopAxisAnimation();
 
+    void AttachAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSpringProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSnapProperty();
@@ -516,6 +521,12 @@ public:
         panActionEndEvents_.emplace_back(event);
     }
 
+    SnapType GetSnapType()
+    {
+        CHECK_NULL_RETURN(getSnapTypeCallback_, SnapType::NONE_SNAP);
+        return getSnapTypeCallback_();
+    }
+
 private:
     void InitPanRecognizerNG();
     void SetOnActionStart();
@@ -524,7 +535,7 @@ private:
     void SetOnActionCancel();
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
-    void ProcessScrollMotion(double position);
+    void ProcessScrollMotion(double position, int32_t source = SCROLL_FROM_ANIMATION);
     void ProcessListSnapMotion(double position);
     void TriggerFrictionAnimation(float mainPosition, float friction, float correctVelocity);
     void FixScrollMotion(float position, float initVelocity);
@@ -547,9 +558,7 @@ private:
     static inline bool IsMouseWheelScroll(const GestureEvent& info);
 
     ScrollPositionCallback callback_;
-    ScrollEventCallback scrollEnd_;
     ScrollEventCallback scrollEndCallback_;
-    ScrollEventCallback scrollTouchUpCallback_;
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
@@ -561,16 +570,17 @@ private:
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
+    GetSnapTypeCallback getSnapTypeCallback_;
     Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
+    WeakPtr<FrameNode> weakHost_;
     WeakPtr<PipelineContext> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
     double maxFlingVelocity_ = 0.0;
     bool scrollPause_ = false;
-    bool touchUp_ = false;
     bool moved_ = false;
     bool isTouching_ = false;
     bool isDragging_ = false;
@@ -578,7 +588,6 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
-    bool isList_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode
@@ -642,9 +651,14 @@ private:
     std::function<double()> overScrollOffsetCallback_;
 
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
+    bool snapAnimationFromScrollBar_ = false;
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
     bool nestedScrolling_ = false;
+    float axisSnapDistance_ = 0.f;
+    SnapDirection snapDirection_ = SnapDirection::NONE;
+
+    RefPtr<AxisAnimator> axisAnimator_;
 };
 
 } // namespace OHOS::Ace::NG

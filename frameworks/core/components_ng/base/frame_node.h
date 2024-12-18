@@ -422,6 +422,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;
@@ -1118,14 +1120,16 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void OnForegroundColorUpdate(const Color& value);
-
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value) override;
     void RemoveCustomProperty(const std::string& key) override;
+
+    void AddExtraCustomProperty(const std::string& key, void* extraData);
+    void* GetExtraCustomProperty(const std::string& key) const;
+    void RemoveExtraCustomProperty(const std::string& key);
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1149,6 +1153,14 @@ public:
     std::list<RefPtr<FrameNode>> GetActiveChildren();
 
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+    void OnPropertyChangeMeasure() const;
+
+    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
+    {
+        if (visibleAreaChangeTriggerReason_ != triggerReason) {
+            visibleAreaChangeTriggerReason_ = triggerReason;
+        }
+    }
 
 protected:
     void DumpInfo() override;
@@ -1399,6 +1411,8 @@ private:
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
+    std::unordered_map<std::string, void*> extraCustomPropertyMap_;
+
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
@@ -1417,6 +1431,7 @@ private:
     std::optional<RectF> syncedFramePaintRect_;
 
     int32_t childrenUpdatedFrom_ = -1;
+    VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
 
     friend class RosenRenderContext;
     friend class RenderContext;

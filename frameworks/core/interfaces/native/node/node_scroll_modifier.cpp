@@ -375,7 +375,18 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
     CHECK_NULL_VOID(scrollControllerBase);
-    scrollControllerBase->ScrollToEdge(static_cast<ScrollEdgeType>(value), true);
+
+    constexpr ArkUI_Int32 typeSize = 4;
+    if (value >= typeSize || value < 0) {
+        return;
+    }
+    constexpr ScrollEdgeType EDGE_TYPE_TABLE[typeSize] = {
+        ScrollEdgeType::SCROLL_TOP,
+        ScrollEdgeType::SCROLL_BOTTOM,
+        ScrollEdgeType::SCROLL_TOP,
+        ScrollEdgeType::SCROLL_BOTTOM,
+    };
+    scrollControllerBase->ScrollToEdge(EDGE_TYPE_TABLE[value], true);
 }
 
 void ResetScrollTo(ArkUINodeHandle node)

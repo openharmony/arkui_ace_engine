@@ -196,6 +196,7 @@ ohos_source_set("ace_components_event") {
     "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_view.cpp",
+    "$ace_root/frameworks/core/event/axis_event.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/event/touch_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
@@ -392,7 +393,9 @@ ohos_source_set("ace_base") {
     "//third_party/icu/icu4c:static_icui18n",
     "//third_party/icu/icu4c:static_icuuc",
   ]
-  external_deps = [ "zlib:shared_libz" ]
+  if (current_os == "ohos") {
+    external_deps = [ "zlib:shared_libz" ]
+  }
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -452,6 +455,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/common/recorder/event_controller.cpp",
     "$ace_root/frameworks/core/common/recorder/event_recorder.cpp",
     "$ace_root/frameworks/core/common/recorder/exposure_processor.cpp",
+    "$ace_root/frameworks/core/common/recorder/inspector_tree_collector.cpp",
     "$ace_root/frameworks/core/common/recorder/node_data_cache.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
@@ -541,6 +545,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_data_detector_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_data_url_analyzer_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
@@ -581,6 +586,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
+    "$ace_root/test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
@@ -958,6 +964,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/axis/axis_animator.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/axis/axis_scroll_motion.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/refresh_coordination.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable.cpp",

@@ -140,7 +140,6 @@ void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
         if (isShow) {
             outerBorder.SetBorderRadius(Radius(CONTAINER_OUTER_RADIUS));
             outerBorder.SetColor(CONTAINER_BORDER_COLOR);
-            outerBorder.SetWidth(CONTAINER_BORDER_WIDTH);
             padding = Edge(CONTENT_PADDING, Dimension(0.0), CONTENT_PADDING, CONTENT_PADDING);
         }
         containerDecoration->SetBorder(outerBorder);

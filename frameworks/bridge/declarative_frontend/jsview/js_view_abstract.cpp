@@ -51,6 +51,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -59,6 +60,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -2437,7 +2439,11 @@ void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>
             return;
         }
         const auto* vm = nodePtr->GetEcmaVM();
-        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto localHandle = nodePtr->GetLocalHandle();
+        if (localHandle.IsEmpty()) {
+            return;
+        }
+        auto* node = localHandle->ToNativePointer(vm)->Value();
         auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
         RefPtr<NG::FrameNode> contentNode = AceType::Claim(frameNode);
@@ -5368,6 +5374,12 @@ bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& j
     return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
+bool JSViewAbstract::ParseFlexSpaceToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) :
+        ParseJsDimensionVp(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
+}
+
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
     if (!jsValue->IsObject()) {
@@ -7788,11 +7800,14 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
-
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    // arrow is disabled for contextMenu with preview
+    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+        menuParam.enableArrow = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
@@ -8833,6 +8848,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
     JSClass<JSViewAbstract>::StaticMethod("monopolizeEvents", &JSInteractableView::JsMonopolizeEvents);
+    JSClass<JSViewAbstract>::StaticMethod("onFocusAxisEvent", &JSViewAbstract::JsOnFocusAxisEvent);
 
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
@@ -10185,6 +10201,37 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
+}
+
+void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (arg->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnFocusAxisEvent();
+        return;
+    }
+    if (!arg->IsFunction()) {
+        return;
+    }
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(args[0]);
+    if (jsOnFocusAxisEventFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnFocusAxisFuncLocalHandle = jsOnFocusAxisEventFunc->GetLocalHandle();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onFocusAxisEvent = [vm, execCtx = args.GetExecutionContext(),
+                       func = panda::CopyableGlobal(vm, jsOnFocusAxisFuncLocalHandle),
+                       node = frameNode](NG::FocusAxisEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onFocusAxis");
+        PipelineContext::SetCallBackNode(node);
+        auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    ViewAbstractModel::GetInstance()->SetOnFocusAxisEvent(std::move(onFocusAxisEvent));
 }
 
 bool JSViewAbstract::CheckColor(

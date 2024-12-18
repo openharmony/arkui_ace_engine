@@ -18,6 +18,14 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::map<uint32_t, std::string> PAN_GESTURE_MAP = {
+    { PanDirection::LEFT, "Left" },
+    { PanDirection::RIGHT, "Right" },
+    { PanDirection::UP, "Up" },
+    { PanDirection::DOWN, "Down" },
+};
+}
 
 void PlatformEventProxy::SetHostNode(const WeakPtr<FrameNode>& host)
 {
@@ -35,22 +43,13 @@ bool PlatformEventProxy::HasEventProxy(int32_t flag)
         return false;
     }
 
-    if (uFlag & EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL) {
+    auto panFlag = GetPanDirection(static_cast<uint64_t>(uFlag));
+    if (panFlag != 0) {
         if (panEvent_ == nullptr) {
             return false;
         }
 
-        if (panDirection_ != PanDirection::VERTICAL && panDirection_ != PanDirection::ALL) {
-            return false;
-        }
-    }
-
-    if (uFlag & EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL) {
-        if (panEvent_ == nullptr) {
-            return false;
-        }
-
-        if (panDirection_ != PanDirection::HORIZONTAL && panDirection_ != PanDirection::ALL) {
+        if (!(panDirection_ & panFlag)) {
             return false;
         }
     }
@@ -80,17 +79,7 @@ void PlatformEventProxy::SetEventProxyFlag(int32_t flag)
 
 uint32_t PlatformEventProxy::GetPanDirection(uint64_t flag)
 {
-    uint32_t panDirection = PanDirection::NONE;
-    if (flag & EventProxyFlag::EVENT_PAN_GESTURE_VERTICAL) {
-        panDirection = PanDirection::VERTICAL;
-    }
-
-    if (flag & EventProxyFlag::EVENT_PAN_GESTURE_HORIZONTAL) {
-        panDirection = (panDirection == PanDirection::VERTICAL)
-            ? PanDirection::ALL : PanDirection::HORIZONTAL;
-    }
-
-    return panDirection;
+    return flag & 0xF;
 }
 
 EventProxyResultCode PlatformEventProxy::SetClickEventProxy(
@@ -184,7 +173,7 @@ std::string PlatformEventProxy::GetCurEventProxyToString()
     std::string eventProxyStr = "[";
     bool hasPre = false;
     if (clickEvent_) {
-        eventProxyStr.append("ClickEvent");
+        eventProxyStr.append("Click");
         hasPre = true;
     }
 
@@ -192,23 +181,22 @@ std::string PlatformEventProxy::GetCurEventProxyToString()
         if (hasPre) {
             eventProxyStr.append(", ");
         }
-        eventProxyStr.append("LongPressEvent");
+        eventProxyStr.append("LongPress");
         hasPre = true;
     }
 
     if (panEvent_) {
-        if (hasPre) {
-            eventProxyStr.append(", ");
-        }
+        for (const auto item : PAN_GESTURE_MAP) {
+            if (!(panDirection_ & item.first)) {
+                continue;
+            }
 
-        if (panDirection_ == PanDirection::VERTICAL) {
-            eventProxyStr.append("PanGestureVertical");
-        } else if (panDirection_ == PanDirection::HORIZONTAL) {
-            eventProxyStr.append("PanGestureHorizontal");
-        } else if (panDirection_ == PanDirection::ALL) {
-            eventProxyStr.append("PanGestureVertical, PanGestureHorizontal");
-        } else {
-            eventProxyStr.append("InvalidPanGesture");
+            if (hasPre) {
+                eventProxyStr.append(", ");
+            }
+
+            eventProxyStr.append(item.second);
+            hasPre = true;
         }
     }
 

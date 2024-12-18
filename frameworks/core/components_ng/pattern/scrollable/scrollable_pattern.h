@@ -266,8 +266,7 @@ public:
         scrollable->StopScrollable();
     }
 
-    virtual bool StartSnapAnimation(
-        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f)
+    virtual bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     {
         return false;
     }
@@ -402,10 +401,25 @@ public:
     void UpdateMouseStart(float offset);
 
     // scrollSnap
-    virtual std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance, float velocity)
+    virtual std::optional<float> CalcPredictSnapOffset(
+        float delta, float dragDistance, float velocity, SnapDirection snapDirection)
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;
+    }
+
+    virtual void SetLastSnapTargetIndex(int32_t lastSnapTargetIndex) {}
+
+    virtual int32_t GetLastSnapTargetIndex()
+    {
+        return -1;
+    }
+
+    void SetScrollableCurrentPos(float currentPos)
+    {
+        auto scrollable = GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        return scrollable->SetCurrentPos(currentPos);
     }
 
     virtual bool NeedScrollSnapToSide(float delta)
@@ -580,6 +594,11 @@ public:
         return scrollable->IsSpringMotionRunning();
     }
 
+    virtual SnapType GetSnapType()
+    {
+        return SnapType::NONE_SNAP;
+    }
+
     virtual bool IsScrollSnap()
     {
         // When setting snap or enablePaging in scroll, the PARENT_FIRST in nestedScroll_ is invalid
@@ -721,6 +740,8 @@ public:
 
     void ScrollEndCallback(bool nestedScroll, float velocity);
 
+    void StopScrollableAndAnimate();
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -820,6 +841,8 @@ protected:
 
     void CheckScrollBarOff();
 
+    void RecordScrollEvent(Recorder::EventType eventType);
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -837,7 +860,6 @@ private:
     float GetScrollDelta(float offset, bool& stopAnimation);
 
     void OnAttachToFrameNode() override;
-    void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
 
@@ -912,6 +934,7 @@ private:
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
+    void SetGetSnapTypeCallback(const RefPtr<Scrollable>& scrollable);
     RefPtr<Scrollable> CreateScrollable();
 
     // Scrollable::UpdateScrollPosition
@@ -963,6 +986,7 @@ private:
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
     bool isAnimateOverScroll_ = false;
+    bool isScrollToOverAnimation_ = false;
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
@@ -1025,6 +1049,7 @@ private:
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
     bool prevHasFadingEdge_ = false;
+    float scrollStartOffset_ = 0.0f;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

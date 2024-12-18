@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -181,6 +182,13 @@ void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
@@ -439,6 +447,8 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
@@ -653,7 +663,8 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
+    bool isBypass, MouseStyleChangeReason reason)
 {
     return true;
 }

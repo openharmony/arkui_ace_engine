@@ -632,6 +632,9 @@ public:
         return static_cast<int32_t>(pageFlipMode_);
     }
 
+    float CalcCurrentTurnPageRate() const;
+    int32_t GetFirstIndexInVisibleArea() const;
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -818,8 +821,9 @@ private:
      * @brief Stops animations when the scroll starts.
      *
      * @param flushImmediately Whether to flush layout immediately.
+     * @param stopLongPointAnimation Whether to stop indicator long point animation immediately.
      */
-    void StopAnimationOnScrollStart(bool flushImmediately);
+    void StopAnimationOnScrollStart(bool flushImmediately, bool stopLongPointAnimation = false);
     /**
      * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
@@ -984,6 +988,10 @@ private:
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
     void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
+    bool NeedEnableIgnoreBlankOffset() const
+    {
+        return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
+    }
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 

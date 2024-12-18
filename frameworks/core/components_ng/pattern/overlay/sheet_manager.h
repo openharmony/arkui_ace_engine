@@ -65,7 +65,7 @@ public:
         return sheetFocusId_;
     }
 
-    void RemoveSheetByESC();
+    bool RemoveSheetByESC();
 
     void DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType);
 

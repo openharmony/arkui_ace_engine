@@ -463,11 +463,14 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContextWithCheck());
     }
-    TriggerVisibleAreaChangeCallback(0, true);
-    CleanVisibleAreaUserCallback();
-    CleanVisibleAreaInnerCallback();
     if (eventHub_) {
         eventHub_->ClearOnAreaChangedInnerCallbacks();
+        if (eventHub_->HasVisibleAreaCallback(true) || eventHub_->HasVisibleAreaCallback(false)) {
+            SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::FRAMENODE_DESTROY);
+            TriggerVisibleAreaChangeCallback(0, true);
+            CleanVisibleAreaUserCallback();
+            CleanVisibleAreaInnerCallback();
+        }
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
@@ -668,8 +671,12 @@ void FrameNode::InitializePatternAndContext()
 
 void FrameNode::DumpSafeAreaInfo()
 {
-    if (layoutProperty_->GetSafeAreaExpandOpts()) {
-        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()->ToString());
+    auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
+    if (opts) {
+        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()
+                                           ->ToString()
+                                           .append(",hostPageId: ")
+                                           .append(std::to_string(GetPageId()).c_str()));
     }
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
@@ -789,7 +796,9 @@ void FrameNode::DumpCommonInfo()
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
     }
     if (GetTag() == V2::ROOT_ETS_TAG) {
-        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(GetContext()->GetDensity())));
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
     }
     DumpAlignRulesInfo();
     DumpDragInfo();
@@ -1156,6 +1165,33 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
 }
 
+void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    if (layoutProperty_) {
+        layoutProperty_->ToTreeJson(json, config);
+    } else {
+        LayoutProperty lp;
+        lp.ToTreeJson(json, config);
+    }
+    if (paintProperty_) {
+        paintProperty_->ToTreeJson(json, config);
+    }
+    if (pattern_) {
+        pattern_->ToTreeJson(json, config);
+    }
+    auto id = propInspectorId_.value_or("");
+    if (!id.empty()) {
+        json->Put(TreeKey::ID, id.c_str());
+    }
+    if (!config.contentOnly) {
+        auto eventHub = GetOrCreateGestureEventHub();
+        if (eventHub) {
+            json->Put(TreeKey::CLICKABLE, eventHub->IsClickable());
+            json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
+        }
+    }
+}
+
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     if (renderContext_) {
@@ -1293,6 +1329,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     FireFontNDKCallback(configurationChange);
+    OnPropertyChangeMeasure();
+}
+
+void FrameNode::OnPropertyChangeMeasure() const
+{
     auto layoutProperty = GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->OnPropertyChangeMeasure();
@@ -1660,13 +1701,28 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
-    bool isFrameDisappear = !context->GetOnShow() || !AllowVisibleAreaCheck() || !IsVisible();
+    auto isOnShow = context->GetOnShow();
+    auto isOnMainTree = AllowVisibleAreaCheck();
+    auto isSelfVisible = IsVisible();
+    if (!isSelfVisible) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::SELF_INVISIBLE);
+    }
+    if (!isOnMainTree) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::IS_NOT_ON_MAINTREE);
+    }
+    if (!isOnShow) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::BACKGROUND);
+    }
+    bool isFrameDisappear = !isOnShow || !isOnMainTree || !isSelfVisible;
     if (isFrameDisappear) {
         cachedIsFrameDisappear_ = { timestamp, true };
         return true;
     }
-
-    return IsFrameAncestorDisappear(timestamp);
+    auto result = IsFrameAncestorDisappear(timestamp);
+    if (result) {
+        SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::ANCESTOR_INVISIBLE);
+    }
+    return result;
 }
 
 bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
@@ -1726,8 +1782,8 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
         }
         return;
     }
-    bool logFlag = IsDebugInspectorId();
-    auto visibleResult = GetCacheVisibleRect(timestamp, logFlag);
+    auto visibleResult = GetCacheVisibleRect(timestamp, IsDebugInspectorId());
+    SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
     if (hasInnerCallback) {
         if (isCalculateInnerVisibleRectClip_) {
             ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
@@ -1813,6 +1869,11 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
 
     auto callback = visibleAreaUserCallback.callback;
     if (isHandled && callback) {
+        if (GetTag() == V2::WEB_ETS_TAG) {
+            TAG_LOGI(AceLogTag::ACE_UIEVENT, "exp=%{public}d ratio=%{public}s %{public}d-%{public}s reason=%{public}d",
+                isVisible, std::to_string(currentVisibleRatio).c_str(), GetId(),
+                std::to_string(GetAccessibilityId()).c_str(), static_cast<int32_t>(visibleAreaChangeTriggerReason_));
+        }
         callback(isVisible, currentVisibleRatio);
     }
 }
@@ -2938,6 +2999,9 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
         auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
         auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
         auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+            continue;
+        }
         RectF responseRegion(round(offset.GetX() + x.value()), round(offset.GetY() + y.value()),
             round(width.value()), round(height.value()));
         responseRegionList.emplace_back(responseRegion);
@@ -3762,7 +3826,7 @@ RefPtr<FrameNode> FrameNode::FindChildByPositionWithoutChildTransform(float x, f
         }
 
         auto globalFrameRect = geometryNode->GetFrameRect();
-        auto childOffset = child->GetGeometryNode()->GetFrameOffset();
+        auto childOffset = geometryNode->GetFrameOffset();
         childOffset += parentOffset;
         globalFrameRect.SetOffset(childOffset);
 
@@ -4348,6 +4412,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         if (needSyncRsNode) {
             renderContext_->SyncPartialRsProperties();
         }
+    } else {
+        geometryNode_->SetPixelGridRoundOffset(geometryNode_->GetFrameOffset());
+        geometryNode_->SetPixelGridRoundSize(geometryNode_->GetFrameSize());
     }
     config = { .frameSizeChange = frameSizeChange,
         .frameOffsetChange = frameOffsetChange,
@@ -4535,7 +4602,7 @@ void FrameNode::RemoveChildInRenderTree(uint32_t index)
 
 bool FrameNode::SkipMeasureContent() const
 {
-    return layoutAlgorithm_->SkipMeasure();
+    return layoutAlgorithm_ && layoutAlgorithm_->SkipMeasure();
 }
 
 bool FrameNode::CheckNeedForceMeasureAndLayout()
@@ -5772,13 +5839,6 @@ void FrameNode::ChildrenUpdatedFrom(int32_t index)
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
-void FrameNode::OnForegroundColorUpdate(const Color& value)
-{
-    auto pattern = GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->OnForegroundColorUpdate(value);
-}
-
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
 {
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
@@ -6024,6 +6084,28 @@ void FrameNode::RemoveCustomProperty(const std::string& key)
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
+    }
+}
+
+void FrameNode::AddExtraCustomProperty(const std::string& key, void* extraData)
+{
+    extraCustomPropertyMap_[key] = extraData;
+}
+
+void* FrameNode::GetExtraCustomProperty(const std::string& key) const
+{
+    auto iter = extraCustomPropertyMap_.find(key);
+    if (iter != extraCustomPropertyMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
+void FrameNode::RemoveExtraCustomProperty(const std::string& key)
+{
+    auto iter = extraCustomPropertyMap_.find(key);
+    if (iter != extraCustomPropertyMap_.end()) {
+        extraCustomPropertyMap_.erase(iter);
     }
 }
 

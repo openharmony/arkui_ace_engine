@@ -85,6 +85,7 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     auto sharedManager = pipeline->GetSharedOverlayManager();
     CHECK_NULL_VOID(sharedManager);
     sharedManager->StartSharedTransition(srcPage, destPage);
+    animationSrcPage_ = srcPage;
     destPageNode_ = destPage;
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "start pageTransition, from node %{public}d to %{public}d",
         srcPage ? srcPage->GetId() : -1, destPage ? destPage->GetId() : -1);
@@ -135,7 +136,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     int64_t startTime = GetSysTimestamp();
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_RETURN(pipeline, false);
-
+    StopPageTransition(needTransition);
     const auto& children = stageNode_->GetChildren();
     RefPtr<FrameNode> outPageNode;
     needTransition &= !children.empty();
@@ -210,6 +211,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, node);
     if (needTransition) {
+        ExpandSafeArea(node);
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
             auto stage = weakStage.Upgrade();
@@ -275,6 +277,7 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(stageNode_, false);
+    StopPageTransition(needTransition);
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "router pop page start, children is empty");
@@ -284,6 +287,7 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     const size_t transitionPageSize = 2;
     needTransition &= (children.size() >= transitionPageSize);
     if (needTransition) {
+        ExpandSafeArea(pageNode);
         pipeline->FlushPipelineImmediately();
     }
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
@@ -317,6 +321,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(stageNode_, false);
+    StopPageTransition(needTransition);
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
         return false;
@@ -328,12 +333,12 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (popSize == 0) {
         return true;
     }
-
+    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     if (needTransition) {
+        ExpandSafeArea(outPageNode);
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
-    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = *iter;
@@ -409,6 +414,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(stageNode_, false);
+    StopPageTransition(needTransition);
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
         return false;
@@ -418,6 +424,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
         return true;
     }
     if (needTransition) {
+        ExpandSafeArea(node);
         pipeline->FlushPipelineImmediately();
     }
     if (needHideLast) {
@@ -498,7 +505,7 @@ void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefP
     auto outPagePattern = outPageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(outPagePattern);
     auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(inPageNode)]() {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called.");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIExtNodeDestroy called.");
         auto page = weak.Upgrade();
         CHECK_NULL_VOID(page);
         auto pattern = page->GetPattern<PagePattern>();
@@ -506,7 +513,7 @@ void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefP
         pattern->SetIsModalCovered(false);
     };
     auto onUIExtNodeBindingCompleted = [weak = WeakPtr<FrameNode>(inPageNode)]() {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called.");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIExtNodeBindingCompleted called.");
         auto page = weak.Upgrade();
         CHECK_NULL_VOID(page);
         auto pattern = page->GetPattern<PagePattern>();
@@ -578,7 +585,7 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return nullptr;
     }
     if (stageInTrasition_) {
-        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+        return DynamicCast<FrameNode>(animationSrcPage_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
 }
@@ -683,5 +690,35 @@ void StageManager::UpdatePageNeedRemove(const RefPtr<UINode>& pageNode)
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->SetIsNeedRemove(true);
+}
+
+void StageManager::ExpandSafeArea(const RefPtr<UINode>& pageNode)
+{
+    auto node = AceType::DynamicCast<FrameNode>(pageNode);
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+        .edges = SAFE_AREA_EDGE_ALL };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
+}
+
+void StageManager::StopPageTransition(bool needTransition)
+{
+    if (needTransition) {
+        return;
+    }
+    auto srcNode = animationSrcPage_.Upgrade();
+    if (srcNode) {
+        auto pattern = srcNode->GetPattern<PagePattern>();
+        pattern->StopPageTransition();
+        animationSrcPage_ = nullptr;
+    }
+    auto destNode = destPageNode_.Upgrade();
+    if (destNode) {
+        auto pattern = destNode->GetPattern<PagePattern>();
+        pattern->StopPageTransition();
+        destPageNode_ = nullptr;
+    }
 }
 } // namespace OHOS::Ace::NG

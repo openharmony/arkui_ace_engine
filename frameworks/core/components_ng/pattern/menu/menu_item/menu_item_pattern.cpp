@@ -244,7 +244,8 @@ void MenuItemPattern::RecordChangeEvent() const
         .SetType(host->GetTag())
         .SetChecked(isSelected_)
         .SetText(content)
-        .SetDescription(host->GetAutoEventParamValue(""));
+        .SetDescription(host->GetAutoEventParamValue(""))
+        .SetHost(host);
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
 }
@@ -298,6 +299,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
@@ -308,8 +311,6 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
         return;
     }
 
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
     menuPattern->FocusViewHide();
     HideSubMenu();
     isSubMenuShowed_ = true;
@@ -322,6 +323,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(focusMenuRenderContext);
     if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
         auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
+        CHECK_NULL_VOID(focusMenuBlurStyle);
         param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
@@ -391,6 +393,9 @@ RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
 {
     auto frameNode = GetSubMenu(customNode);
+    if (!frameNode) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "subMenu has no Menu node");
+    }
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
         auto props = frameNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -412,6 +417,7 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
 
 void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
+    CHECK_NULL_VOID(subMenu);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
@@ -471,13 +477,19 @@ void MenuItemPattern::HideSubMenu()
 void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
 {
     CHECK_NULL_VOID(expandableNode);
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     isExpanded_ = !isExpanded_;
     if (isExpanded_) {
         embeddedMenu_ = expandableNode;
         ShowEmbeddedExpandMenu(embeddedMenu_);
+        menuPattern->SetShowedSubMenu(embeddedMenu_);
     } else {
         HideEmbeddedExpandMenu(embeddedMenu_);
         embeddedMenu_ = nullptr;
+        menuPattern->SetShowedSubMenu(nullptr);
     }
 }
 
@@ -581,6 +593,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
 
 void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode)
 {
+    CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
@@ -782,6 +795,7 @@ void MenuItemPattern::RegisterOnKeyEvent()
 
 bool MenuItemPattern::OnClick()
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem index:%{public}d receive click event", index_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (onClickAIMenuItem_) {
@@ -833,6 +847,7 @@ bool MenuItemPattern::OnClick()
 
 void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem index:%{public}d receive touch event", index_);
     auto menuWrapper = GetMenuWrapper();
     // When menu wrapper exists, the pressed state is handed over to the menu wrapper
     if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
@@ -891,6 +906,7 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
 
 void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "Custom MenuItem receive touch event");
     const auto& touches = info.GetTouches();
     CHECK_EQUAL_VOID(touches.empty(), true);
     auto touchType = touches.front().GetTouchType();
@@ -1526,13 +1542,15 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         node = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     }
-    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(node);
+    auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(false);
     auto context = PipelineBase::GetCurrentContext();
-    auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());

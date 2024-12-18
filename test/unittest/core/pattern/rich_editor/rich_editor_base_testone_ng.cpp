@@ -507,14 +507,14 @@ HWTEST_F(RichEditorBaseTestOneNg, Controller001, TestSize.Level1)
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     UpdateSpanStyle typingStyle;
     richEditorController->SetTypingStyle(typingStyle, style);
     TextSpanOptions options1;
     options1.style = richEditorPattern->typingTextStyle_;
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info1 = richEditorController->GetSpansInfo(1, 5);
     TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle2.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
@@ -554,7 +554,7 @@ HWTEST_F(RichEditorBaseTestOneNg, Controller002, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     richEditorController->SetSelection(1, 3);
     auto info1 = richEditorController->GetSpansInfo(1, 2);
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
@@ -632,7 +632,7 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
     layoutAlgorithm->paragraphManager_ = paragraphManager;
 
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
 
@@ -705,7 +705,7 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     ASSERT_NE(spanItem, nullptr);
 
-    std::string str = "\n";
+    std::u16string str = u"\n";
     spanItem->content = str;
     spans.emplace_back(spanItem);
     auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager),

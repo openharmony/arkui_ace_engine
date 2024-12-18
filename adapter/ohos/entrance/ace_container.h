@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -275,11 +276,21 @@ public:
         return resourceInfo_;
     }
 
+    std::shared_ptr<Framework::JsValue> GetJsContext();
+    void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
+
     void SetOrientation(Orientation orientation) override
     {
         CHECK_NULL_VOID(uiWindow_);
         auto dmOrientation = static_cast<Rosen::Orientation>(static_cast<uint32_t>(orientation));
         uiWindow_->SetRequestedOrientation(dmOrientation);
+    }
+
+    uint64_t GetDisplayId() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, -1);
+        return uiWindow_->GetDisplayId();
     }
 
     Orientation GetOrientation() override

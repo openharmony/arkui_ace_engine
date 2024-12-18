@@ -181,6 +181,8 @@ public:
         isRenderDone_ = true;
     }
 
+    void StopPageTransition();
+
     void SetDynamicPageSizeCallback(DynamicPageSizeCallback&& dynamicPageSizeCallback)
     {
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);

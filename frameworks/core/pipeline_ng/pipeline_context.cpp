@@ -37,6 +37,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_engine.h"
@@ -103,6 +104,13 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     PipelineContext::aliveInstanceSet_.emplace(instanceId);
 #endif
     window_->OnHide();
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
+PipelineContext::PipelineContext()
+{
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
@@ -597,6 +605,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushMouseEventVoluntarily();
         isNeedFlushMouseEvent_ = false;
     }
+    eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
         window_->FlushAnimationStartTime(animationTimeStamp_);
         isNeedFlushAnimationStartTime_ = false;
@@ -1150,6 +1159,16 @@ void PipelineContext::SetupRootElement()
     AddOnAreaChangeNode(rootNode_->GetId());
 }
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask([weak = WeakClaim(this), callback]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->focusOnNodeCallback_ = callback;
+        }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
+}
+
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -1400,6 +1419,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 break;
             }
             PostKeyboardAvoidTask();
+            break;
+        }
+        case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
+            SetRootRect(width, height, 0.0);
+            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -3416,32 +3440,14 @@ void PipelineContext::DispatchMouseEvent(
     }
 }
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass,
+    MouseStyleChangeReason reason)
 {
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    if (!mouseStyle) {
-        TAG_LOGW(AceLogTag::ACE_MOUSE, "ChangeMouseStyle mouseStyle is null");
-        return false;
-    }
-    auto window = GetWindow();
-    if (window && window->IsUserSetCursor()) {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "ChangeMouseStyle UserSetCursor");
-        return false;
-    }
-    if (!windowId) {
-        windowId = static_cast<int32_t>(GetFocusWindowId());
-    }
-    if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
-        return false;
-    }
-    int32_t currentStyle = static_cast<int32_t>(format);
-    if (lastMouseStyle_ != 0 && currentStyle == 0) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle "
-            "[%{public}d,%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
-            nodeId, mouseStyleNodeId_.value_or(-1), currentStyle, lastMouseStyle_, windowId, isByPass);
-    }
-    lastMouseStyle_ = currentStyle;
-    return mouseStyle->ChangePointerStyle(windowId, format);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_RETURN(mouseStyleManager, false);
+    mouseStyleManager->SetMouseFormat(windowId, nodeId, format, isByPass, reason);
+    RequestFrame();
+    return true;
 }
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent)
@@ -3533,14 +3539,45 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             axisEventChecker_.GetPreAction());
     }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
     auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
     if (event.action != AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
-#endif
 
+    DispatchAxisEventToDragDropManager(event, node);
+
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+        eventManager_->AxisTest(scaleEvent, node);
+        eventManager_->DispatchAxisEventNG(scaleEvent);
+    }
+    if (event.action == AxisAction::BEGIN && formEventMgr) {
+        formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
+    }
+    if (scaleEvent.action == AxisAction::BEGIN) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
+        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
+    } else if (scaleEvent.verticalAxis == 0 && scaleEvent.horizontalAxis == 0) {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis End");
+        ResSchedReport::GetInstance().ResSchedDataReport("axis_off");
+    } else {
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
+        ResSchedReport::GetInstance().OnAxisEvent(scaleEvent);
+    }
+    if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
+        eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
+    }
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseMoveEventForAxisEvent(mouseEvent, node);
+    if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
+        formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
+        formEventMgr->RemoveEtsCardTouchEventCallback(event.id);
+    }
+}
+
+void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node)
+{
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
     auto dragManager = GetDragDropManager();
     if (dragManager && !dragManager->IsDragged()) {
         if (event.action == AxisAction::BEGIN) {
@@ -3559,24 +3596,6 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         eventManager_->DispatchTouchEvent(scaleEvent);
         isBeforeDragHandleAxis_ = false;
     }
-
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, node);
-        eventManager_->DispatchAxisEventNG(scaleEvent);
-    }
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
-    if (event.action == AxisAction::BEGIN && formEventMgr) {
-        formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
-    }
-#endif
-
-    auto mouseEvent = ConvertAxisToMouse(event);
-    OnMouseMoveEventForAxisEvent(mouseEvent, node);
-#ifdef  FORM_MOUSE_AXIS_SUPPORT
-    if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
-        formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
-    }
-#endif
 }
 
 void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
@@ -3951,9 +3970,7 @@ void PipelineContext::Destroy()
     auto formEventMgr = this->GetFormEventManager();
     if (formEventMgr) {
         formEventMgr->ClearEtsCardTouchEventCallback();
-#ifdef FORM_MOUSE_AXIS_SUPPORT
         formEventMgr->ClearEtsCardAxisEventCallback();
-#endif
     }
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
@@ -4622,11 +4639,12 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         CHECK_NULL_VOID(window);
         auto mouseStyle = MouseStyle::CreateMouseStyle();
         CHECK_NULL_VOID(mouseStyle);
-        auto cursor = static_cast<MouseFormat>(cursorValue);
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "user SetCursor mouseStyle=%{public}d", cursorValue);
-        window->SetCursor(cursor);
-        window->SetUserSetCursor(true);
-        mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
+        auto mouseFormat = static_cast<MouseFormat>(cursorValue);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        CHECK_NULL_VOID(mouseStyleManager);
+        mouseStyleManager->SetUserSetCursor(true);
+        ChangeMouseStyle(-1, mouseFormat, GetFocusWindowId(),
+            false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     }
 }
 
@@ -4636,10 +4654,11 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(window);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
-    window->SetCursor(MouseFormat::DEFAULT);
-    window->SetUserSetCursor(false);
-    TAG_LOGI(AceLogTag::ACE_MOUSE, "RestoreDefault param windowId=%{public}d", windowId);
-    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
+    ChangeMouseStyle(-1, MouseFormat::DEFAULT, windowId > 0 ? windowId : GetFocusWindowId(),
+        false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
+    auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+    CHECK_NULL_VOID(mouseStyleManager);
+    mouseStyleManager->SetUserSetCursor(false);
 }
 
 void PipelineContext::OpenFrontendAnimation(

@@ -18,6 +18,7 @@
 #include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -557,10 +558,24 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
             return overlayManager->RemoveOverlayInSubwindow();
         } else {
-            return overlayManager->RemoveOverlay(false);
+            return overlayManager->RemoveOverlay(false) || SheetManager::GetInstance().RemoveSheetByESC();
         }
     }
     return false;
+}
+
+bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
+{
+    auto container = Container::GetContainer(GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto focusNodeHub = rootNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    focusNodeHub->HandleEvent(event);
+    return true;
 }
 
 bool KeyEventManager::TriggerKeyEventDispatch(const KeyEvent& event)

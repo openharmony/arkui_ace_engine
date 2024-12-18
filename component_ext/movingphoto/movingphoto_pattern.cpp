@@ -161,15 +161,22 @@ void MovingPhotoPattern::InitEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (longPressEvent_) {
+        if (isEnableAnalyzer_) {
+            gestureHub->SetLongPressEvent(nullptr);
+            longPressEvent_ = nullptr;
+        } else {
+            gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
+        }
+    }
+    if (!isEnableAnalyzer_) {
+        auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleLongPress(info);
+        };
+        longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
         gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
     }
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPress(info);
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
 
     if (touchEvent_) {
         gestureHub->AddTouchEvent(touchEvent_);
@@ -258,7 +265,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
     if (!isPrepared_ || isPlayByController_) {
         return;
     }
-    if (autoAndRepeatLevel_ == PlaybackMode::NONE && isEnableAnalyzer_) {
+    if (autoAndRepeatLevel_ == PlaybackMode::NONE && isEnableAnalyzer_ && isAnalyzerPlaying_) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent isEnableAnalyzer_ return.");
         return;
     }
@@ -1059,15 +1066,27 @@ void MovingPhotoPattern::StartAnimation()
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption,
-        [imageRsContext, videoRsContext, repeatFlag = historyAutoAndRepeatLevel_]() {
+        [imageRsContext, videoRsContext, flag = autoAndRepeatLevel_, movingPhotoPattern]() {
             imageRsContext->UpdateOpacity(0.0);
-            imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-            if (repeatFlag == PlaybackMode::REPEAT) {
-                videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-            } else {
-                videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-            }
+            auto movingPhoto = movingPhotoPattern.Upgrade();
+            CHECK_NULL_VOID(movingPhoto);
+            movingPhoto->RsContextUpdateTransformScale(imageRsContext, videoRsContext, flag);
         }, animationOption.GetOnFinishEvent());
+}
+
+void MovingPhotoPattern::RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
+    const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode)
+{
+    if (playbackMode == PlaybackMode::REPEAT) {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    } else if (playbackMode == PlaybackMode::AUTO) {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+    } else {
+        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    }
 }
 
 void MovingPhotoPattern::StopPlayback()
@@ -1158,13 +1177,12 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
-    videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-    video->MarkModifyDone();
 
     imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     imageRsContext->UpdateOpacity(0.0);
-    imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    RsContextUpdateTransformScale(imageRsContext, videoRsContext, autoAndRepeatLevel_);
     image->MarkModifyDone();
+    video->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption option;
     option.SetDuration(ANIMATION_DURATION_300);

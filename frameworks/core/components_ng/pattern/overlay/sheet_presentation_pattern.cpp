@@ -45,6 +45,9 @@
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
 #include "core/components_ng/property/property.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -206,9 +209,6 @@ void SheetPresentationPattern::InitScrollProps()
     // When sheet content height is larger than sheet height,
     // the sheet height should set scroll always enabled.
     scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && IsScrollable());
-
-    // reset isScrolling prop to false.
-    isScrolling_ = false;
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -878,7 +878,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
         // when avoiding keyboard twice, recover input height before avoiding is needed.
         inputH = textFieldManager ? pipelineContext->GetRootHeight() -
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight() - sheetHeightUp_ -
-            scrollHeight_ - resizeDecreasedHeight_ : 0.f;
+            scrollHeight_ : 0.f;
     } else {
         inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                                     textFieldManager->GetHeight()) : 0.f;
@@ -899,6 +899,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
     // The expected height of the sheet to be lifted
     auto h = inputMinH - inputH;
     if (h <= maxH) {
+        RecoverScrollOrResizeAvoidStatus();
         // sheet is lifted up with h
         TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet is lifted up with h = %{public}f", h);
         return h;
@@ -1033,6 +1034,14 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
     return offset;
 }
 
+void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) const
+{
+    option.SetFillMode(FillMode::FORWARDS);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        option.SetDuration(SHEET_ANIMATION_DURATION);
+    }
+}
+
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
     bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDirectionUp_;
@@ -1047,7 +1056,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
     const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
-    option.SetFillMode(FillMode::FORWARDS);
+    SetSheetAnimationOption(option);
     auto offset = UpdateSheetTransitionOffset();
     if (!isTransitionIn) {
         const auto& overlayManager = GetOverlayManager();
@@ -1750,6 +1759,21 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     }
 }
 
+void SheetPresentationPattern::SetUIFirstSwitch(bool isFirstTransition, bool isNone)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!isFirstTransition) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rosenContext = DynamicCast<RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(rosenContext);
+    rosenContext->SetUIFirstSwitch(
+        isNone ? OHOS::Rosen::RSUIFirstSwitch::NONE : OHOS::Rosen::RSUIFirstSwitch::MODAL_WINDOW_CLOSE);
+#endif
+}
+
 void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
 {
     auto host = this->GetHost();
@@ -2020,6 +2044,16 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         windowChanged_ = true;
     }
 
+    if (type == WindowSizeChangeReason::ROTATION && sheetType == SheetType::SHEET_CENTER) {
+        auto recoverTask = [weak = WeakClaim(this), id = Container::CurrentId()] () {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->RecoverHalfFoldOrAvoidStatus();
+        };
+        PostTask(recoverTask, "ArkUISheetHalfFoldStatusSwitch");
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -2062,6 +2096,7 @@ void SheetPresentationPattern::ScrollTo(float height)
         float maxAvoidSize = keyboardHeight_ - (sheetType_ == SheetType::SHEET_CENTER ? height_ - centerHeight_ : 0.f);
         auto pipelineContext = host->GetContext();
         CHECK_NULL_VOID(pipelineContext);
+        auto useCaretAvoidMode = pipelineContext->UsingCaretAvoidMode();
         /*
          * when the screen rotates from portrait to landscape, and the sheet needs to avoid caret twice,
          * there is a condition that, the caret position that does not exceed the height of sheet in portrait mode,
@@ -2069,13 +2104,14 @@ void SheetPresentationPattern::ScrollTo(float height)
          * the distance to avoid caret may exceed as well. To keep bindSheet display normally,
          * we need to obtain the minimum content height and then the avoidance is made.
          */
-        if (pipelineContext->UsingCaretAvoidMode() && NonNegative(maxAvoidSize) &&
-            maxScrollDecreaseHeight > maxAvoidSize) {
-            maxScrollDecreaseHeight = maxAvoidSize;
+        if (useCaretAvoidMode && NonNegative(maxAvoidSize) && NonNegative(maxAvoidSize - sheetHeightUp_) &&
+            maxScrollDecreaseHeight > maxAvoidSize - sheetHeightUp_) {
+            maxScrollDecreaseHeight = maxAvoidSize - sheetHeightUp_;
         }
         layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
             CalcLength(GetScrollHeight() - maxScrollDecreaseHeight)));
-        scrollPattern->UpdateCurrentOffset(-height, SCROLL_FROM_JUMP);
+        auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
+        scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     }
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -2091,8 +2127,16 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     auto buildContent = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_RETURN(buildContent, false);
     auto scrollHeight = scroll->GetGeometryNode() ? scroll->GetGeometryNode()->GetFrameSize().Height() : .0f;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto useCaretAvoidMode = pipelineContext->UsingCaretAvoidMode();
+    if (useCaretAvoidMode) {
+        scrollHeight = GetScrollHeight();
+    }
     auto childHeight = buildContent->GetGeometryNode() ? buildContent->GetGeometryNode()->GetFrameSize().Height() : .0f;
-    if (scrollHeight - height <= childHeight) {
+    if (scrollHeight <= childHeight) {
         return false;
     }
     auto layoutProp = scroll->GetLayoutProperty<ScrollLayoutProperty>();
@@ -2106,7 +2150,8 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     layoutProp->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(GetScrollHeight() - (scrollHeight - childHeight + height))));
     // And then scroll move the content with '-height' offset
-    scrollPattern->UpdateCurrentOffset(-height, SCROLL_FROM_JUMP);
+    auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
+    scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     return true;
 }
 
@@ -2946,5 +2991,41 @@ void SheetPresentationPattern::FireHoverModeChangeCallback()
         return;
     }
     OnHeightDidChange(centerHeight_);
+}
+
+void SheetPresentationPattern::RecoverHalfFoldOrAvoidStatus()
+{
+    TAG_LOGD(AceLogTag::ACE_SHEET, "recover half fold status because of window rotate");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (IsCurSheetNeedHalfFoldHover()) {
+        RecoverAvoidKeyboardStatus();
+    } else {
+        AvoidSafeArea(true);
+    }
+}
+
+void SheetPresentationPattern::RecoverAvoidKeyboardStatus()
+{
+    RecoverScrollOrResizeAvoidStatus();
+    sheetHeightUp_ = 0.f;
+    OnHeightDidChange(centerHeight_);
+}
+
+void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scroll = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scroll);
+    auto layoutProp = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight())));
+    resizeDecreasedHeight_ = 0.f;
+    scrollHeight_ = 0.f;
+    ScrollTo(0.f);
+    isScrolling_ = false;
 }
 } // namespace OHOS::Ace::NG

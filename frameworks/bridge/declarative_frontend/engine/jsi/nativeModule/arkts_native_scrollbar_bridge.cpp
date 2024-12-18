@@ -30,6 +30,7 @@ ArkUINativeModuleValue ScrollBarBridge::SetScrollBarEnableNestedScroll(ArkUIRunt
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> enablePagingArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     if (enablePagingArg->IsBoolean()) {
         bool enablePaging = enablePagingArg->ToBoolean(vm)->Value();
@@ -43,6 +44,7 @@ ArkUINativeModuleValue ScrollBarBridge::ResetScrollBarEnableNestedScroll(ArkUIRu
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarEnableNestedScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);

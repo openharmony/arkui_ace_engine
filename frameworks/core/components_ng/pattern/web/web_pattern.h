@@ -26,8 +26,7 @@
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
 #include "base/view_data/hint_to_type_wrap.h"
-#include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/common/recorder/web_event_recorder.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -62,8 +61,26 @@ class WebDelegateObserver;
 class ImageAnalyzerManager;
 }
 
+namespace OHOS::NWeb {
+    class NWebQuickMenuParams;
+    class NWebQuickMenuCallback;
+    class NWebTouchHandleState;
+    class NWebCursorInfo;
+    class NWebSelectPopupMenuParam;
+    class NWebDateTimeChooser;
+    class NWebDateTimeSuggestion;
+    class NWebSelectPopupMenuCallback;
+    class NWebDateTimeChooserCallback;
+    class NWebAccessibilityNodeInfo;
+    class NWebMessage;
+    class NWebKeyEvent;
+    class NWebSelectMenuBound;
+    enum class CursorType;
+}
 namespace OHOS::Ace::NG {
 class WebAccessibilityChildTreeCallback;
+class ViewDataCommon;
+class TransitionalNodeInfo;
 
 namespace {
 
@@ -71,14 +88,6 @@ struct MouseClickInfo {
     double x = -1;
     double y = -1;
     TimeStamp start;
-};
-
-struct ViewDataCommon {
-    OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
-    std::string pageUrl;
-    bool isUserSelected = false;
-    bool isOtherAccount = false;
-    std::string source;
 };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -106,8 +115,11 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
-class WebPattern : public NestableScrollContainer, public TextBase, public Magnifier {
-    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier);
+class WebPattern : public NestableScrollContainer,
+                   public TextBase,
+                   public Magnifier,
+                   public Recorder::WebEventRecorder {
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, Recorder::WebEventRecorder);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -369,10 +381,7 @@ public:
         }
     }
 
-    RefPtr<WebEventHub> GetWebEventHub()
-    {
-        return GetEventHub<WebEventHub>();
-    }
+    RefPtr<WebEventHub> GetWebEventHub();
 
     FocusPattern GetFocusPattern() const override
     {
@@ -560,9 +569,10 @@ public:
         RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale);
     void ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
-    void ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child, ViewDataCommon& viewDataCommon);
+    void ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child,
+        const std::shared_ptr<ViewDataCommon>& viewDataCommon);
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
-        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, ViewDataCommon& viewDataCommon);
+        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon);
     AceAutoFillType GetFocusedType();
     HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -618,10 +628,11 @@ public:
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
-        bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
+    std::shared_ptr<NG::TransitionalNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
+        bool isAccessibilityFocus);
+    std::shared_ptr<NG::TransitionalNodeInfo> GetTransitionalNodeById(int64_t accessibilityId);
+    std::shared_ptr<NG::TransitionalNodeInfo> GetAccessibilityNodeByFocusMove(int64_t accessibilityId,
         int32_t direction);
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
@@ -709,6 +720,8 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+    void RecordWebEvent(bool isInit = false) override;
+    void GetPageContentAsync(const std::string& jsCode);
 
     bool IsPreviewImageNodeExist() const
     {
@@ -1185,7 +1198,7 @@ private:
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
-    ViewDataCommon viewDataCommon_;
+    std::shared_ptr<ViewDataCommon> viewDataCommon_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
     bool isTouchpadSliding_ = false;
@@ -1199,7 +1212,7 @@ private:
     bool imageOverlayIsSelected_ = false;
     bool isLayoutModeChanged_ = false;
     bool isDragEnd_ = false;
-    OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
+    OHOS::NWeb::CursorType cursorType_;
     float touchPointX = 0;
     float touchPointY = 0;
     bool isUsingCustomKeyboardAvoid_ = false;

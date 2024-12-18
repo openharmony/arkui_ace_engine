@@ -63,7 +63,8 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
     if (ret != Rosen::WSError::WS_OK) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, ret: %{public}d", static_cast<int32_t>(ret));
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
+            session_->GetPersistentId(), static_cast<int32_t>(ret));
     }
 }
 
@@ -140,14 +141,15 @@ void SystemWindowScene::SetWindowScenePosition()
     auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetGetWindowScenePosition([weakSession = wptr(session_)] (
-        int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY) {
+        NG::WindowSceneInfo& windowSceneInfo) {
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         auto windowRect = session->GetSessionGlobalRect();
-        left = windowRect.posX_;
-        top = windowRect.posY_;
-        scaleX = session->GetScaleX();
-        scaleY = session->GetScaleY();
+        windowSceneInfo.left = windowRect.posX_;
+        windowSceneInfo.top = windowRect.posY_;
+        windowSceneInfo.scaleX = session->GetScaleX();
+        windowSceneInfo.scaleY = session->GetScaleY();
+        windowSceneInfo.innerWindowId = session->GetPersistentId();
     });
 }
 

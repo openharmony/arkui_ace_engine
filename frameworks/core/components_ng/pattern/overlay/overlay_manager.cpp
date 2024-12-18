@@ -71,7 +71,6 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -1888,7 +1887,8 @@ void OverlayManager::HideCustomPopups()
     if (popupMap_.empty()) {
         return;
     }
-    for (const auto& popup : popupMap_) {
+    auto tempPopupMap = popupMap_;
+    for (const auto& popup : tempPopupMap) {
         auto popupInfo = popup.second;
         if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
             auto targetNodeId = popupInfo.target.Upgrade()->GetId();
@@ -2788,7 +2788,7 @@ void OverlayManager::PopModalDialog(int32_t maskId)
             break;
         }
     }
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_, dialogDisplayId_);
     CHECK_NULL_VOID(subWindow);
     auto subOverlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(subOverlayManager);
@@ -3180,8 +3180,6 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             return true;
         }
-    } else {
-        SheetManager::GetInstance().RemoveSheetByESC();
     }
     return false;
 }
@@ -4439,19 +4437,19 @@ void OverlayManager::PlaySheetTransition(
     sheetNode->OnAccessibilityEvent(
         isTransitionIn ? AccessibilityEventType::PAGE_OPEN : AccessibilityEventType::PAGE_CLOSE,
         WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
 
     // current sheet animation
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
-    option.SetFillMode(FillMode::FORWARDS);
+    sheetPattern->SetSheetAnimationOption(option);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateRenderGroup(true, false, true);
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
     CHECK_NULL_VOID(sheetParent);
@@ -4486,6 +4484,7 @@ void OverlayManager::PlaySheetTransition(
                 context->UpdateRenderGroup(false, false, true);
                 TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+                pattern->SetUIFirstSwitch(isFirst, true);
                 if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
                     isFirst) {
                     pattern->OnAppear();
@@ -4497,6 +4496,7 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
         ACE_SCOPED_TRACE("Sheet start admission");
+        sheetPattern->SetUIFirstSwitch(isFirstTransition, false);
         AnimationUtils::Animate(
             option,
             [context, offset]() {
@@ -5610,7 +5610,7 @@ void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode);
     columnNode->OnMountToParentDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     if (isDragPixelMap) {
         dragPixmapColumnNodeWeak_ = columnNode;
         hasDragPixelMap_ = true;
@@ -5807,6 +5807,7 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
 void OverlayManager::RemoveFilterAnimation()
 {
     if (!hasFilter_) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter node is not exist");
         return;
     }
     auto filterNode = filterColumnNodeWeak_.Upgrade();
@@ -5827,6 +5828,7 @@ void OverlayManager::RemoveFilterAnimation()
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "removeFilter with animation");
     AnimationUtils::Animate(
         option,
         [filterContext]() {
@@ -5841,6 +5843,7 @@ void OverlayManager::RemoveFilterAnimation()
 void OverlayManager::RemoveFilter()
 {
     if (!hasFilter_) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter node is not exist");
         return;
     }
     auto columnNode = filterColumnNodeWeak_.Upgrade();
@@ -5849,6 +5852,7 @@ void OverlayManager::RemoveFilter()
         CHECK_NULL_VOID(rootNode);
         rootNode->RemoveChild(columnNode);
         rootNode->RebuildRenderContextTree();
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "removeFilter without animation");
     }
     hasFilter_ = false;
 }
@@ -6493,7 +6497,7 @@ void OverlayManager::MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_VOID(rootNode);
     frameNode->MountToParent(rootNode);
     frameNode->OnMountToParentDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     gatherNodeWeak_ = frameNode;
     hasGatherNode_ = true;
     gatherNodeChildrenInfo_ = gatherNodeChildrenInfo;

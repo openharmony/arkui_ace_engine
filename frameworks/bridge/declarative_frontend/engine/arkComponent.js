@@ -1831,6 +1831,19 @@ class OnKeyPreImeModifier extends ModifierWithKey {
   }
 }
 OnKeyPreImeModifier.identity = Symbol('onKeyPreIme');
+class OnFocusAxisEventModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnFocusAxisEvent(node);
+    } else {
+      getUINativeModule().common.setOnFocusAxisEvent(node, this.value);
+    }
+  }
+}
+OnFocusAxisEventModifier.identity = Symbol('onFocusAxisEvent');
 class OnFocusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2178,6 +2191,26 @@ class PaddingModifier extends ModifierWithKey {
   }
 }
 PaddingModifier.identity = Symbol('padding');
+class SafeAreaPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetSafeAreaPadding(node);
+    }
+    else {
+      getUINativeModule().common.setSafeAreaPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+SafeAreaPaddingModifier.identity = Symbol('safeAreaPadding');
 class VisibilityModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3447,6 +3480,38 @@ class ArkComponent {
     }
     return this;
   }
+  safeAreaPadding(value) {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isObject(value) && (Object.keys(value).indexOf('value') >= 0)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
+      }
+      modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, undefined);
+    }
+    return this;
+  }
   margin(value) {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
@@ -3706,6 +3771,10 @@ class ArkComponent {
   }
   onKeyPreIme(event) {
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
+    return this;
+  }
+  onFocusAxisEvent(event) {
+    modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
     return this;
   }
   focusable(value) {
@@ -11904,6 +11973,24 @@ class TextResponseRegionModifier extends ModifierWithKey {
 }
 TextResponseRegionModifier.identity = Symbol('textResponseRegion');
 
+class TextEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().text.setEnableHapticFeedback(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextEnableHapticFeedbackModifier.identity = Symbol('textEnableHapticFeedback');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -12116,6 +12203,10 @@ class ArkTextComponent extends ArkComponent {
   }
   responseRegion(value) {
     modifierWithKey(this._modifiersWithKeys, TextResponseRegionModifier.identity, TextResponseRegionModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TextEnableHapticFeedbackModifier.identity, TextEnableHapticFeedbackModifier, value);
     return this;
   }
 }
@@ -15441,6 +15532,23 @@ class VideoOpacityModifier extends ModifierWithKey {
   }
 }
 VideoOpacityModifier.identity = Symbol('videoOpacity');
+class VideoSurfaceBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetVideoSurfaceBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().video.setVideoSurfaceBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoSurfaceBackgroundColorModifier.identity = Symbol('videoSurfaceBackgroundColor');
 class VideoTransitionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15468,6 +15576,11 @@ class ArkVideoComponent extends ArkComponent {
   }
   autoPlay(value) {
     modifierWithKey(this._modifiersWithKeys, VideoAutoPlayModifier.identity, VideoAutoPlayModifier, value);
+    return this;
+  }
+  surfaceBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoSurfaceBackgroundColorModifier.identity,
+      VideoSurfaceBackgroundColorModifier, value);
     return this;
   }
   controls(value) {
@@ -19241,6 +19354,10 @@ class ArkTimePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity, TimepickerDateTimeOptionsModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class TimepickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -19412,6 +19529,21 @@ class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
   }
 }
 TimepickerDateTimeOptionsModifier.identity = Symbol('timepickerDateTimeOptions');
+
+class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+TimepickerEnableHapticFeedbackModifier.identity = Symbol('timepickerEnableHapticFeedback');
 
 // @ts-ignore
 if (globalThis.TimePicker !== undefined) {

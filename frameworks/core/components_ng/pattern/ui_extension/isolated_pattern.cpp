@@ -32,6 +32,9 @@ constexpr char REGISTER_COMPONENTS[] = "registerComponents";
 constexpr int32_t PARAM_ERR_CODE = 10001;
 constexpr char PARAM_NAME[] = "paramError";
 constexpr char PARAM_MSG[] = "The param is empty";
+constexpr int32_t WORKER_ERROR = 10002;
+constexpr char PARAM_NAME_RESTRICTED_WORKER_ERROR[] = "restrictedWorkerError";
+constexpr char PARAM_MSG_RESTRICTED_WORKER_ERROR[] = "Run not in restricted worker thread";
 }
 
 int32_t IsolatedPattern::isolatedIdGenerator_ = 0;
@@ -72,20 +75,6 @@ RefPtr<AccessibilitySessionAdapter> IsolatedPattern::GetAccessibilitySessionAdap
     return accessibilitySessionAdapter_;
 }
 
-void IsolatedPattern::InitializeDynamicComponent(
-    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
-{
-    if (hapPath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
-        PLATFORM_LOGE("The param empty.");
-        return;
-    }
-
-    curIsolatedInfo_.abcPath = abcPath;
-    curIsolatedInfo_.reourcePath = hapPath;
-    curIsolatedInfo_.entryPoint = entryPoint;
-    InitializeRender(runtime);
-}
-
 void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
 {
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
@@ -114,10 +103,18 @@ void IsolatedPattern::InitializeRender(void* runtime)
         ContainerScope scope(instanceId_);
         dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), runtime, curIsolatedInfo_);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
+        if (!dynamicComponentRenderer_->IsRestrictedWorkerThread()) {
+            PLATFORM_LOGW("DynamicComponent should run in restricted worker thread");
+            FireOnErrorCallbackOnUI(
+                WORKER_ERROR, PARAM_NAME_RESTRICTED_WORKER_ERROR, PARAM_MSG_RESTRICTED_WORKER_ERROR);
+            return;
+        }
+
+        dynamicComponentRenderer_->SetUIContentType(UIContentType::ISOLATED_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
-        AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
+            AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
     }
 #else
     PLATFORM_LOGE("IsolatedComponent not support preview.");

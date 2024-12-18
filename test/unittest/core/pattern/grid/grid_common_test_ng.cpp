@@ -1183,4 +1183,90 @@ HWTEST_F(GridCommonTestNg, Focus002, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
+
+/**
+ * @tc.name: Focus003
+ * @tc.desc: Test Focus with Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, Focus003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, true);
+    CreateFocusableGridItems(28, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. When focus grid from the outside
+     * @tc.expected: Will focus first child
+     */
+    auto gridFocusNode = frameNode_->GetOrCreateFocusHub();
+    gridFocusNode->RequestFocusImmediately();
+    FlushUITasks();
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Scroll to third row
+     * @tc.expected: item 0 is in cache, keep focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 2, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Scroll to forth row
+     * @tc.expected: item 0 scroll out of cache, lost focus
+     */
+    pattern_->UpdateCurrentOffset(- ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Scroll to third row
+     * @tc.expected: item 0 scroll into cache, request focus
+     */
+    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: IsInViewPort001
+ * @tc.desc: Test Focus with Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, IsInViewPort001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, true);
+    CreateFocusableGridItems(28, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check is in view port
+     * @tc.expected: item 0 is in view port
+     */
+    EXPECT_TRUE(pattern_->focusHandler_.IsInViewport(0, true));
+    EXPECT_TRUE(pattern_->focusHandler_.IsInViewport(0, false));
+
+    /**
+     * @tc.steps: step2. Scroll to third row
+     * @tc.expected: item 0 is in cache, not in view port
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 2, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->focusHandler_.IsInViewport(0, true));
+    EXPECT_FALSE(pattern_->focusHandler_.IsInViewport(0, false));
+
+    /**
+     * @tc.steps: step2. Scroll to fifth row
+     * @tc.expected: item 0 is not cache, not in view port
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->focusHandler_.IsInViewport(0, true));
+    EXPECT_FALSE(pattern_->focusHandler_.IsInViewport(0, false));
+}
 } // namespace OHOS::Ace::NG

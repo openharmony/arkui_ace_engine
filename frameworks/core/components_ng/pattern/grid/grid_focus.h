@@ -57,6 +57,11 @@ public:
         focusIndex_.reset();
     }
 
+    void SetFocusIndex(int32_t index)
+    {
+        focusIndex_ = index;
+    }
+
 private:
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
     void FireFocus();
@@ -73,7 +78,7 @@ private:
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
-    bool IsInViewport(int32_t index) const;
+    bool IsInViewport(int32_t index, bool needCheckCache) const;
 
     std::optional<int32_t> focusIndex_;
     GridItemIndexInfo curFocusIndexInfo_;

@@ -455,6 +455,22 @@ void PagePattern::FirePageTransitionFinish()
     }
 }
 
+void PagePattern::StopPageTransition()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = host->GetAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
+    if (property) {
+        FirePageTransitionFinish();
+        return;
+    }
+    AnimationOption option(Curves::LINEAR, 0);
+    AnimationUtils::Animate(
+        option, [host]() { host->UpdateAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY, 0.0f); });
+    host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
+    FirePageTransitionFinish();
+}
+
 void PagePattern::BeforeCreateLayoutWrapper()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -855,6 +871,11 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     if (type == PageTransitionType::ENTER_PUSH) {
         auto renderContext = inPage->GetRenderContext();
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto layoutProperty = inPage->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_NONE };
+        layoutProperty->UpdateSafeAreaExpandOpts(opts);
+        inPage->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();
