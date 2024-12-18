@@ -109,7 +109,6 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSi
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setRestoreId(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
-        // std::cout << "\n********* " << fullJson->ToString() << "\n";
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_RESTORE_ID_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
