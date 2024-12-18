@@ -22,7 +22,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLE = 2.0f;
-constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 }
 
 bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -645,7 +644,7 @@ void RichEditorSelectOverlay::OnHandleMarkInfoChange(
     std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
 {
     IF_TRUE((flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE, SwitchCaretState(info));
-    CHECK_NULL_VOID((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG);
+    CHECK_NULL_VOID((flag & DIRTY_HANDLE_COLOR_FLAG) == DIRTY_HANDLE_COLOR_FLAG);
     CHECK_NULL_VOID(info);
 
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -660,7 +659,7 @@ void RichEditorSelectOverlay::UpdateHandleColor()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+    manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
 }
 
 } // namespace OHOS::Ace::NG
