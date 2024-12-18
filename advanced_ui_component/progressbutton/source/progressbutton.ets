@@ -101,13 +101,13 @@ export struct ProgressButton {
           .hoverEffect(HoverEffect.None)
           .clip(false)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
-          .color(this.colorOptions?.pregressColor ? this.colorOptions?.progressColor : this.progressColor)
+          .color(this.colorOption?.progressColor ? this.colorOption?.progressColor : this.progressColor)
         Row() {
           Text(this.isLoading ? this.textProgress: this.content)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
             .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
-            .fontColor(this.colorOptions?.textColor)
+            .fontColor(this.colorOption?.textColor)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .padding({ top: 4, left: 8, right: 8, bottom: 4})
@@ -124,7 +124,10 @@ export struct ProgressButton {
         Row()
           .key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY)
           .backgroundColor(Color.Transparent)
-          .border({ width: 1, color: this.colorOption?.borderColor? this.colorOptions?.borderColor : this.containerBorderColor})
+          .border({
+            width: 1,
+            color: this.colorOption?.borderColor ? this.colorOption?.borderColor : this.containerBorderColor
+          })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
           .borderRadius(this.buttonBorderRadius)
@@ -135,7 +138,7 @@ export struct ProgressButton {
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
-    .backgroundColor(this.colorOptions?.backgroundColor ? this.colorOptions?.backgroundColor : this.containerBackgroundColor)
+    .backgroundColor(this.colorOption?.backgroundColor ? this.colorOption?.backgroundColor : this.containerBackgroundColor)
     .constraintSize({minWidth: 44})
     .padding({ top: 0, bottom: 0})
     .width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?

@@ -235,7 +235,7 @@ export class ProgressButton extends ViewPU {
       Button.clip(false);
       Button.hoverEffect(HoverEffect.None);
       Button.key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY);
-      Button.backgroundColor(this.colorOptions?.backgroundColor ? this.colorOptions?.backgroundColor : this.containerBackgroundColor);
+      Button.backgroundColor(this.colorOption?.backgroundColor ? this.colorOption?.backgroundColor : this.containerBackgroundColor);
       Button.constraintSize({ minWidth: 44 });
       Button.padding({ top: 0, bottom: 0 });
       Button.width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?
@@ -274,7 +274,7 @@ export class ProgressButton extends ViewPU {
       Progress.hoverEffect(HoverEffect.None);
       Progress.clip(false);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
-      Progress.color(this.colorOptions?.pregressColor ? this.colorOptions?.progressColor : this.progressColor);
+      Progress.color(this.colorOption?.progressColor ? this.colorOption?.progressColor : this.progressColor);
       if (!q) {
         Progress.pop();
       }
@@ -295,7 +295,7 @@ export class ProgressButton extends ViewPU {
       Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Text.fontWeight(FontWeight.Medium);
       Text.key(PROGRESS_BUTTON_PRIMARY_FONT_KEY);
-      Text.fontColor(this.colorOptions?.textColor);
+      Text.fontColor(this.colorOption?.textColor);
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.padding({ top: 4, left: 8, right: 8, bottom: 4 });
@@ -319,7 +319,10 @@ export class ProgressButton extends ViewPU {
       Row.create();
       Row.key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY);
       Row.backgroundColor(Color.Transparent);
-      Row.border({ width: 1, color: this.colorOption?.borderColor ? this.colorOptions?.borderColor : this.containerBorderColor });
+      Row.border({
+        width: 1,
+        color: this.colorOption?.borderColor ? this.colorOption?.borderColor : this.containerBorderColor
+      });
       Row.height(ObservedObject.GetRawObject(this.textHeight));
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
       Row.borderRadius(this.buttonBorderRadius);
