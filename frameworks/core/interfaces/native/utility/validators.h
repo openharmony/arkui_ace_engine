@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 namespace Validator {
+void ClampByRange(std::optional<float>& opt, const float& left, const float& right);
 void ValidateNonNegative(std::optional<Dimension>& opt);
 void ValidateNonPercent(std::optional<Dimension>& opt);
 void ValidatePositive(std::optional<Dimension>& opt);

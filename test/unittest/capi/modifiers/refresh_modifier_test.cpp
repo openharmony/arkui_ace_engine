@@ -19,6 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/components_ng/pattern/refresh/refresh_event_hub.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -41,22 +42,80 @@ class RefreshModifierTest : public ModifierTestBase<
 > {
 };
 
+typedef std::pair<int32_t, Ark_RefreshStatus> StateChangeTest;
+const std::vector<StateChangeTest> STATE_CHANGE_EVENT_TEST_PLAN = {
+    { 0, ARK_REFRESH_STATUS_INACTIVE },
+    { 1, ARK_REFRESH_STATUS_DRAG },
+    { 2, ARK_REFRESH_STATUS_OVER_DRAG },
+    { 3, ARK_REFRESH_STATUS_REFRESH },
+    { 4, ARK_REFRESH_STATUS_DONE },
+};
+
 /*
- * @tc.name: DISABLED_setOnStateChangeTest
+ * @tc.name: setOnStateChangeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshModifierTest, DISABLED_setOnStateChangeTest, TestSize.Level1)
+HWTEST_F(RefreshModifierTest, setOnStateChangeTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnStateChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<Ark_RefreshStatus> expected = std::nullopt;
+    auto onStateChange = [](const Ark_Int32 resourceId, Ark_RefreshStatus parameter) {
+        expected = parameter;
+    };
+    Callback_RefreshStatus_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onStateChange
+    };
+    modifier_->setOnStateChange(node_, &func);
+
+    for (const auto& testValue : STATE_CHANGE_EVENT_TEST_PLAN) {
+        eventHub->FireOnStateChange(testValue.first);
+
+        EXPECT_TRUE(expected.has_value());
+        EXPECT_EQ(expected, testValue.second);
+    };
 }
 
 /*
- * @tc.name: DISABLED_setOnRefreshingTest
+ * @tc.name: setOnRefreshingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshModifierTest, DISABLED_setOnRefreshingTest, TestSize.Level1)
+HWTEST_F(RefreshModifierTest, setOnRefreshingTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnRefreshing, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<bool> expected = std::nullopt;
+    auto onRefreshing = [](const Ark_Int32 resourceId) {
+        expected = true;
+    };
+    Callback_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onRefreshing
+    };
+    modifier_->setOnRefreshing(node_, &func);
+
+    eventHub->FireOnRefreshing();
+
+    EXPECT_TRUE(expected.has_value());
 }
 
 /*
@@ -158,13 +217,41 @@ HWTEST_F(RefreshModifierTest, setPullToRefreshTestValidValues, TestSize.Level1)
     }
 }
 
+const std::vector<float> OFFSET_CHANGE_EVENT_TEST_PLAN = { 1.f, 3.f, 10.f, 20.f, 100.f };
+
 /*
- * @tc.name: DISABLED_setOnOffsetChangeTest
+ * @tc.name: setOnOffsetChangeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshModifierTest, DISABLED_setOnOffsetChangeTest, TestSize.Level1)
+HWTEST_F(RefreshModifierTest, setOnOffsetChangeTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnOffsetChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<float> expected = std::nullopt;
+    auto onOffsetChange = [](const Ark_Int32 resourceId, Ark_Number parameter) {
+        expected = Converter::Convert<float>(parameter);
+    };
+    Callback_Number_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onOffsetChange
+    };
+    modifier_->setOnOffsetChange(node_, &func);
+
+    for (const auto& testValue : OFFSET_CHANGE_EVENT_TEST_PLAN) {
+        eventHub->FireOnOffsetChange(testValue);
+
+        EXPECT_TRUE(expected.has_value());
+        EXPECT_EQ(expected, testValue);
+    };
 }
 
 /*
@@ -184,9 +271,9 @@ static std::vector<std::tuple<std::string, Opt_Number, double>> pullDownRatioPul
     { "0", Converter::ArkValue<Opt_Number>(0), 0 },
     { "0.5", Converter::ArkValue<Opt_Number>(0.5f), 0.5 },
     { "1", Converter::ArkValue<Opt_Number>(1), 1 },
-    { "-20", Converter::ArkValue<Opt_Number>(-20), -20 },
-    { "12.4", Converter::ArkValue<Opt_Number>(12.4f), 12.4 },
-    { "22.5", Converter::ArkValue<Opt_Number>(22.5f), 22.5 },
+    { "-20", Converter::ArkValue<Opt_Number>(-20), 0 },
+    { "12.4", Converter::ArkValue<Opt_Number>(12.4f), 1 },
+    { "22.5", Converter::ArkValue<Opt_Number>(22.5f), 1 },
 };
 
 /*
