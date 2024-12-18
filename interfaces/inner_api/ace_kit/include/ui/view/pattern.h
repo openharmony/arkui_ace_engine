@@ -43,6 +43,11 @@ public:
         return host_;
     }
 
+    virtual bool IsAtomicNode() const
+    {
+        return true;
+    }
+
 private:
     WeakPtr<FrameNode> host_;
 };

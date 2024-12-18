@@ -2600,6 +2600,9 @@ const RefPtr<Pattern>& FrameNode::GetPattern() const
 
 bool FrameNode::IsAtomicNode() const
 {
+    if (kitNode_ && kitNode_->GetPattern()) {
+        return kitNode_->GetPattern()->IsAtomicNode();
+    }
     return pattern_->IsAtomicNode();
 }
 
