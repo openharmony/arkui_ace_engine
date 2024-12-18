@@ -602,7 +602,7 @@ private:
     void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
         float targetOffset);
     void CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName);
-    void StopTranslateAnimation();
+    void StopTranslateAnimation(bool isImmediately = false);
     float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
 

@@ -404,7 +404,7 @@ void TabBarPattern::SetTabBarFinishCallback()
             }
         }
 
-        pattern->StopTranslateAnimation();
+        pattern->StopTranslateAnimation(true);
         pattern->ResetIndicatorAnimationState();
         auto swiperPattern = pattern->GetSwiperPattern();
         CHECK_NULL_VOID(swiperPattern);
@@ -2532,13 +2532,32 @@ void TabBarPattern::CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& ho
     }
 }
 
-void TabBarPattern::StopTranslateAnimation()
+void TabBarPattern::StopTranslateAnimation(bool isImmediately)
 {
-    if (translateAnimation_)
-        AnimationUtils::StopAnimation(translateAnimation_);
+    if (isImmediately) {
+        AnimationOption option;
+        option.SetDuration(0);
+        option.SetCurve(Curves::LINEAR);
+        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, pattern->currentOffset_);
 
-    if (tabbarIndicatorAnimation_)
-        AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
+            auto indicatorCurrentValue =
+                pattern->turnPageRate_ * (pattern->indicatorEndPos_ - pattern->indicatorStartPos_) +
+                pattern->indicatorStartPos_;
+            host->UpdateAnimatablePropertyFloat(INDICATOR_WIDTH_PROPERTY_NAME, indicatorCurrentValue);
+            host->UpdateAnimatablePropertyFloat(INDICATOR_OFFSET_PROPERTY_NAME, indicatorCurrentValue);
+        });
+    } else {
+        if (translateAnimation_)
+            AnimationUtils::StopAnimation(translateAnimation_);
+
+        if (tabbarIndicatorAnimation_)
+            AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
+    }
 
     indicatorAnimationIsRunning_ = false;
     translateAnimationIsRunning_ = false;
