@@ -498,7 +498,7 @@ void NavigationGroupNode::ConfigureNavigationWithAnimation(
     navigationManager->SetIsNavigationOnAnimation(true);
 }
 
-void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
+void NavigationGroupNode::ResetTransitionAnimationNodeState(
     const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode)
 {
     auto navigationManager = FetchNavigationManager();
@@ -508,13 +508,13 @@ void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
     }
     auto curNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(curNode);
     if (curNavDestContentFrameNode) {
-        navigationManager->UpdateRenderGroup(curNavDestContentFrameNode, false);
+        navigationManager->UpdateAnimationCachedRenderGroup(curNavDestContentFrameNode, false);
         navigationManager->SetCurNodeAnimationCached(false);
         navigationManager->SetCurrentNodeNeverSet(true);
     }
     auto preNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(preNode);
     if (preNavDestContentFrameNode) {
-        navigationManager->UpdateRenderGroup(preNavDestContentFrameNode, false);
+        navigationManager->UpdateAnimationCachedRenderGroup(preNavDestContentFrameNode, false);
         navigationManager->SetPreNodeAnimationCached(false);
         navigationManager->SetPreNodeNeverSet(true);
     }
@@ -603,7 +603,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
-            navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
+            navigation->ResetTransitionAnimationNodeState(preNavDesNode, curNavDesNode);
             if (preNavdestination->SystemTransitionPopCallback(animationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -735,7 +735,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             if (curNode) {
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
-                navigation->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+                navigation->ResetTransitionAnimationNodeState(preNode, curNode);
                 curNavDestination->FinishSystemTransitionPush(true, animationId);
             }
             navigation->RemoveDialogDestination();
@@ -845,7 +845,7 @@ void NavigationGroupNode::TransitionWithReplace(
         }
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto curNode = weakCurNode.Upgrade();
-        navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        navigationNode->ResetTransitionAnimationNodeState(preNode, curNode);
         auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
@@ -1473,7 +1473,7 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         navigation->CleanPushAnimations();
         auto curNode = weakCurNode.Upgrade();
         auto preNode = weakPreNode.Upgrade();
-        navigation->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        navigation->ResetTransitionAnimationNodeState(preNode, curNode);
     });
     auto newPushAnimation = AnimationUtils::StartAnimation(option,
         [curNavList]() {
@@ -1538,7 +1538,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
             CHECK_NULL_VOID(navigation);
             auto curNode = weakCurNode.Upgrade();
             auto preNode = weakPreNode.Upgrade();
-            navigation->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+            navigation->ResetTransitionAnimationNodeState(preNode, curNode);
             for (auto iter: preNavList) {
                 auto preNode = iter.Upgrade();
                 CHECK_NULL_VOID(preNode);
