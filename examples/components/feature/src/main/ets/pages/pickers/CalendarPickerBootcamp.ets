@@ -1893,6 +1893,7 @@ export struct CalendarPickerBootcamp {
           })
           .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
           .onClick((event?: ClickEvent) => {
+            this.handlePopup = !this.handlePopup
             this.compEventTriggeredLog('点击事件onClick触发');
           })
           .onTouch((event?: TouchEvent) => {
