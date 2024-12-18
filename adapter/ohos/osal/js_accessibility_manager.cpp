@@ -40,6 +40,7 @@
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "js_third_provider_interaction_operation.h"
 #include "nlohmann/json.hpp"
+#include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -1454,7 +1455,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
-    const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node, AccessibilityElementInfo& nodeInfo, int32_t treeId)
+    const std::shared_ptr<NG::TransitionalNodeInfo>& node, AccessibilityElementInfo& nodeInfo, int32_t treeId)
 {
     CHECK_NULL_VOID(node);
     nodeInfo.SetContent(node->GetContent());
@@ -1739,7 +1740,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
-    const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node, const CommonProperty& commonProperty,
+    const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::WebPattern>& webPattern)
 {
     if (node->GetParentId() == -1) {
@@ -3035,12 +3036,6 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
         DumpLog::GetInstance().Print("Error: invalid arguments!");
         return;
     }
-    enum class DumpMode {
-        TREE,
-        NODE,
-        HANDLE_EVENT,
-        HOVER_TEST
-    };
     bool useWindowId = false;
     DumpMode mode = DumpMode::TREE;
     bool isDumpSimplify = params[0].compare("-simplify") == 0;
@@ -3087,7 +3082,7 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
         }
     }
     std::vector<std::string> info;
-    bool isChildElement = CheckIsChildElement(nodeId, params, info);
+    bool isChildElement = CheckIsChildElement(nodeId, params, info, mode, rootId);
     if (isChildElement) {
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "dump child element: %{public}" PRId64, nodeId);
         return;
@@ -4789,7 +4784,7 @@ void GetChildrenFromWebNode(
 {
     std::list<int64_t> webNodeChildren;
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        auto node = webPattern->GetAccessibilityNodeById(nodeId);
+        auto node = webPattern->GetTransitionalNodeById(nodeId);
         CHECK_NULL_VOID(node);
     for (auto& childId : node->GetChildIds()) {
             webNodeChildren.emplace_back(childId);
@@ -4862,7 +4857,7 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityIdNG(int64_t ele
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
 
     CHECK_NULL_VOID(webPattern);
-    auto node = webPattern->GetAccessibilityNodeById(elementId);
+    auto node = webPattern->GetTransitionalNodeById(elementId);
     CHECK_NULL_VOID(node);
     UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
     nodeInfo.SetAccessibilityVisible(webPattern->GetAccessibilityVisible(elementId));
@@ -5033,7 +5028,7 @@ void JsAccessibilityManager::UpdateWebCacheInfo(std::list<AccessibilityElementIn
         AccessibilityElementInfo nodeInfo;
 
         GetChildrenFromWebNode(parent, children, ngPipeline, webPattern);
-        auto node = webPattern->GetAccessibilityNodeById(parent);
+        auto node = webPattern->GetTransitionalNodeById(parent);
         if (node) {
             UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
             infos.push_back(nodeInfo);
@@ -5255,19 +5250,33 @@ void JsAccessibilityManager::NotifySetChildTreeIdAndWinId(
 }
 
 bool JsAccessibilityManager::CheckIsChildElement(
-    int64_t &elementId, const std::vector<std::string> &params, std::vector<std::string> &info)
+    int64_t &elementId,
+    const std::vector<std::string> &params,
+    std::vector<std::string> &info,
+    DumpMode mode,
+    int64_t &rootId)
 {
-    if (elementId <= 0) {
-        return false;
-    }
-
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
-    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
-    if (splitTreeId <= 0 || splitTreeId == treeId_) {
-        elementId = splitElementId;
-        return false;
+
+    if (mode == DumpMode::TREE) {
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(rootId, splitElementId, splitTreeId);
+        if (splitTreeId <= 0 || splitTreeId == treeId_) {
+            rootId = splitElementId;
+            return false;
+        }
+    } else {
+        if (elementId <= 0) {
+            return false;
+        }
+
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+        if (splitTreeId <= 0 || splitTreeId == treeId_) {
+            elementId = splitElementId;
+            return false;
+        }
     }
+
     std::lock_guard<std::mutex> lock(childTreeCallbackMapMutex_);
     for (const auto &item : childTreeCallbackMap_) {
         if (item.second == nullptr) {
@@ -6284,7 +6293,7 @@ void JsAccessibilityManager::GetWebCursorPosition(const int64_t elementId, const
     AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern)
 {
     CHECK_NULL_VOID(webPattern);
-    auto node = webPattern->GetAccessibilityNodeById(elementId);
+    auto node = webPattern->GetTransitionalNodeById(elementId);
     CHECK_NULL_VOID(node);
 
     callback.SetCursorPositionResult(node->GetSelectionStart(), requestId);

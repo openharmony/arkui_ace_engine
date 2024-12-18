@@ -542,6 +542,7 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    TriggerAvoidOnCaretChangeImmediately();
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -3149,7 +3150,7 @@ void RichEditorPattern::UpdateModifierCaretOffsetAndHeight()
 
 void RichEditorPattern::NotifyCaretChange()
 {
-    CHECK_NULL_VOID(IsSelected());
+    CHECK_NULL_VOID(!IsSelected());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -3258,7 +3259,11 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         return;
     }
     HandleDoubleClickOrLongPress(info, host);
-    ForceTriggerAvoidOnCaretChange(true);
+    if (IsSelected()) {
+        TriggerAvoidOnCaretChangeImmediately();
+    } else {
+        ForceTriggerAvoidOnCaretChange(true);
+    }
 }
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
@@ -5159,21 +5164,6 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     return true;
 }
 
-void RichEditorPattern::ResetFirstNodeStyle()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto spans = tmpHost->GetChildren();
-    if (!spans.empty()) {
-        auto&& firstNode = DynamicCast<SpanNode>(*(spans.begin()));
-        if (firstNode) {
-            firstNode->ResetTextAlign();
-            firstNode->ResetLeadingMargin();
-            tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
-}
-
 bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info)
 {
     auto eventHub = GetEventHub<RichEditorEventHub>();
@@ -5303,7 +5293,6 @@ std::u16string RichEditorPattern::DeleteBackwardOperation(int32_t length)
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     if (caretPosition_ == 0) {
         info.SetLength(0);
-        ResetFirstNodeStyle();
         DoDeleteActions(0, 0, info);
         return deleteText;
     }

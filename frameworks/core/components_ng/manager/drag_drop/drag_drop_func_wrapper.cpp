@@ -704,4 +704,24 @@ void DragDropFuncWrapper::GetPointerEventAction(const TouchEvent& touchPoint, Dr
             break;
     }
 }
+
+RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByKey(const RefPtr<FrameNode>& root, const std::string& key)
+{
+    std::queue<RefPtr<UINode>> elements;
+    elements.push(root);
+    RefPtr<UINode> inspectorElement;
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        if (key == current->GetInspectorId().value_or("")) {
+            return AceType::DynamicCast<FrameNode>(current);
+        }
+
+        const auto& children = current->GetChildren();
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace

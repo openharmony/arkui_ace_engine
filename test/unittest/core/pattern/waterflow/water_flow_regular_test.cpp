@@ -782,6 +782,55 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LazyForEachNotify001
+ * @tc.desc: lazyforeach notify change with footer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyForEachNotify001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetCachedCount(5);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(5);
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
+    EXPECT_EQ(frameNode_->GetChildren().size(), 7);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 106);
+
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(6));
+    lazyForEachNode->OnDataDeleted(5);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 11);
+    mockLazy->SetTotalCount(99);
+    FlushUITasks();
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), -1);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 5);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 105);
+
+    lazyForEachNode->OnDataAdded(4);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 10);
+    mockLazy->SetTotalCount(100);
+    FlushUITasks();
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), -1);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 5);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 106);
+
+    lazyForEachNode->OnDataChanged(3);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 9);
+    mockLazy->SetTotalCount(100);
+    FlushUITasks();
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), -1);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 5);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 106);
+}
+
+/**
  * @tc.name: ScrollToEdge009
  * @tc.desc: scrollEdge to bottom from top and trigger reach end
  * @tc.type: FUNC

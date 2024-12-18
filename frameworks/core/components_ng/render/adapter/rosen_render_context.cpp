@@ -684,6 +684,9 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnPropertyChangeMeasure();
 }
 
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
@@ -1576,7 +1579,7 @@ public:
     std::function<void(const RefPtr<PixelMap>&)> callback_;
 };
 
-RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
+RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale, bool isOffline)
 {
     CHECK_NULL_RETURN(rsNode_, nullptr);
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
@@ -1588,8 +1591,8 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
-    auto ret =
-        RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
+    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY,
+        isOffline);
     if (!ret) {
         LOGE("TakeSurfaceCaptureForUI failed!");
         return nullptr;

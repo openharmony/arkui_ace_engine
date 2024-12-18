@@ -446,7 +446,8 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
         context = frameNode->GetRenderContext();
     }
     CHECK_NULL_VOID(context);
-    auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+    bool isOffline = GetTextDraggable() ? true : false;
+    auto thumbnailPixelMap = context->GetThumbnailPixelMap(false, isOffline);
     CHECK_NULL_VOID(thumbnailPixelMap);
     SetPixelMap(thumbnailPixelMap);
 }

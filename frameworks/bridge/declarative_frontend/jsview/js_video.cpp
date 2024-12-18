@@ -175,7 +175,7 @@ void JSVideo::JsObjectFit(const JSCallbackInfo& info)
 void JSVideo::JsSurfaceBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor = Color::BLACK;
-    if (ParseJsColor(info[0], backgroundColor) && backgroundColor != Color::TRANSPARENT) {
+    if (ParseColorMetricsToColor(info[0], backgroundColor) && backgroundColor != Color::TRANSPARENT) {
         backgroundColor = Color::BLACK;
     }
 

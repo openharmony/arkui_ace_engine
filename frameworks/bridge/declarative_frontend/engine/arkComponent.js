@@ -15480,6 +15480,23 @@ class VideoOpacityModifier extends ModifierWithKey {
   }
 }
 VideoOpacityModifier.identity = Symbol('videoOpacity');
+class VideoSurfaceBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetVideoSurfaceBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().video.setVideoSurfaceBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoSurfaceBackgroundColorModifier.identity = Symbol('videoSurfaceBackgroundColor');
 class VideoTransitionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15507,6 +15524,11 @@ class ArkVideoComponent extends ArkComponent {
   }
   autoPlay(value) {
     modifierWithKey(this._modifiersWithKeys, VideoAutoPlayModifier.identity, VideoAutoPlayModifier, value);
+    return this;
+  }
+  surfaceBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoSurfaceBackgroundColorModifier.identity,
+      VideoSurfaceBackgroundColorModifier, value);
     return this;
   }
   controls(value) {
@@ -19280,6 +19302,10 @@ class ArkTimePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity, TimepickerDateTimeOptionsModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class TimepickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -19451,6 +19477,21 @@ class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
   }
 }
 TimepickerDateTimeOptionsModifier.identity = Symbol('timepickerDateTimeOptions');
+
+class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+TimepickerEnableHapticFeedbackModifier.identity = Symbol('timepickerEnableHapticFeedback');
 
 // @ts-ignore
 if (globalThis.TimePicker !== undefined) {

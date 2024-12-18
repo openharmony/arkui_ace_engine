@@ -639,7 +639,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         actuator->ResetResponseRegion();
         actuator->SetGatherNode(nullptr);
-        if (actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
+        bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
+        if (!isMenuShow && actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
         }
         if (!gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() &&
@@ -1261,7 +1262,7 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMap(
     const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode)
 {
     // Attempt to retrieve the PixelMap using the inspector ID.
-    auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId);
+    auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId, selfFrameNode);
 
     // If a preview PixelMap was found, return it.
     if (previewPixelMap != nullptr) {
@@ -1278,15 +1279,21 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMap(
  * @param inspectorId The unique identifier for a frameNode.
  * @return A RefPtr to a PixelMap containing the preview image, or nullptr if not found or the ID is empty.
  */
-RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMapByInspectorId(const std::string& inspectorId)
+RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMapByInspectorId(
+    const std::string& inspectorId, const RefPtr<FrameNode>& frameNode)
 {
     // Check for an empty inspector ID and return nullptr if it is empty.
     if (inspectorId == "") {
         return nullptr;
     }
 
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeLine = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeLine, nullptr);
+    auto rootNode = pipeLine->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
     // Retrieve the frame node using the inspector's ID.
-    auto dragPreviewFrameNode = Inspector::GetFrameNodeByKey(inspectorId);
+    auto dragPreviewFrameNode = DragDropFuncWrapper::GetFrameNodeByKey(rootNode, inspectorId);
     CHECK_NULL_RETURN(dragPreviewFrameNode, nullptr);
 
     auto layoutProperty = dragPreviewFrameNode->GetLayoutProperty();

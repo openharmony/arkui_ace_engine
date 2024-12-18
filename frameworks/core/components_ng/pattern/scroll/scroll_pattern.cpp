@@ -872,7 +872,7 @@ std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapD
 {
     std::optional<float> predictSnapOffset;
     int32_t start = 0;
-    int32_t end = snapOffsets_.size() - 1;
+    int32_t end = static_cast<int32_t>(snapOffsets_.size()) - 1;
     int32_t mid = 0;
     auto targetOffset = currentOffset_ + delta;
     if (LessOrEqual(targetOffset, -scrollableDistance_) && snapDirection == SnapDirection::BACKWARD) {
@@ -891,7 +891,8 @@ std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapD
         } else {
             if (snapDirection == SnapDirection::FORWARD && mid > 0) {
                 predictSnapOffset = snapOffsets_[mid - 1] - currentOffset_;
-            } else if (snapDirection == SnapDirection::BACKWARD && (mid + 1) < snapOffsets_.size()) {
+            } else if (snapDirection == SnapDirection::BACKWARD &&
+                       (mid + 1) < static_cast<int32_t>(snapOffsets_.size())) {
                 predictSnapOffset = snapOffsets_[mid + 1] - currentOffset_;
             }
             return predictSnapOffset;

@@ -1513,6 +1513,11 @@ void UIExtensionPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
     DumpLog::GetInstance().AddDesc(std::string("focusStatus: ").append(std::to_string(focusState_)));
     DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(ToString(state_)));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("eventProxy: ").append(eventProxyStr));
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -1544,6 +1549,11 @@ void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
     json->Put("focusStatus: ", std::to_string(focusState_).c_str());
     json->Put("abilityState: ", ToString(state_));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    json->Put("eventProxy: ", eventProxyStr.c_str());
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);

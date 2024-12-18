@@ -543,11 +543,6 @@ HWTEST_F(RichEditorPatternTestFourNg, ResetFirstNodeStyle001, TestSize.Level1)
     auto index4 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index4, 3);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
-
-    richEditorPattern->ResetFirstNodeStyle();
-
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
 }
 
 /**

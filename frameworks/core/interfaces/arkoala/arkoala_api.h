@@ -2740,6 +2740,8 @@ struct ArkUITimepickerModifier {
     void (*setTimepickerDateTimeOptions)(
         ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType);
     void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
+    void (*setTimepickerEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetTimepickerEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -2755,6 +2757,8 @@ struct ArkUIVideoModifier {
     void (*resetVideoMuted)(ArkUINodeHandle node);
     void (*setVideoOpacity)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetVideoOpacity)(ArkUINodeHandle node);
+    void (*setVideoSurfaceBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetVideoSurfaceBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoControllerModifier {

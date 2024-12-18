@@ -35,6 +35,10 @@ namespace OHOS::NWeb {
 class NWebAccessibilityNodeInfo;
 } // namespace OHOS::NWeb::NWebAccessibilityNodeInfo
 
+namespace OHOS::Ace::NG {
+    class TransitionalNodeInfo;
+}
+
 namespace OHOS::Ace::Framework {
 
 struct SearchParameter {
@@ -84,6 +88,13 @@ struct AccessibilityActionParam {
 struct ActionParam {
     Accessibility::ActionType action;
     std::map<std::string, std::string> actionArguments;
+};
+
+enum class DumpMode {
+    TREE,
+    NODE,
+    HANDLE_EVENT,
+    HOVER_TEST
 };
 
 class JsAccessibilityManager : public AccessibilityNodeManager,
@@ -501,10 +512,10 @@ private:
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
-    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node,
+    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         Accessibility::AccessibilityElementInfo& nodeInfo, int32_t treeId);
 
-    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NWeb::NWebAccessibilityNodeInfo>& node,
+    void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         const CommonProperty& commonProperty, Accessibility::AccessibilityElementInfo& nodeInfo,
         const RefPtr<NG::WebPattern>& webPattern);
 
@@ -521,7 +532,11 @@ private:
     void NotifySetChildTreeIdAndWinId(int64_t elementId, const int32_t treeId, const int32_t childWindowId);
 
     bool CheckIsChildElement(
-        int64_t &elementId, const std::vector<std::string>& params, std::vector<std::string>& info);
+        int64_t &elementId,
+        const std::vector<std::string>& params,
+        std::vector<std::string>& info,
+        DumpMode mode,
+        int64_t &rootId);
 
     bool NeedRegisterChildTree(uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId);
 
