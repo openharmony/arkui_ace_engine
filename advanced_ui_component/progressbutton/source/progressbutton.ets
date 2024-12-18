@@ -14,7 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
-import { ProgressButtonColorOptions } from '@ohos.arkui.advance.ProgressButton';
+import { ProgressButtonColorOptions } from '@ohos.arkui.advanced.ProgressButton';
 
 const EMPTY_STRING: string = '';
 const MAX_PROGRESS: number = 100;
