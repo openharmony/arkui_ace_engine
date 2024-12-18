@@ -264,7 +264,8 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     }
     auto renderContext = child->GetRenderContext();
     if (renderContext) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            IsSupportBlurStyle(renderContext, param->IsShowInSubWindow())) {
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
@@ -359,7 +360,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     }
     if (columnRenderContext) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-            columnRenderContext->IsUniRenderEnabled()) {
+            IsSupportBlurStyle(columnRenderContext, param->IsShowInSubWindow())) {
             auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
@@ -634,7 +635,8 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         childLayoutProperty->ClearUserDefinedIdealSize(true, false);
     }
     if (renderContext) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            IsSupportBlurStyle(renderContext, param->IsShowInSubWindow())) {
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
@@ -913,5 +915,13 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     }
     buttonNode->MarkModifyDone();
     return buttonNode;
+}
+
+bool BubbleView::IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow)
+{
+    if (isShowInSubWindow) {
+        return renderContext->IsUniRenderEnabled();
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
