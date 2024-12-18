@@ -6091,6 +6091,24 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     ResetRootNode(-(sessionId));
 }
 
+void OverlayManager::UpdateModalUIExtensionConfig(
+    int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config)
+{
+    auto targetModalNode = GetModal((-(sessionId)));
+    if (!targetModalNode) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY,
+            "not has sessionId(%{public}d) when UpdateModalUIExtensionConfig", sessionId);
+        return;
+    }
+
+    const auto& targetModalPattern = targetModalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_VOID(targetModalPattern);
+    targetModalPattern->SetProhibitedRemoveByNavigation(config.prohibitedRemoveByNavigation);
+    targetModalPattern->SetProhibitedRemoveByRouter(config.prohibitedRemoveByRouter);
+    TAG_LOGE(AceLogTag::ACE_OVERLAY,
+        "UpdateModalUIExtensionConfig seccess with sessionId(%{public}d)", sessionId);
+}
+
 RefPtr<FrameNode> OverlayManager::BuildAIEntityMenu(
     const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions)
 {
