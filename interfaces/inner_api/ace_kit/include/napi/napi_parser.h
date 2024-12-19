@@ -13,28 +13,19 @@
  * limitations under the License.
  */
 
-#include "interfaces/inner_api/ace_kit/src/view/extend_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_NAPI_NAPI_PARSER_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_NAPI_NAPI_PARSER_H
+
+#include "native_engine/native_value.h"
+#include "ui/base/macros.h"
+#include "ui/properties/color.h"
 
 namespace OHOS::Ace::Kit {
 
-ExtendPattern::ExtendPattern(const RefPtr<Kit::Pattern>& kitPattern) : kitPattern_(kitPattern) {}
-
-bool ExtendPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<NG::LayoutWrapper>& dirty, const NG::DirtySwapConfig& changeConfig)
-{
-    if (kitPattern_) {
-        return kitPattern_->OnDirtyLayoutrSwap(changeConfig);
-    }
-    return false;
-}
-
-void ExtendPattern::OnModifyDone()
-{
-    NG::Pattern::OnModifyDone();
-    if (kitPattern_) {
-        kitPattern_->OnModifyDone();
-    }
-}
+bool ACE_FORCE_EXPORT ParseColor(napi_env env, napi_value value, Color& info);
+// bool ParseNapiDimensionNG(
+//     napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent);
 
 } // namespace OHOS::Ace::Kit
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_NAPI_NAPI_PARSER_H

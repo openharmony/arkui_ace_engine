@@ -21,6 +21,8 @@
 #include <string>
 
 #include "ui/base/ace_type.h"
+#include "ui/event/event_hub.h"
+#include "ui/properties/dirty_flag.h"
 
 namespace OHOS::Ace::NG {
 class LayoutProperty;
@@ -32,6 +34,7 @@ namespace OHOS::Ace::Kit {
 
 class Pattern;
 class UIContext;
+class Property;
 class FrameNode : public AceType {
     DECLARE_ACE_TYPE(FrameNode, AceType);
 
@@ -46,6 +49,15 @@ public:
     virtual void Layout() = 0;
     virtual RefPtr<NG::LayoutProperty> GetLayoutProperty() = 0;
     virtual RefPtr<Pattern> GetPattern() = 0;
+    virtual RefPtr<Property> GetProperty() = 0;
+    virtual void MarkDirtyNode(NG::PropertyChangeFlag flag = NG::PROPERTY_UPDATE_NORMAL) = 0;
+
+    template<typename T>
+    RefPtr<T> GetEventHub() const
+    {
+        return DynamicCast<T>(eventHub_);
+    }
+
     virtual void MeasureChildren() = 0;
     virtual void LayoutChildren() = 0;
 

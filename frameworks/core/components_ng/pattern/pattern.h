@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "ui/base/dirty_flag.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -32,7 +34,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
-#include "ui/base/dirty_flag.h"
+
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;

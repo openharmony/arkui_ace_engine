@@ -35,7 +35,6 @@ public:
     void Reset() override;
 
     void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) override;
-
     void Layout() override;
 
     void InitializePatternAndContext() override;
@@ -46,6 +45,10 @@ public:
     RefPtr<AceNode> GetAceNode() const;
     NG::LayoutWrapper* GetLayoutWrapper();
     RefPtr<UIContext> GetUIContext() const override;
+    AceNode* GetAceNodePtr();
+    NG::LayoutWrapper* GetLayoutWrapper();
+    RefPtr<Property> GetProperty() override;
+    void MarkDirtyNode(NG::PropertyChangeFlag flag) override;
 
     void MeasureChildren() override;
     void LayoutChildren() override;
@@ -54,6 +57,7 @@ private:
     AceNode* frameNode_;
     RefPtr<AceNode> nodeRef_;
     RefPtr<Pattern> pattern_;
+    RefPtr<Property> property_;
 };
 } // namespace OHOS::Ace::Kit
 

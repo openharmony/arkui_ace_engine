@@ -6442,4 +6442,10 @@ void FrameNode::FireFrameNodeDestructorCallback()
         frameNodeDestructorCallback_(GetId());
     }
 }
+
+RefPtr<Kit::FrameNode> FrameNode::GetKitNode() const
+{
+    return kitNode_;
+}
+
 } // namespace OHOS::Ace::NG

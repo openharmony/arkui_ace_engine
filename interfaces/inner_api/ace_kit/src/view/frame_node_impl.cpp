@@ -54,6 +54,10 @@ void FrameNodeImpl::InitializePatternAndContext()
 {
     CHECK_NULL_VOID(frameNode_);
     frameNode_->InitializePatternAndContext();
+    CHECK_NULL_VOID(pattern_);
+    property_ = pattern_->CreateProperty();
+    CHECK_NULL_VOID(property_);
+    property_->SetHost(WeakClaim(this));
 }
 
 RefPtr<AceNode> FrameNodeImpl::PopAceNode()
@@ -66,6 +70,11 @@ RefPtr<AceNode> FrameNodeImpl::PopAceNode()
 RefPtr<AceNode> FrameNodeImpl::GetAceNode() const
 {
     return nodeRef_;
+}
+
+AceNode* FrameNodeImpl::GetAceNodePtr()
+{
+    return frameNode_;
 }
 
 void FrameNodeImpl::Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint)
@@ -89,6 +98,11 @@ RefPtr<Ace::NG::LayoutProperty> FrameNodeImpl::GetLayoutProperty()
 RefPtr<Pattern> FrameNodeImpl::GetPattern()
 {
     return pattern_;
+}
+
+RefPtr<Property> FrameNodeImpl::GetProperty()
+{
+    return property_;
 }
 
 NG::LayoutWrapper* FrameNodeImpl::GetLayoutWrapper()
@@ -121,4 +135,11 @@ RefPtr<UIContext> FrameNodeImpl::GetUIContext() const
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetUIContext();
 }
+
+void FrameNodeImpl::MarkDirtyNode(NG::PropertyChangeFlag flag)
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->MarkDirtyNode(flag);
+}
+
 } // namespace OHOS::Ace::Kit
