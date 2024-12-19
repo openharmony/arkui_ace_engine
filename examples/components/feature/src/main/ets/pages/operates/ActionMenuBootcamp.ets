@@ -83,7 +83,7 @@ export struct ActionMenuBootcamp {
       Column({ space: 8 }) {
 
         RadioBlock({
-          title: 'showInSubWindow',
+          title: 'ActionMenuOptions.showInSubWindow',
           isEnabled: $enableShowInSubWindow,
           value: $showInSubWindow,
           dataSource: [
@@ -93,7 +93,7 @@ export struct ActionMenuBootcamp {
         })
 
         RadioBlock({
-          title: 'isModal',
+          title: 'ActionMenuOptions.isModal',
           isEnabled: $enableIsModal,
           value: $isModal,
           dataSource: [
