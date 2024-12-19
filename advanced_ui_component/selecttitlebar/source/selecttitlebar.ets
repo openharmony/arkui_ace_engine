@@ -713,7 +713,7 @@ class Util {
       return false;
     }
     let resource = resourceStr as Resource;
-    return resource.type === RESOURCE_TYPE_SYMBOL;
+    return resource.type == RESOURCE_TYPE_SYMBOL;
   }
 
   public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
