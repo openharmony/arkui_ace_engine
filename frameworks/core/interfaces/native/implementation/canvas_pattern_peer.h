@@ -22,20 +22,24 @@ struct CanvasPatternPeer {
 public:
     CanvasPatternPeer() = default;
     virtual ~CanvasPatternPeer() = default;
-    const std::shared_ptr<OHOS::Ace::NG::CanvasPattern>& GetPattern() const
+    const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>& GetPattern() const
     {
         return pattern_;
     }
-    void SetPattern(const std::shared_ptr<OHOS::Ace::NG::CanvasPattern>& pattern)
+    void SetPattern(const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>& pattern)
     {
         pattern_ = pattern;
     }
     virtual void SetTransform(const OHOS::Ace::TransformParam& param)
     {
-        CHECK_NULL_VOID(pattern_);
+        if (!pattern_) {
+        LOGE("ARKOALA CanvasPatternPeer::SetTransform pattern "
+             "not bound to component.");
+        return;
+        }
         pattern_->SetTransform(param);
     }
 private:
-    std::shared_ptr<OHOS::Ace::NG::CanvasPattern> pattern_ = nullptr;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern> pattern_ = nullptr;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H

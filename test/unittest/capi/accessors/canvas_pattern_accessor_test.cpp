@@ -12,22 +12,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "test/mock/core/pattern/mock_canvas_pattern.h"
+#include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
-#include "accessor_test_base.h"
 #include "frameworks/base/utils/utils.h"
 #include "node_api.h"
+
+#include "core/interfaces/native/implementation/matrix2d_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/canvas_pattern_peer.h"
+
+#include "core/components_ng/pattern/canvas/canvas_paint_method.h"
+#include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
+#include "core/interfaces/native/implementation/canvas_path_peer.h"
+#include "core/interfaces/native/implementation/canvas_gradient_peer.h"
+#include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
+const double DEFAULT_DOUBLE_VALUE = 10.0;
+const double SCALE_VALUE = 3.0;
+
+class MockCanvasPattern : public CanvasPattern {
+public:
+    MockCanvasPattern() = default;
+    ~MockCanvasPattern() override = default;
+};
 
 class CanvasPatternAccessorTest : public AccessorTestBase<GENERATED_ArkUICanvasPatternAccessor,
     &GENERATED_ArkUIAccessors::getCanvasPatternAccessor, CanvasPatternPeer> {
 public:
+    void SetUp(void) override
+    {
+        AccessorTestBase::SetUp();
+        mockPattern_ = new MockCanvasPattern();
+        mockPatternKeeper_ = AceType::Claim(mockPattern_);
+        ASSERT_NE(mockPatternKeeper_, nullptr);
+        auto peerImpl = reinterpret_cast<CanvasPatternPeer*>(peer_);
+        ASSERT_NE(peerImpl, nullptr);
+        peerImpl->SetPattern(mockPatternKeeper_);
+        ASSERT_NE(mockPattern_, nullptr);
+    }
+
+    void TearDown() override
+    {
+        AccessorTestBaseParent::TearDown();
+        mockPatternKeeper_ = nullptr;
+        mockPattern_ = nullptr;
+    }
+
+    MockCanvasPattern* mockPattern_ = nullptr;
+    RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
 };
 
 /**
@@ -37,17 +74,28 @@ public:
  */
 HWTEST_F(CanvasPatternAccessorTest, setTransformTest, TestSize.Level1)
 {
- 
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
     ASSERT_NE(accessor_->setTransform, nullptr);
 
-    // peer_->SetPettern(pattern);
-    Opt_Matrix2D* matrix = new(Opt_Matrix2D);
-    matrix->tag = ARK_TAG_RESOURCE;
-    Ark_Materialized arkValue = { nullptr };   //Ark_Matrix2d
-    matrix->value = arkValue;
-    accessor_->setTransform(peer_, matrix);
+    Ark_Matrix2D arkMatrix;
+    auto peer = new Matrix2DPeer();
+    arkMatrix.ptr = peer;
+    auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
+    auto valD = DEFAULT_DOUBLE_VALUE;
+    peer->transform.scaleX = SCALE_VALUE;
+    peer->transform.scaleY = SCALE_VALUE;
+    peer->transform.skewX = valD;
+    peer->transform.skewY = valD;
+    peer->transform.translateX = valD;
+    peer->transform.translateY = valD;
+    accessor_->setTransform(peer_, &optMatrix);
 
-    ASSERT_NE(peer_, nullptr); // wrong check
-    delete matrix;
+    EXPECT_TRUE(holder->isCalled);
+    EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleX, SCALE_VALUE));
+    EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleY, SCALE_VALUE));
+
+    holder->TearDown();
 }
 } // namespace OHOS::Ace::NG
