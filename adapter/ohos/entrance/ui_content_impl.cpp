@@ -97,6 +97,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
@@ -3719,7 +3720,10 @@ Shadow UIContentImpl::GetPopupShadow()
     CHECK_NULL_RETURN(pipelineContext, shadow);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
-    return shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, shadow);
+    auto popupShadowStyle = popupTheme->GetPopupShadowStyle();
+    return shadowTheme->GetShadow(popupShadowStyle, colorMode);
 }
 
 void UIContentImpl::OnPopupStateChange(
