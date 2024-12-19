@@ -2176,6 +2176,22 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     };
     pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
 
+    auto&& startAbilityOnQueryHandler = [weak = WeakClaim(this), instanceId](const std::string& queryWord) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), queryWord]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnStartAbilityOnQuery(queryWord);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbilityOnQuery");
+    };
+    pipelineContext_->SetStartAbilityOnQueryHandler(startAbilityOnQueryHandler);
+
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);

@@ -2063,6 +2063,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get SEARCH() {
+    return new TextMenuItemId('OH_DEFAULT_SEARCH');
+  }
+
   static get COLLABORATION_SERVICE() {
     return new TextMenuItemId('OH_DEFAULT_COLLABORATION_SERVICE');
   }

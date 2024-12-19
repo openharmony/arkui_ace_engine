@@ -1649,6 +1649,15 @@ void TextFieldPattern::HandleOnPaste()
     clipboard_->GetData(pasteCallback);
 }
 
+bool TextFieldPattern::IsShowSearch()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    return textFieldTheme->GetIsSupportSearch();
+}
+
 void TextFieldPattern::HandleOnCameraInput()
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnCameraInput");
@@ -3107,6 +3116,7 @@ void TextFieldPattern::OnModifyDone()
         UpdateTextFieldInfo();
     }
     TriggerAvoidWhenCaretGoesDown();
+    selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;
 }

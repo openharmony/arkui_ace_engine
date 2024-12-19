@@ -333,6 +333,14 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const
     }
 }
 
+void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const
+{
+    CHECK_RUN_ON(UI);
+    if (startAbilityOnQueryHandler_) {
+        startAbilityOnQueryHandler_(queryWord);
+    }
+}
+
 void PipelineBase::NotifyStatusBarBgColor(const Color& color) const
 {
     CHECK_RUN_ON(UI);
