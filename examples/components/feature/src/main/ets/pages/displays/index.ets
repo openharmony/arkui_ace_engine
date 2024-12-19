@@ -26,6 +26,8 @@ import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 import { DataPanelBootcamp } from './DataPanelBootcamp';
 import { GaugeBootcamp } from './GaugeBootcamp';
+import { PatternLockBootcamp } from './PatternLockBootcamp'
+
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -38,11 +40,12 @@ export const displaysRoute: RouteGroup = {
     { name: 'loading-progress', label: '加载进度/LoadingProgress' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
-    { name: 'chip', label: '操作块/Chip' }
-    { name: 'counter', label: '计数器/Counter'},
-    { name: 'advancedCounter', label: '计数器/advanced.Counter'},
-    { name: 'dataPanel', label: '数据面板/DataPanel'}
+    { name: 'chip', label: '操作块/Chip' },
+    { name: 'counter', label: '计数器/Counter' },
+    { name: 'advancedCounter', label: '计数器/advanced.Counter' },
+    { name: 'dataPanel', label: '数据面板/DataPanel' },
     { name: 'gauge', label: '数据量规图/gauge' },
+    { name: 'PatternLock', label: '图案密码锁/PatternLock' }
   ]
 };
 
@@ -62,16 +65,18 @@ export function DisplaysDestination(name: string, route: Route) {
     TextBootcamp({ title: route.label })
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
-  } else if (name === 'displays/chip'){
+  } else if (name === 'displays/chip') {
     ChipBootcamp({ title: route.label })
   } else if (name === 'displays/counter') {
-    CounterBootcamp({ title: route.label})
-  } else if (name === 'displays/advancedCounter'){
-    AdvancedCounterBootcamp({ title: route.label})
-  } else if (name === 'displays/dataPanel'){
-    DataPanelBootcamp({ title: route.label})
+    CounterBootcamp({ title: route.label })
+  } else if (name === 'displays/advancedCounter') {
+    AdvancedCounterBootcamp({ title: route.label })
+  } else if (name === 'displays/dataPanel') {
+    DataPanelBootcamp({ title: route.label })
   } else if (name === 'displays/gauge') {
     GaugeBootcamp({ title: route.label })
+  } else if (name === 'displays/PatternLock') {
+    PatternLockBootcamp({ title: route.label })
   }
 }
 
