@@ -10635,6 +10635,23 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
     }
 }
 
+void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto enableHoverModeValue = obj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        properties.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
+    // Parse hoverModeArea
+    auto hoverModeAreaValue = obj->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            properties.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
+    }
+}
+
 std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackInfo& info, int32_t nodeId)
 {
     auto* vm = info.GetVm();
