@@ -41,7 +41,7 @@ public:
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
-    void SetCachedCount(int32_t value) override;
+    void SetCachedCount(int32_t value, bool show = false) override;
     void SetIsRTL(TextDirection direction) override;
     void SetLayoutDirection(FlexDirection value) override;
     void SetMaxCount(int32_t value) override;
@@ -72,7 +72,7 @@ public:
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
-
+    
     DisplayMode GetDisplayMode() const override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -86,6 +86,7 @@ public:
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& scrollBarWidth);
     static void SetScrollBarColor(FrameNode* frameNode, const Color& scrollBarColor);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetShowCached(FrameNode* frameNode, bool show);
     static void SetLayoutDirection(FrameNode* frameNode, FlexDirection layoutDirection);
     static void SetMaxCount(FrameNode* frameNode, int32_t maxCount);
     static void SetMinCount(FrameNode* frameNode, int32_t minCount);
@@ -104,6 +105,7 @@ public:
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static bool GetShowCached(FrameNode* frameNode);
     static void InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
         const RefPtr<ScrollProxy>& scrollProxy);
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);

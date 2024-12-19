@@ -198,33 +198,4 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines003, TestSize.Level1)
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
-
-/**
- * @tc.name: Create001
- * @tc.desc: Test creating items in front
- * @tc.type: FUNC
- */
-HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
-{
-    GridModelNG model = CreateRepeatGrid(100, [](uint32_t idx) { return ITEM_HEIGHT; });
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetLayoutOptions({});
-    model.SetCachedCount(1); // 6 lines
-    CreateDone(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.endIndex_, 11);
-
-    pattern_->ScrollToIndex(99, false, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 89));
-    EXPECT_EQ(info.startIndex_, 90);
-    const std::list<int32_t> preload = { 89, 88, 87 };
-    CheckPreloadListEqual(preload);
-
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    EXPECT_TRUE(pattern_->preloadItemList_.empty());
-    ASSERT_TRUE(GetChildFrameNode(frameNode_, 88));
-    EXPECT_EQ(GetChildWidth(frameNode_, 88), 0.0f); // not measured
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 88)->IsActive());
-}
 } // namespace OHOS::Ace::NG

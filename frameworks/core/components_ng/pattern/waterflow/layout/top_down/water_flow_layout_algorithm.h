@@ -37,8 +37,8 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
-    
+    bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+
 private:
     FlowItemPosition GetItemPosition(int32_t index);
     bool MeasureToTarget(LayoutWrapper* layoutWrapper, int32_t startFrom, std::optional<int64_t> cacheDeadline);
@@ -52,6 +52,8 @@ private:
         return index + layoutInfo_->footerIndex_ + 1;
     }
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
+
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;

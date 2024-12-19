@@ -5766,8 +5766,9 @@ class ArkGridComponent extends ArkComponent {
   onScrollIndex(event) {
     throw new Error('Method not implemented.');
   }
-  cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, value);
+  cachedCount(count, show) {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
   editMode(value) {
@@ -6044,7 +6045,7 @@ class GridCachedCountModifier extends ModifierWithKey {
       getUINativeModule().grid.resetCachedCount(node);
     }
     else {
-      getUINativeModule().grid.setCachedCount(node, this.value);
+      getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
@@ -28949,7 +28950,7 @@ class WaterFlowCachedCountModifier extends ModifierWithKey {
       getUINativeModule().waterFlow.resetCachedCount(node);
     }
     else {
-      getUINativeModule().waterFlow.setCachedCount(node, this.value);
+      getUINativeModule().waterFlow.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
@@ -29043,8 +29044,9 @@ class ArkWaterFlowComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, FrictionModifier.identity, FrictionModifier, value);
     return this;
   }
-  cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, value);
+  cachedCount(count, show) {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
     return this;
   }
   onReachStart(event) {
