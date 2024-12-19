@@ -111,7 +111,7 @@ public:
 
     void SetControlDistance(float controlDistance)
     {
-        if (Positive(controlDistance_)) {
+        if (Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance)) {
             controlDistanceChanged_ = true;
         }
         controlDistance_ = controlDistance;
@@ -209,6 +209,7 @@ public:
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
     void RegisterScrollBarEventTask();
+    void InitScrollBarGestureEvent();
     bool UpdateScrollBarDisplay();
     bool IsReverse() const;
     void SetReverse(bool reverse);
@@ -334,6 +335,11 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    RefPtr<ScrollBar> GetScrollBar() const
+    {
+        return scrollBar_;
+    }
 private:
     void OnModifyDone() override;
     void InitScrollPositionCallback();

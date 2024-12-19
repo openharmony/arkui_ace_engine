@@ -1078,6 +1078,62 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteJavaScript");
 }
 
+class NativeWebProxyCallback : public OHOS::NWeb::NWebJsProxyCallback {
+public:
+    NativeWebProxyCallback(const std::string& methodName, const NativeMethodCallback& method)
+        : methodName_(methodName), method_(method) {};
+    ~NativeWebProxyCallback() = default;
+
+    std::string GetMethodName() override
+    {
+        return methodName_;
+    }
+
+    NativeArkWebOnJavaScriptProxyCallback GetMethodCallback() override
+    {
+        return method_;
+    }
+
+private:
+    std::string methodName_;
+    NativeMethodCallback method_;
+};
+
+void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
+    const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), objName, methodList, isNeedRefresh]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                std::vector<std::shared_ptr<NWebJsProxyCallback>> callbacks;
+                for (const auto& item : methodList) {
+                    auto callback = std::make_shared<NativeWebProxyCallback>(item.first, item.second);
+                    callbacks.emplace_back(callback);
+                }
+                delegate->nweb_->RegisterNativeArkJSFunction(objName.c_str(), callbacks);
+                if (isNeedRefresh) {
+                    delegate->nweb_->Reload();
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRegisterNativeArkJSFunction");
+}
+
+void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName)
+{
+    if (nweb_) {
+        nweb_->UnRegisterNativeArkJSFunction(objName.c_str());
+    }
+}
+
 void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
     const std::string& encoding, const std::string& historyUrl)
 {
@@ -4422,6 +4478,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
         .SetType(host->GetHostTag())
         .SetEventType(eventType)
         .SetText(param)
+        .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
@@ -5454,6 +5511,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
                 auto pattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(pattern);
                 pattern->NotifyStartDragTask(true);
             },
             TaskExecutor::TaskType::UI, DRAG_DELAY_MILLISECONDS, "OnDragAndDropDataUdmf");
@@ -5781,6 +5839,12 @@ bool WebDelegate::WebOnKeyEvent(int32_t keyCode, int32_t keyAction,
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->WebSendKeyEvent(keyCode, keyAction, pressedCodes);
+}
+
+bool WebDelegate::SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent)
+{
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->SendKeyboardEvent(keyboardEvent);
 }
 
 void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count)

@@ -447,7 +447,7 @@ void SetDatePickerOnDateChange(ArkUINodeHandle node, void* extraParam)
         if (minute && minute->IsNumber()) {
             event.componentAsyncEvent.data[4].i32 = minute->GetInt();
         }
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     DatePickerModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }

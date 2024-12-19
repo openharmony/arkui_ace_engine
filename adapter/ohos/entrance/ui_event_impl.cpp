@@ -16,9 +16,11 @@
 #include "adapter/ohos/entrance/ui_event_impl.h"
 
 #include <dlfcn.h>
+#include <string>
 
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
+#include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/inspector.h"
 
@@ -43,7 +45,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(std::string& tree)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
 {
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTree.");
     auto containerId = Recorder::EventRecorder::Get().GetContainerId();
@@ -51,8 +53,28 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(std::string
     if (!container) {
         return;
     }
+    if (params.isWindowIdOnly) {
+        tree = std::to_string(container->GetWindowId());
+        return;
+    }
     if (container->IsUseNewPipeline()) {
-        tree = NG::Inspector::GetSimplifiedInspector(containerId);
+        tree = NG::Inspector::GetSimplifiedInspector(containerId, params, true);
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
+    const TreeParams& params, OnInspectorTreeResult&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTreeAsync.");
+    auto containerId = Recorder::EventRecorder::Get().GetContainerId();
+    auto container = Container::GetContainer(containerId);
+    if (!container) {
+        return;
+    }
+    if (container->IsUseNewPipeline()) {
+        Recorder::InspectorTreeCollector::Get().GetTree(
+            [containerId, params]() { NG::Inspector::GetSimplifiedInspector(containerId, params, false); },
+            std::move(callback));
     }
 }
 

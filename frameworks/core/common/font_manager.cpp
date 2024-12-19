@@ -65,6 +65,7 @@ void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 {
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
+    FontNodeChangeStyleNG();
 }
 
 bool FontManager::IsDefaultFontChanged()
@@ -254,6 +255,19 @@ void FontManager::UnRegisterCallback(const WeakPtr<RenderNode>& node)
 {
     for (auto& fontLoader : fontLoaders_) {
         fontLoader->RemoveCallback(node);
+    }
+}
+
+void FontManager::FontNodeChangeStyleNG()
+{
+    for (auto iter = fontNodesNG_.begin(); iter != fontNodesNG_.end();) {
+        auto fontNode = iter->Upgrade();
+        CHECK_NULL_VOID(fontNode);
+        auto frameNode = DynamicCast<NG::FrameNode>(fontNode);
+        if (frameNode) {
+            frameNode->OnPropertyChangeMeasure();
+        }
+        ++iter;
     }
 }
 

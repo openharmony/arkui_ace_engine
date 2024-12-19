@@ -675,6 +675,9 @@ ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
     value->min = ArkUI_OptionalInt { 0, -1 };
     value->max = ArkUI_OptionalInt { 0, -1 };
     value->current = ArkUI_OptionalInt { 0, -1 };
+    value->rangeMin = ArkUI_OptionalInt { 0, -1 };
+    value->rangeMax = ArkUI_OptionalInt { 0, -1 };
+    value->rangeCurrent = ArkUI_OptionalInt { 0, -1 };
     value->text = ArkUI_OptionalCharPtr { 0, "" };
     return value;
 }
@@ -704,7 +707,7 @@ void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t
     value->max.value = max;
 }
 
-int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value) 
+int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value)
 {
     CHECK_NULL_RETURN(value, -1);
     return value->max.value;
@@ -721,6 +724,45 @@ int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value)
 {
     CHECK_NULL_RETURN(value, -1);
     return value->current.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetRangeMin(ArkUI_AccessibilityValue* value, int32_t rangeMin)
+{
+    CHECK_NULL_VOID(value);
+    value->rangeMin.isSet = 1;
+    value->rangeMin.value = rangeMin;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMin(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->rangeMin.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetRangeMax(ArkUI_AccessibilityValue* value, int32_t rangeMax)
+{
+    CHECK_NULL_VOID(value);
+    value->rangeMax.isSet = 1;
+    value->rangeMax.value = rangeMax;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMax(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->rangeMax.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetRangeCurrent(ArkUI_AccessibilityValue* value, int32_t rangeCurrent)
+{
+    CHECK_NULL_VOID(value);
+    value->rangeCurrent.isSet = 1;
+    value->rangeCurrent.value = rangeCurrent;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetRangeCurrent(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->rangeCurrent.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetText(ArkUI_AccessibilityValue* value, const char* text)

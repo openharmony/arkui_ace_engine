@@ -132,7 +132,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     auto isUIExtension = container && container->IsUIExtensionWindow();
     auto pattern = curFocusNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (isUIExtension && !pattern->NeedSoftKeyboard()) {
+    if (isUIExtension && !pattern->NeedSoftKeyboard() && pipeline->IsWindowFocused()) {
         HideKeyboardAcrossProcesses();
     } else {
         CloseKeyboard(curFocusNode);

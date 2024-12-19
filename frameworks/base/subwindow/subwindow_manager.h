@@ -79,6 +79,7 @@ public:
 
     // Get the subwindow of instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
+    const RefPtr<Subwindow> GetSubwindow(int32_t instanceId, uint64_t displayId);
     const RefPtr<Subwindow> GetOrCreateSubwindow(int32_t instanceId);
 
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);

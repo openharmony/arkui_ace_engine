@@ -48,9 +48,7 @@ public:
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
     void CreateNestedSwiper();
     ListModelNG CreateNestedList();
-    AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset);
-    AssertionResult TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset);
-    AssertionResult TickByVelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset);
+    AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset) override;
 
     RefPtr<FrameNode> scrollNode_;
     RefPtr<ScrollPattern> scrollPattern_;
@@ -119,7 +117,7 @@ void RefreshNestedTestNg::CreateNestedSwiper()
     swiperNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     swiperPattern_ = swiperNode_->GetPattern<SwiperPattern>();
     for (int32_t index = 0; index < TEXT_NUMBER; index++) {
-        CreateText();
+        RefreshTestNg::CreateText();
     }
     ViewStackProcessor::GetInstance()->Pop();
 }
@@ -131,10 +129,12 @@ ListModelNG RefreshNestedTestNg::CreateNestedList()
     listModel.SetEdgeEffect(EdgeEffect::NONE, true);
     ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    {
         ListItemModelNG itemModel;
         itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
         ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
         ViewStackProcessor::GetInstance()->Pop();
+    }
     listNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     listPattern_ = listNode_->GetPattern<ListPattern>();
     ViewStackProcessor::GetInstance()->Pop();
@@ -144,21 +144,6 @@ ListModelNG RefreshNestedTestNg::CreateNestedList()
 AssertionResult RefreshNestedTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
     return IsEqual(GetChildY(frameNode, 0), expectOffset);
-}
-
-AssertionResult RefreshNestedTestNg::TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset)
-{
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode);
-    return Position(frameNode, expectOffset);
-}
-
-AssertionResult RefreshNestedTestNg::TickByVelocityPosition(
-    const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
-{
-    MockAnimationManager::GetInstance().TickByVelocity(velocity);
-    FlushLayoutTask(frameNode);
-    return Position(frameNode, expectOffset);
 }
 
 /**
@@ -240,7 +225,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshNestedSwiper002, TestSize.Level1)
     {
         CreateContent();
         {
-            CreateText();
+            RefreshTestNg::CreateText();
             CreateRefresh();
             {
                 CreateNestedSwiper();
@@ -868,6 +853,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
     RefreshModelNG refreshModel = CreateRefresh();
     std::optional<float> pullDownRatio = 1.0f;
     refreshModel.SetPullDownRatio(pullDownRatio);
+    {
         ListModelNG listModel;
         listModel.Create();
         listModel.SetEdgeEffect(EdgeEffect::NONE, false);
@@ -877,9 +863,11 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
         });
         ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
         ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+        {
             ListItemModelNG itemModel;
             itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
             ViewAbstract::SetHeight(CalcLength(450));
+            {
                 ListModelNG listModelTwo;
                 listModelTwo.Create();
                 listModelTwo.SetEdgeEffect(EdgeEffect::NONE, false);
@@ -889,13 +877,18 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
                 });
                 ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
                 ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT / 2));
+                {
                     ListItemModelNG itemModelTwo;
                     itemModelTwo.Create([](int32_t) {}, V2::ListItemStyle::NONE);
                     ViewAbstract::SetHeight(CalcLength(225));
                     ViewStackProcessor::GetInstance()->Pop();
+                }
                 ViewStackProcessor::GetInstance()->Pop();
+            }
             ViewStackProcessor::GetInstance()->Pop();
+        }
         ViewStackProcessor::GetInstance()->Pop();
+    }
     CreateDone();
 
     /**

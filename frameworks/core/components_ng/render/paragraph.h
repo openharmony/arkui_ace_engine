@@ -90,6 +90,8 @@ struct LineMetrics {
     float height = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
+    int32_t startIndex = 0;
+    int32_t endIndex = 0;
 };
 
 struct LeadingMargin {

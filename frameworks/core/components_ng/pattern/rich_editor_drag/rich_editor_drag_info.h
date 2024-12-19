@@ -28,7 +28,7 @@ struct RichEditorDragInfo {
     std::optional<Color> selectedBackgroundColor;
     RectF firstHandle;
     RectF secondHandle;
-    float selectedWidth = 0.0f;
+    float maxSelectedWidth = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

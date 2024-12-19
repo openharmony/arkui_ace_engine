@@ -44,6 +44,8 @@ const querySnapshotAsync = async (want: Want, componentId: string): Promise<void
     hilog.info(0x3900, tag, 'pixelStr length:' + pixelStr.length);
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
+  } finally {
+    imagePackageApi?.release();
   }
 }
 

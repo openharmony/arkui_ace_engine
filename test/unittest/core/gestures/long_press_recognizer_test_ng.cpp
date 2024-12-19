@@ -1260,6 +1260,6 @@ HWTEST_F(LongPressRecognizerTestNg, DeadlineTimerTest, TestSize.Level1)
     RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
         FINGER_NUMBER, false);
     longPressRecognizerPtr->DeadlineTimer(1, true);
-    ASSERT_NE(longPressRecognizerPtr, nullptr);
+    EXPECT_NE(longPressRecognizerPtr, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -51,7 +51,6 @@ DisplaySyncImpl::DisplaySyncImpl()
     auto uiDisplaySync = Ace::AceType::MakeRefPtr<Ace::UIDisplaySync>();
     displaySync_ = std::make_shared<DisplaySync>(uiDisplaySync);
     if (displaySync_ == nullptr) {
-        LOGE("The displaySync is nullptr.");
         return;
     }
 }
@@ -60,7 +59,6 @@ int32_t DisplaySyncImpl::SetExpectedFrameRateRange(CFrameRateRange cRateRange)
 {
     const auto uiDisplaySync = displaySync_->GetUIDisplaySync();
     if (!uiDisplaySync) {
-        LOGE("SetExpectedFrameRateRange: cannot get uiDisplaySync");
         return ERR_CJ_INNER_EXCEPTION;
     }
 
@@ -94,7 +92,6 @@ int32_t DisplaySyncImpl::Start()
 {
     const auto uiDisplaySync = displaySync_->GetUIDisplaySync();
     if (!uiDisplaySync) {
-        LOGE("Start: cannot get uiDisplaySync");
         return ERR_CJ_INNER_EXCEPTION;
     }
     uiDisplaySync->AddToPipelineOnContainer();
@@ -105,7 +102,6 @@ int32_t DisplaySyncImpl::Stop()
 {
     const auto uiDisplaySync = displaySync_->GetUIDisplaySync();
     if (!uiDisplaySync) {
-        LOGE("Start: cannot get uiDisplaySync");
         return ERR_CJ_INNER_EXCEPTION;
     }
     uiDisplaySync->DelFromPipelineOnContainer();

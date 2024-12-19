@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_CONSTANTS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_CONSTANTS_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_CONSTANTS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_CONSTANTS_H
 
 #include <cstddef>
 #include <cstdint>
+
+#include "base/geometry/dimension.h"
 enum class MenuPreviewMode {
     NONE,
     IMAGE,
@@ -90,6 +92,17 @@ enum class EventTreeType {
     POST_EVENT,
 };
 
+enum class AxisModel {
+    ABS_X = 0,
+    ABS_Y,
+    ABS_Z,
+    ABS_RZ,
+    ABS_GAS,
+    ABS_BRAKE,
+    ABS_HAT0X,
+    ABS_HAT0Y,
+};
+
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -120,7 +133,7 @@ enum class UIInputEventType {
     TOUCH,
     AXIS,
     KEY,
-    NON_POINTER_AXIS,
+    FOCUS_AXIS,
 };
 
 enum class KeyIntention : int32_t {
@@ -156,6 +169,33 @@ enum class KeyIntention : int32_t {
 
     INTENTION_CAMERA = 300,
 };
+
+constexpr double MOUSE_WHEEL_DEGREES = 15.0;
+constexpr double DP_PER_LINE_DESKTOP = 40.0;
+constexpr Dimension LINE_HEIGHT_DESKTOP = 21.0_vp;
+constexpr int32_t LINE_NUMBER_DESKTOP = 3;
+constexpr int32_t DP_PER_LINE_PHONE = 64;
+constexpr int32_t LINE_NUMBER_PHONE = 1;
+
+enum class AxisDirection : int32_t {
+    NONE = 0,
+    UP = 1,
+    DOWN = 2,
+    LEFT = 4,
+    RIGHT = 8,
+    UP_LEFT = 5,
+    UP_RIGHT = 9,
+    DOWN_LEFT = 6,
+    DOWN_RIGHT = 10,
+};
+
+enum class AxisAction : int32_t {
+    NONE = 0,
+    BEGIN,
+    UPDATE,
+    END,
+    CANCEL,
+};
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_CONSTANTS_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_CONSTANTS_H

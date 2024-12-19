@@ -72,8 +72,7 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge003, TestSize.Level1)
     model.SetRowsGap(Dimension(5.0f));
     CreateRandomWaterFlowItems(100);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->endIndex_, 99);
     EXPECT_EQ(GetChildRect(frameNode_, 100).Bottom(), 750.0f);
@@ -94,8 +93,7 @@ HWTEST_F(WaterFlowSWTest, Reset001, TestSize.Level1)
     model.SetFooter(GetDefaultHeaderBuilder());
     CreateWaterFlowItems();
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 9);
     for (int i = 0; i < 5; i++) {
@@ -125,8 +123,7 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     CreateWaterFlowItems(100);
     CreateWaterFlowItems();
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(info_->startIndex_, 99);
     EXPECT_EQ(info_->endIndex_, 109);
     for (int i = 0; i < 5; i++) {
@@ -172,8 +169,7 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     CreateWaterFlowItems();
     CreateDone();
-    pattern_->ScrollToIndex(8);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(8, false, ScrollAlign::START);
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 9);
     EXPECT_EQ(info_->idxToLane_.at(8), 2);
@@ -237,8 +233,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     CreateWaterFlowItems(80);
     CreateDone();
 
-    pattern_->ScrollToIndex(50, false, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(50, false, ScrollAlign::CENTER);
     EXPECT_EQ(info_->startIndex_, 44);
     EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 46), -100.0f);
@@ -264,8 +259,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 40), 10.0f); // changed after refill
 
     // update footer
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(GetChildY(frameNode_, 80), 550.0f);
     EXPECT_EQ(info_->startIndex_, 69);
     EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
@@ -353,8 +347,7 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
 
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(GetChildY(frameNode_, 3), 320.0f);
@@ -409,8 +402,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     CreateWaterFlowItems(50);
     CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     UpdateCurrentOffset(-30000.0f);
     const float endPos = info_->EndPos();
@@ -486,8 +478,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     CreateRandomWaterFlowItems(50);
     CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     for (int i = 1; i <= 10; ++i) {
         info_->delta_ = -100.0f;
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -548,11 +539,9 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     CreateWaterFlowItems(50);
     CreateDone();
     EXPECT_FALSE(info_->IsMisaligned());
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
-    pattern_->ScrollToIndex(2, true, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, true, ScrollAlign::START);
     EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -2850.0f);
     UpdateCurrentOffset(2800.0f + 101.0f);
     // should mark misaligned
@@ -589,10 +578,8 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     CreateDone();
 
     EXPECT_FALSE(info_->IsMisaligned());
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
-    pattern_->ScrollToIndex(15, true, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    ScrollToIndex(15, true, ScrollAlign::START);
     EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -575.0f);
     UpdateCurrentOffset(550.0f);
 
@@ -675,8 +662,7 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge002, TestSize.Level1)
     model.SetRowsGap(Dimension(5.0f));
     CreateRandomWaterFlowItems(100);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->endIndex_, 99);
     EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
@@ -810,15 +796,13 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge008, TestSize.Level1)
     /**
      * @tc.steps: step2. scrollEdge to end
      */
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     /**
      * @tc.steps: step3. scrollEdge to start
      * @tc.expected: Trigger reachstart
      */
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(isReachStartCalled);
 }
 
@@ -1345,10 +1329,12 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition004, TestSize.Level1)
                  {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}} -> {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}}.
      * @tc.expected: newStartIndex_ should be set to 0+1, keep content unchanged.
      */
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
-    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 2);
-    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 3);
-    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 4);
+
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 5.000000 EndPos: 315.000000 Items [0 1 2 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [3 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [4 ] }");
+    EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 445.000000 EndPos: 647.000000 Items [5 6 ] }");
 
     AddItemsAtSlot(1, 100.0f, 0);
     frameNode_->ChildrenUpdatedFrom(0);
@@ -1391,12 +1377,11 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 4);
     EXPECT_EQ(info_->endIndex_, 10);
     EXPECT_EQ(info_->newStartIndex_, -1);
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 4);
-    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 6);
-    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 7);
-    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 8);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 5.000000 EndPos: 315.000000 Items [4 5 6 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [7 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [8 ] }");
     EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 10);
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 445.000000 EndPos: 647.000000 Items [9 10 ] }");
 
     /**
      * @ts.brief: when delete items in front of startIndex_ using section.UPDATE, keep content unchanged.
@@ -1424,12 +1409,11 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 2);
     EXPECT_EQ(info_->endIndex_, 8);
     EXPECT_EQ(info_->newStartIndex_, -1);
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 2);
-    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 4);
-    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 5);
-    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 6);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 5.000000 EndPos: 315.000000 Items [2 3 4 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [5 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [6 ] }");
     EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 8);
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 445.000000 EndPos: 647.000000 Items [7 8 ] }");
 
     /**
      * @ts.brief: when delete items in front of startIndex_ using section.UPDATE, keep content unchanged.
@@ -1455,12 +1439,11 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 1);
     EXPECT_EQ(info_->endIndex_, 7);
     EXPECT_EQ(info_->newStartIndex_, -1);
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 1);
-    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 3);
-    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 4);
-    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 5);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 5.000000 EndPos: 315.000000 Items [1 2 3 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [4 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [5 ] }");
     EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 7);
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 445.000000 EndPos: 647.000000 Items [6 7 ] }");
 
     /**
      * @ts.brief: when delete items in front of startIndex_ using section.UPDATE, keep content unchanged.
@@ -1534,12 +1517,11 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition005, TestSize.Level1)
                  {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}} -> {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}}.
      * @tc.expected: newStartIndex_ should be set to 0+2, keep content unchanged.
      */
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
-    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 2);
-    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 3);
-    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 4);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 5.000000 EndPos: 315.000000 Items [0 1 2 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [3 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [4 ] }");
     EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 6);
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 445.000000 EndPos: 647.000000 Items [5 6 ] }");
 
     AddItemsAtSlot(2, 100.0f, 0);
     frameNode_->ChildrenUpdatedFrom(0);
@@ -1558,27 +1540,24 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition005, TestSize.Level1)
     EXPECT_EQ(info_->endIndex_, 8);
     EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
     EXPECT_TRUE(info_->lanes_[0][1].items_.empty());
-    EXPECT_EQ(info_->lanes_[1][0].items_.front().idx, 2);
-    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 4);
-    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 5);
-    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 6);
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 5.000000 EndPos: 315.000000 Items [2 3 4 ] }");
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [5 ] }");
+    EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 325.000000 EndPos: 425.000000 Items [6 ] }");
     EXPECT_TRUE(info_->lanes_[3][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[4][0].items_.back().idx, 8);
+    EXPECT_EQ(info_->lanes_[4][0].ToString(), "{StartPos: 445.000000 EndPos: 647.000000 Items [7 8 ] }");
     EXPECT_EQ(info_->newStartIndex_, -1);
 
     // slide backward.
     UpdateCurrentOffset(1000.0f);
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 7);
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
-    EXPECT_EQ(info_->lanes_[0][1].items_.front().idx, 1);
-    EXPECT_EQ(info_->lanes_[1][0].items_.front().idx, 2);
-    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 4);
-    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 5);
-    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 6);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 5.000000 EndPos: 105.000000 Items [0 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 5.000000 EndPos: 105.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 115.000000 EndPos: 425.000000 Items [2 3 4 ] }");
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 435.000000 EndPos: 535.000000 Items [5 ] }");
+    EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 435.000000 EndPos: 535.000000 Items [6 ] }");
     EXPECT_TRUE(info_->lanes_[3][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[4][0].items_.back().idx, 7);
-
+    EXPECT_EQ(info_->lanes_[4][0].ToString(), "{StartPos: 555.000000 EndPos: 655.000000 Items [7 ] }");
     /**
      * @ts.brief: when ADD new sections in the beginning using section.SPLICE, keep content unchanged.
      * @tc.steps: step2. current lanes_: [0, 7], add 2 section(including 2 items) at 0.
@@ -1611,28 +1590,25 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition005, TestSize.Level1)
     EXPECT_TRUE(info_->lanes_[0][1].items_.empty());
     EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
     EXPECT_TRUE(info_->lanes_[1][1].items_.empty());
-    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 4);
-    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 5);
-    EXPECT_EQ(info_->lanes_[3][0].items_.front().idx, 6);
-    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 8);
-    EXPECT_EQ(info_->lanes_[4][0].items_.back().idx, 9);
-    EXPECT_EQ(info_->lanes_[4][1].items_.back().idx, 10);
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 5.000000 EndPos: 105.000000 Items [4 ] }");
+    EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 5.000000 EndPos: 105.000000 Items [5 ] }");
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 115.000000 EndPos: 425.000000 Items [6 7 8 ] }");
+    EXPECT_EQ(info_->lanes_[4][0].ToString(), "{StartPos: 435.000000 EndPos: 535.000000 Items [9 ] }");
+    EXPECT_EQ(info_->lanes_[4][1].ToString(), "{StartPos: 435.000000 EndPos: 535.000000 Items [10 ] }");
     EXPECT_TRUE(info_->lanes_[5][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[6][0].items_.back().idx, 11);
+    EXPECT_EQ(info_->lanes_[6][0].ToString(), "{StartPos: 555.000000 EndPos: 655.000000 Items [11 ] }");
     EXPECT_EQ(info_->newStartIndex_, -1);
 
     // slide backward.
     UpdateCurrentOffset(1000.0f);
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 8);
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
-    EXPECT_EQ(info_->lanes_[0][1].items_.front().idx, 1);
-    EXPECT_EQ(info_->lanes_[1][0].items_.front().idx, 2);
-    EXPECT_EQ(info_->lanes_[1][1].items_.front().idx, 3);
-    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 4);
-    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 5);
-    EXPECT_EQ(info_->lanes_[3][0].items_.front().idx, 6);
-    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 8);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 5.000000 EndPos: 105.000000 Items [0 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 5.000000 EndPos: 105.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 115.000000 EndPos: 215.000000 Items [2 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 115.000000 EndPos: 215.000000 Items [3 ] }");
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 225.000000 EndPos: 325.000000 Items [4 ] }");
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 335.000000 EndPos: 645.000000 Items [6 7 8 ] }");
     EXPECT_TRUE(info_->lanes_[4][0].items_.empty());
     EXPECT_TRUE(info_->lanes_[4][1].items_.empty());
     EXPECT_TRUE(info_->lanes_[5][0].items_.empty());
@@ -1663,16 +1639,14 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition006, TestSize.Level1)
                  {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}} -> {lanes_[0]: {0, 1, 2, 3, 4}}.
      * @tc.expected: newStartIndex_ should be set to 5, keep content unchanged.
      */
-    pattern_->ScrollToIndex(5, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(5, false, ScrollAlign::START);
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 10);
     EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
     EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
     EXPECT_TRUE(info_->lanes_[1][1].items_.empty());
     EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[3][0].items_.front().idx, 5);
-    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 10);
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 0.000000 EndPos: 610.000000 Items [5 6 7 8 9 10 ] }");
 
     std::vector<WaterFlowSections::Section> newSection = {
         WaterFlowSections::Section { .itemsCount = 5,
@@ -1692,18 +1666,15 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition006, TestSize.Level1)
     EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
     EXPECT_TRUE(info_->lanes_[0][1].items_.empty());
     EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 5);
-    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 10);
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 0.000000 EndPos: 610.000000 Items [5 6 7 8 9 10 ] }");
     // slide backward.
     UpdateCurrentOffset(200.0f);
     EXPECT_EQ(info_->startIndex_, 1);
     EXPECT_EQ(info_->endIndex_, 8);
-    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 1);
-    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 3);
-    EXPECT_EQ(info_->lanes_[0][1].items_.back().idx, 4);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -25.000000 EndPos: 180.000000 Items [1 3 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -25.000000 EndPos: 180.000000 Items [2 4 ] }");
     EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
-    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 5);
-    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 8);
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 200.000000 EndPos: 606.000000 Items [5 6 7 8 ] }");
 }
 
 /**
@@ -1721,8 +1692,7 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     CreateDone();
-    pattern_->ScrollToIndex(30);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(30, false, ScrollAlign::START);
     EXPECT_EQ(info_->startIndex_, 30);
     EXPECT_EQ(info_->endIndex_, 40);
     const std::list<int32_t> preloadList = { 41, 42, 43, 29, 28, 27 };
@@ -1905,7 +1875,7 @@ HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0),  -31.510389);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -31.510389);
 
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
@@ -1997,14 +1967,10 @@ HWTEST_F(WaterFlowSWTest, Illegal004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 2);
     EXPECT_EQ(info_->maxHeight_, 300);
-    EXPECT_EQ(
-        info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [0 ] }");
-    EXPECT_EQ(
-        info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
-    EXPECT_EQ(
-        info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
-    EXPECT_EQ(
-        info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 200.000000 empty}");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [0 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 200.000000 empty}");
     EXPECT_EQ(info_->idxToLane_.size(), 3);
     EXPECT_FALSE(info_->idxToLane_.count(3));
 }

@@ -1018,6 +1018,11 @@ public:
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
     }
 
+    void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) override
+    {
+        ViewAbstract::SetOnFocusAxisEvent(std::move(onFocusAxisCallback));
+    }
+
     void SetDraggable(bool draggable) override
     {
         ViewAbstract::SetDraggable(draggable);
@@ -1400,6 +1405,18 @@ public:
         ViewAbstract::DisableOnBlur();
     }
 
+    void DisableOnFocusAxisEvent() override
+    {
+        ViewAbstract::DisableOnFocusAxisEvent();
+    }
+
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnFocusAxisCallback();
+    }
+
     static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
 
     void SetLightPosition(
@@ -1492,7 +1509,7 @@ public:
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
 
 private:
-    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 

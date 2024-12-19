@@ -527,6 +527,11 @@ public:
         return childLayoutConstraint_;
     }
 
+    void SetPreviewDisappearStartOffset(OffsetF offset)
+    {
+        previewDisappearStartOffset_ = offset;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -585,6 +590,7 @@ private:
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
     bool hasFoldModeChangeTransition_ = false;
+    OffsetF previewDisappearStartOffset_;
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;

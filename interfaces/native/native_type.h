@@ -813,6 +813,19 @@ typedef enum {
 } ArkUI_SwiperNestedScrollMode;
 
 /**
+ * @brief Enumerates the page flipping modes using the mouse wheel for the <b>Swiper</b> component.
+ *
+ * @since 14
+ */
+typedef enum {
+    /** When the mouse wheel is scrolled continuously, multiple pages are flipped, which is determined by the number of
+     *  times that mouse events are reported. */
+    ARKUI_PAGE_FLIP_MODE_CONTINUOUS = 0,
+    /** The system does not respond to other mouse wheel events until the page flipping animation ends. */
+    ARKUI_PAGE_FLIP_MODE_SINGLE,
+} ArkUI_PageFlipMode;
+
+/**
  * @brief Enumerates the accessibility modes.
  *
  * @since 12
@@ -3545,6 +3558,63 @@ void OH_ArkUI_AccessibilityValue_SetCurrent(ArkUI_AccessibilityValue* value, int
  * @since 12
 */
 int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @param rangeMin minimum value based on range components, The default value is -1。
+ * @since 16
+*/
+void OH_ArkUI_AccessibilityValue_SetRangeMin(ArkUI_AccessibilityValue* value, int32_t rangeMin);
+
+/**
+ * @brief Get accessibility minimum value.
+ *
+ * @param value accessibility value object.
+ * @return minimum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 16
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMin(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility maximum value.
+ *
+ * @param value accessibility value object.
+ * @param rangeMax maximum value based on range components, The default value is -1。
+ * @since 16
+*/
+void OH_ArkUI_AccessibilityValue_SetRangeMax(ArkUI_AccessibilityValue* value, int32_t rangeMax);
+
+/**
+ * @brief Get accessibility maximum value.
+ *
+ * @param value accessibility value object.
+ * @return maximum value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 16
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMax(ArkUI_AccessibilityValue* value);
+
+/**
+ * @brief Set accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @param rangeCurrent value based on range components, The default value is -1。
+ * @since 16
+*/
+void OH_ArkUI_AccessibilityValue_SetRangeCurrent(ArkUI_AccessibilityValue* value, int32_t rangeCurrent);
+
+/**
+ * @brief Get accessibility current value.
+ *
+ * @param value accessibility value object.
+ * @return current value based on range components, The default value is -1。
+ *         If the function parameter is abnormal, return -1.
+ * @since 16
+*/
+int32_t OH_ArkUI_AccessibilityValue_GetRangeCurrent(ArkUI_AccessibilityValue* value);
 
 /**
  * @brief Set accessibility text value.

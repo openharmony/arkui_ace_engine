@@ -15,7 +15,11 @@
 
 #include "core/components/theme/app_theme.h"
 
+#include "core/common/resource/resource_manager.h"
 namespace OHOS::Ace {
+namespace {
+constexpr uint64_t FOCUS_COLOR = 125831021;
+}
 
 RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
 {
@@ -29,9 +33,15 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     }
 
     theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::WHITE);
-    auto color = themeStyle->GetAttr<Color>("focus_color", Color());
-    if (color != Color(0xff000000)) {
-        theme->focusColor_ = color;
+
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        theme->focusColor_ = resAdapter->GetColor(FOCUS_COLOR);
+    } else {
+        auto color = themeStyle->GetAttr<Color>("focus_color", Color());
+        if (color != Color(0xff000000)) {
+            theme->focusColor_ = color;
+        }
     }
 
     auto hoverColor = themeStyle->GetAttr<Color>(THEME_ATTR_HOVER_COLOR, Color::FromRGBO(0, 0, 0, 0.05));
