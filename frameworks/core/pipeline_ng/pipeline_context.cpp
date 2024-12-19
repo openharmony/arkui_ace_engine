@@ -765,6 +765,10 @@ void PipelineContext::FlushMessages()
     if (navigationMgr_) {
         navigationMgr_->CacheNavigationNodeAnimation();
     }
+    if (!window_->GetIsRequestFrame()) {
+        ACE_SCOPED_TRACE("smart gc end with no request frame(app_start or push_page)!");
+        ResSchedReport::GetInstance().ResSchedDataReport("page_end_flush", {});
+    }
     window_->FlushTasks();
 }
 
