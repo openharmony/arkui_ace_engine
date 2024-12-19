@@ -1149,6 +1149,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     nodeType = static_cast<int32_t>(ARKUI_NODE_TEXT_PICKER);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_TEXT_PICKER_EVENT_ON_CHANGE, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_TEXT_PICKER_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_TEXT_PICKER_EVENT_ON_SCROLL_STOP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_TEXT_PICKER_SCROLL_STOP));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_CALENDAR_PICKER);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_CALENDAR_PICKER_EVENT_ON_CHANGE, nodeType);
@@ -1355,6 +1357,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_TIME_PICKER_EVENT_ON_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_TEXT_PICKER_CHANGE);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_TEXT_PICKER_EVENT_ON_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_TEXT_PICKER_SCROLL_STOP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_TEXT_PICKER_EVENT_ON_SCROLL_STOP));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_CALENDAR_PICKER_CHANGE);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_CALENDAR_PICKER_EVENT_ON_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_CHECKBOX_CHANGE);

@@ -19,6 +19,7 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status);
 void SetOnDragStart(ArkUINodeHandle node, void* extraParam);
 void SetOnDragDrop(ArkUINodeHandle node, void* extraParam);
 void SetOnDragEnter(ArkUINodeHandle node, void* extraParam);

@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
-class Logger {
-  static log(message: string): void {}
+#include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/text/html_utils.h"
+
+namespace OHOS::Ace {
+
+// Currently not completed
+std::string HtmlUtils::ToHtml(const SpanString* str)
+{
+    return "";
 }
+
+} // namespace OHOS::Ace

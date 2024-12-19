@@ -649,6 +649,8 @@ public:
 
     size_t GetLineCount() const override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
+    std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
     void OnSelectionMenuOptionsUpdate(

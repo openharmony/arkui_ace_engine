@@ -50,6 +50,7 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -1709,14 +1710,16 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ArkUI_Int32 blurStyle = (*intArray)[NUM_0];
     ArkUI_Int32 colorMode = (*intArray)[NUM_1];
     ArkUI_Int32 adaptiveColor = (*intArray)[NUM_2];
+    ArkUI_Int32 policy = (*intArray)[NUM_3];
+    ArkUI_Int32 blurType = (*intArray)[NUM_4];
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1739,6 +1742,11 @@ void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], Ar
         blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
         bgBlurStyle.blurOption = blurOption;
     }
+    bgBlurStyle.policy = static_cast<BlurStyleActivePolicy>(policy);
+    bgBlurStyle.blurType = static_cast<BlurType>(blurType);
+    bgBlurStyle.isValidColor = isValidColor;
+    Color inactiveColor(inactiveColorArg);
+    bgBlurStyle.inactiveColor = inactiveColor;
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
@@ -3459,19 +3467,33 @@ void ResetForegroundEffect(ArkUINodeHandle node)
 
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
-    ArkUI_Int32 blurValuesSize)
+    ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
+    ArkUI_Uint32 inactiveColorArg)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
-    radius.SetValue(radiusArg);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        radius = CalcDimension(radiusArg, DimensionUnit::VP);
+    } else {
+        radius = CalcDimension(radiusArg, DimensionUnit::PX);
+    }
     Color color(colorArg);
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
 
-    EffectOption option = { radius, saturationArg, brightnessArg, color, static_cast<AdaptiveColor>(adaptiveColorArg),
-        blurOption };
-
-    CHECK_NULL_VOID(frameNode);
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturationArg;
+    option.brightness = brightnessArg;
+    option.color = color;
+    option.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorArg);
+    option.blurOption = blurOption;
+    option.blurType = static_cast<BlurType>(blurType);
+    option.policy = static_cast<BlurStyleActivePolicy>(policy);
+    Color inactiveColor(inactiveColorArg);
+    option.inactiveColor = inactiveColor;
+    option.isValidColor = isValidColor;
     ViewAbstract::SetBackgroundEffect(frameNode, option);
 }
 
@@ -6206,6 +6228,28 @@ void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_
     ViewAbstractModelNG::SetBrightnessBlender(frameNode, brightnessBlender);
     ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
 }
+
+void SetTabStop(ArkUINodeHandle node, ArkUI_Bool tabstop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTabStop(frameNode, tabstop);
+}
+
+void ResetTabStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool tabstop = false;
+    ViewAbstract::SetTabStop(frameNode, tabstop);
+}
+
+ArkUI_Bool GetTabStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6282,7 +6326,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
         ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop,
-        SetBlendModeByBlender };
+        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop};
 
     return &modifier;
 }
@@ -6557,6 +6601,92 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
     }  else {
         ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
     }
+}
+
+void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetOnKeyEvent(frameNode, onKeyEvent);
+}
+
+void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onPreImeEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ON_KEY_PREIME;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
+}
+
+void ResetOnKeyEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnKeyEvent(frameNode);
+}
+
+void ResetOnKeyPreIme(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
 }
 
 void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint, bool usePx)

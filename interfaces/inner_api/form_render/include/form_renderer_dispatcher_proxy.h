@@ -18,6 +18,7 @@
 
 #include "form_renderer_dispatcher_interface.h"
 #include "iremote_proxy.h"
+#include <transaction/rs_transaction.h>
 
 #include "base/utils/macros.h"
 
@@ -38,7 +39,8 @@ public:
 
     void SetAllowUpdate(bool allowUpdate) override;
 
-    void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) override;
+    void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;
 
     void SetObscured(bool isObscured) override;
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;

@@ -756,6 +756,15 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
     }
 }
 
+void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation)
+{
+    if (result_) {
+        result_->SetGestureEventResultV2(result, stopPropagation);
+        SetSendTask();
+        eventResult_ = result;
+    }
+}
+
 void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
     const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
@@ -5400,6 +5409,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
                 auto pattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(pattern);
                 pattern->NotifyStartDragTask(true);
             },
             TaskExecutor::TaskType::UI, DRAG_DELAY_MILLISECONDS, "OnDragAndDropDataUdmf");
@@ -5649,7 +5659,6 @@ void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const doub
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchPress(id, x, y, from_overlay);
     }
 }
@@ -5658,7 +5667,6 @@ void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchRelease(id, x, y, from_overlay);
     }
 }

@@ -265,7 +265,8 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node))) {
+    if (hitSelf && shouldSearchSelf
+        && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node) || HitAccessibilityHoverPriority(node))) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -305,7 +306,8 @@ static const std::set<std::string> TAGS_CROSS_PROCESS_COMPONENT = {
     V2::UI_EXTENSION_COMPONENT_ETS_TAG,
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG,
-    V2::ISOLATED_COMPONENT_ETS_TAG
+    V2::ISOLATED_COMPONENT_ETS_TAG,
+    V2::WEB_ETS_TAG,
 };
 
 static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
@@ -329,6 +331,14 @@ bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
+}
+
+bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->IsAccessibilityHoverPriority();
 }
 
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
@@ -761,9 +771,8 @@ void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::stri
 
 void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibilityLevel)
 {
-    if (accessibilityLevel == accessibilityLevel_.value_or("")) {
-        return;
-    }
+    auto backupLevel = accessibilityLevel_.value_or("");
+
     if (accessibilityLevel == Level::YES_STR ||
         accessibilityLevel == Level::NO_STR ||
         accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
@@ -771,6 +780,21 @@ void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibili
     } else {
         accessibilityLevel_ = Level::AUTO;
     }
-    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+
+    if (backupLevel != accessibilityLevel_.value_or("")) {
+        NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    }
 }
+
+bool AccessibilityProperty::IsAccessibilityHoverPriority() const
+{
+    return accessibilityHoverPriority_;
+}
+
+void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
+{
+    // true means node consume barrierfree hover event prior to brothers
+    accessibilityHoverPriority_ = hoverPriority;
+}
+
 } // namespace OHOS::Ace::NG

@@ -1043,6 +1043,14 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
 
+var NavigationSystemTransitionType;
+(function (NavigationSystemTransitionType) {
+  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+}(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
+
 let NavigationOperation;
 (function (NavigationOperation) {
   NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";
@@ -1455,6 +1463,19 @@ var BlurStyle;
   BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
+
+var BlurStyleActivePolicy;
+(function (BlurStyleActivePolicy) {
+  BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
+})(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
+
+var BlurType;
+(function (BlurType) {
+  BlurType[BlurType["WITHIN_WINDOW"] = 0] = "WITHIN_WINDOW";
+  BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
+})(BlurType || (BlurType = {}));
 
 var ThemeColorMode;
 (function (ThemeColorMode) {

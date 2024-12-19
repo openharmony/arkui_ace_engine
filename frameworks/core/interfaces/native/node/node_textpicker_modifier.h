@@ -34,6 +34,7 @@ void SetSelectedInternal(
 void ProcessCascadeSelected(
     const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues);
 void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam);
+void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TEXT_PICKER_MODIFIER_H

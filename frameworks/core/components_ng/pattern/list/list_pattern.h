@@ -156,7 +156,7 @@ public:
             });
     }
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
@@ -331,6 +331,7 @@ public:
         }
         return canOverScroll;
     }
+    void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 private:
 
     bool IsNeedInitClickEventRecorder() const override
@@ -435,6 +436,7 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     float listTotalHeight_ = 0.0f;

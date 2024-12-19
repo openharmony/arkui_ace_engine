@@ -162,7 +162,9 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
-
+    bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
+        (!pattern->textSelector_.StartGreaterDest());
+    IF_TRUE(isChangeSecondHandle, pattern->TriggerAvoidOnCaretChange());
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);
     } else {
@@ -405,17 +407,21 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     IF_TRUE(needResetSelection, pattern->ResetSelection());
     IF_TRUE(isHoldByOther, pattern->CloseSelectOverlay());
     if (isBackPressed) {
-        if (pattern->IsEditing()) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
-            pattern->isCursorAlwaysDisplayed_ = false;
-            pattern->StartTwinkling();
-        }
+        IF_TRUE((info && info->isSingleHandle), pattern->OnBackPressed());
+        ResumeTwinkling();
     }
 }
 
 void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
+    CHECK_NULL_VOID(IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType));
+    if (IsSingleHandle()) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        ResumeTwinkling();
+    } else {
+        HideMenu();
+    }
 }
 
 void RichEditorSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
@@ -533,6 +539,15 @@ void RichEditorSelectOverlay::SwitchCaretState()
         pattern->isCursorAlwaysDisplayed_ = false;
         pattern->StartTwinkling();
     }
+}
+
+void RichEditorSelectOverlay::ResumeTwinkling()
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern && pattern->IsEditing());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
+    pattern->isCursorAlwaysDisplayed_ = false;
+    pattern->StartTwinkling();
 }
 
 void RichEditorSelectOverlay::OnHandleIsHidden()

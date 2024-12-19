@@ -22,5 +22,6 @@
 namespace OHOS::Ace::NG {
     TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
     void ConvertToMouseEvent(MouseEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
+    void ConvertToAxisEvent(AxisEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
 }
 #endif

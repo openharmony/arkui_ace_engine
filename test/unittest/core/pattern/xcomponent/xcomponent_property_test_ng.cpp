@@ -966,7 +966,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentCreateFrameNodeTest022, TestSize.Le
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        xComponent.CreateFrameNode(nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, std::nullopt);
+        xComponent.CreateFrameNode(nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
 }
 

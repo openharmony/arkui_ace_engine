@@ -335,7 +335,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     if (sessionWrapper_->IsSessionValid()) {
         auto sessionWant = sessionWrapper_->GetWant();
         if (sessionWant == nullptr) {
-            UIEXT_LOGW("The sessionWrapper want is nulllptr.");
+            UIEXT_LOGW("The sessionWrapper want is nullptr.");
             return;
         }
         if (sessionWant->IsEquals(want)) {

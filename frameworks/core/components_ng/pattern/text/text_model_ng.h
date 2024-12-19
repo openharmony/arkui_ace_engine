@@ -35,6 +35,8 @@ public:
     void SetTextColor(const Color& value) override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
+    void SetTextCaretColor(const Color& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override;
@@ -127,6 +129,7 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
+    static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
@@ -161,6 +164,8 @@ public:
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
+    static Color GetCaretColor(FrameNode* frameNode);
+    static void ResetCaretColor(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);

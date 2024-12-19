@@ -30,8 +30,6 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
-#include "core/common/ace_view.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -169,6 +167,7 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
     if (!isTypedNode_) {
         InitNativeXComponent();
     }
+    RegisterSurfaceCallbackModeEvent();
 }
 
 void XComponentPattern::InitNativeXComponent()
@@ -206,9 +205,9 @@ void XComponentPattern::InitSurface()
     renderContext->SetClipToFrame(true);
     renderContext->SetClipToBounds(true);
 #ifdef RENDER_EXTRACT_SUPPORTED
-    renderSurface_ = RenderSurface::Create(CovertToRenderSurfaceType(type_));
+        renderSurface_ = RenderSurface::Create(CovertToRenderSurfaceType(type_));
 #else
-    renderSurface_ = RenderSurface::Create();
+         renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
     if (type_ == XComponentType::SURFACE) {
@@ -282,25 +281,15 @@ void XComponentPattern::Initialize()
 
 void XComponentPattern::OnAttachToMainTree()
 {
-    if (isTypedNode_) {
-        CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->RegisterSurface();
-        surfaceId_ = renderSurface_->GetUniqueId();
-        CHECK_NULL_VOID(xcomponentController_);
-        xcomponentController_->SetSurfaceId(surfaceId_);
-        OnSurfaceCreated();
+    if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
+        HandleSurfaceCreated();
     }
 }
 
 void XComponentPattern::OnDetachFromMainTree()
 {
-    if (isTypedNode_) {
-        CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->ReleaseSurfaceBuffers();
-        renderSurface_->UnregisterSurface();
-        CHECK_NULL_VOID(xcomponentController_);
-        OnSurfaceDestroyed();
-        xcomponentController_->SetSurfaceId("");
+    if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
+        HandleSurfaceDestroyed();
     }
 }
 
@@ -380,6 +369,10 @@ void XComponentPattern::OnAttachToFrameNode()
 
 void XComponentPattern::OnModifyDone()
 {
+    // if surface has been reset by pip, do not set backgroundColor
+    if (handlingSurfaceRenderContext_ != renderContextForSurface_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -463,6 +456,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     UninitializeAccessibility();
     if (isTypedNode_) {
+        if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
+            HandleSurfaceDestroyed();
+        }
         if (isNativeXComponent_) {
             OnNativeUnload(frameNode);
         }
@@ -492,7 +488,6 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
 #endif
     }
-
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -838,7 +833,7 @@ bool XComponentPattern::OnAccessibilityChildTreeDeregister()
 void XComponentPattern::OnSetAccessibilityChildTree(
     int32_t childWindowId, int32_t childTreeId)
 {
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnAccessibilityChildTreeDeregister, "
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnSetAccessibilityChildTree, "
         "windowId: %{public}d, treeId: %{public}d.", childWindowId, childTreeId);
     windowId_ = static_cast<uint32_t>(childWindowId);
     treeId_ = childTreeId;
@@ -987,6 +982,10 @@ bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
     nativeXComponentImpl_->SetKeyEvent(keyEvent);
 
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto keyEventCallbackWithResult = nativeXComponentImpl_->GetKeyEventCallbackWithResult();
+    if (keyEventCallbackWithResult) {
+        return keyEventCallbackWithResult(nativeXComponent_.get(), surface);
+    }
     const auto keyEventCallback = nativeXComponentImpl_->GetKeyEventCallback();
     CHECK_NULL_RETURN(keyEventCallback, false);
     keyEventCallback(nativeXComponent_.get(), surface);
@@ -1107,7 +1106,6 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
             { touchInfo.GetFingerId(), ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
-
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (touchType == TouchType::DOWN) {
         RequestFocus();
@@ -1329,6 +1327,7 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+    host->MarkModifyDone();
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -1350,6 +1349,10 @@ XComponentControllerErrorCode XComponentPattern::SetExtController(const RefPtr<X
     }
     if (extPattern_.Upgrade()) {
         return XCOMPONENT_CONTROLLER_REPEAT_SET;
+    }
+    if (handlingSurfaceRenderContext_) {
+        // backgroundColor of pip's surface is black
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
     }
     extPattern->SetHandlingRenderContextForSurface(handlingSurfaceRenderContext_);
     extPattern_ = extPattern;
@@ -1726,6 +1729,52 @@ void XComponentPattern::OnSurfaceDestroyed()
     }
 }
 
+void XComponentPattern::RegisterSurfaceCallbackModeEvent()
+{
+    if (isTypedNode_ && !surfaceCallbackModeChangeEvent_) {
+        surfaceCallbackModeChangeEvent_ = [weak = WeakClaim(this)](SurfaceCallbackMode mode) {
+            auto xcPattern = weak.Upgrade();
+            CHECK_NULL_VOID(xcPattern);
+            xcPattern->OnSurfaceCallbackModeChange(mode);
+        };
+    }
+}
+
+void XComponentPattern::OnSurfaceCallbackModeChange(SurfaceCallbackMode mode)
+{
+    CHECK_EQUAL_VOID(surfaceCallbackMode_, mode);
+    surfaceCallbackMode_ = mode;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->IsOnMainTree()) {
+        if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
+            HandleSurfaceCreated();
+        } else if (surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
+            HandleSurfaceDestroyed();
+        }
+    }
+}
+
+void XComponentPattern::HandleSurfaceCreated()
+{
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->RegisterSurface();
+    surfaceId_ = renderSurface_->GetUniqueId();
+    CHECK_NULL_VOID(xcomponentController_);
+    xcomponentController_->SetSurfaceId(surfaceId_);
+    OnSurfaceCreated();
+}
+
+void XComponentPattern::HandleSurfaceDestroyed()
+{
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->ReleaseSurfaceBuffers();
+    renderSurface_->UnregisterSurface();
+    CHECK_NULL_VOID(xcomponentController_);
+    OnSurfaceDestroyed();
+    xcomponentController_->SetSurfaceId("");
+}
+
 void XComponentPattern::NativeSurfaceShow()
 {
     CHECK_RUN_ON(UI);
@@ -1916,14 +1965,20 @@ void XComponentPattern::CreateAnalyzerOverlay()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
+    
+    auto layoutProperty = GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding  = layoutProperty->CreatePaddingAndBorder();
+    Rect contentRect = { padding.left.value_or(0), padding.top.value_or(0), drawSize_.Width(), drawSize_.Height() };
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pixelMap = context->GetThumbnailPixelMap();
+    auto nailPixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(nailPixelMap);
+    auto pixelMap = nailPixelMap->GetCropPixelMap(contentRect);
     CHECK_NULL_VOID(pixelMap);
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
-    }
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
 }
 
 void XComponentPattern::UpdateAnalyzerOverlay()

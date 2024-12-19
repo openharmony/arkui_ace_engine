@@ -391,7 +391,7 @@ public:
                 taskExecutor->PostTask(
                     [context] {
                         CHECK_NULL_VOID(context);
-                        context->OnVirtualKeyboardAreaChange(Rect());
+                        context->OnVirtualKeyboardAreaChange(Rect(), 0, 0);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
                 return;
@@ -488,12 +488,10 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
-        LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d, instanceId %{public}d",
-            type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
-            (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
-            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_, instanceId_);
+        ACE_SCOPED_TRACE("OnAvoidAreaChanged: incoming avoidArea: %s, instanceId %d, type %d",
+            avoidArea.ToString().c_str(), instanceId_, type);
+        LOGI("Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
+            avoidArea.ToString().c_str(), instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto pipeline = container->GetPipelineContext();
@@ -1189,10 +1187,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
-#ifdef APS_ENABLE
-    auto apsMonitor = std::make_shared<ApsMonitorImpl>();
-    PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
-#endif
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
@@ -1738,6 +1732,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
+#endif
+#ifdef APS_ENABLE
+    auto apsMonitor = std::make_shared<ApsMonitorImpl>();
+    PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     auto container =
@@ -2437,6 +2435,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_, config.ToString().c_str());
+    bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
@@ -2477,6 +2476,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
+        context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr)) {
@@ -2676,21 +2676,21 @@ void UIContentImpl::SetOnWindowFocused(const std::function<void()>& callback)
     pipeline->SetOnWindowFocused(callback);
 }
 
-void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, "
-         "hideMinimize: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, hideSplit, hideMaximize, hideMinimize);
+        "hideMinimize: %{public}d, hideClose: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, hideSplit, hideMaximize, hideMinimize, hideClose);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [container, hideSplit, hideMaximize, hideMinimize]() {
+        [container, hideSplit, hideMaximize, hideMinimize, hideClose]() {
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
+            pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
         },
         TaskExecutor::TaskType::UI, "ArkUIHideWindowTitleButton");
 }
@@ -3027,7 +3027,8 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     return front->SetErrorEventHandler(std::move(errorCallback));
 }
 
-void UIContentImpl::OnFormSurfaceChange(float width, float height)
+void UIContentImpl::OnFormSurfaceChange(float width, float height, OHOS::Rosen::WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -3040,7 +3041,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     ContainerScope scope(instanceId_);
     auto density = pipelineContext->GetDensity();
     pipelineContext->SetRootSize(density, formWidth, formHeight);
-    pipelineContext->OnSurfaceChanged(formWidth, formHeight);
+    pipelineContext->OnSurfaceChanged(formWidth, formHeight, static_cast<WindowSizeChangeReason>(type), rsTransaction);
 }
 
 void UIContentImpl::SetFormBackgroundColor(const std::string& color)

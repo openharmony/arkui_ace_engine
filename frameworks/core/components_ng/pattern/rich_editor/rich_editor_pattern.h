@@ -374,7 +374,7 @@ public:
     void HandleSelectOverlayOnLayoutSwap();
     void FireOnReady();
     void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
-    void MoveCaretOnLayoutSwap(bool isReduceSize);
+    void MoveCaretOnLayoutSwap();
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
@@ -552,6 +552,8 @@ public:
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     std::pair<OffsetF, float> CalculateEmptyValueCaretRect();
+    void UpdateModifierCaretOffsetAndHeight();
+    void NotifyCaretChange();
     TextAlign GetTextAlignByDirection();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     void RemoveEmptySpanItems();
@@ -559,13 +561,12 @@ public:
     void RemoveEmptySpans();
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
-    void AfterAddImage(RichEditorChangeValue& changeValue);
     void OnWindowHide() override;
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
     RefPtr<SpanString> ToStyledString(int32_t start, int32_t end);
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
-    void AfterAddSymbol(RichEditorChangeValue& changeValue);
+    void AfterContentChange(RichEditorChangeValue& changeValue);
 
     bool IsUsingMouse() const
     {
@@ -680,6 +681,8 @@ public:
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
+    std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
@@ -690,11 +693,7 @@ public:
 
     void OnAttachToFrameNode() override;
 
-    void OnDetachFromFrameNode(FrameNode* node) override
-    {
-        TextPattern::OnDetachFromFrameNode(node);
-        ScrollablePattern::OnDetachFromFrameNode(node);
-    }
+    void OnDetachFromFrameNode(FrameNode* node) override;
 
     bool IsAtBottom() const override
     {
@@ -944,6 +943,53 @@ public:
 
     void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
 
+    void TriggerAvoidOnCaretChange();
+
+    void ForceTriggerAvoidOnCaretChange(bool isMoveContent = false)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+        IF_TRUE(isMoveContent, MoveCaretToContentRect());
+        isTriggerAvoidOnCaretAvoidMode_ = true;
+    }
+
+    void TriggerAvoidOnCaretChangeImmediately()
+    {
+        ForceTriggerAvoidOnCaretChange(true);
+        isTriggerAvoidOnCaretAvoidMode_ = false;
+        UpdateModifierCaretOffsetAndHeight();
+        TriggerAvoidOnCaretChange();
+    }
+
+    void ResetTriggerAvoidFlagOnCaretChange()
+    {
+        isTriggerAvoidOnCaretAvoidMode_ = false;
+    }
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+    bool IsTriggerAvoidOnCaretAvoidMode()
+    {
+        return isTriggerAvoidOnCaretAvoidMode_;
+    }
+
+    void SetAvoidFlagOnCaretAvoidMode(bool isTriggerAvoidOnCaretAvoidMode)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline && pipeline->UsingCaretAvoidMode());
+        isTriggerAvoidOnCaretAvoidMode_ = isTriggerAvoidOnCaretAvoidMode;
+    }
+
+    void ChangeLastRichTextRect()
+    {
+        lastRichTextRect_ = richTextRect_;
+    }
+
+    const RectF& GetLastTextRect()
+    {
+        return lastRichTextRect_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -1137,7 +1183,6 @@ private:
     void BeforeRedo(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
     void BeforeDrag(RichEditorChangeValue& changeValue, int32_t& innerPosition, const OperationRecord& record);
     bool BeforeChangeText(RichEditorChangeValue& changeValue, const TextSpanOptions& options);
-    void AfterChangeText(RichEditorChangeValue& changeValue);
 
     // add for scroll.
     void UpdateChildrenOffset();
@@ -1188,6 +1233,8 @@ private:
     }
 
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
+    RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
+    RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
     RectF GetSelectArea();
     bool IsTouchInFrameArea(const PointF& touchPoint);
@@ -1230,6 +1277,8 @@ private:
     void ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options);
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
+    void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
+    void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
@@ -1255,6 +1304,7 @@ private:
     void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void UpdateImagePreviewParam();
+    void ClearOnFocusTextField();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1377,6 +1427,8 @@ private:
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
     std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
+    bool isTriggerAvoidOnCaretAvoidMode_ = false;
+    RectF lastRichTextRect_;
 };
 } // namespace OHOS::Ace::NG
 

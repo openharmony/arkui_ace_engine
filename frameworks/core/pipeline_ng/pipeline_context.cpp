@@ -914,6 +914,7 @@ void PipelineContext::FlushFocusView()
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
+        focusManager_->SetFocusViewStackState(FocusViewStackState::IDLE);
     }
 }
 
@@ -1362,6 +1363,9 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
+            if (UsingCaretAvoidMode()) {
+                safeAreaManager_->UpdateKeyboardSafeArea(0.0f);
+            }
             safeAreaManager_->UpdateKeyboardOffset(0.0);
             SetRootRect(width, height, 0.0);
             FlushUITasks();
@@ -1390,6 +1394,16 @@ void PipelineContext::PostKeyboardAvoidTask()
 {
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
     CHECK_NULL_VOID(textFieldManager);
+    if (textFieldManager->UsingCustomKeyboardAvoid()) {
+        taskExecutor_->PostTask(
+            [weak = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+                auto manager = weak.Upgrade();
+                CHECK_NULL_VOID(manager);
+                manager->TriggerCustomKeyboardAvoid();
+            },
+            TaskExecutor::TaskType::UI, "ArkUICustomKeyboardAvoid");
+        return;
+    }
     CHECK_NULL_VOID(textFieldManager->GetLaterAvoid());
     auto container = Container::Current();
     if (container) {
@@ -1582,10 +1596,17 @@ void PipelineContext::UpdateSizeChangeReason(
 #endif
 }
 
-void PipelineContext::SetEnableKeyBoardAvoidMode(bool value)
+void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value)
 {
-    safeAreaManager_->SetKeyBoardAvoidMode(value);
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "keyboardAvoid Mode update:%{public}d", value);
+    if (safeAreaManager_->SetKeyBoardAvoidMode(value)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "keyboardAvoid Mode update:%{public}d", value);
+    }
+}
+
+KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
+{
+    return safeAreaManager_->GetKeyBoardAvoidMode();
 }
 
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
@@ -1843,10 +1864,16 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
+    if (UsingCaretAvoidMode()) {
+        OnCaretPositionChangeOrKeyboardHeightChange(keyboardHeight,
+            positionY, height, rsTransaction, forceChange);
+        return;
+    }
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
+        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         TAG_LOGD(
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
@@ -1854,7 +1881,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     if (!forceChange && (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
         NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
         return;
@@ -1871,7 +1898,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     }
 
     manager->UpdatePrevHasTextFieldPattern();
-    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1978,6 +2005,140 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         rsTransaction->Commit();
     }
 #endif
+}
+
+bool PipelineContext::UsingCaretAvoidMode()
+{
+    CHECK_NULL_RETURN(safeAreaManager_, false);
+    return safeAreaManager_->GetKeyBoardAvoidMode() == KeyBoardAvoidMode::OFFSET_WITH_CARET ||
+        safeAreaManager_->GetKeyBoardAvoidMode() == KeyBoardAvoidMode::RESIZE_WITH_CARET;
+}
+
+void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
+    float keyboardHeight, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(safeAreaManager_);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_VOID(manager);
+    if (manager->UsingCustomKeyboardAvoid()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
+        return;
+    }
+    manager->UpdatePrevHasTextFieldPattern();
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
+    ACE_FUNCTION_TRACE();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+
+    bool keyboardHeightChanged = NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length());
+    auto weak = WeakClaim(this);
+    auto func = [weak, keyboardHeight, positionY, height, manager, keyboardHeightChanged]() mutable {
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->SetIsLayouting(false);
+        context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        if (keyboardHeight > 0) {
+            // add height of navigation bar
+            keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
+        }
+        SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
+        float caretPos = manager->GetFocusedNodeCaretRect().Top() - context->GetRootRect().GetOffset().GetY() -
+            context->GetSafeAreaManager()->GetKeyboardOffset();
+        auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+        float adjust = 0.0f;
+        if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+            adjust = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust().Top();
+            positionY = caretPos;
+            height = manager->GetHeight();
+        }
+        positionY += adjust;
+        if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
+            height = rootSize.Height() - positionY;
+        }
+        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
+        auto newKeyboardOffset = context->CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize);
+        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
+            (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
+        } else {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
+        }
+        manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
+            "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
+            "final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
+            context->safeAreaManager_->GetKeyboardOffset());
+        context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
+        manager->AvoidKeyBoardInNavigation();
+        // layout before scrolling textfield to safeArea, because of getting correct position
+        context->FlushUITasks();
+        bool scrollResult = manager->ScrollTextFieldToSafeArea();
+        if (scrollResult) {
+            context->FlushUITasks();
+        }
+    };
+    FlushUITasks();
+    SetIsLayouting(true);
+    DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
+    float height, SizeF& rootSize)
+{
+    auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
+    CHECK_NULL_RETURN(safeAreaManager_, newKeyboardOffset);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_RETURN(manager, newKeyboardOffset);
+    auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_RETURN(onFocusField, newKeyboardOffset);
+    auto host = onFocusField->GetHost();
+    CHECK_NULL_RETURN(host, newKeyboardOffset);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
+    auto paintOffset = host->GetPaintRectOffset();
+    auto frameSize = geometryNode->GetFrameSize();
+    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffset(),
+        frameSize.Height(), rootSize);
+    return std::max(offset, newKeyboardOffset);
+}
+
+float PipelineContext::CalcAvoidOffset(float keyboardHeight, float positionY,
+    float height, SizeF rootSize)
+{
+    float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
+        ? keyboardHeight - (rootSize.Height() - positionY - height)
+        : keyboardHeight;
+    if (NearZero(keyboardHeight)) {
+        return 0.0f;
+    }
+    if (positionY + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
+        return -offsetFix;
+    }
+    if (LessOrEqual(rootSize.Height() - positionY - height, height) &&
+        LessOrEqual(rootSize.Height() - positionY, keyboardHeight)) {
+        return -keyboardHeight;
+    }
+    if ((positionY + height > rootSize.Height() - keyboardHeight &&
+        positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+        NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
+        return -height - offsetFix / 2.0f;
+    }
+    return 0.0f;
 }
 
 bool PipelineContext::OnBackPressed()
@@ -2482,9 +2643,13 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     }
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
-    if (node && node->GetTag() == V2::DIALOG_ETS_TAG) {
-        viewDataWrap->SetPageUrl(node->GetTag());
-        return true;
+    // The page path may not be obtained in the container, use the node tag as the page path.
+    if (node) {
+        const auto& nodeTag = node->GetTag();
+        if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
+            viewDataWrap->SetPageUrl(nodeTag);
+            return true;
+        }
     }
     CHECK_NULL_RETURN(pageNode, false);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
@@ -3601,12 +3766,12 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.emplace_back(nodeId);
+    onWindowFocusChangedCallbacks_.emplace(nodeId);
 }
 
 void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.remove(nodeId);
+    onWindowFocusChangedCallbacks_.erase(nodeId);
 }
 
 void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
@@ -3883,6 +4048,21 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
     taskScheduler_->AddAfterRenderTask(std::move(task));
 }
 
+void PipelineContext::AddSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    taskScheduler_->AddSafeAreaPaddingProcessTask(node);
+}
+
+void PipelineContext::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    taskScheduler_->RemoveSafeAreaPaddingProcessTask(node);
+}
+
+void PipelineContext::FlushSafeAreaPaddingProcess()
+{
+    taskScheduler_->FlushSafeAreaPaddingProcess();
+}
+
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
 {
     auto child = nodeInfo->GetChild();
@@ -3930,7 +4110,7 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
     return false;
 }
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("Set app icon failed, Window modal is not container.");
@@ -3941,7 +4121,7 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
+    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)
@@ -4288,6 +4468,14 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
         return true;
     }
     return false;
+}
+
+void PipelineContext::StopWindowAnimation()
+{
+    isWindowAnimation_ = false;
+    if (taskScheduler_ && !taskScheduler_->IsPredictTaskEmpty()) {
+        RequestFrame();
+    }
 }
 
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)

@@ -334,6 +334,9 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->CopySelectionMenuParams(overlayInfo);
+    auto layoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    overlayInfo.handlerColor = layoutProperty->GetCursorColor();
     OnUpdateOnCreateMenuCallback(overlayInfo);
     auto scrollableParent = FindScrollableParent();
     if (scrollableParent) {
@@ -535,5 +538,14 @@ OffsetF TextSelectOverlay::GetHotPaintOffset()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, hostPaintOffset_);
     return renderContext->GetPaintRectWithTransform().GetOffset();
+}
+
+std::optional<Color> TextSelectOverlay::GetHandleColor()
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, std::nullopt);
+    auto layoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    return layoutProperty->GetCursorColor();
 }
 } // namespace OHOS::Ace::NG

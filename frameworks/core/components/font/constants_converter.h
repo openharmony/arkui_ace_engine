@@ -35,6 +35,8 @@ namespace txt {
 enum class FontWeight;
 enum class FontStyle;
 enum class TextAlign;
+enum class RectHeightStyle;
+enum class RectWidthStyle;
 enum class TextDirection;
 enum class TextDecorationStyle;
 } // namespace txt
@@ -43,6 +45,8 @@ namespace OHOS::Rosen {
 enum class FontWeight;
 enum class FontStyle;
 enum class TextAlign;
+enum class TextRectHeightStyle;
+enum class TextRectWidthStyle;
 enum class TextBaseline;
 enum class TextDirection;
 enum class PlaceholderVerticalAlignment;
@@ -62,6 +66,8 @@ enum class FontWeight;
 enum class FontStyle;
 enum class TextBaseline;
 enum class TextAlign;
+enum class TextRectHeightStyle;
+enum class TextRectWidthStyle;
 enum class TextDirection;
 enum class TextDecoration;
 enum class TextDecorationStyle;
@@ -78,6 +84,10 @@ txt::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
 txt::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
 txt::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
+
+txt::Paragraph::RectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle);
+
+txt::Paragraph::RectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
 
 txt::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
@@ -105,6 +115,10 @@ OHOS::Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
 OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
 OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
+
+OHOS::Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle);
+
+OHOS::Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
 
 OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 

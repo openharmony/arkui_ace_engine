@@ -61,7 +61,7 @@ public:
     MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
     MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));
     MOCK_METHOD2(UpdateDecorVisible, void(bool visible, bool hasDeco));
-    MOCK_METHOD3(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize));
+    MOCK_METHOD4(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose));
     MOCK_METHOD1(SetIgnoreViewSafeArea, void(bool ignoreViewSafeArea));
     MOCK_METHOD0(GetBackgroundColor, uint32_t());
     MOCK_METHOD1(SetBackgroundColor, void(uint32_t color));
@@ -80,7 +80,8 @@ public:
     MOCK_METHOD1(SetFormHeight, void(const float height));
     MOCK_METHOD0(GetFormWidth, float());
     MOCK_METHOD0(GetFormHeight, float());
-    MOCK_METHOD2(OnFormSurfaceChange, void(float width, float height));
+    MOCK_METHOD4(OnFormSurfaceChange, void(float width, float height, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> &rsTransaction));
     MOCK_METHOD1(SetActionEventHandler, void(std::function<void(const std::string& action)>&& actionCallback));
     MOCK_METHOD1(SetFormLinkInfoUpdateHandler, void(std::function<void(const std::vector<std::string>&)>&& callback));
     MOCK_METHOD1(SetErrorEventHandler,

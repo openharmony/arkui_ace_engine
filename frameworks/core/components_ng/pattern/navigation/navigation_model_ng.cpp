@@ -70,6 +70,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -239,7 +240,7 @@ void NavigationModelNG::Create()
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+    auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     if (!CreateNavBarNodeIfNeeded(navigationGroupNode) ||  // navBar node
         !CreateContentNodeIfNeeded(navigationGroupNode) || // content node
@@ -252,7 +253,11 @@ void NavigationModelNG::Create()
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
 }
 
 bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
@@ -1369,6 +1374,32 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     titleBarNode->AddChild(backButtonNode, 0);
 }
 
+void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
+}
+
+void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
+}
+
 void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1445,7 +1476,7 @@ void NavigationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
 
 RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+    auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     // navBar node
     if (!navigationGroupNode->GetNavBarNode()) {
@@ -1525,8 +1556,11 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
     SetNavigationStack(AceType::RawPtr(navigationGroupNode));
 
     return navigationGroupNode;
@@ -1590,5 +1624,62 @@ void NavigationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationTitle
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavigationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    // if previous menu is custom, just remove it and create new menu, otherwise update old menu
+    if (navBarNode->GetPrevMenuIsCustom().value_or(false)) {
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (navBarNode->GetMenu()) {
+            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+        }
+    }
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetTitleBarMenuItems(menuItems);
+    navBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navBarPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navBarNode->UpdatePrevMenuIsCustom(false);
+}
+
+void NavigationModelNG::SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index)
+{
+    CHECK_NULL_VOID(action);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    auto menuItems = navBarPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).action = action;
+        navBarPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavigationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index)
+{
+    CHECK_NULL_VOID(symbol);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    auto menuItems = navBarPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).iconSymbol = symbol;
+        navBarPattern->SetTitleBarMenuItems(menuItems);
+    }
 }
 } // namespace OHOS::Ace::NG

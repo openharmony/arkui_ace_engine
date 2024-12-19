@@ -691,6 +691,32 @@ void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector
     }
 }
 
+void TxtParagraph::TxtGetRectsForRange(int32_t start, int32_t end,
+    RectHeightStyle heightStyle, RectWidthStyle widthStyle,
+    std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections)
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
+#ifndef USE_GRAPHIC_TEXT_GINE
+    const auto& boxes = paragrah->GetRectsForRange(
+        start, end, Constants::ConvertTxtRectHeightStyle(heightStyle), Constants::ConvertTxtRectWidthStyle(widthStyle));
+#else
+    const auto& boxes = paragrah->GetTextRectsByBoundary(
+        start, end, Constants::ConvertTxtRectHeightStyle(heightStyle), Constants::ConvertTxtRectWidthStyle(widthStyle));
+#endif
+    if (boxes.empty()) {
+        return;
+    }
+    for (const auto& box : boxes) {
+        auto rect = Constants::ConvertSkRect(box.rect);
+        auto textDirection = box.direction;
+        RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
+            static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
+        selectedRects.emplace_back(selectionRect);
+        textDirections.emplace_back(static_cast<OHOS::Ace::TextDirection>(textDirection));
+    }
+}
+
 int32_t TxtParagraph::AdjustIndexForEmoji(int32_t index)
 {
     int32_t start = 0;
@@ -964,6 +990,18 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
         lineMetrics.runMetrics.insert(std::map<size_t, RunMetrics>::value_type(it.first, runMetrics));
     }
     return lineMetrics;
+}
+
+RectF TxtParagraph::GetPaintRegion(float x, float y)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(GetParagraph());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+#endif
+    CHECK_NULL_RETURN(paragraphTxt, RectF());
+    auto region = paragraphTxt->GeneratePaintRegion(x, y);
+    return RectF(region.GetLeft(), region.GetTop(), region.GetWidth(), region.GetHeight());
 }
 
 void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes)

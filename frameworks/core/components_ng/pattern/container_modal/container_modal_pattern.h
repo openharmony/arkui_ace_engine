@@ -70,7 +70,7 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
-    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose);
 
     void SetCloseButtonStatus(bool isEnabled);
 
@@ -238,7 +238,8 @@ protected:
 private:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
-        const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+        const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize,
+            bool hideClose);
     CalcLength GetControlButtonRowWidth();
     void InitTitle();
     void InitContainerEvent();

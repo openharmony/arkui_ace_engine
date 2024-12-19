@@ -131,6 +131,10 @@ public:
      */
     SafeAreaInsets::Inset GetKeyboardInset() const
     {
+        if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
+            SafeAreaInsets::Inset inset;
+            return inset;
+        }
         return keyboardInset_;
     }
 
@@ -138,7 +142,8 @@ public:
     {
         keyboardOffset_ = offset;
     }
-    float GetKeyboardOffset() const;
+    
+    float GetKeyboardOffset(bool withoutProcess = false) const;
 
     float GetRawKeyboardHeight() const
     {
@@ -197,7 +202,8 @@ public:
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
-    bool SetKeyBoardAvoidMode(bool value);
+    bool SetKeyBoardAvoidMode(KeyBoardAvoidMode value);
+    KeyBoardAvoidMode GetKeyBoardAvoidMode();
     bool IsIgnoreAsfeArea()
     {
         return ignoreSafeArea_;
@@ -257,6 +263,8 @@ public:
         keyboardChangeCbsConsideringUIExt_.erase(nodeId);
     }
 
+    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
+
 private:
     bool isAtomicService_ = false;
 
@@ -280,6 +288,8 @@ private:
      * offset vertically according to [keyboardOffset_].
      */
     bool keyboardSafeAreaEnabled_ = false;
+
+    KeyBoardAvoidMode keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
 
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;

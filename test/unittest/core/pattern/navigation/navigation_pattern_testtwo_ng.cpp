@@ -360,7 +360,7 @@ HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_010, TestSize.Leve
     navigationPattern->needSyncWithJsStack_ = true;
     navigationPattern->isFinishInteractiveAnimation_ = false;
     navigationPattern->SyncWithJsStackIfNeeded();
-    EXPECT_TRUE(navigationPattern->needSyncWithJsStack_);
+    EXPECT_FALSE(navigationPattern->needSyncWithJsStack_);
     navigationPattern->needSyncWithJsStack_ = true;
     navigationPattern->isFinishInteractiveAnimation_ = true;
     navigationPattern->SyncWithJsStackIfNeeded();

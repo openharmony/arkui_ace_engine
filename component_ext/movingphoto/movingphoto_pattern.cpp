@@ -1073,8 +1073,8 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 
 void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
-    if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime
-            && endTime <= VIDEO_PLAYTIME_END_POSITION) {
+    if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime &&
+        endTime <= VIDEO_PLAYTIME_END_POSITION) {
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
         autoPlayPeriodStartTime_ = startTime;
         autoPlayPeriodEndTime_ = endTime;
@@ -1083,8 +1083,8 @@ void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 
 void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
-    if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime
-            || endTime > VIDEO_PLAYTIME_END_POSITION) {
+    if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime ||
+        endTime > VIDEO_PLAYTIME_END_POSITION) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer SetAutoPlayPeriod error.");
         return;
     }

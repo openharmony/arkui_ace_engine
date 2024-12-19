@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NO_NEED_RESTART_SINGLE_HANDLE = 100;
+constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
@@ -1190,5 +1191,23 @@ void BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(RectF& selectArea)
     if (GreatOrEqual(selectArea.Top(), keyboardInset.start)) {
         selectArea.SetHeight(0.0f);
     }
+}
+
+void BaseTextSelectOverlay::OnHandleMarkInfoChange(
+    const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
+        info->handlerColor = GetHandleColor();
+        manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void BaseTextSelectOverlay::UpdateHandleColor()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
 }
 } // namespace OHOS::Ace::NG

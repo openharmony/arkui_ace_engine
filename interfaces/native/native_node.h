@@ -1665,6 +1665,16 @@ typedef enum {
     NODE_FOCUS_BOX = 96,
 
     /**
+     * @brief Defines the moving distance limit for the component-bound tap gesture.
+     * This attribute can be set as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: allowed moving distance of a finger, in vp. \n
+     *
+     */
+    NODE_TAB_STOP = 98,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -5421,6 +5431,31 @@ typedef enum {
      */
     NODE_ON_DRAG_END = 20,
     /**
+     * @brief Defines the event triggered when a key event occurs.
+     *
+     * The callback can be triggered during interactions with a focused window using an external keyboard or other input
+     * device. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
+     */
+    NODE_ON_KEY_EVENT = 21,
+    /**
+     * @brief Defines the event triggered before the input method responds to the key action.
+     *
+     * If the return value of this callback is <b>true</b>, it is considered that the key event has been consumed, and
+     * subsequent event callbacks (<b>keyboardShortcut</b>, input method events, <b>onKeyEvent</b>) will be intercepted
+     * and no longer triggered.
+     * The callback can be triggered during interactions with a focused window using an external keyboard or other input
+     * device. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
+     */
+    NODE_ON_KEY_PRE_IME = 22,
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n
@@ -5809,6 +5844,19 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
      */
     NODE_TEXT_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
+
+    /**
+     * @brief Defines the event triggered when an item is selected and scrolling has stopped in the
+     * <b>ARKUI_NODE_TEXT_PICKER</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+     *
+     * @since 14
+     */
+    NODE_TEXT_PICKER_EVENT_ON_SCROLL_STOP = 15001,
 
     /**
      * @brief Defines the event triggered when a date is selected in the <b>NODE_CALENDAR_PICKER</b>.

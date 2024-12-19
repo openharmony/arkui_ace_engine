@@ -457,6 +457,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
 
+    UpdateTouchPointWithAxisEvent(event);
     UpdateAxisPointInVelocityTracker(event);
     time_ = event.time;
 

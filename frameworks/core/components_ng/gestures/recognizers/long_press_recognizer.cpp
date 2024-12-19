@@ -374,6 +374,7 @@ void LongPressRecognizer::SendCallbackMsg(
         info.SetPointerEvent(lastPointEvent_);
         Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

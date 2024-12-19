@@ -31,6 +31,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -968,7 +969,7 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
     OHOS::Ace::NG::RectF frameRect;
     OHOS::Ace::NG::RectF visibleInnerRect;
     OHOS::Ace::NG::RectF visibleRect;
-    frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect, true);
     bool isClipCheckSkip = NearEqual(visibleRect.Width(), 0.0) && NearEqual(visibleRect.Height(), 0.0) &&
                            NearEqual(visibleInnerRect.Width(), 0.0) && NearEqual(visibleInnerRect.Height(), 0.0);
     clipVisible = (GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0)) ||
@@ -1239,6 +1240,65 @@ void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& 
         uint32_t unsignedTreeId = static_cast<uint32_t>(treeId);
         info.SetPageId((unsignedTreeId << SUB_TREE_OFFSET_IN_PAGE_ID) | unsignedPageId);
     }
+}
+
+bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const RefPtr<NG::FrameNode>& parentFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    auto parentPattern = parentFrameNode->GetPattern<NG::ScrollablePattern>();
+    CHECK_NULL_RETURN(parentPattern, false);
+
+    auto scrollAbility = parentPattern->GetScrollOffsetAbility();
+    auto scrollFunc = scrollAbility.scrollFunc;
+    auto scrollAxis = scrollAbility.axis;
+    if (!scrollFunc || scrollAxis == Axis::NONE) {
+        return false;
+    }
+    auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
+        scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
+    if (!NearZero(moveOffset)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
+            moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
+        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+        return ret;
+    }
+    return false;
+}
+
+bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    bool ret = false;
+    auto parentFrameNode = curFrameNode->GetParentFrameNode();
+
+    while (parentFrameNode) {
+        if (ScrollByOffsetToParent(curFrameNode, parentFrameNode)) {
+            ret = true;
+        }
+        parentFrameNode = parentFrameNode->GetParentFrameNode();
+    }
+    return ret;
+}
+
+void ProcessFocusScroll(const RefPtr<NG::FrameNode>& curFrameNode, RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [node = AceType::WeakClaim(AceType::RawPtr(curFrameNode))] {
+            auto focusNode = node.Upgrade();
+            CHECK_NULL_VOID(focusNode);
+            auto accessibilityProperty = focusNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (accessibilityProperty->GetAccessibilityFocusState()) {
+                ScrollByOffset(focusNode);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityProcessFocusScroll");
 }
 } // namespace
 
@@ -1987,6 +2047,7 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
     CHECK_NULL_RETURN(accessibilityProperty, false);
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     accessibilityProperty->SetAccessibilityFocusState(true);
+    ProcessFocusScroll(frameNode, context);
     return true;
 }
 
@@ -3315,16 +3376,17 @@ void JsAccessibilityManager::DumpTreeNodeSafeAreaInfoNg(const RefPtr<NG::FrameNo
     CHECK_NULL_VOID(manager);
     if (!manager->IsIgnoreAsfeArea() && !manager->IsNeedAvoidWindow() && !manager->IsFullScreen() &&
         !manager->KeyboardSafeAreaEnabled() && !pipeline->GetUseCutout()) {
-        DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
-                                           .append(std::to_string(manager->IsIgnoreAsfeArea()))
-                                           .append(std::string(", isNeedAvoidWindow: ").c_str())
-                                           .append(std::to_string(manager->IsNeedAvoidWindow()))
-                                           .append(std::string(", IisFullScreen: ").c_str())
-                                           .append(std::to_string(manager->IsFullScreen()))
-                                           .append(std::string(", isKeyboardAvoidMode: ").c_str())
-                                           .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
-                                           .append(std::string(", isUseCutout: ").c_str())
-                                           .append(std::to_string(pipeline->GetUseCutout())));
+        DumpLog::GetInstance().AddDesc(
+            std::string("ignoreSafeArea: ")
+                .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                .append(std::string(", isNeedAvoidWindow: ").c_str())
+                .append(std::to_string(manager->IsNeedAvoidWindow()))
+                .append(std::string(", IisFullScreen: ").c_str())
+                .append(std::to_string(manager->IsFullScreen()))
+                .append(std::string(", isKeyboardAvoidMode: ").c_str())
+                .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
+                .append(std::string(", isUseCutout: ").c_str())
+                .append(std::to_string(pipeline->GetUseCutout())));
     }
 }
 

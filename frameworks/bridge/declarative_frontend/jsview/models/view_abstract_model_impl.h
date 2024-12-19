@@ -50,6 +50,12 @@ public:
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
+    void SetSafeAreaPadding(const CalcDimension& value) override {}
+    void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) override {}
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {}
+    void ResetSafeAreaPadding() override {}
     void SetMargin(const CalcDimension& value) override;
     void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
@@ -87,6 +93,7 @@ public:
     void SetLayoutPriority(int32_t priority) override;
     void SetPixelRound(uint16_t value) override;
     void SetLayoutWeight(float value) override;
+    void SetLayoutWeight(const NG::LayoutWeightPair& value) override {};
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
@@ -184,7 +191,7 @@ public:
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
-    void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
+    void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};

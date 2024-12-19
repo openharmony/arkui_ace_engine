@@ -774,6 +774,18 @@ bool ResourceAdapterImplV2::GetRawFileDescription(
     return true;
 }
 
+bool ResourceAdapterImplV2::CloseRawFileDescription(const std::string &rawfileName) const
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto state = manager->CloseRawFileDescriptor(rawfileName);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("Close RawFile Description error, error:%{public}u", state);
+        return false;
+    }
+    return true;
+}
+
 bool ResourceAdapterImplV2::GetMediaById(const int32_t& resId, std::string& mediaPath) const
 {
     auto manager = GetResourceManager();

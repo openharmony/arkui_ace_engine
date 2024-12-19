@@ -799,6 +799,12 @@ class FocusController {
         __JSScopeUtil__.restoreInstanceId();
         return result;
     }
+
+    setAutoFocusTransfer(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setAutoFocusTransfer(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class CursorController {
