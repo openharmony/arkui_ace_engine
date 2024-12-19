@@ -651,7 +651,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
     expandableAreaContext->UpdateChainedTransition(opacity);
 
-    AnimationUtils::Animate(option, [this, host, expandableNode, menuWrapperPattern]() {
+    AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
         host->RemoveChild(expandableNode, true);
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
