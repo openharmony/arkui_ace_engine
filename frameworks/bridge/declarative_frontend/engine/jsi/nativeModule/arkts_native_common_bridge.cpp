@@ -26,7 +26,6 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -6448,33 +6447,25 @@ void CommonBridge::SetOnGestureEvent(
     auto obj = eventArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
-    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
 
     if (action == Ace::GestureEventAction::CANCEL) {
-        auto onActionCancelFunc = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), containerId]() {
+        auto onActionCancelFunc = [vm, func = panda::CopyableGlobal(vm, func), containerId]() {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             ContainerScope scope(containerId);
-            auto function = func.Lock();
-            if (!function.IsEmpty() && function->IsFunction(vm)) {
-                function->Call(vm, function.ToLocal(), nullptr, 0);
-            }
+            func->Call(vm, func.ToLocal(), nullptr, 0);
         };
         auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
         gesturePtr->SetOnActionCancelId(onActionCancelFunc);
         return;
     }
-    auto event = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), containerId](GestureEvent& info) {
+    auto event = [vm, func = panda::CopyableGlobal(vm, func), containerId](GestureEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
-        auto function = func.Lock();
-        if (!function.IsEmpty() && function->IsFunction(vm)) {
-            auto obj = CreateCommonGestureEventInfo(vm, info);
-            panda::Local<panda::JSValueRef> params[1] = { obj };
-            function->Call(vm, function.ToLocal(), params, 1);
-        }
+        auto obj = CreateCommonGestureEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[1] = { obj };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
     switch (action) {
