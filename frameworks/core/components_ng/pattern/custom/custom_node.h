@@ -131,7 +131,13 @@ public:
 
     void FireCustomDisappear() override;
 
+    // called for DFX
+    void DumpInfo() override;
 private:
+    // for DFX
+    void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
+    void DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo);
+
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;

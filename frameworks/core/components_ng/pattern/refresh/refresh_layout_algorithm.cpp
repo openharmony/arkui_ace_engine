@@ -32,7 +32,7 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
     int32_t index = 0;
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (!Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
             child->Measure(layoutConstraint);
             ++index;
             continue;
@@ -126,7 +126,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         }
         auto paddingOffsetChild = paddingOffset;
         if (HasCustomBuilderIndex()) {
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
                 UpdateChildPosition(layoutWrapper, index, paddingOffsetChild);
             } else if (index == customBuilderIndex_.value_or(0)) {
                 paddingOffsetChild += OffsetF(0.0f, customBuilderOffset_);

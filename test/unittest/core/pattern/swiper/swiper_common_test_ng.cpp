@@ -926,4 +926,86 @@ TEST_F(SwiperCommonTestNg, IsFocusNodeInItemPositionAfterJumpTest)
     targetFocusHub = childNode->GetFirstFocusHubChild();
     EXPECT_FALSE(pattern_->IsFocusNodeInItemPosition(targetFocusHub));
 }
+
+/**
+ * @tc.name: NeedStartNewAnimation001
+ * @tc.desc: Test NeedStartNewAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, NeedStartNewAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    pattern_->itemPositionInAnimation_.clear();
+    OffsetF offset;
+    EXPECT_TRUE(pattern_->NeedStartNewAnimation(offset));
+
+    struct SwiperItemInfo swiperItemInfo1;
+    struct SwiperItemInfo swiperItemInfo2;
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = 0.0f;
+    swiperItemInfo1.endPos = 180.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    pattern_->itemPositionInAnimation_.emplace(std::make_pair(0, swiperItemInfo1));
+
+    swiperItemInfo2.startPos = 180.0f;
+    swiperItemInfo2.endPos = 360.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo2));
+    pattern_->itemPositionInAnimation_.emplace(std::make_pair(0, swiperItemInfo2));
+
+    EXPECT_FALSE(pattern_->NeedStartNewAnimation(offset));
+}
+
+/**
+ * @tc.name: NextMarginIgnoreBlank001
+ * @tc.desc: Test nextMargin and ignoreBlank
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, NextMarginIgnoreBlank001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetIndex(4);
+    model.SetNextMargin(Dimension(NEXT_MARGIN), true);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 4);
+    EXPECT_EQ(GetChildX(frameNode_, 3), NEXT_MARGIN - (SWIPER_WIDTH - NEXT_MARGIN));
+    EXPECT_EQ(GetChildX(frameNode_, 4), NEXT_MARGIN);
+}
+
+/**
+ * @tc.name: ResetOffscreenItemPosition001
+ * @tc.desc: Test swiper layout ResetOffscreenItemPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, ResetOffscreenItemPosition001, TestSize.Level1)
+{
+    CreateWithArrow();
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    auto indicatorIndex = 4;
+    auto indicatorGeometryNode = indicatorNode_->GetGeometryNode();
+    auto indicatorOffset = indicatorGeometryNode->GetMarginFrameRect();
+    swiperLayoutAlgorithm->ResetOffscreenItemPosition(&layoutWrapper, indicatorIndex, true);
+    EXPECT_EQ(indicatorGeometryNode->GetMarginFrameRect(), indicatorOffset);
+
+    auto leftArrowIndex = 5;
+    auto leftArrowGeometryNode = leftArrowNode_->GetGeometryNode();
+    auto leftArrowOffset = leftArrowGeometryNode->GetMarginFrameRect();
+    swiperLayoutAlgorithm->ResetOffscreenItemPosition(&layoutWrapper, leftArrowIndex, true);
+    EXPECT_EQ(leftArrowGeometryNode->GetMarginFrameRect(), leftArrowOffset);
+
+    auto rightArrowIndex = 6;
+    auto rightArrowGeometryNode = rightArrowNode_->GetGeometryNode();
+    auto rightArrowOffset = rightArrowGeometryNode->GetMarginFrameRect();
+    swiperLayoutAlgorithm->ResetOffscreenItemPosition(&layoutWrapper, rightArrowIndex, true);
+    EXPECT_EQ(rightArrowGeometryNode->GetMarginFrameRect(), rightArrowOffset);
+}
 } // namespace OHOS::Ace::NG

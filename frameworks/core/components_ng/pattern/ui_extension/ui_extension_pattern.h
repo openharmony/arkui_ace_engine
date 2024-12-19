@@ -243,6 +243,11 @@ private:
     void OnModifyDone() override;
     bool CheckConstraint();
 
+    void InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -283,6 +288,14 @@ private:
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
     void ResetAccessibilityChildTreeCallback();
+    bool GetForceProcessOnKeyEventInternal() const
+    {
+        return forceProcessOnKeyEventInternal_;
+    }
+    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
+    {
+        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
+    }
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -342,6 +355,7 @@ private:
     uint32_t focusWindowId_ = 0;
     uint32_t realHostWindowId_ = 0;
     std::string want_;
+    bool forceProcessOnKeyEventInternal_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

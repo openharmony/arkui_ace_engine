@@ -58,6 +58,7 @@ struct ArkUIInteralDragAction {
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
     std::string extraParams;
     int32_t sourceType = 0;
+    int32_t toolType = -1;
     float dipScale = 0.0;
     void* userData;
     std::function<void(const OHOS::Ace::DragNotifyMsg& info, int32_t status)> callback;

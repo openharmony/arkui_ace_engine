@@ -25,6 +25,9 @@ export interface TabTitleBarMenuItem {
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
+  accessibilityText?: ResourceStr;
+  accessibilityLevel?: string;
+  accessibilityDescription?: ResourceStr;
 }
 
 export interface TabTitleBarTabItem {
@@ -37,6 +40,35 @@ const TEXT_EDITABLE_DIALOG = '18.3fp'
 const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
 const MIN_DIALOG = '216vp'
+
+class ButtonGestureModifier implements GestureModifier {
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
+}
 
 @Component
 export struct TabTitleBar {
@@ -215,7 +247,6 @@ struct CollapsibleMenuSection {
     value: PUBLIC_MORE,
     label: $r('sys.string.ohos_toolbar_more'),
   } as TabTitleBarMenuItem;
-  longPressTime: number = 500;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
@@ -231,7 +262,7 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false
   @State isMoreIconOnHover: boolean = false
   @State isMoreIconOnClick: boolean = false
-  @Prop fontSize: number = 1
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
 
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: TabTitleBarDialog({
@@ -247,6 +278,8 @@ struct CollapsibleMenuSection {
     isModal: true,
     customStyle: true,
   })
+
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
@@ -280,6 +313,7 @@ struct CollapsibleMenuSection {
           this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
+    this.fontSize = this.decideFontScale()
   }
 
   decideFontScale(): number {
@@ -289,6 +323,10 @@ struct CollapsibleMenuSection {
       return 1;
     }
     return Math.min(this.systemFontScale, this.maxFontScale);
+  }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
   }
 
   build() {
@@ -304,7 +342,7 @@ struct CollapsibleMenuSection {
              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
 
-          Row() {
+          Button({ type: ButtonType.Normal, stateEffect: true }) {
             Image(PUBLIC_MORE)
               .width(ImageMenuItem.imageSize)
               .height(ImageMenuItem.imageSize)
@@ -312,12 +350,12 @@ struct CollapsibleMenuSection {
               .draggable(false)
               .fillColor($r('sys.color.icon_primary'))
           }
+          .accessibilityText($r('sys.string.ohos_toolbar_more'))
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
           .borderRadius(ImageMenuItem.buttonBorderRadius)
           .foregroundColor(this.getMoreIconFgColor())
           .backgroundColor(this.getMoreIconBgColor())
-          .justifyContent(FlexAlign.Center)
           .stateStyles({
             focused: {
               .border({
@@ -360,16 +398,7 @@ struct CollapsibleMenuSection {
             }
           })
           .onClick(() => this.isPopupShown = true)
-          .gesture(
-            LongPressGesture({ repeat: false, duration: this.longPressTime })
-              .onAction((event: GestureEvent) => {
-                this.fontSize = this.decideFontScale();
-                if (event) {
-                  if (this.fontSize >= this.minFontSize) {
-                    this.dialogController?.open()
-                  }
-                }
-              }))
+          .gestureModifier(this.buttonGestureModifier)
           .bindPopup(this.isPopupShown, {
             builder: this.popupBuilder,
             placement: Placement.Bottom,
@@ -463,9 +492,27 @@ struct TabContentItem {
     return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth
   }
 
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource;
+    } else if (typeof resource === 'undefined') {
+      return '';
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
+    }
+  }
+
   build() {
     Stack() {
-      Row() {
+      Button() {
         Column() {
           if (this.item.icon === undefined) {
             Text(this.item.title)
@@ -507,6 +554,7 @@ struct TabContentItem {
                 }
               })
               .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
+              .accessibilitySelected(this.index === this.currentIndex)
           } else {
             Row() {
               Image(this.item.icon)
@@ -514,6 +562,7 @@ struct TabContentItem {
                 .width(this.getImageLayoutWidth())
                 .height(TabContentItem.imageSize)
                 .objectFit(ImageFit.Fill)
+                .accessibilityText(this.toStringFormat(this.item.title))
                 .scale({
                   x: this.getImageScaleFactor(),
                   y: this.getImageScaleFactor()
@@ -569,13 +618,12 @@ struct TabContentItem {
               }
             })
             .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
+            .accessibilitySelected(this.index === this.currentIndex)
           }
         }
         .justifyContent(FlexAlign.Center)
       }
       .height(TabTitleBar.totalHeight)
-      .alignItems(VerticalAlign.Center)
-      .justifyContent(FlexAlign.Center)
       .borderRadius(TabContentItem.buttonBorderRadius)
       .backgroundColor(this.getBgColor())
       .onAreaChange((_oldValue, newValue) => {
@@ -612,6 +660,11 @@ struct TabContentItem {
 struct ImageMenuItem {
   item: TabTitleBarMenuItem = { value: '' };
   index: number = 0;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
+  isPopup: boolean = false;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -623,6 +676,30 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: TabTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      tabTitleDialog: this.item,
+      tabTitleBarDialog: this.item.label ? this.item.label : '',
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
+
+  private textDialog(): ResourceStr {
+    if (this.item.value === PUBLIC_MORE) {
+      return $r('sys.string.ohos_toolbar_more');
+    } else {
+      return this.item.label ? this.item.label : '';
+    }
+  }
 
   getFgColor() {
     return this.isOnClick
@@ -640,8 +717,70 @@ struct ImageMenuItem {
     }
   }
 
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource;
+    } else if (typeof resource === 'undefined') {
+      return '';
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
+    }
+  }
+
+  private getAccessibilityReadText(): string | undefined {
+    if (this.item.value === PUBLIC_MORE) {
+      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+    } else if (this.item.accessibilityText) {
+      return this.toStringFormat(this.item.accessibilityText);
+    } else if (this.item.label) {
+      return this.toStringFormat(this.item.label);
+    }
+    return ' ';
+  }
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+
+  aboutToAppear(): void {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
+    this.fontSize = this.decideFontScale();
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
+  }
+
   build() {
-    Row() {
+    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       Image(this.item.value)
         .width(ImageMenuItem.imageSize)
         .height(ImageMenuItem.imageSize)
@@ -649,12 +788,14 @@ struct ImageMenuItem {
         .key(ImageMenuItem.focusablePrefix + this.index)
         .draggable(false)
     }
+    .accessibilityText(this.getAccessibilityReadText())
+    .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
-    .justifyContent(FlexAlign.Center)
     .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
     .stateStyles({
       focused: {
@@ -708,9 +849,13 @@ struct ImageMenuItem {
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
+        if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          this.dialogController?.close()
+        }
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+    .gestureModifier(this.buttonGestureModifier)
   }
 }
 

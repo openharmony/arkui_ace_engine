@@ -2412,6 +2412,56 @@ void ResetPadding(ArkUINodeHandle node)
     ViewAbstract::SetPadding(frameNode, paddings);
 }
 
+void SetSafeAreaPadding(
+    ArkUINodeHandle node, const struct ArkUIPaddingType* safeAreaPadding, ArkUI_Bool isLengthMetrics)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength endDimen;
+    CalcLength bottomDimen;
+    CalcLength startDimen;
+    if (safeAreaPadding->top.string != nullptr) {
+        topDimen = CalcLength(safeAreaPadding->top.string);
+    } else {
+        topDimen = CalcLength(safeAreaPadding->top.value, static_cast<DimensionUnit>(safeAreaPadding->top.unit));
+    }
+    if (safeAreaPadding->end.string != nullptr) {
+        endDimen = CalcLength(safeAreaPadding->end.string);
+    } else {
+        endDimen = CalcLength(safeAreaPadding->end.value, static_cast<DimensionUnit>(safeAreaPadding->end.unit));
+    }
+    if (safeAreaPadding->bottom.string != nullptr) {
+        bottomDimen = CalcLength(safeAreaPadding->bottom.string);
+    } else {
+        bottomDimen =
+            CalcLength(safeAreaPadding->bottom.value, static_cast<DimensionUnit>(safeAreaPadding->bottom.unit));
+    }
+    if (safeAreaPadding->start.string != nullptr) {
+        startDimen = CalcLength(safeAreaPadding->start.string);
+    } else {
+        startDimen = CalcLength(safeAreaPadding->start.value, static_cast<DimensionUnit>(safeAreaPadding->start.unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    if (isLengthMetrics) {
+        paddings.end = std::optional<CalcLength>(endDimen);
+        paddings.start = std::optional<CalcLength>(startDimen);
+    } else {
+        paddings.right = std::optional<CalcLength>(endDimen);
+        paddings.left = std::optional<CalcLength>(startDimen);
+    }
+    ViewAbstract::SetSafeAreaPadding(frameNode, paddings);
+}
+
+void ResetSafeAreaPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetSafeAreaPadding(frameNode);
+}
+
 /**
  * @param values value value
  * values[0] : left, values[1] : top, values[2] : right, values[3] : bottom
@@ -5648,7 +5698,7 @@ void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_
         event.componentAsyncEvent.subKind = ON_VISIBLE_AREA_CHANGE;
         event.componentAsyncEvent.data[0].i32 = visible;
         event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
 }
@@ -5755,6 +5805,15 @@ void SetAccessibilityValue(ArkUINodeHandle node, const ArkUIAccessibilityValue& 
     if (value.current.isSet) {
         accessibilityProperty->SetUserCurrentValue(value.current.value);
     }
+    if (value.rangeMin.isSet) {
+        accessibilityProperty->SetUserRangeMinValue(value.rangeMin.value);
+    }
+    if (value.rangeMax.isSet) {
+        accessibilityProperty->SetUserRangeMaxValue(value.rangeMax.value);
+    }
+    if (value.rangeCurrent.isSet) {
+        accessibilityProperty->SetUserRangeCurrentValue(value.rangeCurrent.value);
+    }
     if (value.text.isSet) {
         accessibilityProperty->SetUserTextValue(value.text.value);
     }
@@ -5772,6 +5831,12 @@ void GetAccessibilityValue(ArkUINodeHandle node, ArkUIAccessibilityValue& value)
     value.max.value = accessibilityProperty->GetUserMaxValue();
     value.current.isSet = accessibilityProperty->HasUserCurrentValue();
     value.current.value = accessibilityProperty->GetUserCurrentValue();
+    value.rangeMin.isSet = accessibilityProperty->HasUserRangeMinValue();
+    value.rangeMin.value = accessibilityProperty->GetUserRangeMinValue();
+    value.rangeMax.isSet = accessibilityProperty->HasUserRangeMaxValue();
+    value.rangeMax.value = accessibilityProperty->GetUserRangeMaxValue();
+    value.rangeCurrent.isSet = accessibilityProperty->HasUserRangeCurrentValue();
+    value.rangeCurrent.value = accessibilityProperty->GetUserRangeCurrentValue();
     value.text.isSet = accessibilityProperty->HasUserTextValue();
     g_strValue = accessibilityProperty->GetUserTextValue();
     value.text.value = g_strValue.c_str();
@@ -5791,6 +5856,15 @@ void ResetAccessibilityValue(ArkUINodeHandle node)
     }
     if (accessibilityProperty->HasUserCurrentValue()) {
         accessibilityProperty->SetUserCurrentValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeMinValue()) {
+        accessibilityProperty->SetUserRangeMinValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeMaxValue()) {
+        accessibilityProperty->SetUserRangeMaxValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeCurrentValue()) {
+        accessibilityProperty->SetUserRangeCurrentValue(-1);
     }
     if (accessibilityProperty->HasUserTextValue()) {
         accessibilityProperty->SetUserTextValue("");
@@ -6249,6 +6323,62 @@ ArkUI_Bool GetTabStop(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
 }
+
+void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onClick = [node, eventReceiver](GestureEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.componentAsyncEvent.subKind = ON_CLICK;
+        auto target = info.GetTarget();
+        event.touchEvent.target = { target.id.c_str(), target.type.c_str(),
+            { static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetHeight().Value()) },
+            { static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+                static_cast<ArkUI_Int32>(target.origin.GetY().Value()) } };
+        Offset globalOffset = info.GetGlobalLocation();
+        Offset localOffset = info.GetLocalLocation();
+        Offset screenOffset = info.GetScreenLocation();
+        // x
+        event.componentAsyncEvent.data[0].f32 = localOffset.GetX();
+        // y
+        event.componentAsyncEvent.data[1].f32 = localOffset.GetY();
+        // timestamp
+        event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        // source
+        event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
+        // windowX
+        event.componentAsyncEvent.data[4].f32 = globalOffset.GetX();
+        // windowY
+        event.componentAsyncEvent.data[5].f32 = globalOffset.GetY();
+        // displayX
+        event.componentAsyncEvent.data[6].f32 = screenOffset.GetX();
+        // displayY
+        event.componentAsyncEvent.data[7].f32 = screenOffset.GetY();
+        eventReceiver(node, event);
+    };
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
+        SpanModelNG::SetOnClick(uiNode, std::move(onClick));
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
+    }  else {
+        ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
+    }
+}
+
+void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onAppear = [node, weak = AceType::WeakClaim(frameNode), eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6278,7 +6408,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
         ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
         ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
+        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin,
+        SetSafeAreaPadding, ResetSafeAreaPadding, SetMarkAnchor, ResetMarkAnchor,
         SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
         SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
         ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
@@ -6325,7 +6456,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
         ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetClickDistance, ResetClickDistance,
-        SetDisAllowDrop, SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop };
+        SetDisAllowDrop, SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, SetOnClickExt, SetOnAppearExt };
 
     return &modifier;
 }
@@ -6415,7 +6546,7 @@ void SetOnAppear(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_APPEAR;
         PipelineContext::SetCallBackNode(node);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
@@ -6432,7 +6563,7 @@ void SetOnDisappear(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DISAPPEAR;
         PipelineContext::SetCallBackNode(node);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
 }
@@ -6449,7 +6580,7 @@ void SetOnAttach(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_ATTACH;
         PipelineContext::SetCallBackNode(node);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
@@ -6466,7 +6597,7 @@ void SetOnDetach(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DETACH;
         PipelineContext::SetCallBackNode(node);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
@@ -6482,7 +6613,7 @@ void SetOnFocus(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_FOCUS;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
@@ -6498,7 +6629,7 @@ void SetOnBlur(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_BLUR;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
@@ -6535,7 +6666,7 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX());
         event.componentAsyncEvent.data[11].f32 =
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
                                   const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
@@ -6591,7 +6722,7 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         //displayY
         event.componentAsyncEvent.data[7].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
@@ -6631,7 +6762,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
         return event.keyEvent.isConsumed;
     };
@@ -6667,11 +6798,48 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
         return event.keyEvent.isConsumed;
     };
     NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
+}
+
+void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onFocusAxisEvent = [frameNode, nodeId, extraParam](FocusAxisEventInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.focusAxisEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+        event.focusAxisEvent.absXValue = info.GetAbsXValue();
+        event.focusAxisEvent.absYValue = info.GetAbsYValue();
+        event.focusAxisEvent.absZValue = info.GetAbsZValue();
+        event.focusAxisEvent.absRzValue = info.GetAbsRzValue();
+        event.focusAxisEvent.absGasValue = info.GetAbsGasValue();
+        event.focusAxisEvent.absBrakeValue = info.GetAbsBrakeValue();
+        event.focusAxisEvent.absHat0XValue = info.GetAbsHat0XValue();
+        event.focusAxisEvent.absHat0YValue = info.GetAbsHat0YValue();
+        event.focusAxisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.focusAxisEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+        event.focusAxisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.focusAxisEvent.deviceId = info.GetDeviceId();
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.focusAxisEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnFocusAxisEvent(frameNode, onFocusAxisEvent);
 }
 
 void ResetOnKeyEvent(ArkUINodeHandle node)
@@ -6686,6 +6854,13 @@ void ResetOnKeyPreIme(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+}
+
+void ResetOnFocusAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstractModelNG::DisableOnFocusAxisEvent(frameNode);
 }
 
 void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint, bool usePx)
@@ -6843,7 +7018,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.historySize = 0;
         }
         event.touchEvent.stopPropagation = false;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         eventInfo.SetStopPropagation(event.touchEvent.stopPropagation);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
@@ -6889,7 +7064,7 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         touchEvent.touchEvent.historySize = 0;
         touchEvent.touchEvent.subKind = ON_TOUCH_INTERCEPT;
         touchEvent.touchEvent.interceptResult = 0;
-        SendArkUIAsyncEvent(&touchEvent);
+        SendArkUISyncEvent(&touchEvent);
         return static_cast<NG::HitTestMode>(touchEvent.touchEvent.interceptResult);
     };
     ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
@@ -6907,7 +7082,7 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_HOVER;
         event.componentAsyncEvent.data[0].i32 = isHover;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHover(frameNode, onEvent);
 }
@@ -6934,7 +7109,7 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);
 }
@@ -6951,7 +7126,7 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ACCESSIBILITY_ACTIONS;
         event.componentAsyncEvent.data[0].u32 = actionType;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetActions(onEvent);

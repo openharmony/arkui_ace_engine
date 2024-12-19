@@ -49,6 +49,7 @@ void CalendarMonthPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitFoldState();
 }
 
 bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -941,6 +942,7 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
     auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
                     ? theme->GetCalendarTheme().colSpace.ConvertToPx()
                     : paintProperty->GetColSpaceValue({}).ConvertToPx();
+    colSpace_ = colSpace;
     Dimension buttonOffsetX = Dimension(margin_ / 2 + (colSpace + dayWidth) * pos.first);
     auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
                             ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()

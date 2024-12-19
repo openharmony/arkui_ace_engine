@@ -2786,4 +2786,221 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo, TestSize.Level1)
     bool hasKeyParentLayout = !(valueParentLayout->IsNull());
     EXPECT_FALSE(hasKeyParentLayout);
 }
+
+/**
+ * @tc.name: FrameNodeDumpSimplifySafeAreaInfo
+ * @tc.desc: Test DumpSimplifySafeAreaInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifySafeAreaInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create json.
+     * @tc.expected: expect is nullptr.
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    EXPECT_NE(json, nullptr);
+
+    /**
+     * @tc.steps: step3. test DumpSimplifySafeAreaInfo.
+     * @tc.expected: expect is FALSE.
+     */
+    frameNode->DumpSimplifySafeAreaInfo(json);
+    const auto& valueExpandOpts = json->GetValue("SafeAreaExpandOpts");
+    bool hasvalueExpandOpts = !(valueExpandOpts->IsNull());
+    EXPECT_FALSE(hasvalueExpandOpts);
+
+    const auto& valueInsets = json->GetValue("SafeAreaInsets");
+    bool hasKeyInsets = !(valueInsets->IsNull());
+    EXPECT_FALSE(hasKeyInsets);
+
+    const auto& valueSelfAdjust = json->GetValue("SelfAdjust");
+    bool hasKeySelfAdjust = !(valueSelfAdjust->IsNull());
+    EXPECT_FALSE(hasKeySelfAdjust);
+
+    const auto& valueParentSelfAdjust = json->GetValue("ParentSelfAdjust");
+    bool hasKeyParentSelfAdjust = !(valueParentSelfAdjust->IsNull());
+    EXPECT_FALSE(hasKeyParentSelfAdjust);
+
+    const auto& valueIgnore = json->GetValue("IgnoreSafeArea");
+    bool hasKeyIgnore = !(valueIgnore->IsNull());
+    EXPECT_FALSE(hasKeyIgnore);
+
+    const auto& valueAvoidWindow = json->GetValue("IsNeedAvoidWindow");
+    bool hasKeyAvoidWindow = !(valueAvoidWindow->IsNull());
+    EXPECT_FALSE(hasKeyAvoidWindow);
+
+    const auto& valueIsFullScreen = json->GetValue("IsFullScreen");
+    bool hasKeyIsFullScreen = !(valueIsFullScreen->IsNull());
+    EXPECT_FALSE(hasKeyIsFullScreen);
+
+    const auto& valueIsKeyboard = json->GetValue("IsKeyboardAvoidMode");
+    bool hasKeyIsKeyboard = !(valueIsKeyboard->IsNull());
+    EXPECT_FALSE(hasKeyIsKeyboard);
+
+    const auto& valueIsUseCutout = json->GetValue("IsUseCutout");
+    bool hasKeyIsUseCutout = !(valueIsUseCutout->IsNull());
+    EXPECT_FALSE(hasKeyIsUseCutout);
+}
+
+/**
+ * @tc.name: FrameNodeDumpCommonInfo
+ * @tc.desc: Test DumpCommonInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpCommonInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create json.
+     * @tc.expected: expect is nullptr.
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    EXPECT_NE(json, nullptr);
+
+    /**
+     * @tc.steps: step3. test DumpCommonInfo.
+     * @tc.expected: expect is FALSE.
+     */
+    frameNode->DumpCommonInfo(json);
+
+    const auto& valueFrameRect = json->GetValue("FrameRect");
+    bool hasvalueFrameRect = !(valueFrameRect->IsNull());
+    EXPECT_TRUE(hasvalueFrameRect);
+
+    const auto& valuePaintRect = json->GetValue("PaintRect without transform");
+    bool hasvaluePaintRect = !(valuePaintRect->IsNull());
+    EXPECT_TRUE(hasvaluePaintRect);
+
+    const auto& valueBackgroundColor= json->GetValue("BackgroundColor");
+    bool hasvalueBackgroundColor = !(valueBackgroundColor->IsNull());
+    EXPECT_FALSE(hasvalueBackgroundColor);
+
+    const auto& valueConstraint = json->GetValue("ParentLayoutConstraint");
+    bool hasKeyConstraint = !(valueConstraint->IsNull());
+    EXPECT_FALSE(hasKeyConstraint);
+}
+
+/**
+ * @tc.name: FrameNodeGetJSCustomProperty001
+ * @tc.desc: Test GetJSCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetJSCustomProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetJSCustomProperty.
+     * @tc.expected: expect false.
+     */
+    const std::string key  = "testKey";
+    std::string value = "testValue";
+    auto hasKey = frameNode->GetJSCustomProperty(key, value);
+
+    EXPECT_FALSE(hasKey);
+}
+
+/**
+ * @tc.name: FrameNodeGetJSCustomProperty002
+ * @tc.desc: Test GetJSCustomProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetJSCustomProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set getCustomProperty_ value test.
+     * @tc.expected: expect result value test.
+     */
+    std::function<bool()> func = []() -> bool { return true; };
+    std::function<std::string(const std::string&)> getFunc = [](const std::string& key) -> std::string {
+        return "test";};
+    frameNode->SetJSCustomProperty(func, getFunc);
+
+    /**
+     * @tc.steps: step2. test GetJSCustomProperty.
+     * @tc.expected: expect true.
+     */
+    const std::string key  = "testKey";
+    std::string value = "testValue";
+    auto hasKey = frameNode->GetJSCustomProperty(key, value);
+
+    EXPECT_TRUE(hasKey);
+    EXPECT_EQ(value, "test");
+}
+
+/**
+ * @tc.name: FrameNodeGetCapiCustomProperty001
+ * @tc.desc: Test GetCapiCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetCapiCustomProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. GetCapiCustomProperty
+     * @tc.expected: expect result value false.
+     */
+    frameNode->setIsCNode(false);
+    std::string value;
+    bool hasKey = frameNode->GetCapiCustomProperty("key", value);
+    EXPECT_FALSE(hasKey);
+}
+
+/**
+ * @tc.name: FrameNodeGetCapiCustomProperty002
+ * @tc.desc: Test GetCapiCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetCapiCustomProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. GetCapiCustomProperty.
+     * @tc.expected: expect result true.
+     */
+    frameNode->setIsCNode(true);
+    frameNode->AddCustomProperty("key", "value");
+    std::string value;
+    bool result = frameNode->GetCapiCustomProperty("key", value);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(value, "value");
+}
 } // namespace OHOS::Ace::NG

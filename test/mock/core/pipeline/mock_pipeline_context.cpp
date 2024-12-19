@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -181,6 +182,13 @@ void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
@@ -364,7 +372,10 @@ void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
-void PipelineContext::WindowFocus(bool isFocus) {}
+void PipelineContext::WindowFocus(bool isFocus)
+{
+    onFocus_ = isFocus;
+}
 
 void PipelineContext::ContainerModalUnFocus() {}
 
@@ -436,6 +447,8 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
@@ -490,9 +503,6 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
-
-void PipelineContext::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-    uint32_t closeButtonRightMargin, int32_t isDarkMode) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
@@ -653,7 +663,8 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
+    bool isBypass, MouseStyleChangeReason reason)
 {
     return true;
 }
@@ -878,6 +889,15 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    return 0;
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1018,8 +1038,6 @@ bool PipelineBase::MaybeRelease()
 {
     return AceType::MaybeRelease();
 }
-
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
 double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {

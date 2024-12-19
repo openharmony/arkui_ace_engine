@@ -56,11 +56,15 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
     // so we need an u16string to get the correct index
     std::u16string remainString = u"";
     std::u32string u32ContentToDelete;
+    int32_t substrLength = u16.length() - startIndex;
+    if (substrLength < 0) {
+        return 0;
+    }
     if (isBackward) {
         if (startIndex == static_cast<int32_t>(u16.length())) {
             u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(content));
         } else {
-            remainString = u16.substr(startIndex, u16.length() - startIndex);
+            remainString = u16.substr(startIndex, substrLength);
             std::u16string temp = u16.substr(0, startIndex);
             u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
         }
@@ -78,7 +82,7 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
             u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(content));
         } else {
             remainString = u16.substr(0, startIndex);
-            std::u16string temp = u16.substr(startIndex, u16.length() - startIndex);
+            std::u16string temp = u16.substr(startIndex, substrLength);
             u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
         }
         if (u32ContentToDelete.length() == 0) {
@@ -91,8 +95,8 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
         }
         content = remainString + StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32ContentToDelete));
     }
+    // we need length to update the cursor
     int32_t deletedLength = static_cast<int32_t>(u16.length() - content.length());
-    //we need length to update the cursor
     return deletedLength;
 }
 
@@ -133,12 +137,6 @@ int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ByteNumToCharNum contentLength=%{public}zu pos=%{public}d charNum=%{public}d",
         content.length(), pos, charNum);
     return charNum;
-}
-
-EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
-    const std::string& content, int32_t& startIndex, int32_t& endIndex)
-{
-    return GetIndexRelationToEmoji(index, StringUtils::Str8ToStr16(content), startIndex, endIndex);
 }
 
 EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,

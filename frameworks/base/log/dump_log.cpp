@@ -17,7 +17,9 @@
 
 #include <fstream>
 
+#if defined(OHOS_PLATFORM)
 #include "zlib.h"
+#endif
 
 #include "core/common/ace_application_info.h"
 
@@ -204,6 +206,7 @@ std::string DumpLog::FormatDumpInfo(const std::string& str, int32_t depth)
     return str;
 }
 
+#if defined(OHOS_PLATFORM)
 int DumpLog::CompressString(const char* in_str, size_t in_len, std::string& out_str, int level)
 {
     if (!in_str)
@@ -251,6 +254,7 @@ int DumpLog::CompressString(const char* in_str, size_t in_len, std::string& out_
         return Z_STREAM_ERROR;
     return Z_OK;
 }
+#endif
 
 void DumpLog::OutPutByCompress()
 {
@@ -259,11 +263,15 @@ void DumpLog::OutPutByCompress()
         return;
     }
     std::string compressString;
+#if defined(OHOS_PLATFORM)
     if (CompressString(result_.c_str(), result_.size(), compressString, COMPRESS_VERSION) == Z_OK) {
         ostream_->write(compressString.c_str(), compressString.length());
     } else {
         ostream_->write(result_.c_str(), result_.length());
     }
+#else
+    ostream_->write(result_.c_str(), result_.length());
+#endif
     result_.clear();
     ostream_->flush();
 }

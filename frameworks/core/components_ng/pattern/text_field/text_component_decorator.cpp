@@ -302,7 +302,7 @@ void CounterDecorator::HandleNonTextArea()
     auto cleanNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
     auto updateCountXWithArea = [&countX, isRTL](const std::vector<RefPtr<TextInputResponseArea>>& areas) {
         for (auto area : areas) {
-            if (area) {
+            if (!area) {
                 continue;
             }
             if (isRTL) {

@@ -159,11 +159,13 @@ public:
             return;
         }
         if (onValueChangeEvent_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change event");
+            TAG_LOGI(
+                AceLogTag::ACE_TEXT_FIELD, "On change event, len:%{public}d", static_cast<int32_t>(value.length()));
             onValueChangeEvent_(value);
         }
         if (onChange_) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change previewText index %{private}d", previewText.offset);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change previewText, len:%{public}d, index:%{private}d",
+                static_cast<int32_t>(previewText.value.length()), previewText.offset);
             // Not all in one, in order to fix the cppcrash bug
             auto onChange = onChange_;
             onChange(value, previewText);
@@ -339,6 +341,8 @@ public:
     bool FireOnWillInsertValueEvent(const InsertValueInfo& info)
     {
         if (onWillInsertValueEvent_) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnWillInsertValueEvent len:%{public}d,offset:%{public}d",
+                static_cast<int32_t>(info.insertValue.length()), info.insertOffset);
             return onWillInsertValueEvent_(info);
         }
         return true;
@@ -352,6 +356,8 @@ public:
     void FireOnDidInsertValueEvent(const InsertValueInfo& info)
     {
         if (onDidInsertValueEvent_) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnDidInsertValueEvent len:%{public}d,offset:%{public}d",
+                static_cast<int32_t>(info.insertValue.length()), info.insertOffset);
             onDidInsertValueEvent_(info);
         }
     }
@@ -364,6 +370,8 @@ public:
     bool FireOnWillDeleteEvent(const DeleteValueInfo& info)
     {
         if (onWillDeleteEvent_) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnWillDeleteEvent len:%{public}d,offset:%{public}d",
+                static_cast<int32_t>(info.deleteValue.length()), info.deleteOffset);
             return onWillDeleteEvent_(info);
         }
         return true;
@@ -377,6 +385,8 @@ public:
     void FireOnDidDeleteValueEvent(const DeleteValueInfo& info)
     {
         if (onDidDeleteEvent_) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnDidDeleteValueEvent len:%{public}d,offset:%{public}d",
+                static_cast<int32_t>(info.deleteValue.length()), info.deleteOffset);
             onDidDeleteEvent_(info);
         }
     }

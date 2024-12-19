@@ -294,7 +294,7 @@ void UIExtensionManager::UpdateSessionViewportConfig(const ViewportConfig& confi
         auto instanceId = uiExtension->GetInstanceIdFromHost();
         auto container = Platform::AceContainer::GetContainer(instanceId);
         if (container) {
-            displayId = container->GetDisplayId();
+            displayId = container->GetCurrentDisplayId();
         }
         SessionViewportConfig newConfig = {
             .isDensityFollowHost_ = uiExtension->GetDensityDpi(),

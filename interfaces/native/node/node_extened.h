@@ -137,6 +137,9 @@ struct ArkUI_AccessibilityValue {
     ArkUI_OptionalInt min;
     ArkUI_OptionalInt max;
     ArkUI_OptionalInt current;
+    ArkUI_OptionalInt rangeMin;
+    ArkUI_OptionalInt rangeMax;
+    ArkUI_OptionalInt rangeCurrent;
     ArkUI_OptionalCharPtr text;
 };
 

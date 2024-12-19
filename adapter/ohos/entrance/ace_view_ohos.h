@@ -89,7 +89,7 @@ public:
 
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme);
 
-    bool ProcessNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool ProcessRotationEvent(float rotationValue);
 

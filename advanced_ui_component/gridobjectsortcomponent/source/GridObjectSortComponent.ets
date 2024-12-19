@@ -19,7 +19,7 @@ import curves from '@ohos.curves';
 // import component
 import {
   ComposeTitleBar, LengthMetrics, MeasureText, EditableTitleBar,
-  EditableLeftIconType, SubHeader, OperationType
+  EditableLeftIconType, SubHeader, OperationType, SymbolGlyphModifier
 } from '@kit.ArkUI';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -31,7 +31,11 @@ const COL_TEXT = 4;
 const GRID_COL_3 = '1fr 1fr 1fr';
 const GRID_COL_4 = '1fr 1fr 1fr 1fr';
 const ICON_SIZE = 24;
+const SYMBOL_SIZE_24VP = '24vp';
+const SYMBOL_SIZE_12FP = 12;
 const IMAGE_DEFAULT = 56;
+const SYMBOL_DEFAULT = '56vp';
+const SYMBOL_WEIGHT = 400;
 const TEXT_PADDING_LEFT_RIGHT = 12;
 const PADDING_EIGHT = 4;
 const GRID_ITEM_HEIGHT_TEXT = 28;
@@ -41,8 +45,10 @@ const SUBTITLE_HEIGHT = 56;
 const TEXT_MAX_LINES = 1;
 const MIN_FONT_SCALE = 1;
 const MAX_FONT_SCALE = 2;
+const MIN_SYMBOL_FONT_SCALE = 1.15;
 const DEFAULT_TEXT_SIZE = 12;
 const DEFAULT_FONT_SIZE_SCALE = 1;
+const DEFAULT_FONT_WEIGHT_SCALE = 1;
 const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
 const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 // Animation Parameters
@@ -59,6 +65,7 @@ export interface GridObjectSortComponentItem {
   selected: boolean;
   order: number;
   url?: ResourceStr;
+  symbolStyle?:SymbolGlyphModifier;
   visibility?: Visibility;
 }
 
@@ -83,11 +90,13 @@ interface PositionXY {
 
 class MenuItem {
   public value: Resource;
+  public symbolStyle: SymbolGlyphModifier;
   public isEnabled: boolean;
   public action: () => void;
 
-  constructor(value: Resource, enabled: boolean, action: () => void) {
+  constructor(value: Resource, symbolStyle: SymbolGlyphModifier, enabled: boolean, action: () => void) {
     this.value = value;
+    this.symbolStyle = symbolStyle;
     this.isEnabled = enabled;
     this.action = action;
   }
@@ -107,8 +116,18 @@ export struct GridObjectSortComponent {
   @State copySelected: GridObjectSortComponentItem[] = [];
   @State copyUnSelected: GridObjectSortComponentItem[] = [];
   // Current data when touched
-  @State content: GridObjectSortComponentItem = { id: '', text: '', selected: false, order: 0 };
-  @State dragContent: GridObjectSortComponentItem = { id: '', text: '', selected: false, order: 0 };
+  @State content: GridObjectSortComponentItem = {
+    id: '',
+    text: '',
+    selected: false,
+    order: 0
+  };
+  @State dragContent: GridObjectSortComponentItem = {
+    id: '',
+    text: '',
+    selected: false,
+    order: 0
+  };
   @State dragContentIndex: number = -1;
   @State hoverId: number | string = '';
   // component state : edit === true   unedited === false
@@ -152,6 +171,7 @@ export struct GridObjectSortComponent {
   @State imageTextRemoveIconShow: boolean = false;
   @State firstIn: boolean = true;
   @State @Watch('calcAreaInfo') fontSizeScale: number | undefined = 1;
+  @State fontWeightScale: number | undefined = 1;
   @State customColumns: string = '1fr 1fr 1fr 1fr';
   @State editGridHeight: number = 0;
   @State addGridHeight: number = 0;
@@ -166,7 +186,7 @@ export struct GridObjectSortComponent {
   private focusBorder: Resource = $r('sys.color.ohos_id_color_focused_outline');
   private imageText: boolean = false;
   private menuItems: Array<MenuItem> = [
-    new MenuItem($r('sys.media.ohos_ic_public_edit'), true, () => {
+    new MenuItem($r('sys.media.ohos_ic_public_edit'), (new SymbolGlyphModifier($r('sys.symbol.square_and_pencil'))), true, () => {
       this.goEdit();
     }),
   ];
@@ -189,6 +209,8 @@ export struct GridObjectSortComponent {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxAppFontScale = uiContent.getMaxFontScale();
       this.fontSizeScale = this.decideFontScale(uiContent);
+      this.fontWeightScale =
+        (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
     } catch (exception) {
       let code = (exception as BusinessError).code;
       let message = (exception as BusinessError).message;
@@ -209,11 +231,34 @@ export struct GridObjectSortComponent {
     }, 500);
   }
 
+  // get adaptive for symbol font size
+  getAdaptiveSymbolFontSize(): string {
+    let fontScale : number | undefined = this.fontSizeScale;
+    if (!this.isFollowingSystemFontScale || fontScale === undefined) {
+      fontScale = MIN_FONT_SCALE;
+    }
+    fontScale = Math.min(MIN_SYMBOL_FONT_SCALE, fontScale);
+    fontScale = Math.max(fontScale, MIN_FONT_SCALE);
+    return (fontScale * SYMBOL_SIZE_12FP).toString() + 'vp';
+  }
+
+  // translate option imageSize to symbol fontSize
+  getSymbolFontSizeFrom(imageSize?: number | Resource | undefined) : string | Resource {
+    if (imageSize === undefined) {
+      return SYMBOL_DEFAULT;
+    }
+    if (typeof imageSize === 'number') {
+      return (imageSize as number).toString() + 'vp';
+    }
+    return imageSize as Resource;
+  }
+
+
   calcTextItemEditHeight() {
     let sizeOptions: SizeOptions = MeasureText.measureTextSize({
       textContent: this.dataList[0]?.text ?? '',
-      fontSize: `${ (LengthMetrics.resource($r('sys.float.ohos_id_text_size_button3'))?.value ??
-        DEFAULT_TEXT_SIZE) * (this.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE) }vp`,
+      fontSize: `${(LengthMetrics.resource($r('sys.float.ohos_id_text_size_button3'))?.value ??
+        DEFAULT_TEXT_SIZE) * (this.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE)}vp`,
       overflow: TextOverflow.Ellipsis,
       maxLines: TEXT_MAX_LINES
     });
@@ -226,6 +271,7 @@ export struct GridObjectSortComponent {
     onConfigurationUpdated: (config) => {
       let uiContent: UIContext = this.getUIContext();
       this.fontSizeScale = this.decideFontScale(uiContent);
+      this.fontWeightScale = config.fontWeightScale;
     },
     onMemoryLevel: (level) => {}
   }
@@ -392,7 +438,7 @@ export struct GridObjectSortComponent {
     this.content = content;
     this.selectedIndex = currentIndex;
     this.calcGridHeight();
-    animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
+    animateTo({curve: REMOVE_ADD_SPRING, onFinish: () => {
       this.scaleIcon = 1;
       this.selected.splice(currentIndex, 1);
       this.unSelected.unshift(content);
@@ -402,7 +448,8 @@ export struct GridObjectSortComponent {
       this.editItemMoveY = 0;
       this.arraySelectIsChange = 2;
       this.clickRemoveBtn = false;
-    } }, () => {
+    }
+    }, () => {
       let addItemGridPosition = this.getAddItemGridPosition();
       this.editItemMoveX = addItemGridPosition.x;
       this.editItemMoveY = addItemGridPosition.y;
@@ -461,7 +508,7 @@ export struct GridObjectSortComponent {
   imageTextRemoveIcon(select: GridObjectSortComponentItem): Resource {
     const clickRemoveIcon: boolean = this.clickRemoveBtn && this.content.id === select.id;
     const icon = clickRemoveIcon ?
-      $r('sys.media.ohos_ic_public_add_norm_filled') : $r('sys.media.ohos_ic_public_remove_filled');
+    $r('sys.symbol.plus_circle_fill') : $r('sys.symbol.minus_circle_fill');
     return icon;
   }
 
@@ -469,9 +516,10 @@ export struct GridObjectSortComponent {
   imageTextAddIcon(select: GridObjectSortComponentItem): Resource {
     const clickAddIcon: boolean = this.clickAddBtn && this.content.id === select.id && this.gridComState;
     const icon = clickAddIcon ?
-      $r('sys.media.ohos_ic_public_remove_filled') : $r('sys.media.ohos_ic_public_add_norm_filled');
+    $r('sys.symbol.minus_circle_fill') : $r('sys.symbol.plus_circle_fill');
     return icon;
   }
+
   // Displaying and hiding area icons in image_text mode
   imageTextAddIconVisible(select: GridObjectSortComponentItem): Visibility {
     const iconHideShow: boolean = this.clickAddBtn && this.content.id === select.id && !this.gridComState;
@@ -686,14 +734,29 @@ export struct GridObjectSortComponent {
   }
 
   @Builder
-  PixelMapBuilder(url: ResourceStr | undefined, text: ResourceStr) {
+  PixelMapBuilder(url: ResourceStr | SymbolGlyphModifier | undefined, text: ResourceStr) {
     Stack({ alignContent: Alignment.Center }) {
       if (this.imageText) {
         Column() {
-          Image(url)
-            .draggable(false)
-            .height(this.options.imageSize || IMAGE_DEFAULT)
-            .width((this.options.imageSize || IMAGE_DEFAULT))
+          if (url === undefined) {
+            SymbolGlyph()
+              .draggable(false)
+              .height(this.options.imageSize || SYMBOL_DEFAULT)
+              .width(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+          } else if (url instanceof SymbolGlyphModifier) {
+            SymbolGlyph()
+              .draggable(false)
+              .height(this.options.imageSize || SYMBOL_DEFAULT)
+              .width(this.options.imageSize || SYMBOL_DEFAULT)
+              .attributeModifier(url)
+              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+          } else {
+            Image(url)
+              .draggable(false)
+              .height(this.options.imageSize || IMAGE_DEFAULT)
+              .width(this.options.imageSize || IMAGE_DEFAULT)
+          }
           Text(text)
             .textAlign(TextAlign.Center)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
@@ -703,9 +766,11 @@ export struct GridObjectSortComponent {
             .minFontScale(MIN_FONT_SCALE)
             .maxFontScale(this.fontSizeScale)
 
-          Image($r('sys.media.ohos_ic_public_remove_filled'))
+          SymbolGlyph($r('sys.symbol.minus_circle_fill'))
+            .fontSize(SYMBOL_SIZE_24VP)
+            .fontWeight(SYMBOL_WEIGHT)
             .draggable(false)
-            .fillColor($r('sys.color.ohos_id_color_secondary'))
+            .fontColor([$r('sys.color.ohos_id_color_secondary')])
             .width(ICON_SIZE)
             .height(ICON_SIZE)
             .position({
@@ -731,9 +796,12 @@ export struct GridObjectSortComponent {
             .maxLines(TEXT_MAX_LINES)
             .minFontScale(MIN_FONT_SCALE)
             .maxFontScale(this.fontSizeScale)
-          Image($r('sys.media.ohos_ic_public_remove_filled'))
+
+          SymbolGlyph($r('sys.symbol.minus_circle_fill'))
+            .fontSize(SYMBOL_SIZE_24VP)
+            .fontWeight(SYMBOL_WEIGHT)
             .draggable(false)
-            .fillColor($r('sys.color.ohos_id_color_secondary'))
+            .fontColor([$r('sys.color.ohos_id_color_secondary')])
             .width(ICON_SIZE)
             .height(ICON_SIZE)
             .position({
@@ -785,10 +853,23 @@ export struct GridObjectSortComponent {
   ImageTextBuilder(select: GridObjectSortComponentItem, type: string) {
     Column() {
       Column() {
-        Image(select.url)
-          .draggable(false)
-          .height(this.options.imageSize || IMAGE_DEFAULT)
-          .width((this.options.imageSize || IMAGE_DEFAULT))
+        if (select.symbolStyle !== undefined) {
+          SymbolGlyph()
+            .draggable(false)
+            .attributeModifier(select.symbolStyle)
+            .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+        } else {
+          if (select.url === undefined) {
+            SymbolGlyph()
+              .draggable(false)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+          } else {
+            Image(select.url)
+              .draggable(false)
+              .height(this.options.imageSize || IMAGE_DEFAULT)
+              .width((this.options.imageSize || IMAGE_DEFAULT))
+          }
+        }
         Text(select.text)
           .textAlign(TextAlign.Center)
           .fontSize($r('sys.float.ohos_id_text_size_button3'))
@@ -802,10 +883,12 @@ export struct GridObjectSortComponent {
             bottom: PADDING_EIGHT
           })
 
-        Image(this.imageTextAddIcon(select))
+        SymbolGlyph(this.imageTextAddIcon(select))
+          .fontSize(SYMBOL_SIZE_24VP)
+          .fontWeight(SYMBOL_WEIGHT)
           .draggable(false)
           .visibility(type === 'add' ? this.imageTextAddIconVisible(select) : Visibility.Hidden)
-          .fillColor($r('sys.color.ohos_id_color_secondary'))
+          .fontColor([$r('sys.color.ohos_id_color_secondary')])
           .width(ICON_SIZE)
           .height(ICON_SIZE)
           .position({
@@ -825,33 +908,34 @@ export struct GridObjectSortComponent {
             this.arrayUnSelectIsChange = 1;
             this.clickAddBtn = true;
             this.calcGridHeight();
-            animateTo({
-              curve: REMOVE_ADD_SPRING,
-              onFinish: () => {
-                if (!this.selected.some(val => val.id === select.id)) {
-                  this.arrayUnSelectIsChange = 2;
-                  this.scaleIcon = 1;
-                  this.selected.push(select);
-                  this.unSelected.splice(index, 1);
-                  this.calcGridHeight();
-                  this.addItemMoveX = 0;
-                  this.addItemMoveY = 0;
-                  if (!this.gridComState) {
-                    this.onSaveEdit();
-                  }
-                  this.clickAddBtn = false;
+            animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
+              if (!this.selected.some(val => val.id === select.id)) {
+                this.arrayUnSelectIsChange = 2;
+                this.scaleIcon = 1;
+                this.selected.push(select);
+                this.unSelected.splice(index, 1);
+                this.calcGridHeight();
+                this.addItemMoveX = 0;
+                this.addItemMoveY = 0;
+                if (!this.gridComState) {
+                  this.onSaveEdit();
                 }
+                this.clickAddBtn = false;
               }
+            }
             }, () => {
               this.addItemMoveX = endPosition.x;
               this.addItemMoveY = endPosition.y;
             })
           })
 
-        Image(this.imageTextRemoveIcon(select))
+        SymbolGlyph(this.imageTextRemoveIcon(select))
+          .fontSize(SYMBOL_SIZE_24VP)
+          .fontWeight(SYMBOL_WEIGHT)
           .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_secondary'))
-          .visibility(type === 'delete' && this.gridComState ? Visibility.Visible : Visibility.Hidden)
+          .fontColor([$r('sys.color.ohos_id_color_secondary')])
+          .visibility(type === 'delete' && this.gridComState ? Visibility.Visible :
+          Visibility.Hidden)
           .width(ICON_SIZE)
           .height(ICON_SIZE)
           .position({
@@ -893,12 +977,12 @@ export struct GridObjectSortComponent {
         curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
       } : { duration: 0 })
       .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
+
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Image($r('sys.media.ohos_ic_public_add'))
-          .width(12)
-          .height(12)
+        SymbolGlyph($r('sys.symbol.plus'))
+          .fontSize(this.getAdaptiveSymbolFontSize())
           .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_text_secondary'))
+          .fontColor([$r('sys.color.ohos_id_color_text_secondary')])
           .visibility(this.clickRemoveBtn && select.id === this.content.id ? Visibility.Visible : Visibility.None)
           .transition({ type: TransitionType.All, scale: { x: 0, y: 0, } })
           .margin({ right: 4 })
@@ -906,6 +990,7 @@ export struct GridObjectSortComponent {
             duration: ENTER_EXIT_ICON_DURATION,
             curve: COMMON_BEZIER
           })
+
         Text(select.text)
           .fontColor($r('sys.color.ohos_id_color_text_primary'))
           .fontSize($r('sys.float.ohos_id_text_size_button3'))
@@ -914,9 +999,12 @@ export struct GridObjectSortComponent {
           .maxLines(TEXT_MAX_LINES)
           .minFontScale(MIN_FONT_SCALE)
           .maxFontScale(this.fontSizeScale)
-        Image($r('sys.media.ohos_ic_public_remove_filled'))
+
+        SymbolGlyph($r('sys.symbol.minus_circle_fill'))
+          .fontSize(SYMBOL_SIZE_24VP)
+          .fontWeight(SYMBOL_WEIGHT)
           .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_secondary'))
+          .fontColor([$r('sys.color.ohos_id_color_secondary')])
           .width(ICON_SIZE)
           .transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: '50%' } })
           .scale(select.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon } : {})
@@ -975,11 +1063,10 @@ export struct GridObjectSortComponent {
       .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
 
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Image($r('sys.media.ohos_ic_public_add'))
+        SymbolGlyph($r('sys.symbol.plus'))
+          .fontSize(this.getAdaptiveSymbolFontSize())
           .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_text_secondary'))
-          .width(12)
-          .height(12)
+          .fontColor([$r('sys.color.ohos_id_color_text_secondary')])
           .visibility(this.addIconShow && select.id === this.content.id ? Visibility.None : Visibility.Visible)
           .transition({ type: TransitionType.All, scale: { x: 0, y: 0 } })
           .margin({ right: 4 })
@@ -997,10 +1084,12 @@ export struct GridObjectSortComponent {
           .maxFontScale(this.fontSizeScale)
 
         if (this.gridComState && this.addIconShow && select.id === this.content.id) {
-          Image($r('sys.media.ohos_ic_public_remove_filled'))
+          SymbolGlyph($r('sys.symbol.minus_circle_fill'))
+            .fontSize(SYMBOL_SIZE_24VP)
+            .fontWeight(SYMBOL_WEIGHT)
             .draggable(false)
             .transition({ type: TransitionType.All, scale: { x: 0, y: 0 } })
-            .fillColor($r('sys.color.ohos_id_color_secondary'))
+            .fontColor([$r('sys.color.ohos_id_color_secondary')])
             .width(ICON_SIZE)
             .translate(this.gridComState ? { x: -MARGIN_EIGHT } : {})
             .position({
@@ -1100,27 +1189,30 @@ export struct GridObjectSortComponent {
               this.clickAddBtn = true;
               this.arrayUnSelectIsChange = 1;
               this.calcGridHeight();
-              animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-                if (!this.selected.some(val => val.id === item.id)) {
-                  this.scaleIcon = 1;
-                  this.scaleAddIcon = 0;
-                  this.selected.push(item);
-                  this.unSelected.splice(index, 1);
-                  this.calcGridHeight();
-                  this.arrayUnSelectIsChange = 2;
-                  this.addItemMoveX = 0;
-                  this.addItemMoveY = 0;
-                  if (!this.gridComState) {
-                    this.onSaveEdit();
+              animateTo({
+                curve: REMOVE_ADD_SPRING, onFinish: () => {
+                  if (!this.selected.some(val => val.id === item.id)) {
+                    this.scaleIcon = 1;
+                    this.scaleAddIcon = 0;
+                    this.selected.push(item);
+                    this.unSelected.splice(index, 1);
+                    this.calcGridHeight();
+                    this.arrayUnSelectIsChange = 2;
+                    this.addItemMoveX = 0;
+                    this.addItemMoveY = 0;
+                    if (!this.gridComState) {
+                      this.onSaveEdit();
+                    }
+                    animateTo({
+                      duration: ENTER_EXIT_ICON_DURATION,
+                      curve: COMMON_BEZIER
+                    }, () => {
+                      this.addIconShow = false;
+                    });
+                    this.clickAddBtn = false;
                   }
-                  animateTo({
-                    duration: ENTER_EXIT_ICON_DURATION,
-                    curve: COMMON_BEZIER }, () => {
-                    this.addIconShow = false;
-                  });
-                  this.clickAddBtn = false;
                 }
-              } }, () => {
+              }, () => {
                 this.addItemMoveX = endPosition.x;
                 this.addItemMoveY = endPosition.y;
               })
@@ -1163,7 +1255,7 @@ export struct GridObjectSortComponent {
         })
       }, (item: GridObjectSortComponentItem) => item.id.toString())
     }
-    .translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {} )
+    .translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {})
     .animation({
       duration: ENTER_EXIT_ICON_DURATION,
       curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
@@ -1295,7 +1387,7 @@ export struct GridObjectSortComponent {
         this.insertIndex = itemIndex;
         this.dragContent = this.selected[itemIndex];
         this.dragContentIndex = itemIndex;
-        return this.PixelMapBuilder(this.dragContent?.url, this.dragContent?.text);
+        return this.PixelMapBuilder(this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text);
       })
       .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
         this.insertItem(itemIndex, insertIndex);

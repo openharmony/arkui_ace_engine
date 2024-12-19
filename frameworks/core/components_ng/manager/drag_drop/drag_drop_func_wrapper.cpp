@@ -35,7 +35,7 @@ using DragNotifyMsg = OHOS::Ace::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using StopDragCallback = std::function<void()>;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 1;
+constexpr int32_t SOURCE_TOOL_PEN = 2;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
@@ -125,6 +125,7 @@ bool ConfirmCurPointerEventInfo(
     } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         dragAction->pointer = PEN_POINTER_ID;
     }
+    dragAction->toolType = sourceTool;
     return getPointSuccess;
 }
 
@@ -170,7 +171,8 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(), dragAction->sourceType,
-        recordSize, pointerId, dragAction->x, dragAction->y, dragAction->displayId, windowId, true, false, summary };
+        recordSize, pointerId, dragAction->toolType, dragAction->x, dragAction->y, dragAction->displayId, windowId,
+        true, false, summary };
 }
 
 void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -633,6 +635,23 @@ void DragDropFuncWrapper::UpdatePositionFromFrameNode(const RefPtr<FrameNode>& t
     UpdateNodePositionToScreen(targetNode, offset);
 }
 
+OffsetF DragDropFuncWrapper::GetFrameNodeOffsetToWindow(const RefPtr<FrameNode>& targetNode,
+    const RefPtr<FrameNode>& frameNode, float width, float height)
+{
+    CHECK_NULL_RETURN(targetNode, OffsetF());
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto paintRectCenter = GetPaintRectCenterToScreen(frameNode);
+    auto offset = paintRectCenter - OffsetF(width / 2.0f, height / 2.0f);
+    offset -= GetCurrentWindowOffset(targetNode->GetContextRefPtr());
+    auto renderContext = targetNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, OffsetF());
+    RefPtr<FrameNode> parentNode = targetNode->GetAncestorNodeOfFrame(true);
+    if (parentNode) {
+        offset -= parentNode->GetPositionToWindowWithTransform();
+    }
+    return offset;
+}
+
 void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event)
 {
     event.rawPointerEvent = touchPoint.pointerEvent;
@@ -684,5 +703,25 @@ void DragDropFuncWrapper::GetPointerEventAction(const TouchEvent& touchPoint, Dr
             event.action = PointerAction::UNKNOWN;
             break;
     }
+}
+
+RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByKey(const RefPtr<FrameNode>& root, const std::string& key)
+{
+    std::queue<RefPtr<UINode>> elements;
+    elements.push(root);
+    RefPtr<UINode> inspectorElement;
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        if (key == current->GetInspectorId().value_or("")) {
+            return AceType::DynamicCast<FrameNode>(current);
+        }
+
+        const auto& children = current->GetChildren();
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

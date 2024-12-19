@@ -1171,7 +1171,7 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
     setPagePolicy(u2) {
         this.mPolicyMap = u2;
     }
-    switchFullScreen(r2) {
+    switchFullScreenState(r2) {
         let s2 = this.totalStack.length;
         let t2 = this.subStackList.length;
         if (t2 < 1 || s2 < 1) {
