@@ -3159,7 +3159,9 @@ void AccessibilityText1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<std::string>(*value);
-    ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value_or(""));
+    if (optValue.has_value()) {
+        ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
+    }
 }
 void AccessibilityTextHintImpl(Ark_NativePointer node,
                                const Ark_String* value)
