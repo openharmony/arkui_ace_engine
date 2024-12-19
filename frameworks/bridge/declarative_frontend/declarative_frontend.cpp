@@ -26,6 +26,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
+
 namespace OHOS::Ace {
 namespace {
 
@@ -556,9 +558,69 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->UpdateRootComponent();
         };
-        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadPageByBufferCallback),
-                                           std::move(loadNamedRouterCallback),
-                                           std::move(updateRootComponentCallback));
+        auto getFullPathInfoCallback =
+            [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> std::unique_ptr<JsonValue> {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return nullptr;
+            }
+            return jsEngine->GetFullPathInfo();
+        };
+        auto restoreFullPathInfoCallback =
+            [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::unique_ptr<JsonValue> fullPathInfo) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return;
+            }
+            return jsEngine->RestoreFullPathInfo(std::move(fullPathInfo));
+        };
+        auto getNamedRouterInfoCallback =
+            [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> std::unique_ptr<JsonValue> {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return nullptr;
+            }
+            return jsEngine->GetNamedRouterInfo();
+        };
+        auto restoreNamedRouterInfoCallback =
+            [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::unique_ptr<JsonValue> namedRouterInfo) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return;
+            }
+            return jsEngine->RestoreNamedRouterInfo(std::move(namedRouterInfo));
+        };
+        auto isNamedRouterNeedPreloadCallback =
+            [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& name) -> bool {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->IsNamedRouterNeedPreload(name);
+        };
+
+        auto preloadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+            const std::string& name, std::function<void(bool)>&& loadFinishCallback) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return;
+            }
+            return jsEngine->PreloadNamedRouter(name, std::move(loadFinishCallback));
+        };
+
+        auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
+        pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
+        pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
+        pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
+        pageRouterManager->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
+        pageRouterManager->SetGetFullPathInfoCallback(std::move(getFullPathInfoCallback));
+        pageRouterManager->SetRestoreFullPathInfoCallback(std::move(restoreFullPathInfoCallback));
+        pageRouterManager->SetGetNamedRouterInfoCallback(std::move(getNamedRouterInfoCallback));
+        pageRouterManager->SetRestoreNamedRouterInfoCallback(std::move(restoreNamedRouterInfoCallback));
+        pageRouterManager->SetIsNamedRouterNeedPreloadCallback(std::move(isNamedRouterNeedPreloadCallback));
+        pageRouterManager->SetPreloadNamedRouterCallback(std::move(preloadNamedRouterCallback));
+        delegate_->SetPageRouterManager(pageRouterManager);
+
 #if defined(PREVIEW)
         auto isComponentPreviewCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
             auto jsEngine = weakEngine.Upgrade();
@@ -651,10 +713,10 @@ UIContentErrorCode DeclarativeFrontend::RunPage(
     return UIContentErrorCode::NULL_POINTER;
 }
 
-UIContentErrorCode DeclarativeFrontend::RunPageByNamedRouter(const std::string& name)
+UIContentErrorCode DeclarativeFrontend::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
     if (delegate_) {
-        return delegate_->RunPage(name, "", pageProfile_, true);
+        return delegate_->RunPage(name, params, pageProfile_, true);
     }
 
     return UIContentErrorCode::NULL_POINTER;
@@ -729,18 +791,19 @@ RefPtr<NG::PageRouterManager> DeclarativeFrontend::GetPageRouterManager() const
     return delegate_->GetPageRouterManager();
 }
 
-std::pair<std::string, UIContentErrorCode> DeclarativeFrontend::RestoreRouterStack(const std::string& contentInfo)
+std::pair<RouterRecoverRecord, UIContentErrorCode> DeclarativeFrontend::RestoreRouterStack(
+    const std::string& contentInfo, ContentInfoType type)
 {
     if (delegate_) {
-        return delegate_->RestoreRouterStack(contentInfo);
+        return delegate_->RestoreRouterStack(contentInfo, type);
     }
-    return std::make_pair("", UIContentErrorCode::NULL_POINTER);
+    return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER);
 }
 
-std::string DeclarativeFrontend::GetContentInfo() const
+std::string DeclarativeFrontend::GetContentInfo(ContentInfoType type) const
 {
     if (delegate_) {
-        return delegate_->GetContentInfo();
+        return delegate_->GetContentInfo(type);
     }
     return "";
 }
@@ -1049,19 +1112,27 @@ void DeclarativeFrontend::FlushReload()
 
 void DeclarativeFrontend::DumpFrontend() const
 {
-    if (!delegate_) {
+    if (!delegate_ || !DumpLog::GetInstance().GetDumpFile()) {
         return;
     }
-    int32_t routerIndex = 0;
-    std::string routerName;
-    std::string routerPath;
-    delegate_->GetState(routerIndex, routerName, routerPath);
 
-    if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc("Components: " + std::to_string(delegate_->GetComponentsCount()));
-        DumpLog::GetInstance().AddDesc("Path: " + routerPath);
-        DumpLog::GetInstance().AddDesc("Length: " + std::to_string(routerIndex));
-        DumpLog::GetInstance().Print(0, routerName, 0);
+    bool unrestore = false;
+    std::string name;
+    std::string path;
+    std::string params;
+    int32_t stackSize = delegate_->GetStackSize();
+    DumpLog::GetInstance().Print(0, "Router stack size " + std::to_string(stackSize));
+    for (int32_t i = 1; i <= stackSize; ++i) {
+        delegate_->GetRouterStateByIndex(i, name, path, params);
+        unrestore = delegate_->IsUnrestoreByIndex(i);
+        DumpLog::GetInstance().Print(1, "Page[" + std::to_string(i) + "], name: " + name);
+        DumpLog::GetInstance().Print(2, "Path: " + path);
+        DumpLog::GetInstance().Print(2, "Params: " + params);
+        DumpLog::GetInstance().Print(2, "Unrestore: " + std::string(unrestore ? "yes" : "no"));
+        if (i != stackSize) {
+            continue;
+        }
+        DumpLog::GetInstance().Print(2, "Components: " + std::to_string(delegate_->GetComponentsCount()));
     }
 }
 

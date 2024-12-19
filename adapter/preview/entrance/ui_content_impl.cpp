@@ -319,9 +319,9 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     return errorCode;
 }
 
-std::string UIContentImpl::GetContentInfo() const
+std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
-    return AceContainer::GetContentInfo(instanceId_);
+    return AceContainer::GetContentInfo(instanceId_, type);
 }
 
 UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,

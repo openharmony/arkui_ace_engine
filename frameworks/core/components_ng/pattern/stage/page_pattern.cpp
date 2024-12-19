@@ -199,7 +199,7 @@ void PagePattern::OnAttachToMainTree()
     int32_t index = INVALID_PAGE_INDEX;
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        index = delegate->GetStackSize();
+        index = delegate->GetCurrentPageIndex();
         GetPageInfo()->SetPageIndex(index);
     }
     state_ = RouterPageState::ABOUT_TO_APPEAR;

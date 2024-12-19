@@ -41,12 +41,13 @@ public:
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
-    // distribute
-    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override
+    // restore
+    std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        const std::string& contentInfo, ContentInfoType type) override
     {
-        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
+        return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NO_ERRORS);
     }
-    std::string GetContentInfo() override;
+    std::string GetContentInfo(ContentInfoType type) override;
     // JSFrontend delegate NG functions.
     void RunPage(const std::string& url, const std::string& params, const std::string& profile);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
@@ -97,15 +98,15 @@ public:
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void PushWithCallback(const std::string& uri, const std::string& params,
+    void PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void PushNamedRoute(const std::string& uri, const std::string& params,
+    void PushNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void ReplaceWithCallback(const std::string& uri, const std::string& params,
+    void ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void ReplaceNamedRoute(const std::string& uri, const std::string& params,
+    void ReplaceNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void BackToIndex(int32_t index, const std::string& params) override;

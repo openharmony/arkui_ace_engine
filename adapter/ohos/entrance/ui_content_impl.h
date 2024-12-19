@@ -76,10 +76,10 @@ public:
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
-    // distribute
-    UIContentErrorCode Restore(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
-    std::string GetContentInfo() const override;
+    // restore
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
