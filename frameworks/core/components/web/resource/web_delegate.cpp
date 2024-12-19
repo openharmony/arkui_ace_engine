@@ -5149,6 +5149,13 @@ void WebDelegate::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t heigh
         TaskExecutor::TaskType::UI, "ArkUIWebPopupSize");
 }
 
+void WebDelegate::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
+}
+
 void WebDelegate::OnPopupShow(bool show)
 {
     auto context = context_.Upgrade();
