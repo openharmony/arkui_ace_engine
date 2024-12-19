@@ -175,13 +175,13 @@ export struct promptActionCustomDialogBootcamp {
       Column({ space: 8 }) {
 
         ColorBlock({
-          title: 'backgroundColor',
+          title: 'CustomDialogOptions.backgroundColor',
           isEnabled: $enableCustomDialogBackgroundColor,
           color: $customDialogBackgroundColor
         })
 
         SliderBlock({
-          title: 'borderRadiusTopLeft',
+          title: 'CustomDialogOptions.borderRadiusTopLeft',
           isEnabled: $enableBorderRadiusTopLeft,
           value: $borderRadiusTopLeft,
           min: 0,
@@ -189,7 +189,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'borderRadiusTopRight',
+          title: 'CustomDialogOptions.borderRadiusTopRight',
           isEnabled: $enableBorderRadiusTopRight,
           value: $borderRadiusTopRight,
           min: 0,
@@ -197,7 +197,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'borderRadiusBottomLeft',
+          title: 'CustomDialogOptions.borderRadiusBottomLeft',
           isEnabled: $enableBorderRadiusBottomLeft,
           value: $borderRadiusBottomLeft,
           min: 0,
@@ -205,7 +205,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'borderRadiusBottomRight',
+          title: 'CustomDialogOptions.borderRadiusBottomRight',
           isEnabled: $enableBorderRadiusBottomRight,
           value: $borderRadiusBottomRight,
           min: 0,
@@ -213,7 +213,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'borderBorderWidthTop',
+          title: 'CustomDialogOptions.borderBorderWidthTop',
           isEnabled: $enableBorderWidthTop,
           value: $borderWidthTop,
           min: 0,
@@ -221,7 +221,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'borderBorderWidthLeft',
+          title: 'CustomDialogOptions.borderBorderWidthLeft',
           isEnabled: $enableBorderWidthLeft,
           value: $borderWidthLeft,
           min: 0,
@@ -229,7 +229,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'borderBorderWidthBottom',
+          title: 'CustomDialogOptions.borderBorderWidthBottom',
           isEnabled: $enableBorderWidthBottom,
           value: $borderWidthBottom,
           min: 0,
@@ -237,7 +237,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'borderBorderWidthRight',
+          title: 'CustomDialogOptions.borderBorderWidthRight',
           isEnabled: $enableBorderWidthRight,
           value: $borderWidthRight,
           min: 0,
@@ -245,32 +245,32 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         ColorBlock({
-          title: 'borderColorTop',
+          title: 'CustomDialogOptions.borderColorTop',
           isEnabled: $enableBorderColorTop,
           color: $borderColorTop
         })
 
         ColorBlock({
-          title: 'borderColorLeft',
+          title: 'CustomDialogOptions.borderColorLeft',
           isEnabled: $enableBorderColorLeft,
           color: $borderColorLeft
         })
 
         ColorBlock({
-          title: 'borderColorBottom',
+          title: 'CustomDialogOptions.borderColorBottom',
           isEnabled: $enableBorderColorBottom,
           color: $borderColorBottom
         })
 
         ColorBlock({
-          title: 'borderColorRight',
+          title: 'CustomDialogOptions.borderColorRight',
           isEnabled: $enableBorderColorRight,
           color: $borderColorRight
         })
 
 
         RadioBlock({
-          title: 'borderStyleTop',
+          title: 'CustomDialogOptions.borderStyleTop',
           isEnabled: $enableBorderStyleTop,
           value: $borderStyleTop,
           dataSource: [
@@ -281,7 +281,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         RadioBlock({
-          title: 'borderStyleLeft',
+          title: 'CustomDialogOptions.borderStyleLeft',
           isEnabled: $enableBorderStyleLeft,
           value: $borderStyleLeft,
           dataSource: [
@@ -292,7 +292,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         RadioBlock({
-          title: 'borderStyleBottom',
+          title: 'CustomDialogOptions.borderStyleBottom',
           isEnabled: $enableBorderStyleBottom,
           value: $borderStyleBottom,
           dataSource: [
@@ -303,7 +303,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         RadioBlock({
-          title: 'borderStyleRight',
+          title: 'CustomDialogOptions.borderStyleRight',
           isEnabled: $enableBorderStyleRight,
           value: $borderStyleRight,
           dataSource: [
@@ -314,7 +314,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'width',
+          title: 'CustomDialogOptions.width',
           isEnabled: $enableCustomDialogWidth,
           value: $customDialogWidth,
           min: 100,
@@ -322,7 +322,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         SliderBlock({
-          title: 'height',
+          title: 'CustomDialogOptions.height',
           isEnabled: $enableCustomDialogHeight,
           value: $customDialogHeight,
           min: 100,
@@ -332,7 +332,7 @@ export struct promptActionCustomDialogBootcamp {
 
 
         RadioBlock({
-          title: 'backgroundBlurStyle',
+          title: 'CustomDialogOptions.backgroundBlurStyle',
           isEnabled: $enableCustomDialogBackgroundBlurStyle,
           value: $customDialogBackgroundBlurStyle,
           dataSource: [
@@ -352,7 +352,7 @@ export struct promptActionCustomDialogBootcamp {
         })
 
         RadioBlock({
-          title: 'shadowType',
+          title: 'CustomDialogOptions.shadow',
           isEnabled: $enableShadowType,
           value: $shadowType,
           dataSource: [
