@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/image/pixel_map.h"
 #include "base/thread/task_executor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -105,11 +106,6 @@ public:
         return containerId_;
     }
 
-    void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
-    {
-        dynamicMode_ = dynamicMode;
-    }
-
     void SetIsHdrDecoderNeed(bool isHdrDecoderNeed)
     {
         isHdrDecoderNeed_ = isHdrDecoderNeed;
@@ -120,11 +116,6 @@ public:
         return isHdrDecoderNeed_;
     }
 
-    DynamicRangeMode GetDynamicRangeMode()
-    {
-        return dynamicMode_;
-    }
-
     void SetImageQuality(AIImageQuality imageQuality)
     {
         imageQuality_ = imageQuality;
@@ -133,6 +124,16 @@ public:
     AIImageQuality GetImageQuality()
     {
         return imageQuality_;
+    }
+
+    void SetPhotoDecodeFormat(PixelFormat photoDecodeFormat)
+    {
+        photoDecodeFormat_ = photoDecodeFormat;
+    }
+
+    PixelFormat GetPhotoDecodeFormat()
+    {
+        return photoDecodeFormat_;
     }
 
     void FinishMearuse()
@@ -205,10 +206,10 @@ private:
     const int32_t containerId_ {0};
 
     bool isHdrDecoderNeed_ = false;
+    PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
     bool syncLoad_ = false;
 
-    DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
 
     RectF srcRect_;

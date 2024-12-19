@@ -370,6 +370,9 @@ void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
                 continue;
             }
             const auto* vm = nodePtr->GetEcmaVM();
+            if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
+                continue;
+            }
             auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
             auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
             if (!frameNode) {
@@ -380,6 +383,40 @@ void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
         }
     } while (false);
 }
+namespace {
+void InsertPlaceholderObj(JsiRef<JsiObject>& obj,
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
+{
+    do {
+        RefPtr<NG::FrameNode> placeholderNode = nullptr;
+        JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
+        if (!componentContent->IsObject()) {
+            break;
+        }
+        auto componentContentObj = JSRef<JSObject>::Cast(componentContent);
+        JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+        if (!builderNode->IsObject()) {
+            break;
+        }
+        auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+        JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+        if (nodePtr.IsEmpty()) {
+            break;
+        }
+        const auto* vm = nodePtr->GetEcmaVM();
+        if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
+            break;
+        }
+        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+        if (!frameNode) {
+            break;
+        }
+        placeholderNode = AceType::Claim(frameNode);
+        placeholderMap.insert({NG::PlaceholderType::INITIAL, placeholderNode});
+    } while (false);
+}
+} // namespace
 
 void JSUIExtension::Create(const JSCallbackInfo& info)
 {
@@ -402,31 +439,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         if (enableDensityDPI->IsNumber()) {
             densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
         }
-        do {
-            RefPtr<NG::FrameNode> placeholderNode = nullptr;
-            JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
-            if (!componentContent->IsObject()) {
-                break;
-            }
-            auto componentContentObj = JSRef<JSObject>::Cast(componentContent);
-            JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
-            if (!builderNode->IsObject()) {
-                break;
-            }
-            auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
-            JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
-            if (nodePtr.IsEmpty()) {
-                break;
-            }
-            const auto* vm = nodePtr->GetEcmaVM();
-            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
-            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-            if (!frameNode) {
-                break;
-            }
-            placeholderNode = AceType::Claim(frameNode);
-            placeholderMap.insert({NG::PlaceholderType::INITIAL, placeholderNode});
-        } while (false);
+        InsertPlaceholderObj(obj, placeholderMap);
         ResolveAreaPlaceholderParams(obj, placeholderMap);
     }
     UIExtensionModel::GetInstance()->Create(want, placeholderMap, transferringCaller, densityDpi);

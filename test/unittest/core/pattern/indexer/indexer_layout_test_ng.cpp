@@ -1347,7 +1347,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 3
      */
     pattern_->MoveIndexByOffset(Offset(0, 10));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto stackNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild());
     auto stackRenderContext = stackNode->GetRenderContext();
     auto listNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
@@ -1360,7 +1360,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 4
      */
     listPattern->ScrollTo(20);
-    FlushLayoutTask(listNode);
+    FlushUITasks();
     EXPECT_FALSE(listPattern->IsAtTop());
     EXPECT_FALSE(listPattern->IsAtBottom());
     EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 4);
@@ -1370,7 +1370,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 3
      */
     listPattern->ScrollTo(100);
-    FlushLayoutTask(listNode);
+    FlushUITasks();
     EXPECT_TRUE(listPattern->IsAtBottom());
     EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
 
@@ -1379,7 +1379,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 3
      */
     listPattern->ScrollTo(0);
-    FlushLayoutTask(listNode);
+    FlushUITasks();
     EXPECT_TRUE(listPattern->IsAtTop());
     EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
     Container::Current()->SetApiTargetVersion(apiTargetVersion);

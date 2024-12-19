@@ -34,8 +34,10 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "base/view_data/view_data_wrap.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "bridge/js_frontend/engine/jsi/js_value.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -73,12 +75,13 @@ struct ParsedConfig {
     std::string mcc;
     std::string mnc;
     std::string preferredLanguage;
+    std::string fontId;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
-                 preferredLanguage.empty());
+                 preferredLanguage.empty() && fontId.empty());
     }
 };
 
@@ -244,7 +247,7 @@ public:
         colorScheme_ = colorScheme;
     }
 
-    ResourceConfiguration GetResourceConfiguration() const
+    ResourceConfiguration GetResourceConfiguration() const override
     {
         return resourceInfo_.GetResourceConfiguration();
     }
@@ -274,11 +277,21 @@ public:
         return resourceInfo_;
     }
 
+    std::shared_ptr<Framework::JsValue> GetJsContext();
+    void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
+
     void SetOrientation(Orientation orientation) override
     {
         CHECK_NULL_VOID(uiWindow_);
         auto dmOrientation = static_cast<Rosen::Orientation>(static_cast<uint32_t>(orientation));
         uiWindow_->SetRequestedOrientation(dmOrientation);
+    }
+
+    uint64_t GetDisplayId() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, -1);
+        return uiWindow_->GetDisplayId();
     }
 
     Orientation GetOrientation() override
@@ -518,6 +531,8 @@ public:
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration);
+    void UpdateConfigurationSyncForAll(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
@@ -596,8 +611,10 @@ public:
 
     bool GetCurPointerEventSourceType(int32_t& sourceType) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
+    int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+        bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true,

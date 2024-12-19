@@ -105,9 +105,10 @@ void JSRenderImage::Finalizer(napi_env env, void* data, void* hint)
 napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
-    size_t argc = 0;
+    size_t argc = 2; // The number of params is 2.
+    napi_value argv[2] = { nullptr }; // The number of params is 2.
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &thisVar, nullptr));
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
     auto wrapper = AceType::MakeRefPtr<JSRenderImage>();
     wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (argc <= 0) {
@@ -117,11 +118,6 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         wrapper->IncRefCount();
         return thisVar;
     }
-    napi_value argv[2] = {nullptr};
-    napi_status status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (status != napi_ok) {
-        return nullptr;
-    }
     if (argc == 2) {  // 2: args count
         int32_t unit = 0;
         napi_get_value_int32(env, argv[1], &unit);
@@ -130,7 +126,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         }
     }
     size_t textLen = 0;
-    status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
+    napi_status status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
     if (status == napi_ok) {
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(context, nullptr);

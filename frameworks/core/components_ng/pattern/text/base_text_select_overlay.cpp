@@ -22,7 +22,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NO_NEED_RESTART_SINGLE_HANDLE = 100;
-constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
@@ -59,8 +58,8 @@ void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, boo
     SetIsShowHandleLine(!request.hideHandleLine);
     latestReqeust_ = request;
     if (!SelectOverlayIsOn() && enableHandleLevel_) {
-        auto firstLocalRect = GetFirstHandleLocalPaintRect();
-        auto secondLocalRect = GetSecondHandleLocalPaintRect();
+        auto firstLocalRect = GetHandleLocalPaintRect(DragHandleIndex::FIRST);
+        auto secondLocalRect = GetHandleLocalPaintRect(DragHandleIndex::SECOND);
         CalcHandleLevelMode(firstLocalRect, secondLocalRect);
     }
     if (enableHandleLevel_) {
@@ -335,18 +334,31 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
 RectF BaseTextSelectOverlay::MergeSelectedBoxes(
     const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset)
 {
+    if (boxes.empty()) {
+        return RectF();
+    }
     auto frontRect = boxes.front();
     auto backRect = boxes.back();
-    RectF res;
-    if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
-        res.SetRect(contentRect.GetX() + paintOffset.GetX(), frontRect.GetY() + textRect.GetY() + paintOffset.GetY(),
-            contentRect.Width(), backRect.Bottom() - frontRect.Top());
-    } else {
-        res.SetRect(frontRect.GetX() + textRect.GetX() + paintOffset.GetX(),
-            frontRect.GetY() + textRect.GetY() + paintOffset.GetY(), backRect.Right() - frontRect.Left(),
-            backRect.Bottom() - frontRect.Top());
+    float selectAreaRight = frontRect.Right();
+    float selectAreaLeft = frontRect.Left();
+    if (boxes.size() != 1) {
+        std::unordered_map<float, RectF> selectLineRect;
+        for (const auto& box : boxes) {
+            auto combineLineRect = box;
+            auto top = box.Top();
+            if (selectLineRect.find(top) == selectLineRect.end()) {
+                selectLineRect.insert({ top, combineLineRect });
+            } else {
+                combineLineRect = combineLineRect.CombineRectT(selectLineRect[top]);
+                selectLineRect.insert({ top, combineLineRect });
+            }
+            selectAreaRight = std::max(selectAreaRight, combineLineRect.Right());
+            selectAreaLeft = std::min(selectAreaLeft, combineLineRect.Left());
+        }
     }
-    return res;
+    return { selectAreaLeft + textRect.GetX() + paintOffset.GetX(),
+        frontRect.GetY() + textRect.GetY() + paintOffset.GetY(), selectAreaRight - selectAreaLeft,
+        backRect.Bottom() - frontRect.Top() };
 }
 
 void BaseTextSelectOverlay::SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect)
@@ -704,6 +716,7 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     isHandleDragging_ = false;
+    dragHandleIndex_ = DragHandleIndex::NONE;
     if (reason == CloseReason::CLOSE_REASON_BY_RECREATE) {
         return;
     }
@@ -723,12 +736,7 @@ void BaseTextSelectOverlay::SetHandleLevelMode(HandleLevelMode mode)
     handleLevelMode_ = mode;
 }
 
-RectF BaseTextSelectOverlay::GetFirstHandleLocalPaintRect()
-{
-    return RectF();
-}
-
-RectF BaseTextSelectOverlay::GetSecondHandleLocalPaintRect()
+RectF BaseTextSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex)
 {
     return RectF();
 }
@@ -1155,6 +1163,18 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
         return false;
     }
     contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
+    CHECK_NULL_RETURN(CalculateClippedRect(contentRect), false);
+    if (!contentRect.IsEmpty()) {
+        UpdateClipHandleViewPort(contentRect);
+    }
+    rect = contentRect;
+    return true;
+}
+
+bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
         RectF parentContentRect;
@@ -1175,10 +1195,6 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
     contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
-    if (Positive(contentRect.Width()) && Positive(contentRect.Height())) {
-        UpdateClipHandleViewPort(contentRect);
-    }
-    rect = contentRect;
     return true;
 }
 
@@ -1233,7 +1249,7 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
+    if ((flag & DIRTY_HANDLE_COLOR_FLAG) == DIRTY_HANDLE_COLOR_FLAG) {
         info->handlerColor = GetHandleColor();
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -1243,7 +1259,7 @@ void BaseTextSelectOverlay::UpdateHandleColor()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+    manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
 }
 
 std::pair<ContentClipMode, std::optional<ContentClip>> BaseTextSelectOverlay::GetScrollableClipInfo(
@@ -1393,5 +1409,23 @@ void BaseTextSelectOverlay::RemoveAvoidKeyboardCallback()
     auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManagerNg);
     textFieldManagerNg->RemoveAvoidKeyboardCallback(host->GetId());
+}
+
+bool BaseTextSelectOverlay::IsHiddenHandle()
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return overlayInfo->isSingleHandle && overlayManager->IsHiddenHandle();
+}
+
+bool BaseTextSelectOverlay::IsHandleVisible(bool isFirst)
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return isFirst ? overlayInfo->firstHandle.isShow : overlayInfo->secondHandle.isShow;
 }
 } // namespace OHOS::Ace::NG

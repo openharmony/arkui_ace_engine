@@ -127,6 +127,12 @@ CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSetShadowOffsetY(int64_t selfI
 CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSetImageSmoothingEnabled(int64_t selfId, bool enabled);
 CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSetImageSmoothingQuality(int64_t selfId, const char* quality);
 
+CJ_EXPORT double FfiOHOSAceFrameworkRenderingContextGetHight(int64_t contextId);
+CJ_EXPORT double FfiOHOSAceFrameworkRenderingContextGetWidth(int64_t contextId);
+CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextRestoreLayer(int64_t contextId);
+CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSaveLayer(int64_t contextId);
+CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSetFilter(int64_t contextId, const char* value);
+
 // Rendering Context Function
 CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextFillRect(
     int64_t selfId, double x, double y, double width, double height);

@@ -58,6 +58,7 @@ class RSTransaction;
 class Transform;
 enum class AvoidAreaType : uint32_t;
 class AvoidArea;
+struct DecorButtonStyle;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -457,6 +458,11 @@ public:
     {
         return false;
     }
+
+    virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {}
+    virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
+
+    virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
 };
 
 } // namespace OHOS::Ace

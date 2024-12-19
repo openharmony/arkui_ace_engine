@@ -29,8 +29,8 @@ public:
     static SearchModel* GetInstance();
     virtual ~SearchModel() = default;
 
-    virtual RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
+    virtual RefPtr<TextFieldControllerBase> Create(const std::optional<std::u16string>& value,
+        const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon);
     virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetSearchButton(const std::string& text);
     virtual void SetCaretWidth(const Dimension& value);
@@ -62,19 +62,19 @@ public:
     virtual void SetHeight(const Dimension& height);
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
-    virtual void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit);
-    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange);
+    virtual void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit);
+    virtual void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
-    virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
-    virtual void SetOnCut(std::function<void(const std::string&)>&& func);
-    virtual void SetOnPaste(std::function<void(const std::string&)>&& func);
-    virtual void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
+    virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func);
+    virtual void SetOnCut(std::function<void(const std::u16string&)>&& func);
+    virtual void SetOnPaste(std::function<void(const std::u16string&)>&& func);
+    virtual void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
     virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func);
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func);
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func);
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func);
-    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
+    virtual void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
@@ -93,7 +93,7 @@ public:
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption option) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
 
-    virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};
+    virtual void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
     virtual void SetTextIndent(const Dimension& value) {};
     virtual void SetSelectionMenuOptions(

@@ -223,6 +223,13 @@ public:
     {
         maskNodeIdMap_[dialogId] = maskId;
     }
+
+    void SetModalDialogDisplayId(uint64_t displayId)
+    {
+        if (displayId != -1ULL) {
+            dialogDisplayId_ = displayId;
+        }
+    }
     bool isMaskNode(int32_t maskId);
     int32_t GetMaskNodeIdWithDialogId(int32_t dialogId);
 
@@ -243,6 +250,7 @@ public:
     void AfterRemoveAllModalInOverlayByList();
     bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -506,6 +514,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
+    static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
@@ -689,7 +699,7 @@ private:
      *   @return     true if process is successful
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
-
+    void ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper);
     // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
     // 2. end show animation: overlay node get focus;
@@ -832,6 +842,7 @@ private:
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
+    uint64_t dialogDisplayId_ = 0;
     bool hasPixelMap_ { false };
     bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };

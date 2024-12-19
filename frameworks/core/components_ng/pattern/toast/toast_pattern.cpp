@@ -219,9 +219,7 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, Dimension(0.0));
-    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    auto context = GetToastContext();
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
@@ -446,10 +444,10 @@ void ToastPattern::OnAttachToFrameNode()
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    CHECK_NULL_VOID(node);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-    auto pipeline = parentContainerId < 0 ? node->GetContextRefPtr() : PipelineContext::GetMainPipelineContext();
+    auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = parentContainerId < 0 ? current_context : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
@@ -663,5 +661,12 @@ NG::SizeF ToastPattern::GetSystemTopMostSubwindowSize() const
         }
     }
     return windowSize;
+}
+RefPtr<PipelineContext> ToastPattern::GetToastContext()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto context = IsDefaultToast() ? host->GetContextRefPtr() : GetMainPipelineContext();
+    return context;
 }
 } // namespace OHOS::Ace::NG

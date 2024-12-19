@@ -12,7 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -64,7 +75,7 @@ HWTEST_F(RichEditorEditTestOneNg, GetRightTextOfCursor001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "tesol";
+    richEditorPattern->textForDisplay_ = u"tesol";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 2;
@@ -119,10 +130,10 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto ret = richEditorPattern->GetSelectedSpanText(StringUtils::ToWstring(INIT_VALUE_1), -1, 1);
-    ret = richEditorPattern->GetSelectedSpanText(StringUtils::ToWstring(INIT_VALUE_1), -1, 10);
-    ret = richEditorPattern->GetSelectedSpanText(StringUtils::ToWstring(INIT_VALUE_1), 0, 1);
-    EXPECT_EQ(ret, "h");
+    auto ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, -1, 1);
+    ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, -1, 10);
+    ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, 0, 1);
+    EXPECT_EQ(StringUtils::Str16ToStr8(ret), "h");
 }
 
 /**
@@ -171,21 +182,20 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::string ori = "12345";
-    std::wstring value = StringUtils::ToWstring(ori);
+    std::u16string ori = u"12345";
 
     std::vector<int> start = { -1, 0, 15 };
     std::vector<int> end = { 10, -3 };
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 2; ++j) {
-            auto ret = richEditorPattern->GetSelectedSpanText(value, start[i], end[j]);
-            EXPECT_EQ(ret, "");
+            auto ret = richEditorPattern->GetSelectedSpanText(ori, start[i], end[j]);
+            EXPECT_EQ(StringUtils::Str16ToStr8(ret), "");
         }
     }
 
-    auto ret = richEditorPattern->GetSelectedSpanText(value, 0, 1);
-    EXPECT_EQ(ret, "1");
+    auto ret = richEditorPattern->GetSelectedSpanText(ori, 0, 1);
+    EXPECT_EQ(StringUtils::Str16ToStr8(ret), "1");
 }
 
 /**
@@ -429,20 +439,12 @@ HWTEST_F(RichEditorEditTestOneNg, SetSelection001, TestSize.Level1)
 
     SelectionOptions options;
     options.menuPolicy = MenuPolicy::SHOW;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
-        richEditorPattern->selectionMenuOffsetByMouse_.GetX());
-
     int32_t start = 1;
     int32_t end = 3;
     richEditorPattern->SetSelection(start, end, options);
     EXPECT_NE(richEditorPattern->textSelector_.GetStart(), start);
 
     options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
-        richEditorPattern->selectionMenuOffsetByMouse_.GetX());
-
     richEditorPattern->SetSelection(start, end, options);
     EXPECT_NE(richEditorPattern->textSelector_.GetEnd(), end);
 
@@ -460,7 +462,7 @@ HWTEST_F(RichEditorEditTestOneNg, CreateHandles001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "testShowHandles";
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 1;
@@ -498,11 +500,6 @@ HWTEST_F(RichEditorEditTestOneNg, RefreshSelectOverlay001, TestSize.Level1)
     int32_t posy = 3;
     richEditorPattern->HandleSurfacePositionChanged(posx, posy);
     EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->RefreshSelectOverlay(true, false);
-    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(0, 0, 0, 0));
-
-    EXPECT_EQ(richEditorPattern->IsHandlesShow(), false);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
@@ -649,7 +646,7 @@ HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite002, TestSize.Level1)
     auto start = richEditorPattern->operationRecords_.size();
 
     std::vector<uint8_t> buff;
-    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     richEditorPattern->HandleAIWriteResult(0, 5, buff);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 3);
@@ -694,10 +691,10 @@ HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite003, TestSize.Level1)
     /**
      * @tc.steps: step3. replace and recover placeholder for non-text.
      */
-    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>("");
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"");
     ASSERT_NE(spanString, nullptr);
     richEditorPattern->SetSubSpansWithAIWrite(spanString, 0, 12);
-    auto spanStr = AceType::MakeRefPtr<SpanString>("test![id1]占位符![id2]");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"test![id1]占位符![id2]");
     richEditorPattern->textSelector_.Update(0, 10);
     auto start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanStr);
@@ -713,7 +710,7 @@ HWTEST_F(RichEditorEditTestOneNg, GetTextBoxes001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "testShowHandles";
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 1;
@@ -1244,25 +1241,20 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestSetPreviewText001, TestSi
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
-    std::string previewTextValue = INIT_VALUE_1;
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
+    std::vector<std::tuple<int, int, std::string, int>> testPreviewList;
+    testPreviewList.emplace_back(-1, -1, PREVIEW_TEXT_VALUE1, 0);
+    testPreviewList.emplace_back(0, -1, PREVIEW_TEXT_VALUE1, -1);
+    testPreviewList.emplace_back(-1, 0, PREVIEW_TEXT_VALUE1, -1);
+    testPreviewList.emplace_back(0, 0, PREVIEW_TEXT_VALUE1, 0);
     PreviewRange previewRange;
-
-    previewRange.start = -1;
-    previewRange.end = -1;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), 0);
-
-    previewRange.start = 0;
-    previewRange.end = -1;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), -1);
-
-    previewRange.start = -1;
-    previewRange.end = 0;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), -1);
-
-    previewRange.start = 0;
-    previewRange.end = 0;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), 0);
+    for (const auto& testCase : testPreviewList) {
+        previewRange.start = std::get<0>(testCase);
+        previewRange.end = std::get<1>(testCase);
+        ASSERT_EQ(richEditorPattern->SetPreviewText(std::get<2>(testCase), previewRange), std::get<3>(testCase));
+    }
 }
 
 /**
@@ -1280,14 +1272,14 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestGetPreviewTextStyle001, T
 
     auto layoutProperty = host->layoutProperty_;
     host->layoutProperty_ = nullptr;
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
     host->layoutProperty_ = layoutProperty;
 
     ASSERT_NE(host->layoutProperty_, nullptr);
     auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
     ASSERT_NE(property, nullptr);
 
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
 
     property->UpdatePreviewTextStyle("normal");
     EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
@@ -1296,7 +1288,7 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestGetPreviewTextStyle001, T
     EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
 
     property->UpdatePreviewTextStyle("unknown");
-    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::UNDERLINE);
+    EXPECT_EQ(richEditorPattern->GetPreviewTextStyle(), PreviewTextStyle::NORMAL);
 }
 
 /**

@@ -122,7 +122,7 @@ public:
 
     enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
 
-    void UpdateChangeEvent(const std::string& value, int16_t style = -1);
+    void UpdateChangeEvent(const std::u16string& value, int16_t style = -1);
 
     void SetCancelButtonNode(const RefPtr<FrameNode>& cancelButtonNode)
     {
@@ -199,7 +199,7 @@ public:
     void CreateSearchIcon(const std::string& src, bool forceUpdate = false);
     void CreateCancelIcon();
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
-    void UpdateDisable(const std::string& textValue);
+    void UpdateDisable(const std::u16string& textValue);
 
 private:
     void OnModifyDone() override;
@@ -260,7 +260,7 @@ private:
     void InitClickEvent();
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
-    bool IsEventEnabled(const std::string& textValue, int16_t style);
+    bool IsEventEnabled(const std::u16string& textValue, int16_t style);
 
     void UpdateSearchSymbolIconColor();
     void UpdateCancelSymbolIconColor();
@@ -287,7 +287,7 @@ private:
     void UpdateCancelButton();
     void UpdateDividerColorMode();
     void UpdateCancelButtonColorMode();
-    void UpdateCancelButtonStatus(const std::string& value, int16_t style = -1);
+    void UpdateCancelButtonStatus(const std::u16string& value, int16_t style = -1);
 
     bool IsSearchAttached();
 

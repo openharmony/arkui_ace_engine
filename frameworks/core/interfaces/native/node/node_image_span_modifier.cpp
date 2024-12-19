@@ -131,7 +131,7 @@ void GetImageSpanTextBackgroundStyle(ArkUINodeHandle node, ArkUITextBackgroundSt
     options->topLeft = styleOptions.backgroundRadius->radiusTopLeft->Value();
     options->topRight = styleOptions.backgroundRadius->radiusTopRight->Value();
     options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
-    options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
+    options->bottomRight = styleOptions.backgroundRadius->radiusBottomRight->Value();
 }
 
 void SetImageSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
@@ -276,7 +276,7 @@ void SetImageSpanOnCompleteEvent(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_Y_INDEX].f32 = info.GetContentOffsetY();
         event.componentAsyncEvent.data[IMAGE_CONTENT_WIDTH_INDEX].f32 = info.GetContentWidth();
         event.componentAsyncEvent.data[IMAGE_CONTENT_HEIGHT_INDEX].f32 = info.GetContentHeight();
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageSpanView::SetOnComplete(frameNode, std::move(onEvent));
 }
@@ -291,7 +291,7 @@ void SetImageSpanOnErrorEvent(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_SPAN_ERROR;
         event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageSpanView::SetOnError(frameNode, std::move(onEvent));
 }

@@ -213,6 +213,9 @@ RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
     DetachModifiers();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveExtraCustomProperty("RS_NODE");
 }
 
 void RosenRenderContext::DetachModifiers()
@@ -366,6 +369,9 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
 {
     RenderContext::SetHostNode(host);
     AddFrameNodeInfoToRsNode();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddExtraCustomProperty("RS_NODE", rsNode_.get());
 }
 
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode)
@@ -675,12 +681,12 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 
 void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnForegroundColorUpdate(value);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnPropertyChangeMeasure();
 }
 
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
@@ -1573,7 +1579,7 @@ public:
     std::function<void(const RefPtr<PixelMap>&)> callback_;
 };
 
-RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
+RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale, bool isOffline)
 {
     CHECK_NULL_RETURN(rsNode_, nullptr);
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
@@ -1585,8 +1591,8 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
-    auto ret =
-        RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
+    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY,
+        isOffline);
     if (!ret) {
         LOGE("TakeSurfaceCaptureForUI failed!");
         return nullptr;
@@ -3492,6 +3498,8 @@ void RosenRenderContext::RecalculatePosition()
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
 {
     CHECK_NULL_VOID(rsNode_);
+    // When zindex is combined with transform/rotate, zindex has the action of controlling camera height
+    rsNode_->SetPositionZApplicableCamera3D(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN));
     rsNode_->SetPositionZ(static_cast<float>(value));
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
@@ -3558,11 +3566,13 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
 void RosenRenderContext::PaintFocusState(
     const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
 {
+#ifndef IS_RELEASE_VERSION
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). Color is %{public}s, PainWidth is "
         "%{public}s",
         paintRect.GetRect().Left(), paintRect.GetRect().Top(), paintRect.GetRect().Width(),
         paintRect.GetRect().Height(), paintColor.ColorToString().c_str(), paintWidth.ToString().c_str());
+#endif
     CHECK_NULL_VOID(paintRect.GetRect().IsValid());
     CHECK_NULL_VOID(rsNode_);
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
@@ -3725,10 +3735,9 @@ void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(foregroundDraw);
     rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE,
-            [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas)
-            {
-                CHECK_NULL_VOID(canvas);
-                foregroundDraw(*canvas);
+        [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas) {
+            CHECK_NULL_VOID(canvas);
+            foregroundDraw(*canvas);
         });
 }
 
@@ -4906,10 +4915,24 @@ void RosenRenderContext::SetSecurityLayer(bool isSecure)
     rsSurfaceNode->SetSecurityLayer(isSecure);
 }
 
+void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetHDRBrightness(hdrBrightness);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetFrameGravity(gravity);
+}
+
+void RosenRenderContext::SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUIFirstSwitch(uiFirstSwitch);
 }
 
 int32_t RosenRenderContext::CalcExpectedFrameRate(const std::string& scene, float speed)
@@ -4987,6 +5010,9 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
     }
     rsNode_ = externalNode;
     AddFrameNodeInfoToRsNode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddExtraCustomProperty("RS_NODE", rsNode_.get());
 
     ResetTransform();
     ResetTransformMatrix();

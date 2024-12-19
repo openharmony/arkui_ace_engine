@@ -86,17 +86,19 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
-    if (!childWrapper && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-        UpdateIdealSize(axis, size, parentSize, idealSize, layoutWrapper);
-        scrollBarPattern->SetChild(false);
-    } else {
-        CHECK_NULL_VOID(childWrapper);
-        childWrapper->Measure(childLayoutConstraint);
-        // Use child size when self idea size of scroll is not setted.
-        auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
-        UpdateIdealSize(axis, childSize, parentSize, idealSize, layoutWrapper);
-        scrollBarPattern->SetChild(true);
+    if (scrollBarPattern) {
+        if (!childWrapper && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+            UpdateIdealSize(axis, size, parentSize, idealSize, layoutWrapper);
+            scrollBarPattern->SetChild(false);
+        } else {
+            CHECK_NULL_VOID(childWrapper);
+            childWrapper->Measure(childLayoutConstraint);
+            // Use child size when self idea size of scroll is not setted.
+            auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+            UpdateIdealSize(axis, childSize, parentSize, idealSize, layoutWrapper);
+            scrollBarPattern->SetChild(true);
+        }
     }
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();

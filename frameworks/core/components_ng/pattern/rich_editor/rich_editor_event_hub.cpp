@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "base/utils/utf_helper.h"
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -113,6 +114,11 @@ int32_t RichEditorAbstractSpanResult::GetEraseLength() const
 void RichEditorAbstractSpanResult::SetValue(const std::string& value)
 {
     value_ = value;
+}
+
+void RichEditorAbstractSpanResult::SetValue(const std::u16string& value)
+{
+    value_ = UtfUtils::Str16ToStr8(value);
 }
 
 const std::string& RichEditorAbstractSpanResult::GetValue() const
@@ -463,6 +469,16 @@ void StyledStringChangeValue::SetReplacementString(const RefPtr<SpanStringBase>&
 const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() const
 {
     return replacementString_;
+}
+
+void StyledStringChangeValue::SetPreviewText(const std::string& previewText)
+{
+    previewText_ = previewText;
+}
+
+const std::string& StyledStringChangeValue::GetPreviewText() const
+{
+    return previewText_;
 }
 
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)

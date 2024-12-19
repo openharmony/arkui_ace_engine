@@ -82,12 +82,13 @@ static bool GetPixelMapArray(napi_env env, napi_value arg, std::vector<std::shar
         if (pixmapNapi == nullptr) {
             continue;
         }
-        pixelMaps.push_back(*(pixmapNapi->GetPixelMap()));
+        auto *pixelmap = pixmapNapi->GetPixelMap();
+        if (pixelmap == nullptr) {
+            continue;
+        }
+        pixelMaps.push_back(*(pixelmap));
     }
-    if (pixelMaps.size() <= 0) {
-        return false;
-    }
-    return true;
+    return !pixelMaps.empty();
 }
 
 napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback_info info)

@@ -44,8 +44,7 @@ public:
 
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
-    RectF GetFirstHandleLocalPaintRect() override;
-    RectF GetSecondHandleLocalPaintRect() override;
+    RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex) override;
     void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateAllHandlesOffset() override;
     void UpdateFirstHandleOffset() override;

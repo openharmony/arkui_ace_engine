@@ -48,6 +48,8 @@ constexpr float LOOP_OPACITY_DURATION_PERCENT = 0.25f;
 constexpr uint8_t TARGET_ALPHA = 255;
 constexpr int32_t BLACK_POINT_DURATION = 400;
 constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
+constexpr float HALF_FLOAT = 0.5f;
+constexpr float TWO_FLOAT = 2.0f;
 constexpr int32_t LONG_POINT_STEP_TWO = 2;
 constexpr int32_t LONG_POINT_STEP_THREE = 3;
 constexpr int32_t LONG_POINT_STEP_FOUR = 4;
@@ -149,7 +151,7 @@ std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentPrope
     float leftCenterX = contentProperty.longPointLeftCenterX;
     float rightCenterX = contentProperty.longPointRightCenterX;
 
-    if (isCustomSize_ || contentProperty.vectorBlackPointCenterX.empty()) {
+    if (contentProperty.vectorBlackPointCenterX.empty()) {
         return { leftCenterX, rightCenterX };
     }
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
@@ -269,26 +271,31 @@ void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const Offs
 }
 
 void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
-    const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes)
+    const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes, bool isOverlong)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
 
-    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]
+    auto selectedItemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    if (isCustomSize_ && !isOverlong) {
+        selectedItemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * HALF_FLOAT;
+    }
+
+    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() - selectedItemHalfWidth
                                                 : leftCenter.GetY() - itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]);
 
     float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() - itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]
-                                               : leftCenter.GetX() - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]);
-    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]
+                                               : leftCenter.GetX() - selectedItemHalfWidth);
+    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() + selectedItemHalfWidth
                                                  : rightCenter.GetY() + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]);
 
     float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]
-                                                  : rightCenter.GetX() + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]);
+                                                  : rightCenter.GetX() + selectedItemHalfWidth);
 
-    float rectSelectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
-    float rectSelectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
+    float rectSelectedItemWidth = selectedItemHalfWidth * TWO_FLOAT;
+    float rectSelectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * TWO_FLOAT;
 
     if (rectSelectedItemHeight > rectSelectedItemWidth && !isCustomSize_) {
         canvas.DrawRoundRect(
@@ -861,6 +868,7 @@ void DotIndicatorModifier::StopAnimation(bool ifImmediately)
         AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
+            modifier->ifNeedFinishCallback_ = false;
             modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
             modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
         });

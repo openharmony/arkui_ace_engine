@@ -240,6 +240,7 @@ bool JSListItemGroup::ParseHeaderAndFooterContent(const JSRef<JSVal>& contentPar
         return false;
     }
     const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_RETURN(nodeptr->GetLocalHandle()->IsNativePointer(vm), false);
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);

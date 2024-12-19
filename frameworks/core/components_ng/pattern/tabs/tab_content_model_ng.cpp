@@ -174,6 +174,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());
     tabBarPattern->AddTabBarItemClickEvent(columnNode);
+    tabBarPattern->AddTabBarItemCallBack(columnNode);
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
     auto boardStyle = tabContentPattern->GetBoardStyle();
@@ -252,7 +253,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::CUSTOM_BUILDER);
         tabBarPattern->SetIsExecuteBuilder(true);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
@@ -272,10 +273,15 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     } else {
         auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
         layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
-            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
+            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
     }
 
-    bool isFrameNode = false;
+    bool isFrameNode = tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode();
+    if (isFrameNode) {
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::COMPONENT_CONTENT);
+    } else {
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::NORMAL);
+    }
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         if (tabBarParam.GetSymbol().has_value()) {
             iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -284,8 +290,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
         }
-        if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode()) {
-            isFrameNode = true;
+        if (isFrameNode) {
             textNode = tabContentPattern->FireCustomStyleNode();
         } else {
             textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -298,8 +303,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
     } else {
-        if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode()) {
-            isFrameNode = true;
+        if (isFrameNode) {
             auto builderNode = tabContentPattern->FireCustomStyleNode();
             columnNode->ReplaceChild(AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back()), builderNode);
         }
@@ -324,7 +328,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    int32_t indicator = swiperLayoutProperty->GetIndexValue(0);
+    int32_t indicator = 0;
+    if (tabLayoutProperty->GetIndexSetByUser().has_value()) {
+        indicator = tabLayoutProperty->GetIndexSetByUser().value();
+    } else if (swiperLayoutProperty->GetIndex().has_value()) {
+        indicator = swiperLayoutProperty->GetIndex().value();
+    }
     int32_t totalCount = swiperPattern->TotalCount();
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
@@ -362,8 +371,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         textLayoutProperty->UpdateContent(tabBarParam.GetText());
         textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    }
-    if (!isFrameNode) {
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     }
@@ -449,7 +456,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
-    tabBarPattern->AddTabBarItemType(columnNode->GetId(), false);
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 

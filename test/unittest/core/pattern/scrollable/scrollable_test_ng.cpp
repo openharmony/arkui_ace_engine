@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 
 namespace OHOS::Ace::NG {
 
@@ -39,6 +40,7 @@ void ScrollableTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollableTheme));
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void ScrollableTestNg::TearDownTestSuite()
@@ -515,10 +517,10 @@ HWTEST_F(ScrollableTestNg, SelectWithScroll003, TestSize.Level1)
     scrollPn->SetAxis(Axis::VERTICAL);
     Offset localLocation;
     localLocation.SetX(-1.0f);
-    localLocation.SetY(-0.0f);
+    localLocation.SetY(0.0f);
     scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
     scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -0.0f);
+    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
 }
 
 /**
@@ -831,9 +833,9 @@ HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped001, TestSize.Level1)
      * @tc.expected: The result is true
      */
     scrollPn->SetAxis(Axis::VERTICAL);
-    localLocation.SetY(-0.0f);
+    localLocation.SetY(0.0f);
     scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -0.0f);
+    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
     result = scrollPn->ShouldSelectScrollBeStopped();
     EXPECT_TRUE(result);
 }
@@ -981,7 +983,7 @@ HWTEST_F(ScrollableTestNg, GetOffsetWithLimit002, TestSize.Level1)
      */
     float offset = -0.1f;
     auto result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_EQ(result, -0.0f);
+    EXPECT_EQ(result, 0.0f);
 }
 
 /**

@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/security_session_wrapper_impl.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType sessionType,
@@ -21,6 +22,17 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType s
 {
     if (sessionType == SessionType::UI_EXTENSION_ABILITY || sessionType == SessionType::EMBEDDED_UI_EXTENSION) {
         return RefPtr<SessionWrapper>();
+    }
+    return nullptr;
+}
+
+RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(
+    SessionType sessionType, const SessionCreateParam& sessionCreateParam)
+{
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        return AceType::MakeRefPtr<SecuritySessionWrapperImpl>(
+            sessionCreateParam.hostPattern, sessionCreateParam.instanceId,
+            sessionCreateParam.isTransferringCaller, sessionType);
     }
     return nullptr;
 }

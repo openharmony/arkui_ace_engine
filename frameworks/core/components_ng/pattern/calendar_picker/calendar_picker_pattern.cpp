@@ -604,7 +604,7 @@ bool CalendarPickerPattern::HandleBlurEvent(const KeyEvent& event)
     CHECK_NULL_RETURN(textFrameNode, false);
     auto focusHub = textFrameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->HandleKeyEvent(event);
+    return focusHub->HandleEvent(event);
 }
 
 bool CalendarPickerPattern::HandleYearKeyWaitingEvent(

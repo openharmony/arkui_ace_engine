@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
 
+#include "base/utils/utf_helper.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
@@ -26,14 +27,14 @@ constexpr uint32_t TEXTAREA_MAXLENGTH_VALUE_DEFAULT = std::numeric_limits<uint32
 } // namespace
 
 RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextInput(
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+    const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
     auto textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
     if (placeholder) {
-        textInputComponent->SetPlaceholder(placeholder.value());
+        textInputComponent->SetPlaceholder(UtfUtils::Str16ToStr8(placeholder.value()));
     }
     if (value) {
-        textInputComponent->SetValue(value.value());
+        textInputComponent->SetValue(UtfUtils::Str16ToStr8(value.value()));
     }
     ViewStackProcessor::GetInstance()->ClaimElementId(textInputComponent);
     textInputComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
@@ -120,7 +121,7 @@ void InitTextAreaDefaultStyle()
 }
 
 RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextArea(
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+    const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
     RefPtr<TextFieldComponent> textAreaComponent = AceType::MakeRefPtr<TextFieldComponent>();
     textAreaComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
@@ -137,10 +138,10 @@ RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextArea(
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
     if (value) {
-        textAreaComponent->SetValue(value.value());
+        textAreaComponent->SetValue(UtfUtils::Str16ToStr8(value.value()));
     }
     if (placeholder) {
-        textAreaComponent->SetPlaceholder(placeholder.value());
+        textAreaComponent->SetPlaceholder(UtfUtils::Str16ToStr8(placeholder.value()));
     }
     UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
 
@@ -356,15 +357,17 @@ void TextFieldModelImpl::SetFontFamily(const std::vector<std::string>& value)
 }
 
 void TextFieldModelImpl::SetInputFilter(
-    const std::string& value, const std::function<void(const std::string&)>& onError)
+    const std::string& value, const std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
     component->SetInputFilter(value);
-
-    if (onError) {
-        component->SetOnError(onError);
+    if (func) {
+        auto onError = [func] (const std::string& value) {
+            func(UtfUtils::Str8ToStr16(value));
+        };
+        component->SetOnError(std::move(onError));
     }
 }
 
@@ -392,7 +395,7 @@ void TextFieldModelImpl::SetOnSubmit(std::function<void(int32_t)>&& func)
     component->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelImpl::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func)
+void TextFieldModelImpl::SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
@@ -400,34 +403,49 @@ void TextFieldModelImpl::SetOnChange(std::function<void(const std::string&, Prev
     auto onChange = [func] (const std::string& value) {
         if (!func) {
             PreviewText previewText {};
-            func(value, previewText);
+            func(UtfUtils::Str8ToStr16(value), previewText);
         }
     };
     component->SetOnChange(std::move(onChange));
 }
 
-void TextFieldModelImpl::SetOnCopy(std::function<void(const std::string&)>&& func)
+void TextFieldModelImpl::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnCopy(std::move(func));
+    auto onCopy = [func] (const std::string& value) {
+        if (func) {
+            func(UtfUtils::Str8ToStr16(value));
+        }
+    };
+    component->SetOnCopy(std::move(onCopy));
 }
 
-void TextFieldModelImpl::SetOnCut(std::function<void(const std::string&)>&& func)
+void TextFieldModelImpl::SetOnCut(std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnCut(std::move(func));
+    auto onCut = [func] (const std::string& value) {
+        if (func) {
+            func(UtfUtils::Str8ToStr16(value));
+        }
+    };
+    component->SetOnCut(std::move(onCut));
 }
 
-void TextFieldModelImpl::SetOnPaste(std::function<void(const std::string&)>&& func)
+void TextFieldModelImpl::SetOnPaste(std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnPaste(std::move(func));
+    auto onPaste = [func] (const std::string& value) {
+        if (func) {
+            func(UtfUtils::Str8ToStr16(value));
+        }
+    };
+    component->SetOnPaste(std::move(onPaste));
 }
 
 void TextFieldModelImpl::SetCopyOption(CopyOptions copyOption)

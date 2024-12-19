@@ -221,11 +221,24 @@ bool ScrollBarProxy::NotifySnapScroll(
     CHECK_NULL_RETURN(scrollable, false);
     if (scorllableNode_.startSnapAnimationCallback) {
         auto controlDistance = GetScrollableNodeDistance(scrollable);
-        auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
-        dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
-        return scorllableNode_.startSnapAnimationCallback(patternOffset, -velocity, -velocity, dragDistance);
+        SnapAnimationOptions snapAnimationOptions = {
+            .snapDelta = CalcPatternOffset(controlDistance, barScrollableDistance, delta),
+            .animationVelocity = -velocity,
+            .dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance),
+            .fromScrollBar = true,
+        };
+        return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
     }
     return false;
+}
+
+bool ScrollBarProxy::NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const
+{
+    auto scrollable = scorllableNode_.scrollableNode.Upgrade();
+    if (!scrollable || !CheckScrollable(scrollable) || !scorllableNode_.startSnapAnimationCallback) {
+        return false;
+    }
+    return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
 }
 
 float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const
@@ -271,6 +284,29 @@ bool ScrollBarProxy::IsNestScroller() const
         auto enableNestedSorll = scrollBarPattern->GetEnableNestedSorll();
         if (enableNestedSorll) {
             return true;
+        }
+    }
+    return false;
+}
+
+bool ScrollBarProxy::IsScrollSnapTrigger() const
+{
+    if (scrollSnapTrigger_) {
+        return true;
+    }
+    for (auto bar : scrollBars_) {
+        auto scrollBar = bar.Upgrade();
+        if (!scrollBar) {
+            continue;
+        }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
+            auto innerScrollBar = scrollBar->GetScrollBar();
+            if (!innerScrollBar) {
+                continue;
+            }
+            if (innerScrollBar->IsDriving()) {
+                return true;
+            }
         }
     }
     return false;

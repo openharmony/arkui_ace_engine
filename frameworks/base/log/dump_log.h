@@ -161,6 +161,8 @@ public:
     static const size_t MIN_JSON_LENGTH = 4;
     static const size_t END_POS_TWO = 2;
     static const size_t END_POS_THREE = 3;
+    int CompressString(const char* in_str, size_t in_len, std::string& out_str, int level);
+    void OutPutByCompress();
 
 private:
     std::vector<std::string> description_;

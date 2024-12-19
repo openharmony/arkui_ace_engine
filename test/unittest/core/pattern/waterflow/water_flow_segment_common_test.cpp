@@ -559,16 +559,14 @@ HWTEST_F(WaterFlowSegmentCommonTest, InsertAndJump001, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_7);
     CreateDone();
 
-    pattern_->ScrollToIndex(10);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(10, false, ScrollAlign::START);
     EXPECT_EQ(GetChildY(frameNode_, 10), 0.0f);
 
     AddItemsAtSlot(2, 100.0f, 4);
     secObj->ChangeData(0, 1, SECTION_9);
     frameNode_->ChildrenUpdatedFrom(4);
     info_->NotifyDataChange(4, 2);
-    pattern_->ScrollToIndex(12, false, ScrollAlign::START, 20.0f);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(12, false, ScrollAlign::START, 20.0f);
     EXPECT_EQ(GetChildY(frameNode_, 12), -20.0f);
 }
 
@@ -842,12 +840,10 @@ HWTEST_F(WaterFlowSegmentCommonTest, ScrollToEdge, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(GetChildY(frameNode_, 36), 500.0f);
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 
@@ -967,8 +963,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Spring001, TestSize.Level1)
     EXPECT_FLOAT_EQ(info->TopFinalPos() - info->CurrentPos(), -9.54851f);
 
     UpdateCurrentOffset(-10.0f);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(GetChildRect(frameNode_, 36).Bottom(), 400.0f);
     UpdateCurrentOffset(-10.0f);
     EXPECT_EQ(GetChildRect(frameNode_, 36).Bottom(), 390.0f);
@@ -1046,8 +1041,13 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal004, TestSize.Level1)
      */
     AddItems(1);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->startIndex_, 3);
-    EXPECT_EQ(info->endIndex_, 12);
+#ifdef TEST_WATER_FLOW_SW
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 8);
+#else
+    EXPECT_EQ(info->startIndex_, 1);
+    EXPECT_EQ(info->endIndex_, 10);
+#endif
 }
 
 /**
@@ -1076,8 +1076,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
     EXPECT_TRUE(info->itemStart_);
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(GetChildY(frameNode_, 36), 500.0f);
     EXPECT_FALSE(info->offsetEnd_);
     UpdateCurrentOffset(-4.0f);
@@ -1110,8 +1109,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, ReachStart001, TestSize.Level1)
     EXPECT_TRUE(reached);
 
     reached = false;
-    pattern_->ScrollToIndex(36);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(36, false, ScrollAlign::START);
     UpdateCurrentOffset(Infinity<float>());
     EXPECT_TRUE(reached);
 }

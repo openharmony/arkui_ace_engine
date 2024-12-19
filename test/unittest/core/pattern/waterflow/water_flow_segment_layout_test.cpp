@@ -34,6 +34,7 @@ public:
     static void SetUpTestSuite()
     {
         MockPipelineContext::SetUp();
+        MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     }
     static void TearDownTestSuite()
     {
@@ -556,7 +557,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump004, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 27);
-    EXPECT_EQ(info->currentOffset_, -0.0f);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
 
     info->jumpIndex_ = 99;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1497,8 +1498,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump001, TestSize.Level1)
     secObj->ChangeData(1, 1, newSection);
     AddItems(5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
 
     EXPECT_EQ(info->currentOffset_, 0);
     EXPECT_EQ(info->startIndex_, 0);
@@ -1530,8 +1530,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
     EXPECT_EQ(info->childrenCount_, 60);
 
     frameNode_->ChildrenUpdatedFrom(10);
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
 
     EXPECT_EQ(info->currentOffset_, 0);
     EXPECT_EQ(info->startIndex_, 0);
@@ -1539,11 +1538,67 @@ HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
 }
 
 /**
- * @tc.name: EstimateContentHeight001
- * @tc.desc: Test EstimateContentHeight.
+ * @tc.name: Jump003
+ * @tc.desc: Test jump function without user defined height.
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowSegmentTest, EstimateContentHeight001, TestSize.Level1)
+HWTEST_F(WaterFlowSegmentTest, Jump003, TestSize.Level1)
+{
+    WaterFlowModelNG model;
+    model.Create();
+    GetWaterFlow();
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 15);
+    EXPECT_EQ(info->currentOffset_, 0);
+    for (int i = 0; i <= 36; ++i) {
+        auto seg = info->GetSegment(i);
+        EXPECT_FALSE(secObj->GetSectionInfo()[seg].onGetItemMainSizeByIndex);
+    }
+    const decltype(WaterFlowLayoutInfo::items_) itemsMap = { { {0, { {0, {0, 100}}, {2, {100, 100}}, {3, {200, 200}},
+        {6, {400, 100}}, {7, {500, 200}}, {10, {700, 100}}, {11, {800, 200}} }}, {1, { {1, {0, 200}}, {4, {200, 100}},
+        {5, {300, 200}}, {8, {500, 100}}, {9, {600, 200}}, {12, {800, 100}}, {13, {900, 200}} }} },
+        { {0, { {14, {1100, 100}}, {15, {1200, 200}} }} }, { {0, {}} } };
+    EXPECT_EQ(info->items_, itemsMap);
+
+    ScrollToIndex(19, false, ScrollAlign::START);
+    EXPECT_EQ(info->currentOffset_, -1800.0f);
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 27);
+    const decltype(WaterFlowLayoutInfo::items_) itemsMap_1 = { { {0, { {0, {0, 100}}, {2, {100, 100}}, {3, {200, 200}},
+        {6, {400, 100}}, {7, {500, 200}}, {10, {700, 100}}, {11, {800, 200}} }}, {1, { {1, {0, 200}}, {4, {200, 100}},
+        {5, {300, 200}}, {8, {500, 100}}, {9, {600, 200}}, {12, {800, 100}}, {13, {900, 200}} }} },
+        { {0, { {14, {1100, 100}}, {15, {1200, 200}}, {16, {1400, 100}}, {17, {1500, 200}}, {18, {1700, 100}},
+        {19, {1800, 200}}, {20, {2000, 100}}, {21, {2100, 200}}, {22, {2300, 100}}, {23, {2400, 200}},
+        {24, {2600, 100}}, {25, {2700, 200}}, {26, {2900, 100}}, {27, {3000, 200}} }} }, { {0, {}} } };
+    EXPECT_EQ(info->items_, itemsMap_1);
+
+    ScrollToIndex(28, false, ScrollAlign::START);
+    EXPECT_EQ(info->currentOffset_, -3200.0f);
+    EXPECT_EQ(info->startIndex_, 28);
+    EXPECT_EQ(info->endIndex_, 36);
+    const decltype(WaterFlowLayoutInfo::items_) itemsMap_2 = { { {0, { {0, {0, 100}}, {2, {100, 100}}, {3, {200, 200}},
+        {6, {400, 100}}, {7, {500, 200}}, {10, {700, 100}}, {11, {800, 200}} }}, {1, { {1, {0, 200}}, {4, {200, 100}},
+        {5, {300, 200}}, {8, {500, 100}}, {9, {600, 200}}, {12, {800, 100}}, {13, {900, 200}} }} },
+        { {0, { {14, {1100, 100}}, {15, {1200, 200}}, {16, {1400, 100}}, {17, {1500, 200}}, {18, {1700, 100}},
+        {19, {1800, 200}}, {20, {2000, 100}}, {21, {2100, 200}}, {22, {2300, 100}}, {23, {2400, 200}},
+        {24, {2600, 100}}, {25, {2700, 200}}, {26, {2900, 100}}, {27, {3000, 200}}, {28, {3200, 100}},
+        {29, {3300, 200}}, {30, {3500, 100}}, {31, {3600, 200}}, {32, {3800, 100}}, {33, {3900, 200}} }} },
+        { {0, { {34, {4100, 100}}, {35, {4200, 200}}, {36, {4400, 100}} }} } };
+    EXPECT_EQ(info->items_, itemsMap_2);
+}
+
+/**
+ * @tc.name: EstimateTotalHeight001
+ * @tc.desc: Test EstimateTotalHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, EstimateTotalHeight001, TestSize.Level1)
 {
     CreateWaterFlow();
     ViewAbstract::SetWidth(CalcLength(400.0f));
@@ -1561,12 +1616,12 @@ HWTEST_F(WaterFlowSegmentTest, EstimateContentHeight001, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 13);
 
     int32_t childCnt = static_cast<int32_t>(info->itemInfos_.size());
-    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
+    EXPECT_EQ(info->EstimateTotalHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
 
     UpdateCurrentOffset(-9000.0f);
     childCnt = static_cast<int32_t>(info->itemInfos_.size());
     EXPECT_EQ(info->endIndex_, 59);
-    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
+    EXPECT_EQ(info->EstimateTotalHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
 }
 
 /**
@@ -1706,7 +1761,7 @@ HWTEST_F(WaterFlowSegmentTest, WaterFlowGetChildrenExpandedSize001, TestSize.Lev
     model.SetLayoutDirection(FlexDirection::ROW);
     model.SetRowsTemplate("1fr 1fr");
     CreateWaterFlowItems(60);
-    CreateDone(frameNode_);
+    CreateDone();
 
     info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     childCnt = static_cast<int32_t>(info->itemInfos_.size());

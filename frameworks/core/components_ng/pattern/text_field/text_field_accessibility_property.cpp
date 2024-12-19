@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
@@ -81,11 +82,6 @@ AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
     return ret;
 }
 
-bool TextFieldAccessibilityProperty::IsEditable() const
-{
-    return true;
-}
-
 bool TextFieldAccessibilityProperty::IsMultiLine() const
 {
     auto frameNode = host_.Upgrade();
@@ -132,7 +128,7 @@ std::string TextFieldAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, "");
-    std::string text = textFieldLayoutProperty->GetValueValue("");
+    std::string text = UtfUtils::Str16ToStr8(textFieldLayoutProperty->GetValueValue(u""));
     if (IsPassword() && !text.empty()) {
         return std::string(text.size(), '*');
     }
@@ -145,8 +141,8 @@ bool TextFieldAccessibilityProperty::IsHint() const
     CHECK_NULL_RETURN(frameNode, false);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    return !(!textFieldLayoutProperty->GetValueValue("").empty() ||
-        textFieldLayoutProperty->GetPlaceholderValue("").empty());
+    return !(!textFieldLayoutProperty->GetValueValue(u"").empty() ||
+        textFieldLayoutProperty->GetPlaceholderValue(u"").empty());
 }
 
 std::string TextFieldAccessibilityProperty::GetHintText() const
@@ -155,12 +151,7 @@ std::string TextFieldAccessibilityProperty::GetHintText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, "");
-    return textFieldPattern->GetPlaceHolder();
-}
-
-std::string TextFieldAccessibilityProperty::GetErrorText() const
-{
-    return errorText_;
+    return UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder());
 }
 
 bool TextFieldAccessibilityProperty::GetContentInvalid() const
@@ -186,14 +177,6 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     if (textFieldPattern->AllowCopy()) {
         AddSupportAction(AceAction::ACTION_COPY);
         AddSupportAction(AceAction::ACTION_CUT);
-    }
-    if (IsScrollable() && textFieldPattern->IsTextArea()) {
-        if (!textFieldPattern->IsAtTop()) {
-            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-        }
-        if (!textFieldPattern->IsAtBottom()) {
-            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
-        }
     }
 
     AddSupportAction(AceAction::ACTION_PASTE);

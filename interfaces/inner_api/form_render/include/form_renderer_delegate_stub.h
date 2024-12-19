@@ -26,6 +26,7 @@
 
 namespace OHOS {
 namespace Ace {
+struct AccessibilityParentRectInfo;
 /**
  * @class FormRendererDelegateStub
  * Form renderer delegate stub.
