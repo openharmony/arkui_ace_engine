@@ -10215,7 +10215,7 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
     }
     EcmaVM* vm = args.GetVm();
     CHECK_NULL_VOID(vm);
-    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(args[0]);
+    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(arg);
     if (jsOnFocusAxisEventFunc->IsEmpty()) {
         return;
     }
