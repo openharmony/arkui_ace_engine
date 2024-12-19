@@ -399,4 +399,9 @@ void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node)
     observers_.erase(node);
 }
 
+std::vector<std::string> FontManager::GetFontNames()
+{
+    return fontNames_;
+}
+
 } // namespace OHOS::Ace
