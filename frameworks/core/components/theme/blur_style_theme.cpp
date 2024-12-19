@@ -48,6 +48,7 @@ void BlurStyleTheme::Builder::ParsePattern(
         std::pair<std::string, BlurStyle> { "component_regular", BlurStyle::COMPONENT_REGULAR },
         std::pair<std::string, BlurStyle> { "component_thick", BlurStyle::COMPONENT_THICK },
         std::pair<std::string, BlurStyle> { "component_ultra_thick", BlurStyle::COMPONENT_ULTRA_THICK },
+        std::pair<std::string, BlurStyle> { "component_ultra_thick_window", BlurStyle::COMPONENT_ULTRA_THICK_WINDOW },
     };
     const auto length = sizeof(blurStyles) / sizeof(std::pair<std::string, BlurStyle>);
     for (size_t i = 0; i != length; ++i) {

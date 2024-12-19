@@ -408,6 +408,7 @@ public:
     {
         return isDisappearing_;
     }
+    void UpdateWindowBlur() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -484,6 +485,8 @@ protected:
     void OnBloomUpdate(const float bloomIntensity) override;
 
     void OnUseEffectUpdate(bool useEffect) override;
+    void OnUseEffectTypeUpdate(EffectType effectType) override;
+    bool GetStatusByEffectTypeAndWindow() override;
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
@@ -672,6 +675,7 @@ protected:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+    std::optional<WindowBlurModifier> windowBlurModifier_;
     // translate and scale modifier for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;

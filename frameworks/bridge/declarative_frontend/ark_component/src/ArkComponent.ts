@@ -1744,8 +1744,8 @@ class RenderFitModifier extends ModifierWithKey<number> {
   }
 }
 
-class UseEffectModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class UseEffectModifier extends ModifierWithKey<ArkUseEffect> {
+  constructor(value: ArkUseEffect) {
     super(value);
   }
   static identity: Symbol = Symbol('useEffect');
@@ -1753,7 +1753,7 @@ class UseEffectModifier extends ModifierWithKey<boolean> {
     if (reset) {
       getUINativeModule().common.resetUseEffect(node);
     } else {
-      getUINativeModule().common.setUseEffect(node, this.value);
+      getUINativeModule().common.setUseEffect(node, this.value.useEffect, this.value.effectType);
     }
   }
 }
@@ -3950,8 +3950,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  useEffect(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, value);
+  useEffect(value: boolean, type: EffectType = EffectType.DEFAULT): this {
+    let useEffectObj = new ArkUseEffect();
+    useEffectObj.useEffect = value;
+    useEffectObj.effectType = type;
+    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, useEffectObj);
     return this;
   }
 
