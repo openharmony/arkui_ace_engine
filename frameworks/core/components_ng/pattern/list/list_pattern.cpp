@@ -122,6 +122,10 @@ bool ListPattern::HandleTargetIndex(bool isJump)
         MarkDirtyNodeSelf();
         return true;
     }
+    auto iter = itemPosition_.find(targetIndex_.value());
+    if (iter == itemPosition_.end()) {
+        ResetExtraOffset();
+    }
     AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
     // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
     targetIndex_.reset();
