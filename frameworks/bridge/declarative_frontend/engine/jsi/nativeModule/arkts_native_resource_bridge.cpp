@@ -40,6 +40,22 @@ ColorMode MapJsColorModeToColorMode(int32_t jsColorMode)
     }
     return ColorMode::COLOR_MODE_UNDEFINED;
 }
+
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+void UpdateColorModeForThemeConstants(const ColorMode& colorMode)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto resConfig = container->GetResourceConfiguration();
+    resConfig.SetColorMode(colorMode);
+
+    auto themeManager = PipelineBase::CurrentThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    themeConstants->UpdateConfig(resConfig);
+}
+#endif
 } // namespace
 
 ArkUINativeModuleValue ResourceBridge::UpdateColorMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -53,8 +69,11 @@ ArkUINativeModuleValue ResourceBridge::UpdateColorMode(ArkUIRuntimeCallInfo* run
         colorModeValue = MapJsColorModeToColorMode(firstArgValue);
     }
     if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        UpdateColorModeForThemeConstants(colorModeValue);
+#else
         ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
-
+#endif
         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
         pipelineContext->SetLocalColorMode(colorModeValue);
@@ -72,7 +91,11 @@ ArkUINativeModuleValue ResourceBridge::Restore(ArkUIRuntimeCallInfo* runtimeCall
     pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
 
     auto colorModeValue = SystemProperties::GetColorMode();
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    UpdateColorModeForThemeConstants(colorModeValue);
+#else
     ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+#endif
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -115,6 +115,8 @@ static const std::unordered_set<std::string> stringAttrs = {
     "textfield_writting_is_support",
     "rich_editor_writting_is_support",
     "ai_write_menu_name",
+    "text_menu_search_is_support",
+    "textfield_menu_search_is_support",
     "textfield_accessibility_clear",
     "pass_point",
     "general_next_year",

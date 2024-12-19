@@ -161,7 +161,8 @@ enum class RequestFocusReason {
     AUTO_FILL,
     CLEAN_NODE,
     MOUSE,
-    SYSTEM
+    SYSTEM,
+    DRAG_ENTER
 };
 
 
@@ -947,6 +948,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -1816,6 +1818,7 @@ private:
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void ResetTouchAndMoveCaretState();
     void ResetFirstClickAfterGetFocus();
+    void ProcessAutoFillOnFocus();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2008,6 +2011,7 @@ private:
     std::optional<float> maxFontSizeScale_;
     bool firstClickAfterLosingFocus_ = true;
     CancelableCallback<void()> firstClickResetTask_;
+    RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
 };
 } // namespace OHOS::Ace::NG
 

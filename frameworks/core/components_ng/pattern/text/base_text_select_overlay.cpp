@@ -1253,6 +1253,13 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
         info->handlerColor = GetHandleColor();
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE ||
+        (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
+        if (info->menuInfo.showSearch != (isSupportMenuSearch_ && IsNeedMenuSearch())) {
+            info->menuInfo.showSearch = !info->menuInfo.showSearch;
+            manager->NotifyUpdateToolBar(true);
+        }
+    }
 }
 
 void BaseTextSelectOverlay::UpdateHandleColor()
@@ -1260,6 +1267,23 @@ void BaseTextSelectOverlay::UpdateHandleColor()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
+}
+
+bool BaseTextSelectOverlay::IsNeedMenuSearch()
+{
+    auto searchContent = GetSelectedText();
+    return !std::regex_match(searchContent, std::regex("^\\s*$"));
+}
+
+void BaseTextSelectOverlay::HandleOnSearch()
+{
+    auto value = GetSelectedText();
+    auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (!queryWord.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->StartAbilityOnQuery(queryWord);
+    }
 }
 
 std::pair<ContentClipMode, std::optional<ContentClip>> BaseTextSelectOverlay::GetScrollableClipInfo(

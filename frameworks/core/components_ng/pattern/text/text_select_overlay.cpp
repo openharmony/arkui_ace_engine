@@ -317,6 +317,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     CHECK_NULL_VOID(textPattern);
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
     menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
+    menuInfo.showSearch = menuInfo.showCopy && textPattern->IsShowSearch() && IsNeedMenuSearch();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
@@ -370,6 +371,9 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
             break;
         case OptionMenuActionId::SELECT_ALL:
             textPattern->HandleOnSelectAll();
+            break;
+        case OptionMenuActionId::SEARCH:
+            HandleOnSearch();
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);

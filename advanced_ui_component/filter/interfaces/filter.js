@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -38,6 +38,8 @@ const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const curves = requireNativeModule('ohos.curves');
 const measure = requireNapi('measure');
 const hilog = requireNapi('hilog');
+const JSON = requireNapi('util.json');
+const accessibility = requireNapi('accessibility');
 const TEXT_HOT_AREA_WIDTH = 8;
 const LIST_ROW_HEIGHT = 40;
 const ARROW_IMG_SIZE = 24;
@@ -67,11 +69,17 @@ const MAX_SYMBOL_FONT_SCALE = 1.45;
 const MIN_SYMBOL_FONT_SCALE = 1;
 const DEFAULT_SYMBOL_FONT_SCALE = 1;
 
-export var FilterType;
+export let FilterType;
 (function (e13) {
     e13[e13['MULTI_LINE_FILTER'] = 0] = 'MULTI_LINE_FILTER';
     e13[e13['LIST_FILTER'] = 1] = 'LIST_FILTER';
 })(FilterType || (FilterType = {}));
+let FilterAccessibilityType;
+(function (z21) {
+    z21[z21['ACCESSIBILITY_TEXT'] = 0] = 'ACCESSIBILITY_TEXT';
+    z21[z21['ACCESSIBILITY_DESC'] = 1] = 'ACCESSIBILITY_DESC';
+    z21[z21['SEND_ACCESSIBILITY'] = 2] = 'SEND_ACCESSIBILITY';
+})(FilterAccessibilityType || (FilterAccessibilityType = {}));
 let FontWeightArray = class FontWeightArray extends Array {
 };
 FontWeightArray = __decorate([
@@ -183,61 +191,73 @@ class GradientMask extends ViewPU {
 }
 
 class ListFilterRow extends ViewPU {
-    constructor(i12, j12, k12, l12 = -1, m12 = undefined, n12) {
-        super(i12, k12, l12, n12);
-        if (typeof m12 === 'function') {
-            this.paramsGenerator_ = m12;
+    constructor(d21, e21, f21, g21 = -1, h21 = undefined, i21) {
+        super(d21, f21, g21, i21);
+        if (typeof h21 === 'function') {
+            this.paramsGenerator_ = h21;
         }
-        this.__colorRow = new SynchedPropertyNesedObjectPU(j12.colorRow, this, 'colorRow');
-        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(j12.fontWeightRow, this, 'fontWeightRow');
+        this.__colorRow = new SynchedPropertyNesedObjectPU(e21.colorRow, this, 'colorRow');
+        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(e21.fontWeightRow, this, 'fontWeightRow');
         this.__backgroundColorRow =
-            new SynchedPropertyNesedObjectPU(j12.backgroundColorRow, this, 'backgroundColorRow');
+            new SynchedPropertyNesedObjectPU(e21.backgroundColorRow, this, 'backgroundColorRow');
         this.__isBackgroundHoverRow =
-            new SynchedPropertyNesedObjectPU(j12.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
+            new SynchedPropertyNesedObjectPU(e21.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
+        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(e21.isSelectedRow, this, 'isSelectedRow');
+        this.accessibilitySelectedText = '';
         this.filterRow = { name: '', options: [] };
         this.onItemClick = () => {
         };
         this.rowIndex = 0;
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
-        this.setInitiallyProvidedValue(j12);
+        this.bundleName = '';
+        this.setInitiallyProvidedValue(e21);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(h12) {
-        this.__colorRow.set(h12.colorRow);
-        this.__fontWeightRow.set(h12.fontWeightRow);
-        this.__backgroundColorRow.set(h12.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(h12.isBackgroundHoverRow);
-        if (h12.filterRow !== undefined) {
-            this.filterRow = h12.filterRow;
+    setInitiallyProvidedValue(c21) {
+        this.__colorRow.set(c21.colorRow);
+        this.__fontWeightRow.set(c21.fontWeightRow);
+        this.__backgroundColorRow.set(c21.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(c21.isBackgroundHoverRow);
+        this.__isSelectedRow.set(c21.isSelectedRow);
+        if (c21.accessibilitySelectedText !== undefined) {
+            this.accessibilitySelectedText = c21.accessibilitySelectedText;
         }
-        if (h12.onItemClick !== undefined) {
-            this.onItemClick = h12.onItemClick;
+        if (c21.filterRow !== undefined) {
+            this.filterRow = c21.filterRow;
         }
-        if (h12.rowIndex !== undefined) {
-            this.rowIndex = h12.rowIndex;
+        if (c21.onItemClick !== undefined) {
+            this.onItemClick = c21.onItemClick;
         }
-        if (h12.maxAppFontScale !== undefined) {
-            this.maxAppFontScale = h12.maxAppFontScale;
+        if (c21.rowIndex !== undefined) {
+            this.rowIndex = c21.rowIndex;
         }
-        if (h12.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = h12.isFollowingSystemFontScale;
+        if (c21.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = c21.maxAppFontScale;
+        }
+        if (c21.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = c21.isFollowingSystemFontScale;
+        }
+        if (c21.bundleName !== undefined) {
+            this.bundleName = c21.bundleName;
         }
     }
 
-    updateStateVars(g12) {
-        this.__colorRow.set(g12.colorRow);
-        this.__fontWeightRow.set(g12.fontWeightRow);
-        this.__backgroundColorRow.set(g12.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(g12.isBackgroundHoverRow);
+    updateStateVars(b21) {
+        this.__colorRow.set(b21.colorRow);
+        this.__fontWeightRow.set(b21.fontWeightRow);
+        this.__backgroundColorRow.set(b21.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(b21.isBackgroundHoverRow);
+        this.__isSelectedRow.set(b21.isSelectedRow);
     }
 
-    purgeVariableDependenciesOnElmtId(f12) {
-        this.__colorRow.purgeDependencyOnElmtId(f12);
-        this.__fontWeightRow.purgeDependencyOnElmtId(f12);
-        this.__backgroundColorRow.purgeDependencyOnElmtId(f12);
-        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(f12);
+    purgeVariableDependenciesOnElmtId(a21) {
+        this.__colorRow.purgeDependencyOnElmtId(a21);
+        this.__fontWeightRow.purgeDependencyOnElmtId(a21);
+        this.__backgroundColorRow.purgeDependencyOnElmtId(a21);
+        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(a21);
+        this.__isSelectedRow.purgeDependencyOnElmtId(a21);
     }
 
     aboutToBeDeleted() {
@@ -245,18 +265,16 @@ class ListFilterRow extends ViewPU {
         this.__fontWeightRow.aboutToBeDeleted();
         this.__backgroundColorRow.aboutToBeDeleted();
         this.__isBackgroundHoverRow.aboutToBeDeleted();
+        this.__isSelectedRow.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get colorRow() {
         return this.__colorRow.get();
     }
-
     get fontWeightRow() {
         return this.__fontWeightRow.get();
     }
-
     get backgroundColorRow() {
         return this.__backgroundColorRow.get();
     }
@@ -265,36 +283,100 @@ class ListFilterRow extends ViewPU {
         return this.__isBackgroundHoverRow.get();
     }
 
+    get isSelectedRow() {
+        return this.__isSelectedRow.get();
+    }
+
     aboutToAppear() {
+        this.initAccessibilityResource();
         try {
-            let e12 = this.getUIContext();
-            this.isFollowingSystemFontScale = e12.isFollowingSystemFontScale();
-            this.maxAppFontScale = e12.getMaxFontScale();
-        } catch (b12) {
-            let c12 = b12.code;
-            let d12 = b12.message;
-            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${c12}, message: ${d12}`);
+            let z20 = this.getUIContext();
+            this.isFollowingSystemFontScale = z20.isFollowingSystemFontScale();
+            this.maxAppFontScale = z20.getMaxFontScale();
+        }
+        catch (w20) {
+            let x20 = w20.code;
+            let y20 = w20.message;
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${x20}, message: ${y20}`);
+        }
+    }
+
+    initAccessibilityResource() {
+        try {
+            this.bundleName = getContext(this)?.abilityInfo?.bundleName;
+            let v20 = getContext()?.resourceManager;
+            this.accessibilitySelectedText = v20?.getStringByNameSync('filter_accessibility_selected');
+        }
+        catch (s20) {
+            let t20 = s20.code;
+            let u20 = s20.message;
+            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${t20}, message: ${u20}`);
         }
     }
 
     updateFontScale() {
-        let z11 = this.getUIContext();
-        let a12 = z11.getHostContext()?.config?.fontSizeScale ?? 1;
+        let q20 = this.getUIContext();
+        let r20 = q20.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        return Math.min(a12, this.maxAppFontScale);
+        return Math.min(r20, this.maxAppFontScale);
+    }
+
+    getAccessibilityText(i20, j20, k20) {
+        let l20 = '';
+        try {
+            let p20 = '';
+            if (typeof i20 === 'string') {
+                p20 = i20;
+            }
+            else {
+                p20 = getContext()?.resourceManager?.getStringSync(i20?.id);
+            }
+            switch (k20) {
+                case FilterAccessibilityType.ACCESSIBILITY_TEXT:
+                    l20 = j20 ? this.accessibilitySelectedText : p20;
+                    break;
+                case FilterAccessibilityType.ACCESSIBILITY_DESC:
+                    l20 = j20 ? p20 : '';
+                    break;
+                case FilterAccessibilityType.SEND_ACCESSIBILITY:
+                    l20 = j20 ? `${this.accessibilitySelectedText},${p20}` : '';
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (m20) {
+            let n20 = m20.code;
+            let o20 = m20.message;
+            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${n20}, message: ${o20}`);
+        }
+        return l20;
+    }
+
+    sendAccessibility(e20, f20) {
+        let g20 = ({
+            type: 'announceForAccessibility',
+            bundleName: this.bundleName,
+            triggerAction: 'common',
+            textAnnouncedForAccessibility: this.getAccessibilityText(e20,
+                f20, FilterAccessibilityType.SEND_ACCESSIBILITY),
+        });
+        accessibility.sendAccessibilityEvent(g20).then(() => {
+            hilog.info(0x3900, 'Ace', `ListFilter sendAccessibility send event, event info is ${JSON.stringify(g20)}`);
+        });
     }
 
     initialRender() {
-        this.observeComponentCreation2((x11, y11) => {
+        this.observeComponentCreation2((c20, d20) => {
             Stack.create({ alignContent: Alignment.End });
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
         }, Stack);
-        this.observeComponentCreation2((v11, w11) => {
+        this.observeComponentCreation2((a20, b20) => {
             Stack.create({ alignContent: Alignment.Start });
         }, Stack);
-        this.observeComponentCreation2((t11, u11) => {
+        this.observeComponentCreation2((y19, z19) => {
             List.create();
             List.listDirection(Axis.Horizontal);
             List.scrollBar(BarState.Off);
@@ -302,25 +384,25 @@ class ListFilterRow extends ViewPU {
             List.height(LIST_ROW_HEIGHT);
             List.align(Alignment.Start);
         }, List);
-        this.observeComponentCreation2((p10, q10) => {
+        this.observeComponentCreation2((d18, e18) => {
             ForEach.create();
-            const b8 = (s10, t10) => {
-                const u10 = s10;
-                this.observeComponentCreation2((i11, j11) => {
+            const f18 = (h18, i18) => {
+                const j18 = h18;
+                this.observeComponentCreation2((i19, j19) => {
                     If.create();
-                    if (t10 === 0) {
+                    if (i18 === 0) {
                         this.ifElseBranchUpdateFunction(0, () => {
                             {
-                                const y8 = (r11, s11) => {
-                                    ViewStackProcessor.StartGetAccessRecordingFor(r11);
-                                    g9(r11, s11);
-                                    if (!s11) {
+                                const m19 = (w19, x19) => {
+                                    ViewStackProcessor.StartGetAccessRecordingFor(w19);
+                                    n19(w19, x19);
+                                    if (!x19) {
                                         ListItem.pop();
                                     }
                                     ViewStackProcessor.StopGetAccessRecording();
                                 };
-                                const g9 = (p11, q11) => {
-                                    ListItem.create(h9, true);
+                                const n19 = (u19, v19) => {
+                                    ListItem.create(o19, true);
                                     ListItem.width({
                                         'id': -1,
                                         'type': 10002,
@@ -330,34 +412,40 @@ class ListFilterRow extends ViewPU {
                                     });
                                     ListItem.height(LIST_ROW_HEIGHT);
                                 };
-                                const h9 = (n11, o11) => {
-                                    y8(n11, o11);
+                                const o19 = (s19, t19) => {
+                                    m19(s19, t19);
                                     ListItem.pop();
                                 };
-                                this.observeComponentCreation2(g9, ListItem);
+                                this.observeComponentCreation2(n19, ListItem);
                                 ListItem.pop();
                             }
                         });
-                    } else {
+                    }
+                    else {
                         this.ifElseBranchUpdateFunction(1, () => {
                         });
                     }
                 }, If);
                 If.pop();
                 {
-                    const v8 = (g11, h11) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(g11);
-                        w8(g11, h11);
-                        if (!h11) {
+                    const l18 = (g19, h19) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(g19);
+                        m18(g19, h19);
+                        if (!h19) {
                             ListItem.pop();
                         }
                         ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const w8 = (c11, d11) => {
-                        ListItem.create(x8, true);
+                    const m18 = (w18, x18) => {
+                        ListItem.create(n18, true);
+                        ListItem.accessibilityText(this.getAccessibilityText(j18,
+                            this.isSelectedRow[i18], FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                        ListItem.accessibilityDescription(this.getAccessibilityText(j18,
+                            this.isSelectedRow[i18], FilterAccessibilityType.ACCESSIBILITY_DESC));
                         ListItem.height(PERCENT_100);
                         ListItem.onClick(() => {
-                            this.onItemClick(t10);
+                            this.onItemClick(i18);
+                            this.sendAccessibility(j18, true);
                         });
                         ListItem.focusable(true);
                         ViewStackProcessor.visualState('focused');
@@ -399,58 +487,60 @@ class ListFilterRow extends ViewPU {
                             end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
                         });
                         ViewStackProcessor.visualState();
-                        ListItem.backgroundColor(this.isBackgroundHoverRow[t10] ? this.backgroundColorRow[t10] :
+                        ListItem.backgroundColor(this.isBackgroundHoverRow[i18] ? this.backgroundColorRow[i18] :
                             TRANS_COLOR);
-                        ListItem.onHover((f11) => {
+                        ListItem.onHover((e19) => {
                             Context.animateTo({
                                 curve: FRICTION_CUBIC_BEZIER,
                                 duration: ANIMATION_DURATION_250
                             }, () => {
-                                if (f11) {
-                                    this.backgroundColorRow[t10] = {
+                                if (e19) {
+                                    this.backgroundColorRow[i18] = {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_hover'],
                                         'bundleName': '__harDefaultBundleName__',
                                         'moduleName': '__harDefaultModuleName__'
                                     };
-                                    this.isBackgroundHoverRow[t10] = true;
-                                } else {
-                                    this.isBackgroundHoverRow[t10] = false;
+                                    this.isBackgroundHoverRow[i18] = true;
+                                }
+                                else {
+                                    this.isBackgroundHoverRow[i18] = false;
                                 }
                             });
                         });
-                        ListItem.onTouch((e11) => {
-                            if (e11.type === TouchType.Down) {
+                        ListItem.onTouch((b19) => {
+                            if (b19.type === TouchType.Down) {
                                 Context.animateTo({
                                     curve: SHARP_CUBIC_BEZIER,
                                     duration: ANIMATION_DURATION_100
                                 }, () => {
-                                    this.backgroundColorRow[t10] = {
+                                    this.backgroundColorRow[i18] = {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_click_effect'],
                                         'bundleName': '__harDefaultBundleName__',
                                         'moduleName': '__harDefaultModuleName__'
                                     };
-                                    this.isBackgroundHoverRow[t10] = true;
+                                    this.isBackgroundHoverRow[i18] = true;
                                 });
-                            } else if (e11.type === TouchType.Up || e11.type === TouchType.Cancel) {
+                            }
+                            else if (b19.type === TouchType.Up || b19.type === TouchType.Cancel) {
                                 Context.animateTo({
                                     curve: SHARP_CUBIC_BEZIER,
                                     duration: ANIMATION_DURATION_100
                                 }, () => {
-                                    this.isBackgroundHoverRow[t10] = false;
+                                    this.isBackgroundHoverRow[i18] = false;
                                 });
                             }
                         });
-                        ListItem.margin({ start: LengthMetrics.vp(t10 === 0 ? -TEXT_HOT_AREA_WIDTH : 0) });
-                        ListItem.tabIndex(t10 === 0 ? this.rowIndex : -1);
+                        ListItem.margin({ start: LengthMetrics.vp(i18 === 0 ? -TEXT_HOT_AREA_WIDTH : 0) });
+                        ListItem.tabIndex(i18 === 0 ? this.rowIndex : -1);
                     };
-                    const x8 = (y10, z10) => {
-                        v8(y10, z10);
-                        this.observeComponentCreation2((a11, b11) => {
-                            Text.create(u10);
+                    const n18 = (r18, s18) => {
+                        l18(r18, s18);
+                        this.observeComponentCreation2((u18, v18) => {
+                            Text.create(j18);
                             Text.fontSize({
                                 'id': -1,
                                 'type': 10002,
@@ -460,33 +550,33 @@ class ListFilterRow extends ViewPU {
                             });
                             Text.minFontScale(1);
                             Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
-                            Text.fontColor(this.colorRow[t10]);
-                            Text.fontWeight(this.fontWeightRow[t10]);
+                            Text.fontColor(this.colorRow[i18]);
+                            Text.fontWeight(this.fontWeightRow[i18]);
                             Text.focusable(true);
                         }, Text);
                         Text.pop();
                         ListItem.pop();
                     };
-                    this.observeComponentCreation2(w8, ListItem);
+                    this.observeComponentCreation2(m18, ListItem);
                     ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(p10, this.filterRow.options, b8, undefined, true, false);
+            this.forEachUpdateFunction(d18, this.filterRow.options, f18, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         List.pop();
         {
-            this.observeComponentCreation2((l10, m10) => {
-                if (m10) {
-                    let n10 = new GradientMask(this, {
+            this.observeComponentCreation2((x17, y17) => {
+                if (y17) {
+                    let z17 = new GradientMask(this, {
                         x0: 0,
                         y0: LIST_ROW_HEIGHT / 2,
                         x1: GRADIENT_WIDTH,
                         y1: LIST_ROW_HEIGHT / 2
-                    }, undefined, l10, () => {
-                    }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 245, col: 9 });
-                    ViewPU.create(n10);
-                    let o6 = () => {
+                    }, undefined, x17, () => {
+                    }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 318, col: 9 });
+                    ViewPU.create(z17);
+                    let a18 = () => {
                         return {
                             x0: 0,
                             y0: LIST_ROW_HEIGHT / 2,
@@ -494,25 +584,26 @@ class ListFilterRow extends ViewPU {
                             y1: LIST_ROW_HEIGHT / 2
                         };
                     };
-                    n10.paramsGenerator_ = o6;
-                } else {
-                    this.updateStateVarsOfChildByElmtId(l10, {});
+                    z17.paramsGenerator_ = a18;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(x17, {});
                 }
             }, { name: 'GradientMask' });
         }
         Stack.pop();
         {
-            this.observeComponentCreation2((h10, i10) => {
-                if (i10) {
-                    let j10 = new GradientMask(this, {
+            this.observeComponentCreation2((q17, r17) => {
+                if (r17) {
+                    let s17 = new GradientMask(this, {
                         x0: GRADIENT_WIDTH,
                         y0: LIST_ROW_HEIGHT / 2,
                         x1: 0,
                         y1: LIST_ROW_HEIGHT / 2
-                    }, undefined, h10, () => {
-                    }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 253, col: 7 });
-                    ViewPU.create(j10);
-                    let h6 = () => {
+                    }, undefined, q17, () => {
+                    }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 326, col: 7 });
+                    ViewPU.create(s17);
+                    let t17 = () => {
                         return {
                             x0: GRADIENT_WIDTH,
                             y0: LIST_ROW_HEIGHT / 2,
@@ -520,9 +611,10 @@ class ListFilterRow extends ViewPU {
                             y1: LIST_ROW_HEIGHT / 2
                         };
                     };
-                    j10.paramsGenerator_ = h6;
-                } else {
-                    this.updateStateVarsOfChildByElmtId(h10, {});
+                    s17.paramsGenerator_ = t17;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(q17, {});
                 }
             }, { name: 'GradientMask' });
         }
@@ -535,23 +627,26 @@ class ListFilterRow extends ViewPU {
 }
 
 class MultiFilterRow extends ViewPU {
-    constructor(b10, c10, d10, e10 = -1, f10 = undefined, g10) {
-        super(b10, d10, e10, g10);
-        if (typeof f10 === 'function') {
-            this.paramsGenerator_ = f10;
+    constructor(e17, f17, g17, h17 = -1, i17 = undefined, j17) {
+        super(e17, g17, h17, j17);
+        if (typeof i17 === 'function') {
+            this.paramsGenerator_ = i17;
         }
-        this.__colorRow = new SynchedPropertyNesedObjectPU(c10.colorRow, this, 'colorRow');
-        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(c10.fontWeightRow, this, 'fontWeightRow');
+        this.__colorRow = new SynchedPropertyNesedObjectPU(f17.colorRow, this, 'colorRow');
+        this.__fontWeightRow =
+            new SynchedPropertyNesedObjectPU(f17.fontWeightRow, this, 'fontWeightRow');
         this.__backgroundColorRow =
-            new SynchedPropertyNesedObjectPU(c10.backgroundColorRow, this, 'backgroundColorRow');
+            new SynchedPropertyNesedObjectPU(f17.backgroundColorRow, this, 'backgroundColorRow');
         this.__isBackgroundHoverRow =
-            new SynchedPropertyNesedObjectPU(c10.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
+            new SynchedPropertyNesedObjectPU(f17.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
         this.__twoLineModeItemNumRow =
-            new SynchedPropertyNesedObjectPU(c10.twoLineModeItemNumRow, this, 'twoLineModeItemNumRow');
+            new SynchedPropertyNesedObjectPU(f17.twoLineModeItemNumRow, this, 'twoLineModeItemNumRow');
         this.__twoLineModeItemNumRecordRow =
-            new SynchedPropertyNesedObjectPU(c10.twoLineModeItemNumRecordRow, this, 'twoLineModeItemNumRecordRow');
-        this.__arrowShowStateRow = new SynchedPropertyNesedObjectPU(c10.arrowShowStateRow, this, 'arrowShowStateRow');
-        this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(c10.isArrowIconDown, this, 'isArrowIconDown');
+            new SynchedPropertyNesedObjectPU(f17.twoLineModeItemNumRecordRow, this, 'twoLineModeItemNumRecordRow');
+        this.__arrowShowStateRow =
+            new SynchedPropertyNesedObjectPU(f17.arrowShowStateRow, this, 'arrowShowStateRow');
+        this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(f17.isArrowIconDown, this, 'isArrowIconDown');
+        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(f17.isSelectedRow, this, 'isSelectedRow');
         this.filterRow = null;
         this.onItemClick = () => {
         };
@@ -563,83 +658,119 @@ class MultiFilterRow extends ViewPU {
             'moduleName': '__harDefaultModuleName__'
         }, this, 'arrowBgColorRow');
         this.__isArrowBgHoverRow = new ObservedPropertySimplePU(false, this, 'isArrowBgHoverRow');
-        this.__fontSizeScale = new SynchedPropertyObjectOneWayPU(c10.fontSizeScale, this, 'fontSizeScale');
+        this.__fontSizeScale = new SynchedPropertyObjectOneWayPU(f17.fontSizeScale, this, 'fontSizeScale');
         this.__replaceEffect = new ObservedPropertySimplePU(0, this, 'replaceEffect');
+        this.__isSendArrowAccessibility = new ObservedPropertySimplePU(false, this, 'isSendArrowAccessibility');
         this.filterColumnWidth = 0;
         this.lastFilterColumnWidth = 0;
         this.rowIndex = 0;
+        this.accessibilityExpand = '';
+        this.accessibilitySelectedText = '';
+        this.accessibilityCollapse = '';
+        this.accessibilityExpanded = '';
+        this.accessibilityCollapsed = '';
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
-        this.setInitiallyProvidedValue(c10);
+        this.bundleName = '';
+        this.filterId = this.getUniqueId();
+        this.setInitiallyProvidedValue(f17);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(a10) {
-        this.__colorRow.set(a10.colorRow);
-        this.__fontWeightRow.set(a10.fontWeightRow);
-        this.__backgroundColorRow.set(a10.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(a10.isBackgroundHoverRow);
-        this.__twoLineModeItemNumRow.set(a10.twoLineModeItemNumRow);
-        this.__twoLineModeItemNumRecordRow.set(a10.twoLineModeItemNumRecordRow);
-        this.__arrowShowStateRow.set(a10.arrowShowStateRow);
-        this.__isArrowIconDown.set(a10.isArrowIconDown);
-        if (a10.filterRow !== undefined) {
-            this.filterRow = a10.filterRow;
+    setInitiallyProvidedValue(d17) {
+        this.__colorRow.set(d17.colorRow);
+        this.__fontWeightRow.set(d17.fontWeightRow);
+        this.__backgroundColorRow.set(d17.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(d17.isBackgroundHoverRow);
+        this.__twoLineModeItemNumRow.set(d17.twoLineModeItemNumRow);
+        this.__twoLineModeItemNumRecordRow.set(d17.twoLineModeItemNumRecordRow);
+        this.__arrowShowStateRow.set(d17.arrowShowStateRow);
+        this.__isArrowIconDown.set(d17.isArrowIconDown);
+        this.__isSelectedRow.set(d17.isSelectedRow);
+        if (d17.filterRow !== undefined) {
+            this.filterRow = d17.filterRow;
         }
-        if (a10.onItemClick !== undefined) {
-            this.onItemClick = a10.onItemClick;
+        if (d17.onItemClick !== undefined) {
+            this.onItemClick = d17.onItemClick;
         }
-        if (a10.arrowBgColorRow !== undefined) {
-            this.arrowBgColorRow = a10.arrowBgColorRow;
+        if (d17.arrowBgColorRow !== undefined) {
+            this.arrowBgColorRow = d17.arrowBgColorRow;
         }
-        if (a10.isArrowBgHoverRow !== undefined) {
-            this.isArrowBgHoverRow = a10.isArrowBgHoverRow;
+        if (d17.isArrowBgHoverRow !== undefined) {
+            this.isArrowBgHoverRow = d17.isArrowBgHoverRow;
         }
-        if (a10.replaceEffect !== undefined) {
-            this.replaceEffect = a10.replaceEffect;
+        if (d17.replaceEffect !== undefined) {
+            this.replaceEffect = d17.replaceEffect;
         }
-        if (a10.filterColumnWidth !== undefined) {
-            this.filterColumnWidth = a10.filterColumnWidth;
+        if (d17.isSendArrowAccessibility !== undefined) {
+            this.isSendArrowAccessibility = d17.isSendArrowAccessibility;
         }
-        if (a10.lastFilterColumnWidth !== undefined) {
-            this.lastFilterColumnWidth = a10.lastFilterColumnWidth;
+        if (d17.filterColumnWidth !== undefined) {
+            this.filterColumnWidth = d17.filterColumnWidth;
         }
-        if (a10.rowIndex !== undefined) {
-            this.rowIndex = a10.rowIndex;
+        if (d17.lastFilterColumnWidth !== undefined) {
+            this.lastFilterColumnWidth = d17.lastFilterColumnWidth;
         }
-        if (a10.maxAppFontScale !== undefined) {
-            this.maxAppFontScale = a10.maxAppFontScale;
+        if (d17.rowIndex !== undefined) {
+            this.rowIndex = d17.rowIndex;
         }
-        if (a10.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = a10.isFollowingSystemFontScale;
+        if (d17.accessibilityExpand !== undefined) {
+            this.accessibilityExpand = d17.accessibilityExpand;
+        }
+        if (d17.accessibilitySelectedText !== undefined) {
+            this.accessibilitySelectedText = d17.accessibilitySelectedText;
+        }
+        if (d17.accessibilityCollapse !== undefined) {
+            this.accessibilityCollapse = d17.accessibilityCollapse;
+        }
+        if (d17.accessibilityExpanded !== undefined) {
+            this.accessibilityExpanded = d17.accessibilityExpanded;
+        }
+        if (d17.accessibilityCollapsed !== undefined) {
+            this.accessibilityCollapsed = d17.accessibilityCollapsed;
+        }
+        if (d17.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = d17.maxAppFontScale;
+        }
+        if (d17.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = d17.isFollowingSystemFontScale;
+        }
+        if (d17.bundleName !== undefined) {
+            this.bundleName = d17.bundleName;
+        }
+        if (d17.filterId !== undefined) {
+            this.filterId = d17.filterId;
         }
     }
 
-    updateStateVars(z9) {
-        this.__colorRow.set(z9.colorRow);
-        this.__fontWeightRow.set(z9.fontWeightRow);
-        this.__backgroundColorRow.set(z9.backgroundColorRow);
-        this.__isBackgroundHoverRow.set(z9.isBackgroundHoverRow);
-        this.__twoLineModeItemNumRow.set(z9.twoLineModeItemNumRow);
-        this.__twoLineModeItemNumRecordRow.set(z9.twoLineModeItemNumRecordRow);
-        this.__arrowShowStateRow.set(z9.arrowShowStateRow);
-        this.__isArrowIconDown.set(z9.isArrowIconDown);
-        this.__fontSizeScale.reset(z9.fontSizeScale);
+    updateStateVars(c17) {
+        this.__colorRow.set(c17.colorRow);
+        this.__fontWeightRow.set(c17.fontWeightRow);
+        this.__backgroundColorRow.set(c17.backgroundColorRow);
+        this.__isBackgroundHoverRow.set(c17.isBackgroundHoverRow);
+        this.__twoLineModeItemNumRow.set(c17.twoLineModeItemNumRow);
+        this.__twoLineModeItemNumRecordRow.set(c17.twoLineModeItemNumRecordRow);
+        this.__arrowShowStateRow.set(c17.arrowShowStateRow);
+        this.__isArrowIconDown.set(c17.isArrowIconDown);
+        this.__isSelectedRow.set(c17.isSelectedRow);
+        this.__fontSizeScale.reset(c17.fontSizeScale);
     }
 
-    purgeVariableDependenciesOnElmtId(y9) {
-        this.__colorRow.purgeDependencyOnElmtId(y9);
-        this.__fontWeightRow.purgeDependencyOnElmtId(y9);
-        this.__backgroundColorRow.purgeDependencyOnElmtId(y9);
-        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(y9);
-        this.__twoLineModeItemNumRow.purgeDependencyOnElmtId(y9);
-        this.__twoLineModeItemNumRecordRow.purgeDependencyOnElmtId(y9);
-        this.__arrowShowStateRow.purgeDependencyOnElmtId(y9);
-        this.__isArrowIconDown.purgeDependencyOnElmtId(y9);
-        this.__arrowBgColorRow.purgeDependencyOnElmtId(y9);
-        this.__isArrowBgHoverRow.purgeDependencyOnElmtId(y9);
-        this.__fontSizeScale.purgeDependencyOnElmtId(y9);
-        this.__replaceEffect.purgeDependencyOnElmtId(y9);
+    purgeVariableDependenciesOnElmtId(b17) {
+        this.__colorRow.purgeDependencyOnElmtId(b17);
+        this.__fontWeightRow.purgeDependencyOnElmtId(b17);
+        this.__backgroundColorRow.purgeDependencyOnElmtId(b17);
+        this.__isBackgroundHoverRow.purgeDependencyOnElmtId(b17);
+        this.__twoLineModeItemNumRow.purgeDependencyOnElmtId(b17);
+        this.__twoLineModeItemNumRecordRow.purgeDependencyOnElmtId(b17);
+        this.__arrowShowStateRow.purgeDependencyOnElmtId(b17);
+        this.__isArrowIconDown.purgeDependencyOnElmtId(b17);
+        this.__isSelectedRow.purgeDependencyOnElmtId(b17);
+        this.__arrowBgColorRow.purgeDependencyOnElmtId(b17);
+        this.__isArrowBgHoverRow.purgeDependencyOnElmtId(b17);
+        this.__fontSizeScale.purgeDependencyOnElmtId(b17);
+        this.__replaceEffect.purgeDependencyOnElmtId(b17);
+        this.__isSendArrowAccessibility.purgeDependencyOnElmtId(b17);
     }
 
     aboutToBeDeleted() {
@@ -651,10 +782,12 @@ class MultiFilterRow extends ViewPU {
         this.__twoLineModeItemNumRecordRow.aboutToBeDeleted();
         this.__arrowShowStateRow.aboutToBeDeleted();
         this.__isArrowIconDown.aboutToBeDeleted();
+        this.__isSelectedRow.aboutToBeDeleted();
         this.__arrowBgColorRow.aboutToBeDeleted();
         this.__isArrowBgHoverRow.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
         this.__replaceEffect.aboutToBeDeleted();
+        this.__isSendArrowAccessibility.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -691,47 +824,61 @@ class MultiFilterRow extends ViewPU {
         return this.__isArrowIconDown.get();
     }
 
+    get isSelectedRow() {
+        return this.__isSelectedRow.get();
+    }
+
     get arrowBgColorRow() {
         return this.__arrowBgColorRow.get();
     }
 
-    set arrowBgColorRow(x9) {
-        this.__arrowBgColorRow.set(x9);
+    set arrowBgColorRow(a17) {
+        this.__arrowBgColorRow.set(a17);
     }
 
     get isArrowBgHoverRow() {
         return this.__isArrowBgHoverRow.get();
     }
 
-    set isArrowBgHoverRow(w9) {
-        this.__isArrowBgHoverRow.set(w9);
+    set isArrowBgHoverRow(z16) {
+        this.__isArrowBgHoverRow.set(z16);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(r10) {
-        this.__fontSizeScale.set(r10);
+    set fontSizeScale(y16) {
+        this.__fontSizeScale.set(y16);
     }
 
     get replaceEffect() {
         return this.__replaceEffect.get();
     }
 
-    set replaceEffect(u9) {
-        this.__replaceEffect.set(u9);
+    set replaceEffect(x16) {
+        this.__replaceEffect.set(x16);
+    }
+
+    get isSendArrowAccessibility() {
+        return this.__isSendArrowAccessibility.get();
+    }
+
+    set isSendArrowAccessibility(w16) {
+        this.__isSendArrowAccessibility.set(w16);
     }
 
     aboutToAppear() {
+        this.initAccessibilityResource();
         try {
-            let t9 = this.getUIContext();
-            this.isFollowingSystemFontScale = t9.isFollowingSystemFontScale();
-            this.maxAppFontScale = t9.getMaxFontScale();
-        } catch (q9) {
-            let r9 = q9.code;
-            let s9 = q9.message;
-            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${r9}, message: ${s9}`);
+            let r16 = this.getUIContext();
+            this.isFollowingSystemFontScale = r16.isFollowingSystemFontScale();
+            this.maxAppFontScale = r16.getMaxFontScale();
+        }
+        catch (o16) {
+            let p16 = o16.code;
+            let q16 = o16.message;
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${p16}, message: ${q16}`);
         }
     }
 
@@ -742,6 +889,23 @@ class MultiFilterRow extends ViewPU {
             return 1;
         }
         return Math.min(p9, this.maxAppFontScale);
+    }
+
+    initAccessibilityResource() {
+        try {
+            this.bundleName = getContext(this)?.abilityInfo?.bundleName;
+            let p16 = getContext()?.resourceManager;
+            this.accessibilitySelectedText = p16?.getStringByNameSync('filter_accessibility_selected');
+            this.accessibilityExpand = p16?.getStringByNameSync('filter_accessibility_expand');
+            this.accessibilityCollapse = p16?.getStringByNameSync('filter_accessibility_collapse');
+            this.accessibilityExpanded = p16?.getStringByNameSync('filter_accessibility_expanded');
+            this.accessibilityCollapsed = p16?.getStringByNameSync('filter_accessibility_collapsed');
+        }
+        catch (m16) {
+            let n16 = m16.code;
+            let o16 = m16.message;
+            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${n16}, message: ${o16}`);
+        }
     }
 
     calcMultiFilterRowItemNum() {
@@ -783,10 +947,73 @@ class MultiFilterRow extends ViewPU {
         return j9;
     }
 
-    DownAndUpArrow(b9 = null) {
-        this.observeComponentCreation2((e9, f9) => {
+    getAccessibilityText(y15, z15, a16) {
+        let b16 = '';
+        try {
+            let f16 = '';
+            if (typeof y15 === 'string') {
+                f16 = y15;
+            }
+            else {
+                f16 = getContext()?.resourceManager?.getStringSync(y15?.id);
+            }
+            switch (a16) {
+                case FilterAccessibilityType.ACCESSIBILITY_TEXT:
+                    b16 = z15 ? this.accessibilitySelectedText : f16;
+                    break;
+                case FilterAccessibilityType.ACCESSIBILITY_DESC:
+                    b16 = z15 ? f16 : '';
+                    break;
+                case FilterAccessibilityType.SEND_ACCESSIBILITY:
+                    b16 = z15 ? `${this.accessibilitySelectedText},${f16}` : '';
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (c16) {
+            let d16 = c16.code;
+            let e16 = c16.message;
+            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${d16}, message: ${e16}`);
+        }
+        return b16;
+    }
+
+    sendAccessibility(v15, w15) {
+        let x15 = ({
+            type: 'announceForAccessibility',
+            bundleName: this.bundleName,
+            triggerAction: 'common',
+            textAnnouncedForAccessibility: this.getAccessibilityText(v15,
+                w15, FilterAccessibilityType.SEND_ACCESSIBILITY),
+        });
+        accessibility.sendAccessibilityEvent(x15);
+    }
+
+    sendArrowAccessibility(r15) {
+        this.isSendArrowAccessibility = true;
+        setTimeout(() => {
+            let u15 = ({
+                type: 'requestFocusForAccessibility',
+                bundleName: this.bundleName,
+                triggerAction: 'common',
+                customId: r15,
+            });
+            accessibility.sendAccessibilityEvent(u15);
+        }, 100);
+        setTimeout(() => {
+            this.isSendArrowAccessibility = false;
+        }, 200);
+    }
+
+    DownAndUpArrow(v14 = null) {
+        this.observeComponentCreation2((p15, q15) => {
             Row.create();
-            Row.border({
+            Row.height(LIST_ROW_HEIGHT);
+        }, Row);
+        this.observeComponentCreation2((b15, c15) => {
+            Button.createWithChild({ stateEffect: false, type: ButtonType.Normal });
+            Button.border({
                 radius: {
                     'id': -1,
                     'type': 10002,
@@ -795,16 +1022,22 @@ class MultiFilterRow extends ViewPU {
                     'moduleName': '__harDefaultModuleName__'
                 }
             });
-            Row.height(LIST_ROW_HEIGHT);
-            Row.backgroundColor(this.isArrowBgHoverRow ? this.arrowBgColorRow : TRANS_COLOR);
-            Row.focusable(true);
-            Row.visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden);
-            Row.onHover((m15) => {
+            Button.height(LIST_ROW_HEIGHT);
+            Button.backgroundColor(this.isArrowBgHoverRow ? this.arrowBgColorRow : TRANS_COLOR);
+            Button.focusable(true);
+            Button.accessibilityGroup(true);
+            Button.accessibilityText(this.isSendArrowAccessibility ?
+                (this.isArrowIconDown?.value ? this.accessibilityCollapsed : this.accessibilityExpanded) :
+                (this.isArrowIconDown?.value ? this.accessibilityExpand : this.accessibilityCollapse));
+            Button.accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined);
+            Button.id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
+            Button.visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden);
+            Button.onHover((n15) => {
                 Context.animateTo({
                     curve: FRICTION_CUBIC_BEZIER,
                     duration: ANIMATION_DURATION_250
                 }, () => {
-                    if (m15) {
+                    if (n15) {
                         this.arrowBgColorRow = {
                             'id': -1,
                             'type': 10001,
@@ -813,13 +1046,14 @@ class MultiFilterRow extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         };
                         this.isArrowBgHoverRow = true;
-                    } else {
+                    }
+                    else {
                         this.isArrowBgHoverRow = false;
                     }
                 });
             });
-            Row.onTouch((l15) => {
-                if (l15.type === TouchType.Down) {
+            Button.onTouch((k15) => {
+                if (k15.type === TouchType.Down) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -833,7 +1067,8 @@ class MultiFilterRow extends ViewPU {
                         };
                         this.isArrowBgHoverRow = true;
                     });
-                } else if (l15.type === TouchType.Up || l15.type === TouchType.Cancel) {
+                }
+                else if (k15.type === TouchType.Up || k15.type === TouchType.Cancel) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -842,7 +1077,7 @@ class MultiFilterRow extends ViewPU {
                     });
                 }
             });
-            Row.onClick(() => {
+            Button.onClick(() => {
                 this.replaceEffect += 1;
                 if (this.isArrowIconDown.value) {
                     this.isArrowIconDown.value = false;
@@ -859,7 +1094,8 @@ class MultiFilterRow extends ViewPU {
                     }, () => {
                         this.arrowShowStateRow.value = true;
                     });
-                } else {
+                }
+                else {
                     this.isArrowIconDown.value = true;
                     this.arrowShowStateRow.value = false;
                     Context.animateTo({
@@ -875,9 +1111,10 @@ class MultiFilterRow extends ViewPU {
                         this.arrowShowStateRow.value = true;
                     });
                 }
+                this.sendArrowAccessibility(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
             });
-        }, Row);
-        this.observeComponentCreation2((c9, d9) => {
+        }, Button);
+        this.observeComponentCreation2((z14, a15) => {
             SymbolGlyph.create(this.isArrowIconDown.value ? {
                 'id': -1,
                 'type': 40000,
@@ -938,11 +1175,12 @@ class MultiFilterRow extends ViewPU {
             ViewStackProcessor.visualState();
             SymbolGlyph.tabIndex(-1);
         }, SymbolGlyph);
+        Button.pop();
         Row.pop();
     }
 
     initialRender() {
-        this.observeComponentCreation2((z8, a9) => {
+        this.observeComponentCreation2((t14, u14) => {
             Flex.create();
             Flex.width(PERCENT_100);
             Flex.padding({
@@ -962,171 +1200,186 @@ class MultiFilterRow extends ViewPU {
                 })
             });
         }, Flex);
-        this.observeComponentCreation2((t8, u8) => {
+        this.observeComponentCreation2((e14, f14) => {
             If.create();
             if (this.filterRow?.options && this.filterRow?.options.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b15, d15) => {
-                        Text.create(this.filterRow?.options[0]);
-                        Text.height(LIST_ROW_HEIGHT);
-                        Text.margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) });
-                        Text.fontSize({
-                            'id': -1,
-                            'type': 10002,
-                            params: ['sys.float.ohos_id_text_size_body3'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
-                        });
-                        Text.minFontScale(1);
-                        Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
-                        Text.maxLines(1);
-                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.fontColor(this.colorRow[0]);
-                        Text.fontWeight(this.fontWeightRow[0]);
-                        Text.backgroundColor(this.isBackgroundHoverRow[0] ? this.backgroundColorRow[0] : TRANS_COLOR);
-                        Text.onClick(() => {
-                            this.onItemClick(0);
-                        });
-                        Text.focusable(true);
-                        Text.onHover((k15) => {
-                            Context.animateTo({
-                                curve: FRICTION_CUBIC_BEZIER,
-                                duration: ANIMATION_DURATION_250
-                            }, () => {
-                                if (k15) {
-                                    this.backgroundColorRow[0] = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_hover'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
-                                    this.isBackgroundHoverRow[0] = true;
-                                } else {
-                                    this.isBackgroundHoverRow[0] = false;
+                    if (!If.canRetake(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`)) {
+                        this.observeComponentCreation2((j14, k14) => {
+                            Text.create(this.filterRow?.options[0]);
+                            Text.height(LIST_ROW_HEIGHT);
+                            Text.margin({ start: LengthMetrics.vp(-TEXT_HOT_AREA_WIDTH) });
+                            Text.fontSize({
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_text_size_body3'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            });
+                            Text.minFontScale(1);
+                            Text.maxFontScale(Math.min(this.updateFontScale(), MAX_FONT_SCALE));
+                            Text.maxLines(1);
+                            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                            Text.fontColor(this.colorRow[0]);
+                            Text.fontWeight(this.fontWeightRow[0]);
+                            Text.backgroundColor(this.isBackgroundHoverRow[0] ? this.backgroundColorRow[0] :
+                                TRANS_COLOR);
+                            Text.accessibilityText(this.getAccessibilityText(this.filterRow?.options[0],
+                                this.isSelectedRow[0], FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                            Text.accessibilityDescription(this.getAccessibilityText(this.filterRow?.options[0],
+                                this.isSelectedRow[0], FilterAccessibilityType.ACCESSIBILITY_DESC));
+                            Text.onClick(() => {
+                                this.onItemClick(0);
+                                this.sendAccessibility(this.filterRow?.options[0], true);
+                            });
+                            Text.id(`filterMultiFilterRow_${this.filterId}_${this.rowIndex}`);
+                            Text.focusable(true);
+                            Text.onHover((r14) => {
+                                Context.animateTo({
+                                    curve: FRICTION_CUBIC_BEZIER,
+                                    duration: ANIMATION_DURATION_250
+                                }, () => {
+                                    if (r14) {
+                                        this.backgroundColorRow[0] = {
+                                            'id': -1,
+                                            'type': 10001,
+                                            params: ['sys.color.ohos_id_color_hover'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
+                                        };
+                                        this.isBackgroundHoverRow[0] = true;
+                                    }
+                                    else {
+                                        this.isBackgroundHoverRow[0] = false;
+                                    }
+                                });
+                            });
+                            Text.onTouch((o14) => {
+                                if (o14.type === TouchType.Down) {
+                                    Context.animateTo({
+                                        curve: SHARP_CUBIC_BEZIER,
+                                        duration: ANIMATION_DURATION_100
+                                    }, () => {
+                                        this.backgroundColorRow[0] = {
+                                            'id': -1,
+                                            'type': 10001,
+                                            params: ['sys.color.ohos_id_color_click_effect'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
+                                        };
+                                        this.isBackgroundHoverRow[0] = true;
+                                    });
+                                }
+                                else if (o14.type === TouchType.Up || o14.type === TouchType.Cancel) {
+                                    Context.animateTo({
+                                        curve: SHARP_CUBIC_BEZIER,
+                                        duration: ANIMATION_DURATION_100
+                                    }, () => {
+                                        this.isBackgroundHoverRow[0] = false;
+                                    });
                                 }
                             });
-                        });
-                        Text.onTouch((f15) => {
-                            if (f15.type === TouchType.Down) {
-                                Context.animateTo({
-                                    curve: SHARP_CUBIC_BEZIER,
-                                    duration: ANIMATION_DURATION_100
-                                }, () => {
-                                    this.backgroundColorRow[0] = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_click_effect'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
-                                    this.isBackgroundHoverRow[0] = true;
-                                });
-                            } else if (f15.type === TouchType.Up || f15.type === TouchType.Cancel) {
-                                Context.animateTo({
-                                    curve: SHARP_CUBIC_BEZIER,
-                                    duration: ANIMATION_DURATION_100
-                                }, () => {
-                                    this.isBackgroundHoverRow[0] = false;
-                                });
-                            }
-                        });
-                        ViewStackProcessor.visualState('focused');
-                        Text.border({
-                            radius: {
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.ohos_id_corner_radius_clicked'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            },
-                            width: FOCUS_BORDER_WIDTH,
-                            color: {
-                                'id': -1,
-                                'type': 10001,
-                                params: ['sys.color.ohos_id_color_focused_outline'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            },
-                            style: BorderStyle.Solid
-                        });
-                        Text.padding({
-                            start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
-                            end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
-                        });
-                        ViewStackProcessor.visualState('normal');
-                        Text.border({
-                            radius: {
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.ohos_id_corner_radius_clicked'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            },
-                            width: 0
-                        });
-                        Text.padding({
-                            start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
-                            end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
-                        });
-                        ViewStackProcessor.visualState();
-                        Text.constraintSize({ maxWidth: '50%' });
-                        Text.flexShrink(0);
-                        Text.tabIndex(this.rowIndex);
-                    }, Text);
-                    Text.pop();
+                            ViewStackProcessor.visualState('focused');
+                            Text.border({
+                                radius: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.ohos_id_corner_radius_clicked'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                width: FOCUS_BORDER_WIDTH,
+                                color: {
+                                    'id': -1,
+                                    'type': 10001,
+                                    params: ['sys.color.ohos_id_color_focused_outline'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                style: BorderStyle.Solid
+                            });
+                            Text.padding({
+                                start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH),
+                                end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH - FOCUS_BORDER_WIDTH)
+                            });
+                            ViewStackProcessor.visualState('normal');
+                            Text.border({
+                                radius: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.ohos_id_corner_radius_clicked'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                },
+                                width: 0
+                            });
+                            Text.padding({
+                                start: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH),
+                                end: LengthMetrics.vp(TEXT_HOT_AREA_WIDTH)
+                            });
+                            ViewStackProcessor.visualState();
+                            Text.constraintSize({ maxWidth: '50%' });
+                            Text.flexShrink(0);
+                            Text.tabIndex(this.rowIndex);
+                        }, Text);
+                        Text.pop();
+                    }
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((n8, o8) => {
+        this.observeComponentCreation2((x13, y13) => {
             Row.create();
             Row.width(PERCENT_100);
-            Row.onAreaChange((p8, q8) => {
-                this.filterColumnWidth = vp2px(parseInt(q8.width.toString(), 0));
+            Row.onAreaChange((a14, b14) => {
+                this.filterColumnWidth = vp2px(parseInt(b14.width.toString(), 0));
                 if (this.twoLineModeItemNumRow.value === 0) {
-                    let s8 = this.calcMultiFilterRowItemNum();
-                    this.twoLineModeItemNumRow.value = s8;
-                    this.twoLineModeItemNumRecordRow.value = s8;
-                    if (this.filterRow && s8 < this.filterRow.options.length - 1) {
+                    let d14 = this.calcMultiFilterRowItemNum();
+                    this.twoLineModeItemNumRow.value = d14;
+                    this.twoLineModeItemNumRecordRow.value = d14;
+                    if (this.filterRow && d14 < this.filterRow.options.length - 1) {
                         this.arrowShowStateRow.value = true;
-                    } else {
+                    }
+                    else {
                         this.arrowShowStateRow.value = false;
                     }
-                } else if (this.filterColumnWidth !== this.lastFilterColumnWidth) {
-                    let r8 = this.calcMultiFilterRowItemNum();
-                    if (this.filterRow && r8 < this.filterRow.options.length - 1) {
+                }
+                else if (this.filterColumnWidth !== this.lastFilterColumnWidth) {
+                    let c14 = this.calcMultiFilterRowItemNum();
+                    if (this.filterRow && c14 < this.filterRow.options.length - 1) {
                         if (!this.arrowShowStateRow.value || this.isArrowIconDown.value) {
                             this.arrowShowStateRow.value = true;
                             this.isArrowIconDown.value = true;
-                            this.twoLineModeItemNumRow.value = r8;
+                            this.twoLineModeItemNumRow.value = c14;
                         }
-                    } else {
+                    }
+                    else {
                         this.arrowShowStateRow.value = false;
                         this.isArrowIconDown.value = false;
-                        this.twoLineModeItemNumRow.value = r8;
+                        this.twoLineModeItemNumRow.value = c14;
                     }
-                    this.twoLineModeItemNumRecordRow.value = r8;
+                    this.twoLineModeItemNumRecordRow.value = c14;
                 }
                 this.lastFilterColumnWidth = this.filterColumnWidth;
             });
         }, Row);
-        this.observeComponentCreation2((l8, m8) => {
+        this.observeComponentCreation2((v13, w13) => {
             Flex.create({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap });
         }, Flex);
-        this.observeComponentCreation2((z7, a8) => {
+        this.observeComponentCreation2((y12, z12) => {
             ForEach.create();
-            const a6 = (c8, d8) => {
-                const e8 = c8;
-                this.observeComponentCreation2((f8, g8) => {
+            const a13 = (c13, d13) => {
+                const e13 = c13;
+                this.observeComponentCreation2((g13, h13) => {
                     If.create();
-                    if (d8 > 0) {
+                    if (d13 > 0) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((h8, i8) => {
-                                Text.create(e8);
+                            this.observeComponentCreation2((l13, m13) => {
+                                Text.create(e13);
                                 Text.transition(TransitionEffect.OPACITY);
                                 Text.fontSize({
                                     'id': -1,
@@ -1140,53 +1393,60 @@ class MultiFilterRow extends ViewPU {
                                 Text.maxLines(1);
                                 Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                 Text.height(LIST_ROW_HEIGHT);
-                                Text.fontColor(this.colorRow[d8]);
-                                Text.fontWeight(this.fontWeightRow[d8]);
-                                Text.backgroundColor(this.isBackgroundHoverRow[d8] ?
-                                this.backgroundColorRow[d8] : TRANS_COLOR);
+                                Text.fontColor(this.colorRow[d13]);
+                                Text.fontWeight(this.fontWeightRow[d13]);
+                                Text.accessibilityText(this.getAccessibilityText(e13,
+                                    this.isSelectedRow[d13], FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                                Text.accessibilityDescription(this.getAccessibilityText(e13,
+                                    this.isSelectedRow[d13], FilterAccessibilityType.ACCESSIBILITY_DESC));
+                                Text.backgroundColor(this.isBackgroundHoverRow[d13] ?
+                                this.backgroundColorRow[d13] : TRANS_COLOR);
                                 Text.onClick(() => {
-                                    this.onItemClick(d8);
+                                    this.onItemClick(d13);
+                                    this.sendAccessibility(e13, true);
                                 });
-                                Text.onHover((k8) => {
+                                Text.onHover((t13) => {
                                     Context.animateTo({
                                         curve: FRICTION_CUBIC_BEZIER,
                                         duration: ANIMATION_DURATION_250
                                     }, () => {
-                                        if (k8) {
-                                            this.backgroundColorRow[d8] = {
+                                        if (t13) {
+                                            this.backgroundColorRow[d13] = {
                                                 'id': -1,
                                                 'type': 10001,
                                                 params: ['sys.color.ohos_id_color_hover'],
                                                 'bundleName': '__harDefaultBundleName__',
                                                 'moduleName': '__harDefaultModuleName__'
                                             };
-                                            this.isBackgroundHoverRow[d8] = true;
-                                        } else {
-                                            this.isBackgroundHoverRow[d8] = false;
+                                            this.isBackgroundHoverRow[d13] = true;
+                                        }
+                                        else {
+                                            this.isBackgroundHoverRow[d13] = false;
                                         }
                                     });
                                 });
-                                Text.onTouch((j8) => {
-                                    if (j8.type === TouchType.Down) {
+                                Text.onTouch((q13) => {
+                                    if (q13.type === TouchType.Down) {
                                         Context.animateTo({
                                             curve: SHARP_CUBIC_BEZIER,
                                             duration: ANIMATION_DURATION_100
                                         }, () => {
-                                            this.backgroundColorRow[d8] = {
+                                            this.backgroundColorRow[d13] = {
                                                 'id': -1,
                                                 'type': 10001,
                                                 params: ['sys.color.ohos_id_color_click_effect'],
                                                 'bundleName': '__harDefaultBundleName__',
                                                 'moduleName': '__harDefaultModuleName__'
                                             };
-                                            this.isBackgroundHoverRow[d8] = true;
+                                            this.isBackgroundHoverRow[d13] = true;
                                         });
-                                    } else if (j8.type === TouchType.Up || j8.type === TouchType.Cancel) {
+                                    }
+                                    else if (q13.type === TouchType.Up || q13.type === TouchType.Cancel) {
                                         Context.animateTo({
                                             curve: SHARP_CUBIC_BEZIER,
                                             duration: ANIMATION_DURATION_100
                                         }, () => {
-                                            this.isBackgroundHoverRow[d8] = false;
+                                            this.isBackgroundHoverRow[d13] = false;
                                         });
                                     }
                                 });
@@ -1234,24 +1494,26 @@ class MultiFilterRow extends ViewPU {
                             }, Text);
                             Text.pop();
                         });
-                    } else {
+                    }
+                    else {
                         this.ifElseBranchUpdateFunction(1, () => {
                         });
                     }
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(z7, this.filterRow?.options.slice(0, this.twoLineModeItemNumRow.value + 1), a6,
-                undefined, true, false);
+            this.forEachUpdateFunction(y12, this.filterRow?.options.slice(0, this.twoLineModeItemNumRow.value + 1),
+                a13, undefined, true, false);
         }, ForEach);
         ForEach.pop();
-        this.observeComponentCreation2((x7, y7) => {
+        this.observeComponentCreation2((u12, v12) => {
             If.create();
             if (this.arrowShowStateRow.value) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.DownAndUpArrow.bind(this)();
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -1268,16 +1530,16 @@ class MultiFilterRow extends ViewPU {
 }
 
 export class Filter extends ViewPU {
-    constructor(q7, r7, s7, t7 = -1, u7 = undefined, v7) {
-        super(q7, s7, t7, v7);
-        if (typeof u7 === 'function') {
-            this.paramsGenerator_ = u7;
+    constructor(h12, i12, j12, k12 = -1, l12 = undefined, m12) {
+        super(h12, j12, k12, m12);
+        if (typeof l12 === 'function') {
+            this.paramsGenerator_ = l12;
         }
         this.container = undefined;
-        this.__multiFilters = new SynchedPropertyObjectOneWayPU(r7.multiFilters, this, 'multiFilters');
-        this.__additionFilters = new SynchedPropertyObjectOneWayPU(r7.additionFilters, this, 'additionFilters');
+        this.__multiFilters = new SynchedPropertyObjectOneWayPU(i12.multiFilters, this, 'multiFilters');
+        this.__additionFilters = new SynchedPropertyObjectOneWayPU(i12.additionFilters, this, 'additionFilters');
         this.onFilterChanged = null;
-        this.__filterType = new SynchedPropertySimpleOneWayPU(r7.filterType, this, 'filterType');
+        this.__filterType = new SynchedPropertySimpleOneWayPU(i12.filterType, this, 'filterType');
         this.selectedFilters = null;
         this.__colorArr = new ObservedPropertyObjectPU(null, this, 'colorArr');
         this.__fontWeightArr = new ObservedPropertyObjectPU(null, this, 'fontWeightArr');
@@ -1290,6 +1552,7 @@ export class Filter extends ViewPU {
         this.__additionFontWeightArr = new ObservedPropertyObjectPU(null, this, 'additionFontWeightArr');
         this.__additionBackgroundColorArr = new ObservedPropertyObjectPU(null, this, 'additionBackgroundColorArr');
         this.__isAdditionBackgroundHover = new ObservedPropertyObjectPU(null, this, 'isAdditionBackgroundHover');
+        this.__isSelectedArr = new ObservedPropertyObjectPU(null, this, 'isSelectedArr');
         this.__colorRefresh = new ObservedPropertySimplePU(false, this, 'colorRefresh');
         this.__isFloatBarShow = new ObservedPropertySimplePU(false, this, 'isFloatBarShow');
         this.isFloatBarShowWithoutAnimation = false;
@@ -1308,122 +1571,175 @@ export class Filter extends ViewPU {
         this.__fontSizeScale = new ObservedPropertyObjectPU(undefined, this, 'fontSizeScale');
         this.callbackId = undefined;
         this.callbacks = {
-            onConfigurationUpdated: (w7) => {
+            onConfigurationUpdated: (n12) => {
                 this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
                 this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
             },
             onMemoryLevel() {
             }
         };
-        this.setInitiallyProvidedValue(r7);
+        this.__additionFiltersSelectedIndex = new ObservedPropertySimplePU(-1, this, 'additionFiltersSelectedIndex');
+        this.__floatFilterBarAccessibilityText =
+            new ObservedPropertySimplePU('', this, 'floatFilterBarAccessibilityText');
+        this.accessibilityUnselectedText = '';
+        this.accessibilitySelectedText = '';
+        this.accessibilityExpanded = '';
+        this.accessibilityCollapsed = '';
+        this.accessibilityFilters = '';
+        this.accessibilitySelectedDesc = '';
+        this.accessibilityUnselectedDesc = '';
+        this.accessibilityExpandDesc = '';
+        this.bundleName = '';
+        this.filterId = this.getUniqueId();
+        this.setInitiallyProvidedValue(i12);
+        this.declareWatch('isFloatBarShow', this.updateFocusForAccessibility);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(p7) {
-        if (p7.container !== undefined) {
-            this.container = p7.container;
+    setInitiallyProvidedValue(g12) {
+        if (g12.container !== undefined) {
+            this.container = g12.container;
         }
-        if (p7.multiFilters === undefined) {
+        if (g12.multiFilters === undefined) {
             this.__multiFilters.set([]);
         }
-        if (p7.additionFilters === undefined) {
+        if (g12.additionFilters === undefined) {
             this.__additionFilters.set(null);
         }
-        if (p7.onFilterChanged !== undefined) {
-            this.onFilterChanged = p7.onFilterChanged;
+        if (g12.onFilterChanged !== undefined) {
+            this.onFilterChanged = g12.onFilterChanged;
         }
-        if (p7.filterType === undefined) {
+        if (g12.filterType === undefined) {
             this.__filterType.set(FilterType.LIST_FILTER);
         }
-        if (p7.selectedFilters !== undefined) {
-            this.selectedFilters = p7.selectedFilters;
+        if (g12.selectedFilters !== undefined) {
+            this.selectedFilters = g12.selectedFilters;
         }
-        if (p7.colorArr !== undefined) {
-            this.colorArr = p7.colorArr;
+        if (g12.colorArr !== undefined) {
+            this.colorArr = g12.colorArr;
         }
-        if (p7.fontWeightArr !== undefined) {
-            this.fontWeightArr = p7.fontWeightArr;
+        if (g12.fontWeightArr !== undefined) {
+            this.fontWeightArr = g12.fontWeightArr;
         }
-        if (p7.backgroundColorArr !== undefined) {
-            this.backgroundColorArr = p7.backgroundColorArr;
+        if (g12.backgroundColorArr !== undefined) {
+            this.backgroundColorArr = g12.backgroundColorArr;
         }
-        if (p7.isBackgroundHover !== undefined) {
-            this.isBackgroundHover = p7.isBackgroundHover;
+        if (g12.isBackgroundHover !== undefined) {
+            this.isBackgroundHover = g12.isBackgroundHover;
         }
-        if (p7.floatArrowBgColor !== undefined) {
-            this.floatArrowBgColor = p7.floatArrowBgColor;
+        if (g12.floatArrowBgColor !== undefined) {
+            this.floatArrowBgColor = g12.floatArrowBgColor;
         }
-        if (p7.isFloatArrowBgHover !== undefined) {
-            this.isFloatArrowBgHover = p7.isFloatArrowBgHover;
+        if (g12.isFloatArrowBgHover !== undefined) {
+            this.isFloatArrowBgHover = g12.isFloatArrowBgHover;
         }
-        if (p7.isArrowIconDownArr !== undefined) {
-            this.isArrowIconDownArr = p7.isArrowIconDownArr;
+        if (g12.isArrowIconDownArr !== undefined) {
+            this.isArrowIconDownArr = g12.isArrowIconDownArr;
         }
-        if (p7.additionColorArr !== undefined) {
-            this.additionColorArr = p7.additionColorArr;
+        if (g12.additionColorArr !== undefined) {
+            this.additionColorArr = g12.additionColorArr;
         }
-        if (p7.additionFontWeightArr !== undefined) {
-            this.additionFontWeightArr = p7.additionFontWeightArr;
+        if (g12.additionFontWeightArr !== undefined) {
+            this.additionFontWeightArr = g12.additionFontWeightArr;
         }
-        if (p7.additionBackgroundColorArr !== undefined) {
-            this.additionBackgroundColorArr = p7.additionBackgroundColorArr;
+        if (g12.additionBackgroundColorArr !== undefined) {
+            this.additionBackgroundColorArr = g12.additionBackgroundColorArr;
         }
-        if (p7.isAdditionBackgroundHover !== undefined) {
-            this.isAdditionBackgroundHover = p7.isAdditionBackgroundHover;
+        if (g12.isAdditionBackgroundHover !== undefined) {
+            this.isAdditionBackgroundHover = g12.isAdditionBackgroundHover;
         }
-        if (p7.colorRefresh !== undefined) {
-            this.colorRefresh = p7.colorRefresh;
+        if (g12.isSelectedArr !== undefined) {
+            this.isSelectedArr = g12.isSelectedArr;
         }
-        if (p7.isFloatBarShow !== undefined) {
-            this.isFloatBarShow = p7.isFloatBarShow;
+        if (g12.colorRefresh !== undefined) {
+            this.colorRefresh = g12.colorRefresh;
         }
-        if (p7.isFloatBarShowWithoutAnimation !== undefined) {
-            this.isFloatBarShowWithoutAnimation = p7.isFloatBarShowWithoutAnimation;
+        if (g12.isFloatBarShow !== undefined) {
+            this.isFloatBarShow = g12.isFloatBarShow;
         }
-        if (p7.isFloatShowAllFilter !== undefined) {
-            this.isFloatShowAllFilter = p7.isFloatShowAllFilter;
+        if (g12.isFloatBarShowWithoutAnimation !== undefined) {
+            this.isFloatBarShowWithoutAnimation = g12.isFloatBarShowWithoutAnimation;
         }
-        if (p7.isFloatShowAllFilterWithoutAnimation !== undefined) {
-            this.isFloatShowAllFilterWithoutAnimation = p7.isFloatShowAllFilterWithoutAnimation;
+        if (g12.isFloatShowAllFilter !== undefined) {
+            this.isFloatShowAllFilter = g12.isFloatShowAllFilter;
         }
-        if (p7.floatFilterPosition !== undefined) {
-            this.floatFilterPosition = p7.floatFilterPosition;
+        if (g12.isFloatShowAllFilterWithoutAnimation !== undefined) {
+            this.isFloatShowAllFilterWithoutAnimation = g12.isFloatShowAllFilterWithoutAnimation;
         }
-        if (p7.floatFilterBarHeight !== undefined) {
-            this.floatFilterBarHeight = p7.floatFilterBarHeight;
+        if (g12.floatFilterPosition !== undefined) {
+            this.floatFilterPosition = g12.floatFilterPosition;
         }
-        if (p7.floatFilterBarPosition !== undefined) {
-            this.floatFilterBarPosition = p7.floatFilterBarPosition;
+        if (g12.floatFilterBarHeight !== undefined) {
+            this.floatFilterBarHeight = g12.floatFilterBarHeight;
         }
-        if (p7.filterDynamicHeight !== undefined) {
-            this.filterDynamicHeight = p7.filterDynamicHeight;
+        if (g12.floatFilterBarPosition !== undefined) {
+            this.floatFilterBarPosition = g12.floatFilterBarPosition;
         }
-        if (p7.twoLineModeItemNum !== undefined) {
-            this.twoLineModeItemNum = p7.twoLineModeItemNum;
+        if (g12.filterDynamicHeight !== undefined) {
+            this.filterDynamicHeight = g12.filterDynamicHeight;
         }
-        if (p7.twoLineModeItemNumRecord !== undefined) {
-            this.twoLineModeItemNumRecord = p7.twoLineModeItemNumRecord;
+        if (g12.twoLineModeItemNum !== undefined) {
+            this.twoLineModeItemNum = g12.twoLineModeItemNum;
         }
-        if (p7.downArrowShowState !== undefined) {
-            this.downArrowShowState = p7.downArrowShowState;
+        if (g12.twoLineModeItemNumRecord !== undefined) {
+            this.twoLineModeItemNumRecord = g12.twoLineModeItemNumRecord;
         }
-        if (p7.floatFilterBarText !== undefined) {
-            this.floatFilterBarText = p7.floatFilterBarText;
+        if (g12.downArrowShowState !== undefined) {
+            this.downArrowShowState = g12.downArrowShowState;
         }
-        if (p7.maxAppFontScale !== undefined) {
-            this.maxAppFontScale = p7.maxAppFontScale;
+        if (g12.floatFilterBarText !== undefined) {
+            this.floatFilterBarText = g12.floatFilterBarText;
         }
-        if (p7.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = p7.isFollowingSystemFontScale;
+        if (g12.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = g12.maxAppFontScale;
         }
-        if (p7.fontSizeScale !== undefined) {
-            this.fontSizeScale = p7.fontSizeScale;
+        if (g12.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = g12.isFollowingSystemFontScale;
         }
-        if (p7.callbackId !== undefined) {
-            this.callbackId = p7.callbackId;
+        if (g12.fontSizeScale !== undefined) {
+            this.fontSizeScale = g12.fontSizeScale;
         }
-        if (p7.callbacks !== undefined) {
-            this.callbacks = p7.callbacks;
+        if (g12.callbackId !== undefined) {
+            this.callbackId = g12.callbackId;
+        }
+        if (g12.callbacks !== undefined) {
+            this.callbacks = g12.callbacks;
+        }
+        if (g12.additionFiltersSelectedIndex !== undefined) {
+            this.additionFiltersSelectedIndex = g12.additionFiltersSelectedIndex;
+        }
+        if (g12.floatFilterBarAccessibilityText !== undefined) {
+            this.floatFilterBarAccessibilityText = g12.floatFilterBarAccessibilityText;
+        }
+        if (g12.accessibilityUnselectedText !== undefined) {
+            this.accessibilityUnselectedText = g12.accessibilityUnselectedText;
+        }
+        if (g12.accessibilitySelectedText !== undefined) {
+            this.accessibilitySelectedText = g12.accessibilitySelectedText;
+        }
+        if (g12.accessibilityExpanded !== undefined) {
+            this.accessibilityExpanded = g12.accessibilityExpanded;
+        }
+        if (g12.accessibilityCollapsed !== undefined) {
+            this.accessibilityCollapsed = g12.accessibilityCollapsed;
+        }
+        if (g12.accessibilityFilters !== undefined) {
+            this.accessibilityFilters = g12.accessibilityFilters;
+        }
+        if (g12.accessibilitySelectedDesc !== undefined) {
+            this.accessibilitySelectedDesc = g12.accessibilitySelectedDesc;
+        }
+        if (g12.accessibilityUnselectedDesc !== undefined) {
+            this.accessibilityUnselectedDesc = g12.accessibilityUnselectedDesc;
+        }
+        if (g12.accessibilityExpandDesc !== undefined) {
+            this.accessibilityExpandDesc = g12.accessibilityExpandDesc;
+        }
+        if (g12.bundleName !== undefined) {
+            this.bundleName = g12.bundleName;
+        }
+        if (g12.filterId !== undefined) {
+            this.filterId = g12.filterId;
         }
     }
 
@@ -1448,6 +1764,7 @@ export class Filter extends ViewPU {
         this.__additionFontWeightArr.purgeDependencyOnElmtId(n7);
         this.__additionBackgroundColorArr.purgeDependencyOnElmtId(n7);
         this.__isAdditionBackgroundHover.purgeDependencyOnElmtId(n7);
+        this.__isSelectedArr.purgeDependencyOnElmtId(n7);
         this.__colorRefresh.purgeDependencyOnElmtId(n7);
         this.__isFloatBarShow.purgeDependencyOnElmtId(n7);
         this.__isFloatShowAllFilter.purgeDependencyOnElmtId(n7);
@@ -1459,6 +1776,8 @@ export class Filter extends ViewPU {
         this.__downArrowShowState.purgeDependencyOnElmtId(n7);
         this.__floatFilterBarText.purgeDependencyOnElmtId(n7);
         this.__fontSizeScale.purgeDependencyOnElmtId(n7);
+        this.__additionFiltersSelectedIndex.purgeDependencyOnElmtId(n7);
+        this.__floatFilterBarAccessibilityText.purgeDependencyOnElmtId(n7);
     }
 
     aboutToBeDeleted() {
@@ -1476,6 +1795,7 @@ export class Filter extends ViewPU {
         this.__additionFontWeightArr.aboutToBeDeleted();
         this.__additionBackgroundColorArr.aboutToBeDeleted();
         this.__isAdditionBackgroundHover.aboutToBeDeleted();
+        this.__isSelectedArr.aboutToBeDeleted();
         this.__colorRefresh.aboutToBeDeleted();
         this.__isFloatBarShow.aboutToBeDeleted();
         this.__isFloatShowAllFilter.aboutToBeDeleted();
@@ -1487,6 +1807,8 @@ export class Filter extends ViewPU {
         this.__downArrowShowState.aboutToBeDeleted();
         this.__floatFilterBarText.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
+        this.__additionFiltersSelectedIndex.aboutToBeDeleted();
+        this.__floatFilterBarAccessibilityText.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1494,201 +1816,170 @@ export class Filter extends ViewPU {
     get multiFilters() {
         return this.__multiFilters.get();
     }
-
-    set multiFilters(m7) {
-        this.__multiFilters.set(m7);
+    set multiFilters(d12) {
+        this.__multiFilters.set(d12);
     }
-
     get additionFilters() {
         return this.__additionFilters.get();
     }
-
-    set additionFilters(l7) {
-        this.__additionFilters.set(l7);
+    set additionFilters(c12) {
+        this.__additionFilters.set(c12);
     }
-
     get filterType() {
         return this.__filterType.get();
     }
-
-    set filterType(k7) {
-        this.__filterType.set(k7);
+    set filterType(b12) {
+        this.__filterType.set(b12);
     }
-
     get colorArr() {
         return this.__colorArr.get();
     }
-
-    set colorArr(j7) {
-        this.__colorArr.set(j7);
+    set colorArr(a12) {
+        this.__colorArr.set(a12);
     }
-
     get fontWeightArr() {
         return this.__fontWeightArr.get();
     }
-
-    set fontWeightArr(i7) {
-        this.__fontWeightArr.set(i7);
+    set fontWeightArr(z11) {
+        this.__fontWeightArr.set(z11);
     }
-
     get backgroundColorArr() {
         return this.__backgroundColorArr.get();
     }
-
-    set backgroundColorArr(h7) {
-        this.__backgroundColorArr.set(h7);
+    set backgroundColorArr(y11) {
+        this.__backgroundColorArr.set(y11);
     }
-
     get isBackgroundHover() {
         return this.__isBackgroundHover.get();
     }
-
-    set isBackgroundHover(g7) {
-        this.__isBackgroundHover.set(g7);
+    set isBackgroundHover(x11) {
+        this.__isBackgroundHover.set(x11);
     }
-
     get floatArrowBgColor() {
         return this.__floatArrowBgColor.get();
     }
-
-    set floatArrowBgColor(f7) {
-        this.__floatArrowBgColor.set(f7);
+    set floatArrowBgColor(w11) {
+        this.__floatArrowBgColor.set(w11);
     }
-
     get isFloatArrowBgHover() {
         return this.__isFloatArrowBgHover.get();
     }
-
-    set isFloatArrowBgHover(e7) {
-        this.__isFloatArrowBgHover.set(e7);
+    set isFloatArrowBgHover(v11) {
+        this.__isFloatArrowBgHover.set(v11);
     }
-
     get isArrowIconDownArr() {
         return this.__isArrowIconDownArr.get();
     }
-
-    set isArrowIconDownArr(d7) {
-        this.__isArrowIconDownArr.set(d7);
+    set isArrowIconDownArr(u11) {
+        this.__isArrowIconDownArr.set(u11);
     }
-
     get additionColorArr() {
         return this.__additionColorArr.get();
     }
-
-    set additionColorArr(c7) {
-        this.__additionColorArr.set(c7);
+    set additionColorArr(t11) {
+        this.__additionColorArr.set(t11);
     }
-
     get additionFontWeightArr() {
         return this.__additionFontWeightArr.get();
     }
-
-    set additionFontWeightArr(b7) {
-        this.__additionFontWeightArr.set(b7);
+    set additionFontWeightArr(s11) {
+        this.__additionFontWeightArr.set(s11);
     }
-
     get additionBackgroundColorArr() {
         return this.__additionBackgroundColorArr.get();
     }
-
-    set additionBackgroundColorArr(a7) {
-        this.__additionBackgroundColorArr.set(a7);
+    set additionBackgroundColorArr(r11) {
+        this.__additionBackgroundColorArr.set(r11);
     }
-
     get isAdditionBackgroundHover() {
         return this.__isAdditionBackgroundHover.get();
     }
-
-    set isAdditionBackgroundHover(z6) {
-        this.__isAdditionBackgroundHover.set(z6);
+    set isAdditionBackgroundHover(q11) {
+        this.__isAdditionBackgroundHover.set(q11);
     }
-
+    get isSelectedArr() {
+        return this.__isSelectedArr.get();
+    }
+    set isSelectedArr(p11) {
+        this.__isSelectedArr.set(p11);
+    }
     get colorRefresh() {
         return this.__colorRefresh.get();
     }
-
-    set colorRefresh(y6) {
-        this.__colorRefresh.set(y6);
+    set colorRefresh(o11) {
+        this.__colorRefresh.set(o11);
     }
-
     get isFloatBarShow() {
         return this.__isFloatBarShow.get();
     }
-
-    set isFloatBarShow(x6) {
-        this.__isFloatBarShow.set(x6);
+    set isFloatBarShow(n11) {
+        this.__isFloatBarShow.set(n11);
     }
-
     get isFloatShowAllFilter() {
         return this.__isFloatShowAllFilter.get();
     }
-
-    set isFloatShowAllFilter(w6) {
-        this.__isFloatShowAllFilter.set(w6);
+    set isFloatShowAllFilter(m11) {
+        this.__isFloatShowAllFilter.set(m11);
     }
-
     get floatFilterPosition() {
         return this.__floatFilterPosition.get();
     }
-
-    set floatFilterPosition(v6) {
-        this.__floatFilterPosition.set(v6);
+    set floatFilterPosition(l11) {
+        this.__floatFilterPosition.set(l11);
     }
-
     get floatFilterBarHeight() {
         return this.__floatFilterBarHeight.get();
     }
-
-    set floatFilterBarHeight(u6) {
-        this.__floatFilterBarHeight.set(u6);
+    set floatFilterBarHeight(k11) {
+        this.__floatFilterBarHeight.set(k11);
     }
-
     get floatFilterBarPosition() {
         return this.__floatFilterBarPosition.get();
     }
-
-    set floatFilterBarPosition(t6) {
-        this.__floatFilterBarPosition.set(t6);
+    set floatFilterBarPosition(j11) {
+        this.__floatFilterBarPosition.set(j11);
     }
-
     get twoLineModeItemNum() {
         return this.__twoLineModeItemNum.get();
     }
-
-    set twoLineModeItemNum(s6) {
-        this.__twoLineModeItemNum.set(s6);
+    set twoLineModeItemNum(i11) {
+        this.__twoLineModeItemNum.set(i11);
     }
-
     get twoLineModeItemNumRecord() {
         return this.__twoLineModeItemNumRecord.get();
     }
-
-    set twoLineModeItemNumRecord(r6) {
-        this.__twoLineModeItemNumRecord.set(r6);
+    set twoLineModeItemNumRecord(h11) {
+        this.__twoLineModeItemNumRecord.set(h11);
     }
-
     get downArrowShowState() {
         return this.__downArrowShowState.get();
     }
-
-    set downArrowShowState(q6) {
-        this.__downArrowShowState.set(q6);
+    set downArrowShowState(g11) {
+        this.__downArrowShowState.set(g11);
     }
-
     get floatFilterBarText() {
         return this.__floatFilterBarText.get();
     }
-
-    set floatFilterBarText(p6) {
-        this.__floatFilterBarText.set(p6);
+    set floatFilterBarText(f11) {
+        this.__floatFilterBarText.set(f11);
     }
-
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-
-    set fontSizeScale(k10) {
-        this.__fontSizeScale.set(k10);
+    set fontSizeScale(e11) {
+        this.__fontSizeScale.set(e11);
+    }
+    get additionFiltersSelectedIndex() {
+        return this.__additionFiltersSelectedIndex.get();
+    }
+    set additionFiltersSelectedIndex(d11) {
+        this.__additionFiltersSelectedIndex.set(d11);
+    }
+    get floatFilterBarAccessibilityText() {
+        return this.__floatFilterBarAccessibilityText.get();
+    }
+    set floatFilterBarAccessibilityText(c11) {
+        this.__floatFilterBarAccessibilityText.set(c11);
     }
 
     textColor(m6, n6) {
@@ -1713,6 +2004,7 @@ export class Filter extends ViewPU {
 
     aboutToAppear() {
         this.initParams();
+        this.initAccessibilityResource();
         try {
             let l6 = this.getUIContext();
             this.isFollowingSystemFontScale = l6.isFollowingSystemFontScale();
@@ -1737,6 +2029,38 @@ export class Filter extends ViewPU {
         }
     }
 
+    initAccessibilityResource() {
+        try {
+            this.bundleName = getContext(this)?.abilityInfo?.bundleName;
+            let v10 = getContext()?.resourceManager;
+            this.accessibilitySelectedText = v10?.getStringByNameSync('filter_accessibility_selected');
+            this.accessibilityUnselectedText = v10?.getStringByNameSync('filter_accessibility_unselected');
+            this.accessibilityFilters = v10?.getStringByNameSync('filter_accessibility_filters');
+            this.accessibilitySelectedDesc = v10?.getStringByNameSync('filter_accessibility_select_desc');
+            this.accessibilityUnselectedDesc = v10?.getStringByNameSync('filter_accessibility_unselect_desc');
+            this.accessibilityExpandDesc = v10?.getStringByNameSync('filter_accessibility_expand_desc');
+            this.accessibilityExpanded = v10?.getStringByNameSync('filter_accessibility_expanded');
+            this.accessibilityCollapsed = v10?.getStringByNameSync('filter_accessibility_collapsed');
+        }
+        catch (s10) {
+            let t10 = s10.code;
+            let u10 = s10.message;
+            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${t10}, message: ${u10}`);
+        }
+    }
+
+    updateFocusForAccessibility() {
+        if (this.isFloatBarShow) {
+            let r10 = ({
+                type: 'requestFocusForAccessibility',
+                bundleName: this.bundleName,
+                triggerAction: 'common',
+                customId: `FiliterFloatFilterBar_${this.getUniqueId()}`,
+            });
+            accessibility.sendAccessibilityEvent(r10);
+        }
+    }
+
     updateFontScale() {
         let f6 = this.getUIContext();
         let g6 = f6.getHostContext()?.config?.fontSizeScale ?? 1;
@@ -1744,6 +2068,52 @@ export class Filter extends ViewPU {
             return 1;
         }
         return Math.min(g6, this.maxAppFontScale);
+    }
+
+    getAccessibilityText(h10, i10, j10) {
+        let k10 = '';
+        try {
+            let o10 = '';
+            if (typeof h10 === 'string') {
+                o10 = h10;
+            }
+            else {
+                o10 = getContext().resourceManager.getStringSync(h10?.id);
+            }
+            switch (j10) {
+                case FilterAccessibilityType.ACCESSIBILITY_TEXT:
+                    k10 = i10 ? `${this.accessibilitySelectedText},${o10}` : o10;
+                    break;
+                case FilterAccessibilityType.ACCESSIBILITY_DESC:
+                    k10 = i10 ? this.accessibilityUnselectedDesc : this.accessibilitySelectedDesc;
+                    break;
+                case FilterAccessibilityType.SEND_ACCESSIBILITY:
+                    k10 = i10 ? `${this.accessibilitySelectedText},${o10}` :
+                        `${this.accessibilityUnselectedText},${o10}`;
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (l10) {
+            let m10 = l10.code;
+            let n10 = l10.message;
+            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${m10}, message: ${n10}`);
+        }
+        return k10;
+    }
+
+    sendAccessibility(d10, e10) {
+        let f10 = ({
+            type: 'announceForAccessibility',
+            bundleName: this.bundleName,
+            triggerAction: 'common',
+            textAnnouncedForAccessibility: this.getAccessibilityText(d10,
+                e10, FilterAccessibilityType.SEND_ACCESSIBILITY),
+        });
+        accessibility.sendAccessibilityEvent(f10).then(() => {
+            hilog.info(0x3900, 'Ace', `ListFilter sendAccessibility send event, event info is ${JSON.stringify(f10)}`);
+        });
     }
 
     filterItemClick(b6, c6) {
@@ -1769,6 +2139,10 @@ export class Filter extends ViewPU {
                 this.fontWeightArr[b6][c6] = FontWeight.Medium;
                 this.fontWeightArr[b6][this.selectedFilters[b6].index] = FontWeight.Regular;
             }
+            if (this.isSelectedArr) {
+                this.isSelectedArr[b6][c6] = true;
+                this.isSelectedArr[b6][this.selectedFilters[b6].index] = false;
+            }
             this.colorRefresh = !this.colorRefresh;
             this.selectedFilters[b6].value = d6;
             this.selectedFilters[b6].index = c6;
@@ -1780,37 +2154,96 @@ export class Filter extends ViewPU {
 
     refreshFloatFilterBarText() {
         this.floatFilterBarText = '';
+        this.floatFilterBarAccessibilityText = '';
         if (this.selectedFilters) {
-            for (let v10 = 0; v10 < this.selectedFilters.length; v10++) {
-                if (this.selectedFilters[v10].value !== null) {
-                    if (typeof this.selectedFilters[v10].value !== 'string') {
-                        this.selectedFilters[v10].value =
-                            getContext()?.resourceManager?.getStringSync(this.selectedFilters[v10].value);
-                    }
-                    if (v10 === 0) {
-                        this.floatFilterBarText += this.selectedFilters[v10].value;
-                    } else {
-                        this.floatFilterBarText += '/' + this.selectedFilters[v10].value;
-                    }
+            const u9 = this.selectedFilters?.filter(y9 => y9?.value).map((x9) => {
+                if (typeof x9.value !== 'string') {
+                    return getContext()?.resourceManager?.getStringSync(x9.value?.id);
                 }
+                else {
+                    return x9.value;
+                }
+            });
+            this.floatFilterBarText = u9.join('/');
+            this.floatFilterBarAccessibilityText = u9.join(' ');
+        }
+    }
+
+    getFloatAccessibilityText(n9, o9) {
+        let p9 = '';
+        try {
+            let t9 = '';
+            if (typeof n9 === 'string') {
+                t9 = n9;
             }
+            else {
+                t9 = getContext()?.resourceManager?.getStringSync(n9?.id);
+            }
+            switch (o9) {
+                case FilterAccessibilityType.ACCESSIBILITY_TEXT:
+                    p9 = `${this.accessibilityFilters},${this.accessibilityCollapsed},${t9}`;
+                    break;
+                case FilterAccessibilityType.ACCESSIBILITY_DESC:
+                    p9 = this.accessibilityExpandDesc;
+                    break;
+                case FilterAccessibilityType.SEND_ACCESSIBILITY:
+                    p9 = this.accessibilityExpanded;
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (q9) {
+            let r9 = q9.code;
+            let s9 = q9.message;
+            hilog.error(0x3900, 'Ace', `Filter getAccessibilityText error, code: ${r9}, message: ${s9}`);
+        }
+        return p9;
+    }
+
+    sendFloatAccessibility(j9) {
+        let k9 = ({
+            type: 'announceForAccessibility',
+            bundleName: this.bundleName,
+            triggerAction: 'common',
+            textAnnouncedForAccessibility: this.getFloatAccessibilityText(j9,
+                FilterAccessibilityType.SEND_ACCESSIBILITY),
+        });
+        accessibility.sendAccessibilityEvent(k9);
+        if (this.multiFilters && this.multiFilters.length > 0) {
+            let m9 = ({
+                type: 'requestFocusForAccessibility',
+                bundleName: this.bundleName,
+                triggerAction: 'common',
+                customId: `filterMultiFilterRow_${this.filterId}_0`,
+            });
+            accessibility.sendAccessibilityEvent(m9);
+        }
+        else if (this.additionFilters && this.additionFilters.name) {
+            let l9 = ({
+                type: 'requestFocusForAccessibility',
+                bundleName: this.bundleName,
+                triggerAction: 'common',
+                customId: `filterAdditionFiltersName_${this.filterId}`,
+            });
+            accessibility.sendAccessibilityEvent(l9);
         }
     }
 
     initParams() {
         if (!this.selectedFilters) {
             this.selectedFilters = [];
-            for (let y5 of this.multiFilters) {
-                let z5 = { name: y5.name, index: -1, value: '' };
-                if (y5.options.length > 0) {
-                    z5.index = 0;
-                    z5.value = y5.options[0];
+            for (let h9 of this.multiFilters) {
+                let i9 = { name: h9.name, index: -1, value: '' };
+                if (h9.options.length > 0) {
+                    i9.index = 0;
+                    i9.value = h9.options[0];
                 }
-                this.selectedFilters.push(z5);
+                this.selectedFilters.push(i9);
             }
             if (this.additionFilters && this.additionFilters.name) {
-                let x5 = { name: this.additionFilters.name, index: -1, value: '' };
-                this.selectedFilters.push(x5);
+                let g9 = { name: this.additionFilters.name, index: -1, value: '' };
+                this.selectedFilters.push(g9);
             }
             this.refreshFloatFilterBarText();
         }
@@ -1820,6 +2253,7 @@ export class Filter extends ViewPU {
             this.isBackgroundHover = [];
             this.fontWeightArr = [];
             this.isArrowIconDownArr = [];
+            this.isSelectedArr = [];
             this.floatArrowBgColor = {
                 'id': -1,
                 'type': 10001,
@@ -1827,32 +2261,36 @@ export class Filter extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
-            for (let r5 of this.multiFilters) {
-                let s5 = new ResourceArray();
-                let t5 = new FontWeightArray();
-                let u5 = new ResourceArray();
-                let v5 = new BooleanArray();
-                for (let w5 of r5.options.keys()) {
-                    if (w5 === 0) {
-                        s5.push({
+            for (let z8 of this.multiFilters) {
+                let a9 = new ResourceArray();
+                let b9 = new FontWeightArray();
+                let c9 = new ResourceArray();
+                let d9 = new BooleanArray();
+                let e9 = new BooleanArray();
+                for (let f9 of z8.options.keys()) {
+                    if (f9 === 0) {
+                        a9.push({
                             'id': -1,
                             'type': 10001,
                             params: ['sys.color.ohos_id_color_text_primary_activated'],
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        t5.push(FontWeight.Medium);
-                    } else {
-                        s5.push({
+                        b9.push(FontWeight.Medium);
+                        e9.push(true);
+                    }
+                    else {
+                        a9.push({
                             'id': -1,
                             'type': 10001,
                             params: ['sys.color.ohos_id_color_text_primary'],
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
-                        t5.push(FontWeight.Regular);
+                        b9.push(FontWeight.Regular);
+                        e9.push(false);
                     }
-                    u5.push({
+                    c9.push({
                         'id': -1,
                         'type': 10001,
                         params: ['sys.color.ohos_id_color_hover'],
@@ -1860,11 +2298,12 @@ export class Filter extends ViewPU {
                         'moduleName': '__harDefaultModuleName__'
                     });
                 }
-                this.colorArr.push(s5);
-                this.fontWeightArr.push(t5);
-                this.backgroundColorArr.push(u5);
-                this.isBackgroundHover.push(v5);
+                this.colorArr.push(a9);
+                this.fontWeightArr.push(b9);
+                this.backgroundColorArr.push(c9);
+                this.isBackgroundHover.push(d9);
                 this.isArrowIconDownArr.push(new ObservedBoolean(true));
+                this.isSelectedArr.push(e9);
             }
         }
         if (this.additionFilters && this.additionFilters.options) {
@@ -1872,7 +2311,7 @@ export class Filter extends ViewPU {
             this.additionFontWeightArr = [];
             this.additionBackgroundColorArr = [];
             this.isAdditionBackgroundHover = [];
-            for (let q5 = 0; q5 < this.additionFilters.options.length; q5++) {
+            for (let y8 = 0; y8 < this.additionFilters.options.length; y8++) {
                 this.additionColorArr.push({
                     'id': -1,
                     'type': 10001,
@@ -1895,101 +2334,107 @@ export class Filter extends ViewPU {
             this.twoLineModeItemNum = [];
             this.twoLineModeItemNumRecord = [];
             this.downArrowShowState = [];
-            for (let p5 = 0; p5 < this.multiFilters.length; p5++) {
-                this.twoLineModeItemNum.push(new ObservedNumber(this.multiFilters[p5].options.length));
-                this.twoLineModeItemNumRecord.push(new ObservedNumber(this.multiFilters[p5].options.length));
+            for (let x8 = 0; x8 < this.multiFilters.length; x8++) {
+                this.twoLineModeItemNum.push(new ObservedNumber(this.multiFilters[x8].options.length));
+                this.twoLineModeItemNumRecord.push(new ObservedNumber(this.multiFilters[x8].options.length));
                 this.downArrowShowState.push(new ObservedBoolean(false));
             }
         }
     }
 
-    ListFilter(y4 = null) {
-        this.observeComponentCreation2((l5, m5) => {
+    ListFilter(z7 = null) {
+        this.observeComponentCreation2((s8, t8) => {
             Column.create();
             Column.width(PERCENT_100);
             Column.align(Alignment.Start);
-            Column.onAreaChange((n5, o5) => {
+            Column.onAreaChange((v8, w8) => {
                 if (!this.isFloatShowAllFilterWithoutAnimation && !this.isFloatBarShowWithoutAnimation) {
                     if (this.additionFilters !== null) {
                         this.filterDynamicHeight =
-                            parseInt(o5.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
-                    } else {
-                        this.filterDynamicHeight = parseInt(o5.height.toString(), 0) + FILTER_TOP_PADDING;
+                            parseInt(w8.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
+                    }
+                    else {
+                        this.filterDynamicHeight = parseInt(w8.height.toString(), 0) + FILTER_TOP_PADDING;
                     }
                     this.floatFilterPosition = -this.filterDynamicHeight;
                 }
             });
         }, Column);
-        this.observeComponentCreation2((z4, a5) => {
+        this.observeComponentCreation2((c8, d8) => {
             ForEach.create();
-            const b5 = (c5, d5) => {
-                const e5 = c5;
+            const e8 = (g8, h8) => {
+                const i8 = g8;
                 {
-                    this.observeComponentCreation2((f5, g5) => {
-                        if (g5) {
-                            let h5 = new ListFilterRow(this, {
-                                colorRow: this.colorArr ? this.colorArr[d5] : [],
-                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[d5] : [],
-                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[d5] : [],
-                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[d5] : [],
-                                filterRow: e5,
-                                onItemClick: (k5) => {
-                                    this.filterItemClick(d5, k5);
+                    this.observeComponentCreation2((k8, l8) => {
+                        if (l8) {
+                            let m8 = new ListFilterRow(this, {
+                                colorRow: this.colorArr ? this.colorArr[h8] : [],
+                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
+                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
+                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[h8] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : [],
+                                filterRow: i8,
+                                onItemClick: (r8) => {
+                                    this.filterItemClick(h8, r8);
                                 },
-                                rowIndex: d5,
-                            }, undefined, f5, () => {
-                            }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 845, col: 9 });
-                            ViewPU.create(h5);
-                            let i5 = () => {
+                                rowIndex: h8,
+                            }, undefined, k8, () => {
+                            }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 1174, col: 9 });
+                            ViewPU.create(m8);
+                            let n8 = () => {
                                 return {
-                                    colorRow: this.colorArr ? this.colorArr[d5] : [],
-                                    fontWeightRow: this.fontWeightArr ? this.fontWeightArr[d5] : [],
-                                    backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[d5] : [],
-                                    isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[d5] : [],
-                                    filterRow: e5,
-                                    onItemClick: (j5) => {
-                                        this.filterItemClick(d5, j5);
+                                    colorRow: this.colorArr ? this.colorArr[h8] : [],
+                                    fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
+                                    backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
+                                    isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[h8] : [],
+                                    isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : [],
+                                    filterRow: i8,
+                                    onItemClick: (q8) => {
+                                        this.filterItemClick(h8, q8);
                                     },
-                                    rowIndex: d5
+                                    rowIndex: h8
                                 };
                             };
-                            h5.paramsGenerator_ = i5;
-                        } else {
-                            this.updateStateVarsOfChildByElmtId(f5, {
-                                colorRow: this.colorArr ? this.colorArr[d5] : [],
-                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[d5] : [],
-                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[d5] : [],
-                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[d5] : []
+                            m8.paramsGenerator_ = n8;
+                        }
+                        else {
+                            this.updateStateVarsOfChildByElmtId(k8, {
+                                colorRow: this.colorArr ? this.colorArr[h8] : [],
+                                fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
+                                backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
+                                isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[h8] : [],
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : []
                             });
                         }
                     }, { name: 'ListFilterRow' });
                 }
             };
-            this.forEachUpdateFunction(z4, this.multiFilters, b5, undefined, true, false);
+            this.forEachUpdateFunction(c8, this.multiFilters, e8, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
     }
 
-    MultiLineFilter(h4 = null) {
-        this.observeComponentCreation2((u4, v4) => {
+    MultiLineFilter(b7 = null) {
+        this.observeComponentCreation2((u7, v7) => {
             Column.create();
             Column.width(PERCENT_100);
-            Column.onAreaChange((w4, x4) => {
+            Column.onAreaChange((x7, y7) => {
                 if (this.additionFilters !== null) {
-                    this.filterDynamicHeight = parseInt(x4.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
-                } else {
-                    this.filterDynamicHeight = parseInt(x4.height.toString(), 0) + FILTER_TOP_PADDING;
+                    this.filterDynamicHeight = parseInt(y7.height.toString(), 0) + LIST_ROW_HEIGHT + FILTER_TOP_PADDING;
+                }
+                else {
+                    this.filterDynamicHeight = parseInt(y7.height.toString(), 0) + FILTER_TOP_PADDING;
                 }
                 if (!this.isFloatBarShowWithoutAnimation && !this.isFloatShowAllFilterWithoutAnimation) {
                     this.floatFilterPosition = -this.filterDynamicHeight;
                 }
             });
         }, Column);
-        this.observeComponentCreation2((i4, j4) => {
+        this.observeComponentCreation2((e7, f7) => {
             ForEach.create();
-            const k4 = (l4, m4) => {
-                const n4 = l4;
+            const g7 = (i7, m4) => {
+                const n4 = i7;
                 {
                     this.observeComponentCreation2((o4, p4) => {
                         if (p4) {
@@ -2002,6 +2447,7 @@ export class Filter extends ViewPU {
                                     new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[m4] :
                                     new ObservedNumber(0),
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[m4] : [],
                                 twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
                                 this.twoLineModeItemNumRecord[m4] :
                                     new ObservedNumber(0),
@@ -2013,8 +2459,9 @@ export class Filter extends ViewPU {
                                 },
                                 rowIndex: m4,
                                 fontSizeScale: this.fontSizeScale,
+                                filterId: this.filterId,
                             }, undefined, o4, () => {
-                            }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 875, col: 9 });
+                            }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 1205, col: 9 });
                             ViewPU.create(q4);
                             let r4 = () => {
                                 return {
@@ -2026,6 +2473,7 @@ export class Filter extends ViewPU {
                                         new ObservedBoolean(false),
                                     twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[m4] :
                                         new ObservedNumber(0),
+                                    isSelectedRow: this.isSelectedArr ? this.isSelectedArr[m4] : [],
                                     twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
                                     this.twoLineModeItemNumRecord[m4] :
                                         new ObservedNumber(0),
@@ -2036,11 +2484,13 @@ export class Filter extends ViewPU {
                                         this.filterItemClick(m4, s4);
                                     },
                                     rowIndex: m4,
-                                    fontSizeScale: this.fontSizeScale
+                                    fontSizeScale: this.fontSizeScale,
+                                    filterId: this.filterId
                                 };
                             };
                             q4.paramsGenerator_ = r4;
-                        } else {
+                        }
+                        else {
                             this.updateStateVarsOfChildByElmtId(o4, {
                                 colorRow: this.colorArr ? this.colorArr[m4] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[m4] : [],
@@ -2050,18 +2500,17 @@ export class Filter extends ViewPU {
                                     new ObservedBoolean(false),
                                 twoLineModeItemNumRow: this.twoLineModeItemNum ? this.twoLineModeItemNum[m4] :
                                     new ObservedNumber(0),
-                                twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ?
-                                this.twoLineModeItemNumRecord[m4] :
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[m4] : [],
+                                twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ? this.twoLineModeItemNumRecord[m4] :
                                     new ObservedNumber(0),
-                                isArrowIconDown: this.isArrowIconDownArr ? this.isArrowIconDownArr[m4] :
-                                    new ObservedBoolean(false),
+                                isArrowIconDown: this.isArrowIconDownArr ? this.isArrowIconDownArr[m4] : new ObservedBoolean(false),
                                 fontSizeScale: this.fontSizeScale
                             });
                         }
                     }, { name: 'MultiFilterRow' });
                 }
             };
-            this.forEachUpdateFunction(i4, this.multiFilters, k4, undefined, true, false);
+            this.forEachUpdateFunction(e7, this.multiFilters, g7, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
@@ -2081,6 +2530,7 @@ export class Filter extends ViewPU {
                 this.additionFontWeightArr && (this.additionFontWeightArr[e4] = FontWeight.Medium);
                 this.selectedFilters[f4].value = this.additionFilters ? this.additionFilters.options[e4] : '';
                 this.selectedFilters[f4].index = e4;
+                this.additionFiltersSelectedIndex = e4;
             } else {
                 let g4 = this.selectedFilters[f4].index;
                 this.additionColorArr && (this.additionColorArr[g4] = {
@@ -2102,6 +2552,7 @@ export class Filter extends ViewPU {
                 this.selectedFilters && (this.selectedFilters[f4].value = this.additionFilters ?
                 this.additionFilters.options[e4] : '');
                 this.selectedFilters && (this.selectedFilters[f4].index = e4);
+                this.additionFiltersSelectedIndex = e4;
             }
         } else {
             this.additionColorArr && (this.additionColorArr[e4] = {
@@ -2114,12 +2565,23 @@ export class Filter extends ViewPU {
             this.additionFontWeightArr && (this.additionFontWeightArr[e4] = FontWeight.Regular);
             this.selectedFilters && (this.selectedFilters[f4].value = '');
             this.selectedFilters && (this.selectedFilters[f4].index = -1);
+            this.additionFiltersSelectedIndex = -1;
         }
         if (this.selectedFilters) {
             this.onFilterChanged && this.onFilterChanged(this.selectedFilters);
         }
         this.colorRefresh = !this.colorRefresh;
         this.refreshFloatFilterBarText();
+    }
+
+    getSelected(w6) {
+        let x6 = this.multiFilters.length;
+        if (this.selectedFilters && this.selectedFilters[x6].index !== w6) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
     AdditionFilterList(f2 = null) {
@@ -2192,6 +2654,7 @@ export class Filter extends ViewPU {
                                         'moduleName': '__harDefaultModuleName__'
                                     })
                                 });
+                                Text.id(`filterAdditionFiltersName_${this.filterId}`);
                             }, Text);
                             Text.pop();
                             this.observeComponentCreation2((o3, p3) => {
@@ -2228,6 +2691,12 @@ export class Filter extends ViewPU {
                                 };
                                 const x2 = (d3, e3) => {
                                     ListItem.create(y2, true);
+                                    ListItem.accessibilityText(this.getAccessibilityText(v2,
+                                        this.additionFiltersSelectedIndex === u2,
+                                        FilterAccessibilityType.ACCESSIBILITY_TEXT));
+                                    ListItem.accessibilityDescription(this.getAccessibilityText(v2,
+                                        this.additionFiltersSelectedIndex === u2,
+                                        FilterAccessibilityType.ACCESSIBILITY_DESC));
                                     ListItem.height(PERCENT_100);
                                     ListItem.backgroundColor(this.isAdditionBackgroundHover &&
                                     this.isAdditionBackgroundHover[u2] ?
@@ -2324,6 +2793,7 @@ export class Filter extends ViewPU {
                                     ViewStackProcessor.visualState();
                                     ListItem.onClick(() => {
                                         this.additionItemClick(u2);
+                                        this.sendAccessibility(v2, this.getSelected(u2));
                                     });
                                     ListItem.tabIndex(u2 === 0 ? this.multiFilters.length : -1);
                                 };
@@ -2365,7 +2835,11 @@ export class Filter extends ViewPU {
                                     x1: GRADIENT_WIDTH,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, m2, () => {
-                                }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 1039, col: 11 });
+                                }, {
+                                    page: 'library2/src/main/ets/components/mainpage/MainPage.ets',
+                                    line: 1389,
+                                    col: 11
+                                });
                                 ViewPU.create(o2);
                                 let p2 = () => {
                                     return {
@@ -2391,7 +2865,11 @@ export class Filter extends ViewPU {
                                     x1: 0,
                                     y1: LIST_ROW_HEIGHT / 2
                                 }, undefined, i2, () => {
-                                }, { page: 'Filter/src/main/ets/components/MainPage.ets', line: 1047, col: 9 });
+                                }, {
+                                    page: 'library2/src/main/ets/components/mainpage/MainPage.ets',
+                                    line: 1397,
+                                    col: 9
+                                });
                                 ViewPU.create(k2);
                                 let l2 = () => {
                                     return {
@@ -2510,8 +2988,8 @@ export class Filter extends ViewPU {
         Column.pop();
     }
 
-    FloatFilterBar(a1 = null) {
-        this.observeComponentCreation2((n1, o1) => {
+    FloatFilterBar(m1 = null) {
+        this.observeComponentCreation2((o2, p2) => {
             Row.create();
             Row.width(PERCENT_100);
             Row.height(this.floatFilterBarHeight);
@@ -2531,8 +3009,13 @@ export class Filter extends ViewPU {
             Row.position({ x: 0, y: this.floatFilterBarPosition });
             Row.zIndex(1);
         }, Row);
-        this.observeComponentCreation2((j1, k1) => {
+        this.observeComponentCreation2((b2, c2) => {
             Column.create();
+            Column.id(`FiliterFloatFilterBar_${this.getUniqueId()}`);
+            Column.accessibilityText(this.getFloatAccessibilityText(this.floatFilterBarAccessibilityText,
+                FilterAccessibilityType.ACCESSIBILITY_TEXT));
+            Column.accessibilityDescription(this.getFloatAccessibilityText(this.floatFilterBarAccessibilityText,
+                FilterAccessibilityType.ACCESSIBILITY_DESC));
             Column.backgroundColor(this.isFloatArrowBgHover ? this.floatArrowBgColor : TRANS_COLOR);
             ViewStackProcessor.visualState('focused');
             Column.border({
@@ -2568,8 +3051,8 @@ export class Filter extends ViewPU {
             Column.alignItems(HorizontalAlign.Center);
             Column.width(PERCENT_100);
             Column.height(LIST_ROW_HEIGHT);
-            Column.onTouch((m1) => {
-                if (m1.type === TouchType.Down) {
+            Column.onTouch((l2) => {
+                if (l2.type === TouchType.Down) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -2583,7 +3066,8 @@ export class Filter extends ViewPU {
                         };
                         this.isFloatArrowBgHover = true;
                     });
-                } else if (m1.type === TouchType.Up || m1.type === TouchType.Cancel) {
+                }
+                else if (l2.type === TouchType.Up || l2.type === TouchType.Cancel) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -2611,9 +3095,10 @@ export class Filter extends ViewPU {
                     this.floatFilterPosition = 0;
                     this.floatFilterBarPosition = this.filterDynamicHeight;
                 });
+                this.sendFloatAccessibility(this.floatFilterBarAccessibilityText);
             });
-            Column.onHover((l1) => {
-                if (l1) {
+            Column.onHover((g2) => {
+                if (g2) {
                     Context.animateTo({
                         curve: FRICTION_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_250
@@ -2627,7 +3112,8 @@ export class Filter extends ViewPU {
                         };
                         this.isFloatArrowBgHover = true;
                     });
-                } else {
+                }
+                else {
                     Context.animateTo({
                         curve: FRICTION_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_250
@@ -2637,18 +3123,18 @@ export class Filter extends ViewPU {
                 }
             });
         }, Column);
-        this.observeComponentCreation2((h1, i1) => {
+        this.observeComponentCreation2((z1, a2) => {
             Row.create();
             Row.height(PERCENT_100);
             Row.alignItems(VerticalAlign.Center);
         }, Row);
-        this.observeComponentCreation2((f1, g1) => {
+        this.observeComponentCreation2((x1, y1) => {
             Row.create();
             Row.height(LIST_ROW_HEIGHT);
             Row.margin({ start: LengthMetrics.vp(FILTER_BAR_MARGIN) });
             Row.focusable(true);
         }, Row);
-        this.observeComponentCreation2((d1, e1) => {
+        this.observeComponentCreation2((v1, w1) => {
             Text.create(this.floatFilterBarText);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fontColor({
@@ -2671,7 +3157,7 @@ export class Filter extends ViewPU {
             Text.maxLines(1);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((b1, c1) => {
+        this.observeComponentCreation2((t1, u1) => {
             SymbolGlyph.create({
                 'id': -1,
                 'type': 40000,

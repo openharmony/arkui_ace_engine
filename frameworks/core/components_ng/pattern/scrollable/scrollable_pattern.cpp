@@ -1453,7 +1453,7 @@ void ScrollablePattern::InitSpringOffsetProperty()
         bool stopAnimation = false;
         auto delta = pattern->GetScrollDelta(offset, stopAnimation);
         auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
-        if (pattern->GetLastSnapTargetIndex() >= 0) {
+        if (pattern->GetLastSnapTargetIndex().has_value()) {
             source = SCROLL_FROM_ANIMATION;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
@@ -2706,7 +2706,8 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             onScrollStop();
             AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
             SetScrollSource(SCROLL_FROM_NONE);
-            SetLastSnapTargetIndex(-1);
+            ResetLastSnapTargetIndex();
+            ResetScrollableSnapDirection();
         }
         auto scrollBar = GetScrollBar();
         if (scrollBar) {

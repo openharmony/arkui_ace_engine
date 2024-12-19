@@ -125,6 +125,8 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
+const std::string PARAM_QUERY_KEY = "query";
+const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
@@ -1908,6 +1910,19 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 abilityContext->StartAbility(want, REQUEST_CODE);
             });
     }
+
+    container->SetAbilityOnSearch([context = context_](const std::string& queryWord) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.AddEntity(Want::ENTITY_BROWSER);
+        want.SetAction(ACTION_SEARCH);
+        want.SetParam(PARAM_QUERY_KEY, queryWord);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
 
     if (window_->IsDecorEnable()) {
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);

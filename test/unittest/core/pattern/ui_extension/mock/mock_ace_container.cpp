@@ -206,11 +206,13 @@ bool AceContainer::GetCurPointerEventSourceType(int32_t& sourceType)
     return true;
 }
 
-bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
+int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
 {
-    return true;
+    return AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
+
 bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
 {
     return true;
