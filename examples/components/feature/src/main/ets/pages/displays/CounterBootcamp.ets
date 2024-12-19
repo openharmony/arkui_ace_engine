@@ -244,17 +244,17 @@ export struct CounterBootcamp {
   @State compBackgroundImagePositionY: Length = 0;
   @State enableCompBackgroundBlurStyle: boolean = false;
   @State compBackgroundBlurStyle: BlurStyle = BlurStyle.NONE;
-  @State enableCompBackgroundBlurStyleOptions: boolean = false;
-  @State enableCompBackgroundBlurStyleOptionsColorMode: boolean = false;
-  @State compBackgroundBlurStyleOptionsColorMode: ThemeColorMode = ThemeColorMode.SYSTEM;
-  @State enableCompBackgroundBlurStyleOptionsAdaptiveColor: boolean = false;
-  @State compBackgroundBlurStyleOptionsAdaptiveColor: AdaptiveColor = AdaptiveColor.DEFAULT;
-  @State enableCompBackgroundBlurStyleOptionsBlurOptionsLeft: boolean = false;
-  @State compBackgroundBlurStyleOptionsBlurOptionsLeft: number = 0;
-  @State enableCompBackgroundBlurStyleOptionsBlurOptionsRight: boolean = false;
-  @State compBackgroundBlurStyleOptionsBlurOptionsRight: number = 0;
-  @State enableCompBackgroundBlurStyleOptionsScale: boolean = false;
-  @State compBackgroundBlurStyleOptionsScale: number = 1;
+  @State enableCompBackgroundBlurStyleParams: boolean = false;
+  @State enableCompBackgroundBlurStyleParamsColorMode: boolean = false;
+  @State compBackgroundBlurStyleParamsColorMode: ThemeColorMode = ThemeColorMode.SYSTEM;
+  @State enableCompBackgroundBlurStyleParamsAdaptiveColor: boolean = false;
+  @State compBackgroundBlurStyleParamsAdaptiveColor: AdaptiveColor = AdaptiveColor.DEFAULT;
+  @State enableCompBackgroundBlurStyleParamsBlurOptionsLeft: boolean = false;
+  @State compBackgroundBlurStyleParamsBlurOptionsLeft: number = 0;
+  @State enableCompBackgroundBlurStyleParamsBlurOptionsRight: boolean = false;
+  @State compBackgroundBlurStyleParamsBlurOptionsRight: number = 0;
+  @State enableCompBackgroundBlurStyleParamsScale: boolean = false;
+  @State compBackgroundBlurStyleParamsScale: number = 1;
   @State enableCompBackdropBlur: boolean = false;
   @State compBackdropBlur: number = 0;
   @State enableCompBackdropBlurGrayscale: boolean = false;
@@ -1208,28 +1208,28 @@ export struct CounterBootcamp {
         y: useEnabled(this.enableCompBackgroundImagePositionY, this.compBackgroundImagePositionY)
       })
       .backgroundBlurStyle(useEnabled(this.enableCompBackgroundBlurStyle, this.compBackgroundBlurStyle),
-        this.enableCompBackgroundBlurStyleOptions ? {
+        this.enableCompBackgroundBlurStyleParams ? {
           colorMode: useEnabled(
-            this.enableCompBackgroundBlurStyleOptionsColorMode,
-            this.compBackgroundBlurStyleOptionsColorMode
+            this.enableCompBackgroundBlurStyleParamsColorMode,
+            this.compBackgroundBlurStyleParamsColorMode
           ),
           adaptiveColor: useEnabled(
-            this.enableCompBackgroundBlurStyleOptionsAdaptiveColor,
-            this.compBackgroundBlurStyleOptionsAdaptiveColor
+            this.enableCompBackgroundBlurStyleParamsAdaptiveColor,
+            this.compBackgroundBlurStyleParamsAdaptiveColor
           ),
           scale: useEnabled(
-            this.enableCompBackgroundBlurStyleOptionsScale,
-            this.compBackgroundBlurStyleOptionsScale
+            this.enableCompBackgroundBlurStyleParamsScale,
+            this.compBackgroundBlurStyleParamsScale
           ),
           blurOptions: {
             grayscale: [
               useEnabled(
-                this.enableCompBackgroundBlurStyleOptionsBlurOptionsLeft,
-                this.compBackgroundBlurStyleOptionsBlurOptionsLeft
+                this.enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
+                this.compBackgroundBlurStyleParamsBlurOptionsLeft
               ),
               useEnabled(
-                this.enableCompBackgroundBlurStyleOptionsBlurOptionsRight,
-                this.compBackgroundBlurStyleOptionsBlurOptionsRight
+                this.enableCompBackgroundBlurStyleParamsBlurOptionsRight,
+                this.compBackgroundBlurStyleParamsBlurOptionsRight
               )
             ]
           }
@@ -2228,17 +2228,17 @@ export struct CounterBootcamp {
           compBackgroundImagePositionY: $compBackgroundImagePositionY,
           enableCompBackgroundBlurStyle: $enableCompBackgroundBlurStyle,
           compBackgroundBlurStyle: $compBackgroundBlurStyle,
-          enableCompBackgroundBlurStyleOptions: $enableCompBackgroundBlurStyleOptions,
-          enableCompBackgroundBlurStyleOptionsColorMode: $enableCompBackgroundBlurStyleOptionsColorMode,
-          compBackgroundBlurStyleOptionsColorMode: $compBackgroundBlurStyleOptionsColorMode,
-          enableCompBackgroundBlurStyleOptionsAdaptiveColor: $enableCompBackgroundBlurStyleOptionsAdaptiveColor,
-          compBackgroundBlurStyleOptionsAdaptiveColor: $compBackgroundBlurStyleOptionsAdaptiveColor,
-          enableCompBackgroundBlurStyleOptionsBlurOptionsLeft: $enableCompBackgroundBlurStyleOptionsBlurOptionsLeft,
-          compBackgroundBlurStyleOptionsBlurOptionsLeft: $compBackgroundBlurStyleOptionsBlurOptionsLeft,
-          enableCompBackgroundBlurStyleOptionsBlurOptionsRight: $enableCompBackgroundBlurStyleOptionsBlurOptionsRight,
-          compBackgroundBlurStyleOptionsBlurOptionsRight: $compBackgroundBlurStyleOptionsBlurOptionsRight,
-          enableCompBackgroundBlurStyleOptionsScale: $enableCompBackgroundBlurStyleOptionsScale,
-          compBackgroundBlurStyleOptionsScale: $compBackgroundBlurStyleOptionsScale,
+          enableCompBackgroundBlurStyleParams: $enableCompBackgroundBlurStyleParams,
+          enableCompBackgroundBlurStyleParamsColorMode: $enableCompBackgroundBlurStyleParamsColorMode,
+          compBackgroundBlurStyleParamsColorMode: $compBackgroundBlurStyleParamsColorMode,
+          enableCompBackgroundBlurStyleParamsAdaptiveColor: $enableCompBackgroundBlurStyleParamsAdaptiveColor,
+          compBackgroundBlurStyleParamsAdaptiveColor: $compBackgroundBlurStyleParamsAdaptiveColor,
+          enableCompBackgroundBlurStyleParamsBlurOptionsLeft: $enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
+          compBackgroundBlurStyleParamsBlurOptionsLeft: $compBackgroundBlurStyleParamsBlurOptionsLeft,
+          enableCompBackgroundBlurStyleParamsBlurOptionsRight: $enableCompBackgroundBlurStyleParamsBlurOptionsRight,
+          compBackgroundBlurStyleParamsBlurOptionsRight: $compBackgroundBlurStyleParamsBlurOptionsRight,
+          enableCompBackgroundBlurStyleParamsScale: $enableCompBackgroundBlurStyleParamsScale,
+          compBackgroundBlurStyleParamsScale: $compBackgroundBlurStyleParamsScale,
           enableCompBackdropBlur: $enableCompBackdropBlur,
           compBackdropBlur: $compBackdropBlur,
           enableCompBackdropBlurGrayscale: $enableCompBackdropBlurGrayscale,
