@@ -21,6 +21,7 @@ constexpr auto ERROR_VALUE = -1;
 } // namespace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+
 void CanvasRenderingContext2DPeerImpl::SetCanvasPattern(const RefPtr<AceType>& pattern)
 {
     CHECK_NULL_VOID(pattern);
@@ -65,7 +66,7 @@ void CanvasRenderingContext2DPeerImpl::OnDetachFromCanvas()
     }
 }
 
-CanvasCallbackList::const_iterator CanvasRenderingContext2DPeerImpl::FindCallbackInList(
+CanvasRenderingContext2DPeerImpl::CanvasCallbackIterator CanvasRenderingContext2DPeerImpl::FindCallbackInList(
     const CanvasCallbackList& callbackFuncPairList,
     const CallbackHelper<Callback_Void>& callback) const
 {

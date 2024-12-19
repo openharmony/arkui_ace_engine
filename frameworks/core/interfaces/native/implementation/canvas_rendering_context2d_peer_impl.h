@@ -26,14 +26,16 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-enum class CanvasCallbackType {
-    ON_ATTACH = 0,
-    ON_DETACH,
-    UNKNOWN
-};
-using CanvasCallbackList = std::list<CallbackHelper<Callback_Void>>;
+
 class CanvasRenderingContext2DPeerImpl : public Referenced {
 public:
+    enum class CanvasCallbackType {
+        ON_ATTACH = 0,
+        ON_DETACH,
+        UNKNOWN
+    };
+    using CanvasCallbackList = std::list<CallbackHelper<Callback_Void>>;
+    using CanvasCallbackIterator = CanvasCallbackList::const_iterator;
     CanvasRenderingContext2DPeerImpl() = default;
     ~CanvasRenderingContext2DPeerImpl() override = default;
 

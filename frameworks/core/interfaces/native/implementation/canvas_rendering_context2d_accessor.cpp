@@ -126,7 +126,7 @@ void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(callback);
     auto arkCallback = CallbackHelper(*callback);
-    peerImpl->On(std::move(arkCallback), CanvasCallbackType::ON_ATTACH);
+    peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
 void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
                      const Opt_Callback_Void* callback)
@@ -136,7 +136,7 @@ void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
     std::function<void()> cb = nullptr;
     auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
     auto arkCallback = CallbackHelper(*optCallback);
-    peerImpl->Off(std::move(arkCallback), CanvasCallbackType::ON_ATTACH);
+    peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
 void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
                     const Callback_Void* callback)
@@ -145,7 +145,7 @@ void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(callback);
     auto arkCallback = CallbackHelper(*callback);
-    peerImpl->On(std::move(arkCallback), CanvasCallbackType::ON_DETACH);
+    peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
 void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
                      const Opt_Callback_Void* callback)
@@ -154,7 +154,7 @@ void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
     auto arkCallback = CallbackHelper(*optCallback);
-    peerImpl->Off(std::move(arkCallback), CanvasCallbackType::ON_DETACH);
+    peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
 Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)
 {
