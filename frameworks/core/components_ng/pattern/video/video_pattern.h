@@ -355,6 +355,7 @@ private:
     void* GetNativeWindow(int32_t instanceId, int64_t textureId);
 #endif
 
+    void RegisterRenderContextCallBack();
     void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();

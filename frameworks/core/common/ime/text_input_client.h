@@ -118,6 +118,7 @@ public:
         return value;
     };
 #endif
+    virtual void UpdateInputFilterErrorText(const std::string& errorText) {};
     virtual void ResetTouchAtLeftOffsetFlag() {}
 
     // Requests that this client Y point.

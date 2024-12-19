@@ -33,7 +33,7 @@ template("build_component_plugin") {
 
     es2abc_gen_abc("gen_${js_source}_abc_$platform") {
       src_js = rebase_path("${js_source}.js")
-      dst_file = rebase_path(target_out_dir + "/${js_source}.abc")
+      dst_file = rebase_path(target_out_dir + "/${platform}/${js_source}.abc")
       in_puts = [ "${js_source}.js" ]
       out_puts = [ target_out_dir + "/${platform}/${js_source}.abc" ]
       extra_args = [ "--module" ]
