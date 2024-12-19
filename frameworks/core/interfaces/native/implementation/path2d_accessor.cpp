@@ -16,8 +16,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "canvas_path_accessor_peer_impl.h"
 
-struct Path2DPeer {};
+struct Path2DPeer : public CanvasPathPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
