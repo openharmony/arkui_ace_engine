@@ -3226,6 +3226,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
+        delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -7565,4 +7566,10 @@ RefPtr<WebEventHub> WebPattern::GetWebEventHub()
     return GetEventHub<WebEventHub>();
 }
 
+void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateOptimizeParserBudgetEnabled(value);
+    }
+}
 } // namespace OHOS::Ace::NG

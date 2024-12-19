@@ -7521,4 +7521,20 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
     }
 #endif
 }
+
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool& enable)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->PutOptimizeParserBudgetEnabled(enable);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOptimizeParserBudget");
+}
 } // namespace OHOS::Ace
