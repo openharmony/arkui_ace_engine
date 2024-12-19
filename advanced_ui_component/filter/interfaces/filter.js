@@ -1,25 +1,26 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (f13, g13, h13, i13) {
-    var j13 = arguments.length,
-        k13 = j13 < 3 ? g13 : i13 === null ? i13 = Object.getOwnPropertyDescriptor(g13, h13) : i13, l13;
+let __decorate = (this && this.__decorate) || function (f13, g13, h13, i13) {
+    let j13 = arguments.length;
+    let k13 = j13 < 3 ? g13 : i13 === null ? i13 = Object.getOwnPropertyDescriptor(g13, h13) : i13;
+    let l13;
     if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function') {
         k13 = Reflect.decorate(f13, g13, h13, i13);
     } else {
-        for (var m13 = f13.length - 1; m13 >= 0; m13--) {
+        for (let m13 = f13.length - 1; m13 >= 0; m13--) {
             if (l13 = f13[m13]) {
                 k13 = (j13 < 3 ? l13(k13) : j13 > 3 ? l13(g13, h13, k13) : l13(g13, h13)) || k13;
             }
@@ -113,6 +114,23 @@ let ObservedNumber = class ObservedNumber {
 ObservedNumber = __decorate([
     Observed
 ], ObservedNumber);
+let FilterAccessibilityText = class FilterAccessibilityText {
+    constructor() {
+        this.accessibilitySelectedText = '';
+        this.accessibilityExpand = '';
+        this.accessibilityCollapse = '';
+        this.accessibilityExpanded = '';
+        this.accessibilityCollapsed = '';
+        this.accessibilityUnselectedText = '';
+        this.accessibilityFilters = '';
+        this.accessibilitySelectedDesc = '';
+        this.accessibilityUnselectedDesc = '';
+        this.accessibilityExpandDesc = '';
+    }
+};
+FilterAccessibilityText = __decorate([
+    Observed
+], FilterAccessibilityText);
 
 class GradientMask extends ViewPU {
     constructor(w12, x12, y12, z12 = -1, a13 = undefined, b13) {
@@ -203,7 +221,8 @@ class ListFilterRow extends ViewPU {
         this.__isBackgroundHoverRow =
             new SynchedPropertyNesedObjectPU(e21.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
         this.__isSelectedRow = new SynchedPropertyNesedObjectPU(e21.isSelectedRow, this, 'isSelectedRow');
-        this.accessibilitySelectedText = '';
+        this.__filterAccessibilityText =
+            new SynchedPropertyNesedObjectPU(e21.filterAccessibilityText, this, 'filterAccessibilityText');
         this.filterRow = { name: '', options: [] };
         this.onItemClick = () => {
         };
@@ -221,9 +240,7 @@ class ListFilterRow extends ViewPU {
         this.__backgroundColorRow.set(c21.backgroundColorRow);
         this.__isBackgroundHoverRow.set(c21.isBackgroundHoverRow);
         this.__isSelectedRow.set(c21.isSelectedRow);
-        if (c21.accessibilitySelectedText !== undefined) {
-            this.accessibilitySelectedText = c21.accessibilitySelectedText;
-        }
+        this.__filterAccessibilityText.set(c21.filterAccessibilityText);
         if (c21.filterRow !== undefined) {
             this.filterRow = c21.filterRow;
         }
@@ -250,6 +267,7 @@ class ListFilterRow extends ViewPU {
         this.__backgroundColorRow.set(b21.backgroundColorRow);
         this.__isBackgroundHoverRow.set(b21.isBackgroundHoverRow);
         this.__isSelectedRow.set(b21.isSelectedRow);
+        this.__filterAccessibilityText.set(b21.filterAccessibilityText);
     }
 
     purgeVariableDependenciesOnElmtId(a21) {
@@ -258,6 +276,7 @@ class ListFilterRow extends ViewPU {
         this.__backgroundColorRow.purgeDependencyOnElmtId(a21);
         this.__isBackgroundHoverRow.purgeDependencyOnElmtId(a21);
         this.__isSelectedRow.purgeDependencyOnElmtId(a21);
+        this.__filterAccessibilityText.purgeDependencyOnElmtId(a21);
     }
 
     aboutToBeDeleted() {
@@ -266,6 +285,7 @@ class ListFilterRow extends ViewPU {
         this.__backgroundColorRow.aboutToBeDeleted();
         this.__isBackgroundHoverRow.aboutToBeDeleted();
         this.__isSelectedRow.aboutToBeDeleted();
+        this.__filterAccessibilityText.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -287,8 +307,11 @@ class ListFilterRow extends ViewPU {
         return this.__isSelectedRow.get();
     }
 
+    get filterAccessibilityText() {
+        return this.__filterAccessibilityText.get();
+    }
+
     aboutToAppear() {
-        this.initAccessibilityResource();
         try {
             let z20 = this.getUIContext();
             this.isFollowingSystemFontScale = z20.isFollowingSystemFontScale();
@@ -299,19 +322,7 @@ class ListFilterRow extends ViewPU {
             let y20 = w20.message;
             hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${x20}, message: ${y20}`);
         }
-    }
-
-    initAccessibilityResource() {
-        try {
-            this.bundleName = getContext(this)?.abilityInfo?.bundleName;
-            let v20 = getContext()?.resourceManager;
-            this.accessibilitySelectedText = v20?.getStringByNameSync('filter_accessibility_selected');
-        }
-        catch (s20) {
-            let t20 = s20.code;
-            let u20 = s20.message;
-            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${t20}, message: ${u20}`);
-        }
+        this.bundleName = getContext(this)?.abilityInfo?.bundleName;
     }
 
     updateFontScale() {
@@ -335,13 +346,13 @@ class ListFilterRow extends ViewPU {
             }
             switch (k20) {
                 case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-                    l20 = j20 ? this.accessibilitySelectedText : p20;
+                    l20 = j20 ? this.filterAccessibilityText.accessibilitySelectedText : p20;
                     break;
                 case FilterAccessibilityType.ACCESSIBILITY_DESC:
                     l20 = j20 ? p20 : '';
                     break;
                 case FilterAccessibilityType.SEND_ACCESSIBILITY:
-                    l20 = j20 ? `${this.accessibilitySelectedText},${p20}` : '';
+                    l20 = j20 ? `${this.filterAccessibilityText.accessibilitySelectedText},${p20}` : '';
                     break;
                 default:
                     break;
@@ -647,6 +658,8 @@ class MultiFilterRow extends ViewPU {
             new SynchedPropertyNesedObjectPU(f17.arrowShowStateRow, this, 'arrowShowStateRow');
         this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(f17.isArrowIconDown, this, 'isArrowIconDown');
         this.__isSelectedRow = new SynchedPropertyNesedObjectPU(f17.isSelectedRow, this, 'isSelectedRow');
+        this.__filterAccessibilityText =
+            new SynchedPropertyNesedObjectPU(f17.filterAccessibilityText, this, 'filterAccessibilityText');
         this.filterRow = null;
         this.onItemClick = () => {
         };
@@ -664,11 +677,6 @@ class MultiFilterRow extends ViewPU {
         this.filterColumnWidth = 0;
         this.lastFilterColumnWidth = 0;
         this.rowIndex = 0;
-        this.accessibilityExpand = '';
-        this.accessibilitySelectedText = '';
-        this.accessibilityCollapse = '';
-        this.accessibilityExpanded = '';
-        this.accessibilityCollapsed = '';
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
         this.bundleName = '';
@@ -687,6 +695,7 @@ class MultiFilterRow extends ViewPU {
         this.__arrowShowStateRow.set(d17.arrowShowStateRow);
         this.__isArrowIconDown.set(d17.isArrowIconDown);
         this.__isSelectedRow.set(d17.isSelectedRow);
+        this.__filterAccessibilityText.set(d17.filterAccessibilityText);
         if (d17.filterRow !== undefined) {
             this.filterRow = d17.filterRow;
         }
@@ -714,21 +723,6 @@ class MultiFilterRow extends ViewPU {
         if (d17.rowIndex !== undefined) {
             this.rowIndex = d17.rowIndex;
         }
-        if (d17.accessibilityExpand !== undefined) {
-            this.accessibilityExpand = d17.accessibilityExpand;
-        }
-        if (d17.accessibilitySelectedText !== undefined) {
-            this.accessibilitySelectedText = d17.accessibilitySelectedText;
-        }
-        if (d17.accessibilityCollapse !== undefined) {
-            this.accessibilityCollapse = d17.accessibilityCollapse;
-        }
-        if (d17.accessibilityExpanded !== undefined) {
-            this.accessibilityExpanded = d17.accessibilityExpanded;
-        }
-        if (d17.accessibilityCollapsed !== undefined) {
-            this.accessibilityCollapsed = d17.accessibilityCollapsed;
-        }
         if (d17.maxAppFontScale !== undefined) {
             this.maxAppFontScale = d17.maxAppFontScale;
         }
@@ -753,6 +747,7 @@ class MultiFilterRow extends ViewPU {
         this.__arrowShowStateRow.set(c17.arrowShowStateRow);
         this.__isArrowIconDown.set(c17.isArrowIconDown);
         this.__isSelectedRow.set(c17.isSelectedRow);
+        this.__filterAccessibilityText.set(c17.filterAccessibilityText);
         this.__fontSizeScale.reset(c17.fontSizeScale);
     }
 
@@ -766,6 +761,7 @@ class MultiFilterRow extends ViewPU {
         this.__arrowShowStateRow.purgeDependencyOnElmtId(b17);
         this.__isArrowIconDown.purgeDependencyOnElmtId(b17);
         this.__isSelectedRow.purgeDependencyOnElmtId(b17);
+        this.__filterAccessibilityText.purgeDependencyOnElmtId(b17);
         this.__arrowBgColorRow.purgeDependencyOnElmtId(b17);
         this.__isArrowBgHoverRow.purgeDependencyOnElmtId(b17);
         this.__fontSizeScale.purgeDependencyOnElmtId(b17);
@@ -783,6 +779,7 @@ class MultiFilterRow extends ViewPU {
         this.__arrowShowStateRow.aboutToBeDeleted();
         this.__isArrowIconDown.aboutToBeDeleted();
         this.__isSelectedRow.aboutToBeDeleted();
+        this.__filterAccessibilityText.aboutToBeDeleted();
         this.__arrowBgColorRow.aboutToBeDeleted();
         this.__isArrowBgHoverRow.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
@@ -826,6 +823,10 @@ class MultiFilterRow extends ViewPU {
 
     get isSelectedRow() {
         return this.__isSelectedRow.get();
+    }
+
+    get filterAccessibilityText() {
+        return this.__filterAccessibilityText.get();
     }
 
     get arrowBgColorRow() {
@@ -880,6 +881,7 @@ class MultiFilterRow extends ViewPU {
             let q16 = o16.message;
             hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${p16}, message: ${q16}`);
         }
+        this.bundleName = getContext(this)?.abilityInfo?.bundleName;
     }
 
     updateFontScale() {
@@ -889,23 +891,6 @@ class MultiFilterRow extends ViewPU {
             return 1;
         }
         return Math.min(p9, this.maxAppFontScale);
-    }
-
-    initAccessibilityResource() {
-        try {
-            this.bundleName = getContext(this)?.abilityInfo?.bundleName;
-            let p16 = getContext()?.resourceManager;
-            this.accessibilitySelectedText = p16?.getStringByNameSync('filter_accessibility_selected');
-            this.accessibilityExpand = p16?.getStringByNameSync('filter_accessibility_expand');
-            this.accessibilityCollapse = p16?.getStringByNameSync('filter_accessibility_collapse');
-            this.accessibilityExpanded = p16?.getStringByNameSync('filter_accessibility_expanded');
-            this.accessibilityCollapsed = p16?.getStringByNameSync('filter_accessibility_collapsed');
-        }
-        catch (m16) {
-            let n16 = m16.code;
-            let o16 = m16.message;
-            hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${n16}, message: ${o16}`);
-        }
     }
 
     calcMultiFilterRowItemNum() {
@@ -959,13 +944,13 @@ class MultiFilterRow extends ViewPU {
             }
             switch (a16) {
                 case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-                    b16 = z15 ? this.accessibilitySelectedText : f16;
+                    b16 = z15 ? this.filterAccessibilityText.accessibilitySelectedText : f16;
                     break;
                 case FilterAccessibilityType.ACCESSIBILITY_DESC:
                     b16 = z15 ? f16 : '';
                     break;
                 case FilterAccessibilityType.SEND_ACCESSIBILITY:
-                    b16 = z15 ? `${this.accessibilitySelectedText},${f16}` : '';
+                    b16 = z15 ? `${this.filterAccessibilityText.accessibilitySelectedText},${f16}` : '';
                     break;
                 default:
                     break;
@@ -1027,9 +1012,11 @@ class MultiFilterRow extends ViewPU {
             Button.focusable(true);
             Button.accessibilityGroup(true);
             Button.accessibilityText(this.isSendArrowAccessibility ?
-                (this.isArrowIconDown?.value ? this.accessibilityCollapsed : this.accessibilityExpanded) :
-                (this.isArrowIconDown?.value ? this.accessibilityExpand : this.accessibilityCollapse));
-            Button.accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined);
+                (this.isArrowIconDown?.value ? this.filterAccessibilityText.accessibilityCollapsed :
+                this.filterAccessibilityText.accessibilityExpanded) :
+                (this.isArrowIconDown?.value ? this.filterAccessibilityText.accessibilityExpand :
+                this.filterAccessibilityText.accessibilityCollapse));
+            Button.accessibilityDescription(this.isSendArrowAccessibility ? ' ' : '');
             Button.id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
             Button.visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden);
             Button.onHover((n15) => {
@@ -1581,14 +1568,8 @@ export class Filter extends ViewPU {
         this.__additionFiltersSelectedIndex = new ObservedPropertySimplePU(-1, this, 'additionFiltersSelectedIndex');
         this.__floatFilterBarAccessibilityText =
             new ObservedPropertySimplePU('', this, 'floatFilterBarAccessibilityText');
-        this.accessibilityUnselectedText = '';
-        this.accessibilitySelectedText = '';
-        this.accessibilityExpanded = '';
-        this.accessibilityCollapsed = '';
-        this.accessibilityFilters = '';
-        this.accessibilitySelectedDesc = '';
-        this.accessibilityUnselectedDesc = '';
-        this.accessibilityExpandDesc = '';
+        this.__filterAccessibilityText =
+            new ObservedPropertyObjectPU(new FilterAccessibilityText(), this, 'filterAccessibilityText');
         this.bundleName = '';
         this.filterId = this.getUniqueId();
         this.setInitiallyProvidedValue(i12);
@@ -1711,29 +1692,8 @@ export class Filter extends ViewPU {
         if (g12.floatFilterBarAccessibilityText !== undefined) {
             this.floatFilterBarAccessibilityText = g12.floatFilterBarAccessibilityText;
         }
-        if (g12.accessibilityUnselectedText !== undefined) {
-            this.accessibilityUnselectedText = g12.accessibilityUnselectedText;
-        }
-        if (g12.accessibilitySelectedText !== undefined) {
-            this.accessibilitySelectedText = g12.accessibilitySelectedText;
-        }
-        if (g12.accessibilityExpanded !== undefined) {
-            this.accessibilityExpanded = g12.accessibilityExpanded;
-        }
-        if (g12.accessibilityCollapsed !== undefined) {
-            this.accessibilityCollapsed = g12.accessibilityCollapsed;
-        }
-        if (g12.accessibilityFilters !== undefined) {
-            this.accessibilityFilters = g12.accessibilityFilters;
-        }
-        if (g12.accessibilitySelectedDesc !== undefined) {
-            this.accessibilitySelectedDesc = g12.accessibilitySelectedDesc;
-        }
-        if (g12.accessibilityUnselectedDesc !== undefined) {
-            this.accessibilityUnselectedDesc = g12.accessibilityUnselectedDesc;
-        }
-        if (g12.accessibilityExpandDesc !== undefined) {
-            this.accessibilityExpandDesc = g12.accessibilityExpandDesc;
+        if (g12.filterAccessibilityText !== undefined) {
+            this.filterAccessibilityText = g12.filterAccessibilityText;
         }
         if (g12.bundleName !== undefined) {
             this.bundleName = g12.bundleName;
@@ -1778,6 +1738,7 @@ export class Filter extends ViewPU {
         this.__fontSizeScale.purgeDependencyOnElmtId(n7);
         this.__additionFiltersSelectedIndex.purgeDependencyOnElmtId(n7);
         this.__floatFilterBarAccessibilityText.purgeDependencyOnElmtId(n7);
+        this.__filterAccessibilityText.purgeDependencyOnElmtId(n7);
     }
 
     aboutToBeDeleted() {
@@ -1809,6 +1770,7 @@ export class Filter extends ViewPU {
         this.__fontSizeScale.aboutToBeDeleted();
         this.__additionFiltersSelectedIndex.aboutToBeDeleted();
         this.__floatFilterBarAccessibilityText.aboutToBeDeleted();
+        this.__filterAccessibilityText.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1972,14 +1934,25 @@ export class Filter extends ViewPU {
     get additionFiltersSelectedIndex() {
         return this.__additionFiltersSelectedIndex.get();
     }
+
     set additionFiltersSelectedIndex(d11) {
         this.__additionFiltersSelectedIndex.set(d11);
     }
+
     get floatFilterBarAccessibilityText() {
         return this.__floatFilterBarAccessibilityText.get();
     }
+
     set floatFilterBarAccessibilityText(c11) {
         this.__floatFilterBarAccessibilityText.set(c11);
+    }
+
+    get filterAccessibilityText() {
+        return this.__filterAccessibilityText.get();
+    }
+
+    set filterAccessibilityText(c11) {
+        this.__filterAccessibilityText.set(c11);
     }
 
     textColor(m6, n6) {
@@ -2033,14 +2006,26 @@ export class Filter extends ViewPU {
         try {
             this.bundleName = getContext(this)?.abilityInfo?.bundleName;
             let v10 = getContext()?.resourceManager;
-            this.accessibilitySelectedText = v10?.getStringByNameSync('filter_accessibility_selected');
-            this.accessibilityUnselectedText = v10?.getStringByNameSync('filter_accessibility_unselected');
-            this.accessibilityFilters = v10?.getStringByNameSync('filter_accessibility_filters');
-            this.accessibilitySelectedDesc = v10?.getStringByNameSync('filter_accessibility_select_desc');
-            this.accessibilityUnselectedDesc = v10?.getStringByNameSync('filter_accessibility_unselect_desc');
-            this.accessibilityExpandDesc = v10?.getStringByNameSync('filter_accessibility_expand_desc');
-            this.accessibilityExpanded = v10?.getStringByNameSync('filter_accessibility_expanded');
-            this.accessibilityCollapsed = v10?.getStringByNameSync('filter_accessibility_collapsed');
+            this.filterAccessibilityText.accessibilitySelectedText =
+            v10?.getStringByNameSync('filter_accessibility_selected');
+            this.filterAccessibilityText.accessibilityUnselectedText =
+            v10?.getStringByNameSync('filter_accessibility_unselected');
+            this.filterAccessibilityText.accessibilityFilters =
+            v10?.getStringByNameSync('filter_accessibility_filters');
+            this.filterAccessibilityText.accessibilitySelectedDesc =
+            v10?.getStringByNameSync('filter_accessibility_select_desc');
+            this.filterAccessibilityText.accessibilityUnselectedDesc =
+            v10?.getStringByNameSync('filter_accessibility_unselect_desc');
+            this.filterAccessibilityText.accessibilityExpandDesc =
+            v10?.getStringByNameSync('filter_accessibility_expand_desc');
+            this.filterAccessibilityText.accessibilityExpanded =
+            v10?.getStringByNameSync('filter_accessibility_expanded');
+            this.filterAccessibilityText.accessibilityCollapsed =
+            v10?.getStringByNameSync('filter_accessibility_collapsed');
+            this.filterAccessibilityText.accessibilityExpand =
+            v10?.getStringByNameSync('filter_accessibility_expand');
+            this.filterAccessibilityText.accessibilityCollapse =
+            v10?.getStringByNameSync('filter_accessibility_collapse');
         }
         catch (s10) {
             let t10 = s10.code;
@@ -2082,14 +2067,15 @@ export class Filter extends ViewPU {
             }
             switch (j10) {
                 case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-                    k10 = i10 ? `${this.accessibilitySelectedText},${o10}` : o10;
+                    k10 = i10 ? `${this.filterAccessibilityText.accessibilitySelectedText},${o10}` : o10;
                     break;
                 case FilterAccessibilityType.ACCESSIBILITY_DESC:
-                    k10 = i10 ? this.accessibilityUnselectedDesc : this.accessibilitySelectedDesc;
+                    k10 = i10 ? this.filterAccessibilityText.accessibilityUnselectedDesc :
+                    this.filterAccessibilityText.accessibilitySelectedDesc;
                     break;
                 case FilterAccessibilityType.SEND_ACCESSIBILITY:
-                    k10 = i10 ? `${this.accessibilitySelectedText},${o10}` :
-                        `${this.accessibilityUnselectedText},${o10}`;
+                    k10 = i10 ? `${this.filterAccessibilityText.accessibilitySelectedText},${o10}` :
+                        `${this.filterAccessibilityText.accessibilityUnselectedText},${o10}`;
                     break;
                 default:
                     break;
@@ -2171,6 +2157,8 @@ export class Filter extends ViewPU {
 
     getFloatAccessibilityText(n9, o9) {
         let p9 = '';
+        let q9 = this.filterAccessibilityText.accessibilityFilters;
+        let r9 = this.filterAccessibilityText.accessibilityCollapsed;
         try {
             let t9 = '';
             if (typeof n9 === 'string') {
@@ -2181,13 +2169,13 @@ export class Filter extends ViewPU {
             }
             switch (o9) {
                 case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-                    p9 = `${this.accessibilityFilters},${this.accessibilityCollapsed},${t9}`;
+                    p9 = `${q9},${r9},${t9}`;
                     break;
                 case FilterAccessibilityType.ACCESSIBILITY_DESC:
-                    p9 = this.accessibilityExpandDesc;
+                    p9 = this.filterAccessibilityText.accessibilityExpandDesc;
                     break;
                 case FilterAccessibilityType.SEND_ACCESSIBILITY:
-                    p9 = this.accessibilityExpanded;
+                    p9 = this.filterAccessibilityText.accessibilityExpanded;
                     break;
                 default:
                     break;
@@ -2378,6 +2366,7 @@ export class Filter extends ViewPU {
                                     this.filterItemClick(h8, r8);
                                 },
                                 rowIndex: h8,
+                                filterAccessibilityText: this.filterAccessibilityText,
                             }, undefined, k8, () => {
                             }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 1174, col: 9 });
                             ViewPU.create(m8);
@@ -2392,18 +2381,20 @@ export class Filter extends ViewPU {
                                     onItemClick: (q8) => {
                                         this.filterItemClick(h8, q8);
                                     },
-                                    rowIndex: h8
+                                    rowIndex: h8,
+                                    filterAccessibilityText: this.filterAccessibilityText
                                 };
                             };
                             m8.paramsGenerator_ = n8;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(k8, {
+                            this.updateStateletsOfChildByElmtId(k8, {
                                 colorRow: this.colorArr ? this.colorArr[h8] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
                                 isBackgroundHoverRow: this.isBackgroundHover ? this.isBackgroundHover[h8] : [],
-                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : []
+                                isSelectedRow: this.isSelectedArr ? this.isSelectedArr[h8] : [],
+                                filterAccessibilityText: this.filterAccessibilityText
                             });
                         }
                     }, { name: 'ListFilterRow' });
@@ -2460,6 +2451,7 @@ export class Filter extends ViewPU {
                                 rowIndex: m4,
                                 fontSizeScale: this.fontSizeScale,
                                 filterId: this.filterId,
+                                filterAccessibilityText: this.filterAccessibilityText,
                             }, undefined, o4, () => {
                             }, { page: 'library2/src/main/ets/components/mainpage/MainPage.ets', line: 1205, col: 9 });
                             ViewPU.create(q4);
@@ -2485,13 +2477,14 @@ export class Filter extends ViewPU {
                                     },
                                     rowIndex: m4,
                                     fontSizeScale: this.fontSizeScale,
-                                    filterId: this.filterId
+                                    filterId: this.filterId,
+                                    filterAccessibilityText: this.filterAccessibilityText,
                                 };
                             };
                             q4.paramsGenerator_ = r4;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(o4, {
+                            this.updateStateletsOfChildByElmtId(o4, {
                                 colorRow: this.colorArr ? this.colorArr[m4] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[m4] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[m4] : [],
@@ -2504,7 +2497,8 @@ export class Filter extends ViewPU {
                                 twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord ? this.twoLineModeItemNumRecord[m4] :
                                     new ObservedNumber(0),
                                 isArrowIconDown: this.isArrowIconDownArr ? this.isArrowIconDownArr[m4] : new ObservedBoolean(false),
-                                fontSizeScale: this.fontSizeScale
+                                fontSizeScale: this.fontSizeScale,
+                                filterAccessibilityText: this.filterAccessibilityText
                             });
                         }
                     }, { name: 'MultiFilterRow' });
