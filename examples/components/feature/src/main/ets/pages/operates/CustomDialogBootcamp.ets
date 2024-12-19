@@ -188,9 +188,12 @@ export struct CustomDialogBootcamp {
       playMode: useEnabled(this.enableAnimateParamPlayMode,this.animateParamPlayMode),
       finishCallbackType: useEnabled(this.enableAnimateParamFinishCallbackType,this.animateParamFinishCallbackType),
       expectedFrameRateRange: {
-        min: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMin,this.animateParamExpectedFrameRateRangeMin,30),
-        max: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMax,this.animateParamExpectedFrameRateRangeMax,120),
-        expected: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeExpected,this.animateParamExpectedFrameRateRangeExpected,60),
+        min: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMin,
+          this.animateParamExpectedFrameRateRangeMin,30),
+        max: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMax,
+          this.animateParamExpectedFrameRateRangeMax,120),
+        expected: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeExpected,
+          this.animateParamExpectedFrameRateRangeExpected,60),
       }
     },
     closeAnimation: {
@@ -202,9 +205,16 @@ export struct CustomDialogBootcamp {
       playMode: useEnabled(this.enableAnimateParamPlayMode,this.animateParamPlayMode),
       finishCallbackType: useEnabled(this.enableAnimateParamFinishCallbackType,this.animateParamFinishCallbackType),
       expectedFrameRateRange: {
-        min: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMin,this.animateParamExpectedFrameRateRangeMin,30),
-        max: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMax,this.animateParamExpectedFrameRateRangeMax,120),
-        expected: useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeExpected,this.animateParamExpectedFrameRateRangeExpected,60),
+        min:
+        useEnabledNumber(
+          this.enableAnimateParamExpectedFrameRateRangeMin,
+          this.animateParamExpectedFrameRateRangeMin,30),
+        max:
+        useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeMax,
+          this.animateParamExpectedFrameRateRangeMax,120),
+        expected:
+        useEnabledNumber(this.enableAnimateParamExpectedFrameRateRangeExpected,
+          this.animateParamExpectedFrameRateRangeExpected,60),
       }
     },
     isModal: useEnabled(this.enableCustomDialogControllerOptionsIsModal, this.customDialogControllerOptionsIsModal),
