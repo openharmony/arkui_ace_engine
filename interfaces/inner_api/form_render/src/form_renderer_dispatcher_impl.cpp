@@ -116,9 +116,13 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
 
+#ifdef FORM_SIZE_CHANGE_ANIMATION
     // form existed in Sceneboard window always get undefined sizeChangeReason, use Visible to control anim instead
     reason = isVisible_ ? static_cast<uint32_t>(Rosen::WindowSizeChangeReason::ROTATION) :
         static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
+#else
+    reason = static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
+#endif
     handler->PostTask([content = uiContent_, width, height, reason, rsTransaction, borderWidth, this]() {
         auto uiContent = content.lock();
         if (!uiContent) {

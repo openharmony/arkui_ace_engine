@@ -810,6 +810,23 @@ class TextHalfLeadingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().text.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1003,6 +1020,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   halfLeading(value: boolean): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity,
       TextHalfLeadingModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextEnableHapticFeedbackModifier.identity, TextEnableHapticFeedbackModifier, value);
     return this;
   }
 }

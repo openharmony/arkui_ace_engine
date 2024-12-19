@@ -24,6 +24,7 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+constexpr Dimension TEXT_DRAG_RADIUS_2IN1 = 8.0_vp;
 constexpr Dimension TEXT_DRAG_RADIUS = 18.0_vp;
 constexpr Dimension TEXT_DRAG_OFFSET = 8.0_vp;
 constexpr Dimension TEXT_DRAG_MIN_WIDTH = 64.0_vp;
@@ -204,10 +205,7 @@ public:
         return rectsForPlaceholders_;
     }
 
-    virtual Dimension GetDragCornerRadius()
-    {
-        return TEXT_DRAG_RADIUS;
-    }
+    virtual Dimension GetDragCornerRadius();
 
     Color GetDragBackgroundColor();
 protected:

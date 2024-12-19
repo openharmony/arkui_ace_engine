@@ -122,7 +122,12 @@ bool ListPattern::HandleTargetIndex(bool isJump)
         MarkDirtyNodeSelf();
         return true;
     }
-    AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+    auto iter = itemPosition_.find(targetIndex_.value());
+    if (iter != itemPosition_.end()) {
+        AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
+    } else if (lastSnapTargetIndex_ >= 0) {
+        lastSnapTargetIndex_ = -1;
+    }
     // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
     targetIndex_.reset();
     targetIndexInGroup_.reset();
@@ -934,6 +939,7 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     predictSnapOffset_ = snapAnimationOptions.snapDelta;
     scrollSnapVelocity_ = snapAnimationOptions.animationVelocity;
     snapTrigByScrollBar_ = snapAnimationOptions.fromScrollBar;
+    lastSnapTargetIndex_ = -1;
     MarkDirtyNodeSelf();
     return true;
 }
@@ -1948,8 +1954,9 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
         if (!Negative(posInfo.mainPos)) {
             float startPos = posInfo.mainPos - currentOffset_;
             float targetPos = 0.0f;
-            GetListItemAnimatePos(startPos, startPos + posInfo.mainSize, target.align, targetPos);
-            targetPos += currentOffset_ + target.extraOffset;
+            GetListItemAnimatePos(startPos + target.extraOffset, startPos + posInfo.mainSize + target.extraOffset,
+                target.align, targetPos);
+            targetPos += currentOffset_;
             const float epsilon = 0.1f;
             if (!NearEqual(relativeOffset + prevOffset, currentOffset_, epsilon) ||
                 !NearEqual(target.targetOffset, targetPos, epsilon)) {
@@ -2024,6 +2031,11 @@ void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChang
 {
     if (itemPosition_.find(index) == itemPosition_.end()) {
         return;
+    }
+    auto posInfo = posMap_->GetPositionInfo(index);
+    auto prevPosInfo = posMap_->GetPositionInfo(index - 1);
+    if (Negative(prevPosInfo.mainPos)) {
+        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange});
     }
     if (index == GetStartIndex()) {
         sizeChange += delta;
@@ -2438,15 +2450,26 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
 int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, GetStartIndex());
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, GetStartIndex());
     auto globalOffset = host->GetTransformRelativeOffset();
     float relativeX = xOffset - globalOffset.GetX();
     float relativeY = yOffset - globalOffset.GetY();
     float mainOffset = GetAxis() == Axis::VERTICAL ? relativeY : relativeX;
     float crossOffset = GetAxis() == Axis::VERTICAL ? relativeX : relativeY;
+    float mainSize = GetMainAxisSize(GetContentSize(), GetAxis());
     float crossSize = GetCrossAxisSize(GetContentSize(), GetAxis());
+    if (TextDirection::RTL == listProperty->GetNonAutoLayoutDirection()) {
+        if (Axis::VERTICAL == GetAxis()) {
+            crossOffset = crossSize - crossOffset;
+        } else {
+            mainOffset = mainSize - mainOffset;
+        }
+    }
     int32_t lanesOffset = 0;
     if (lanes_ > 1) {
-        lanesOffset = static_cast<int32_t>(crossOffset / (crossSize / lanes_));
+        lanesOffset = static_cast<int32_t>(crossOffset / ((crossSize + laneGutter_) / lanes_));
     }
     for (auto& pos : itemPosition_) {
         if (mainOffset <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */

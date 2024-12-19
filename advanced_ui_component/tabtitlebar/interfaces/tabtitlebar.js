@@ -14,1490 +14,1887 @@
  */
 
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+}
+if (PUV2ViewBase.contextStack === undefined) {
+  Reflect.set(PUV2ViewBase, 'contextStack', []);
+}
+const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
+const MeasureText = requireNapi('measure');
+const hilog = requireNapi('hilog');
+const PUBLIC_MORE = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const TEXT_EDITABLE_DIALOG = '18.3fp';
+const IMAGE_SIZE = '64vp';
+const MAX_DIALOG = '256vp';
+const MIN_DIALOG = '216vp';
+class ButtonGestureModifier {
+  constructor(x14) {
+    this.fontSize = 1;
+    this.controller = null;
+    this.controller = x14;
   }
-  const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
-  const MeasureText = requireNapi('measure');
-  const hilog = requireNapi('hilog');
-  const PUBLIC_MORE = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_more'],
-    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-  const TEXT_EDITABLE_DIALOG = '18.3fp';
-  const IMAGE_SIZE = '64vp';
-  const MAX_DIALOG = '256vp';
-  const MIN_DIALOG = '216vp';
-  export class TabTitleBar extends ViewPU {
-    constructor(g9, h9, i9, j9 = -1, k9 = undefined, l9) {
-      super(g9, i9, j9, l9);
-      if (typeof k9 === 'function') {
-        this.paramsGenerator_ = k9;
-      }
-      this.tabItems = [];
-      this.menuItems = [];
-      this.swiperContent = undefined;
-      this.__tabWidth = new ObservedPropertySimplePU(0, this, 'tabWidth');
-      this.__currentIndex = new ObservedPropertySimplePU(0, this, 'currentIndex');
-      this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
-      this.menuSectionWidth = 0;
-      this.tabOffsets = [];
-      this.imageWidths = [];
-      this.scroller = new Scroller();
-      this.swiperController = new SwiperController();
-      this.settings = new RenderingContextSettings(true);
-      this.leftContext2D = new CanvasRenderingContext2D(this.settings);
-      this.rightContext2D = new CanvasRenderingContext2D(this.settings);
-      this.setInitiallyProvidedValue(h9);
-      this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(f9) {
-      if (f9.tabItems !== undefined) {
-        this.tabItems = f9.tabItems;
-      }
-      if (f9.menuItems !== undefined) {
-        this.menuItems = f9.menuItems;
-      }
-      if (f9.swiperContent !== undefined) {
-        this.swiperContent = f9.swiperContent;
-      }
-      if (f9.tabWidth !== undefined) {
-        this.tabWidth = f9.tabWidth;
-      }
-      if (f9.currentIndex !== undefined) {
-        this.currentIndex = f9.currentIndex;
-      }
-      if (f9.fontSize !== undefined) {
-        this.fontSize = f9.fontSize;
-      }
-      if (f9.menuSectionWidth !== undefined) {
-        this.menuSectionWidth = f9.menuSectionWidth;
-      }
-      if (f9.tabOffsets !== undefined) {
-        this.tabOffsets = f9.tabOffsets;
-      }
-      if (f9.imageWidths !== undefined) {
-        this.imageWidths = f9.imageWidths;
-      }
-      if (f9.scroller !== undefined) {
-        this.scroller = f9.scroller;
-      }
-      if (f9.swiperController !== undefined) {
-        this.swiperController = f9.swiperController;
-      }
-      if (f9.settings !== undefined) {
-        this.settings = f9.settings;
-      }
-      if (f9.leftContext2D !== undefined) {
-        this.leftContext2D = f9.leftContext2D;
-      }
-      if (f9.rightContext2D !== undefined) {
-        this.rightContext2D = f9.rightContext2D;
-      }
-    }
-    updateStateVars(e9) {
-    }
-    purgeVariableDependenciesOnElmtId(d9) {
-      this.__tabWidth.purgeDependencyOnElmtId(d9);
-      this.__currentIndex.purgeDependencyOnElmtId(d9);
-      this.__fontSize.purgeDependencyOnElmtId(d9);
-    }
-    aboutToBeDeleted() {
-      this.__tabWidth.aboutToBeDeleted();
-      this.__currentIndex.aboutToBeDeleted();
-      this.__fontSize.aboutToBeDeleted();
-      SubscriberManager.Get().delete(this.id__());
-      this.aboutToBeDeletedInternal();
-    }
-    get tabWidth() {
-      return this.__tabWidth.get();
-    }
-    set tabWidth(c9) {
-      this.__tabWidth.set(c9);
-    }
-    get currentIndex() {
-      return this.__currentIndex.get();
-    }
-    set currentIndex(b9) {
-      this.__currentIndex.set(b9);
-    }
-    get fontSize() {
-      return this.__fontSize.get();
-    }
-    set fontSize(a9) {
-      this.__fontSize.set(a9);
-    }
-    GradientMask(p8, q8, r8, s8, t8, u8 = null) {
-      this.observeComponentCreation2((y8, z8) => {
-        Column.create();
-        Column.blendMode(BlendMode.DST_OUT);
-        Column.width(TabTitleBar.gradientMaskWidth);
-        Column.height(TabTitleBar.totalHeight);
-      }, Column);
-      this.observeComponentCreation2((v8, w8) => {
-        Canvas.create(p8);
-        Canvas.width(TabTitleBar.gradientMaskWidth);
-        Canvas.height(TabTitleBar.totalHeight);
-        Canvas.onReady(() => {
-          let x8 = p8.createLinearGradient(q8, r8, s8, t8);
-          x8.addColorStop(0.0, '#ffffffff');
-          x8.addColorStop(1, '#00ffffff');
-          p8.fillStyle = x8;
-          p8.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight);
-        });
-      }, Canvas);
-      Canvas.pop();
-      Column.pop();
-    }
-    emptyBuilder(o8 = null) {
-    }
-    aboutToAppear() {
-      if (!this.swiperContent) {
-        this.swiperContent = this.emptyBuilder;
-      }
-      this.tabItems.forEach((n8) => {
-        this.imageWidths.push(0);
-      });
-      this.loadOffsets();
-    }
-    loadOffsets() {
-      this.tabOffsets.length = 0;
-      let k8 = 0;
-      this.tabOffsets.push(k8);
-      k8 += TabContentItem.marginFirst;
-      this.tabItems.forEach((l8, m8) => {
-        if (l8.icon !== undefined) {
-          if (Math.abs(this.imageWidths[m8]) > TabContentItem.imageHotZoneWidth) {
-            k8 += this.imageWidths[m8];
-          } else {
-            k8 += TabContentItem.imageHotZoneWidth;
+  applyGesture(u14) {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      u14.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+        .onAction(() => {
+          if (u14) {
+            this.controller?.open();
           }
-        } else {
-          k8 += TabContentItem.paddingLeft;
-          k8 += px2vp(MeasureText.measureText({
-            textContent: l8.title.toString(),
-            fontSize: 18,
-            fontWeight: FontWeight.Medium,
-          }));
-          k8 += TabContentItem.paddingRight;
-        }
-        this.tabOffsets.push(k8);
-      });
+        })
+        .onActionEnd(() => {
+          this.controller?.close();
+        }));
     }
-    initialRender() {
-      this.observeComponentCreation2((i8, j8) => {
-        Column.create();
-      }, Column);
-      this.observeComponentCreation2((e8, f8) => {
-        Flex.create({
-          justifyContent: FlexAlign.SpaceBetween,
-          alignItems: ItemAlign.Stretch
-        });
-        Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-        Flex.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_end'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
-        Flex.onAreaChange((g8, h8) => {
-          this.tabWidth = Number(h8.width) - this.menuSectionWidth;
-        });
-      }, Flex);
-      this.observeComponentCreation2((c8, d8) => {
-        Stack.create({ alignContent: Alignment.End });
-        Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
-      }, Stack);
-      this.observeComponentCreation2((a8, b8) => {
-        Stack.create({ alignContent: Alignment.Start });
-      }, Stack);
-      this.observeComponentCreation2((y7, z7) => {
-        Column.create();
-      }, Column);
-      this.observeComponentCreation2((w7, x7) => {
-        List.create({ initialIndex: 0, scroller: this.scroller, space: 0 });
-        List.width('100%');
-        List.height(TabTitleBar.totalHeight);
-        List.constraintSize({ maxWidth: this.tabWidth });
-        List.edgeEffect(EdgeEffect.Spring);
-        List.listDirection(Axis.Horizontal);
-        List.scrollBar(BarState.Off);
-      }, List);
-      this.observeComponentCreation2((z6, a7) => {
-        ForEach.create();
-        const b7 = (c7, d7) => {
-          const e7 = c7;
-          {
-            const f7 = (u7, v7) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(u7);
-              g7(u7, v7);
-              if (!v7) {
-                ListItem.pop();
-              }
-              ViewStackProcessor.StopGetAccessRecording();
-            };
-            const g7 = (s7, t7) => {
-              ListItem.create(h7, true);
-            };
-            const h7 = (i7, j7) => {
-              f7(i7, j7);
-              {
-                this.observeComponentCreation2((k7, l7) => {
-                  if (l7) {
-                    let m7 = new TabContentItem(this, {
-                      item: e7,
-                      index: d7,
+    else {
+      u14.clearGestures();
+    }
+  }
+}
+ButtonGestureModifier.longPressTime = 500;
+ButtonGestureModifier.minFontSize = 1.75;
+export class TabTitleBar extends ViewPU {
+  constructor(o14, p14, q14, r14 = -1, s14 = undefined, t14) {
+    super(o14, q14, r14, t14);
+    if (typeof s14 === 'function') {
+      this.paramsGenerator_ = s14;
+    }
+    this.tabItems = [];
+    this.menuItems = [];
+    this.swiperContent = undefined;
+    this.__tabWidth = new ObservedPropertySimplePU(0, this, 'tabWidth');
+    this.__currentIndex = new ObservedPropertySimplePU(0, this, 'currentIndex');
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+    this.menuSectionWidth = 0;
+    this.tabOffsets = [];
+    this.imageWidths = [];
+    this.scroller = new Scroller();
+    this.swiperController = new SwiperController();
+    this.settings = new RenderingContextSettings(true);
+    this.leftContext2D = new CanvasRenderingContext2D(this.settings);
+    this.rightContext2D = new CanvasRenderingContext2D(this.settings);
+    this.setInitiallyProvidedValue(p14);
+    this.finalizeConstruction();
+  }
+  setInitiallyProvidedValue(n14) {
+    if (n14.tabItems !== undefined) {
+      this.tabItems = n14.tabItems;
+    }
+    if (n14.menuItems !== undefined) {
+      this.menuItems = n14.menuItems;
+    }
+    if (n14.swiperContent !== undefined) {
+      this.swiperContent = n14.swiperContent;
+    }
+    if (n14.tabWidth !== undefined) {
+      this.tabWidth = n14.tabWidth;
+    }
+    if (n14.currentIndex !== undefined) {
+      this.currentIndex = n14.currentIndex;
+    }
+    if (n14.fontSize !== undefined) {
+      this.fontSize = n14.fontSize;
+    }
+    if (n14.menuSectionWidth !== undefined) {
+      this.menuSectionWidth = n14.menuSectionWidth;
+    }
+    if (n14.tabOffsets !== undefined) {
+      this.tabOffsets = n14.tabOffsets;
+    }
+    if (n14.imageWidths !== undefined) {
+      this.imageWidths = n14.imageWidths;
+    }
+    if (n14.scroller !== undefined) {
+      this.scroller = n14.scroller;
+    }
+    if (n14.swiperController !== undefined) {
+      this.swiperController = n14.swiperController;
+    }
+    if (n14.settings !== undefined) {
+      this.settings = n14.settings;
+    }
+    if (n14.leftContext2D !== undefined) {
+      this.leftContext2D = n14.leftContext2D;
+    }
+    if (n14.rightContext2D !== undefined) {
+      this.rightContext2D = n14.rightContext2D;
+    }
+  }
+  updateStateVars(m14) {
+  }
+  purgeVariableDependenciesOnElmtId(l14) {
+    this.__tabWidth.purgeDependencyOnElmtId(l14);
+    this.__currentIndex.purgeDependencyOnElmtId(l14);
+    this.__fontSize.purgeDependencyOnElmtId(l14);
+  }
+  aboutToBeDeleted() {
+    this.__tabWidth.aboutToBeDeleted();
+    this.__currentIndex.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+  get tabWidth() {
+    return this.__tabWidth.get();
+  }
+  set tabWidth(k14) {
+    this.__tabWidth.set(k14);
+  }
+  get currentIndex() {
+    return this.__currentIndex.get();
+  }
+  set currentIndex(j14) {
+    this.__currentIndex.set(j14);
+  }
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+  set fontSize(i14) {
+    this.__fontSize.set(i14);
+  }
+  GradientMask(u13, v13, w13, x13, y13, z13 = null) {
+    this.observeComponentCreation((g14, h14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g14);
+      Column.create();
+      Column.blendMode(BlendMode.DST_OUT);
+      Column.width(TabTitleBar.gradientMaskWidth);
+      Column.height(TabTitleBar.totalHeight);
+      if (!h14) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((c14, d14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(c14);
+      Canvas.create(u13);
+      Canvas.width(TabTitleBar.gradientMaskWidth);
+      Canvas.height(TabTitleBar.totalHeight);
+      Canvas.onReady(() => {
+        let f14 = u13.createLinearGradient(v13, w13, x13, y13);
+        f14.addColorStop(0.0, '#ffffffff');
+        f14.addColorStop(1, '#00ffffff');
+        u13.fillStyle = f14;
+        u13.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight);
+      });
+      if (!d14) {
+        Canvas.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Canvas.pop();
+    Column.pop();
+  }
+  emptyBuilder(t13 = null) {
+  }
+  aboutToAppear() {
+    if (!this.swiperContent) {
+      this.swiperContent = this.emptyBuilder;
+    }
+    this.tabItems.forEach((s13) => {
+      this.imageWidths.push(0);
+    });
+    this.loadOffsets();
+  }
+  loadOffsets() {
+    this.tabOffsets.length = 0;
+    let n13 = 0;
+    this.tabOffsets.push(n13);
+    n13 += TabContentItem.marginFirst;
+    this.tabItems.forEach((p13, q13) => {
+      if (p13.icon !== undefined) {
+        if (Math.abs(this.imageWidths[q13]) > TabContentItem.imageHotZoneWidth) {
+          n13 += this.imageWidths[q13];
+        }
+        else {
+          n13 += TabContentItem.imageHotZoneWidth;
+        }
+      }
+      else {
+        n13 += TabContentItem.paddingLeft;
+        n13 += px2vp(MeasureText.measureText({
+          textContent: p13.title.toString(),
+          fontSize: 18,
+          fontWeight: FontWeight.Medium,
+        }));
+        n13 += TabContentItem.paddingRight;
+      }
+      this.tabOffsets.push(n13);
+    });
+  }
+  initialRender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation((l13, m13) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(l13);
+      Column.create();
+      if (!m13) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((g13, h13) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g13);
+      Flex.create({
+        justifyContent: FlexAlign.SpaceBetween,
+        alignItems: ItemAlign.Stretch
+      });
+      Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+      Flex.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
+      Flex.onAreaChange((j13, k13) => {
+        this.tabWidth = Number(k13.width) - this.menuSectionWidth;
+      });
+      if (!h13) {
+        Flex.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((e13, f13) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e13);
+      Stack.create({ alignContent: Alignment.End });
+      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
+      if (!f13) {
+        Stack.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((c13, d13) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(c13);
+      Stack.create({ alignContent: Alignment.Start });
+      if (!d13) {
+        Stack.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((a13, b13) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(a13);
+      Column.create();
+      if (!b13) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((y12, z12) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(y12);
+      List.create({ initialIndex: 0, scroller: this.scroller, space: 0 });
+      List.width('100%');
+      List.height(TabTitleBar.totalHeight);
+      List.constraintSize({ maxWidth: this.tabWidth });
+      List.edgeEffect(EdgeEffect.Spring);
+      List.listDirection(Axis.Horizontal);
+      List.scrollBar(BarState.Off);
+      if (!z12) {
+        List.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((u11, v11) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(u11);
+      ForEach.create();
+      const w11 = (y11, z11) => {
+        const a12 = y11;
+        {
+          const b12 = (w12, x12) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(w12);
+            c12(w12, x12);
+            if (!x12) {
+              ListItem.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          };
+          const c12 = (u12, v12) => {
+            ListItem.create(d12, true);
+          };
+          const d12 = (h12, i12) => {
+            b12(h12, i12);
+            this.updateFuncByElmtId.set(h12, b12);
+            {
+              this.observeComponentCreation((k12, l12) => {
+                ViewStackProcessor.StartGetAccessRecordingFor(k12);
+                if (l12) {
+                  let m12 = new TabContentItem(this, {
+                    item: a12,
+                    index: z11,
+                    maxIndex: this.tabItems.length - 1,
+                    currentIndex: this.currentIndex,
+                    onCustomClick: (t12) => this.currentIndex = t12,
+                    onImageComplete: (s12) => {
+                      this.imageWidths[z11] = s12;
+                      this.loadOffsets();
+                    }
+                  }, undefined, k12, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 170, col: 21 });
+                  ViewPU.create(m12);
+                  let n12 = () => {
+                    return {
+                      item: a12,
+                      index: z11,
                       maxIndex: this.tabItems.length - 1,
                       currentIndex: this.currentIndex,
-                      onCustomClick: (r7) => this.currentIndex = r7,
-                      onImageComplete: (q7) => {
-                        this.imageWidths[d7] = q7;
+                      onCustomClick: (r12) => this.currentIndex = r12,
+                      onImageComplete: (q12) => {
+                        this.imageWidths[z11] = q12;
                         this.loadOffsets();
                       }
-                    }, undefined, k7, () => { }, { page: 'library/src/main/ets/components/MainPage.ets',
-                      line: 138, col: 21 });
-                    ViewPU.create(m7);
-                    let n7 = () => {
-                      return {
-                        item: e7,
-                        index: d7,
-                        maxIndex: this.tabItems.length - 1,
-                        currentIndex: this.currentIndex,
-                        onCustomClick: (p7) => this.currentIndex = p7,
-                        onImageComplete: (o7) => {
-                          this.imageWidths[d7] = o7;
-                          this.loadOffsets();
-                        }
-                      };
-                    };
-                    m7.paramsGenerator_ = n7;
-                  }
-                  else {
-                    this.updateStateVarsOfChildByElmtId(k7, {
-                      currentIndex: this.currentIndex
-                    });
-                  }
-                }, { name: 'TabContentItem' });
-              }
-              ListItem.pop();
-            };
-            this.observeComponentCreation2(g7, ListItem);
-            ListItem.pop();
-          }
-        };
-        this.forEachUpdateFunction(z6, this.tabItems, b7, undefined, true, false);
-      }, ForEach);
-      ForEach.pop();
-      List.pop();
-      Column.pop();
-      this.GradientMask.bind(this)(this.leftContext2D, 0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth,
-        TabTitleBar.totalHeight / 2);
-      Stack.pop();
-      this.GradientMask.bind(this)(this.rightContext2D, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0,
-        TabTitleBar.totalHeight / 2);
-      Stack.pop();
-      this.observeComponentCreation2((p6, q6) => {
-        If.create();
-        if (this.menuItems !== undefined && this.menuItems.length > 0) {
-          this.ifElseBranchUpdateFunction(0, () => {
-            this.observeComponentCreation2((v6, w6) => {
-              __Common__.create();
-              __Common__.height(TabTitleBar.totalHeight);
-              __Common__.onAreaChange((x6, y6) => {
-                this.menuSectionWidth = Number(y6.width);
-              });
-            }, __Common__);
-            {
-              this.observeComponentCreation2((r6, s6) => {
-                if (s6) {
-                  let t6 = new CollapsibleMenuSection(this, { menuItems: this.menuItems,
-                    index: 1 + TabTitleBar.instanceCount++ }, undefined, r6, () => { },
-                    { page: 'library/src/main/ets/components/MainPage.ets', line: 168, col: 11 });
-                  ViewPU.create(t6);
-                  let u6 = () => {
-                    return {
-                      menuItems: this.menuItems,
-                      index: 1 + TabTitleBar.instanceCount++
                     };
                   };
-                  t6.paramsGenerator_ = u6;
-                } else {
-                  this.updateStateVarsOfChildByElmtId(r6, {});
+                  m12.paramsGenerator_ = n12;
                 }
-              }, { name: 'CollapsibleMenuSection' });
+                else {
+                  this.updateStateVarsOfChildByElmtId(k12, {
+                    currentIndex: this.currentIndex
+                  });
+                }
+                ViewStackProcessor.StopGetAccessRecording();
+              });
             }
-            __Common__.pop();
-          });
-        } else {
-          this.ifElseBranchUpdateFunction(1, () => {
-          });
+            ListItem.pop();
+          };
+          this.observeComponentCreation(b12);
+          ListItem.pop();
         }
-      }, If);
-      If.pop();
-      Flex.pop();
-      this.observeComponentCreation2((n6, o6) => {
-        Column.create();
-      }, Column);
-      this.observeComponentCreation2((j6, k6) => {
-        Swiper.create(this.swiperController);
-        Swiper.index(this.currentIndex);
-        Swiper.itemSpace(0);
-        Swiper.indicator(false);
-        Swiper.width('100%');
-        Swiper.height('100%');
-        Swiper.curve(Curve.Friction);
-        Swiper.onChange((l6) => {
-          const m6 = this.tabOffsets[l6] + TabTitleBar.correctionOffset;
-          this.currentIndex = l6;
-          this.scroller.scrollTo({
-            xOffset: m6 > 0 ? m6 : 0,
-            yOffset: 0,
-            animation: {
-              duration: 300,
-              curve: Curve.EaseInOut
-            }
-          });
-        });
-        Swiper.onAppear(() => {
-          this.scroller.scrollToIndex(this.currentIndex);
-          this.scroller.scrollBy(TabTitleBar.correctionOffset, 0);
-        });
-      }, Swiper);
-      this.swiperContent.bind(this)();
-      Swiper.pop();
-      Column.pop();
-      Column.pop();
-    }
-    rerender() {
-      this.updateDirtyElements();
-    }
-  }
-  TabTitleBar.totalHeight = 56;
-  TabTitleBar.correctionOffset = -40.0;
-  TabTitleBar.gradientMaskWidth = 24;
-  TabTitleBar.instanceCount = 0;
-  class CollapsibleMenuSection extends ViewPU {
-    constructor(b6, c6, d6, e6 = -1, f6 = undefined, g6) {
-      super(b6, d6, e6, g6);
-      if (typeof f6 === 'function') {
-        this.paramsGenerator_ = f6;
-      }
-      this.menuItems = [];
-      this.index = 0;
-      this.item = {
-        value: PUBLIC_MORE,
-        label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
       };
-      this.longPressTime = 500;
-      this.minFontSize = 1.75;
-      this.isFollowingSystemFontScale = false;
-      this.maxFontScale = 1;
-      this.systemFontScale = 1;
-      this.firstFocusableIndex = -1;
-      this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
-      this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
-      this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
-      this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
-      this.__fontSize = new SynchedPropertySimpleOneWayPU(c6.fontSize, this, 'fontSize');
-      this.dialogController = new CustomDialogController({
-        builder: () => {
-          let h6 = new TabTitleBarDialog(this, {
+      this.forEachUpdateFunction(u11, this.tabItems, w11, undefined, true, false);
+      if (!v11) {
+        ForEach.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    ForEach.pop();
+    List.pop();
+    Column.pop();
+    this.GradientMask.bind(this)(this.leftContext2D, 0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2);
+    Stack.pop();
+    this.GradientMask.bind(this)(this.rightContext2D, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2);
+    Stack.pop();
+    this.observeComponentCreation((d11, e11) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(d11);
+      If.create();
+      if (this.menuItems !== undefined && this.menuItems.length > 0) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((p11, q11) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(p11);
+            __Common__.create();
+            __Common__.height(TabTitleBar.totalHeight);
+            __Common__.onAreaChange((s11, t11) => {
+              this.menuSectionWidth = Number(t11.width);
+            });
+            if (!q11) {
+              __Common__.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          {
+            this.observeComponentCreation((j11, k11) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(j11);
+              if (k11) {
+                let l11 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, j11, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 200, col: 11 });
+                ViewPU.create(l11);
+                let m11 = () => {
+                  return {
+                    menuItems: this.menuItems,
+                    index: 1 + TabTitleBar.instanceCount++
+                  };
+                };
+                l11.paramsGenerator_ = m11;
+              }
+              else {
+                this.updateStateVarsOfChildByElmtId(j11, {});
+              }
+              ViewStackProcessor.StopGetAccessRecording();
+            });
+          }
+          __Common__.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!e11) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    If.pop();
+    Flex.pop();
+    this.observeComponentCreation((b11, c11) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(b11);
+      Column.create();
+      if (!c11) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((v10, w10) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(v10);
+      Swiper.create(this.swiperController);
+      Swiper.index(this.currentIndex);
+      Swiper.itemSpace(0);
+      Swiper.indicator(false);
+      Swiper.width('100%');
+      Swiper.height('100%');
+      Swiper.curve(Curve.Friction);
+      Swiper.onChange((z10) => {
+        const a11 = this.tabOffsets[z10] + TabTitleBar.correctionOffset;
+        this.currentIndex = z10;
+        this.scroller.scrollTo({
+          xOffset: a11 > 0 ? a11 : 0,
+          yOffset: 0,
+          animation: {
+            duration: 300,
+            curve: Curve.EaseInOut
+          }
+        });
+      });
+      Swiper.onAppear(() => {
+        this.scroller.scrollToIndex(this.currentIndex);
+        this.scroller.scrollBy(TabTitleBar.correctionOffset, 0);
+      });
+      if (!w10) {
+        Swiper.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.swiperContent.bind(this)();
+    Swiper.pop();
+    Column.pop();
+    Column.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+}
+TabTitleBar.totalHeight = 56;
+TabTitleBar.correctionOffset = -40.0;
+TabTitleBar.gradientMaskWidth = 24;
+TabTitleBar.instanceCount = 0;
+class CollapsibleMenuSection extends ViewPU {
+  constructor(b10, c10, d10, e10 = -1, f10 = undefined, g10) {
+    super(b10, d10, e10, g10);
+    if (typeof f10 === 'function') {
+      this.paramsGenerator_ = f10;
+    }
+    this.menuItems = [];
+    this.index = 0;
+    this.item = {
+      value: PUBLIC_MORE,
+      label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+    };
+    this.minFontSize = 1.75;
+    this.isFollowingSystemFontScale = false;
+    this.maxFontScale = 1;
+    this.systemFontScale = 1;
+    this.firstFocusableIndex = -1;
+    this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
+    this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
+    this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
+    this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
+    this.__fontSize = new SynchedPropertySimpleOneWayPU(c10.fontSize, this, 'fontSize');
+    this.dialogController = new CustomDialogController({
+      builder: () => {
+        let h10 = new TabTitleBarDialog(this, {
+          cancel: () => {
+          },
+          confirm: () => {
+          },
+          tabTitleDialog: this.item,
+          tabTitleBarDialog: this.item.label ? this.item.label : '',
+          fontSize: this.fontSize,
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 268, col: 14 });
+        h10.setController(this.dialogController);
+        ViewPU.create(h10);
+        let i10 = () => {
+          return {
             cancel: () => {
             },
             confirm: () => {
             },
             tabTitleDialog: this.item,
             tabTitleBarDialog: this.item.label ? this.item.label : '',
-            fontSize: this.fontSize,
-          }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 237, col: 14 });
-          h6.setController(this.dialogController);
-          ViewPU.create(h6);
-          let i6 = () => {
-            return {
-              cancel: () => {
-              },
-              confirm: () => {
-              },
-              tabTitleDialog: this.item,
-              tabTitleBarDialog: this.item.label ? this.item.label : '',
-              fontSize: this.fontSize
-            };
+            fontSize: this.fontSize
           };
-          h6.paramsGenerator_ = i6;
-        },
-        maskColor: Color.Transparent,
-        isModal: true,
-        customStyle: true
-      }, this);
-      this.setInitiallyProvidedValue(c6);
-      this.finalizeConstruction();
+        };
+        h10.paramsGenerator_ = i10;
+      },
+      maskColor: Color.Transparent,
+      isModal: true,
+      customStyle: true
+    }, this);
+    this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
+    this.setInitiallyProvidedValue(c10);
+    this.declareWatch('fontSize', this.onFontSizeUpdated);
+    this.finalizeConstruction();
+  }
+  setInitiallyProvidedValue(a10) {
+    if (a10.menuItems !== undefined) {
+      this.menuItems = a10.menuItems;
     }
-    setInitiallyProvidedValue(a6) {
-      if (a6.menuItems !== undefined) {
-        this.menuItems = a6.menuItems;
-      }
-      if (a6.index !== undefined) {
-        this.index = a6.index;
-      }
-      if (a6.item !== undefined) {
-        this.item = a6.item;
-      }
-      if (a6.longPressTime !== undefined) {
-        this.longPressTime = a6.longPressTime;
-      }
-      if (a6.minFontSize !== undefined) {
-        this.minFontSize = a6.minFontSize;
-      }
-      if (a6.isFollowingSystemFontScale !== undefined) {
-        this.isFollowingSystemFontScale = a6.isFollowingSystemFontScale;
-      }
-      if (a6.maxFontScale !== undefined) {
-        this.maxFontScale = a6.maxFontScale;
-      }
-      if (a6.systemFontScale !== undefined) {
-        this.systemFontScale = a6.systemFontScale;
-      }
-      if (a6.firstFocusableIndex !== undefined) {
-        this.firstFocusableIndex = a6.firstFocusableIndex;
-      }
-      if (a6.isPopupShown !== undefined) {
-        this.isPopupShown = a6.isPopupShown;
-      }
-      if (a6.isMoreIconOnFocus !== undefined) {
-        this.isMoreIconOnFocus = a6.isMoreIconOnFocus;
-      }
-      if (a6.isMoreIconOnHover !== undefined) {
-        this.isMoreIconOnHover = a6.isMoreIconOnHover;
-      }
-      if (a6.isMoreIconOnClick !== undefined) {
-        this.isMoreIconOnClick = a6.isMoreIconOnClick;
-      }
-      if (a6.fontSize === undefined) {
-        this.__fontSize.set(1);
-      }
-      if (a6.dialogController !== undefined) {
-        this.dialogController = a6.dialogController;
-      }
+    if (a10.index !== undefined) {
+      this.index = a10.index;
     }
-    updateStateVars(z5) {
-      this.__fontSize.reset(z5.fontSize);
+    if (a10.item !== undefined) {
+      this.item = a10.item;
     }
-    purgeVariableDependenciesOnElmtId(y5) {
-      this.__isPopupShown.purgeDependencyOnElmtId(y5);
-      this.__isMoreIconOnFocus.purgeDependencyOnElmtId(y5);
-      this.__isMoreIconOnHover.purgeDependencyOnElmtId(y5);
-      this.__isMoreIconOnClick.purgeDependencyOnElmtId(y5);
-      this.__fontSize.purgeDependencyOnElmtId(y5);
+    if (a10.minFontSize !== undefined) {
+      this.minFontSize = a10.minFontSize;
     }
-    aboutToBeDeleted() {
-      this.__isPopupShown.aboutToBeDeleted();
-      this.__isMoreIconOnFocus.aboutToBeDeleted();
-      this.__isMoreIconOnHover.aboutToBeDeleted();
-      this.__isMoreIconOnClick.aboutToBeDeleted();
-      this.__fontSize.aboutToBeDeleted();
-      SubscriberManager.Get().delete(this.id__());
-      this.aboutToBeDeletedInternal();
+    if (a10.isFollowingSystemFontScale !== undefined) {
+      this.isFollowingSystemFontScale = a10.isFollowingSystemFontScale;
     }
-    get isPopupShown() {
-      return this.__isPopupShown.get();
+    if (a10.maxFontScale !== undefined) {
+      this.maxFontScale = a10.maxFontScale;
     }
-    set isPopupShown(x5) {
-      this.__isPopupShown.set(x5);
+    if (a10.systemFontScale !== undefined) {
+      this.systemFontScale = a10.systemFontScale;
     }
-    get isMoreIconOnFocus() {
-      return this.__isMoreIconOnFocus.get();
+    if (a10.firstFocusableIndex !== undefined) {
+      this.firstFocusableIndex = a10.firstFocusableIndex;
     }
-    set isMoreIconOnFocus(w5) {
-      this.__isMoreIconOnFocus.set(w5);
+    if (a10.isPopupShown !== undefined) {
+      this.isPopupShown = a10.isPopupShown;
     }
-    get isMoreIconOnHover() {
-      return this.__isMoreIconOnHover.get();
+    if (a10.isMoreIconOnFocus !== undefined) {
+      this.isMoreIconOnFocus = a10.isMoreIconOnFocus;
     }
-    set isMoreIconOnHover(v5) {
-      this.__isMoreIconOnHover.set(v5);
+    if (a10.isMoreIconOnHover !== undefined) {
+      this.isMoreIconOnHover = a10.isMoreIconOnHover;
     }
-    get isMoreIconOnClick() {
-      return this.__isMoreIconOnClick.get();
+    if (a10.isMoreIconOnClick !== undefined) {
+      this.isMoreIconOnClick = a10.isMoreIconOnClick;
     }
-    set isMoreIconOnClick(u5) {
-      this.__isMoreIconOnClick.set(u5);
+    if (a10.fontSize === undefined) {
+      this.__fontSize.set(1);
     }
-    get fontSize() {
-      return this.__fontSize.get();
+    if (a10.dialogController !== undefined) {
+      this.dialogController = a10.dialogController;
     }
-    set fontSize(t5) {
-      this.__fontSize.set(t5);
+    if (a10.buttonGestureModifier !== undefined) {
+      this.buttonGestureModifier = a10.buttonGestureModifier;
     }
-    getMoreIconFgColor() {
-      return this.isMoreIconOnClick
-        ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-        { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+  }
+  updateStateVars(z9) {
+    this.__fontSize.reset(z9.fontSize);
+  }
+  purgeVariableDependenciesOnElmtId(y9) {
+    this.__isPopupShown.purgeDependencyOnElmtId(y9);
+    this.__isMoreIconOnFocus.purgeDependencyOnElmtId(y9);
+    this.__isMoreIconOnHover.purgeDependencyOnElmtId(y9);
+    this.__isMoreIconOnClick.purgeDependencyOnElmtId(y9);
+    this.__fontSize.purgeDependencyOnElmtId(y9);
+    this.__buttonGestureModifier.purgeDependencyOnElmtId(y9);
+  }
+  aboutToBeDeleted() {
+    this.__isPopupShown.aboutToBeDeleted();
+    this.__isMoreIconOnFocus.aboutToBeDeleted();
+    this.__isMoreIconOnHover.aboutToBeDeleted();
+    this.__isMoreIconOnClick.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
+    this.__buttonGestureModifier.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+  get isPopupShown() {
+    return this.__isPopupShown.get();
+  }
+  set isPopupShown(x9) {
+    this.__isPopupShown.set(x9);
+  }
+  get isMoreIconOnFocus() {
+    return this.__isMoreIconOnFocus.get();
+  }
+  set isMoreIconOnFocus(w9) {
+    this.__isMoreIconOnFocus.set(w9);
+  }
+  get isMoreIconOnHover() {
+    return this.__isMoreIconOnHover.get();
+  }
+  set isMoreIconOnHover(v9) {
+    this.__isMoreIconOnHover.set(v9);
+  }
+  get isMoreIconOnClick() {
+    return this.__isMoreIconOnClick.get();
+  }
+  set isMoreIconOnClick(u9) {
+    this.__isMoreIconOnClick.set(u9);
+  }
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+  set fontSize(t9) {
+    this.__fontSize.set(t9);
+  }
+  get buttonGestureModifier() {
+    return this.__buttonGestureModifier.get();
+  }
+  set buttonGestureModifier(s9) {
+    this.__buttonGestureModifier.set(s9);
+  }
+  getMoreIconFgColor() {
+    return this.isMoreIconOnClick
+      ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+  }
+  getMoreIconBgColor() {
+    if (this.isMoreIconOnClick) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
-    getMoreIconBgColor() {
-      if (this.isMoreIconOnClick) {
-        return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    else if (this.isMoreIconOnHover) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    }
+    else {
+      return Color.Transparent;
+    }
+  }
+  aboutToAppear() {
+    try {
+      let r9 = this.getUIContext();
+      this.isFollowingSystemFontScale = r9.isFollowingSystemFontScale();
+      this.maxFontScale = r9.getMaxFontScale();
+    }
+    catch (o9) {
+      let p9 = o9.code;
+      let q9 = o9.message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${p9}, message: ${q9}`);
+    }
+    this.menuItems.forEach((m9, n9) => {
+      if (m9.isEnabled && this.firstFocusableIndex === -1 &&
+        n9 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        this.firstFocusableIndex = this.index * 1000 + n9 + 1;
       }
-      else if (this.isMoreIconOnHover) {
-        return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    });
+    this.fontSize = this.decideFontScale();
+  }
+  decideFontScale() {
+    let k9 = this.getUIContext();
+    this.systemFontScale = k9.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
+  }
+  onFontSizeUpdated() {
+    this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+  initialRender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation((i9, j9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(i9);
+      Column.create();
+      Column.height('100%');
+      Column.justifyContent(FlexAlign.Center);
+      if (!j9) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((g9, h9) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g9);
+      Row.create();
+      if (!h9) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((i7, j7) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(i7);
+      If.create();
+      if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((s8, t8) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(s8);
+            ForEach.create();
+            const u8 = (w8, x8) => {
+              const y8 = w8;
+              {
+                this.observeComponentCreation((a9, b9) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(a9);
+                  if (b9) {
+                    let c9 = new ImageMenuItem(this, { item: y8, index: this.index * 1000 + x8 + 1 }, undefined, a9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 337, col: 13 });
+                    ViewPU.create(c9);
+                    let d9 = () => {
+                      return {
+                        item: y8,
+                        index: this.index * 1000 + x8 + 1
+                      };
+                    };
+                    c9.paramsGenerator_ = d9;
+                  }
+                  else {
+                    this.updateStateVarsOfChildByElmtId(a9, {});
+                  }
+                  ViewStackProcessor.StopGetAccessRecording();
+                });
+              }
+            };
+            this.forEachUpdateFunction(s8, this.menuItems, u8, undefined, true, false);
+            if (!t8) {
+              ForEach.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          ForEach.pop();
+        });
       }
       else {
-        return Color.Transparent;
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation((c8, d8) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(c8);
+            ForEach.create();
+            const e8 = (g8, h8) => {
+              const i8 = g8;
+              {
+                this.observeComponentCreation((k8, l8) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(k8);
+                  if (l8) {
+                    let m8 = new ImageMenuItem(this, { item: i8, index: this.index * 1000 + h8 + 1 }, undefined, k8, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 342, col: 15 });
+                    ViewPU.create(m8);
+                    let n8 = () => {
+                      return {
+                        item: i8,
+                        index: this.index * 1000 + h8 + 1
+                      };
+                    };
+                    m8.paramsGenerator_ = n8;
+                  }
+                  else {
+                    this.updateStateVarsOfChildByElmtId(k8, {});
+                  }
+                  ViewStackProcessor.StopGetAccessRecording();
+                });
+              }
+            };
+            this.forEachUpdateFunction(c8, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), e8, undefined, true, false);
+            if (!d8) {
+              ForEach.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          ForEach.pop();
+          this.observeComponentCreation((q7, r7) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(q7);
+            Button.createWithChild({ type: ButtonType.Normal, stateEffect: true });
+            Button.accessibilityText({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Button.width(ImageMenuItem.imageHotZoneWidth);
+            Button.height(ImageMenuItem.imageHotZoneWidth);
+            Button.borderRadius(ImageMenuItem.buttonBorderRadius);
+            Button.foregroundColor(this.getMoreIconFgColor());
+            Button.backgroundColor(this.getMoreIconBgColor());
+            ViewStackProcessor.visualState('focused');
+            Button.border({
+              radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              width: ImageMenuItem.focusBorderWidth,
+              color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              style: BorderStyle.Solid
+            });
+            ViewStackProcessor.visualState('normal');
+            Button.border({
+              radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              width: 0
+            });
+            ViewStackProcessor.visualState();
+            Button.onFocus(() => this.isMoreIconOnFocus = true);
+            Button.onBlur(() => this.isMoreIconOnFocus = false);
+            Button.onHover((b8) => this.isMoreIconOnHover = b8);
+            Button.onKeyEvent((a8) => {
+              if (a8.keyCode !== KeyCode.KEYCODE_ENTER && a8.keyCode !== KeyCode.KEYCODE_SPACE) {
+                return;
+              }
+              if (a8.type === KeyType.Down) {
+                this.isMoreIconOnClick = true;
+              }
+              if (a8.type === KeyType.Up) {
+                this.isMoreIconOnClick = false;
+              }
+            });
+            Button.onTouch((z7) => {
+              if (z7.type === TouchType.Down) {
+                this.isMoreIconOnClick = true;
+              }
+              if (z7.type === TouchType.Up || z7.type === TouchType.Cancel) {
+                this.isMoreIconOnClick = false;
+                if (this.fontSize >= this.minFontSize) {
+                  this.dialogController?.close();
+                }
+              }
+            });
+            Button.onClick(() => this.isPopupShown = true);
+            Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
+            Button.bindPopup(this.isPopupShown, {
+              builder: { builder: this.popupBuilder.bind(this) },
+              placement: Placement.Bottom,
+              popupColor: Color.White,
+              enableArrow: false,
+              onStateChange: (y7) => {
+                this.isPopupShown = y7.isVisible;
+                if (!y7.isVisible) {
+                  this.isMoreIconOnClick = false;
+                }
+              }
+            });
+            if (!r7) {
+              Button.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((o7, p7) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(o7);
+            Image.create(PUBLIC_MORE);
+            Image.width(ImageMenuItem.imageSize);
+            Image.height(ImageMenuItem.imageSize);
+            Image.focusable(true);
+            Image.draggable(false);
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            if (!p7) {
+              Image.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Button.pop();
+        });
       }
+      if (!j7) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    If.pop();
+    Row.pop();
+    Column.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  popupBuilder(l6 = null) {
+    this.observeComponentCreation((c7, d7) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(c7);
+      Column.create();
+      Column.width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
+      Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
+      Column.onAppear(() => {
+        focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
+      });
+      if (!d7) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((o6, p6) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(o6);
+      ForEach.create();
+      const q6 = (s6, t6) => {
+        const u6 = s6;
+        {
+          this.observeComponentCreation((w6, x6) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(w6);
+            if (x6) {
+              let y6 = new ImageMenuItem(this, { item: u6, index: this.index * 1000 +
+              CollapsibleMenuSection.maxCountOfVisibleItems + t6 }, undefined, w6, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 426, col: 11 });
+              ViewPU.create(y6);
+              let z6 = () => {
+                return {
+                  item: u6,
+                  index: this.index * 1000 +
+                  CollapsibleMenuSection.maxCountOfVisibleItems + t6
+                };
+              };
+              y6.paramsGenerator_ = z6;
+            }
+            else {
+              this.updateStateVarsOfChildByElmtId(w6, {});
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+        }
+      };
+      this.forEachUpdateFunction(o6, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), q6, undefined, true, false);
+      if (!p6) {
+        ForEach.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    ForEach.pop();
+    Column.pop();
+  }
+  rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+}
+CollapsibleMenuSection.maxCountOfVisibleItems = 1;
+CollapsibleMenuSection.focusPadding = 4;
+CollapsibleMenuSection.marginsNum = 2;
+class TabContentItem extends ViewPU {
+  constructor(f6, g6, h6, i6 = -1, j6 = undefined, k6) {
+    super(f6, h6, i6, k6);
+    if (typeof j6 === 'function') {
+      this.paramsGenerator_ = j6;
     }
-    aboutToAppear() {
+    this.item = { title: '' };
+    this.index = 0;
+    this.maxIndex = 0;
+    this.onCustomClick = undefined;
+    this.onImageComplete = undefined;
+    this.__currentIndex = new SynchedPropertySimpleOneWayPU(g6.currentIndex, this, 'currentIndex');
+    this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+    this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
+    this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
+    this.__tabWidth = new ObservedPropertySimplePU(0, this, 'tabWidth');
+    this.__imageWidth = new ObservedPropertySimplePU(24, this, 'imageWidth');
+    this.__imageHeight = new ObservedPropertySimplePU(24, this, 'imageHeight');
+    this.setInitiallyProvidedValue(g6);
+    this.finalizeConstruction();
+  }
+  setInitiallyProvidedValue(e6) {
+    if (e6.item !== undefined) {
+      this.item = e6.item;
+    }
+    if (e6.index !== undefined) {
+      this.index = e6.index;
+    }
+    if (e6.maxIndex !== undefined) {
+      this.maxIndex = e6.maxIndex;
+    }
+    if (e6.onCustomClick !== undefined) {
+      this.onCustomClick = e6.onCustomClick;
+    }
+    if (e6.onImageComplete !== undefined) {
+      this.onImageComplete = e6.onImageComplete;
+    }
+    if (e6.isOnFocus !== undefined) {
+      this.isOnFocus = e6.isOnFocus;
+    }
+    if (e6.isOnHover !== undefined) {
+      this.isOnHover = e6.isOnHover;
+    }
+    if (e6.isOnClick !== undefined) {
+      this.isOnClick = e6.isOnClick;
+    }
+    if (e6.tabWidth !== undefined) {
+      this.tabWidth = e6.tabWidth;
+    }
+    if (e6.imageWidth !== undefined) {
+      this.imageWidth = e6.imageWidth;
+    }
+    if (e6.imageHeight !== undefined) {
+      this.imageHeight = e6.imageHeight;
+    }
+  }
+  updateStateVars(d6) {
+    this.__currentIndex.reset(d6.currentIndex);
+  }
+  purgeVariableDependenciesOnElmtId(c6) {
+    this.__currentIndex.purgeDependencyOnElmtId(c6);
+    this.__isOnFocus.purgeDependencyOnElmtId(c6);
+    this.__isOnHover.purgeDependencyOnElmtId(c6);
+    this.__isOnClick.purgeDependencyOnElmtId(c6);
+    this.__tabWidth.purgeDependencyOnElmtId(c6);
+    this.__imageWidth.purgeDependencyOnElmtId(c6);
+    this.__imageHeight.purgeDependencyOnElmtId(c6);
+  }
+  aboutToBeDeleted() {
+    this.__currentIndex.aboutToBeDeleted();
+    this.__isOnFocus.aboutToBeDeleted();
+    this.__isOnHover.aboutToBeDeleted();
+    this.__isOnClick.aboutToBeDeleted();
+    this.__tabWidth.aboutToBeDeleted();
+    this.__imageWidth.aboutToBeDeleted();
+    this.__imageHeight.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+  get currentIndex() {
+    return this.__currentIndex.get();
+  }
+  set currentIndex(b6) {
+    this.__currentIndex.set(b6);
+  }
+  get isOnFocus() {
+    return this.__isOnFocus.get();
+  }
+  set isOnFocus(a6) {
+    this.__isOnFocus.set(a6);
+  }
+  get isOnHover() {
+    return this.__isOnHover.get();
+  }
+  set isOnHover(z5) {
+    this.__isOnHover.set(z5);
+  }
+  get isOnClick() {
+    return this.__isOnClick.get();
+  }
+  set isOnClick(y5) {
+    this.__isOnClick.set(y5);
+  }
+  get tabWidth() {
+    return this.__tabWidth.get();
+  }
+  set tabWidth(x5) {
+    this.__tabWidth.set(x5);
+  }
+  get imageWidth() {
+    return this.__imageWidth.get();
+  }
+  set imageWidth(w5) {
+    this.__imageWidth.set(w5);
+  }
+  get imageHeight() {
+    return this.__imageHeight.get();
+  }
+  set imageHeight(v5) {
+    this.__imageHeight.set(v5);
+  }
+  getBgColor() {
+    if (this.isOnClick) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    }
+    else if (this.isOnHover) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    }
+    else {
+      return Color.Transparent;
+    }
+  }
+  getBorderAttr() {
+    if (this.isOnFocus) {
+      return {
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        width: TabContentItem.focusBorderWidth,
+        color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        style: BorderStyle.Solid
+      };
+    }
+    return { width: 0 };
+  }
+  getImageScaleFactor() {
+    return this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1;
+  }
+  getImageLayoutWidth() {
+    return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
+  }
+  toStringFormat(q5) {
+    if (typeof q5 === 'string') {
+      return q5;
+    }
+    else if (typeof q5 === 'undefined') {
+      return '';
+    }
+    else {
+      let r5 = '';
       try {
-        let s5 = this.getUIContext();
-        this.isFollowingSystemFontScale = s5.isFollowingSystemFontScale();
-        this.maxFontScale = s5.getMaxFontScale();
+        r5 = getContext()?.resourceManager?.getStringSync(q5);
       }
-      catch (p5) {
-        let q5 = p5.code;
-        let r5 = p5.message;
-        hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${q5}, message: ${r5}`);
+      catch (s5) {
+        let t5 = s5?.code;
+        let u5 = s5?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${t5},message:${u5}`);
       }
-      this.menuItems.forEach((n5, o5) => {
-        if (n5.isEnabled && this.firstFocusableIndex === -1 &&
-          o5 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-          this.firstFocusableIndex = this.index * 1000 + o5 + 1;
+      return r5;
+    }
+  }
+  initialRender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation((o5, p5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(o5);
+      Stack.create();
+      Stack.margin({
+        left: this.index === 0 ? TabContentItem.marginFirst : 0,
+        right: this.index === this.maxIndex ? 12 : 0
+      });
+      if (!p5) {
+        Stack.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((j5, k5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(j5);
+      Button.createWithChild();
+      Button.height(TabTitleBar.totalHeight);
+      Button.borderRadius(TabContentItem.buttonBorderRadius);
+      Button.backgroundColor(this.getBgColor());
+      Button.onAreaChange((m5, n5) => {
+        this.tabWidth = Number(n5.width);
+      });
+      if (!k5) {
+        Button.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((h5, i5) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(h5);
+      Column.create();
+      Column.justifyContent(FlexAlign.Center);
+      if (!i5) {
+        Column.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((y3, z3) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(y3);
+      If.create();
+      if (this.item.icon === undefined) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((w4, x4) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(w4);
+            Text.create(this.item.title);
+            Context.animation({ duration: 300 });
+            Text.fontSize(this.index === this.currentIndex
+              ? { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline9'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor(this.index === this.currentIndex
+              ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text_off'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontWeight(FontWeight.Medium);
+            Text.focusable(true);
+            Context.animation(null);
+            Text.padding({
+              top: this.index === this.currentIndex ? 6 : 10,
+              left: TabContentItem.paddingLeft,
+              bottom: 2,
+              right: TabContentItem.paddingRight
+            });
+            Text.onFocus(() => this.isOnFocus = true);
+            Text.onBlur(() => this.isOnFocus = false);
+            Text.onHover((g5) => this.isOnHover = g5);
+            Text.onKeyEvent((f5) => {
+              if (f5.keyCode !== KeyCode.KEYCODE_ENTER && f5.keyCode !== KeyCode.KEYCODE_SPACE) {
+                return;
+              }
+              if (f5.type === KeyType.Down) {
+                this.isOnClick = true;
+              }
+              if (f5.type === KeyType.Up) {
+                this.isOnClick = false;
+              }
+            });
+            Text.onTouch((e5) => {
+              if (e5.type === TouchType.Down) {
+                this.isOnClick = true;
+              }
+              if (e5.type === TouchType.Up || e5.type === TouchType.Cancel) {
+                this.isOnClick = false;
+              }
+            });
+            Text.onClick(() => this.onCustomClick && this.onCustomClick(this.index));
+            Text.accessibilitySelected(this.index === this.currentIndex);
+            if (!x4) {
+              Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Text.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation((j4, k4) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(j4);
+            Row.create();
+            Context.animation({ duration: 300 });
+            Row.width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
+            TabContentItem.paddingLeft + TabContentItem.paddingRight);
+            Row.constraintSize({
+              minWidth: TabContentItem.imageHotZoneWidth,
+              minHeight: TabContentItem.imageHotZoneWidth
+            });
+            Context.animation(null);
+            Row.justifyContent(FlexAlign.Center);
+            Row.onFocus(() => this.isOnFocus = true);
+            Row.onBlur(() => this.isOnFocus = false);
+            Row.onHover((t4) => this.isOnHover = t4);
+            Row.onKeyEvent((s4) => {
+              if (s4.keyCode !== KeyCode.KEYCODE_ENTER && s4.keyCode !== KeyCode.KEYCODE_SPACE) {
+                return;
+              }
+              if (s4.type === KeyType.Down) {
+                this.isOnClick = true;
+              }
+              if (s4.type === KeyType.Up) {
+                this.isOnClick = false;
+              }
+            });
+            Row.onTouch((r4) => {
+              if (r4.type === TouchType.Down) {
+                this.isOnClick = true;
+              }
+              if (r4.type === TouchType.Up || r4.type === TouchType.Cancel) {
+                this.isOnClick = false;
+              }
+            });
+            Row.onClick(() => this.onCustomClick && this.onCustomClick(this.index));
+            Row.accessibilitySelected(this.index === this.currentIndex);
+            if (!k4) {
+              Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((d4, e4) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(d4);
+            Image.create(this.item.icon);
+            Context.animation({ duration: 300 });
+            Image.alt(this.item.title);
+            Image.width(this.getImageLayoutWidth());
+            Image.height(TabContentItem.imageSize);
+            Image.objectFit(ImageFit.Fill);
+            Image.accessibilityText(this.toStringFormat(this.item.title));
+            Image.scale({
+              x: this.getImageScaleFactor(),
+              y: this.getImageScaleFactor()
+            });
+            Context.animation(null);
+            Image.hitTestBehavior(HitTestMode.None);
+            Image.focusable(true);
+            Image.onComplete((i4) => {
+              if (!this.onImageComplete) {
+                return;
+              }
+              this.imageWidth = px2vp(i4?.width);
+              this.imageHeight = px2vp(i4?.height);
+              this.onImageComplete(px2vp(i4?.componentWidth) +
+              TabContentItem.paddingLeft + TabContentItem.paddingRight);
+            });
+            Image.onError((h4) => {
+              if (!this.onImageComplete) {
+                return;
+              }
+              this.onImageComplete(px2vp(h4.componentWidth) +
+              TabContentItem.paddingLeft + TabContentItem.paddingRight);
+            });
+            if (!e4) {
+              Image.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Row.pop();
+        });
+      }
+      if (!z3) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    If.pop();
+    Column.pop();
+    Button.pop();
+    this.observeComponentCreation((r3, s3) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(r3);
+      If.create();
+      if (this.isOnFocus && this.tabWidth > 0) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((w3, x3) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(w3);
+            Row.create();
+            Row.width(this.tabWidth);
+            Row.height(TabTitleBar.totalHeight);
+            Row.hitTestBehavior(HitTestMode.None);
+            Row.borderRadius(TabContentItem.buttonBorderRadius);
+            ViewStackProcessor.visualState('focused');
+            Row.border(this.getBorderAttr());
+            ViewStackProcessor.visualState('normal');
+            Row.border({
+              radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              width: 0
+            });
+            ViewStackProcessor.visualState();
+            if (!x3) {
+              Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Row.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!s3) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    If.pop();
+    Stack.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+}
+TabContentItem.imageSize = 24;
+TabContentItem.imageHotZoneWidth = 48;
+TabContentItem.imageMagnificationFactor = 1.4;
+TabContentItem.buttonBorderRadius = 8;
+TabContentItem.focusBorderWidth = 2;
+TabContentItem.paddingLeft = 8;
+TabContentItem.paddingRight = 8;
+TabContentItem.marginFirst = 16;
+class ImageMenuItem extends ViewPU {
+  constructor(c3, d3, e3, f3 = -1, g3 = undefined, h3) {
+    super(c3, e3, f3, h3);
+    if (typeof g3 === 'function') {
+      this.paramsGenerator_ = g3;
+    }
+    this.item = { value: '' };
+    this.index = 0;
+    this.minFontSize = 1.75;
+    this.isFollowingSystemFontScale = false;
+    this.maxFontScale = 1;
+    this.systemFontScale = 1;
+    this.isPopup = false;
+    this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+    this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
+    this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
+    this.__fontSize = new SynchedPropertySimpleOneWayPU(d3.fontSize, this, 'fontSize');
+    this.dialogController = new CustomDialogController({
+      builder: () => {
+        let i3 = new TabTitleBarDialog(this, {
+          cancel: () => {
+          },
+          confirm: () => {
+          },
+          tabTitleDialog: this.item,
+          tabTitleBarDialog: this.item.label ? this.item.label : '',
+          fontSize: this.fontSize,
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 682, col: 14 });
+        i3.setController(this.dialogController);
+        ViewPU.create(i3);
+        let j3 = () => {
+          return {
+            cancel: () => {
+            },
+            confirm: () => {
+            },
+            tabTitleDialog: this.item,
+            tabTitleBarDialog: this.item.label ? this.item.label : '',
+            fontSize: this.fontSize
+          };
+        };
+        i3.paramsGenerator_ = j3;
+      },
+      maskColor: Color.Transparent,
+      isModal: true,
+      customStyle: true
+    }, this);
+    this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
+    this.setInitiallyProvidedValue(d3);
+    this.declareWatch('fontSize', this.onFontSizeUpdated);
+    this.finalizeConstruction();
+  }
+  setInitiallyProvidedValue(b3) {
+    if (b3.item !== undefined) {
+      this.item = b3.item;
+    }
+    if (b3.index !== undefined) {
+      this.index = b3.index;
+    }
+    if (b3.minFontSize !== undefined) {
+      this.minFontSize = b3.minFontSize;
+    }
+    if (b3.isFollowingSystemFontScale !== undefined) {
+      this.isFollowingSystemFontScale = b3.isFollowingSystemFontScale;
+    }
+    if (b3.maxFontScale !== undefined) {
+      this.maxFontScale = b3.maxFontScale;
+    }
+    if (b3.systemFontScale !== undefined) {
+      this.systemFontScale = b3.systemFontScale;
+    }
+    if (b3.isPopup !== undefined) {
+      this.isPopup = b3.isPopup;
+    }
+    if (b3.isOnFocus !== undefined) {
+      this.isOnFocus = b3.isOnFocus;
+    }
+    if (b3.isOnHover !== undefined) {
+      this.isOnHover = b3.isOnHover;
+    }
+    if (b3.isOnClick !== undefined) {
+      this.isOnClick = b3.isOnClick;
+    }
+    if (b3.fontSize === undefined) {
+      this.__fontSize.set(1);
+    }
+    if (b3.dialogController !== undefined) {
+      this.dialogController = b3.dialogController;
+    }
+    if (b3.buttonGestureModifier !== undefined) {
+      this.buttonGestureModifier = b3.buttonGestureModifier;
+    }
+  }
+  updateStateVars(a3) {
+    this.__fontSize.reset(a3.fontSize);
+  }
+  purgeVariableDependenciesOnElmtId(z2) {
+    this.__isOnFocus.purgeDependencyOnElmtId(z2);
+    this.__isOnHover.purgeDependencyOnElmtId(z2);
+    this.__isOnClick.purgeDependencyOnElmtId(z2);
+    this.__fontSize.purgeDependencyOnElmtId(z2);
+    this.__buttonGestureModifier.purgeDependencyOnElmtId(z2);
+  }
+  aboutToBeDeleted() {
+    this.__isOnFocus.aboutToBeDeleted();
+    this.__isOnHover.aboutToBeDeleted();
+    this.__isOnClick.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
+    this.__buttonGestureModifier.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+  get isOnFocus() {
+    return this.__isOnFocus.get();
+  }
+  set isOnFocus(y2) {
+    this.__isOnFocus.set(y2);
+  }
+  get isOnHover() {
+    return this.__isOnHover.get();
+  }
+  set isOnHover(x2) {
+    this.__isOnHover.set(x2);
+  }
+  get isOnClick() {
+    return this.__isOnClick.get();
+  }
+  set isOnClick(w2) {
+    this.__isOnClick.set(w2);
+  }
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+  set fontSize(v2) {
+    this.__fontSize.set(v2);
+  }
+  get buttonGestureModifier() {
+    return this.__buttonGestureModifier.get();
+  }
+  set buttonGestureModifier(u2) {
+    this.__buttonGestureModifier.set(u2);
+  }
+  textDialog() {
+    if (this.item.value === PUBLIC_MORE) {
+      return { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    }
+    else {
+      return this.item.label ? this.item.label : '';
+    }
+  }
+  getFgColor() {
+    return this.isOnClick
+      ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+  }
+  getBgColor() {
+    if (this.isOnClick) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    }
+    else if (this.isOnHover) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    }
+    else {
+      return Color.Transparent;
+    }
+  }
+  toStringFormat(p2) {
+    if (typeof p2 === 'string') {
+      return p2;
+    }
+    else if (typeof p2 === 'undefined') {
+      return '';
+    }
+    else {
+      let q2 = '';
+      try {
+        q2 = getContext()?.resourceManager?.getStringSync(p2);
+      }
+      catch (r2) {
+        let s2 = r2?.code;
+        let t2 = r2?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${s2},message:${t2}`);
+      }
+      return q2;
+    }
+  }
+  getAccessibilityReadText() {
+    if (this.item.value === PUBLIC_MORE) {
+      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+    }
+    else if (this.item.accessibilityText) {
+      return this.toStringFormat(this.item.accessibilityText);
+    }
+    else if (this.item.label) {
+      return this.toStringFormat(this.item.label);
+    }
+    return ' ';
+  }
+  onPlaceChildren(k2, l2, m2) {
+    l2.forEach((o2) => {
+      o2.layout({ x: 0, y: 0 });
+    });
+    this.fontSize = this.decideFontScale();
+  }
+  onFontSizeUpdated() {
+    this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+  aboutToAppear() {
+    try {
+      let j2 = this.getUIContext();
+      this.isFollowingSystemFontScale = j2.isFollowingSystemFontScale();
+      this.maxFontScale = j2.getMaxFontScale();
+    }
+    catch (g2) {
+      let h2 = g2.code;
+      let i2 = g2.message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${h2}, message: ${i2}`);
+    }
+    this.fontSize = this.decideFontScale();
+  }
+  decideFontScale() {
+    let f2 = this.getUIContext();
+    this.systemFontScale = f2.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
+  }
+  initialRender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation((u1, v1) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(u1);
+      Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
+      Button.accessibilityText(this.getAccessibilityReadText());
+      Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
+      Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+      Button.width(ImageMenuItem.imageHotZoneWidth);
+      Button.height(ImageMenuItem.imageHotZoneWidth);
+      Button.borderRadius(ImageMenuItem.buttonBorderRadius);
+      Button.foregroundColor(this.getFgColor());
+      Button.backgroundColor(this.getBgColor());
+      Button.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
+      ViewStackProcessor.visualState('focused');
+      Button.border({
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        width: ImageMenuItem.focusBorderWidth,
+        color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        style: BorderStyle.Solid
+      });
+      ViewStackProcessor.visualState('normal');
+      Button.border({
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        width: 0
+      });
+      ViewStackProcessor.visualState();
+      Button.onFocus(() => {
+        if (!this.item.isEnabled) {
+          return;
+        }
+        this.isOnFocus = true;
+      });
+      Button.onBlur(() => this.isOnFocus = false);
+      Button.onHover((e2) => {
+        if (!this.item.isEnabled) {
+          return;
+        }
+        this.isOnHover = e2;
+      });
+      Button.onKeyEvent((d2) => {
+        if (!this.item.isEnabled) {
+          return;
+        }
+        if (d2.keyCode !== KeyCode.KEYCODE_ENTER && d2.keyCode !== KeyCode.KEYCODE_SPACE) {
+          return;
+        }
+        if (d2.type === KeyType.Down) {
+          this.isOnClick = true;
+        }
+        if (d2.type === KeyType.Up) {
+          this.isOnClick = false;
         }
       });
-    }
-    decideFontScale() {
-      let m5 = this.getUIContext();
-      this.systemFontScale = m5.getHostContext()?.config?.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
-      return Math.min(this.systemFontScale, this.maxFontScale);
-    }
-    initialRender() {
-      this.observeComponentCreation2((k5, l5) => {
-        Column.create();
-        Column.height('100%');
-        Column.justifyContent(FlexAlign.Center);
-      }, Column);
-      this.observeComponentCreation2((i5, j5) => {
-        Row.create();
-      }, Row);
-      this.observeComponentCreation2((d4, e4) => {
-        If.create();
-        if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          this.ifElseBranchUpdateFunction(0, () => {
-            this.observeComponentCreation2((y4, z4) => {
-              ForEach.create();
-              const a5 = (b5, c5) => {
-                const d5 = b5;
-                {
-                  this.observeComponentCreation2((e5, f5) => {
-                    if (f5) {
-                      let g5 = new ImageMenuItem(this, { item: d5, index: this.index * 1000 + c5 + 1 },
-                        undefined, e5, () => { }, { page: 'library/src/main/ets/components/MainPage.ets',
-                          line: 299, col: 13 });
-                      ViewPU.create(g5);
-                      let h5 = () => {
-                        return {
-                          item: d5,
-                          index: this.index * 1000 + c5 + 1
-                        };
-                      };
-                      g5.paramsGenerator_ = h5;
-                    } else {
-                      this.updateStateVarsOfChildByElmtId(e5, {});
-                    }
-                  }, { name: 'ImageMenuItem' });
-                }
-              };
-              this.forEachUpdateFunction(y4, this.menuItems, a5, undefined, true, false);
-            }, ForEach);
-            ForEach.pop();
-          });
-        } else {
-          this.ifElseBranchUpdateFunction(1, () => {
-            this.observeComponentCreation2((o4, p4) => {
-              ForEach.create();
-              const q4 = (r4, s4) => {
-                const t4 = r4;
-                {
-                  this.observeComponentCreation2((u4, v4) => {
-                    if (v4) {
-                      let w4 = new ImageMenuItem(this, { item: t4, index: this.index * 1000 + s4 + 1 }, undefined, u4,
-                        () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 304, col: 15 });
-                      ViewPU.create(w4);
-                      let x4 = () => {
-                        return {
-                          item: t4,
-                          index: this.index * 1000 + s4 + 1
-                        };
-                      };
-                      w4.paramsGenerator_ = x4;
-                    } else {
-                      this.updateStateVarsOfChildByElmtId(u4, {});
-                    }
-                  }, { name: 'ImageMenuItem' });
-                }
-              };
-              this.forEachUpdateFunction(o4, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-                q4, undefined, true, false);
-            }, ForEach);
-            ForEach.pop();
-            this.observeComponentCreation2((h4, i4) => {
-              Row.create();
-              Row.width(ImageMenuItem.imageHotZoneWidth);
-              Row.height(ImageMenuItem.imageHotZoneWidth);
-              Row.borderRadius(ImageMenuItem.buttonBorderRadius);
-              Row.foregroundColor(this.getMoreIconFgColor());
-              Row.backgroundColor(this.getMoreIconBgColor());
-              Row.justifyContent(FlexAlign.Center);
-              ViewStackProcessor.visualState('focused');
-              Row.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: ImageMenuItem.focusBorderWidth,
-                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                style: BorderStyle.Solid
-              });
-              ViewStackProcessor.visualState('normal');
-              Row.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: 0
-              });
-              ViewStackProcessor.visualState();
-              Row.onFocus(() => this.isMoreIconOnFocus = true);
-              Row.onBlur(() => this.isMoreIconOnFocus = false);
-              Row.onHover((n4) => this.isMoreIconOnHover = n4);
-              Row.onKeyEvent((m4) => {
-                if (m4.keyCode !== KeyCode.KEYCODE_ENTER && m4.keyCode !== KeyCode.KEYCODE_SPACE) {
-                  return;
-                }
-                if (m4.type === KeyType.Down) {
-                  this.isMoreIconOnClick = true;
-                }
-                if (m4.type === KeyType.Up) {
-                  this.isMoreIconOnClick = false;
-                }
-              });
-              Row.onTouch((l4) => {
-                if (l4.type === TouchType.Down) {
-                  this.isMoreIconOnClick = true;
-                }
-                if (l4.type === TouchType.Up || l4.type === TouchType.Cancel) {
-                  this.isMoreIconOnClick = false;
-                  if (this.fontSize >= this.minFontSize) {
-                    this.dialogController?.close();
-                  }
-                }
-              });
-              Row.onClick(() => this.isPopupShown = true);
-              Gesture.create(GesturePriority.Low);
-              LongPressGesture.create({ repeat: false, duration: this.longPressTime });
-              LongPressGesture.onAction((k4) => {
-                this.fontSize = this.decideFontScale();
-                if (k4) {
-                  if (this.fontSize >= this.minFontSize) {
-                    this.dialogController?.open();
-                  }
-                }
-              });
-              LongPressGesture.pop();
-              Gesture.pop();
-              Row.bindPopup(this.isPopupShown, {
-                builder: { builder: this.popupBuilder.bind(this) },
-                placement: Placement.Bottom,
-                popupColor: Color.White,
-                enableArrow: false,
-                onStateChange: (j4) => {
-                  this.isPopupShown = j4.isVisible;
-                  if (!j4.isVisible) {
-                    this.isMoreIconOnClick = false;
-                  }
-                }
-              });
-            }, Row);
-            this.observeComponentCreation2((f4, g4) => {
-              Image.create(PUBLIC_MORE);
-              Image.width(ImageMenuItem.imageSize);
-              Image.height(ImageMenuItem.imageSize);
-              Image.focusable(true);
-              Image.draggable(false);
-              Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            }, Image);
-            Row.pop();
-          });
+      Button.onTouch((c2) => {
+        if (!this.item.isEnabled) {
+          return;
         }
-      }, If);
-      If.pop();
-      Row.pop();
-      Column.pop();
-    }
-    popupBuilder(q3 = null) {
-      this.observeComponentCreation2((b4, c4) => {
-        Column.create();
-        Column.width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
-        Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
-        Column.onAppear(() => {
-          focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
-        });
-      }, Column);
-      this.observeComponentCreation2((r3, s3) => {
-        ForEach.create();
-        const t3 = (u3, v3) => {
-          const w3 = u3;
-          {
-            this.observeComponentCreation2((x3, y3) => {
-              if (y3) {
-                let z3 = new ImageMenuItem(this, { item: w3,
-                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + v3 }, undefined, x3,
-                  () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 397, col: 11 });
-                ViewPU.create(z3);
-                let a4 = () => {
-                  return {
-                    item: w3,
-                    index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + v3
-                  };
-                };
-                z3.paramsGenerator_ = a4;
-              }
-              else {
-                this.updateStateVarsOfChildByElmtId(x3, {});
-              }
-            }, { name: 'ImageMenuItem' });
+        if (c2.type === TouchType.Down) {
+          this.isOnClick = true;
+        }
+        if (c2.type === TouchType.Up || c2.type === TouchType.Cancel) {
+          this.isOnClick = false;
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+            this.dialogController?.close();
           }
-        };
-        this.forEachUpdateFunction(r3, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
-          this.menuItems.length), t3, undefined, true, false);
-      }, ForEach);
-      ForEach.pop();
-      Column.pop();
+        }
+      });
+      Button.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
+      Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
+      if (!v1) {
+        Button.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((s1, t1) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(s1);
+      Image.create(this.item.value);
+      Image.width(ImageMenuItem.imageSize);
+      Image.height(ImageMenuItem.imageSize);
+      Image.focusable(this.item.isEnabled);
+      Image.key(ImageMenuItem.focusablePrefix + this.index);
+      Image.draggable(false);
+      if (!t1) {
+        Image.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    Button.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+}
+ImageMenuItem.imageSize = 24;
+ImageMenuItem.imageHotZoneWidth = 48;
+ImageMenuItem.buttonBorderRadius = 8;
+ImageMenuItem.focusBorderWidth = 2;
+ImageMenuItem.disabledImageOpacity = 0.4;
+ImageMenuItem.focusablePrefix = 'Id-TabTitleBar-ImageMenuItem-';
+class TabTitleBarDialog extends ViewPU {
+  constructor(i1, j1, k1, l1 = -1, m1 = undefined, n1) {
+    super(i1, k1, l1, n1);
+    if (typeof m1 === 'function') {
+      this.paramsGenerator_ = m1;
     }
-    rerender() {
-      this.updateDirtyElements();
+    this.tabTitleDialog = { value: '' };
+    this.callbackId = undefined;
+    this.tabTitleBarDialog = '';
+    this.mainWindowStage = undefined;
+    this.controller = undefined;
+    this.minFontSize = 1.75;
+    this.maxFontSize = 3.2;
+    this.screenWidth = 640;
+    this.verticalScreenLines = 6;
+    this.horizontalsScreenLines = 1;
+    this.__mainWindow = this.createStorageLink('mainWindow', undefined, 'mainWindow');
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+    this.__maxLines = new ObservedPropertySimplePU(1, this, 'maxLines');
+    this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
+    this.cancel = () => {
+    };
+    this.confirm = () => {
+    };
+    this.setInitiallyProvidedValue(j1);
+    this.finalizeConstruction();
+  }
+  setInitiallyProvidedValue(h1) {
+    if (h1.tabTitleDialog !== undefined) {
+      this.tabTitleDialog = h1.tabTitleDialog;
+    }
+    if (h1.callbackId !== undefined) {
+      this.callbackId = h1.callbackId;
+    }
+    if (h1.tabTitleBarDialog !== undefined) {
+      this.tabTitleBarDialog = h1.tabTitleBarDialog;
+    }
+    if (h1.mainWindowStage !== undefined) {
+      this.mainWindowStage = h1.mainWindowStage;
+    }
+    if (h1.controller !== undefined) {
+      this.controller = h1.controller;
+    }
+    if (h1.minFontSize !== undefined) {
+      this.minFontSize = h1.minFontSize;
+    }
+    if (h1.maxFontSize !== undefined) {
+      this.maxFontSize = h1.maxFontSize;
+    }
+    if (h1.screenWidth !== undefined) {
+      this.screenWidth = h1.screenWidth;
+    }
+    if (h1.verticalScreenLines !== undefined) {
+      this.verticalScreenLines = h1.verticalScreenLines;
+    }
+    if (h1.horizontalsScreenLines !== undefined) {
+      this.horizontalsScreenLines = h1.horizontalsScreenLines;
+    }
+    if (h1.fontSize !== undefined) {
+      this.fontSize = h1.fontSize;
+    }
+    if (h1.maxLines !== undefined) {
+      this.maxLines = h1.maxLines;
+    }
+    if (h1.cancel !== undefined) {
+      this.cancel = h1.cancel;
+    }
+    if (h1.confirm !== undefined) {
+      this.confirm = h1.confirm;
     }
   }
-  CollapsibleMenuSection.maxCountOfVisibleItems = 1;
-  CollapsibleMenuSection.focusPadding = 4;
-  CollapsibleMenuSection.marginsNum = 2;
-  class TabContentItem extends ViewPU {
-    constructor(k3, l3, m3, n3 = -1, o3 = undefined, p3) {
-      super(k3, m3, n3, p3);
-      if (typeof o3 === 'function') {
-        this.paramsGenerator_ = o3;
-      }
-      this.item = { title: '' };
-      this.index = 0;
-      this.maxIndex = 0;
-      this.onCustomClick = undefined;
-      this.onImageComplete = undefined;
-      this.__currentIndex = new SynchedPropertySimpleOneWayPU(l3.currentIndex, this, 'currentIndex');
-      this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
-      this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
-      this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
-      this.__tabWidth = new ObservedPropertySimplePU(0, this, 'tabWidth');
-      this.__imageWidth = new ObservedPropertySimplePU(24, this, 'imageWidth');
-      this.__imageHeight = new ObservedPropertySimplePU(24, this, 'imageHeight');
-      this.setInitiallyProvidedValue(l3);
-      this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(j3) {
-      if (j3.item !== undefined) {
-        this.item = j3.item;
-      }
-      if (j3.index !== undefined) {
-        this.index = j3.index;
-      }
-      if (j3.maxIndex !== undefined) {
-        this.maxIndex = j3.maxIndex;
-      }
-      if (j3.onCustomClick !== undefined) {
-        this.onCustomClick = j3.onCustomClick;
-      }
-      if (j3.onImageComplete !== undefined) {
-        this.onImageComplete = j3.onImageComplete;
-      }
-      if (j3.isOnFocus !== undefined) {
-        this.isOnFocus = j3.isOnFocus;
-      }
-      if (j3.isOnHover !== undefined) {
-        this.isOnHover = j3.isOnHover;
-      }
-      if (j3.isOnClick !== undefined) {
-        this.isOnClick = j3.isOnClick;
-      }
-      if (j3.tabWidth !== undefined) {
-        this.tabWidth = j3.tabWidth;
-      }
-      if (j3.imageWidth !== undefined) {
-        this.imageWidth = j3.imageWidth;
-      }
-      if (j3.imageHeight !== undefined) {
-        this.imageHeight = j3.imageHeight;
-      }
-    }
-    updateStateVars(i3) {
-      this.__currentIndex.reset(i3.currentIndex);
-    }
-    purgeVariableDependenciesOnElmtId(h3) {
-      this.__currentIndex.purgeDependencyOnElmtId(h3);
-      this.__isOnFocus.purgeDependencyOnElmtId(h3);
-      this.__isOnHover.purgeDependencyOnElmtId(h3);
-      this.__isOnClick.purgeDependencyOnElmtId(h3);
-      this.__tabWidth.purgeDependencyOnElmtId(h3);
-      this.__imageWidth.purgeDependencyOnElmtId(h3);
-      this.__imageHeight.purgeDependencyOnElmtId(h3);
-    }
-    aboutToBeDeleted() {
-      this.__currentIndex.aboutToBeDeleted();
-      this.__isOnFocus.aboutToBeDeleted();
-      this.__isOnHover.aboutToBeDeleted();
-      this.__isOnClick.aboutToBeDeleted();
-      this.__tabWidth.aboutToBeDeleted();
-      this.__imageWidth.aboutToBeDeleted();
-      this.__imageHeight.aboutToBeDeleted();
-      SubscriberManager.Get().delete(this.id__());
-      this.aboutToBeDeletedInternal();
-    }
-    get currentIndex() {
-      return this.__currentIndex.get();
-    }
-    set currentIndex(g3) {
-      this.__currentIndex.set(g3);
-    }
-    get isOnFocus() {
-      return this.__isOnFocus.get();
-    }
-    set isOnFocus(f3) {
-      this.__isOnFocus.set(f3);
-    }
-    get isOnHover() {
-      return this.__isOnHover.get();
-    }
-    set isOnHover(e3) {
-      this.__isOnHover.set(e3);
-    }
-    get isOnClick() {
-      return this.__isOnClick.get();
-    }
-    set isOnClick(d3) {
-      this.__isOnClick.set(d3);
-    }
-    get tabWidth() {
-      return this.__tabWidth.get();
-    }
-    set tabWidth(c3) {
-      this.__tabWidth.set(c3);
-    }
-    get imageWidth() {
-      return this.__imageWidth.get();
-    }
-    set imageWidth(b3) {
-      this.__imageWidth.set(b3);
-    }
-    get imageHeight() {
-      return this.__imageHeight.get();
-    }
-    set imageHeight(a3) {
-      this.__imageHeight.set(a3);
-    }
-    getBgColor() {
-      if (this.isOnClick) {
-        return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-      } else if (this.isOnHover) {
-        return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-      } else {
-        return Color.Transparent;
-      }
-    }
-    getBorderAttr() {
-      if (this.isOnFocus) {
-        return {
-          radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-          width: TabContentItem.focusBorderWidth,
-          color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-          style: BorderStyle.Solid
-        };
-      }
-      return { width: 0 };
-    }
-    getImageScaleFactor() {
-      return this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1;
-    }
-    getImageLayoutWidth() {
-      return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
-    }
-    initialRender() {
-      this.observeComponentCreation2((y2, z2) => {
-        Stack.create();
-        Stack.margin({
-          left: this.index === 0 ? TabContentItem.marginFirst : 0,
-          right: this.index === this.maxIndex ? 12 : 0
+  updateStateVars(g1) {
+  }
+  purgeVariableDependenciesOnElmtId(f1) {
+    this.__mainWindow.purgeDependencyOnElmtId(f1);
+    this.__fontSize.purgeDependencyOnElmtId(f1);
+    this.__maxLines.purgeDependencyOnElmtId(f1);
+    this.__windowStandardHeight.purgeDependencyOnElmtId(f1);
+  }
+  aboutToBeDeleted() {
+    this.__mainWindow.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
+    this.__maxLines.aboutToBeDeleted();
+    this.__windowStandardHeight.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+  setController(e1) {
+    this.controller = e1;
+  }
+  get mainWindow() {
+    return this.__mainWindow.get();
+  }
+  set mainWindow(d1) {
+    this.__mainWindow.set(d1);
+  }
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+  set fontSize(c1) {
+    this.__fontSize.set(c1);
+  }
+  get maxLines() {
+    return this.__maxLines.get();
+  }
+  set maxLines(b1) {
+    this.__maxLines.set(b1);
+  }
+  get windowStandardHeight() {
+    return this.__windowStandardHeight.get();
+  }
+  set windowStandardHeight(a1) {
+    this.__windowStandardHeight.set(a1);
+  }
+  initialRender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation((e, f) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      If.create();
+      if (this.tabTitleBarDialog) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((y, z) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(y);
+            Column.create();
+            Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
+            Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
+            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
+            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            if (!z) {
+              Column.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((w, x) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(w);
+            Image.create(this.tabTitleDialog.value);
+            Image.width(IMAGE_SIZE);
+            Image.height(IMAGE_SIZE);
+            Image.margin({
+              top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            });
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            if (!x) {
+              Image.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((u, v) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(u);
+            Column.create();
+            Column.width('100%');
+            Column.padding({
+              left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            });
+            if (!v) {
+              Column.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((s, t) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(s);
+            Text.create(this.tabTitleBarDialog);
+            Text.fontSize(TEXT_EDITABLE_DIALOG);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxLines(this.maxLines);
+            Text.width('100%');
+            Text.textAlign(TextAlign.Center);
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            if (!t) {
+              Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Text.pop();
+          Column.pop();
+          Column.pop();
         });
-      }, Stack);
-      this.observeComponentCreation2((u2, v2) => {
-        Row.create();
-        Row.height(TabTitleBar.totalHeight);
-        Row.alignItems(VerticalAlign.Center);
-        Row.justifyContent(FlexAlign.Center);
-        Row.borderRadius(TabContentItem.buttonBorderRadius);
-        Row.backgroundColor(this.getBgColor());
-        Row.onAreaChange((w2, x2) => {
-          this.tabWidth = Number(x2.width);
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation((l, m) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(l);
+            Column.create();
+            Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
+            Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
+            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
+            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Column.justifyContent(FlexAlign.Center);
+            if (!m) {
+              Column.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          this.observeComponentCreation((j, k) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(j);
+            Image.create(this.tabTitleDialog.value);
+            Image.width(IMAGE_SIZE);
+            Image.height(IMAGE_SIZE);
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            if (!k) {
+              Image.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+          });
+          Column.pop();
         });
-      }, Row);
-      this.observeComponentCreation2((s2, t2) => {
-        Column.create();
-        Column.justifyContent(FlexAlign.Center);
-      }, Column);
-      this.observeComponentCreation2((c2, d2) => {
-        If.create();
-        if (this.item.icon === undefined) {
-          this.ifElseBranchUpdateFunction(0, () => {
-            this.observeComponentCreation2((n2, o2) => {
-              Text.create(this.item.title);
-              Context.animation({ duration: 300 });
-              Text.fontSize(this.index === this.currentIndex ?
-                { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-                { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline9'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-              Text.fontColor(this.index === this.currentIndex ?
-                { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-                { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text_off'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-              Text.fontWeight(FontWeight.Medium);
-              Text.focusable(true);
-              Context.animation(null);
-              Text.padding({
-                top: this.index === this.currentIndex ? 6 : 10,
-                left: TabContentItem.paddingLeft,
-                bottom: 2,
-                right: TabContentItem.paddingRight
-              });
-              Text.onFocus(() => this.isOnFocus = true);
-              Text.onBlur(() => this.isOnFocus = false);
-              Text.onHover((r2) => this.isOnHover = r2);
-              Text.onKeyEvent((q2) => {
-                if (q2.keyCode !== KeyCode.KEYCODE_ENTER && q2.keyCode !== KeyCode.KEYCODE_SPACE) {
-                  return;
-                }
-                if (q2.type === KeyType.Down) {
-                  this.isOnClick = true;
-                }
-                if (q2.type === KeyType.Up) {
-                  this.isOnClick = false;
-                }
-              });
-              Text.onTouch((p2) => {
-                if (p2.type === TouchType.Down) {
-                  this.isOnClick = true;
-                }
-                if (p2.type === TouchType.Up || p2.type === TouchType.Cancel) {
-                  this.isOnClick = false;
-                }
-              });
-              Text.onClick(() => this.onCustomClick && this.onCustomClick(this.index));
-            }, Text);
-            Text.pop();
-          });
-        }
-        else {
-          this.ifElseBranchUpdateFunction(1, () => {
-            this.observeComponentCreation2((i2, j2) => {
-              Row.create();
-              Context.animation({ duration: 300 });
-              Row.width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
-              TabContentItem.paddingLeft + TabContentItem.paddingRight);
-              Row.constraintSize({
-                minWidth: TabContentItem.imageHotZoneWidth,
-                minHeight: TabContentItem.imageHotZoneWidth
-              });
-              Context.animation(null);
-              Row.justifyContent(FlexAlign.Center);
-              Row.onFocus(() => this.isOnFocus = true);
-              Row.onBlur(() => this.isOnFocus = false);
-              Row.onHover((m2) => this.isOnHover = m2);
-              Row.onKeyEvent((l2) => {
-                if (l2.keyCode !== KeyCode.KEYCODE_ENTER && l2.keyCode !== KeyCode.KEYCODE_SPACE) {
-                  return;
-                }
-                if (l2.type === KeyType.Down) {
-                  this.isOnClick = true;
-                }
-                if (l2.type === KeyType.Up) {
-                  this.isOnClick = false;
-                }
-              });
-              Row.onTouch((k2) => {
-                if (k2.type === TouchType.Down) {
-                  this.isOnClick = true;
-                }
-                if (k2.type === TouchType.Up || k2.type === TouchType.Cancel) {
-                  this.isOnClick = false;
-                }
-              });
-              Row.onClick(() => this.onCustomClick && this.onCustomClick(this.index));
-            }, Row);
-            this.observeComponentCreation2((e2, f2) => {
-              Image.create(this.item.icon);
-              Context.animation({ duration: 300 });
-              Image.alt(this.item.title);
-              Image.width(this.getImageLayoutWidth());
-              Image.height(TabContentItem.imageSize);
-              Image.objectFit(ImageFit.Fill);
-              Image.scale({
-                x: this.getImageScaleFactor(),
-                y: this.getImageScaleFactor()
-              });
-              Context.animation(null);
-              Image.hitTestBehavior(HitTestMode.None);
-              Image.focusable(true);
-              Image.onComplete((h2) => {
-                if (!this.onImageComplete) {
-                  return;
-                }
-                this.imageWidth = px2vp(h2?.width);
-                this.imageHeight = px2vp(h2?.height);
-                this.onImageComplete(px2vp(h2?.componentWidth) +
-                TabContentItem.paddingLeft + TabContentItem.paddingRight);
-              });
-              Image.onError((g2) => {
-                if (!this.onImageComplete) {
-                  return;
-                }
-                this.onImageComplete(px2vp(g2.componentWidth) +
-                TabContentItem.paddingLeft + TabContentItem.paddingRight);
-              });
-            }, Image);
-            Row.pop();
-          });
-        }
-      }, If);
-      If.pop();
-      Column.pop();
-      Row.pop();
-      this.observeComponentCreation2((y1, z1) => {
-        If.create();
-        if (this.isOnFocus && this.tabWidth > 0) {
-          this.ifElseBranchUpdateFunction(0, () => {
-            this.observeComponentCreation2((a2, b2) => {
-              Row.create();
-              Row.width(this.tabWidth);
-              Row.height(TabTitleBar.totalHeight);
-              Row.hitTestBehavior(HitTestMode.None);
-              Row.borderRadius(TabContentItem.buttonBorderRadius);
-              ViewStackProcessor.visualState('focused');
-              Row.border(this.getBorderAttr());
-              ViewStackProcessor.visualState('normal');
-              Row.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: 0
-              });
-              ViewStackProcessor.visualState();
-            }, Row);
-            Row.pop();
-          });
-        }
-        else {
-          this.ifElseBranchUpdateFunction(1, () => {
-          });
-        }
-      }, If);
-      If.pop();
-      Stack.pop();
+      }
+      if (!f) {
+        If.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    If.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  async aboutToAppear() {
+    let a = this.getUIContext().getHostContext();
+    this.mainWindowStage = a.windowStage.getMainWindowSync();
+    let b = this.mainWindowStage.getWindowProperties();
+    let c = b.windowRect;
+    if (px2vp(c.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
     }
-    rerender() {
-      this.updateDirtyElements();
+    else {
+      this.maxLines = this.horizontalsScreenLines;
     }
   }
-  TabContentItem.imageSize = 24;
-  TabContentItem.imageHotZoneWidth = 48;
-  TabContentItem.imageMagnificationFactor = 1.4;
-  TabContentItem.buttonBorderRadius = 8;
-  TabContentItem.focusBorderWidth = 2;
-  TabContentItem.paddingLeft = 8;
-  TabContentItem.paddingRight = 8;
-  TabContentItem.marginFirst = 16;
-  class ImageMenuItem extends ViewPU {
-    constructor(s1, t1, u1, v1 = -1, w1 = undefined, x1) {
-      super(s1, u1, v1, x1);
-      if (typeof w1 === 'function') {
-        this.paramsGenerator_ = w1;
-      }
-      this.item = { value: '' };
-      this.index = 0;
-      this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
-      this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
-      this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
-      this.setInitiallyProvidedValue(t1);
-      this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(r1) {
-      if (r1.item !== undefined) {
-        this.item = r1.item;
-      }
-      if (r1.index !== undefined) {
-        this.index = r1.index;
-      }
-      if (r1.isOnFocus !== undefined) {
-        this.isOnFocus = r1.isOnFocus;
-      }
-      if (r1.isOnHover !== undefined) {
-        this.isOnHover = r1.isOnHover;
-      }
-      if (r1.isOnClick !== undefined) {
-        this.isOnClick = r1.isOnClick;
-      }
-    }
-    updateStateVars(q1) {
-    }
-    purgeVariableDependenciesOnElmtId(p1) {
-      this.__isOnFocus.purgeDependencyOnElmtId(p1);
-      this.__isOnHover.purgeDependencyOnElmtId(p1);
-      this.__isOnClick.purgeDependencyOnElmtId(p1);
-    }
-    aboutToBeDeleted() {
-      this.__isOnFocus.aboutToBeDeleted();
-      this.__isOnHover.aboutToBeDeleted();
-      this.__isOnClick.aboutToBeDeleted();
-      SubscriberManager.Get().delete(this.id__());
-      this.aboutToBeDeletedInternal();
-    }
-    get isOnFocus() {
-      return this.__isOnFocus.get();
-    }
-    set isOnFocus(o1) {
-      this.__isOnFocus.set(o1);
-    }
-    get isOnHover() {
-      return this.__isOnHover.get();
-    }
-    set isOnHover(n1) {
-      this.__isOnHover.set(n1);
-    }
-    get isOnClick() {
-      return this.__isOnClick.get();
-    }
-    set isOnClick(m1) {
-      this.__isOnClick.set(m1);
-    }
-    getFgColor() {
-      return this.isOnClick ?
-        { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-        { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-    }
-    getBgColor() {
-      if (this.isOnClick) {
-        return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-      } else if (this.isOnHover) {
-        return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
-          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-      } else {
-        return Color.Transparent;
-      }
-    }
-    initialRender() {
-      this.observeComponentCreation2((h1, i1) => {
-        Row.create();
-        Row.width(ImageMenuItem.imageHotZoneWidth);
-        Row.height(ImageMenuItem.imageHotZoneWidth);
-        Row.borderRadius(ImageMenuItem.buttonBorderRadius);
-        Row.foregroundColor(this.getFgColor());
-        Row.backgroundColor(this.getBgColor());
-        Row.justifyContent(FlexAlign.Center);
-        Row.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
-        ViewStackProcessor.visualState('focused');
-        Row.border({
-          radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-          width: ImageMenuItem.focusBorderWidth,
-          color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-          style: BorderStyle.Solid
-        });
-        ViewStackProcessor.visualState('normal');
-        Row.border({
-          radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-          width: 0
-        });
-        ViewStackProcessor.visualState();
-        Row.onFocus(() => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          this.isOnFocus = true;
-        });
-        Row.onBlur(() => this.isOnFocus = false);
-        Row.onHover((l1) => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          this.isOnHover = l1;
-        });
-        Row.onKeyEvent((k1) => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          if (k1.keyCode !== KeyCode.KEYCODE_ENTER && k1.keyCode !== KeyCode.KEYCODE_SPACE) {
-            return;
-          }
-          if (k1.type === KeyType.Down) {
-            this.isOnClick = true;
-          }
-          if (k1.type === KeyType.Up) {
-            this.isOnClick = false;
-          }
-        });
-        Row.onTouch((j1) => {
-          if (!this.item.isEnabled) {
-            return;
-          }
-          if (j1.type === TouchType.Down) {
-            this.isOnClick = true;
-          }
-          if (j1.type === TouchType.Up || j1.type === TouchType.Cancel) {
-            this.isOnClick = false;
-          }
-        });
-        Row.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
-      }, Row);
-      this.observeComponentCreation2((f1, g1) => {
-        Image.create(this.item.value);
-        Image.width(ImageMenuItem.imageSize);
-        Image.height(ImageMenuItem.imageSize);
-        Image.focusable(this.item.isEnabled);
-        Image.key(ImageMenuItem.focusablePrefix + this.index);
-        Image.draggable(false);
-      }, Image);
-      Row.pop();
-    }
-    rerender() {
-      this.updateDirtyElements();
-    }
+  rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
-  ImageMenuItem.imageSize = 24;
-  ImageMenuItem.imageHotZoneWidth = 48;
-  ImageMenuItem.buttonBorderRadius = 8;
-  ImageMenuItem.focusBorderWidth = 2;
-  ImageMenuItem.disabledImageOpacity = 0.4;
-  ImageMenuItem.focusablePrefix = 'Id-TabTitleBar-ImageMenuItem-';
-  class TabTitleBarDialog extends ViewPU {
-    constructor(z, a1, b1, c1 = -1, d1 = undefined, e1) {
-      super(z, b1, c1, e1);
-      if (typeof d1 === 'function') {
-        this.paramsGenerator_ = d1;
-      }
-      this.tabTitleDialog = { value: '' };
-      this.callbackId = undefined;
-      this.tabTitleBarDialog = '';
-      this.mainWindowStage = undefined;
-      this.controller = undefined;
-      this.minFontSize = 1.75;
-      this.maxFontSize = 3.2;
-      this.screenWidth = 640;
-      this.verticalScreenLines = 6;
-      this.horizontalsScreenLines = 1;
-      this.__mainWindow = this.createStorageLink('mainWindow', undefined, 'mainWindow');
-      this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
-      this.__maxLines = new ObservedPropertySimplePU(1, this, 'maxLines');
-      this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
-      this.cancel = () => {
-      };
-      this.confirm = () => {
-      };
-      this.setInitiallyProvidedValue(a1);
-      this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(y) {
-      if (y.tabTitleDialog !== undefined) {
-        this.tabTitleDialog = y.tabTitleDialog;
-      }
-      if (y.callbackId !== undefined) {
-        this.callbackId = y.callbackId;
-      }
-      if (y.tabTitleBarDialog !== undefined) {
-        this.tabTitleBarDialog = y.tabTitleBarDialog;
-      }
-      if (y.mainWindowStage !== undefined) {
-        this.mainWindowStage = y.mainWindowStage;
-      }
-      if (y.controller !== undefined) {
-        this.controller = y.controller;
-      }
-      if (y.minFontSize !== undefined) {
-        this.minFontSize = y.minFontSize;
-      }
-      if (y.maxFontSize !== undefined) {
-        this.maxFontSize = y.maxFontSize;
-      }
-      if (y.screenWidth !== undefined) {
-        this.screenWidth = y.screenWidth;
-      }
-      if (y.verticalScreenLines !== undefined) {
-        this.verticalScreenLines = y.verticalScreenLines;
-      }
-      if (y.horizontalsScreenLines !== undefined) {
-        this.horizontalsScreenLines = y.horizontalsScreenLines;
-      }
-      if (y.fontSize !== undefined) {
-        this.fontSize = y.fontSize;
-      }
-      if (y.maxLines !== undefined) {
-        this.maxLines = y.maxLines;
-      }
-      if (y.cancel !== undefined) {
-        this.cancel = y.cancel;
-      }
-      if (y.confirm !== undefined) {
-        this.confirm = y.confirm;
-      }
-    }
-    updateStateVars(x) {
-    }
-    purgeVariableDependenciesOnElmtId(w) {
-      this.__mainWindow.purgeDependencyOnElmtId(w);
-      this.__fontSize.purgeDependencyOnElmtId(w);
-      this.__maxLines.purgeDependencyOnElmtId(w);
-      this.__windowStandardHeight.purgeDependencyOnElmtId(w);
-    }
-    aboutToBeDeleted() {
-      this.__mainWindow.aboutToBeDeleted();
-      this.__fontSize.aboutToBeDeleted();
-      this.__maxLines.aboutToBeDeleted();
-      this.__windowStandardHeight.aboutToBeDeleted();
-      SubscriberManager.Get().delete(this.id__());
-      this.aboutToBeDeletedInternal();
-    }
-    setController(v) {
-      this.controller = v;
-    }
-    get mainWindow() {
-      return this.__mainWindow.get();
-    }
-    set mainWindow(u) {
-      this.__mainWindow.set(u);
-    }
-    get fontSize() {
-      return this.__fontSize.get();
-    }
-    set fontSize(t) {
-      this.__fontSize.set(t);
-    }
-    get maxLines() {
-      return this.__maxLines.get();
-    }
-    set maxLines(s) {
-      this.__maxLines.set(s);
-    }
-    get windowStandardHeight() {
-      return this.__windowStandardHeight.get();
-    }
-    set windowStandardHeight(r) {
-      this.__windowStandardHeight.set(r);
-    }
-    initialRender() {
-      this.observeComponentCreation2((d, e) => {
-        If.create();
-        if (this.tabTitleBarDialog) {
-          this.ifElseBranchUpdateFunction(0, () => {
-            this.observeComponentCreation2((p, q) => {
-              Column.create();
-              Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-              Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-              Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
-              Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-              Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            }, Column);
-            this.observeComponentCreation2((n, o) => {
-              Image.create(this.tabTitleDialog.value);
-              Image.width(IMAGE_SIZE);
-              Image.height(IMAGE_SIZE);
-              Image.margin({
-                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              });
-              Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            }, Image);
-            this.observeComponentCreation2((l, m) => {
-              Column.create();
-              Column.width('100%');
-              Column.padding({
-                left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'],
-                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              });
-            }, Column);
-            this.observeComponentCreation2((j, k) => {
-              Text.create(this.tabTitleBarDialog);
-              Text.fontSize(TEXT_EDITABLE_DIALOG);
-              Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-              Text.maxLines(this.maxLines);
-              Text.width('100%');
-              Text.textAlign(TextAlign.Center);
-              Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            }, Text);
-            Text.pop();
-            Column.pop();
-            Column.pop();
-          });
-        }
-        else {
-          this.ifElseBranchUpdateFunction(1, () => {
-            this.observeComponentCreation2((h, i) => {
-              Column.create();
-              Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-              Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-              Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
-              Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-              Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-              Column.justifyContent(FlexAlign.Center);
-            }, Column);
-            this.observeComponentCreation2((f, g) => {
-              Image.create(this.tabTitleDialog.value);
-              Image.width(IMAGE_SIZE);
-              Image.height(IMAGE_SIZE);
-              Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            }, Image);
-            Column.pop();
-          });
-        }
-      }, If);
-      If.pop();
-    }
-    async aboutToAppear() {
-      let a = this.getUIContext().getHostContext();
-      this.mainWindowStage = a.windowStage.getMainWindowSync();
-      let b = this.mainWindowStage.getWindowProperties();
-      let c = b.windowRect;
-      if (px2vp(c.height) > this.screenWidth) {
-        this.maxLines = this.verticalScreenLines;
-      } else {
-        this.maxLines = this.horizontalsScreenLines;
-      }
-    }
-    rerender() {
-      this.updateDirtyElements();
-    }
-  }
-  export default {
-    TabTitleBar: TabTitleBar
-  };
+}
+export default {
+  TabTitleBar: TabTitleBar
+};

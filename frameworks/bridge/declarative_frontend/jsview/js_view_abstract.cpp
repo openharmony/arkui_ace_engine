@@ -2440,7 +2440,7 @@ void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>
         }
         const auto* vm = nodePtr->GetEcmaVM();
         auto localHandle = nodePtr->GetLocalHandle();
-        if (localHandle.IsEmpty()) {
+        if (!localHandle->IsNativePointer(vm)) {
             return;
         }
         auto* node = localHandle->ToNativePointer(vm)->Value();
@@ -5374,6 +5374,12 @@ bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& j
     return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
+bool JSViewAbstract::ParseFlexSpaceToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) :
+        ParseJsDimensionVp(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
+}
+
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
     if (!jsValue->IsObject()) {
@@ -7794,11 +7800,14 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
-
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    // arrow is disabled for contextMenu with preview
+    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+        menuParam.enableArrow = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);

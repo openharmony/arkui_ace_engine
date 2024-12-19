@@ -557,7 +557,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump004, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 27);
-    EXPECT_EQ(info->currentOffset_, -0.0f);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
 
     info->jumpIndex_ = 99;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1498,8 +1498,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump001, TestSize.Level1)
     secObj->ChangeData(1, 1, newSection);
     AddItems(5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
 
     EXPECT_EQ(info->currentOffset_, 0);
     EXPECT_EQ(info->startIndex_, 0);
@@ -1531,8 +1530,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
     EXPECT_EQ(info->childrenCount_, 60);
 
     frameNode_->ChildrenUpdatedFrom(10);
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
 
     EXPECT_EQ(info->currentOffset_, 0);
     EXPECT_EQ(info->startIndex_, 0);
@@ -1568,8 +1566,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump003, TestSize.Level1)
         { {0, { {14, {1100, 100}}, {15, {1200, 200}} }} }, { {0, {}} } };
     EXPECT_EQ(info->items_, itemsMap);
 
-    pattern_->ScrollToIndex(19, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(19, false, ScrollAlign::START);
     EXPECT_EQ(info->currentOffset_, -1800.0f);
     EXPECT_EQ(info->startIndex_, 19);
     EXPECT_EQ(info->endIndex_, 27);
@@ -1581,8 +1578,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump003, TestSize.Level1)
         {24, {2600, 100}}, {25, {2700, 200}}, {26, {2900, 100}}, {27, {3000, 200}} }} }, { {0, {}} } };
     EXPECT_EQ(info->items_, itemsMap_1);
 
-    pattern_->ScrollToIndex(28, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(28, false, ScrollAlign::START);
     EXPECT_EQ(info->currentOffset_, -3200.0f);
     EXPECT_EQ(info->startIndex_, 28);
     EXPECT_EQ(info->endIndex_, 36);

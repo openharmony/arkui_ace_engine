@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_INPUT_MANAGER_INPUT_MANAGER_H
 
 #include <set>
+#include <vector>
 
 #include "base/memory/ace_type.h"
 

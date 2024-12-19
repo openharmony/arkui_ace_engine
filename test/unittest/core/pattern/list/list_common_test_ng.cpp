@@ -850,7 +850,7 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty002, TestSize.Level1)
     /**
      * @tc.steps: step3. Scroll to bottom.
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     accessibilityProperty_->ResetSupportAction();
     exptectActions = 0;
     exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
@@ -973,12 +973,12 @@ HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
 
     MockAnimationManager::GetInstance().SetTicks(TICK);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(Position(-200));
-    EXPECT_TRUE(Position(-400));
+    EXPECT_TRUE(TickPosition(-200.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(Position(-200));
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(-200.0f));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**

@@ -16,17 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_TEST_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_TEST_NG_H
 
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 #define protected public
 #define private public
-#include "core/components/button/button_theme.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
+
+#include "core/components/button/button_theme.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #undef private
 #undef protected
 
@@ -51,6 +52,7 @@ public:
     {
         itemCnt_ = totalCount;
     }
+
 protected:
     int32_t OnGetTotalCount() override
     {
@@ -66,12 +68,13 @@ protected:
             CalcSize(CalcLength(FILL_LENGTH), CalcLength(getHeight_(index))));
         return { std::to_string(index), node };
     }
+
 private:
     int32_t itemCnt_ = 0;
     const std::function<float(int32_t)> getHeight_;
 };
 
-class WaterFlowTestNg : public TestNG {
+class WaterFlowTestNg : public ScrollableUtilsTestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -93,14 +96,12 @@ protected:
     std::function<void()> GetDefaultHeaderBuilder();
     void AddItems(int32_t itemNumber);
     void AddItemsAtSlot(int32_t itemNumber, float height, int32_t slotIdx);
-    AssertionResult IsEqualTotalOffset(float expectOffset);
     void HandleDrag(float offset);
     RectF GetLazyChildRect(int32_t itemIndex);
     RefPtr<FrameNode> GetItem(int32_t index, bool isCache = false);
     void AddItemInLazyForEach(int32_t index);
     void DeleteItemInLazyForEach(int32_t index);
 
-    RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;
     RefPtr<WaterFlowEventHub> eventHub_;
     RefPtr<WaterFlowLayoutProperty> layoutProperty_;

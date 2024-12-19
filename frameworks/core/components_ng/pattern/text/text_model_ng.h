@@ -180,6 +180,7 @@ public:
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 };
 } // namespace OHOS::Ace::NG
 

@@ -469,7 +469,7 @@ void MenuPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
-bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
+bool MenuPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN || IsMultiMenu() || IsDesktopMenu()) {
         return false;
@@ -480,6 +480,7 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
         CHECK_NULL_RETURN(menuWrapper, true);
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_RETURN(wrapperPattern, true);
+        RemoveParentHoverStyle();
         wrapperPattern->HideSubMenu();
         return true;
     }
@@ -1273,6 +1274,9 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     CHECK_NULL_VOID(mainMenu);
 
     auto [originOffset, endOffset] = GetMenuOffset(mainMenu);
+    if (originOffset ==  OffsetF()) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "not found parent MenuItem when show stack sub menu");
+    }
     auto mainMenuContext = mainMenu->GetRenderContext();
     ShowStackMenuAppearOpacityAndBlurAnimation(mainMenuContext);
     auto subMenuContext = host->GetRenderContext();

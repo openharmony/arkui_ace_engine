@@ -436,4 +436,46 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest007, Te
     // tbm  make sure check method;
     EXPECT_NE(frameNode, nullptr);
 }
+
+/**
+ * @tc.name: JsAccessibilityManager001
+ * @tc.desc: UpdateElementInfoTreeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdAccessibilityHoverNgTest, JsAccessibilityManager001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Accessibility::AccessibilityElementInfo info;
+    info.SetPageId(1);
+    info.SetParent(0);
+    info.SetBelongTreeId(10);
+    info.SetAccessibilityId(11);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    EXPECT_NE(info.GetPageId(), 1);
+
+    info.SetBelongTreeId(0);
+    info.SetPageId(1);
+    jsAccessibilityManager->UpdateElementInfoTreeId(info);
+    EXPECT_EQ(info.GetPageId(), 1);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager002
+ * @tc.desc: UpdateAccessibilityVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdAccessibilityHoverNgTest, JsAccessibilityManager002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    // without parent node return visiable false
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode, nodeInfo);
+    EXPECT_EQ(nodeInfo.GetAccessibilityVisible(), false);
+
+    nodeInfo.SetParent(0);
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode, nodeInfo);
+    EXPECT_EQ(nodeInfo.GetAccessibilityVisible(), false);
+}
 } // namespace OHOS::Ace::NG

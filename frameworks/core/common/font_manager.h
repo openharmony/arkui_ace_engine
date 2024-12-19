@@ -129,6 +129,8 @@ protected:
     static std::string appCustomFont_;
 
 private:
+    void FontNodeChangeStyleNG();
+
     std::list<RefPtr<FontLoader>> fontLoaders_;
     std::vector<std::string> fontNames_;
     std::set<WeakPtr<RenderNode>> fontNodes_;

@@ -613,7 +613,7 @@ private:
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event) const;
+    bool OnKeyEvent(const KeyEvent& event);
 
     void DisableTabInMenu();
 

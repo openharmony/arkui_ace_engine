@@ -334,8 +334,7 @@ HWTEST_F(WaterFlowTestNg, ModifyItem002, TestSize.Level1)
     CreateDone();
     auto info = pattern_->layoutInfo_;
 
-    pattern_->ScrollToIndex(50, false, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(50, false, ScrollAlign::CENTER);
     EXPECT_EQ(info->startIndex_, 43);
     EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
     auto child = GetChildFrameNode(frameNode_, 49);
@@ -375,8 +374,7 @@ HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
     UpdateCurrentOffset(-25500.0f);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 10);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     for (int i = 0; i < 50; ++i) {
         UpdateCurrentOffset(-200.0f);
         EXPECT_EQ(info->endIndex_, std::max(49, info->footerIndex_));
@@ -542,34 +540,27 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex004, TestSize.Level1)
      * @tc.expected: GetTotalOffset is right
      */
     std::optional<float> extraOffset = 0.f;
-    pattern_->ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 100.f);
 
     extraOffset = -200.f;
-    pattern_->ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.f);
 
-    pattern_->ScrollToIndex(27, false, ScrollAlign::START, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(27, false, ScrollAlign::START, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1500.f);
 
-    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1300.f);
 
     extraOffset = 200.f;
-    pattern_->ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 300.f);
 
-    pattern_->ScrollToIndex(27, false, ScrollAlign::END, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(27, false, ScrollAlign::END, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1500.f);
 
-    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1500.f);
 }
 
@@ -590,26 +581,21 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex005, TestSize.Level1)
      * @tc.expected: finalPosition_ is right
      */
     std::optional<float> extraOffset = 0.f;
-    pattern_->ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 100.f);
 
     extraOffset = -200.f;
-    pattern_->ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -100.f);
 
-    pattern_->ScrollToIndex(27, true, ScrollAlign::START, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(27, true, ScrollAlign::START, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1800.f);
 
     extraOffset = 200.f;
-    pattern_->ScrollToIndex(2, true, ScrollAlign::END, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, true, ScrollAlign::END, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -400.f);
 
-    pattern_->ScrollToIndex(27, true, ScrollAlign::END, extraOffset);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(27, true, ScrollAlign::END, extraOffset);
     EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1600.f);
 }
 
@@ -628,8 +614,7 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     CreateDone();
 
-    pattern_->ScrollToIndex(30);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(30, false, ScrollAlign::START);
     const auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->startIndex_, 28);
     EXPECT_EQ(info->endIndex_, 39);

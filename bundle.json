@@ -30,7 +30,9 @@
             "ace_engine_feature_asbng_path",
             "ace_engine_feature_sched_model",
             "ace_engine_feature_wearable",
-            "ace_engine_feature_enable_gpu"
+            "ace_engine_feature_enable_gpu",
+            "ace_engine_feature_enable_form_size_change_animation",
+            "ace_engine_feature_form_menu_enable"
         ],
         "adapted_system_type": [
             "standard"

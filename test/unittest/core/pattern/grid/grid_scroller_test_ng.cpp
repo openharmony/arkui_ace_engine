@@ -36,39 +36,39 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Align001, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::START;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
     EXPECT_TRUE(pattern_->IsAtTop());
 
     // Scroll to the first item in row in view
     ScrollToIndex(2, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // Scroll to the last item in row in view
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 
     // Scroll to the item out of view
     ScrollToIndex(12, smooth, align);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
     EXPECT_TRUE(pattern_->IsAtBottom());
 
     // Scroll back
     ScrollToIndex(3, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // Scroll with invalid index
     ScrollToIndex(-100, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
     ScrollToIndex(100, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // Scroll to the last item
     ScrollToIndex(LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-100.0f));
+        EXPECT_TRUE(TickPosition(-100.0f));
         EXPECT_FALSE(pattern_->IsAtBottom());
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
         EXPECT_TRUE(pattern_->IsAtBottom());
     }
 }
@@ -90,32 +90,32 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Align002, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::CENTER;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
     EXPECT_TRUE(pattern_->IsAtTop());
 
     // Scroll to the first item in row in view
     ScrollToIndex(4, smooth, align);
-    EXPECT_TRUE(Position(-50.0f));
+    EXPECT_TRUE(TickPosition(-50.0f));
 
     // Scroll to the last item in row in view
     ScrollToIndex(7, smooth, align);
-    EXPECT_TRUE(Position(-150.0f));
+    EXPECT_TRUE(TickPosition(-150.0f));
 
     // Scroll to the item out of view
     ScrollToIndex(12, smooth, align);
-    EXPECT_TRUE(Position(-450.0f));
+    EXPECT_TRUE(TickPosition(-450.0f));
 
     // Scroll back
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(-50.0f));
+    EXPECT_TRUE(TickPosition(-50.0f));
 
     // Scroll to the last item
     ScrollToIndex(LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-50.0f));
+        EXPECT_TRUE(TickPosition(-50.0f));
         EXPECT_FALSE(pattern_->IsAtBottom());
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
         EXPECT_TRUE(pattern_->IsAtBottom());
     }
 }
@@ -137,32 +137,32 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Align003, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::END;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
     EXPECT_TRUE(pattern_->IsAtTop());
 
     // Scroll to the first item in row in view
     ScrollToIndex(4, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the first item in row out of view
     ScrollToIndex(12, smooth, align);
-    EXPECT_TRUE(Position(-300.0f));
+    EXPECT_TRUE(TickPosition(-300.0f));
 
     // Scroll to the last item in row out of view
     ScrollToIndex(15, smooth, align);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     // Scroll back
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the last item
     ScrollToIndex(LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(0));
+        EXPECT_TRUE(TickPosition(0));
         EXPECT_FALSE(pattern_->IsAtBottom());
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
         EXPECT_TRUE(pattern_->IsAtBottom());
     }
 }
@@ -184,32 +184,32 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Align004, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::AUTO;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
     EXPECT_TRUE(pattern_->IsAtTop());
 
     // Scroll to the first item in row in view
     ScrollToIndex(4, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the first item in row out of view
     ScrollToIndex(12, smooth, align);
-    EXPECT_TRUE(Position(-300.0f));
+    EXPECT_TRUE(TickPosition(-300.0f));
 
     // Scroll to the last item in row out of view
     ScrollToIndex(15, smooth, align);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     // Scroll back
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 
     // Scroll to the last item
     ScrollToIndex(LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-200.0f));
+        EXPECT_TRUE(TickPosition(-200.0f));
         EXPECT_FALSE(pattern_->IsAtBottom());
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
         EXPECT_TRUE(pattern_->IsAtBottom());
     }
 }
@@ -231,23 +231,23 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Gap001, TestSize.Level1)
     // ScrollAlign::START
     bool smooth = GetParam();
     ScrollToIndex(2, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-105.0f));
+    EXPECT_TRUE(TickPosition(-105.0f));
 
     // ScrollAlign::CENTER
     ScrollToIndex(7, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-165.0f));
+    EXPECT_TRUE(TickPosition(-165.0f));
 
     // ScrollAlign::END
     ScrollToIndex(12, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-330.0f));
+    EXPECT_TRUE(TickPosition(-330.0f));
 
     // ScrollAlign::AUTO
     ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::AUTO);
     if (smooth) {
-        EXPECT_TRUE(Position(-330.0f));
+        EXPECT_TRUE(TickPosition(-330.0f));
         EXPECT_FALSE(pattern_->IsAtBottom());
     } else {
-        EXPECT_TRUE(Position(-645.0f));
+        EXPECT_TRUE(TickPosition(-645.0f));
         EXPECT_TRUE(pattern_->IsAtBottom());
     }
 }
@@ -272,7 +272,7 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Gap002, TestSize.Level1)
     bool smooth = GetParam();
     int32_t index = 5;
     ScrollToIndex(index, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-(ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT)));
+    EXPECT_TRUE(TickPosition(-(ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT)));
     /**
      * @tc.cases: use ScrollTo to make item 5 in the last line, ScrollTo index:5, text ScrollAlign::AUTO
      * @tc.expected: scrollToIndex don't change grid offset
@@ -280,7 +280,7 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Gap002, TestSize.Level1)
     auto autoPosition = ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT + ITEM_MAIN_SIZE;
     ScrollTo(autoPosition);
     ScrollToIndex(index, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-autoPosition));
+    EXPECT_TRUE(TickPosition(-autoPosition));
 }
 
 /**
@@ -303,7 +303,7 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Gap003, TestSize.Level1)
     auto endPosition = ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT;
     bool smooth = GetParam();
     ScrollToIndex(5, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-(endPosition + (GRID_HEIGHT - ITEM_MAIN_SIZE) / 2)));
+    EXPECT_TRUE(TickPosition(-(endPosition + (GRID_HEIGHT - ITEM_MAIN_SIZE) / 2)));
 }
 
 /**
@@ -325,11 +325,11 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Gap004, TestSize.Level1)
 
     auto position = ITEM_MAIN_SIZE + 5 * COL_GAP;
     ScrollTo(position);
-    EXPECT_TRUE(Position(-position));
+    EXPECT_TRUE(TickPosition(-position));
 
     bool smooth = GetParam();
     ScrollToIndex(6, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-position));
+    EXPECT_TRUE(TickPosition(-position));
 }
 
 /**
@@ -352,19 +352,19 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Irregular001, TestSize.Level1)
 
     bool smooth = GetParam();
     ScrollToIndex(1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-105.0f));
+    EXPECT_TRUE(TickPosition(-105.0f));
 
     ScrollToIndex(3, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-165.0f));
+    EXPECT_TRUE(TickPosition(-165.0f));
 
     ScrollToIndex(5, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-225.0f));
+    EXPECT_TRUE(TickPosition(-225.0f));
 
     ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::AUTO);
     if (smooth) {
-        EXPECT_TRUE(Position(-225.0f));
+        EXPECT_TRUE(TickPosition(-225.0f));
     } else {
-        EXPECT_TRUE(Position(-435.0f));
+        EXPECT_TRUE(TickPosition(-435.0f));
     }
 }
 
@@ -395,13 +395,13 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Irregular002, TestSize.Level1)
 
     bool smooth = GetParam();
     ScrollToIndex(1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-105.0f));
+    EXPECT_TRUE(TickPosition(-105.0f));
 
     ScrollToIndex(3, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-60.0f));
+    EXPECT_TRUE(TickPosition(-60.0f));
 
     ScrollToIndex(5, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-120.0f));
+    EXPECT_TRUE(TickPosition(-120.0f));
 }
 
 /**
@@ -422,43 +422,43 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_ExtraOffset001, TestSize.Level1)
     bool smooth = GetParam();
     float extraOffset = -100.0f;
     ScrollToIndex(2, smooth, ScrollAlign::START, extraOffset);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     ScrollToIndex(17, smooth, ScrollAlign::START, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     ScrollToIndex(17, smooth, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END, extraOffset);
     if (smooth) {
-        EXPECT_TRUE(Position(-300.0f));
+        EXPECT_TRUE(TickPosition(-300.0f));
     } else {
-        EXPECT_TRUE(Position(-500.0f));
+        EXPECT_TRUE(TickPosition(-500.0f));
     }
 
     /**
      * @tc.steps: step2. Reset position
      */
     ScrollTo(0);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step3. extraOffset > 0
      */
     extraOffset = 100.0f;
     ScrollToIndex(2, smooth, ScrollAlign::START, extraOffset);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 
     ScrollToIndex(2, smooth, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     ScrollToIndex(17, smooth, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     ScrollToIndex(LAST_ITEM, smooth, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 }
 
 /**
@@ -480,21 +480,21 @@ HWTEST_P(GridScrollerTestNg, AnimateTo001, TestSize.Level1)
      */
     bool smooth = GetParam();
     AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     AnimateTo(Dimension(1000.0f), 0, nullptr, smooth);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     /**
      * @tc.steps: step3. AnimateTo the top
      * @tc.expected: AnimateTo the top
      */
     AnimateTo(Dimension(0), 0, nullptr, smooth);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -515,21 +515,21 @@ HWTEST_P(GridScrollerTestNg, AnimateTo002, TestSize.Level1)
      * @tc.expected: AnimateTo the position
      */
     AnimateTo(Dimension(ITEM_MAIN_SIZE), 1000.0f, Curves::EASE, false);
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
     AnimateTo(Dimension(1000.0f), 1000.0f, Curves::EASE, false);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     /**
      * @tc.steps: step3. AnimateTo the top
      * @tc.expected: AnimateTo the top
      */
     AnimateTo(Dimension(0), 1000.0f, Curves::EASE, false);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -546,7 +546,7 @@ HWTEST_P(GridScrollerTestNg, AnimateTo003, TestSize.Level1)
 
     bool smooth = GetParam();
     AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -563,7 +563,7 @@ HWTEST_P(GridScrollerTestNg, AnimateTo004, TestSize.Level1)
 
     bool smooth = GetParam();
     AnimateTo(Dimension(ITEM_MAIN_SIZE * 5), 0, nullptr, smooth);
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE * 5));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE * 5));
 }
 
 /**
@@ -582,7 +582,7 @@ HWTEST_P(GridScrollerTestNg, AnimateTo005, TestSize.Level1)
 
     bool smooth = GetParam();
     AnimateTo(Dimension(ITEM_MAIN_SIZE * 5), 0, nullptr, smooth);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -603,33 +603,29 @@ HWTEST_P(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
      * @tc.expected: ScrollBy the position
      */
     bool smooth = GetParam();
-    positionController_->ScrollBy(0, ITEM_MAIN_SIZE, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    ScrollBy(0, ITEM_MAIN_SIZE, smooth);
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. ScrollBy the position over the scroll
      * @tc.expected: ScrollBy the bottom, can not over scroll
      */
-    positionController_->ScrollBy(0, 1000.0f, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-600.0f));
+    ScrollBy(0, 1000.0f, smooth);
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     /**
      * @tc.steps: step3. ScrollBy the position 0
      * @tc.expected: Not scroll
      */
-    positionController_->ScrollBy(0, 0, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-600.0f));
+    ScrollBy(0, 0, smooth);
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     /**
      * @tc.steps: step4. ScrollBy the position to top
      * @tc.expected: ScrollBy the top
      */
-    positionController_->ScrollBy(0, -1000.0f, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    ScrollBy(0, -1000.0f, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -650,17 +646,15 @@ HWTEST_P(GridScrollerTestNg, ScrollToEdge001, TestSize.Level1)
      * @tc.expected: Scroll to bottom with animation
      */
     bool smooth = GetParam();
-    positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-600.0f));
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, smooth);
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     /**
      * @tc.steps: step2. SCROLL_TOP
      * @tc.expected: Scroll to top with animation
      */
-    positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -681,17 +675,15 @@ HWTEST_P(GridScrollerTestNg, ScrollPage001, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     bool smooth = GetParam();
-    positionController_->ScrollPage(false, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-GRID_HEIGHT));
+    ScrollPage(false, smooth);
+    EXPECT_TRUE(TickPosition(-GRID_HEIGHT));
 
     /**
      * @tc.steps: step2. ScrollPage up
      * @tc.expected: Scroll up
      */
-    positionController_->ScrollPage(true, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    ScrollPage(true, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 INSTANTIATE_TEST_SUITE_P(Smooth, GridScrollerTestNg, testing::Bool());
@@ -718,15 +710,15 @@ HWTEST_F(GridScrollerTestNg, AnimateTo006, TestSize.Level1)
     bool canOverScroll = true;
     bool smooth = false;
     AnimateTo(Dimension(1000.0f), 1000.0f, Curves::EASE, smooth, canOverScroll);
-    EXPECT_TRUE(Position(-200.f));
-    EXPECT_TRUE(Position(-400.f));
-    EXPECT_TRUE(Position(-600.0f));
-    EXPECT_TRUE(Position(-800.f)); // Tick doesn't advance new animations created within the same tick
-    EXPECT_TRUE(Position(-600.f));
-    EXPECT_TRUE(Position(-600.f));
-    EXPECT_TRUE(Position(-600.f));
-    EXPECT_TRUE(Position(-600.f));
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
+    EXPECT_TRUE(TickPosition(-800.0f)); // Tick doesn't advance new animations created within the same tick
+    EXPECT_TRUE(TickPosition(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 }
 
 /**
@@ -751,7 +743,7 @@ HWTEST_F(GridScrollerTestNg, AnimateTo007, TestSize.Level1)
 
     MockAnimationManager::GetInstance().SetTicks(2);
     AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, true);
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE / 2));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE / 2));
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -761,8 +753,8 @@ HWTEST_F(GridScrollerTestNg, AnimateTo007, TestSize.Level1)
     isTrigger = false; // reset val
     pattern_->AnimateTo(ITEM_MAIN_SIZE * 2, 200.f, Curves::LINEAR, true);
     EXPECT_FALSE(isTrigger);
-    EXPECT_TRUE(Position(-125.0f));
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE * 2));
+    EXPECT_TRUE(TickPosition(-125.0f));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE * 2));
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 
@@ -783,16 +775,14 @@ HWTEST_F(GridScrollerTestNg, ScrollToEdge002, TestSize.Level1)
      * @tc.steps: step1. SCROLL_BOTTOM
      * @tc.expected: Scroll to bottom with animation
      */
-    positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.f);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.0f);
     EXPECT_TRUE(Position(-492.0f));
 
     /**
      * @tc.steps: step2. SCROLL_TOP
      * @tc.expected: Scroll to top with animation
      */
-    positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.f);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.0f);
     EXPECT_TRUE(Position(0));
 }
 
@@ -816,19 +806,17 @@ HWTEST_F(GridScrollerTestNg, Fling001, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     const float finalPosition = 100.f;
     const float flingVelocity = finalPosition * FRICTION * FRICTION_SCALE;
-    positionController_->Fling(flingVelocity);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-finalPosition / TICK));
-    EXPECT_TRUE(Position(-finalPosition));
+    Fling(flingVelocity);
+    EXPECT_TRUE(TickPosition(-finalPosition / TICK));
+    EXPECT_TRUE(TickPosition(-finalPosition));
 
     /**
      * @tc.steps: step2. Fling, the flingVelocity less than 0
      * @tc.expected: Scroll up
      */
-    positionController_->Fling(-flingVelocity);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-finalPosition / TICK));
-    EXPECT_TRUE(Position(0));
+    Fling(-flingVelocity);
+    EXPECT_TRUE(TickPosition(-finalPosition / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -843,30 +831,30 @@ HWTEST_F(GridScrollerTestNg, GetInfo001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), 600.0f);
-    EXPECT_EQ(positionController_->GetScrollDirection(), Axis::VERTICAL);
-    EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset()));
-    EXPECT_FALSE(positionController_->IsAtEnd());
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(0), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(4), Rect()));
+    EXPECT_EQ(GetScrollDirection(), Axis::VERTICAL);
+    EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset()));
+    EXPECT_FALSE(IsAtEnd());
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(4), Rect()));
 
     /**
      * @tc.steps: step1. AnimateTo the position
      */
     AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
-    EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset(0, ITEM_MAIN_SIZE)));
-    EXPECT_FALSE(positionController_->IsAtEnd());
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(0), Rect()));
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(1), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(5), Rect()));
+    EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, ITEM_MAIN_SIZE)));
+    EXPECT_FALSE(IsAtEnd());
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect()));
+    EXPECT_TRUE(IsEqual(GetItemRect(1), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(5), Rect()));
 
     /**
      * @tc.steps: step2. AnimateTo bottom
      */
     AnimateTo(Dimension(600.0f), 0, nullptr, false);
-    EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset(0, 600.0f)));
-    EXPECT_TRUE(positionController_->IsAtEnd());
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(5), Rect()));
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(6), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, 600.0f)));
+    EXPECT_TRUE(IsAtEnd());
+    EXPECT_TRUE(IsEqual(GetItemRect(5), Rect()));
+    EXPECT_TRUE(IsEqual(GetItemRect(6), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
 }
 
 /**
@@ -1163,8 +1151,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
 
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
-    pattern_->ScrollToIndex(targetIndex, false, align);
-    FlushUITasks();
+    ScrollToIndex(targetIndex, false, align);
     auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 6);
     EXPECT_EQ(info.endMainLineIndex_, 9);
@@ -1182,8 +1169,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
 
     EXPECT_LT(info.currentOffset_, -75.0f);
 
-    pattern_->ScrollToIndex(targetIndex, false, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(targetIndex, false, ScrollAlign::END);
     for (int i = 0; i < 10; ++i) {
         info.currentOffset_ -= 75.0f;
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1213,8 +1199,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
 
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
-    pattern_->ScrollToIndex(targetIndex, false, align);
-    FlushUITasks();
+    ScrollToIndex(targetIndex, false, align);
     auto& info = pattern_->info_;
     info.prevOffset_ = info.currentOffset_;
     info.currentOffset_ -= 1000.0f;
@@ -1248,8 +1233,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset002, TestSize.Level1)
 
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
-    pattern_->ScrollToIndex(targetIndex, false, align);
-    FlushUITasks();
+    ScrollToIndex(targetIndex, false, align);
     auto& info = pattern_->info_;
     info.prevOffset_ = info.currentOffset_;
     info.currentOffset_ -= 399;
@@ -1305,28 +1289,20 @@ HWTEST_F(GridScrollerTestNg, VerticalGridScrollToIndexWithLargeLineHeight001, Te
     CreateDone();
 
     // cache all line in Grid
-    auto controller = pattern_->positionController_;
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    FlushUITasks();
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
 
-    controller->ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
     EXPECT_TRUE(Position(-550.0f));
 
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
 
-    controller->ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
     EXPECT_TRUE(Position(-790.0f));
 
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
 
-    controller->ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
     EXPECT_TRUE(Position(-1190.0f));
 }
 
@@ -1350,28 +1326,20 @@ HWTEST_F(GridScrollerTestNg, VerticalGridScrollToIndexWithLargeLineHeight002, Te
     CreateDone();
 
     // cache all line in Grid
-    auto controller = pattern_->positionController_;
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    FlushUITasks();
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
 
-    controller->ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
     EXPECT_TRUE(Position(-310.0f));
 
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
 
-    controller->ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
     EXPECT_TRUE(Position(-730.0f));
 
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
 
-    controller->ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
-    FlushUITasks();
+    ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
     EXPECT_TRUE(Position(-870.0f));
 }
 } // namespace OHOS::Ace::NG
