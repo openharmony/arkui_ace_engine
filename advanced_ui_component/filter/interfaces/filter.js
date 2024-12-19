@@ -1560,6 +1560,7 @@ export class Filter extends ViewPU {
             onConfigurationUpdated: (n12) => {
                 this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
                 this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
+                this.initAccessibilityResource();
             },
             onMemoryLevel() {
             }
@@ -2387,7 +2388,7 @@ export class Filter extends ViewPU {
                             m8.paramsGenerator_ = n8;
                         }
                         else {
-                            this.updateStateletsOfChildByElmtId(k8, {
+                            this.updateStateVarsOfChildByElmtId(k8, {
                                 colorRow: this.colorArr ? this.colorArr[h8] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[h8] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[h8] : [],
@@ -2483,7 +2484,7 @@ export class Filter extends ViewPU {
                             q4.paramsGenerator_ = r4;
                         }
                         else {
-                            this.updateStateletsOfChildByElmtId(o4, {
+                            this.updateStateVarsOfChildByElmtId(o4, {
                                 colorRow: this.colorArr ? this.colorArr[m4] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[m4] : [],
                                 backgroundColorRow: this.backgroundColorArr ? this.backgroundColorArr[m4] : [],

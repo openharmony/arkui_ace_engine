@@ -845,6 +845,7 @@ export struct Filter {
     onConfigurationUpdated: (config) => {
       this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
       this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
+      this.initAccessibilityResource();
     }, onMemoryLevel() {
     }
   };
