@@ -3152,8 +3152,8 @@ void AccessibilityGroup0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetAccessibilityGroup0(frameNode, convValue);
+    auto accessible = Converter::Convert<bool>(value);
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, accessible);
 }
 void AccessibilityGroup1Impl(Ark_NativePointer node,
                              Ark_Boolean isGroup,
@@ -3161,9 +3161,11 @@ void AccessibilityGroup1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(isGroup);
-    //auto convValue = Converter::OptConvert<type>(isGroup); // for enums
-    //CommonMethodModelNG::SetAccessibilityGroup1(frameNode, convValue);
+    auto isGroupValue = Converter::Convert<bool>(isGroup);
+    auto accessibilityPreferred = accessibilityOptions
+        ? Converter::OptConvert<bool>(accessibilityOptions->accessibilityPreferred) : std::nullopt;
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupValue);
+    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
 }
 void AccessibilityText0Impl(Ark_NativePointer node,
                             const Ark_String* value)
@@ -3172,7 +3174,7 @@ void AccessibilityText0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetAccessibilityText0(frameNode, convValue);
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, convValue);
 }
 void AccessibilityText1Impl(Ark_NativePointer node,
                             const Ark_Resource* value)
@@ -3180,8 +3182,10 @@ void AccessibilityText1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetAccessibilityText1(frameNode, convValue);
+    auto optValue = Converter::OptConvert<std::string>(*value);
+    if (optValue.has_value()) {
+        ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
+    }
 }
 void AccessibilityTextHintImpl(Ark_NativePointer node,
                                const Ark_String* value)
@@ -3190,7 +3194,7 @@ void AccessibilityTextHintImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetAccessibilityTextHint(frameNode, convValue);
+    ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, convValue);
 }
 void AccessibilityDescription0Impl(Ark_NativePointer node,
                                    const Ark_String* value)
@@ -3199,7 +3203,7 @@ void AccessibilityDescription0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetAccessibilityDescription0(frameNode, convValue);
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, convValue);
 }
 void AccessibilityDescription1Impl(Ark_NativePointer node,
                                    const Ark_Resource* value)
@@ -3207,8 +3211,9 @@ void AccessibilityDescription1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetAccessibilityDescription1(frameNode, convValue);
+    // auto optValue = Converter::OptConvert<std::string>(*value);
+    // ViewAbstractModelNG::SetAccessibilityDescription(frameNode, convValue);
+    LOGE("SetAccessibilityDescription for Ark_Resource is not implemented");
 }
 void AccessibilityLevelImpl(Ark_NativePointer node,
                             const Ark_String* value)
@@ -3217,7 +3222,8 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetAccessibilityLevel(frameNode, convValue);
+    // ViewAbstractModelNG::SetAccessibilityLevel(frameNode, convValue);
+    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
                                   const Callback_Any* value)
@@ -3227,6 +3233,7 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAccessibilityVirtualNode(frameNode, convValue);
+    LOGE("Callback_Any contained not supported Custom_Object");
 }
 void AccessibilityCheckedImpl(Ark_NativePointer node,
                               Ark_Boolean value)
@@ -3234,7 +3241,8 @@ void AccessibilityCheckedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetAccessibilityChecked(frameNode, convValue);
+    auto resetValue = false;
+    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, convValue, resetValue);
 }
 void AccessibilitySelectedImpl(Ark_NativePointer node,
                                Ark_Boolean value)
@@ -3242,7 +3250,8 @@ void AccessibilitySelectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetAccessibilitySelected(frameNode, convValue);
+    bool resetValue = false;
+    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, convValue, resetValue);
 }
 void ObscuredImpl(Ark_NativePointer node,
                   const Array_ObscuredReasons* value)
