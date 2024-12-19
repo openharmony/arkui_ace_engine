@@ -18,6 +18,7 @@
 
 #include "movingphoto_event_hub.h"
 #include "movingphoto_controller.h"
+#include "movingphoto_utils.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -41,6 +42,8 @@ public:
     void AutoPlayPeriod(int64_t startTime, int64_t endTime);
     void AutoPlay(bool isAutoPlay);
     void RepeatPlay(bool isRepeatPlay);
+    void SetMovingPhotoFormat(MovingPhotoFormat format);
+    void SetDynamicRangeMode(DynamicRangeMode rangeMode);
 
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;

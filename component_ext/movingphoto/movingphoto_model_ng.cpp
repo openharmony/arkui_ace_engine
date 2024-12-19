@@ -193,4 +193,22 @@ void MovingPhotoModelNG::RepeatPlay(bool isRepeatPlay)
     CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->RepeatPlay(isRepeatPlay);
 }
+
+void MovingPhotoModelNG::SetMovingPhotoFormat(MovingPhotoFormat format)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->SetMovingPhotoFormat(format);
+}
+
+void MovingPhotoModelNG::SetDynamicRangeMode(DynamicRangeMode rangeMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->SetDynamicRangeMode(rangeMode);
+}
 } // namespace OHOS::Ace::NG

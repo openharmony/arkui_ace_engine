@@ -33,9 +33,9 @@ constexpr int32_t HALF = 2;
 constexpr int64_t PERIOD_START = 0;
 constexpr int32_t PREPARE_RETURN = 0;
 constexpr int64_t VIDEO_PLAYTIME_START_POSITION = 0;
-constexpr int64_t VIDEO_PLAYTIME_END_POSITION = 3000;
 constexpr int32_t IMAGE_LOADING_COMPLETE = 0;
 constexpr int32_t DURATION_FLAG = -1;
+const std::string VIDEO_SCALE = "video_scale_type";
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -229,6 +229,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 
 void MovingPhotoPattern::UpdateImageNode()
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "UpdateImageNode start.%{public}d", movingPhotoFormat_);
     if (startAnimationFlag_) {
         needUpdateImageNode_ = true;
         return;
@@ -239,9 +240,10 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, DynamicRangeMode::HIGH, image);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, DynamicRangeMode::HIGH, image);
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set HDR.");
+    DynamicRangeModeConvert(dynamicRangeMode_);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, image);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, image);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set HDR. %{public}d", dynamicRangeMode_);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasImageSourceInfo()) {
@@ -265,10 +267,58 @@ void MovingPhotoPattern::UpdateImageNode()
         auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
         imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        auto imagePattern = image->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        MovingPhotoFormatConvert(movingPhotoFormat_);
+        imagePattern->SetExternalDecodeFormat(imageFormat_);
         imageLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
     RegisterImageEvent();
+}
+
+void MovingPhotoPattern::MovingPhotoFormatConvert(MovingPhotoFormat format)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhotoFormatConvert %{public}d.", format);
+    switch (format) {
+        case MovingPhotoFormat::RGBA_8888:
+            imageFormat_ = PixelFormat::RGBA_8888;
+            break;
+        case MovingPhotoFormat::NV21:
+            imageFormat_ = PixelFormat::NV21;
+            break;
+        case MovingPhotoFormat::RGBA_1010102:
+            imageFormat_ = PixelFormat::RGBA_1010102;
+            break;
+        case MovingPhotoFormat::YCBCR_P010:
+            imageFormat_ = PixelFormat::YCBCR_P010;
+            break;
+        case MovingPhotoFormat::YCRCB_P010:
+            imageFormat_ = PixelFormat::YCRCB_P010;
+            break;
+        default:
+            imageFormat_ = PixelFormat::UNKNOWN;
+            break;
+    }
+}
+
+void MovingPhotoPattern::DynamicRangeModeConvert(DynamicRangeMode rangeMode)
+{
+    switch (rangeMode) {
+        case DynamicRangeMode::HIGH:
+            dynamicRangeMode_ = DynamicRangeMode::HIGH;
+            break;
+        case DynamicRangeMode::CONSTRAINT:
+            dynamicRangeMode_ = DynamicRangeMode::CONSTRAINT;
+            break;
+        case DynamicRangeMode::STANDARD:
+            dynamicRangeMode_ = DynamicRangeMode::STANDARD;
+            break;
+        default:
+            dynamicRangeMode_ = DynamicRangeMode::HIGH;
+            break;
+    }
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "DynamicRangeModeConvert %{public}d.", rangeMode);
 }
 
 void MovingPhotoPattern::RegisterImageEvent()
@@ -348,8 +398,8 @@ void MovingPhotoPattern::PrepareMediaPlayer()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask(
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
         [weak = WeakClaim(this)] {
             auto movingPhotoPattern = weak.Upgrade();
             CHECK_NULL_VOID(movingPhotoPattern);
@@ -781,6 +831,7 @@ void MovingPhotoPattern::OnMediaPlayerPrepared()
     videoLayoutProperty->UpdateVideoSize(
         SizeF(static_cast<float>(videoSize.Width()), static_cast<float>(videoSize.Height())));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    mediaPlayer_->SetParameter(VIDEO_SCALE, 1);
     UpdateMediaPlayerSpeed();
     UpdateMediaPlayerMuted();
     VisiblePlayback();
@@ -1073,8 +1124,7 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 
 void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
-    if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime &&
-        endTime <= VIDEO_PLAYTIME_END_POSITION) {
+    if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime) {
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
         autoPlayPeriodStartTime_ = startTime;
         autoPlayPeriodEndTime_ = endTime;
@@ -1083,8 +1133,7 @@ void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 
 void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
-    if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime ||
-        endTime > VIDEO_PLAYTIME_END_POSITION) {
+    if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer SetAutoPlayPeriod error.");
         return;
     }

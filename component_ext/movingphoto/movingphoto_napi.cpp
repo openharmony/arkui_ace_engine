@@ -81,6 +81,22 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
         return ExtNapiUtils::CreateNull(env);
     }
 
+    napi_value jsMovingPhotoFormat = nullptr;
+    napi_get_named_property(env, argv[0], "movingPhotoFormat", &jsMovingPhotoFormat);
+    auto format = MovingPhotoFormat::UNKNOWN;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsMovingPhotoFormat, napi_number)) {
+        format = static_cast<MovingPhotoFormat>(ExtNapiUtils::GetCInt32(env, jsMovingPhotoFormat));
+        NG::MovingPhotoModelNG::GetInstance()->SetMovingPhotoFormat(format);
+    }
+
+    napi_value jsDynamicRangeMode = nullptr;
+    napi_get_named_property(env, argv[0], "dynamicRangeMode", &jsDynamicRangeMode);
+    auto rangeMode = DynamicRangeMode::HIGH;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsDynamicRangeMode, napi_number)) {
+        rangeMode = static_cast<DynamicRangeMode>(ExtNapiUtils::GetCInt32(env, jsDynamicRangeMode));
+        NG::MovingPhotoModelNG::GetInstance()->SetDynamicRangeMode(rangeMode);
+    }
+
     napi_value getUri = nullptr;
     napi_get_named_property(env, jsData, "getUri", &getUri);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, getUri, napi_function)) {
