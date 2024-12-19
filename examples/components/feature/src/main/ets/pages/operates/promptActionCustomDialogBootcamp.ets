@@ -18,7 +18,7 @@ import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 import { promptAction } from '@kit.ArkUI';
 
 @Component
-export struct CustomDialogBootcamp {
+export struct promptActionCustomDialogBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   private customDialogComponentId: number = 0
@@ -439,7 +439,7 @@ export struct CustomDialogBootcamp {
 @Component
 struct CustomDialogBootcampPreviewer {
   build() {
-    CustomDialogBootcamp({
+    promptActionCustomDialogBootcamp({
       title: '打开自定义弹窗/CustomDialog'
     })
   }
