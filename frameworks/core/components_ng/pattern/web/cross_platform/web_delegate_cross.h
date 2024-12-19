@@ -406,8 +406,6 @@ public:
     bool LoadDataWithRichText() override;
 
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset) override;
-    void DragResize(
-        const double& width, const double& height, const double& preHeight, const double& preWidth) override;
 private:
     void ReleasePlatformResource();
     void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<NG::PipelineContext>& context);
@@ -482,4 +480,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif
+#endif
