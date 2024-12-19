@@ -146,6 +146,8 @@ JSRef<JSObject> JSCanvasRenderer::createGradientObj(const std::shared_ptr<Gradie
     auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
     if (pasteData) {
         pasteData->SetGradient(gradient);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "Failed to construct 'Gradient'.");
     }
     return pasteObj;
 }
