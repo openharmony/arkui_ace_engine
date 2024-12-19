@@ -598,7 +598,7 @@ void AddExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, void* extra
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGW("AddCustomProperty doesn't run on UI thread");
+        LOGW("AddExtraCustomProperty doesn't run on UI thread");
         return;
     }
     frameNode->AddExtraCustomProperty(key, extraData);
@@ -610,7 +610,7 @@ void* GetExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pipeline = frameNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGW("AddCustomProperty doesn't run on UI thread");
+        LOGW("GetExtraCustomProperty doesn't run on UI thread");
         return nullptr;
     }
     return frameNode->GetExtraCustomProperty(key);
@@ -622,7 +622,7 @@ void RemoveExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGW("AddCustomProperty doesn't run on UI thread");
+        LOGW("RemoveExtraCustomProperty doesn't run on UI thread");
         return;
     }
     frameNode->RemoveExtraCustomProperty(key);
