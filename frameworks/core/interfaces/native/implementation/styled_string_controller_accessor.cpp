@@ -22,14 +22,16 @@ const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyl
 namespace StyledStringControllerAccessor {
 void DestroyPeerImpl(StyledStringControllerPeer* peer)
 {
+    LOGE("StyledStringControllerAccessor::DestroyPeerImpl is not supported, it's an interface.");
 }
 Ark_NativePointer CtorImpl()
 {
-    return GetRichEditorStyledStringControllerAccessor()->ctor();
+    LOGE("StyledStringControllerAccessor::CtorImpl is not supported, it's an interface.");
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return GetRichEditorStyledStringControllerAccessor()->getFinalizer();
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetStyledStringImpl(StyledStringControllerPeer* peer,
                          const Ark_StyledString* styledString)
