@@ -47,7 +47,6 @@ void ScrollTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     MockAnimationManager::Enable(true);
-    testing::FLAGS_gmock_verbose = "error";
 }
 
 void ScrollTestNg::TearDownTestSuite()
@@ -129,60 +128,9 @@ void ScrollTestNg::CreateContentChild(int32_t childNumber)
     }
 }
 
-void ScrollTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
+void ScrollTestNg::ScrollBy(double pixelX, double pixelY, bool smooth)
 {
-    pattern_->ScrollToEdge(scrollEdgeType, false);
+    pattern_->ScrollBy(pixelX, pixelY, smooth);
     FlushLayoutTask(frameNode_);
-}
-
-void ScrollTestNg::ScrollTo(float offset)
-{
-    pattern_->ScrollTo(offset);
-    FlushLayoutTask(frameNode_);
-}
-
-void ScrollTestNg::ScrollBy(float pixelX, float pixelY)
-{
-    pattern_->ScrollBy(pixelX, pixelY, false);
-    FlushLayoutTask(frameNode_);
-}
-
-AssertionResult ScrollTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
-{
-    auto scrollablePattern = frameNode->GetPattern<ScrollablePattern>();
-    if (scrollablePattern->GetAxis() == Axis::HORIZONTAL) {
-        return IsEqual(GetChildX(frameNode, 0), expectOffset);
-    }
-    return IsEqual(GetChildY(frameNode, 0), expectOffset);
-}
-
-AssertionResult ScrollTestNg::TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset)
-{
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode);
-    return Position(frameNode, expectOffset);
-}
-
-AssertionResult ScrollTestNg::TickByVelocityPosition(
-    const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
-{
-    MockAnimationManager::GetInstance().TickByVelocity(velocity);
-    FlushLayoutTask(frameNode);
-    return Position(frameNode, expectOffset);
-}
-
-AssertionResult ScrollTestNg::Position(float expectOffset)
-{
-    return Position(frameNode_, expectOffset);
-}
-
-AssertionResult ScrollTestNg::TickPosition(float expectOffset)
-{
-    return TickPosition(frameNode_, expectOffset);
-}
-
-AssertionResult ScrollTestNg::TickByVelocityPosition(float velocity, float expectOffset)
-{
-    return TickByVelocityPosition(frameNode_, velocity, expectOffset);
 }
 } // namespace OHOS::Ace::NG

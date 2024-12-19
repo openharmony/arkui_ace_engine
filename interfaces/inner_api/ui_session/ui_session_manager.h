@@ -56,6 +56,12 @@ public:
     void ReportComponentChangeEvent(const std::string& key, const std::string& value);
 
     /**
+     * @description: execute click callback when page some component change occurs
+     */
+    void ReportComponentChangeEvent(
+        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value);
+
+    /**
      * @description: save report communication stub side
      * @param reportStub report communication stub side
      */

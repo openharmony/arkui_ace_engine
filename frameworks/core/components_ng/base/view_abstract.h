@@ -111,6 +111,8 @@ enum class OverlayType {
     RESET = 3,
 };
 
+typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* effect);
+
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength &width);
@@ -303,6 +305,7 @@ public:
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest);
+    static void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback);
     static void SetDraggable(bool draggable);
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
     static void SetOnDragStart(
@@ -400,6 +403,8 @@ public:
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
+    static void DisableOnFocusAxisEvent();
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode);
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnDragStart(FrameNode* frameNode);
     static void DisableOnDragEnter(FrameNode* frameNode);
@@ -655,6 +660,7 @@ public:
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
+    static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
@@ -781,6 +787,7 @@ public:
     static void SetOffsetLocalizedEdges(bool needLocalized);
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
+    static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
 
 private:
     static void AddDragFrameNodeToManager();
@@ -789,6 +796,9 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+
+    static OEMVisualEffectFunc oemVisualEffectFunc;
+    static std::mutex visualEffectMutex_;
 };
 } // namespace OHOS::Ace::NG
 

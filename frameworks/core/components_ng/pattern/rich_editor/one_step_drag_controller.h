@@ -54,7 +54,7 @@ protected:
 class ImageOneStepDragParam : public OneStepDragParam {
 public:
     ImageOneStepDragParam(const Builder& builder, const SelectMenuParam& selectMenuParam)
-        : OneStepDragParam(builder, selectMenuParam, TextSpanType::IMAGE, PLACEHOLDER_TAG_FILTER) {}
+        : OneStepDragParam(builder, selectMenuParam, TextSpanType::IMAGE, IMAGE_TAG_FILTER) {}
     MenuParam GetMenuParam(const RefPtr<FrameNode>& frameNode) const override;
     void EnableOneStepDrag(const RefPtr<FrameNode>& frameNode) override;
 
@@ -65,7 +65,7 @@ private:
 class PlaceholderOneStepDragParam : public OneStepDragParam {
 public:
     PlaceholderOneStepDragParam(const Builder& builder, const SelectMenuParam& selectMenuParam)
-        : OneStepDragParam(builder, selectMenuParam, TextSpanType::BUILDER, IMAGE_TAG_FILTER) {}
+        : OneStepDragParam(builder, selectMenuParam, TextSpanType::BUILDER, PLACEHOLDER_TAG_FILTER) {}
     MenuParam GetMenuParam(const RefPtr<FrameNode>& frameNode) const override;
     void EnableDrag(const RefPtr<FrameNode>& frameNode) const override;
     void EnableOneStepDrag(const RefPtr<FrameNode>& frameNode) override;

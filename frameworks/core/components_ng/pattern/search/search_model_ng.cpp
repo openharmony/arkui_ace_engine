@@ -181,6 +181,7 @@ void SearchModelNG::SetSearchButton(const std::string& text)
     } else {
         searchButtonEvent->SetEnabled(false);
         searchButtonRenderContext->UpdateOpacity(0.0);
+        ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton);
     }
 
     buttonFrameNode->MarkModifyDone();

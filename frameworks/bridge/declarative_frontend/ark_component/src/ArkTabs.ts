@@ -136,6 +136,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabEdgeEffectModifier.identity, TabEdgeEffectModifier, value);
     return this;
   }
+  pageFlipMode(value: PageFlipMode): this {
+    modifierWithKey(this._modifiersWithKeys, TabPageFlipModeModifier.identity, TabPageFlipModeModifier, value);
+    return this;
+  }
   width(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, TabWidthModifier.identity, TabWidthModifier, value);
     return this;
@@ -493,6 +497,23 @@ class TabEdgeEffectModifier extends ModifierWithKey<EdgeEffect> {
       getUINativeModule().tabs.resetTabEdgeEffect(node);
     } else {
       getUINativeModule().tabs.setTabEdgeEffect(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TabPageFlipModeModifier extends ModifierWithKey<PageFlipMode> {
+  constructor(value: PageFlipMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabPageFlipMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabPageFlipMode(node);
+    } else {
+      getUINativeModule().tabs.setTabPageFlipMode(node, this.value);
     }
   }
   checkObjectDiff(): boolean {

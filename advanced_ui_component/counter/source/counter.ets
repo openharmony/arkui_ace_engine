@@ -417,7 +417,7 @@ export struct CounterComponent {
       if (this.dateStyleOptions.step < 1) {
         this.step = 1
       } else {
-        this.step = this.dateStyleOptions.step;
+        this.step = Math.floor(this.dateStyleOptions.step);
       }
     }
     if (this.dateStyleOptions.onHoverIncrease !== undefined) {
@@ -1380,7 +1380,6 @@ export struct CounterComponent {
               .borderRadius(0)
               .textAlign(TextAlign.Center)
               .type(InputType.PhoneNumber)
-              .caretColor(Color.Transparent)
               .copyOption(CopyOptions.None)
               .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
@@ -1530,7 +1529,6 @@ export struct CounterComponent {
               .borderRadius(0)
               .textAlign(TextAlign.Center)
               .type(InputType.PhoneNumber)
-              .caretColor(Color.Transparent)
               .copyOption(CopyOptions.None)
               .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
@@ -1808,7 +1806,6 @@ export struct CounterComponent {
           })
             .direction(this.counterDirection)
             .type(InputType.Number)
-            .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
             .fontSize(this.getTextInputFontSize())
             .fontWeight(FontWeight.Medium)
@@ -1938,7 +1935,6 @@ export struct CounterComponent {
           })
             .direction(this.counterDirection)
             .type(InputType.Number)
-            .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
             .fontSize(this.getTextInputFontSize())
             .fontWeight(FontWeight.Medium)
@@ -2076,7 +2072,6 @@ export struct CounterComponent {
           })
             .direction(this.counterDirection)
             .type(InputType.Number)
-            .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
             .fontSize(this.getTextInputFontSize())
             .fontWeight(FontWeight.Medium)

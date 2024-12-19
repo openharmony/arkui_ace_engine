@@ -746,7 +746,7 @@ void RenderSlider::StartMoveAnimation(double from, double to, bool isClick)
         }
     });
 
-    moveController_->AddStopListener([weak = AceType::WeakClaim(this), isClick]() {
+    moveController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto slider = weak.Upgrade();
         if (slider) {
             slider->SyncValueToComponent(slider->totalRatio_ * (slider->max_ - slider->min_) + slider->min_);

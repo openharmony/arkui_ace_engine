@@ -24,39 +24,28 @@
  * change
  */
 
-// in the case of ForEach, Repeat, AND If, two or more UINodes / elmtIds can render at the same time
+// stackOfRenderedComponentsItem[0] and stackOfRenderedComponentsItem[1] is faster than
+// the stackOfRenderedComponentsItem.id and the stackOfRenderedComponentsItem.cmp.
+// So use the array to keep id and cmp.
+type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | PersistenceV2Impl];
+
+// in the case of ForEach, Repeat, AND If, two or more UINodes / elementIds can render at the same time
 // e.g. ForEach -> ForEach child Text, Repeat -> Nested Repeat, child Text
-// Therefore, ObserveV2 needs to keep a strack of currently renderign ids / components
-// in the same way as thsi is also done for PU stateMgmt with ViewPU.currentlyRenderedElmtIdStack_
+// Therefore, ObserveV2 needs to keep a stack of currently rendering ids / components
+// in the same way as this is also done for PU stateMgmt with ViewPU.currentlyRenderedElmtIdStack_
 class StackOfRenderedComponents {
   private stack_: Array<StackOfRenderedComponentsItem> = new Array<StackOfRenderedComponentsItem>();
 
   public push(id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl): void {
-    this.stack_.push(new StackOfRenderedComponentsItem(id, cmp));
+    this.stack_.push([id, cmp]);
   }
 
-  public pop(): [id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl] | undefined {
-    const item = this.stack_.pop();
-    return item ? [item.id_, item.cmp_] : undefined;
+  public pop(): StackOfRenderedComponentsItem | undefined {
+    return this.stack_.pop();
   }
 
-  public top(): [id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl] | undefined {
-    if (this.stack_.length) {
-      const item = this.stack_[this.stack_.length - 1];
-      return [item.id_, item.cmp_];
-    } else {
-      return undefined;
-    }
-  }
-}
-
-class StackOfRenderedComponentsItem {
-  public id_ : number;
-  public cmp_ : IView | MonitorV2 | ComputedV2 | PersistenceV2Impl;
-
-  constructor(id : number, cmp : IView | MonitorV2 | ComputedV2 | PersistenceV2Impl) {
-    this.id_ = id;
-    this.cmp_ = cmp;
+  public top(): StackOfRenderedComponentsItem | undefined {
+    return this.stack_.length ? this.stack_[this.stack_.length - 1] : undefined;
   }
 }
 

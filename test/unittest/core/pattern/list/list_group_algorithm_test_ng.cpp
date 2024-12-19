@@ -201,7 +201,7 @@ HWTEST_F(ListGroupAlgTestNg, ListLayoutAlgorithmTest001, TestSize.Level1)
         wrapper, 0, listLayoutAlgorithm.itemPosition_.begin()->second, startIndex, crossSize);
     float crossOffset = listLayoutAlgorithm.CalculateLaneCrossOffset(crossSize, size.Width(), false);
     auto offset = OffsetF(crossSize - crossOffset - size.Width(), listItemInfo1.startPos);
-    EXPECT_EQ(0.f, crossOffset);
+    EXPECT_EQ(0, crossOffset);
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     EXPECT_EQ(layoutDirection, TextDirection::RTL);
 }
@@ -407,7 +407,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
     CreateDone();
     RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
     RefPtr<FrameNode> secondGroupNode = GetChildFrameNode(frameNode_, 1);
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), ITEM_MAIN_SIZE);
 
@@ -415,7 +415,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
      * @tc.steps: step2. V2::StickyStyle::FOOTER
      * @tc.expected: foot is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
@@ -428,11 +428,11 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
      * @tc.steps: step3. V2::StickyStyle::BOTH
      * @tc.expected: head/foot is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
     EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), GROUP_HEADER_LEN);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), ITEM_MAIN_SIZE);
@@ -456,7 +456,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky002, TestSize.Level1)
     CreateGroupWithHeader(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone();
     RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), ITEM_MAIN_SIZE);
 
@@ -464,11 +464,11 @@ HWTEST_F(ListGroupAlgTestNg, Sticky002, TestSize.Level1)
      * @tc.steps: step2. V2::StickyStyle::BOTH
      * @tc.expected: head is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), ITEM_MAIN_SIZE);
 }
@@ -499,7 +499,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky003, TestSize.Level1)
      * @tc.steps: step3. V2::StickyStyle::BOTH
      * @tc.expected: head/foot is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
@@ -536,7 +536,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky004, TestSize.Level1)
      * @tc.steps: step2. V2::StickyStyle::FOOTER
      * @tc.expected: foot is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
@@ -548,15 +548,15 @@ HWTEST_F(ListGroupAlgTestNg, Sticky004, TestSize.Level1)
      * @tc.steps: step3. V2::StickyStyle::BOTH
      * @tc.expected: head/foot is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
+    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), 0);
     ScrollTo(ITEM_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
+    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), 0);
 }
 
 /**
@@ -586,13 +586,13 @@ HWTEST_F(ListGroupAlgTestNg, Sticky005, TestSize.Level1)
      * @tc.steps: step2. V2::StickyStyle::BOTH
      * @tc.expected: head is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
     ScrollTo(ITEM_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
 }
 
 /**
@@ -623,13 +623,13 @@ HWTEST_F(ListGroupAlgTestNg, Sticky006, TestSize.Level1)
      * @tc.steps: step2. V2::StickyStyle::BOTH
      * @tc.expected: head/foot is Sticky
      */
-    ScrollTo(0.f); // reset position
+    ScrollTo(0); // reset position
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0.f);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0);
     ScrollTo(ITEM_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0.f);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0);
 }
 
 /**

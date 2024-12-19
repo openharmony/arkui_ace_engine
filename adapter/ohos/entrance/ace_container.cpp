@@ -37,6 +37,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -193,6 +194,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         auto nativeEngine = reinterpret_cast<NativeEngine*>(sharedRuntime);
         auto env = reinterpret_cast<napi_env>(nativeEngine);
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
+    }
+}
+
+void ParseLanguage(ConfigurationChange& configurationChange, const std::string& languageTag)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
 } // namespace
@@ -501,6 +514,46 @@ bool AceContainer::RemoveOverlayBySubwindowManager(int32_t instanceId)
         }
     }
     return false;
+}
+
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContext()
+{
+    auto context = runtimeContext_.lock();
+    if (context == nullptr) {
+        LOGW("runtimeContext_ is null.");
+    }
+
+    return context;
+}
+
+void AceContainer::SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext)
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->SetJsContext(jsContext);
+}
+
+std::shared_ptr<Framework::JsValue> AceContainer::GetJsContext()
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_RETURN(jsEngine, nullptr);
+    return jsEngine->GetJsContext();
 }
 
 bool AceContainer::OnBackPressed(int32_t instanceId)
@@ -1637,13 +1690,13 @@ public:
     virtual ~SaveRequestCallback() = default;
     void OnSaveRequestSuccess() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestSuccess called");
         ProcessOnFinish();
     }
 
     void OnSaveRequestFailed() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestFailed called");
         ProcessOnFinish();
     }
 
@@ -2026,6 +2079,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     }
 #endif
 
+    if (isDynamicRender_) {
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
+    }
+
     auto windowDensityCallback = [weak = WeakClaim(this)]() {
         auto container = weak.Upgrade();
         CHECK_NULL_RETURN(container, 0.0);
@@ -2331,8 +2388,9 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-    windowManager->SetGetWindowStartMoveFlagCallBack(
-        [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
+    windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
+    windowManager->SetWindowIsStartMovingCallBack(
+        [window = uiWindow_]() -> bool { return static_cast<bool>(window->IsStartMoving()); });
     windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
     windowManager->SetWindowSplitSecondaryCallBack(
@@ -2360,10 +2418,6 @@ void AceContainer::InitWindowCallback()
     windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
         [window = uiWindow_]() -> bool {
             return window->GetFreeMultiWindowModeEnabledState();
-        });
-    windowManager->SetPerformBackCallback(
-        [window = uiWindow_]() -> void {
-            return window->PerformBack();
         });
     windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
         window->OnContainerModalEvent(name, value);
@@ -2545,6 +2599,9 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
         configurationChange.skinUpdate = skinUpdate;
+        if ((isDynamicRender_ || isFormRender_) && fontUpdate) {
+            CheckAndSetFontFamily();
+        }
     }
 }
 
@@ -2569,14 +2626,8 @@ void AceContainer::BuildResConfig(
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
     if (!parsedConfig.languageTag.empty()) {
-        std::string language;
-        std::string script;
-        std::string region;
-        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
-        if (!language.empty() || !script.empty() || !region.empty()) {
-            configurationChange.languageUpdate = true;
-            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-        }
+        ParseLanguage(configurationChange, parsedConfig.languageTag);
+        resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
         auto fontManager = pipelineContext_->GetFontManager();
@@ -2616,8 +2667,8 @@ void AceContainer::UpdateConfiguration(
     auto resConfig = GetResourceConfiguration();
     BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
+        ParseLanguage(configurationChange, parsedConfig.preferredLanguage);
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
-        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
@@ -2727,7 +2778,8 @@ void AceContainer::HotReload()
 
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->FlushReload(ConfigurationChange());
+            ConfigurationChange configurationChange { .hotReloadUpdate = true };
+            pipeline->FlushReload(configurationChange);
         },
         TaskExecutor::TaskType::UI, "ArkUIHotReload");
 }
@@ -3089,7 +3141,7 @@ bool AceContainer::GetCurPointerEventInfo(
     sourceType = currentPointerEvent->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
-    sourceTool = pointerItem.GetToolType();
+    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
     displayId = currentPointerEvent->GetTargetDisplayId();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;

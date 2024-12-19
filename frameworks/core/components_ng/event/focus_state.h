@@ -51,6 +51,14 @@ public:
     {
         return currentFocus_;
     }
+    void SetTabStop(bool tabStop)
+    {
+        tabStop_ = tabStop;
+    }
+    bool IsTabStop() const
+    {
+        return tabStop_;
+    }
     RefPtr<FrameNode> GetFrameNode() const;
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
@@ -60,6 +68,7 @@ public:
     WeakPtr<EventHub> eventHub_;
     FocusType focusType_ = FocusType::DISABLE;
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
+    bool tabStop_ { false };
 };
 } // namespace OHOS::Ace::NG
 

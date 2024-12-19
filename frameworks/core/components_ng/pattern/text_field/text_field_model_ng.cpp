@@ -57,6 +57,9 @@ void TextFieldModelNG::CreateNode(
         auto changed = pattern->InitValueText(value.value());
         pattern->SetTextChangedAtCreation(changed);
     }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
+    }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
@@ -109,6 +112,9 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
+    }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {

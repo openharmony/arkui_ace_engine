@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 struct FlexMeasureResult {
     float allocatedSize = 0.0f;
     int32_t validSizeCount = 0;
+    int32_t childrenCount = 0;
 };
 
 struct FlexLayoutResult {
@@ -36,6 +37,7 @@ enum class FlexOperatorType {
     RESTORE_MEASURE_RESULT,
     UPDATE_MEASURE_RESULT,
     UPDATE_LAYOUT_RESULT,
+    RESTORE_CHILDREN_COUNT,
 };
 
 class ACE_EXPORT FlexLayoutProperty : public LayoutProperty {

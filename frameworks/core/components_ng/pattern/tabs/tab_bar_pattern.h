@@ -164,6 +164,8 @@ public:
             layoutAlgorithm->SetTargetIndex(targetIndex_);
         } else if (jumpIndex_) {
             layoutAlgorithm->SetJumpIndex(jumpIndex_);
+        } else if (focusIndex_) {
+            layoutAlgorithm->SetFocusIndex(focusIndex_);
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
@@ -505,6 +507,7 @@ public:
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
     void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+    void AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem);
 
     void RemoveTabBarItemInfo(int32_t tabBarItemId)
     {
@@ -557,6 +560,7 @@ private:
         const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
+    bool InsideTabBarRegion(const TouchLocationInfo& locationInfo);
     void InitHoverEvent();
     void InitMouseEvent();
     void SetSurfaceChangeCallback();
@@ -600,13 +604,14 @@ private:
     void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
         float targetOffset);
     void CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName);
-    void StopTranslateAnimation();
+    void StopTranslateAnimation(bool isImmediately = false);
     float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState(bool needMarkDirty = true);
     void FocusIndexChange(int32_t index);
+    void FocusCurrentOffset(int32_t index);
     void UpdateGradientRegions(bool needMarkDirty = true);
 
     float GetSpace(int32_t indicator);
@@ -730,10 +735,12 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
+    bool accessibilityScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

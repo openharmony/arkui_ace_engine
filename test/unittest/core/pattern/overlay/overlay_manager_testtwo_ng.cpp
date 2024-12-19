@@ -31,6 +31,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -1279,8 +1280,8 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowMenuClearAnimation, TestSize.Level1)
     EXPECT_NE(mainPipeline, false);
     auto dragDropManager = mainPipeline->GetDragDropManager();
     EXPECT_NE(dragDropManager, false);
-    dragDropManager->SetPrepareDragFrameNode(dragFrameNode);
-    auto draggingNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(dragFrameNode);
+    auto draggingNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     EXPECT_NE(draggingNode, false);
     auto eventHub = draggingNode->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, false);

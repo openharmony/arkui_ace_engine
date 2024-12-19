@@ -548,7 +548,7 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     pattern_->HandleOnAIWrite();
 
     std::vector<uint8_t> buff;
-    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     pattern_->HandleAIWriteResult(0, 5, buff);
     auto contentController = pattern_->GetTextContentController();

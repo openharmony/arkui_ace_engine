@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr uint8_t TOTAL_COUNT = 3;
 void CalendarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -186,32 +187,30 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
     CHECK_NULL_VOID(swiperFrameNode);
     auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    auto requestDataCallBack = [weak = WeakClaim(this), textDirection,
-                                    swiperEventHubWeak = WeakPtr<SwiperEventHub>(swiperEventHub)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto swiperEventHub = swiperEventHubWeak.Upgrade();
-        CHECK_NULL_VOID(swiperEventHub);
-        auto direction = swiperEventHub->GetDirection();
-        if (textDirection == TextDirection::RTL && !pattern->isClickEvent_) {
-            if (direction == NG::Direction::NEXT) {
-                direction = NG::Direction::PRE;
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    uint8_t totalCount = swiperPattern ? static_cast<uint8_t>(swiperPattern->TotalCount()) : TOTAL_COUNT;
+    CHECK_EQUAL_VOID(totalCount, 0);
+
+    auto changeEventWithPreIndex = std::make_shared<ChangeEventWithPreIndex>(
+        [weak = WeakClaim(this), &curMonthIndex = curMonthIndex_, totalCount](int32_t preIndex, int32_t currentIndex) {
+            CHECK_EQUAL_VOID(curMonthIndex, currentIndex);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+
+            if ((currentIndex == (curMonthIndex + 1) % totalCount) ||
+                (currentIndex == 0 && curMonthIndex == (totalCount - 1))) {
+                    pattern->FireRequestData(MonthState::NEXT_MONTH);
+                    pattern->SetMoveDirection(NG::Direction::NEXT);
             } else {
-                direction = NG::Direction::NEXT;
+                pattern->FireRequestData(MonthState::PRE_MONTH);
+                pattern->SetMoveDirection(NG::Direction::PRE);
             }
-        }
-        pattern->isClickEvent_ = false;
-        if (direction == NG::Direction::NEXT) {
-            pattern->FireRequestData(MonthState::NEXT_MONTH);
-            pattern->SetMoveDirection(NG::Direction::NEXT);
-        } else {
-            pattern->FireRequestData(MonthState::PRE_MONTH);
-            pattern->SetMoveDirection(NG::Direction::PRE);
-        }
-        pattern->ReadTitleNode();
-        pattern->ClearChildrenFocus();
-    };
-    swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
+            curMonthIndex = static_cast<uint8_t>(currentIndex);
+            pattern->ReadTitleNode();
+            pattern->ClearChildrenFocus();
+    });
+    swiperEventHub->AddOnChangeEventWithPreIndex(changeEventWithPreIndex);
+
     for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
         auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
         CHECK_NULL_VOID(calenderMonthFrameNode);

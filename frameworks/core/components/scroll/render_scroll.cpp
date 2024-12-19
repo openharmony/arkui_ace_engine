@@ -891,7 +891,7 @@ void RenderScroll::InitScrollBarProxy()
 void RenderScroll::SetBarCallBack(bool isVertical)
 {
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
-        auto&& barEndCallback = [weakScroll = AceType::WeakClaim(this), isVertical](int32_t value) {
+        auto&& barEndCallback = [weakScroll = AceType::WeakClaim(this)](int32_t value) {
             auto scroll = weakScroll.Upgrade();
             if (!scroll) {
                 LOGE("render scroll is released");
@@ -900,7 +900,7 @@ void RenderScroll::SetBarCallBack(bool isVertical)
             scroll->scrollBarOpacity_ = value;
             scroll->MarkNeedRender();
         };
-        auto&& scrollEndCallback = [weakScroll = AceType::WeakClaim(this), isVertical]() {
+        auto&& scrollEndCallback = [weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (!scroll) {
                 LOGE("render scroll is released");

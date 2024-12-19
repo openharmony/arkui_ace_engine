@@ -85,6 +85,11 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteMeasureSize");
     auto jsParam = JSMeasureLayoutParamNG::GetInstance(layoutWrapper);
+    if (!jsParam) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetInstance return val in onMeasureSize API is null");
+        return;
+    }
 
     auto selfLayoutInfo = jsParam->GetSelfLayoutInfo();
     auto childArray = jsParam->GetChildArray();
@@ -93,6 +98,7 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
     JSRef<JSObject> result = jsMeasureSizeFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */
     if (result->IsUndefined()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return val of onMeasureSize API is empty or undefined");
         return;
     }

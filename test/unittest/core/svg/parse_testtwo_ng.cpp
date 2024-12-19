@@ -21,6 +21,7 @@
 #define protected public
 
 #include "include/core/SkStream.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/memory/ace_type.h"
@@ -57,6 +58,7 @@
 #include "core/components_ng/svg/parse/svg_fe_composite.h"
 #include "core/components_ng/svg/parse/svg_fe_flood.h"
 #include "core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
+#include "core/components_ng/svg/parse/svg_fe_offset.h"
 #include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_g.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
@@ -129,6 +131,9 @@ const std::string RECT_SVG_LABEL2 = "<svg version=\"1.1\" fill=\"red\" "
 const std::string RECT_SVG_LABEL3 = "<svg version=\"1.1\" fill=\"red\" "
                                     "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
                                     "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"1\" ry=\"-1\"></rect></svg>";
+const std::string RECT_SVG_LABEL4 = "<svg version=\"1.1\" fill=\"red\" "
+                                    "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
+                                    "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"-1\" ry=\"1\"></rect></svg>";
 constexpr float X = 150.0f;
 constexpr float Y = 20.0f;
 constexpr float RX = 10.0f;
@@ -256,6 +261,7 @@ const std::string FE_COLOR_MATRIX =
     "<feColorMatrix type=\"saturate\" values=\"10\"/>"
     "<feColorMatrix type=\"hueRotate\" values=\"80\"/>"
     "<feColorMatrix type=\"luminanceToAlpha\" values=\"80\"/>"
+    "<feColorMatrix type=\"matrix\" values=\"1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0\" />"
     "</filter>"
     "<g>"
     "<circle cx=\"30\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
@@ -283,6 +289,27 @@ const std::string FE_FLOOD_AND_COMPOSITE =
     "<feFlood flood-color=\"red\" flood-opacity=\"0\" result=\"flood\" /><feFlood flood-color=\"green\" "
     "flood-opacity=\"1\" result=\"flood1\" />"
     "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"xor\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/></filter>"
+    "<g><rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" /></g></svg>";
+
+const std::string FE_COMPOSITE =
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" >"
+    "<filter id=\"colorMatrix\">"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"undefine\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/>"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"arithmetic\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/>"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"atop\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/>"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"in\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/>"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"lighter\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/>"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"out\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/>"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"xor\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/>"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"over\" result=\"composite\" k1=\"1\" "
     "k2=\"0\"/></filter>"
     "<g><rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" /></g></svg>";
 
@@ -315,6 +342,14 @@ public:
     RefPtr<SvgDom> ParseFeGaussianblur(const std::string& svgLabel);
     static RefPtr<SvgDom> ParseEllipse(const std::string& svgLabel);
     void CallBack(Testing::MockCanvas& rSCanvas);
+    static void SetUpTestSuite()
+    {
+        MockContainer::SetUp();
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::TearDown();
+    }
 };
 
 RefPtr<SvgDom> ParseTestTwoNg::ParseRect(const std::string& svgLabel)
@@ -647,8 +682,8 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
     auto svgCircle = AceType::DynamicCast<SvgCircle>(svg->children_.at(0));
     EXPECT_NE(svgCircle, nullptr);
 
-    Gradient gradient;
-    LinearGradient linearGradientLocal;
+    OHOS::Ace::Gradient gradient;
+    OHOS::Ace::LinearGradient linearGradientLocal;
     linearGradientLocal.x1 = Dimension(1.0);
     linearGradientLocal.x2 = Dimension(1.0);
     linearGradientLocal.y1 = Dimension(1.0);
@@ -666,7 +701,7 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
     linearGradientInfo = gradient.GetLinearGradientInfo();
     EXPECT_EQ(linearGradientInfo.x1, 0.0);
 
-    RadialGradient radialGradientLocal;
+    OHOS::Ace::RadialGradient radialGradientLocal;
     radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
     radialGradientLocal.radialCenterX = AnimatableDimension(1);
     radialGradientLocal.radialCenterY = AnimatableDimension(1);
@@ -695,7 +730,7 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
 {
-    std::function func = [&](Gradient& gradient) {
+    std::function func = [&](const OHOS::Ace::Gradient& gradient) {
         auto svgStream = SkMemoryStream::MakeCopy(CIRCLE_SVG_LABEL.c_str(), CIRCLE_SVG_LABEL.length());
         EXPECT_NE(svgStream, nullptr);
         ImageSourceInfo src;
@@ -707,7 +742,6 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
 
         auto viewPort = Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT);
         auto baseAttr = svgCircle->GetBaseAttributes();
-        gradient.SetType(GradientType::LINEAR);
         svgCircle->fillState_.SetGradient(gradient);
         baseAttr.fillState.SetGradient(gradient);
         baseAttr.strokeState.SetGradient(gradient);
@@ -717,14 +751,12 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
         svgCircle->UpdateFillGradient(viewPort);
         svgCircle->UpdateStrokeGradient(viewPort);
 
-        RadialGradient radialGradientLocal;
+        OHOS::Ace::RadialGradient radialGradientLocal;
         radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
         radialGradientLocal.radialCenterX = AnimatableDimension(1);
         radialGradientLocal.radialCenterY = AnimatableDimension(1);
         radialGradientLocal.fRadialCenterX = Dimension(1);
         radialGradientLocal.fRadialCenterY = Dimension(1);
-        gradient.SetRadialGradient(radialGradientLocal);
-        gradient.SetType(GradientType::RADIAL);
         svgCircle->fillState_.SetGradient(gradient);
         baseAttr.fillState.SetGradient(gradient);
         baseAttr.strokeState.SetGradient(gradient);
@@ -734,9 +766,9 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
         svgCircle->UpdateFillGradient(viewPort);
         svgCircle->UpdateStrokeGradient(viewPort);
     };
-    Gradient gradient;
+    OHOS::Ace::Gradient gradient;
     func(gradient);
-    gradient.AddColor(GradientColor(Color::RED));
+    gradient.AddColor(OHOS::Ace::GradientColor(Color::RED));
     func(gradient);
 }
 
@@ -813,24 +845,21 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest002, TestSize.Level1)
     Size size;
     src.SetFillColor(Color::GREEN);
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
 
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
-    svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    svg->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     svg->OnFilter(rSCanvas, size);
-
     auto containerSize = svgDom->GetContainerSize();
     EXPECT_EQ(containerSize, SizeF(200.0f, 200.0f));
-
     svgDom->SetFillColor(Color::RED);
     EXPECT_EQ(svgDom->fillColor_.value(), Color::RED);
-
+    svgDom->ControlAnimation(true);
     svgDom->SetSmoothEdge(1.1f);
     EXPECT_EQ(svgDom->smoothEdge_, 1.1f);
-
-    svgDom->ControlAnimation(true);
-    EXPECT_EQ(svg->GetGradient(string("")), std::nullopt);
 }
 
 /**
@@ -871,5 +900,568 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest004, TestSize.Level1)
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, size);
+}
+
+/**
+ * @tc.name: ParseNodeTest005
+ * @tc.desc: SvgNode SetAttr Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest005, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create svg node
+     */
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+
+    /* *
+     * @tc.steps: step2. set strokeLinecap
+     * @tc.expected: The property is set successfully
+     */
+    svgNode->SetAttr("strokeLinecap", "butt");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineCap(), LineCapStyle::BUTT);
+
+    /* *
+     * @tc.steps: step3. set strokeLinejoin
+     * @tc.expected: The property is set successfully
+     */
+    svgNode->SetAttr("strokeLinejoin", "miter");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineJoin(), LineJoinStyle::MITER);
+
+    /* *
+     * @tc.steps: step4. set fill
+     * @tc.expected: The property is set successfully
+     */
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    svgNode->SetAttr("fill", "#003153");
+    EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetColor().GetValue(), 0xFF003153);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParseAnimation001
+ * @tc.desc: Test SvgAnimation SetAttr Method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseAnimation001, TestSize.Level1)
+{
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::MOTION);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    svgAnimation->SetAttr("begin", "1000ms");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetBegin(), 1000);
+
+    svgAnimation->SetAttr("dur", "indefinite");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetDur(), 0);
+
+    svgAnimation->SetAttr("repeatcount", "indefinite");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetRepeatCount(), -1);
+
+    svgAnimation->SetAttr("keytimes", "");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeyTimes().size(), 0);
+
+    svgAnimation->SetAttr("keysplines", "");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeySplines().size(), 0);
+
+    svgAnimation->SetAttr("keysplines", "0.25;0.1;0.25;1");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeySplines().size(), 4);
+
+    svgAnimation->SetAttr("keypoints", "");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeyPoints().size(), 0);
+
+    svgAnimation->SetAttr("keypoints", "0;0.4;1");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeyPoints().size(), 3);
+}
+
+/**
+ * @tc.name: ParseAnimation002
+ * @tc.desc: Test SvgAnimation CreatePropertyAnimation Method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseAnimation002, TestSize.Level1)
+{
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::TRANSFORM);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    svgAnimation->SetAttr("begin", "1000ms");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetBegin(), 1000);
+
+    std::function<void(double)> callback = [](double x) -> void { x = 0; };
+    const double value = 0;
+    svgAnimation->values_ = { "1" };
+    svgAnimation->CreatePropertyAnimation<double>(value, std::move(callback));
+    EXPECT_NE(svgAnimation->animator_, nullptr);
+    svgAnimation->animator_->Finish();
+    EXPECT_EQ(svgAnimation->animator_->IsStopped(), true);
+
+    svgAnimation->CreatePropertyAnimation<double>(value, std::move(callback));
+    EXPECT_EQ(svgAnimation->animator_->IsStopped(), false);
+}
+
+/**
+ * @tc.name: ParseAnimation003
+ * @tc.desc: Create Animation SetAttr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseAnimation003, TestSize.Level1)
+{
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::MOTION);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    /* *
+     * @tc.steps: step1. call SetAttr
+     * @tc.expected: Attribute set successfully
+     */
+    svgAnimation->SetAttr("attributeName", "fill");
+    svgAnimation->UpdateAttr();
+    auto svg = SvgSvg::Create();
+    EXPECT_NE(svg, nullptr);
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "fill");
+
+    svgAnimation->SetAttr("calcmode", "paced");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetCalcMode(), CalcMode::PACED);
+
+    svgAnimation->SetAttr("from", "blue");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetFrom(), "blue");
+
+    svgAnimation->SetAttr("to", "red");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetTo(), "red");
+
+    svgAnimation->SetAttr("path", "M0 0 L100 100");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetPath(), "M0 0 L100 100");
+
+    svgAnimation->SetAttr("rotate", "45");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetRotate(), "45");
+}
+
+/**
+ * @tc.name: ParseStopTest001
+ * @tc.desc: parse stop label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseStopTest001, TestSize.Level1)
+{
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    /* *
+     * @tc.steps: step1. create svgStop node
+     */
+    auto svgNode = SvgStop::Create();
+    auto svgStop = AceType::DynamicCast<SvgStop>(svgNode);
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor(), Color::BLACK);
+
+    /* *
+     * @tc.steps: step2. parse stop-color
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "rgba(0,49,83,255)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF003153);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "rgb(0,49,83)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF003153);
+
+    /* *
+     * @tc.steps: step3. parse stopcolor
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "rgb(49,49,83)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF313153);
+
+    /* *
+     * @tc.steps: step4. parse stopOpacity
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stopOpacity", "1.0");
+    EXPECT_FALSE(GreatOrEqual(svgStop->stopAttr_.gradientColor.GetOpacity(), 1.0));
+
+    /* *
+     * @tc.steps: step5. parse properties that do not belong to SvgStop
+     * @tc.expected: The property is parse unsuccessfully
+     */
+    bool parseResult = svgStop->ParseAndSetSpecializedAttr("strokeLinecap", "butt");
+    EXPECT_FALSE(parseResult);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParseFeTest001
+ * @tc.desc: parse fe label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeTest001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create fe node
+     */
+    auto svgFe = AccessibilityManager::MakeRefPtr<SvgFe>();
+
+    svgFe->ParseAndSetSpecializedAttr("color-interpolation-filters", "auto");
+    EXPECT_EQ(svgFe->feAttr_.colorInterpolationType, SvgColorInterpolationType::AUTO);
+
+    svgFe->ParseAndSetSpecializedAttr("color-interpolation-filters", "SRGB");
+    EXPECT_EQ(svgFe->feAttr_.colorInterpolationType, SvgColorInterpolationType::AUTO);
+
+    svgFe->ParseAndSetSpecializedAttr("height", "1px");
+    EXPECT_EQ(svgFe->feAttr_.height, 1.0_px);
+
+    svgFe->ParseAndSetSpecializedAttr("width", "1px");
+    EXPECT_EQ(svgFe->feAttr_.width, 1.0_px);
+
+    svgFe->ParseAndSetSpecializedAttr("x", "1px");
+    EXPECT_EQ(svgFe->feAttr_.x, 1.0_px);
+
+    svgFe->ParseAndSetSpecializedAttr("y", "1px");
+    EXPECT_EQ(svgFe->feAttr_.y, 1.0_px);
+
+    bool parseResult = svgFe->ParseAndSetSpecializedAttr("strokeLinecap", "butt");
+    EXPECT_FALSE(parseResult);
+
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
+    EXPECT_EQ(svgFe->effectFilterArea_.Top(), 0.0f);
+    EXPECT_EQ(svgFe->effectFilterArea_.Left(), 0.0f);
+}
+
+/**
+ * @tc.name: ParseFeBlenderTest001
+ * @tc.desc: test fe blender
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeBlenderTest001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create feBlend node
+     */
+    auto svgFeBlend = AccessibilityManager::MakeRefPtr<SvgFeBlend>();
+
+    svgFeBlend->ParseAndSetSpecializedAttr("in2", "undefine");
+    SvgFeBlendAttribute svgFeBlendDeclaration = svgFeBlend->feBlendAttr_;
+    EXPECT_EQ(svgFeBlendDeclaration.in2.id, "undefine");
+    svgFeBlend->ParseAndSetSpecializedAttr("mode", "undefine");
+    svgFeBlendDeclaration = svgFeBlend->feBlendAttr_;
+    EXPECT_EQ(svgFeBlendDeclaration.blendMode, SvgFeBlendMode::NORMAL);
+
+    RSBlendMode rsBlendMode = svgFeBlend->GetBlendMode(SvgFeBlendMode::NORMAL);
+    EXPECT_EQ(rsBlendMode, RSBlendMode::SRC_OVER);
+    rsBlendMode = svgFeBlend->GetBlendMode(SvgFeBlendMode::MULTIPLY);
+    EXPECT_EQ(rsBlendMode, RSBlendMode::MULTIPLY);
+    rsBlendMode = svgFeBlend->GetBlendMode(SvgFeBlendMode::SCREEN);
+    EXPECT_EQ(rsBlendMode, RSBlendMode::SCREEN);
+    rsBlendMode = svgFeBlend->GetBlendMode(SvgFeBlendMode::DARKEN);
+    EXPECT_EQ(rsBlendMode, RSBlendMode::DARKEN);
+    rsBlendMode = svgFeBlend->GetBlendMode(SvgFeBlendMode::LIGHTEN);
+    EXPECT_EQ(rsBlendMode, RSBlendMode::LIGHTEN);
+    rsBlendMode = svgFeBlend->GetBlendMode(static_cast<SvgFeBlendMode>(8));
+    EXPECT_EQ(rsBlendMode, RSBlendMode::SRC_OVER);
+}
+
+/**
+ * @tc.name: ParseFeColorMatrixTest001
+ * @tc.desc: parse FeColorMatrix label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeColorMatrixTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_COLOR_MATRIX.c_str(), FE_COLOR_MATRIX.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+    // the first child in filter
+    auto svgFeColorMatrix1 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeColorMatrix1, nullptr);
+    svgFeColorMatrix1->OnInitStyle();
+    auto feColorDeclaration1 = svgFeColorMatrix1->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration1.type, SvgFeColorMatrixType::MATRIX);
+    // the second child in filter
+    auto svgFeColorMatrix2 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(1));
+    EXPECT_NE(svgFeColorMatrix2, nullptr);
+    svgFeColorMatrix2->OnInitStyle();
+    auto feColorDeclaration2 = svgFeColorMatrix2->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration2.type, SvgFeColorMatrixType::SATURATE);
+    // the third child in filter
+    auto svgFeColorMatrix3 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(2));
+    EXPECT_NE(svgFeColorMatrix3, nullptr);
+    svgFeColorMatrix3->OnInitStyle();
+    auto feColorDeclaration3 = svgFeColorMatrix3->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration3.type, SvgFeColorMatrixType::HUE_ROTATE);
+    // the fourth child in filter
+    auto svgFeColorMatrix4 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(3));
+    EXPECT_NE(svgFeColorMatrix4, nullptr);
+    svgFeColorMatrix4->OnInitStyle();
+    auto feColorDeclaration4 = svgFeColorMatrix4->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration4.type, SvgFeColorMatrixType::LUMINACE_TO_ALPHA);
+    // the fifth child in filter
+    auto svgFeColorMatrix5 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(4));
+    EXPECT_NE(svgFeColorMatrix5, nullptr);
+    svgFeColorMatrix5->OnInitStyle();
+    auto feColorDeclaration5 = svgFeColorMatrix5->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration5.type, SvgFeColorMatrixType::MATRIX);
+}
+
+/**
+ * @tc.name: ParseFeCompositeTest001
+ * @tc.desc: parse Composite label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeCompositeTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_COMPOSITE.c_str(), FE_COMPOSITE.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+    // the first child in filter
+    auto svgFeComposite1 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeComposite1, nullptr);
+    svgFeComposite1->ParseAndSetSpecializedAttr("operator", "undefine");
+    SvgFeCompositeAttribute svgFeCompositeDeclaration = svgFeComposite1->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_OVER);
+
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgColorInterpolationType srcColor = SvgColorInterpolationType::SRGB;
+    SvgColorInterpolationType currentColor = SvgColorInterpolationType::LINEAR_RGB;
+    svgFeComposite1->feCompositeAttr_.operatorType = static_cast<SvgFeOperatorType>(8);
+    svgFeComposite1->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    RSBlendMode rsBlendMode = svgFeComposite1->BlendModeForOperator(SvgFeOperatorType::FE_ARITHMETIC);
+    EXPECT_EQ(rsBlendMode, RSBlendMode::SRC_OVER);
+
+    auto svgFeComposite5 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(4));
+    EXPECT_NE(svgFeComposite5, nullptr);
+    svgFeComposite5->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    svgFeCompositeDeclaration = svgFeComposite5->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_LIGHTER);
+
+    auto svgFeComposite6 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(5));
+    EXPECT_NE(svgFeComposite6, nullptr);
+    svgFeComposite6->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    svgFeCompositeDeclaration = svgFeComposite6->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_OUT);
+
+    auto svgFeComposite7 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(6));
+    EXPECT_NE(svgFeComposite7, nullptr);
+    svgFeComposite7->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    svgFeCompositeDeclaration = svgFeComposite7->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_XOR);
+
+    auto svgFeComposite8 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(7));
+    EXPECT_NE(svgFeComposite8, nullptr);
+    svgFeComposite8->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    svgFeCompositeDeclaration = svgFeComposite8->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_OVER);
+}
+
+/**
+ * @tc.name: ParseFeCompositeTest002
+ * @tc.desc: parse Composite label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeCompositeTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_COMPOSITE.c_str(), FE_COMPOSITE.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgColorInterpolationType srcColor = SvgColorInterpolationType::SRGB;
+    SvgColorInterpolationType currentColor = SvgColorInterpolationType::LINEAR_RGB;
+    auto svgFeComposite5 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(4));
+    EXPECT_NE(svgFeComposite5, nullptr);
+    svgFeComposite5->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    SvgFeCompositeAttribute svgFeCompositeDeclaration = svgFeComposite5->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_LIGHTER);
+
+    auto svgFeComposite6 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(5));
+    EXPECT_NE(svgFeComposite6, nullptr);
+    svgFeComposite6->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    svgFeCompositeDeclaration = svgFeComposite6->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_OUT);
+
+    auto svgFeComposite7 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(6));
+    EXPECT_NE(svgFeComposite7, nullptr);
+    svgFeComposite7->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    svgFeCompositeDeclaration = svgFeComposite7->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_XOR);
+
+    auto svgFeComposite8 = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(7));
+    EXPECT_NE(svgFeComposite8, nullptr);
+    svgFeComposite8->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
+    svgFeCompositeDeclaration = svgFeComposite8->feCompositeAttr_;
+    EXPECT_EQ(svgFeCompositeDeclaration.operatorType, SvgFeOperatorType::FE_OVER);
+}
+
+HWTEST_F(ParseTestTwoNg, ParseFeGaussianBlurTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_GAUSSIAN_BLUR.c_str(), FE_GAUSSIAN_BLUR.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+    // the first child in filter
+    auto svgFeGaussianBlur1 = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeGaussianBlur1, nullptr);
+
+    auto bResult = svgFeGaussianBlur1->ParseAndSetSpecializedAttr("stddeviation", "");
+    EXPECT_TRUE(bResult);
+}
+
+/**
+ * @tc.name: ParseFeOffsetTest001
+ * @tc.desc: test fe offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeOffsetTest001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create feOffset node
+     */
+    auto svgFeOffset = AccessibilityManager::MakeRefPtr<SvgFeOffset>();
+
+    svgFeOffset->ParseAndSetSpecializedAttr("dx", "5");
+    auto svgFeOffsetAttribute = svgFeOffset->feOffsetAttr_;
+    EXPECT_EQ(svgFeOffsetAttribute.dx, Dimension(5));
+
+    auto bResult = svgFeOffset->ParseAndSetSpecializedAttr("undefine", "undefine");
+    EXPECT_FALSE(bResult);
+}
+
+/**
+ * @tc.name: ParseGradientTest003
+ * @tc.desc: test Gradient
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseGradientTest003, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_RADIAL.c_str(), GRADIENT_SVG_RADIAL.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+    EXPECT_EQ(svg->children_.size(), CHILD_NUMBER);
+    auto defers = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
+    EXPECT_NE(defers, nullptr);
+    EXPECT_NE(defers->children_.at(0), nullptr);
+    auto svgGradient = AceType::DynamicCast<SvgGradient>(defers->children_.at(0));
+    EXPECT_NE(svgGradient, nullptr);
+    SvgGradientAttribute& svgGradientAttribute = svgGradient->gradientAttr_;
+
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    svgGradient->SetSpreadMethod("reflect", svgGradientAttribute);
+    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
+    svgGradient->SetSpreadMethod("repeat", svgGradientAttribute);
+    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+
+    svgGradient->SetSpreadMethod("pad", svgGradientAttribute);
+    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
+    svgGradient->SetSpreadMethod("reflect", svgGradientAttribute);
+    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
+    svgGradient->SetSpreadMethod("repeat", svgGradientAttribute);
+    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
+}
+
+/**
+ * @tc.name: ParseMaskTest001
+ * @tc.desc: test Mask
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseMaskTest001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create svgMask node
+     */
+    auto svgMask = AceType::DynamicCast<SvgMask>(SvgMask::Create());
+    EXPECT_NE(svgMask, nullptr);
+
+    svgMask->ParseAndSetSpecializedAttr("y", "5");
+    auto svgMaskAttribute = svgMask->maskAttr_;
+    EXPECT_EQ(svgMaskAttribute.y, Dimension(5));
+    auto attrValue = svgMask->ParseUnitsAttr(Dimension(1.0, DimensionUnit::PERCENT), 2.0);
+    EXPECT_EQ(attrValue, 2.0);
+    attrValue = svgMask->ParseUnitsAttr(Dimension(1.0), 2.0);
+    EXPECT_EQ(attrValue, 2.0);
+
+    svgMask->isDefaultMaskUnits_ = false;
+    attrValue = svgMask->ParseUnitsAttr(Dimension(1.0), 2.0);
+    EXPECT_EQ(attrValue, 1.0);
+    attrValue = svgMask->ParseUnitsAttr(Dimension(1.0, DimensionUnit::PERCENT), 2.0);
+    EXPECT_EQ(attrValue, 2.0);
+}
+
+/**
+ * @tc.name: ParseRectTest005
+ * @tc.desc: parse rect label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseRectTest005, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(RECT_SVG_LABEL4.c_str(), RECT_SVG_LABEL4.length());
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    /* *
+     * @tc.steps: step1. call AsPath
+     * @tc.expected: Execute function return value not is 0
+     */
+    auto svgRect = AceType::DynamicCast<SvgRect>(svg->children_.at(0));
+    EXPECT_NE(svgRect, nullptr);
+    svgRect->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    auto rectDeclaration = svgRect->rectAttr_;
+    EXPECT_NE(rectDeclaration.rx.Value(), 0);
 }
 } // namespace OHOS::Ace::NG

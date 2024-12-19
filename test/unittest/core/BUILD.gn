@@ -46,6 +46,7 @@ group("linux_core_unittest") {
     "event:click_event_test_ng",
     "event:drag_event_test_ng",
     "event:event_hub_test_ng",
+    "event:event_manager_test_ng",
     "event:focus_hub_test_ng",
     "event:gesture_event_hub_test_ng",
     "event:input_event_hub_test_ng",
