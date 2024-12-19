@@ -617,6 +617,7 @@ public:
     static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
         NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);
     static void JsFocusScopeId(const JSCallbackInfo& info);

@@ -260,6 +260,16 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
+    void UpdateHoverModeChangedCallbackId(std::optional<int32_t> id)
+    {
+        hoverModeChangedCallbackId_ = id;
+    }
+
+    bool HasHoverModeChangedCallbackId()
+    {
+        return hoverModeChangedCallbackId_.has_value();
+    }
+
     bool GetIsSuitableForAging()
     {
         return isSuitableForElderly_;
@@ -309,6 +319,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void RegisterHoverModeChangeCallback();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
@@ -377,6 +388,7 @@ private:
     std::optional<AnimationOption> openAnimation_;
     std::optional<AnimationOption> closeAnimation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    std::optional<int32_t> hoverModeChangedCallbackId_;
     bool isFoldStatusChanged_ = false;
 
     // XTS inspector values

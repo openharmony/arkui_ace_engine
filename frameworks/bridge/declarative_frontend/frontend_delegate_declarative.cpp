@@ -1702,6 +1702,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .onLanguageChange = dialogAttr.onLanguageChange,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
     };
 #if defined(PREVIEW)
@@ -1725,6 +1726,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     }
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
@@ -1776,6 +1780,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .customBuilder = dialogAttr.customBuilder,
         .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor,
@@ -1803,6 +1808,9 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         dialogProperties.isSysBlurStyle = false;
