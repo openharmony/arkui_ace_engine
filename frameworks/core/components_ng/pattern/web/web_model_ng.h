@@ -259,6 +259,108 @@ public:
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void SetNestedScrollExt(FrameNode* frameNode, const std::optional<NestedScrollOptionsExt>& nestedOpt);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption);
+    static void SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle);
+    static void SetPreviewSelectionMenu(
+        FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
+    static void SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnPageStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnProgressChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnTitleReceive(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnGeolocationHide(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnGeolocationShow(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnRequestFocus(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnCommonDialog(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback, int dialogEventType);
+    static void SetOnConsoleLog(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnErrorReceive(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnHttpErrorReceive(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnDownloadStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetRefreshAccessedHistoryId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnUrlLoadIntercept(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetRenderExitedId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnFileSelectorShow(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetResourceLoadId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnFullScreenExit(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnFullScreenEnter(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetScaleChangeId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnHttpAuthRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnInterceptRequest(
+        FrameNode* frameNode, std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& callback);
+    static void SetPermissionRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetScreenCaptureRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnContextMenuShow(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnContextMenuHide(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetSearchResultReceiveEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetScrollId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnSslErrorRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnAllSslErrorRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnSslSelectCertRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetWindowNewEvent(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback);
+    static void SetWindowExitEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnInterceptKeyEventCallback(
+        FrameNode* frameNode, std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo);
+    static void SetTouchIconUrlId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& touchIconUrlId);
+    static void SetFaviconReceivedId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& faviconReceivedId);
+    static void SetPageVisibleId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& pageVisibleId);
+    static void SetOnDataResubmitted(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId);
+    static void SetAudioStateChangedId(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged);
+    static void SetFirstContentfulPaintId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId);
+    static void SetFirstMeaningfulPaintId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId);
+    static void SetLargestContentfulPaintId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId);
+    static void SetOnLoadIntercept(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOverScrollId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetSafeBrowsingCheckResultId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId);
+    static void SetNavigationEntryCommittedId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId);
+    static void SetIntelligentTrackingPreventionResultId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& intelligentTrackingPreventionResultId);
+    static void SetNativeEmbedLifecycleChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetNativeEmbedVisibilityChangeId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetNativeEmbedGestureEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnOverrideUrlLoading(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetRenderProcessNotRespondingId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetRenderProcessRespondingId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetViewportFitChangedId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnInterceptKeyboardAttach(
+        FrameNode* frameNode, std::function<WebKeyboardOption(const BaseEventInfo* info)>&& callback);
+    static void SetAdsBlockedEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

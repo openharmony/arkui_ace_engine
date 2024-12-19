@@ -338,6 +338,23 @@ void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src)
     }
 }
 
+void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src)
+{
+    switch (src) {
+        case ScrollSource::DRAG: dst = ARK_SCROLL_SOURCE_DRAG; break;
+        case ScrollSource::FLING: dst = ARK_SCROLL_SOURCE_FLING; break;
+        case ScrollSource::EDGE_EFFECT: dst = ARK_SCROLL_SOURCE_EDGE_EFFECT; break;
+        case ScrollSource::OTHER_USER_INPUT: dst = ARK_SCROLL_SOURCE_OTHER_USER_INPUT; break;
+        case ScrollSource::SCROLL_BAR: dst = ARK_SCROLL_SOURCE_SCROLL_BAR; break;
+        case ScrollSource::SCROLL_BAR_FLING: dst = ARK_SCROLL_SOURCE_SCROLL_BAR_FLING; break;
+        case ScrollSource::SCROLLER: dst = ARK_SCROLL_SOURCE_SCROLLER; break;
+        case ScrollSource::SCROLLER_ANIMATION: dst = ARK_SCROLL_SOURCE_SCROLLER_ANIMATION; break;
+        default:
+            dst = static_cast<Ark_ScrollSource>(-1);
+            LOGE("Unexpected enum value in ScrollSource: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
 {
     switch (src) {
@@ -471,6 +488,43 @@ void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMo
     }
 }
 
+void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
+{
+    switch (src) {
+        case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
+        case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
+        case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
+        default: dst = static_cast<Ark_SourceType>(-1);
+            LOGE("Unexpected enum value in SourceType: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_SourceTool& dst, const SourceTool& src)
+{
+    switch (src) {
+        case SourceTool::UNKNOWN: dst = Ark_SourceTool::ARK_SOURCE_TOOL_UNKNOWN; break;
+        case SourceTool::FINGER: dst = Ark_SourceTool::ARK_SOURCE_TOOL_FINGER; break;
+        case SourceTool::PEN: dst = Ark_SourceTool::ARK_SOURCE_TOOL_PEN; break;
+        case SourceTool::MOUSE: dst = Ark_SourceTool::ARK_SOURCE_TOOL_MOUSE; break;
+        case SourceTool::TOUCHPAD: dst = Ark_SourceTool::ARK_SOURCE_TOOL_TOUCHPAD; break;
+        case SourceTool::JOYSTICK: dst = Ark_SourceTool::ARK_SOURCE_TOOL_JOYSTICK; break;
+        default: dst = static_cast<Ark_SourceTool>(-1);
+            LOGE("Unexpected enum value in SourceTool: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_TouchType& dst, const TouchType& src)
+{
+    switch (src) {
+        case TouchType::DOWN: dst = Ark_TouchType::ARK_TOUCH_TYPE_DOWN; break;
+        case TouchType::UP: dst = Ark_TouchType::ARK_TOUCH_TYPE_UP; break;
+        case TouchType::MOVE: dst = Ark_TouchType::ARK_TOUCH_TYPE_MOVE; break;
+        case TouchType::CANCEL: dst = Ark_TouchType::ARK_TOUCH_TYPE_CANCEL; break;
+        default: dst = static_cast<Ark_TouchType>(-1);
+            LOGE("Unexpected enum value in TouchType: %{public}zu", src);
+    }
+}
+
 void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src)
 {
     switch (src) {
@@ -490,6 +544,78 @@ void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src)
         case TransitionEdge::START: dst = ARK_TRANSITION_EDGE_START; break;
         case TransitionEdge::END: dst = ARK_TRANSITION_EDGE_END; break;
         default: dst = static_cast<Ark_TransitionEdge>(-1);
+    }
+}
+
+void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src)
+{
+    switch (src) {
+        case RenderProcessNotRespondingReason::INPUT_TIMEOUT: dst =
+            ARK_RENDER_PROCESS_NOT_RESPONDING_REASON_INPUT_TIMEOUT; break;
+        case RenderProcessNotRespondingReason::NAVIGATION_COMMIT_TIMEOUT: dst =
+            ARK_RENDER_PROCESS_NOT_RESPONDING_REASON_NAVIGATION_COMMIT_TIMEOUT; break;
+        default: dst = static_cast<Ark_RenderProcessNotRespondingReason>(-1);
+            LOGE("Unexpected enum value in RenderProcessNotRespondingReason: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src)
+{
+    switch (src) {
+        case RenderExitReason::ABNORMAL_TERMINATION: dst = ARK_RENDER_EXIT_REASON_PROCESS_ABNORMAL_TERMINATION; break;
+        case RenderExitReason::WAS_KILLED: dst = ARK_RENDER_EXIT_REASON_PROCESS_WAS_KILLED; break;
+        case RenderExitReason::CRASHED: dst = ARK_RENDER_EXIT_REASON_PROCESS_CRASHED; break;
+        case RenderExitReason::OOM: dst = ARK_RENDER_EXIT_REASON_PROCESS_OOM; break;
+        case RenderExitReason::EXIT_UNKNOWN: dst = ARK_RENDER_EXIT_REASON_PROCESS_EXIT_UNKNOWN; break;
+        default: dst = static_cast<Ark_RenderExitReason>(-1);
+            LOGE("Unexpected enum value in RenderExitReason: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_KeyType& dst, const KeyAction& src)
+{
+    switch (src) {
+        case KeyAction::DOWN: dst = Ark_KeyType::ARK_KEY_TYPE_DOWN; break;
+        case KeyAction::UP: dst = Ark_KeyType::ARK_KEY_TYPE_UP; break;
+        default: dst = static_cast<Ark_KeyType>(-1);
+            LOGE("Unexpected enum value in KeyAction: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_KeySource& dst, const SourceType& src)
+{
+    switch (src) {
+        case SourceType::NONE: dst = Ark_KeySource::ARK_KEY_SOURCE_UNKNOWN; break;
+        case SourceType::KEYBOARD: dst = Ark_KeySource::ARK_KEY_SOURCE_KEYBOARD; break;
+        default: dst = static_cast<Ark_KeySource>(-1);
+            LOGE("Unexpected enum value in SourceType: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_SslError& dst, const SslError& src)
+{
+    switch (src) {
+        case SslError::INVALID: dst = Ark_SslError::ARK_SSL_ERROR_INVALID; break;
+        case SslError::HOST_MISMATCH: dst = Ark_SslError::ARK_SSL_ERROR_HOST_MISMATCH; break;
+        case SslError::DATE_INVALID: dst = Ark_SslError::ARK_SSL_ERROR_DATE_INVALID; break;
+        case SslError::UNTRUSTED: dst = Ark_SslError::ARK_SSL_ERROR_UNTRUSTED; break;
+        default: dst = static_cast<Ark_SslError>(-1);
+            LOGE("Unexpected enum value in SslError: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src)
+{
+    switch (src) {
+        case NativeEmbedStatus::CREATE: dst = Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_CREATE; break;
+        case NativeEmbedStatus::UPDATE: dst = Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_UPDATE; break;
+        case NativeEmbedStatus::DESTROY: dst = Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_DESTROY; break;
+        case NativeEmbedStatus::ENTER_BFCACHE: dst =
+            Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_ENTER_BFCACHE; break;
+        case NativeEmbedStatus::LEAVE_BFCACHE: dst =
+            Ark_NativeEmbedStatus::ARK_NATIVE_EMBED_STATUS_LEAVE_BFCACHE; break;
+        default: dst = static_cast<Ark_NativeEmbedStatus>(-1);
+            LOGE("Unexpected enum value in NativeEmbedStatus: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

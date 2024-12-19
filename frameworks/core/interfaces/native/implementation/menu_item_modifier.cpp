@@ -48,7 +48,7 @@ SelectIconType Convert(const Ark_String& src)
 }
 
 template<>
-SelectIconType Convert(const Ark_CustomObject& src)
+SelectIconType Convert(const Ark_SymbolGlyphModifier& src)
 {
     return nullptr;
 }

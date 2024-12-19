@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,17 +23,17 @@ namespace CommonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = CommonViewModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // CommonModifier
 namespace CommonInterfaceModifier {
 void SetCommonOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //CommonModelNG::SetSetCommonOptions(frameNode, convValue);
+    // do nothing
 }
 } // CommonInterfaceModifier
 const GENERATED_ArkUICommonModifier* GetCommonModifier()

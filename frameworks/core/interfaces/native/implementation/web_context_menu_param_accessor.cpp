@@ -114,11 +114,13 @@ Ark_Int32 GetEditStateFlagsImpl(WebContextMenuParamPeer* peer)
 }
 Ark_Int32 GetPreviewWidthImpl(WebContextMenuParamPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    return static_cast<Ark_Int32>(peer->GetPreviewWidth());
 }
 Ark_Int32 GetPreviewHeightImpl(WebContextMenuParamPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    return static_cast<Ark_Int32>(peer->GetPreviewHeight());
 }
 } // WebContextMenuParamAccessor
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()

@@ -466,7 +466,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> styl
 };
 
 // Valid values for attribute 'radius' of method 'activateCircleStyle'
-static std::vector<std::tuple<std::string, Opt_CustomObject, std::string>> styleRadiusValidValues = {
+static std::vector<std::tuple<std::string, Opt_LengthMetrics, std::string>> styleRadiusValidValues = {
 };
 
 // Valid values for attribute 'enableWaveEffect' of method 'activateCircleStyle'
@@ -480,7 +480,6 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> styleEnabl
  * @tc.desc:
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
@@ -520,5 +519,4 @@ HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestValidValues
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
     }
 }
-#endif
 } // namespace OHOS::Ace::NG

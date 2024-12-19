@@ -21,7 +21,6 @@
 #include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 
-
 namespace OHOS::Ace::NG {
 namespace {
 struct CircleStyleOptions {

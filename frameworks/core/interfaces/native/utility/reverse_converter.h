@@ -19,6 +19,7 @@
 #pragma once
 
 // SORTED_SECTION
+#include <cstddef>
 #include <iterator>
 #include <string>
 #include <string_view>
@@ -29,8 +30,10 @@
 #include "base/geometry/dimension.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/components/image/image_event.h"
+#include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -44,20 +47,42 @@
 
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
+#include "ace_engine_types.h"
 
 namespace OHOS::Ace::NG::Converter {
+    // Optional trait
+    template<typename T, typename = void>
+    struct IsOptional : std::false_type {};
+    template<typename T>
+    struct IsOptional<T, std::void_t<decltype(T().tag), decltype(T().value)>> : std::true_type {};
+    // Array trait
+    template<typename T, typename = void>
+    struct IsArray : std::false_type {};
+    template<typename T>
+    struct IsArray<T, std::void_t<decltype(T().array), decltype(T().length)>> : std::true_type {};
+
     // Forward declaration for use in custom AssignArkValue() functions
     template<typename To, typename From = Ark_Empty>
-    To ArkValue(const From& src = Ark_Empty());
-    template<typename To, typename From,
-        std::enable_if_t<std::is_trivially_copyable_v<From> && std::is_rvalue_reference_v<From>, bool> = true>
-    To ArkValue(From&& src)
-    {
-        return ArkValue<To>(src);
-    }
-    template<typename To, typename From,
-        std::enable_if_t<!std::is_trivially_copyable_v<From> && std::is_rvalue_reference_v<From>, bool> = false>
+    To ArkValue(const From& src = Ark_Empty(), class ConvContext *ctx = nullptr);
+    template<typename To, typename From, std::enable_if_t<!std::is_trivially_copyable_v<From> &&
+        (std::is_rvalue_reference_v<From> || !std::is_reference_v<From>), bool> = false>
     To ArkValue(From&& src) = delete; // Constructing Ark_ values from r-value is prohibited
+
+    class ConvContext {
+    public:
+        Ark_String Store(const std::string_view& src);
+        void *Allocate(std::size_t size);
+        template<typename T>
+        T AllocateArray(std::size_t size)
+        {
+            T result;
+            result.length = size;
+            result.array = static_cast<decltype(T().array)>(Allocate(size * sizeof(*result.array)));
+            return result;
+        }
+    private:
+        std::vector<std::unique_ptr<std::byte[]>> storage_;
+    };
 
     // Basic types
     inline void AssignArkValue(Ark_Boolean& dst, const bool& src)
@@ -65,129 +90,35 @@ namespace OHOS::Ace::NG::Converter {
         dst = static_cast<Ark_Boolean>(src);
     }
 
-    inline void AssignArkValue(Ark_String& dst, const std::string& src)
+    inline void AssignArkValue(Ark_String& dst, const std::string_view& src, ConvContext *ctx)
     {
-        dst.chars = src.data();
+        if (ctx) {
+            dst = ctx->Store(src);
+        } else {
+            dst.chars = src.data();
+            dst.length = src.size();
+        }
+    }
+
+    inline void AssignArkValue(Ark_String& dst, const std::string& src, ConvContext *ctx)
+    {
+        AssignArkValue(dst, std::string_view(src), ctx);
+    }
+
+    inline void AssignArkValue(Ark_String& dst, const char *src, ConvContext *ctx)
+    {
+        AssignArkValue(dst, std::string_view(src), ctx);
+    }
+
+    inline void AssignArkValue(Ark_Buffer& dst, const std::string& src)
+    {
+        dst.data = const_cast<char*>(src.data());
         dst.length = src.size();
-    }
-
-    inline void AssignArkValue(Ark_String& dst, const std::string_view& src)
-    {
-        dst.chars = src.data();
-        dst.length = src.size();
-    }
-
-    inline void AssignArkValue(Ark_String& dst, const char *src)
-    {
-        AssignArkValue(dst, std::string_view(src));
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const int32_t& src)
-    {
-        dst.tag = ARK_TAG_INT32;
-        dst.i32 = src;
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const uint32_t& src)
-    {
-        dst.tag = ARK_TAG_INT32;
-        dst.i32 = src;
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const float& src)
-    {
-        dst.tag = ARK_TAG_FLOAT32;
-        dst.f32 = src;
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const double& src)
-    {
-        dst.tag = ARK_TAG_FLOAT32;
-        dst.f32 = static_cast<float>(src);
     }
 
     inline void AssignArkValue(Ark_NativePointer& dst, void *src)
     {
         dst = src;
-    }
-
-    inline void AssignArkValue(Ark_Function& dst, const int& src)
-    {
-        dst.id = src;
-    }
-
-    // Complex types
-    inline void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
-    {
-        dst.offset = ArkValue<Ark_Number>(src.offset);
-        dst.value = ArkValue<Ark_String>(src.value);
-    }
-
-    inline void AssignArkValue(Ark_Length& dst, const int& src)
-    {
-        dst.type = ARK_RUNTIME_NUMBER;
-        dst.value = src;
-        dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
-    }
-
-    inline void AssignArkValue(Ark_Length& dst, const float& src)
-    {
-        dst.type = ARK_RUNTIME_NUMBER;
-        dst.value = src;
-        dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
-    }
-
-    inline void AssignArkValue(Ark_Length& dst, const Dimension& src)
-    {
-        dst.type = ARK_RUNTIME_NUMBER;
-        dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
-        dst.unit = static_cast<int32_t>(src.Unit());
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const Dimension& src)
-    {
-        auto value = static_cast<float>(src.ConvertToVp());
-        AssignArkValue(dst, value);
-    }
-
-    inline void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
-    {
-        AssignArkValue(dst.value, src.Value());
-        switch (src.Unit()) {
-            case DimensionUnit::PX: dst.unit = ARK_LENGTH_UNIT_PX; break;
-            case DimensionUnit::VP: dst.unit = ARK_LENGTH_UNIT_VP; break;
-            case DimensionUnit::FP: dst.unit = ARK_LENGTH_UNIT_FP; break;
-            case DimensionUnit::PERCENT: dst.unit = ARK_LENGTH_UNIT_PERCENT; break;
-            case DimensionUnit::LPX: dst.unit = ARK_LENGTH_UNIT_LPX; break;
-            default:
-                AssignArkValue(dst.value, 0.0); dst.unit = ARK_LENGTH_UNIT_VP;
-        }
-    }
-
-    inline void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
-    {
-        dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
-        dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
-    }
-
-    inline void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
-    {
-        dst.index = ArkValue<Ark_Number>(src.index);
-        dst.itemGroupArea = src.area < 0 ?
-            ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
-        dst.itemIndexInGroup = src.indexInGroup < 0 ?
-            ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
-    }
-
-    inline void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
-    {
-        dst.alwaysEnabled = src;
-    }
-
-    inline void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<Dimension, Dimension>& src)
-    {
-        dst.value0 = ArkValue<Ark_Length>(src.first);
-        dst.value1 = ArkValue<Ark_Length>(src.second);
     }
 
     // SORTED_SECTION
@@ -202,14 +133,23 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
+    void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
+    void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
+    void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
+    void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
+    void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
+    void AssignArkValue(Ark_Length& dst, const Dimension& src);
+    void AssignArkValue(Ark_Length& dst, const float& src);
+    void AssignArkValue(Ark_Length& dst, const int& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src);
+    void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src);
@@ -217,12 +157,25 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src);
     void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
+    void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);
+    void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src);
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
     void AssignArkValue(Ark_NavigationTitleMode& dst, const NavigationTitleMode& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
+    void AssignArkValue(Ark_Number& dst, const Dimension& src);
+    void AssignArkValue(Ark_Number& dst, const double& src);
+    void AssignArkValue(Ark_Number& dst, const float& src);
+    void AssignArkValue(Ark_Number& dst, const int32_t& src);
+    void AssignArkValue(Ark_Number& dst, const long long& src);
+    void AssignArkValue(Ark_Number& dst, const long& src);
+    void AssignArkValue(Ark_Number& dst, const uint32_t& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
+    void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src);
+    void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
+    void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
+    void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
     void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);
@@ -239,12 +192,17 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
+    void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
+    void AssignArkValue(Ark_SourceTool& dst, const SourceTool& src);
+    void AssignArkValue(Ark_SourceType& dst, const SourceType& src);
+    void AssignArkValue(Ark_SslError& dst, const SslError& src);
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
+    void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
@@ -252,8 +210,16 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
+    void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
+    void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
+    void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
+    void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);
+    void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src);
+    void AssignArkValue(Ark_ViewportFit& dst, const ViewportFit& src);
+    void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src);
+    void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
 
@@ -261,32 +227,50 @@ namespace OHOS::Ace::NG::Converter {
 
     // Passthrough version
     template<typename T>
-    void AssignArkValue(T &dst, const T& src)
+    void AssignArkValue(T &dst, const T& src, ConvContext *ctx)
     {
         dst = src;
     }
 
+    // Adapter for simple types. Checking for optionals to avoid ambiguous resolution.
+    template<typename To, typename From, std::enable_if_t<!IsOptional<To>::value && !IsArray<To>::value, bool> = false>
+    void AssignArkValue(To& dts, const From& src, ConvContext *ctx)
+    {
+        AssignArkValue(dts, src);
+    }
+
     // Handle optional types
-    template<typename To, typename From, typename = std::void_t<decltype(To().tag), decltype(To().value)>>
-    void AssignArkValue(To& dst, const From& src)
+    template<typename To, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
+    void AssignArkValue(To& dst, const From& src, ConvContext *ctx = nullptr)
     {
         if constexpr (std::is_same_v<From, Ark_Empty> || std::is_same_v<From, std::nullopt_t>) {
             dst.tag = ARK_TAG_UNDEFINED;
         } else {
             dst.tag = ARK_TAG_OBJECT;
-            AssignArkValue(dst.value, src);
+            AssignArkValue(dst.value, src, ctx);
         }
     }
 
-    template<typename To, typename From, typename = std::void_t<decltype(To().tag), decltype(To().value)>>
-    void AssignArkValue(To& dst, const std::optional<From>& src)
+    template<typename To, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
+    void AssignArkValue(To& dst, const std::optional<From>& src, ConvContext *ctx = nullptr)
     {
         if (src.has_value()) {
             dst.tag = ARK_TAG_OBJECT;
-            AssignArkValue(dst.value, src.value());
+            AssignArkValue(dst.value, src.value(), ctx);
         } else {
             dst.tag = ARK_TAG_UNDEFINED;
         }
+    }
+
+    // Array with context
+    template<typename To, typename From>
+    void AssignArkValue(To& dst, const std::vector<From>& src, ConvContext *ctx)
+    {
+        using Val = std::remove_pointer_t<decltype(dst.array)>;
+        dst = ctx->AllocateArray<To>(src.size());
+        std::transform(src.begin(), src.end(), dst.array, [ctx](const From& src) {
+            return ArkValue<Val>(src, ctx);
+        });
     }
 
     /**
@@ -304,10 +288,10 @@ namespace OHOS::Ace::NG::Converter {
      *  Opt_Number emptyNumber = Converter::ArkValue<Opt_Number>(Ark_Empty());
      */
     template<typename To, typename From>
-    To ArkValue(const From& src)
+    To ArkValue(const From& src, ConvContext *ctx)
     {
         To result;
-        AssignArkValue(result, src);
+        AssignArkValue(result, src, ctx);
         return result;
     }
 
@@ -330,134 +314,133 @@ namespace OHOS::Ace::NG::Converter {
      */
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value0)>, int> = SELECTOR_ID_0>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_0,
-            .value0 = ArkValue<Which>(src),
+            .value0 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value1)>, int> = SELECTOR_ID_1>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_1,
-            .value1 = ArkValue<Which>(src),
+            .value1 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value2)>, int> = SELECTOR_ID_2>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_2,
-            .value2 = ArkValue<Which>(src),
+            .value2 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value3)>, int> = SELECTOR_ID_3>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_3,
-            .value3 = ArkValue<Which>(src),
+            .value3 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value4)>, int> = SELECTOR_ID_4>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_4,
-            .value4 = ArkValue<Which>(src),
+            .value4 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value5)>, int> = SELECTOR_ID_5>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_5,
-            .value5 = ArkValue<Which>(src),
+            .value5 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value6)>, int> = SELECTOR_ID_6>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_6,
-            .value6 = ArkValue<Which>(src),
+            .value6 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value7)>, int> = SELECTOR_ID_7>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_7,
-            .value7 = ArkValue<Which>(src),
+            .value7 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value8)>, int> = SELECTOR_ID_8>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_8,
-            .value8 = ArkValue<Which>(src),
+            .value8 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value9)>, int> = SELECTOR_ID_9>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_9,
-            .value9 = ArkValue<Which>(src),
+            .value9 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value10)>, int> = SELECTOR_ID_10>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_10,
-            .value10 = ArkValue<Which>(src),
+            .value10 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value11)>, int> = SELECTOR_ID_11>
-    To ArkUnion(const From& src)
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = SELECTOR_ID_11,
-            .value11 = ArkValue<Which>(src),
+            .value11 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which,
         std::enable_if_t<std::is_same_v<Which, Ark_Empty> && std::is_same_v<Ark_Int32, decltype(To().selector)>,
             int> = -1>
-    To ArkUnion(const std::nullptr_t& src)
+    To ArkUnion(const std::nullptr_t& src, ConvContext *ctx = nullptr)
     {
         return {
             .selector = -1,
         };
     }
 
-    template<typename To, typename Which, typename From,
-        std::enable_if_t<std::is_same_v<Ark_Tag, decltype(To().tag)>, bool> = true>
-    To ArkUnion(const From& src)
+    template<typename To, typename Which, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
             .tag = ARK_TAG_OBJECT,
-            .value = ArkUnion<decltype(To().value), Which>(src),
+            .value = ArkUnion<decltype(To().value), Which>(src, ctx),
         };
     }
 
-    template<typename To, std::enable_if_t<std::is_same_v<Ark_Tag, decltype(To().tag)>, bool> = true>
-    To ArkUnion(const Ark_Empty& src)
+    template<typename To, std::enable_if_t<IsOptional<To>::value, bool> = true>
+    To ArkUnion(const Ark_Empty& src, ConvContext *ctx = nullptr)
     {
         return {
             .tag = ARK_TAG_UNDEFINED,

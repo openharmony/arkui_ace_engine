@@ -492,7 +492,7 @@ public:
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void ResetPosition(FrameNode* frameNode);
-    static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
+    static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
@@ -541,12 +541,12 @@ public:
     static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
-    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static void SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseEffect(FrameNode* frameNode, const std::optional<bool>& useEffect);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
-    static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
+    static void SetMotionPath(FrameNode* frameNode, const std::optional<MotionPathOption>& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);
@@ -586,7 +586,7 @@ public:
     static void SetGrid(FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
-    static void SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop);
+    static void SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop);
     static void SetInspectorId(FrameNode* frameNode, const std::string& inspectorId);
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
@@ -599,7 +599,7 @@ public:
     static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
-    static void SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo);
+    static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& dragDropInfo);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
@@ -618,7 +618,8 @@ public:
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
-    static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
+    static void SetClickEffectLevel(FrameNode* frameNode, const std::optional<ClickEffectLevel>& level,
+                                    const std::optional<float>& scaleValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
@@ -786,6 +787,7 @@ public:
     static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
+    static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
 
 private:
     static void AddDragFrameNodeToManager();

@@ -76,6 +76,10 @@ template("ace_core_interfaces_native") {
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
     ]
+
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      external_deps += [ "ability_base:want" ]
+    }
   }
 }
 

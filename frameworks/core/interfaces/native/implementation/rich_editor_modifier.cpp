@@ -106,22 +106,22 @@ void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& s
     dst.renderingStrategy.value = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
 }
 
-void AssignArkValue(Ark_Resource& dst, const ResourceObject& src)
+void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
 {
-    dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName());
-    dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName());
+    dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName(), ctx);
+    dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName(), ctx);
     dst.id = Converter::ArkValue<Ark_Number>(src.GetId());
     dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
-void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src)
+void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
 {
     dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
     dst.value = Converter::ArkValue<Ark_String>(src.GetValue());
     dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyleResult>(src);
-    dst.symbolSpanStyle.value = Converter::ArkValue<Ark_RichEditorSymbolSpanStyle>(src.GetSymbolSpanStyle());
+    dst.symbolSpanStyle.value = Converter::ArkValue<Ark_RichEditorSymbolSpanStyle>(src.GetSymbolSpanStyle(), ctx);
     if (src.GetValueResource()) {
-        dst.valueResource.value = Converter::ArkValue<Ark_Resource>(*src.GetValueResource());
+        dst.valueResource.value = Converter::ArkValue<Ark_Resource>(*src.GetValueResource(), ctx);
     }
     dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
 }
@@ -146,9 +146,9 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
     dst.rangeBefore.end = Converter::ArkValue<Opt_Number>(rangeBefore.end);
 }
 
-void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src)
+void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src, ConvContext *ctx)
 {
-    dst.text = Converter::ArkValue<Ark_String>(src.GetText());
+    dst.text = Converter::ArkValue<Ark_String>(src.GetText(), ctx);
 }
 
 template<>
@@ -336,7 +336,8 @@ void OnIMEInputCompleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onCallback = [frameNode](const RichEditorAbstractSpanResult& param) {
-        auto data = Converter::ArkValue<Ark_RichEditorTextSpanResult>(param);
+        Converter::ConvContext ctx;
+        auto data = Converter::ArkValue<Ark_RichEditorTextSpanResult>(param, &ctx);
         GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onIMEInputComplete(frameNode->GetId(), data);
     };
     RichEditorModelNG::SetOnIMEInputComplete(frameNode, std::move(onCallback));
@@ -472,7 +473,8 @@ void OnSubmitImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onCallback = [frameNode](int32_t param1, NG::TextFieldCommonEvent& param2) {
         Ark_EnterKeyType enterKey = static_cast<Ark_EnterKeyType>(param1);
-        Ark_SubmitEvent event = Converter::ArkValue<Ark_SubmitEvent>(param2);
+        Converter::ConvContext ctx;
+        Ark_SubmitEvent event = Converter::ArkValue<Ark_SubmitEvent>(param2, &ctx);
         GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->onSubmit(frameNode->GetId(), enterKey, event);
     };
     RichEditorModelNG::SetOnSubmit(frameNode, std::move(onCallback));

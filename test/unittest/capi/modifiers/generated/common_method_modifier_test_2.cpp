@@ -261,4 +261,76 @@ HWTEST_P(
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_String>());
 }
+
+/*
+ * @tc.name: setRenderFitTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(CommonMethodModifierTest, setRenderFitTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE) << "Default value for attribute 'renderFit'";
+}
+
+/*
+ * @tc.name: setRenderFitTestRenderFitValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitValidValues, TestSize.Level1)
+{
+    Ark_RenderFit initValueRenderFit;
+
+    // Initial setup
+    initValueRenderFit = std::get<1>(Fixtures::testFixtureEnumRenderFitValidValues[0]);
+
+    auto checkValue = [this, &initValueRenderFit](
+                          const std::string& input, const std::string& expectedStr, const Ark_RenderFit& value) {
+        Ark_RenderFit inputValueRenderFit = initValueRenderFit;
+
+        inputValueRenderFit = value;
+        modifier_->setRenderFit(node_, inputValueRenderFit);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRenderFit, attribute: renderFit";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumRenderFitValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRenderFitTestRenderFitInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitInvalidValues, TestSize.Level1)
+{
+    Ark_RenderFit initValueRenderFit;
+
+    // Initial setup
+    initValueRenderFit = std::get<1>(Fixtures::testFixtureEnumRenderFitValidValues[0]);
+
+    auto checkValue = [this, &initValueRenderFit](const std::string& input, const Ark_RenderFit& value) {
+        Ark_RenderFit inputValueRenderFit = initValueRenderFit;
+
+        modifier_->setRenderFit(node_, inputValueRenderFit);
+        inputValueRenderFit = value;
+        modifier_->setRenderFit(node_, inputValueRenderFit);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setRenderFit, attribute: renderFit";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumRenderFitInvalidValues) {
+        checkValue(input, value);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -23,8 +23,31 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace::NG {
+void AssignArkValue(Ark_InvertOptions& dst, const float& value)
+{
+    auto arkVal = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(value);
+    dst = {arkVal, arkVal, arkVal, arkVal};
+}
 
+void AssignArkValue(Ark_PixelStretchEffectOptions& dst, const Ark_Empty& value)
+{
+    dst.left = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+    dst.top = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+    dst.right = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+    dst.bottom = OHOS::Ace::NG::Converter::ArkValue<Opt_Length>();
+}
+
+namespace OHOS::Ace {
+void AssignArkValue(Ark_InvertOptions& dst, const InvertOption& value)
+{
+    dst.low = NG::Converter::ArkValue<Ark_Number>(value.low_);
+    dst.high = NG::Converter::ArkValue<Ark_Number>(value.high_);
+    dst.threshold = NG::Converter::ArkValue<Ark_Number>(value.threshold_);
+    dst.thresholdRange = NG::Converter::ArkValue<Ark_Number>(value.thresholdRange_);
+}
+}
+
+namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
     const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
@@ -95,6 +118,8 @@ const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_NAME = "anchor";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME = "align";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_OBSCURED_NAME = "obscured";
+const auto ATTRIBUTE_ARRAY_DEFAULT_SIZE = 0;
 }
 struct PixelStretchEffect {
     float left = 0.0;
@@ -102,47 +127,16 @@ struct PixelStretchEffect {
     float right = 0.0;
     float bottom = 0.0;
 };
-namespace Converter {
-    template<>
-    Ark_InvertOptions ArkValue(const float& value)
-    {
-        auto arkVal = ArkValue<Ark_Number>(value);
-        return {arkVal, arkVal, arkVal, arkVal};
-    }
-    template<>
-    Ark_InvertOptions ArkValue(const InvertOption& value)
-    {
-        return {
-            .low = ArkValue<Ark_Number>(value.low_),
-            .high = ArkValue<Ark_Number>(value.high_),
-            .threshold = ArkValue<Ark_Number>(value.threshold_),
-            .thresholdRange = ArkValue<Ark_Number>(value.thresholdRange_),
-        };
-    }
-    template<>
-    Ark_PixelStretchEffectOptions ArkValue(const Ark_Empty& value)
-    {
-        Ark_PixelStretchEffectOptions dst;
-        dst.left = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        dst.top = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        dst.right = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        dst.bottom = Converter::ArkValue<Opt_Length>(Dimension(0.0));
-        return dst;
-    }
-    template<>
-    Ark_PixelStretchEffectOptions ArkValue(const PixelStretchEffect& value)
-    {
-        Ark_PixelStretchEffectOptions dst;
-        auto left = Dimension(value.left);
-        auto top = Dimension(value.top);
-        auto right = Dimension(value.right);
-        auto bottom = Dimension(value.bottom);
-        dst.left = Converter::ArkValue<Opt_Length>(left);
-        dst.top = Converter::ArkValue<Opt_Length>(top);
-        dst.right = Converter::ArkValue<Opt_Length>(right);
-        dst.bottom = Converter::ArkValue<Opt_Length>(bottom);
-        return dst;
-    }
+void AssignArkValue(Ark_PixelStretchEffectOptions& dst, const PixelStretchEffect& value)
+{
+    auto left = Dimension(value.left);
+    auto top = Dimension(value.top);
+    auto right = Dimension(value.right);
+    auto bottom = Dimension(value.bottom);
+    dst.left = Converter::ArkValue<Opt_Length>(left);
+    dst.top = Converter::ArkValue<Opt_Length>(top);
+    dst.right = Converter::ArkValue<Opt_Length>(right);
+    dst.bottom = Converter::ArkValue<Opt_Length>(bottom);
 }
 class CommonMethodModifierTest4 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
@@ -831,5 +825,60 @@ HWTEST_F(CommonMethodModifierTest4, setAlignRules1TestDefaultValues2, TestSize.L
     resultStr = GetAttrValue<std::string>(resultCenter, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE) <<
         "Default value for attribute 'alignRules.center.align'";
+}
+
+/*
+ * @tc.name: setObscuredTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setObscuredTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
+}
+
+/*
+ * @tc.name: setObscuredTestValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setObscuredTestValues, TestSize.Level1)
+{
+    std::vector<Ark_ObscuredReasons> vecReason = {ARK_OBSCURED_REASONS_PLACEHOLDER, ARK_OBSCURED_REASONS_PLACEHOLDER,
+        ARK_OBSCURED_REASONS_PLACEHOLDER};
+    std::vector<Ark_ObscuredReasons> vecInvalidReason = { static_cast<Ark_ObscuredReasons>(-100)};
+    Converter::ArkArrayHolder<Array_ObscuredReasons> vecHolder(vecReason);
+    Array_ObscuredReasons vecArkReason = vecHolder.ArkValue();
+    modifier_->setObscured(node_, &vecArkReason);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    EXPECT_EQ(jsonArray->GetArraySize(), vecReason.size());
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto itemJson = jsonArray->GetArrayItem(i);
+        auto value = std::to_string(static_cast<int32_t>(vecReason[i]));
+        EXPECT_EQ(itemJson->GetString(), value);
+    }
+}
+
+/*
+ * @tc.name: setObscuredTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setObscuredTestInvalidValues, TestSize.Level1)
+{
+    std::vector<Ark_ObscuredReasons> vecReason = { static_cast<Ark_ObscuredReasons>(-100),
+        static_cast<Ark_ObscuredReasons>(INT_MAX)};
+    Converter::ArkArrayHolder<Array_ObscuredReasons> vecHolder(vecReason);
+    Array_ObscuredReasons vecArkReason = vecHolder.ArkValue();
+    modifier_->setObscured(node_, &vecArkReason);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 }

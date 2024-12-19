@@ -20,18 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockFileSelectorResult : public FileSelectorResult {
-public:
-    MOCK_METHOD(void, HandleFileList, (std::vector<std::string>&));
-};
-} // namespace
 
 class FileSelectorResultAccessorTest : public AccessorTestBase<GENERATED_ArkUIFileSelectorResultAccessor,
     &GENERATED_ArkUIAccessors::getFileSelectorResultAccessor, FileSelectorResultPeer> {

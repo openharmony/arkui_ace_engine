@@ -239,11 +239,9 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_SCREEN: return GeneratedViewModel::createScreenNode(id);
             case GENERATED_ARKUI_SCROLL: return GeneratedViewModel::createScrollNode(id);
             case GENERATED_ARKUI_SCROLL_BAR: return GeneratedViewModel::createScrollBarNode(id);
-            case GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD:
-                return GeneratedViewModel::createScrollableCommonMethodNode(id);
+            case GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD: return GeneratedViewModel::createScrollableCommonMethodNode(id);
             case GENERATED_ARKUI_SEARCH: return GeneratedViewModel::createSearchNode(id);
-            case GENERATED_ARKUI_SECURITY_COMPONENT_METHOD:
-                return GeneratedViewModel::createSecurityComponentMethodNode(id);
+            case GENERATED_ARKUI_SECURITY_COMPONENT_METHOD: return GeneratedViewModel::createSecurityComponentMethodNode(id);
             case GENERATED_ARKUI_SELECT: return GeneratedViewModel::createSelectNode(id);
             case GENERATED_ARKUI_SHAPE: return GeneratedViewModel::createShapeNode(id);
             case GENERATED_ARKUI_SIDE_BAR_CONTAINER: return GeneratedViewModel::createSideBarContainerNode(id);
@@ -275,5 +273,6 @@ namespace GeneratedBridge {
         }
     }
 }
+
 }
 

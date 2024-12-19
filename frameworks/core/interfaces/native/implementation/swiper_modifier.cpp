@@ -30,10 +30,6 @@ using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
 }
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor();
-}
-
 namespace OHOS::Ace::NG::Converter {
 template<>
 SwiperParameters Convert(const Ark_IndicatorStyle& src)

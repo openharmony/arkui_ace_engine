@@ -937,20 +937,19 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-#ifdef WRONG_OPT
 HWTEST_F(NavigationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
 {
     bool boolResult;
     Opt_Boolean inputValue;
 
     // Initial setup
-    inputValue = Converter::ArkValue<Opt_Boolean>(std::optional(true));
+    inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setRecoverable(node_, &inputValue);
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);
     EXPECT_EQ(boolResult, true);
 
     // Verifying attribute's other values
-    inputValue = Converter::ArkValue<Opt_Boolean>(std::optional(false));
+    inputValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setRecoverable(node_, &inputValue);
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);
     EXPECT_EQ(boolResult, false);
@@ -972,7 +971,6 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestInvalidValues, TestSize.Level
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);
     EXPECT_EQ(boolResult, ATTRIBUTE_RECOVERABLE_DEFAULT_VALUE);
 }
-#endif
 
 /*
  * @tc.name: DISABLED_setIgnoreLayoutSafeAreaDefaultValues

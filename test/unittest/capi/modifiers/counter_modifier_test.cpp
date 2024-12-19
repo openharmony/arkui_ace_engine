@@ -409,7 +409,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidHeightValues, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         Ark_SizeOptions inputValue;
-        inputValue.height = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.height = Converter::ArkValue<Opt_Length>(arkLength);
         inputValue.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
         commonModifier_->setSize(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
@@ -443,7 +443,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
 
     for (const auto &[arkLength, expected]: testPlan) {
         Ark_SizeOptions inputValue;
-        inputValue.width = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.width = Converter::ArkValue<Opt_Length>(arkLength);
         inputValue.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
         commonModifier_->setSize(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
@@ -474,7 +474,7 @@ HWTEST_F(CounterModifierTest, setSizeTestInvalidValues, TestSize.Level1)
     };
 
     for (const auto &arkLength : testPlan) {
-        inputValue.width = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.width = Converter::ArkValue<Opt_Length>(arkLength);
         inputValue.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
         commonModifier_->setSize(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
@@ -484,7 +484,7 @@ HWTEST_F(CounterModifierTest, setSizeTestInvalidValues, TestSize.Level1)
     }
 
     for (const auto &arkLength : testPlan) {
-        inputValue.height = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.height = Converter::ArkValue<Opt_Length>(arkLength);
         inputValue.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
         commonModifier_->setSize(node_, &inputValue);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);

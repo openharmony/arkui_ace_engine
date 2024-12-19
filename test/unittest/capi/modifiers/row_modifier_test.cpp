@@ -191,7 +191,6 @@ HWTEST_F(RowModifierTest, setIsReverseDefaultValues, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_REVERSE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_IS_REVERSE_DEFAULT_VALUE);
 }
-#ifdef WRONG_OPT
 // Valid values for attribute 'isReverse'
 static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> isReverseValidValues = {
     {"true", Converter::ArkValue<Opt_Boolean>(true), "1"},
@@ -208,8 +207,8 @@ HWTEST_F(RowModifierTest, setIsReverseDefaultValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean inputValueSelect;
-    Ark_Boolean initValueSelect;
+    Opt_Boolean inputValueSelect;
+    Opt_Boolean initValueSelect;
 
     // Initial setup
     initValueSelect = std::get<1>(isReverseValidValues[0]);
@@ -225,5 +224,4 @@ HWTEST_F(RowModifierTest, setIsReverseDefaultValidValues, TestSize.Level1)
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
-#endif
 } // namespace OHOS::Ace::NG

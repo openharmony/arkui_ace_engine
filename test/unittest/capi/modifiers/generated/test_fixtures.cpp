@@ -27,6 +27,9 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { STRING_RES_NO_EMPTY_0_ID, STRING_RES_NO_EMPTY_0_STR, "abc" },
     { STRING_RES_NO_EMPTY_1_ID, STRING_RES_NO_EMPTY_1_STR, "xyz" },
     { STRING_EMPTY_RES_UNDEFINED_0_ID, STRING_EMPTY_RES_UNDEFINED_0_STR, "" },
+    { URI_STRING_RES_NO_EMPTY_0_ID, URI_STRING_RES_NO_EMPTY_0_STR, "abc" },
+    { URI_STRING_RES_NO_EMPTY_1_ID, URI_STRING_RES_NO_EMPTY_1_STR, "xyz" },
+    { IMAGE_URI_STRING_RES_NO_EMPTY_0_ID, IMAGE_URI_STRING_RES_NO_EMPTY_0_STR, "abc" },
     { FONT_FAMILY_RESOURCE_0_ID, FONT_FAMILY_RESOURCE_0_STR, "Arial" },
     { FONT_FAMILY_RESOURCE_1_ID, FONT_FAMILY_RESOURCE_1_STR, "Arial, Sans Serif" },
     { FONT_FAMILY_RESOURCE_2_ID, FONT_FAMILY_RESOURCE_2_STR, "" },
@@ -167,6 +170,41 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureStrin
         CreateResource(STRING_EMPTY_RES_UNDEFINED_0_ID, Converter::ResourceType::STRING), "undefined" },
     { "ResName:STRING_EMPTY_RES_UNDEFINED_0_STR",
         CreateResource(STRING_EMPTY_RES_UNDEFINED_0_STR, Converter::ResourceType::STRING), "undefined" },
+};
+
+// Fixture 'UriString' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureUriStringValidValues = {
+    { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "file://abc" },
+    { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "file://xyz" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureUriStringInvalidValues = {
+    { "\"\"", Converter::ArkValue<Ark_String>("") },
+};
+
+// Fixture 'UriStringResNoEmpty' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureUriStringResNoEmptyValidValues = {
+    { "ResId:URI_STRING_RES_NO_EMPTY_0_ID",
+        CreateResource(URI_STRING_RES_NO_EMPTY_0_ID, Converter::ResourceType::STRING), "file://abc" },
+    { "ResName:URI_STRING_RES_NO_EMPTY_0_STR",
+        CreateResource(URI_STRING_RES_NO_EMPTY_0_STR, Converter::ResourceType::STRING), "file://abc" },
+    { "ResId:URI_STRING_RES_NO_EMPTY_1_ID",
+        CreateResource(URI_STRING_RES_NO_EMPTY_1_ID, Converter::ResourceType::STRING), "file://xyz" },
+    { "ResName:URI_STRING_RES_NO_EMPTY_1_STR",
+        CreateResource(URI_STRING_RES_NO_EMPTY_1_STR, Converter::ResourceType::STRING), "file://xyz" },
+};
+
+// Fixture 'ImageUriString' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureImageUriStringValidValues = {
+    { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "file://abc " },
+};
+
+// Fixture 'ImageUriStringResNoEmpty' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureImageUriStringResNoEmptyValidValues = {
+    { "ResId:IMAGE_URI_STRING_RES_NO_EMPTY_0_ID",
+        CreateResource(IMAGE_URI_STRING_RES_NO_EMPTY_0_ID, Converter::ResourceType::STRING), "file://abc " },
+    { "ResName:IMAGE_URI_STRING_RES_NO_EMPTY_0_STR",
+        CreateResource(IMAGE_URI_STRING_RES_NO_EMPTY_0_STR, Converter::ResourceType::STRING), "file://abc " },
 };
 
 // Fixture 'FontFamilyResource' for type 'Ark_Resource'
@@ -529,6 +567,26 @@ std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctIn
     { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
     { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct) },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct) },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+// Fixture 'LengthPositivel' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositivelValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.000000" },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), "1.230000" },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), "123.000000" },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), "1.230000" },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), "123.000000" },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), "1.230000" },
+};
+
+std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositivelInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Length>(-1) },
+    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
     { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct) },
     { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
 };
@@ -1336,31 +1394,34 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpaci
 // Fixture 'FixtureNavBarWidthRange' for type 'Ark_Tuple_Dimension_Dimension'
 std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension, std::string>>
     testFixtureFixtureNavBarWidthRangeValidValues = {
-        { "std::pair<Dimension, Dimension>{0.1_fp, 10.0_vp}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0.1_fp, 10.0_vp }),
+        { "std::pair<const Dimension, Dimension>{0.1_fp, 10.0_vp}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(
+                std::pair<const Dimension, Dimension> { 0.1_fp, 10.0_vp }),
             "0.10fp, 10.00vp" },
-        { "std::pair<Dimension, Dimension>{0.1_px, 112.0_vp}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0.1_px, 112.0_vp }),
+        { "std::pair<const Dimension, Dimension>{0.1_px, 112.0_vp}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(
+                std::pair<const Dimension, Dimension> { 0.1_px, 112.0_vp }),
             "0.10px, 112.00vp" },
-        { "std::pair<Dimension, Dimension>{5, 6}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 5, 6 }),
+        { "std::pair<const Dimension, Dimension>{5, 6}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 5, 6 }),
             "5.00px, 6.00px" },
-        { "std::pair<Dimension, Dimension>{0.5_pct, 100}",
-            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0.5_pct, 100 }),
+        { "std::pair<const Dimension, Dimension>{0.5_pct, 100}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 0.5_pct, 100 }),
             "50.00%, 100.00px" },
     };
 
 std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension>> testFixtureFixtureNavBarWidthRangeInvalidValues = {
-    { "std::pair<Dimension, Dimension>{0, 0}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0, 0 }) },
-    { "std::pair<Dimension, Dimension>{-0.1f, INT_MIN}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { -0.1f, INT_MIN }) },
-    { "std::pair<Dimension, Dimension>{-123._px, 0._fp}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { -123._px, 0._fp }) },
-    { "std::pair<Dimension, Dimension>{0, -0.15_pct}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0, -0.15_pct }) },
-    { "std::pair<Dimension, Dimension>{0._px, -432.01_vp}",
-        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0._px, -432.01_vp }) },
+    { "std::pair<const Dimension, Dimension>{0, 0}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 0, 0 }) },
+    { "std::pair<const Dimension, Dimension>{-0.1f, INT_MIN}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { -0.1f, INT_MIN }) },
+    { "std::pair<const Dimension, Dimension>{-123._px, 0._fp}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { -123._px, 0._fp }) },
+    { "std::pair<const Dimension, Dimension>{0, -0.15_pct}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 0, -0.15_pct }) },
+    { "std::pair<const Dimension, Dimension>{0._px, -432.01_vp}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(
+            std::pair<const Dimension, Dimension> { 0._px, -432.01_vp }) },
 };
 
 // Fixture 'TextInputBarState' for type 'Ark_BarState'

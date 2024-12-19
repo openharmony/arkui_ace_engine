@@ -21,19 +21,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/data_resubmission_handler_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockDataResubmitted : public DataResubmitted {
-public:
-    MOCK_METHOD(void, Resend, ());
-    MOCK_METHOD(void, Cancel, ());
-};
-} // namespace
 
 class DataResubmissionHandlerAccessorTest : public AccessorTestBase<GENERATED_ArkUIDataResubmissionHandlerAccessor,
     &GENERATED_ArkUIAccessors::getDataResubmissionHandlerAccessor, DataResubmissionHandlerPeer> {

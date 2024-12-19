@@ -3047,9 +3047,14 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     }
 }
 
-void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix)
+void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
+    if (matrix.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, TransformMatrix, frameNode);
+    }
 }
 
 void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
@@ -3221,9 +3226,13 @@ void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
-void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
+void ViewAbstract::SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit, frameNode);
+    if (renderFit.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, RenderFit, frameNode);
+    }
 }
 
 void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType)
@@ -3357,9 +3366,14 @@ void ViewAbstract::SetBloom(FrameNode* frameNode, const float value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, value, frameNode);
 }
 
-void ViewAbstract::SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath)
+void ViewAbstract::SetMotionPath(FrameNode* frameNode, const std::optional<MotionPathOption>& motionPath)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath, frameNode);
+    if (motionPath.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(MotionPath, motionPath.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, MotionPath, frameNode);
+    }
 }
 
 void ViewAbstract::SetFocusOnTouch(FrameNode* frameNode, bool isSet)
@@ -3680,10 +3694,14 @@ void ViewAbstract::ResetAspectRatio(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, frameNode);
 }
 
-void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop)
+void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetAllowDrop(allowDrop);
+    if (allowDrop.has_value()) {
+        frameNode->SetAllowDrop(allowDrop.value());
+    } else {
+        frameNode->SetAllowDrop({});
+    }
 }
 
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
@@ -3798,10 +3816,16 @@ void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreview
     frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
-void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
+void ViewAbstract::SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& dragDropInfo)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreview(dragDropInfo);
+    if (dragDropInfo.has_value()) {
+        frameNode->SetDragPreview(dragDropInfo.value());
+    } else {
+        // Reset
+        NG::DragDropInfo dragPreviewInfo;
+        frameNode->SetDragPreview(dragPreviewInfo);
+    }
 }
 
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
@@ -3944,12 +3968,22 @@ void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEff
     eventHub->SetHoverEffect(hoverEffect);
 }
 
-void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue)
+void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const std::optional<ClickEffectLevel>& level,
+                                       const std::optional<float>& scaleValue)
 {
-    ClickEffectInfo clickEffectInfo;
-    clickEffectInfo.level = level;
-    clickEffectInfo.scaleNumber = scaleValue;
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    if (level.has_value() || scaleValue.has_value()) {
+        ClickEffectInfo clickEffectInfo;
+        if (level.has_value()) {
+            clickEffectInfo.level = level.value();
+        }
+        if (scaleValue.has_value()) {
+            clickEffectInfo.scaleNumber = scaleValue.value();
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, ClickEffectLevel, frameNode);
+    }
 }
 
 void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
@@ -5312,6 +5346,12 @@ void ViewAbstract::SetPrivacySensitive(FrameNode* frameNode, const std::optional
     CHECK_NULL_VOID(frameNode);
     frameNode->SetPrivacySensitive(flag.value_or(false));
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ViewAbstract::SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDrawModifier(drawModifier);
 }
 
 } // namespace OHOS::Ace::NG

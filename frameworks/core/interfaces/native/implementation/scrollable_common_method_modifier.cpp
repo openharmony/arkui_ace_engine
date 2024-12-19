@@ -22,10 +22,32 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src)
+{
+    switch (src) {
+        case ARK_CONTENT_CLIP_MODE_CONTENT_ONLY:dst = ContentClipMode::CONTENT_ONLY;break;
+        case ARK_CONTENT_CLIP_MODE_BOUNDARY:dst = ContentClipMode::BOUNDARY;break;
+        case ARK_CONTENT_CLIP_MODE_SAFE_AREA:dst = ContentClipMode::SAFE_AREA;break;
+        default: LOGE("Unexpected enum value in Ark_ContentClipMode: %{public}d", src);break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<Dimension>& dst, const Ark_FadingEdgeOptions& src)
+{
+    dst = OptConvert<Dimension>(src.fadingEdgeLength);
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableCommonMethodModifier {
@@ -106,15 +128,35 @@ void OnScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollableCommonMethodModelNG::SetOnScroll(frameNode, convValue);
+    LOGE("ScrollableCommonMethodModifier::OnScrollImpl is not implemented");
 }
 void OnWillScrollImpl(Ark_NativePointer node,
                       const Opt_ScrollOnWillScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollableCommonMethodModelNG::SetOnWillScroll(frameNode, convValue);
+
+    std::optional<ScrollOnWillScrollCallback> arkCallback;
+    if (value) {
+        arkCallback = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
+    }
+    if (arkCallback) {
+        auto modelCallback = [callbackHelper = CallbackHelper(*arkCallback)]
+            (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
+                ScrollFrameResult {
+            auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
+            auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
+            auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
+            Callback_OffsetResult_Void continuation;
+            callbackHelper.Invoke(arkScrollOffset, arkScrollOffset, arkScrollState, arkScrollSource, continuation);
+            ScrollFrameResult result = { .offset = scrollOffset };
+            LOGE("ScrollableCommonMethodModifier::OnWillScrollImpl return value can be incorrect");
+            return result;
+        };
+        ScrollableModelNG::SetOnWillScroll(frameNode, std::move(modelCallback));
+    } else {
+        ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+    }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Opt_ScrollOnWillScrollCallback* value)
@@ -123,6 +165,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
+    LOGE("ScrollableCommonMethodModifier::OnDidScrollImpl is not implemented");
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       const Callback_Void* value)
@@ -130,8 +173,11 @@ void OnReachStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetOnReachStart(frameNode, convValue);
+
+    auto modelCallback = [callbackHelper = CallbackHelper(*value)]() {
+        callbackHelper.Invoke();
+    };
+    ScrollableModelNG::SetOnReachStart(frameNode, std::move(modelCallback));
 }
 void OnReachEndImpl(Ark_NativePointer node,
                     const Callback_Void* value)
@@ -139,8 +185,11 @@ void OnReachEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetOnReachEnd(frameNode, convValue);
+
+    auto modelCallback = [callbackHelper = CallbackHelper(*value)]() {
+        callbackHelper.Invoke();
+    };
+    ScrollableModelNG::SetOnReachEnd(frameNode, std::move(modelCallback));
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        const Callback_Void* value)
@@ -148,8 +197,11 @@ void OnScrollStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetOnScrollStart(frameNode, convValue);
+
+    auto modelCallback = [callbackHelper = CallbackHelper(*value)]() {
+        callbackHelper.Invoke();
+    };
+    ScrollableModelNG::SetOnScrollStart(frameNode, std::move(modelCallback));
 }
 void OnScrollStopImpl(Ark_NativePointer node,
                       const Callback_Void* value)
@@ -157,8 +209,11 @@ void OnScrollStopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetOnScrollStop(frameNode, convValue);
+
+    auto modelCallback = [callbackHelper = CallbackHelper(*value)]() {
+        callbackHelper.Invoke();
+    };
+    ScrollableModelNG::SetOnScrollStop(frameNode, std::move(modelCallback));
 }
 void FlingSpeedLimitImpl(Ark_NativePointer node,
                          const Ark_Number* value)
@@ -175,8 +230,17 @@ void ClipContentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetClipContent(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_ContentClipMode& arkMode) {
+            auto mode = Converter::OptConvert<ContentClipMode>(arkMode);
+            // mode cannot be nullopt, because in model created pair for lauout property
+            ScrollableModelNG::SetContentClip(frameNode, mode.value_or(ContentClipMode::DEFAULT), nullptr);
+        },
+        [](const auto& value) {
+            LOGE("ScrollableCommonMethodModifier::ClipContentImpl set RectShape is not supported");
+        },
+        []() {}
+    );
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,
@@ -194,9 +258,19 @@ void FadingEdgeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(enabled);
-    //auto convValue = Converter::OptConvert<type>(enabled); // for enums
-    //ScrollableCommonMethodModelNG::SetFadingEdge(frameNode, convValue);
+
+    std::optional<bool> fadingEdge;
+    if (enabled) {
+        fadingEdge = Converter::OptConvert<bool>(*enabled);
+    }
+
+    std::optional<Dimension> fadingEdgeLength;
+    if (options) {
+        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
+    }
+    Validator::ValidateNonNegative(fadingEdgeLength);
+
+    ScrollableModelNG::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
 }
 } // ScrollableCommonMethodModifier
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier()

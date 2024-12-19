@@ -22,6 +22,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "common_method_modifier_test.h"
 #include "test/mock/core/render/mock_render_context.h"
 
@@ -33,18 +34,22 @@ namespace OHOS::Ace::NG {
 
 namespace {
     // GENERATED_ArkUICommonMethodModifier
-    const auto ATTRIBUTE_BRIGHTNESS_NAME = "brightness";
-    const auto ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE = "1";
-    const auto ATTRIBUTE_CONTRAST_NAME = "contrast";
-    const auto ATTRIBUTE_CONTRAST_DEFAULT_VALUE = "1";
-    const auto ATTRIBUTE_GRAYSCALE_NAME = "grayscale";
-    const auto ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE = "0";
-    const auto ATTRIBUTE_SATURATE_NAME = "saturate";
-    const auto ATTRIBUTE_SATURATE_DEFAULT_VALUE = "1";
-    const auto ATTRIBUTE_SEPIA_NAME = "sepia";
-    const auto ATTRIBUTE_SEPIA_DEFAULT_VALUE = "0";
-    const auto ATTRIBUTE_USE_SHADOW_BATCHING_NAME = "useShadowBatching";
-    const auto ATTRIBUTE_USE_SHADOW_BATCHING_DEFAULT_VALUE = "false";
+    constexpr auto ATTRIBUTE_BRIGHTNESS_NAME = "brightness";
+    constexpr auto ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE = "1";
+    constexpr auto ATTRIBUTE_CONTRAST_NAME = "contrast";
+    constexpr auto ATTRIBUTE_CONTRAST_DEFAULT_VALUE = "1";
+    constexpr auto ATTRIBUTE_GRAYSCALE_NAME = "grayscale";
+    constexpr auto ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE = "0";
+    constexpr auto ATTRIBUTE_SATURATE_NAME = "saturate";
+    constexpr auto ATTRIBUTE_SATURATE_DEFAULT_VALUE = "1";
+    constexpr auto ATTRIBUTE_SEPIA_NAME = "sepia";
+    constexpr auto ATTRIBUTE_SEPIA_DEFAULT_VALUE = "0";
+    constexpr auto ATTRIBUTE_USE_SHADOW_BATCHING_NAME = "useShadowBatching";
+    constexpr auto ATTRIBUTE_USE_SHADOW_BATCHING_DEFAULT_VALUE = "false";
+    constexpr auto ATTRIBUTE_PROGRESS_MASK_VALUE_NAME = "updateProgress";
+    constexpr auto ATTRIBUTE_PROGRESS_MASK_TOTAL_NAME = "total";
+    constexpr auto ATTRIBUTE_PROGRESS_MASK_COLOR_NAME = "updateColor";
+    constexpr auto ATTRIBUTE_PROGRESS_MASK_ENABLE_BREATHE_NAME = "enableBreathe";
 }
 
 class CommonMethodModifierTest3 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
@@ -366,4 +371,124 @@ HWTEST_F(CommonMethodModifierTest3, setUseShadowBatchingTestValidValues, TestSiz
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
+
+struct ProgressMaskTestPlan {
+    Ark_Number inputValue;
+    std::string expectedValue;
+    Ark_Number inputTotal;
+    std::string expectedTotal;
+    Ark_ResourceColor inputColor;
+    std::string expectedColor;
+    Ark_Boolean inputEnableBreathe;
+    std::string expectedEnableBreathe;
+};
+
+struct AutoProgressMaskPeer {
+    const GENERATED_ArkUIProgressMaskAccessor* const accessor;
+    ProgressMaskPeer* const ptr;
+
+    AutoProgressMaskPeer(
+        const GENERATED_ArkUIFullNodeAPI* fullAPI,
+        const Ark_Number* value, const Ark_Number* total, const Ark_ResourceColor* color
+    ) : accessor(fullAPI->getAccessors()->getProgressMaskAccessor()),
+        ptr(static_cast<ProgressMaskPeer *>(accessor->ctor(value, total, color)))
+    {}
+
+    ~AutoProgressMaskPeer() { accessor->destroyPeer(ptr); }
+
+    Ark_ProgressMask GetArkValue() const
+    {
+        return {
+            .ptr = reinterpret_cast<Ark_NativePointer>(ptr)
+        };
+    }
+    ACE_DISALLOW_COPY_AND_MOVE(AutoProgressMaskPeer);
+};
+
+/*
+ * @tc.name: setMask0ValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest3, setMask0ValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMask0, nullptr);
+    const std::vector<ProgressMaskTestPlan> validValues {
+        {
+            Converter::ArkValue<Ark_Number>(0), "0",
+            Converter::ArkValue<Ark_Number>(100), "100",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED.ToString(),
+            Converter::ArkValue<Ark_Boolean>(false), "false"
+        },
+        {
+            Converter::ArkValue<Ark_Number>(20.5f), "20.5",
+            Converter::ArkValue<Ark_Number>(200.25f), "200.25",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), Color(0xff0000ff).ToString(),
+            Converter::ArkValue<Ark_Boolean>(true), "true"
+        },
+        {
+            Converter::ArkValue<Ark_Number>(65535), "65535",
+            Converter::ArkValue<Ark_Number>(32267), "32267",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#123456"), Color::FromString("#123456").ToString(),
+            Converter::ArkValue<Ark_Boolean>(false), "false"
+        },
+    };
+    for (const auto& plan : validValues) {
+        AutoProgressMaskPeer peer(fullAPI_, &plan.inputValue, &plan.inputTotal, &plan.inputColor);
+        ASSERT_NE(peer.ptr, nullptr);
+        peer.accessor->enableBreathingAnimation(peer.ptr, plan.inputEnableBreathe);
+        const auto materialized = peer.GetArkValue();
+        modifier_->setMask0(node_, &materialized);
+        const auto json = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_VALUE_NAME);
+        EXPECT_EQ(resultValue, plan.expectedValue);
+        resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_TOTAL_NAME);
+        EXPECT_EQ(resultValue, plan.expectedTotal);
+        resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_COLOR_NAME);
+        EXPECT_EQ(resultValue, plan.expectedColor);
+        resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_ENABLE_BREATHE_NAME);
+        EXPECT_EQ(resultValue, plan.expectedEnableBreathe);
+    }
 }
+
+/*
+ * @tc.name: setMask1PartForProgressMaskValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMask1, nullptr);
+    const std::vector<ProgressMaskTestPlan> validValues {
+        {
+            Converter::ArkValue<Ark_Number>(255), "255",
+            Converter::ArkValue<Ark_Number>(99.5f), "99.5",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), Color::TRANSPARENT.ToString(),
+            Converter::ArkValue<Ark_Boolean>(true), "true"
+        },
+        {
+            Converter::ArkValue<Ark_Number>(20.5f), "20.5",
+            Converter::ArkValue<Ark_Number>(20.5f), "20.5",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff123456), Color(0xff123456).ToString(),
+            Converter::ArkValue<Ark_Boolean>(false), "false"
+        },
+    };
+    for (const auto& plan : validValues) {
+        AutoProgressMaskPeer peer(fullAPI_, &plan.inputValue, &plan.inputTotal, &plan.inputColor);
+        ASSERT_NE(peer.ptr, nullptr);
+        peer.accessor->enableBreathingAnimation(peer.ptr, plan.inputEnableBreathe);
+        const auto materialized = peer.GetArkValue();
+        const auto maskValue = Converter::ArkUnion<Ark_Type_CommonMethod_mask_value, Ark_ProgressMask>(materialized);
+        modifier_->setMask1(node_, &maskValue);
+        const auto json = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_VALUE_NAME);
+        EXPECT_EQ(resultValue, plan.expectedValue);
+        resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_TOTAL_NAME);
+        EXPECT_EQ(resultValue, plan.expectedTotal);
+        resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_COLOR_NAME);
+        EXPECT_EQ(resultValue, plan.expectedColor);
+        resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_ENABLE_BREATHE_NAME);
+        EXPECT_EQ(resultValue, plan.expectedEnableBreathe);
+    }
+}
+} // namespace OHOS::Ace::NG

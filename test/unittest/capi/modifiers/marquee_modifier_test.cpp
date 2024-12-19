@@ -18,6 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/marquee/marquee_event_hub.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -466,5 +467,85 @@ HWTEST_F(MarqueeModifierTest, DISABLED_SetMarqueeOptionsValidTest, TestSize.Leve
     EXPECT_EQ(checkPlayerStatus, "false");
     EXPECT_EQ(checkDirection, "true");
 }
+/*
+ * @tc.name: setOnStartTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeModifierTest, setOnStartTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnStart, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnStart(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->FireStartEvent();
+    ASSERT_TRUE(isCalled);
+}
+/*
+ * @tc.name: setOnBounceTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeModifierTest, setOnBounceTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnBounce, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnBounce(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->FireBounceEvent();
+    ASSERT_TRUE(isCalled);
+}
+/*
+ * @tc.name: setOnFinishTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeModifierTest, setOnFinishTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnFinish, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnFinish(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->FireFinishEvent();
+    ASSERT_TRUE(isCalled);
+}
 } // namespace OHOS::Ace::NG

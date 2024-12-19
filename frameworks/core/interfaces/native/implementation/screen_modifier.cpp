@@ -15,7 +15,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/screen/screen_model.h"
+#endif // WINDOW_SCENE_SUPPORTED
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScreenModifier {
@@ -32,8 +35,11 @@ void SetScreenOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(screenId);
-    //auto convValue = Converter::OptConvert<type_name>(*screenId);
-    //ScreenModelNG::SetSetScreenOptions(frameNode, convValue);
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto convValue = Converter::Convert<uint32_t>(*screenId);
+    ScreenModel::SetOptions(frameNode, convValue);
+#endif //WINDOW_SCENE_SUPPORTED
 }
 } // ScreenInterfaceModifier
 const GENERATED_ArkUIScreenModifier* GetScreenModifier()

@@ -20,20 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
+#include "test/unittest/capi/stubs/mock_web_entities.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace {
-class MockAuthResult : public AuthResult {
-public:
-    MOCK_METHOD(bool, Confirm, (std::string&, std::string&));
-    MOCK_METHOD(bool, IsHttpAuthInfoSaved, ());
-    MOCK_METHOD(void, Cancel, ());
-};
-} // namespace
 
 class HttpAuthHandlerAccessorTest : public AccessorTestBase<GENERATED_ArkUIHttpAuthHandlerAccessor,
     &GENERATED_ArkUIAccessors::getHttpAuthHandlerAccessor, HttpAuthHandlerPeer> {
