@@ -82,7 +82,7 @@ public:
     void SetFont(std::string fontStr);
     std::shared_ptr<OHOS::Ace::Gradient> CreateLinearGradient(
         const double x0, const double y0, const double x1, const double y1);
-    std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient( const std::vector<double> params);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient(const std::vector<double> params);
     std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(const double startAngle, const double x, const double y);
 
     void SetUnit(CanvasUnit unit)
