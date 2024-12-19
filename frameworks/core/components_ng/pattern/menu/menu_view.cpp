@@ -1233,6 +1233,16 @@ RefPtr<FrameNode> MenuView::Create(
     return wrapperNode;
 }
 
+EffectOption CreateEffectOption(Dimension radius, double saturation, double brightness, Color color)
+{
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturation;
+    option.brightness = brightness;
+    option.color = color;
+    return option;
+}
+
 void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -1247,7 +1257,7 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
         auto brightness = menuTheme->GetBgEffectBrightness();
         auto radius = menuTheme->GetBgEffectRadius();
         auto color = menuTheme->GetBgEffectColor();
-        EffectOption option = { radius, saturation, brightness, color };
+        EffectOption option = CreateEffectOption(radius, saturation, brightness, color);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->UpdateBackgroundEffect(option);
     }

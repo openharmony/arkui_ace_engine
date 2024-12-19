@@ -419,10 +419,12 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
                 width = std::min(static_cast<float>(SHEET_LANDSCAPE_WIDTH.ConvertToPx()), maxSize.Width());
                 break;
             }
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             width = maxSize.Width();
             break;
         case SheetType::SHEET_BOTTOMLANDSPACE:
+            [[fallthrough]];
         case SheetType::SHEET_CENTER:
             width = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
             break;

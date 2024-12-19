@@ -114,8 +114,8 @@ public:
     void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
         const LinearVector<float>& itemHalfSizes,
         bool currentIndexFlag, const LinearColor& indicatorColor);
-    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
-        const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
+    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter,
+        const LinearVector<float>& itemHalfSizes, bool isOverlong = false);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);

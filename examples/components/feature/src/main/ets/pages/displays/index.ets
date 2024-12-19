@@ -21,6 +21,7 @@ import { LoadingProgressBootcamp } from '../displays/LoadingProgressBootcamp';
 import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
+import { ChipGroupBootcamp } from  './ChipGroupBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
 import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
@@ -44,6 +45,11 @@ export const displaysRoute: RouteGroup = {
     { name: 'counter', label: '计数器/Counter' },
     { name: 'advancedCounter', label: '计数器/advanced.Counter' },
     { name: 'dataPanel', label: '数据面板/DataPanel' },
+    { name: 'chipGroup', label: '操作块群组/ChipGroup' }
+    { name: 'chip', label: '操作块/Chip' }
+    { name: 'counter', label: '计数器/Counter'},
+    { name: 'advancedCounter', label: '计数器/advanced.Counter'},
+    { name: 'dataPanel', label: '数据面板/DataPanel'}
     { name: 'gauge', label: '数据量规图/gauge' },
     { name: 'QRCode', label: '二维码/QRCode' }
   ]
@@ -66,6 +72,9 @@ export function DisplaysDestination(name: string, route: Route) {
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
   } else if (name === 'displays/chip') {
+  } else if (name === 'displays/chipGroup'){
+    ChipGroupBootcamp({ title: route.label })
+  } else if (name === 'displays/chip'){
     ChipBootcamp({ title: route.label })
   } else if (name === 'displays/counter') {
     CounterBootcamp({ title: route.label })

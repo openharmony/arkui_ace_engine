@@ -670,6 +670,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree02, TestSize.Level1)
     EXPECT_TRUE(childNode->isLayoutDirtyMarked_);
     EXPECT_FALSE(frameNode->useOffscreenProcess_);
     EXPECT_TRUE(frameNode->isPropertyDiffMarked_);
+    auto context = frameNode->GetContext();
+    bool hasDirtyPropertyNodes = context->dirtyPropertyNodes_.find(frameNode) != context->dirtyPropertyNodes_.end();
+    EXPECT_TRUE(hasDirtyPropertyNodes);
 }
 
 /**
