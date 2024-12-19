@@ -23,6 +23,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -97,6 +98,8 @@ public:
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
             theme->popupShadowStyle_ = static_cast<ShadowStyle>(
                 pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
+                "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
         }
     };
 
@@ -335,6 +338,11 @@ public:
         return popupShadowStyle_;
     }
 
+    const int& GetPopupBackgroundBlurStyle() const
+    {
+        return popupBackgroundBlurStyle_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -387,6 +395,7 @@ private:
     Color fontPrimaryColor_;
     Color fontSecondaryColor_;
     ShadowStyle popupShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    int popupBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace
