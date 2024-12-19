@@ -1298,7 +1298,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
-        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
+        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode, -1, true }; //FA:true port:-1
         JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
