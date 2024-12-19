@@ -23,7 +23,7 @@ const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const MeasureText = requireNapi('measure');
 const hilog = requireNapi('hilog');
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
-const o = { "id": -1, "type": 40000, params: ['sys.symbol.dot_grid_2x2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+const o = { 'id': -1, 'type': 40000, params: ['sys.symbol.dot_grid_2x2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
 const u = '18.3fp';
 const a1 = '64vp';
 const b1 = '256vp';
@@ -57,15 +57,15 @@ b2.minFontSize = 1.75;
 export class TabTitleBar extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
         this.tabItems = [];
         this.menuItems = [];
         this.swiperContent = undefined;
-        this.e2 = new ObservedPropertySimplePU(0, this, "tabWidth");
-        this.f2 = new ObservedPropertySimplePU(0, this, "currentIndex");
-        this.i1 = new ObservedPropertySimplePU(1, this, "fontSize");
+        this.e2 = new ObservedPropertySimplePU(0, this, 'tabWidth');
+        this.f2 = new ObservedPropertySimplePU(0, this, 'currentIndex');
+        this.i1 = new ObservedPropertySimplePU(1, this, 'fontSize');
         this.menuSectionWidth = 0;
         this.tabOffsets = [];
         this.imageWidths = [];
@@ -221,8 +221,8 @@ export class TabTitleBar extends ViewPU {
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch
             });
-            Flex.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Flex.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_max_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+            Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Flex.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
             Flex.onAreaChange((r2, newValue) => {
                 this.tabWidth = Number(newValue.width) - this.menuSectionWidth;
             });
@@ -277,7 +277,7 @@ export class TabTitleBar extends ViewPU {
                                             this.imageWidths[index] = width;
                                             this.loadOffsets();
                                         }
-                                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 174, j1: 21 });
+                                    }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/mainpage/TabTitleBar.ets', line: 174, j1: 21 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -299,7 +299,7 @@ export class TabTitleBar extends ViewPU {
                                         currentIndex: this.currentIndex
                                     });
                                 }
-                            }, { name: "TabContentItem" });
+                            }, { name: 'TabContentItem' });
                         }
                         ListItem.pop();
                     };
@@ -330,7 +330,7 @@ export class TabTitleBar extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new d1(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 204, j1: 11 });
+                                let componentCall = new d1(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/mainpage/TabTitleBar.ets', line: 204, j1: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -343,7 +343,7 @@ export class TabTitleBar extends ViewPU {
                             else {
                                 this.updateStateVarsOfChildByElmtId(elmtId, {});
                             }
-                        }, { name: "CollapsibleMenuSection" });
+                        }, { name: 'CollapsibleMenuSection' });
                     }
                     __Common__.pop();
                 });
@@ -399,7 +399,7 @@ TabTitleBar.instanceCount = 0;
 class d1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
         this.menuItems = [];
@@ -407,18 +407,18 @@ class d1 extends ViewPU {
         this.item = {
             value: o,
             symbolStyle: new SymbolGlyphModifier(o),
-            label: { "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
         };
         this.minFontSize = 1.75;
         this.isFollowingSystemFontScale = false;
         this.maxFontScale = 1;
         this.systemFontScale = 1;
         this.firstFocusableIndex = -1;
-        this.l1 = new ObservedPropertySimplePU(false, this, "isPopupShown");
-        this.m1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnFocus");
-        this.n1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnHover");
-        this.o1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnClick");
-        this.i1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, "fontSize");
+        this.l1 = new ObservedPropertySimplePU(false, this, 'isPopupShown');
+        this.m1 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
+        this.n1 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
+        this.o1 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
+        this.i1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
                 let jsDialog = new d2(this, {
@@ -429,7 +429,7 @@ class d1 extends ViewPU {
                     tabTitleDialog: this.item,
                     tabTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 273, j1: 14 });
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/TabTitleBar.ets', line: 273, j1: 14 });
                 jsDialog.setController(this.dialogController);
                 ViewPU.create(jsDialog);
                 let paramsLambda = () => {
@@ -449,9 +449,9 @@ class d1 extends ViewPU {
             isModal: true,
             customStyle: true
         }, this);
-        this.g2 = new ObservedPropertyObjectPU(new b2(this.dialogController), this, "buttonGestureModifier");
+        this.g2 = new ObservedPropertyObjectPU(new b2(this.dialogController), this, 'buttonGestureModifier');
         this.setInitiallyProvidedValue(params);
-        this.declareWatch("fontSize", this.onFontSizeUpdated);
+        this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -560,14 +560,14 @@ class d1 extends ViewPU {
     }
     getMoreIconFgColor() {
         return this.isMoreIconOnClick
-            ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     getMoreIconBgColor() {
         if (this.isMoreIconOnClick) {
-            return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else if (this.isMoreIconOnHover) {
-            return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else {
             return Color.Transparent;
@@ -623,7 +623,7 @@ class d1 extends ViewPU {
                             {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     if (isInitialRender) {
-                                        let componentCall = new e1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 342, j1: 13 });
+                                        let componentCall = new e1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/mainpage/TabTitleBar.ets', line: 342, j1: 13 });
                                         ViewPU.create(componentCall);
                                         let paramsLambda = () => {
                                             return {
@@ -636,7 +636,7 @@ class d1 extends ViewPU {
                                     else {
                                         this.updateStateVarsOfChildByElmtId(elmtId, {});
                                     }
-                                }, { name: "ImageMenuItem" });
+                                }, { name: 'ImageMenuItem' });
                             }
                         };
                         this.forEachUpdateFunction(elmtId, this.menuItems, forEachItemGenFunction, undefined, true, false);
@@ -653,7 +653,7 @@ class d1 extends ViewPU {
                             {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     if (isInitialRender) {
-                                        let componentCall = new e1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 347, j1: 15 });
+                                        let componentCall = new e1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/mainpage/TabTitleBar.ets', line: 347, j1: 15 });
                                         ViewPU.create(componentCall);
                                         let paramsLambda = () => {
                                             return {
@@ -666,7 +666,7 @@ class d1 extends ViewPU {
                                     else {
                                         this.updateStateVarsOfChildByElmtId(elmtId, {});
                                     }
-                                }, { name: "ImageMenuItem" });
+                                }, { name: 'ImageMenuItem' });
                             }
                         };
                         this.forEachUpdateFunction(elmtId, this.menuItems.slice(0, d1.maxCountOfVisibleItems - 1), forEachItemGenFunction, undefined, true, false);
@@ -674,22 +674,22 @@ class d1 extends ViewPU {
                     ForEach.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: true });
-                        Button.accessibilityText({ "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Button.accessibilityText({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Button.width(e1.imageHotZoneWidth);
                         Button.height(e1.imageHotZoneWidth);
                         Button.borderRadius(e1.buttonBorderRadius);
                         Button.foregroundColor(this.getMoreIconFgColor());
                         Button.backgroundColor(this.getMoreIconBgColor());
-                        ViewStackProcessor.visualState("focused");
+                        ViewStackProcessor.visualState('focused');
                         Button.border({
-                            radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                             width: e1.focusBorderWidth,
-                            color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                             style: BorderStyle.Solid
                         });
-                        ViewStackProcessor.visualState("normal");
+                        ViewStackProcessor.visualState('normal');
                         Button.border({
-                            radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                             width: 0
                         });
                         ViewStackProcessor.visualState();
@@ -737,7 +737,7 @@ class d1 extends ViewPU {
                         SymbolGlyph.create(o);
                         SymbolGlyph.fontSize(c2.symbolSize);
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                         SymbolGlyph.focusable(true);
                     }, SymbolGlyph);
                     Button.pop();
@@ -765,7 +765,7 @@ class d1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         if (isInitialRender) {
                             let componentCall = new e1(this, { item: item, index: this.index * 1000 +
-                                    d1.maxCountOfVisibleItems + index }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 430, j1: 11 });
+                                    d1.maxCountOfVisibleItems + index }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/mainpage/TabTitleBar.ets', line: 430, j1: 11 });
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
                                 return {
@@ -779,7 +779,7 @@ class d1 extends ViewPU {
                         else {
                             this.updateStateVarsOfChildByElmtId(elmtId, {});
                         }
-                    }, { name: "ImageMenuItem" });
+                    }, { name: 'ImageMenuItem' });
                 }
             };
             this.forEachUpdateFunction(elmtId, this.menuItems.slice(d1.maxCountOfVisibleItems - 1, this.menuItems.length), forEachItemGenFunction, undefined, true, false);
@@ -797,7 +797,7 @@ d1.marginsNum = 2;
 class c2 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
         this.item = { title: '' };
@@ -805,13 +805,13 @@ class c2 extends ViewPU {
         this.maxIndex = 0;
         this.onCustomClick = undefined;
         this.onImageComplete = undefined;
-        this.f2 = new SynchedPropertySimpleOneWayPU(params.currentIndex, this, "currentIndex");
-        this.q1 = new ObservedPropertySimplePU(false, this, "isOnFocus");
-        this.s1 = new ObservedPropertySimplePU(false, this, "isOnHover");
-        this.t1 = new ObservedPropertySimplePU(false, this, "isOnClick");
-        this.e2 = new ObservedPropertySimplePU(0, this, "tabWidth");
-        this.h2 = new ObservedPropertySimplePU(24, this, "imageWidth");
-        this.i2 = new ObservedPropertySimplePU(24, this, "imageHeight");
+        this.f2 = new SynchedPropertySimpleOneWayPU(params.currentIndex, this, 'currentIndex');
+        this.q1 = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+        this.s1 = new ObservedPropertySimplePU(false, this, 'isOnHover');
+        this.t1 = new ObservedPropertySimplePU(false, this, 'isOnClick');
+        this.e2 = new ObservedPropertySimplePU(0, this, 'tabWidth');
+        this.h2 = new ObservedPropertySimplePU(24, this, 'imageWidth');
+        this.i2 = new ObservedPropertySimplePU(24, this, 'imageHeight');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -917,10 +917,10 @@ class c2 extends ViewPU {
     }
     getBgColor() {
         if (this.isOnClick) {
-            return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else if (this.isOnHover) {
-            return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else {
             return Color.Transparent;
@@ -929,9 +929,9 @@ class c2 extends ViewPU {
     getBorderAttr() {
         if (this.isOnFocus) {
             return {
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: c2.focusBorderWidth,
-                color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 style: BorderStyle.Solid
             };
         }
@@ -994,9 +994,9 @@ class c2 extends ViewPU {
                         Text.create(this.item.title);
                         Context.animation({ duration: 300 });
                         Text.fontSize(this.index === this.currentIndex
-                            ? { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline7'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline9'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                            ? { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline9'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor(this.index === this.currentIndex
-                            ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_text_off'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                            ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text_off'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontWeight(FontWeight.Medium);
                         Text.focusable(true);
                         Context.animation(null);
@@ -1079,7 +1079,7 @@ class c2 extends ViewPU {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
                                     Context.animation({ duration: 300 });
-                                    SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
                                     SymbolGlyph.fontSize(c2.symbolSize);
                                     SymbolGlyph.width(this.getImageLayoutWidth());
@@ -1105,7 +1105,7 @@ class c2 extends ViewPU {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.item.icon);
                                                 Context.animation({ duration: 300 });
-                                                SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(c2.symbolSize);
                                                 SymbolGlyph.width(this.getImageLayoutWidth());
                                                 SymbolGlyph.height(c2.imageSize);
@@ -1179,11 +1179,11 @@ class c2 extends ViewPU {
                         Row.height(TabTitleBar.totalHeight);
                         Row.hitTestBehavior(HitTestMode.None);
                         Row.borderRadius(c2.buttonBorderRadius);
-                        ViewStackProcessor.visualState("focused");
+                        ViewStackProcessor.visualState('focused');
                         Row.border(this.getBorderAttr());
-                        ViewStackProcessor.visualState("normal");
+                        ViewStackProcessor.visualState('normal');
                         Row.border({
-                            radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                             width: 0
                         });
                         ViewStackProcessor.visualState();
@@ -1215,7 +1215,7 @@ c2.marginFirst = 16;
 class e1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
         this.item = { value: '' };
@@ -1225,10 +1225,10 @@ class e1 extends ViewPU {
         this.maxFontScale = 1;
         this.systemFontScale = 1;
         this.isPopup = false;
-        this.q1 = new ObservedPropertySimplePU(false, this, "isOnFocus");
-        this.s1 = new ObservedPropertySimplePU(false, this, "isOnHover");
-        this.t1 = new ObservedPropertySimplePU(false, this, "isOnClick");
-        this.i1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, "fontSize");
+        this.q1 = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+        this.s1 = new ObservedPropertySimplePU(false, this, 'isOnHover');
+        this.t1 = new ObservedPropertySimplePU(false, this, 'isOnClick');
+        this.i1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
                 let jsDialog = new d2(this, {
@@ -1239,7 +1239,7 @@ class e1 extends ViewPU {
                     tabTitleDialog: this.item,
                     tabTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 722, j1: 14 });
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/TabTitleBar.ets', line: 722, j1: 14 });
                 jsDialog.setController(this.dialogController);
                 ViewPU.create(jsDialog);
                 let paramsLambda = () => {
@@ -1259,9 +1259,9 @@ class e1 extends ViewPU {
             isModal: true,
             customStyle: true
         }, this);
-        this.g2 = new ObservedPropertyObjectPU(new b2(this.dialogController), this, "buttonGestureModifier");
+        this.g2 = new ObservedPropertyObjectPU(new b2(this.dialogController), this, 'buttonGestureModifier');
         this.setInitiallyProvidedValue(params);
-        this.declareWatch("fontSize", this.onFontSizeUpdated);
+        this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -1356,7 +1356,7 @@ class e1 extends ViewPU {
     }
     textDialog() {
         if (this.item.value === o) {
-            return { "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            return { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else {
             return this.item.label ? this.item.label : '';
@@ -1364,14 +1364,14 @@ class e1 extends ViewPU {
     }
     getFgColor() {
         return this.isOnClick
-            ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     getBgColor() {
         if (this.isOnClick) {
-            return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else if (this.isOnHover) {
-            return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else {
             return Color.Transparent;
@@ -1451,16 +1451,16 @@ class e1 extends ViewPU {
             Button.foregroundColor(this.getFgColor());
             Button.backgroundColor(this.getBgColor());
             Button.opacity(this.item.isEnabled ? 1 : e1.disabledImageOpacity);
-            ViewStackProcessor.visualState("focused");
+            ViewStackProcessor.visualState('focused');
             Button.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: e1.focusBorderWidth,
-                color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 style: BorderStyle.Solid
             });
-            ViewStackProcessor.visualState("normal");
+            ViewStackProcessor.visualState('normal');
             Button.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: 0
             });
             ViewStackProcessor.visualState();
@@ -1514,7 +1514,7 @@ class e1 extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
-                        SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                         SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
                         SymbolGlyph.fontSize(c2.symbolSize);
                         SymbolGlyph.draggable(false);
@@ -1532,7 +1532,7 @@ class e1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create(this.item.value);
-                                    SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.fontSize(c2.symbolSize);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.focusable(this.item?.isEnabled);
@@ -1569,11 +1569,11 @@ e1.imageHotZoneWidth = 48;
 e1.buttonBorderRadius = 8;
 e1.focusBorderWidth = 2;
 e1.disabledImageOpacity = 0.4;
-e1.focusablePrefix = "Id-TabTitleBar-ImageMenuItem-";
+e1.focusablePrefix = 'Id-TabTitleBar-ImageMenuItem-';
 class d2 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
         this.tabTitleDialog = { value: '' };
@@ -1586,10 +1586,10 @@ class d2 extends ViewPU {
         this.screenWidth = 640;
         this.verticalScreenLines = 6;
         this.horizontalsScreenLines = 1;
-        this.v1 = this.createStorageLink('mainWindow', undefined, "mainWindow");
-        this.i1 = new ObservedPropertySimplePU(1, this, "fontSize");
-        this.w1 = new ObservedPropertySimplePU(1, this, "maxLines");
-        this.z1 = this.createStorageProp('windowStandardHeight', 0, "windowStandardHeight");
+        this.v1 = this.createStorageLink('mainWindow', undefined, 'mainWindow');
+        this.i1 = new ObservedPropertySimplePU(1, this, 'fontSize');
+        this.w1 = new ObservedPropertySimplePU(1, this, 'maxLines');
+        this.z1 = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
         this.cancel = () => {
         };
         this.confirm = () => {
@@ -1695,7 +1695,7 @@ class d2 extends ViewPU {
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? b1 : c1 });
                         Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-                        Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
@@ -1703,14 +1703,14 @@ class d2 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.symbolStyle);
                                     SymbolGlyph.fontSize(a1);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                                     SymbolGlyph.margin({
-                                        top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                                        bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                                        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                                     });
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
@@ -1724,13 +1724,13 @@ class d2 extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.tabTitleDialog.value);
-                                                SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(a1);
                                                 SymbolGlyph.draggable(false);
                                                 SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                                                 SymbolGlyph.margin({
-                                                    top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                                                    bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                                                    top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                                    bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                                                 });
                                             }, SymbolGlyph);
                                         });
@@ -1742,10 +1742,10 @@ class d2 extends ViewPU {
                                                 Image.width(a1);
                                                 Image.height(a1);
                                                 Image.margin({
-                                                    top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                                                    bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                                                    top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                                    bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                                                 });
-                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                             }, Image);
                                         });
                                     }
@@ -1763,9 +1763,9 @@ class d2 extends ViewPU {
                         Column.create();
                         Column.width('100%');
                         Column.padding({
-                            left: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                            right: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                            bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1775,7 +1775,7 @@ class d2 extends ViewPU {
                         Text.maxLines(this.maxLines);
                         Text.width('100%');
                         Text.textAlign(TextAlign.Center);
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Text);
                     Text.pop();
                     Column.pop();
@@ -1790,7 +1790,7 @@ class d2 extends ViewPU {
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? b1 : c1 });
                         Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-                        Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1799,7 +1799,7 @@ class d2 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.symbolStyle);
                                     SymbolGlyph.fontSize(a1);
                                     SymbolGlyph.draggable(false);
@@ -1816,13 +1816,13 @@ class d2 extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.tabTitleDialog.value);
-                                                SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
+                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.fontSize(a1);
                                                 SymbolGlyph.draggable(false);
                                                 SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                                                 SymbolGlyph.margin({
-                                                    top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                                                    bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                                                    top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                                    bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                                                 });
                                             }, SymbolGlyph);
                                         });
@@ -1833,7 +1833,7 @@ class d2 extends ViewPU {
                                                 Image.create(this.tabTitleDialog.value);
                                                 Image.width(a1);
                                                 Image.height(a1);
-                                                Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                             }, Image);
                                         });
                                     }
