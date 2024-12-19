@@ -610,7 +610,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createRowNode,
     createFlexNode,
     createListItemNode,
+#ifndef ARKUI_WEARABLE
     createTabsNode,
+#else
+    nullptr, // createTabsNode
+#endif
     nullptr, // Navigator
     nullptr, // Web
     createSliderNode,
@@ -633,8 +637,13 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createCalendarPickerNode,
     createGridItemNode,
     createCustomNode,
+#ifndef ARKUI_WEARABLE
     createWaterFlowNode,
     createFlowItemNode,
+#else
+    nullptr, // createWaterFlowNode
+    nullptr, // createFlowItemNode
+#endif
     createRelativeContainerNode,
     createBlankNode,
     createDividerNode,
@@ -645,7 +654,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSelectNode,
     createImageAnimatorNode,
     createCircleNode,
+#ifndef ARKUI_WEARABLE
     createTabContentNode,
+#else
+    nullptr, // createTabContentNode
+#endif
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
