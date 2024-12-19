@@ -176,4 +176,5 @@ Ark_Int32 CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
     auto width = PipelineBase::Px2VpWithCurrentDensity(pattern_-> GetWidth());
     return  Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width));
 }
+
 } // namespace OHOS::Ace::NG::GeneratedModifier

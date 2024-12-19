@@ -138,12 +138,13 @@ void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     std::function<void()> cb = nullptr;
-    if (callback != nullptr) {
-        auto cb = [arkCallback = CallbackHelper(callback->value)]() -> void {
+    auto arkCallback = Converter::OptConvert<callback>(*callback);
+    if (arkCallback) {
+        auto cb = [arkCallback = CallbackHelper(arkCallback)]() -> void {
             arkCallback.Invoke();
         };
     }
-    auto cbPoint = const_cast<Callback_Void*>(&callback->value);
+    auto cbPoint = const_cast<Callback_Void*>(&arkCallback.value());
     auto tmp = std::make_pair(cbPoint, cb);
     peerImpl->Off(std::move(tmp), CanvasCallbackType::ON_ATTACH);
 }
@@ -166,12 +167,13 @@ void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     std::function<void()> cb = nullptr;
-    if (callback != nullptr) {
-        auto cb = [arkCallback = CallbackHelper(callback->value)]() -> void {
+    auto arkCallback = Converter::OptConvert<callback>(*callback);
+    if (arkCallback) {
+        auto cb = [arkCallback = CallbackHelper(arkCallback)]() -> void {
             arkCallback.Invoke();
         };
     }
-    auto cbPoint = const_cast<Callback_Void*>(&callback->value);
+    auto cbPoint = const_cast<Callback_Void*>(&arkCallback.value());
     auto tmp = std::make_pair(cbPoint, cb);
     peerImpl->Off(std::move(tmp), CanvasCallbackType::ON_DETACH);
 }
