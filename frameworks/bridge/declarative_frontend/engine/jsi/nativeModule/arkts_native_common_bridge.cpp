@@ -3622,12 +3622,25 @@ ArkUINativeModuleValue CommonBridge::SetUseEffect(ArkUIRuntimeCallInfo *runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto useEffect = false;
     if (secondArg->IsBoolean()) {
         useEffect = secondArg->ToBoolean(vm)->Value();
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setUseEffect(nativeNode, useEffect);
+    auto effectTypeDefault = EffectType::DEFAULT;
+    auto effectTypeParam = effectTypeDefault;
+    auto effectTypeValue = static_cast<int32_t>(effectTypeDefault);
+
+    if (thirdArg->IsNumber()) {
+        effectTypeValue = thirdArg->Int32Value(vm);
+        if (effectTypeValue >= static_cast<int32_t>(effectTypeDefault) &&
+            effectTypeValue <= static_cast<int32_t>(EffectType::WINDOW_EFFECT)) {
+            effectTypeParam = static_cast<EffectType>(effectTypeValue);
+        }
+    }
+    auto effectType =  static_cast<ArkUI_Int32>(effectTypeParam);
+    GetArkUINodeModifiers()->getCommonModifier()->setUseEffect(nativeNode, useEffect, effectType);
     return panda::JSValueRef::Undefined(vm);
 }
 

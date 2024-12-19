@@ -412,7 +412,7 @@ public:
     static void DisableOnAreaChange(FrameNode* frameNode);
 
     // useEffect
-    static void SetUseEffect(bool useEffect);
+    static void SetUseEffect(bool useEffect, EffectType effectType);
 
     static void SetFreeze(bool freeze);
 
@@ -533,7 +533,7 @@ public:
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
-    static void SetUseEffect(FrameNode* frameNode, bool useEffect);
+    static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);

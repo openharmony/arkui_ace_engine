@@ -447,6 +447,7 @@ public:
     }
 
     virtual void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange = { false, false }) {}
+
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)

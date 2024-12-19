@@ -894,9 +894,9 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
-    void SetUseEffect(bool useEffect) override
+    void SetUseEffect(bool useEffect, EffectType effectType) override
     {
-        ViewAbstract::SetUseEffect(useEffect);
+        ViewAbstract::SetUseEffect(useEffect, effectType);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override

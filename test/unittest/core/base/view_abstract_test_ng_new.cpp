@@ -270,8 +270,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
     ViewAbstract::SetForegroundColor(BLUE);
     ViewAbstract::SetForegroundColor(AceType::RawPtr(FRAME_NODE_REGISTER), BLUE);
     ViewAbstract::ClearWidthOrHeight(true);
-    ViewAbstract::SetUseEffect(false);
-    ViewAbstract::SetUseEffect(nullptr, false);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderGroup(nullptr, false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);

@@ -1050,7 +1050,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest019, TestSize.Level1)
     ViewAbstract::SetSharedTransition(AceType::RawPtr(FRAME_NODE_REGISTER), "", nullptr);
     ViewAbstract::SetSphericalEffect(RATIO);
     ViewAbstract::SetLightUpEffect(RATIO);
-    ViewAbstract::SetUseEffect(false);
+    ViewAbstract::SetUseEffect(false, EffectType::DEFAULT);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
@@ -1096,7 +1096,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest020, TestSize.Level1)
     ViewAbstract::SetLightUpEffect(RATIO);
     ViewAbstract::SetDraggable(false);
     ViewAbstract::SetDraggable(AceType::RawPtr(FRAME_NODE_REGISTER), false);
-    ViewAbstract::SetUseEffect(false);
+    ViewAbstract::SetUseEffect(false, EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(false, EffectType::WINDOW_EFFECT);
+    ViewAbstract::SetUseEffect(true, EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(true, EffectType::WINDOW_EFFECT);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
