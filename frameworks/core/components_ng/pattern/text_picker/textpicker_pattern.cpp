@@ -626,6 +626,10 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
         } else {
             centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
         }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+            centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
+        }
         AdjustFocusBoxOffset(centerX, centerY);
     } else {
         paintRectHeight = paintRectHeight - DIALOG_OFFSET.ConvertToPx();
