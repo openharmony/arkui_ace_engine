@@ -112,14 +112,10 @@ class MyGestureModifier2 implements GestureModifier {
 export struct ImageboxGroupBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
-  @State enableFocusable: boolean = true;
-  @State compFocusable: boolean = true;
   @State enableCustomSize: boolean = true;
   @State customSize: string = '64*64';
   @State enableBorderRadius: boolean = false;
   @State imageBorderRadius: number = 0;
-  @State enableMargin: boolean = true;
-  @State compMargin: number = 0;
   @State enableImage: boolean = true;
   @State image: ResourceStr = $r('app.media.startIcon');
   @State enableObjectFit: boolean = false;
@@ -172,6 +168,8 @@ export struct ImageboxGroupBootcamp {
   @State compHeight: Length = 300;
   @State enableCompPadding: boolean = false;
   @State compPadding: Padding | Length | LocalizedPadding = 0;
+  @State enableCompMargin: boolean = false;
+  @State compMargin: Margin | Length | LocalizedPadding = 0;
   @State enableCompConstraintSize: boolean = false;
   @State enableCompConstraintSizeMinWidth: boolean = false;
   @State compConstraintSizeMinWidth: Length = 0;
@@ -181,6 +179,7 @@ export struct ImageboxGroupBootcamp {
   @State compConstraintSizeMaxWidth: Length = Infinity;
   @State enableCompConstraintSizeMaxHeight: boolean = false;
   @State compConstraintSizeMaxHeight: Length = Infinity;
+  // location
   @State enableCompPosition: boolean = false;
   @State enableCompPositionTop: boolean = false;
   @State compPositionTop: Dimension = 0;
@@ -200,6 +199,7 @@ export struct ImageboxGroupBootcamp {
   @State compOffsetX: Length = 0;
   @State enableCompOffsetY: boolean = false;
   @State compOffsetY: Length = 0;
+  // aspectRatio
   @State enableCompAspectRatio: boolean = false;
   @State compAspectRatio: number = 1;
   @State enableCompPixelRound: boolean = false;
@@ -211,6 +211,7 @@ export struct ImageboxGroupBootcamp {
   @State compPixelRoundEnd: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
   @State enableCompPixelRoundBottom: boolean = false;
   @State compPixelRoundBottom: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
+  // border
   @State enableCompBorderWidth: boolean = false;
   @State compBorderWidth: Length = 0;
   @State enableCompBorderColor: boolean = false;
@@ -235,6 +236,7 @@ export struct ImageboxGroupBootcamp {
   @State compBorderDashWidthTop: number = 0;
   @State enableCompBorderDashWidthBottom: boolean = false;
   @State compBorderDashWidthBottom: number = 0;
+  // borderImage
   @State enableCompBorderImage: boolean = false;
   @State enableCompBorderImageSource: boolean = false;
   @State enableCompBorderImageSlice: boolean = false;
@@ -268,6 +270,7 @@ export struct ImageboxGroupBootcamp {
   @State compBorderImageRepeat: RepeatMode = RepeatMode.Stretch
   @State enableCompBorderImageFill: boolean = false;
   @State compBorderImageFill: boolean = false;
+  // background
   @State enableCompBackgroundAlign: boolean = false;
   @State compBackgroundAlign: Alignment = Alignment.Center;
   @State enableCompBackgroundColor: boolean = false;
@@ -349,12 +352,16 @@ export struct ImageboxGroupBootcamp {
   @State compBackgroundBrightnessRate: number = 0;
   @State enableCompBackgroundBrightnessLightUpDegree: boolean = false;
   @State compBackgroundBrightnessLightUpDegree: number = 0;
+  // opacity
   @State enableCompOpacity: boolean = false;
   @State compOpacity: number = 1;
+  // visibility
   @State enableCompVisibility: boolean = false;
   @State compVisibility: Visibility = Visibility.Visible;
+  // enabled:
   @State enableCompEnabled: boolean = false;
   @State compEnabled: boolean = false;
+  // overlay
   @State enableCompOverlay: boolean = false;
   @State compOverlay: string = 'overlay';
   @State enableCompOverlayOptions: boolean = false;
@@ -364,8 +371,10 @@ export struct ImageboxGroupBootcamp {
   @State compOverlayOptionsOffsetX: number = 0;
   @State enableCompOverlayOptionsOffsetY: boolean = false;
   @State compOverlayOptionsOffsetY: number = 0;
+  // zIndex
   @State enableCompZIndex: boolean = false;
   @State compZIndex: number = 0;
+  // transformation
   @State enableCompRotate: boolean = false;
   @State enableCompRotateX: boolean = false;
   @State compRotateX: number = 0;
@@ -402,6 +411,7 @@ export struct ImageboxGroupBootcamp {
   @State enableCompScaleCenterY: boolean = false;
   @State compScaleCenterY: number = 0;
   @State enableCompTransform: boolean = false;
+  // shapeClippingBlocks
   @State enableCompClip: boolean = false;
   @State compClip: boolean = false;
   @State enableCompClipShape: boolean = false;
@@ -420,6 +430,7 @@ export struct ImageboxGroupBootcamp {
   @State compMaskShapeWidth: number = 0;
   @State enableCompMaskShapeHeight: boolean = false;
   @State compMaskShapeHeight: number = 0;
+  // imageEffects
   @State enableCompBlurValue: boolean = false
   @State compBlurValue: number = 0
   @State enableCompBlurOptionsNumber1: boolean = false
@@ -482,6 +493,9 @@ export struct ImageboxGroupBootcamp {
   @State compPixelStretchEffectOptionsBottom: number = 0
   @State enableCompFreeze: boolean = false
   @State compFreeze: boolean = false
+  //part2
+  //Gradient Color
+  //linearGradient
   @State enableCompLinearGradientAngle: boolean = false;
   @State compLinearGradientAngle: number = 180;
   @State enableCompLinearGradientDirection: boolean = false;
@@ -496,6 +510,8 @@ export struct ImageboxGroupBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
+  //Popup Control
+  //bindPopup
   @State enableCompBindPopupType: boolean = true;
   @State compBindPopupType: boolean = true;
   @State handlePopup: boolean = false;
@@ -599,6 +615,9 @@ export struct ImageboxGroupBootcamp {
   @State compBindPopupTransitionRotatePerspective: number = 0;
   @State enableCompBindPopupTransitionMove: boolean = false;
   @State compBindPopupTransitionMove: TransitionEdge = TransitionEdge.START;
+  //Focus Control
+  @State enableCompFocusable: boolean = false;
+  @State compFocusable: boolean = false;
   @State enableCompDefaultFocus: boolean = false;
   @State compDefaultFocus: boolean = false;
   @State enableCompGroupDefaultFocus: boolean = false;
@@ -619,8 +638,10 @@ export struct ImageboxGroupBootcamp {
   @State compFocusScopeId: string = '1';
   @State enableCompFocusScopeIdIsGroup: boolean = false;
   @State compFocusScopeIdIsGroup: boolean = false;
+  //hoverEffect
   @State enableCompHoverEffect: boolean = false;
   @State compHoverEffect: HoverEffect = HoverEffect.Auto;
+  //id
   @State enableCompId: boolean = false;
   @State compId: string = '1';
   @State enableCompKey: boolean = false;
@@ -641,18 +662,21 @@ export struct ImageboxGroupBootcamp {
   @State compForegroundBlurStyleOptionsBlurOptions: number = 0;
   @State enableCompForegroundBlurStyleOptionsScale: boolean = false;
   @State compForegroundBlurStyleOptionsScale: number = 0;
+  //motionBlur
   @State enableCompMotionBlurRadius: boolean = false;
   @State compMotionBlurRadius: number = 0;
   @State enableCompMotionBlurAnchorX: boolean = false;
   @State compMotionBlurAnchorX: number = 0;
   @State enableCompMotionBlurAnchorY: boolean = false;
   @State compMotionBlurAnchorY: number = 0;
+  //ClickEffect
   @State enableCompClickEffect: boolean = false;
   @State compClickEffect: boolean = false;
   @State enableCompClickEffectLevel: boolean = false;
   @State compClickEffectLevel: ClickEffectLevel = ClickEffectLevel.LIGHT;
   @State enableCompClickEffectScale: boolean = false;
   @State compClickEffectScale: number = 0.9;
+  //accessibilityGroup
   @State enableCompAccessibilityGroup: boolean = false;
   @State compAccessibilityGroup: boolean = false;
   @State enableCompAccessibilityText: boolean = false;
@@ -661,6 +685,8 @@ export struct ImageboxGroupBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
+  //Menu Control
+  //bindMenu
   @State enableCompBindMenuStartIcon: boolean = false;
   @State compBindMenuStartIcon: boolean = false;
   @State compBindMenuStartIconStr: ResourceStr = $r('app.media.startIcon');
@@ -730,10 +756,12 @@ export struct ImageboxGroupBootcamp {
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
+  // Gesture Modifier
   @State enableCompGestureModifier: boolean = false
   @State compGestureModifier: boolean = false
   myGestureModifier1: MyGestureModifier1 = new MyGestureModifier1()
   myGestureModifier2: MyGestureModifier2 = new MyGestureModifier2()
+  // Outline
   @State enableCompOutlineValueWidth: boolean = false
   @State compOutlineValueWidth: number = 0
   @State enableCompOutlineValueColor: boolean = false
@@ -742,6 +770,7 @@ export struct ImageboxGroupBootcamp {
   @State compOutlineValueRadius: number = 0
   @State enableCompOutlineValueStyle: boolean = false
   @State compOutlineValueStyle: OutlineStyle = OutlineStyle.SOLID
+  // Visual Effect
   @State enableCompVisualEffect: boolean = false
   @State compVisualEffect: boolean = false
   @State enableCompBackgroundFilter: boolean = false
@@ -751,6 +780,7 @@ export struct ImageboxGroupBootcamp {
   @State enableCompCompositingFilter: boolean = false
   @State compCompositingFilter: boolean = false
   @State enableCompResponseRegionValueX: boolean = false
+  // Touch Target
   @State compResponseRegionValueX: number = 0
   @State enableCompResponseRegionValueY: boolean = false
   @State compResponseRegionValueY: number = 0
@@ -758,8 +788,10 @@ export struct ImageboxGroupBootcamp {
   @State compResponseRegionValueWidth: Length = '100%'
   @State enableCompResponseRegionValueHeight: boolean = false
   @State compResponseRegionValueHeight: Length = '100%'
+  // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
+  // Modal Transition
   @State enableCompBindContentCoverIsShow: boolean = false
   @State compBindContentCoverIsShow: boolean = false
   @State enableCompBindContentCoverOptionsModalTransition: boolean = false
@@ -818,6 +850,7 @@ export struct ImageboxGroupBootcamp {
   @State compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax: number = 60
   @State enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected: boolean = false
   @State compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected: number = 60
+  // Sheet Transition
   @State enableCompBindSheetIsShow: boolean = false
   @State compBindSheetIsShow: boolean = false
   @State enableCompBindSheetOptionsHeight: boolean = false
@@ -855,8 +888,10 @@ export struct ImageboxGroupBootcamp {
   @State compBindSheetOptionMode: SheetMode = SheetMode.OVERLAY
   @State enableCompBindSheetOptionScrollSizeMode: boolean = false
   @State compBindSheetOptionScrollSizeMode: ScrollSizeMode = ScrollSizeMode.FOLLOW_DETENT
+  // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
+  // Universal Text Attributes
   @State enableCompFontColor: boolean = false
   @State compFontColor: ResourceColor = $r('sys.color.font_on_primary');
   @State enableCompFontSize: boolean = false
@@ -874,6 +909,7 @@ export struct ImageboxGroupBootcamp {
   @State enableCompDecorationStyle: boolean = false
   @State compDecorationStyle: TextDecorationStyle = TextDecorationStyle.SOLID
   @State enableCompDraggable: boolean = false
+  // Drag and Drop Control
   @State compDraggable: boolean = false
   @State enableCompDragPreview: boolean = false
   @State compDragPreview: string = '默认'
@@ -885,18 +921,23 @@ export struct ImageboxGroupBootcamp {
   @State compDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
   @State enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
   @State compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
+  // Safe Area
   @State enableCompExpandSafeAreaTypes: boolean = false
   @State compExpandSafeAreaTypes: Array<SafeAreaType> =
     [SafeAreaType.SYSTEM, SafeAreaType.CUTOUT, SafeAreaType.KEYBOARD]
   @State enableCompExpandSafeAreaEdges: boolean = false
   @State compExpandSafeAreaEdges: Array<SafeAreaEdge> =
     [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM, SafeAreaEdge.START, SafeAreaEdge.END]
+  // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
+  // Event Monopolization
   @State enableCompMonopolizeEvents: boolean = false
   @State compMonopolizeEvents: boolean = false
+  // Cursor Control
   @State enableCompCursorControl: boolean = false
   @State compCursorControl: pointer.PointerStyle = pointer.PointerStyle.DEFAULT
+  // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
 
@@ -1085,9 +1126,7 @@ export struct ImageboxGroupBootcamp {
           Image(useEnabled(this.enableImage, this.image))
             .width(useEnabled(this.enableCustomSize, this.customSize.split('*')[0]))
             .height(useEnabled(this.enableCustomSize, this.customSize.split('*')[1]))
-            .focusable(useEnabled(this.enableFocusable, this.compFocusable))
             .borderRadius(useEnabled(this.enableBorderRadius, this.imageBorderRadius))
-            .margin(useEnabled(this.enableMargin, this.compMargin))
             .objectFit(useEnabled(this.enableObjectFit,this.objectFit))
             .objectRepeat(useEnabled(this.enableObjectRepeat,this.objectRepeat))
             .interpolation(useEnabled(this.enableInterpolation,this.interpolation))
@@ -2050,16 +2089,6 @@ export struct ImageboxGroupBootcamp {
         })
 
         RadioBlock({
-          title: 'focusable',
-          isEnabled: this.enableFocusable,
-          value: this.compFocusable,
-          dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false }
-          ]
-        })
-
-        RadioBlock({
           title: 'customSize',
           isEnabled: $enableCustomSize,
           value: $customSize,
@@ -2077,15 +2106,6 @@ export struct ImageboxGroupBootcamp {
           min: 0,
           max: 50
         })
-
-        SliderBlock({
-          title: 'margin',
-          isEnabled: $enableMargin,
-          value: $compMargin,
-          min: 0,
-          max: 20
-        })
-
 
         RadioBlock({
           title: 'objectFit',
