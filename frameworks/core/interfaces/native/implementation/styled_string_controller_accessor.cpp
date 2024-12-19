@@ -17,28 +17,30 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct StyledStringControllerPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor();
 namespace StyledStringControllerAccessor {
 void DestroyPeerImpl(StyledStringControllerPeer* peer)
 {
 }
 Ark_NativePointer CtorImpl()
 {
-    return new StyledStringControllerPeer();
+    return GetRichEditorStyledStringControllerAccessor()->ctor();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
+    return GetRichEditorStyledStringControllerAccessor()->getFinalizer();
 }
 void SetStyledStringImpl(StyledStringControllerPeer* peer,
                          const Ark_StyledString* styledString)
 {
+    auto peerRE = reinterpret_cast<RichEditorStyledStringControllerPeer*>(peer);
+    GetRichEditorStyledStringControllerAccessor()->setStyledString(peerRE, styledString);
 }
 Ark_NativePointer GetStyledStringImpl(StyledStringControllerPeer* peer)
 {
-    return nullptr;
+    auto peerRE = reinterpret_cast<RichEditorStyledStringControllerPeer*>(peer);
+    return GetRichEditorStyledStringControllerAccessor()->getStyledString(peerRE);
 }
 } // StyledStringControllerAccessor
 const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor()
