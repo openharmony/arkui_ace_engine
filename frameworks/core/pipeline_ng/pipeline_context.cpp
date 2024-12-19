@@ -79,6 +79,9 @@ constexpr int32_t MAX_MISS_COUNT = 3;
 } // namespace
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension CARET_AVOID_OFFSET = 24.0_vp;
+} // namespace
 
 std::unordered_set<int32_t> PipelineContext::aliveInstanceSet_;
 
@@ -2176,7 +2179,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     auto paintOffset = host->GetPaintRectOffset();
     auto frameSize = geometryNode->GetFrameSize();
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
-        frameSize.Height(), rootSize);
+        frameSize.Height() + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
     return std::max(offset, newKeyboardOffset);
 }
 
