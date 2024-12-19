@@ -140,7 +140,7 @@ export struct ToastBootcamp {
         })
 
         RadioBlock({
-          title: '对齐方式',
+          title: 'ShowToastOptions.alignment',
           isEnabled: $enableAlignment,
           value: $alignment,
           dataSource: [
@@ -157,7 +157,7 @@ export struct ToastBootcamp {
         })
 
         SliderBlock({
-          title: 'offsetX',
+          title: 'ShowToastOptions.offsetX',
           isEnabled: $enableOffsetX,
           value: $offsetX,
           min: 0,
@@ -165,7 +165,7 @@ export struct ToastBootcamp {
         })
 
         SliderBlock({
-          title: 'offsetY',
+          title: 'ShowToastOptions.offsetY',
           isEnabled: $enableOffsetY,
           value: $offsetY,
           min: 0,
@@ -173,19 +173,19 @@ export struct ToastBootcamp {
         })
 
         ColorBlock({
-          title: 'BackgroundColor',
+          title: 'ShowToastOptions.BackgroundColor',
           isEnabled: $enableToastBackgroundColor,
           color: $toastBackgroundColor
         })
 
         ColorBlock({
-          title: 'TextColor',
+          title: 'ShowToastOptions.TextColor',
           isEnabled: $enableToastTextColor,
           color: $toastTextColor
         })
 
         RadioBlock({
-          title: 'BackgroundBlurStyle',
+          title: 'ShowToastOptions.BackgroundBlurStyle',
           isEnabled: $enableToastBackgroundBlurStyle,
           value: $toastBackgroundBlurStyle,
           dataSource: [
@@ -205,7 +205,7 @@ export struct ToastBootcamp {
         })
 
         RadioBlock({
-          title: 'shadowType',
+          title: 'ShowToastOptions.shadow',
           isEnabled: $enableShadowType,
           value: $shadowType,
           dataSource: [
