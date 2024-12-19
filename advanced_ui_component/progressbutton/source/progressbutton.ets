@@ -138,7 +138,10 @@ export struct ProgressButton {
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
-    .backgroundColor(this.colorOption?.backgroundColor ? this.colorOption?.backgroundColor : this.containerBackgroundColor)
+    .backgroundColor(
+      this.colorOptions?.backgroundColor
+        ? this.colorOptions?.backgroundColor
+        : this.containerBackgroundColor)
     .constraintSize({minWidth: 44})
     .padding({ top: 0, bottom: 0})
     .width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?
