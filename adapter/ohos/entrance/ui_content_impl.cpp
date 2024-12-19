@@ -390,7 +390,7 @@ public:
                 taskExecutor->PostTask(
                     [context] {
                         CHECK_NULL_VOID(context);
-                        context->OnVirtualKeyboardAreaChange(Rect());
+                        context->OnVirtualKeyboardAreaChange(Rect(), 0, 0);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
                 return;
