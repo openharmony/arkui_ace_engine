@@ -833,7 +833,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     spanItem->spanItemType = SpanItemType::IMAGE;
     AddSpanItem(spanItem, spanIndex);
     SetGestureOptions(options.userGestureOption, spanItem);
-    AddSpanHoverEvent(spanItem, imageNode, options);
+    auto userMouseOption = options.userMouseOption;
+    IF_TRUE(userMouseOption.onHover, spanItem->onHover_ = std::move(userMouseOption.onHover));
     
     placeholderCount_++;
     if (updateCaret) {
@@ -844,6 +845,63 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     AfterContentChange(changeValue);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "end");
     return spanIndex;
+}
+
+
+HoverInfo RichEditorPattern::CreateHoverInfo(const MouseInfo& info)
+{
+    HoverInfo hoverInfo;
+    hoverInfo.SetType(info.GetType());
+    hoverInfo.SetTimeStamp(info.GetTimeStamp());
+    hoverInfo.SetTarget(info.GetTarget());
+    hoverInfo.SetSourceDevice(info.GetSourceDevice());
+    hoverInfo.SetForce(info.GetForce());
+    IF_TRUE(info.GetTiltX(), hoverInfo.SetTiltX(info.GetTiltX().value()));
+    IF_TRUE(info.GetTiltY(), hoverInfo.SetTiltY(info.GetTiltY().value()));
+    hoverInfo.SetSourceTool(info.GetSourceTool());
+    hoverInfo.SetDeviceId(info.GetDeviceId());
+    hoverInfo.SetTargetDisplayId(info.GetTargetDisplayId());
+    hoverInfo.SetStopPropagation(info.IsStopPropagation());
+    hoverInfo.SetPreventDefault(info.IsPreventDefault());
+    hoverInfo.SetPatternName(info.GetPatternName());
+    hoverInfo.SetPressedKeyCodes(info.GetPressedKeyCodes());
+    hoverInfo.SetIsPostEventResult(info.GetIsPostEventResult());
+    hoverInfo.SetPostEventNodeId(info.GetPostEventNodeId());
+    return hoverInfo;
+}
+
+void RichEditorPattern::HandleImageHoverEvent(const MouseInfo& info)
+{
+    static RefPtr<ImageSpanItem> lastHoverSpanItem = nullptr;
+    CHECK_NULL_VOID(info.GetAction() == MouseAction::MOVE && !isMousePressed_);
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    PointF mouseOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    HoverInfo hoverInfo = CreateHoverInfo(info);
+    for (const auto& spanItem : spans_) {
+        CHECK_NULL_CONTINUE(spanItem && spanItem->spanItemType == SpanItemType::IMAGE);
+        auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
+        CHECK_NULL_CONTINUE(imageSpanItem && imageSpanItem->onHover_);
+        const auto& rects = paragraphs_.GetRects(spanItem->rangeStart, spanItem->position);
+        CHECK_NULL_CONTINUE(rects.size() == 1);
+        auto& rect = rects[0];
+        if (rect.IsInRegion(mouseOffset)) {
+            if (!lastHoverSpanItem) {
+                imageSpanItem->onHover_(true, hoverInfo);
+                lastHoverSpanItem = imageSpanItem;
+                return;
+            }
+            CHECK_NULL_VOID(lastHoverSpanItem.GetRawPtr() != imageSpanItem.GetRawPtr());
+            imageSpanItem->onHover_(true, hoverInfo);
+            lastHoverSpanItem->onHover_(false, hoverInfo);
+            lastHoverSpanItem = imageSpanItem;
+            return;
+        }
+    }
+    if (lastHoverSpanItem) {
+        lastHoverSpanItem->onHover_(false, hoverInfo);
+        lastHoverSpanItem.Reset();
+    }   
 }
 
 void RichEditorPattern::AddOprationWhenAddImage(int32_t beforeCaretPos)
@@ -6703,7 +6761,9 @@ void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
-    if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
+    auto frameNodeRange = GetSpanRangeByLocalOffset(info.GetLocalLocation());
+    bool pressFrameNode = !IsSelected() && InRangeRect(info.GetGlobalLocation(), frameNodeRange);
+    if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation()) || pressFrameNode) {
         blockPress_ = true;
         return;
     }
@@ -6844,25 +6904,34 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
     }
 }
 
-void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
+std::pair<int32_t, int32_t> RichEditorPattern::GetSpanRangeByLocalOffset(Offset localOffset)
 {
-    Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
+    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     auto [pos, affinity] = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
+    auto spanFilter = [](SpanItemType itemType) {
+        return itemType == SpanItemType::IMAGE 
+            || itemType == SpanItemType::PLACEHOLDER
+            || itemType == SpanItemType::CustomSpan; };
     auto it = std::find_if(spans_.begin(), spans_.end(),
-        [pos = static_cast<int32_t>(pos), affinity = affinity](const RefPtr<SpanItem>& spanItem) {
-            CHECK_NULL_RETURN(spanItem->spanItemType == SpanItemType::IMAGE, false);
+        [pos = static_cast<int32_t>(pos), affinity = affinity, spanFilter](const RefPtr<SpanItem>& spanItem) {
+            CHECK_NULL_RETURN(spanFilter(spanItem->spanItemType), false);
             return pos == (affinity == TextAffinity::UPSTREAM ? spanItem->position : spanItem->rangeStart);
         });
-    bool isMouseOnImage = it != spans_.end();
-    auto selectRange = affinity == TextAffinity::UPSTREAM ? std::pair<int32_t, int32_t>(pos - 1, pos)
-                                                          : std::pair<int32_t, int32_t>(pos, pos + 1);
+    bool isMouseOnTarget = it != spans_.end();
+    CHECK_NULL_RETURN(isMouseOnTarget, std::make_pair(-1, -1));
+    return affinity == TextAffinity::UPSTREAM ? std::make_pair(pos - 1, pos) : std::make_pair(pos, pos + 1);
+}
+
+void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
 
-    if (isMouseOnImage && InRangeRect(info.GetGlobalLocation(), selectRange)) {
+    auto selectRange = GetSpanRangeByLocalOffset(info.GetLocalLocation());
+    if (InRangeRect(info.GetGlobalLocation(), selectRange)) {
         selectedType_ = TextSpanType::IMAGE;
         textSelector_.Update(selectRange.first, selectRange.second);
         FireOnSelect(selectRange.first, selectRange.second);
@@ -6872,6 +6941,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     if (textSelector_.IsValid()) {
         ResetSelection();
     }
+    Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
@@ -6922,6 +6992,7 @@ SelectionInfo RichEditorPattern::GetAdjustedSelectionInfo(const SelectionInfo& t
 
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    HandleImageHoverEvent(info);
     if (selectOverlay_->IsHandleShow() && info.GetAction() == MouseAction::PRESS) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close selectOverlay when handle is showing");
         CloseSelectOverlay();
@@ -7536,6 +7607,7 @@ bool RichEditorPattern::InRangeRect(const Offset& globalOffset, const std::pair<
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(range.first > 0 && range.second > 0, false);
     auto offset = host->GetPaintRectOffsetNG();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
