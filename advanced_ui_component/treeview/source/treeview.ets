@@ -19,6 +19,7 @@ import { common } from '@kit.AbilityKit';
 import resourceManager from '@ohos.resourceManager';
 import { Prompt } from '@kit.ArkUI';
 import { accessibility } from '@kit.AccessibilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 const IMAGE_NODE_HEIGHT: number = 24;
 const IMAGE_NODE_WIDTH: number = 24;
@@ -130,6 +131,12 @@ enum CollapseImageType {
   ARROW_RIGHT,
   ARROW_DOWN_WHITE,
   ARROW_RIGHT_WHITE,
+}
+
+enum AccessibilityNodeType {
+  TEXT = 0,
+  PLACE = 1,
+  LIFT = 2,
 }
 
 interface ChildNodeInfo {
@@ -962,7 +969,7 @@ export struct TreeView {
   @State allParentNode: number[] = [];
   @Provide treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   @Provide clickButtonFlag: boolean = true;
-  @Provide clickNodeFlag: boolean = true;
+  @Provide accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
 
   @Builder
   NullBuilder() {
@@ -1089,6 +1096,7 @@ export struct TreeView {
         this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2,
       })
     }
+    .id(`treeView_node_lift${item.getNodeCurrentNodeId() }`)
     .constraintSize({
       minWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.minWidth,
       maxWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.maxWidth,
@@ -1198,6 +1206,7 @@ export struct TreeView {
         })
         .align(Alignment.Start)
         .onDragStart((event: DragEvent, extraParams: string) => {
+          this.accessibilityNodeType = AccessibilityNodeType.LIFT;
           if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
             hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
             return;
@@ -1237,10 +1246,10 @@ export struct TreeView {
             currentNodeInfo.getNodeInfoData()?.primaryTitle;
           let secondaryTitle = currentNodeInfo.getNodeInfoData()?.secondaryTitle === undefined ? '' :
             currentNodeInfo.getNodeInfoData()?.secondaryTitle;
-          let title: string = `${primaryTitle}, ${secondaryTitle}`;
-          Prompt.showToast({
-            message: this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node', title)
-          })
+          let primaryTitleText = this.listNodeDataSource.getAccessibleTitleText(primaryTitle);
+          let secondaryTitleText = this.listNodeDataSource.getAccessibleTitleText(secondaryTitle);
+          let title: string = `${primaryTitleText}, ${secondaryTitleText}`;
+          this.listNodeDataSource.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node', title));
 
           let allParentNode: number[] = [];
           for (let i = 0; i < this.listNodeDataSource.listNode.length; i++) {
@@ -1249,6 +1258,18 @@ export struct TreeView {
             }
           }
           this.allParentNode = allParentNode;
+
+          let eventInfo: accessibility.EventInfo = ({
+            type: 'requestFocusForAccessibility',
+            bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+            triggerAction: 'common',
+            customId: `treeView_node_lift${currentItemNodeId}`
+          })
+          accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+            setTimeout(() => {
+              this.accessibilityNodeType = AccessibilityNodeType.TEXT;
+            }, ENTER_EXIT_DURATION)
+          })
 
           return this.draggingPopup(currentNodeInfo);
         })
@@ -1338,7 +1359,7 @@ export struct TreeView {
 
     /* DragEvent Drop. */
     .onDrop((event: DragEvent, extraParams: string) => {
-      this.clickNodeFlag = false;
+      this.accessibilityNodeType = AccessibilityNodeType.PLACE;
 
       this.listNodeDataSource.clearLastTimeoutExpand();
       let draggingNodeOpacity: number = DRAG_OPACITY_NONE;
@@ -1485,7 +1506,7 @@ export struct TreeView {
       })
       accessibility.sendAccessibilityEvent(eventInfo).then(() => {
         setTimeout(() => {
-          this.clickNodeFlag = true;
+          this.accessibilityNodeType = AccessibilityNodeType.TEXT;
         }, ENTER_EXIT_DURATION);
         console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(eventInfo)}`)
       })
@@ -2840,22 +2861,24 @@ class ListNodeDataSource extends BasicDataSource {
     }
   }
 
-  getAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string | undefined {
+  getAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string {
     let accessibleTitleList: string[] = [];
     while (insertNodeCurrentNodeId !== -1) {
       if (insertNodeCurrentNodeId === undefined) {
-        return;
+        return '';
       }
       let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
       let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
       if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
-        return;
+        return '';
       }
-      let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle === undefined
+      let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.primaryTitle === undefined
         ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle;
-      let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle === undefined
+      let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.secondaryTitle === undefined
         ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle;
-      accessibleTitleList.unshift(`${primaryTitle}${secondaryTitle}`);
+      let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+      let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+      accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
       insertNodeCurrentNodeId = nodeItem.currentNodeId;
     }
     return accessibleTitleList.join(',');
@@ -2873,11 +2896,13 @@ class ListNodeDataSource extends BasicDataSource {
       if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
         return;
       }
-      let primaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData().primaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData().primaryTitle;
-      let secondaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData().secondaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData().secondaryTitle;
-      accessibleTitleList.unshift(`${primaryTitle}${secondaryTitle}`);
+      let primaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle === undefined
+        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle;
+      let secondaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle === undefined
+        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle;
+      let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+      let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+      accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
       insertNodeCurrentNodeId = nodeItem.currentNodeId;
     }
     return accessibleTitleList.join(',');
@@ -2889,9 +2914,6 @@ class ListNodeDataSource extends BasicDataSource {
       return;
     }
     let parentId: number = this.findParentNodeId(insertNodeCurrentNodeId);
-    let insertNodeCurrentNodeIndex: number | undefined = this.findIndex(insertNodeCurrentNodeId);
-    let parentTitleIndex: number = this.findIndex(parentId);
-
     let currentPlaceNode: number | undefined = allParentNode.indexOf(insertNodeCurrentNodeId) + 2;
     let childrenInfo: NodeInfoView[] = this.getClickNodeChildrenInfo(parentId);
     let childrenItemId: (number | undefined)[] = childrenInfo.map(item => item.itemId)
@@ -2899,19 +2921,13 @@ class ListNodeDataSource extends BasicDataSource {
 
     if (parentId === -1 && this.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === NodeStatus.COLLAPSE ||
       parentId === -1 && this.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === undefined) {
-      Prompt.showToast({
-        message: this.getStringByName('treeview_accessibility_move_node_parent', currentPlaceNode)
-      })
+      this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_parent', currentPlaceNode));
     } else if (this.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === NodeStatus.EXPAND) {
-      Prompt.showToast({
-        message: this.getStringByName('treeview_accessibility_move_node_child',
-          this.getAccessibleTitle(insertNodeCurrentNodeId), 1)
-      })
+      this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+        this.getAccessibleTitle(insertNodeCurrentNodeId), 1));
     } else if (parentId !== -1) {
-      Prompt.showToast({
-        message: this.getStringByName('treeview_accessibility_move_node_child',
-          this.getAccessibleTitle(insertNodeCurrentNodeId), insertNodePosition)
-      })
+      this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+        this.getAccessibleTitle(insertNodeCurrentNodeId), insertNodePosition));
     }
   }
 
@@ -2924,6 +2940,32 @@ class ListNodeDataSource extends BasicDataSource {
       }
     }
     return '';
+  }
+
+  public sendAccessibility(textAnnouncedForAccessibility: string): void {
+    let eventInfo: accessibility.EventInfo = ({
+      type: 'announceForAccessibility', // 表示主动播报的事件。
+      bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName, // 目标应用名；不可缺省。
+      triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+      textAnnouncedForAccessibility: textAnnouncedForAccessibility // 主动播报的内容。
+    });
+    accessibility.sendAccessibilityEvent(eventInfo);
+  }
+
+  public getAccessibleTitleText(resource: ResourceStr | string | undefined): string {
+    let resourceString: string = '';
+    try {
+      if (typeof resource === 'string') {
+        resourceString = resource;
+      } else {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource?.id);
+      }
+    } catch (error) {
+      let code: number = (error as BusinessError).code;
+      let message: string = (error as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `treeView getAccessibleTitleText error, code: ${code}, message: ${message}`);
+    }
+    return resourceString;
   }
 
   public setVisibility(flag: Flag, index: number, isOverBorder: boolean, allParentNode: number[]): void {
@@ -4010,7 +4052,7 @@ export struct TreeViewInner {
   @State maxAppFontScale: number = 1;
   @Consume treeViewTheme: TreeViewTheme;
   @Consume clickButtonFlag: boolean;
-  @Consume clickNodeFlag: boolean;
+  @Consume accessibilityNodeType: AccessibilityNodeType;
   @BuilderParam private listTreeViewMenu: () => void;
   private readonly MAX_CN_LENGTH: number = 254;
   private readonly MAX_EN_LENGTH: number = 255;
@@ -4080,11 +4122,13 @@ export struct TreeViewInner {
       return '';
     }
     let nodeInfo = this.listNodeDataSource.getNodeInfoByNodeItem(nodeItem);
-    let primaryTitle: string | undefined = nodeInfo?.getNodeInfoData()?.primaryTitle?.toString() === undefined
-      ? '' : nodeInfo?.getNodeInfoData()?.primaryTitle?.toString();
-    let secondaryTitle: string | undefined = nodeInfo?.getNodeInfoData()?.secondaryTitle?.toString() === undefined
-      ? '' : nodeInfo?.getNodeInfoData()?.secondaryTitle?.toString();
-    let title: string | undefined = `${primaryTitle},${secondaryTitle}`;
+    let primaryTitle = nodeInfo?.getNodeInfoData()?.primaryTitle === undefined
+      ? '' : nodeInfo?.getNodeInfoData()?.primaryTitle;
+    let secondaryTitle = nodeInfo?.getNodeInfoData()?.secondaryTitle === undefined
+      ? '' : nodeInfo?.getNodeInfoData()?.secondaryTitle;
+    let primaryTitleText = this.listNodeDataSource.getAccessibleTitleText(primaryTitle);
+    let secondaryTitleText = this.listNodeDataSource.getAccessibleTitleText(secondaryTitle);
+    let title: string | undefined = `${primaryTitleText}, ${secondaryTitleText}`;
 
     let parentId: number = this.listNodeDataSource.findParentNodeId(currentNodeId);
     let parentNode: number[] = [];
@@ -4097,7 +4141,7 @@ export struct TreeViewInner {
       return '';
     }
 
-    if (this.clickNodeFlag === false) {
+    if (this.accessibilityNodeType === AccessibilityNodeType.PLACE) {
       if (this.listNodeDataSource.findParentNodeId(currentNodeId) === -1) {
         for (let i: number = 0; i < this.listNodeDataSource.listNode.length; i++) {
           if (this.listNodeDataSource.listNode[i].getNodeParentNodeId() === -1) {
@@ -4111,16 +4155,18 @@ export struct TreeViewInner {
         return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_child', accessibleTitle,
           insertNodePosition);
       }
+    } else if (this.accessibilityNodeType === AccessibilityNodeType.LIFT) {
+      return title;
     } else {
       return title;
     }
   }
 
   private getAccessibilityDescription(): string {
-    if (this.clickNodeFlag === false) {
-      return '';
-    } else {
+    if (this.accessibilityNodeType === AccessibilityNodeType.TEXT) {
       return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
+    } else {
+      return '';
     }
   }
 
@@ -4416,11 +4462,9 @@ export struct TreeViewInner {
             let callParam: CallbackParam = { currentNodeId: currentId };
             this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
 
-            Prompt.showToast({
-              message: this.item.getIsSelected()
-                ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
-                `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : ''
-            })
+            this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
+              ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+              `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
           }
 
           if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
