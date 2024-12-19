@@ -972,4 +972,38 @@ void EventHub::FireUntriggeredInnerOnAreaChanged(
     }
     hasInnerAreaChangeUntriggered_.clear();
 }
+
+void EventHub::FireDrawCompletedNDKCallback(PipelineContext* pipeline)
+{
+    if (ndkDrawCompletedCallback_) {
+        if (!pipeline) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, pipeline is null");
+            return;
+        }
+        auto executor = pipeline->GetTaskExecutor();
+        if (!executor) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
+            return;
+        }
+        auto cb = ndkDrawCompletedCallback_;
+        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
+    }
+}
+
+void EventHub::FireLayoutNDKCallback(PipelineContext* pipeline)
+{
+    if (ndkLayoutCallback_) {
+        if (!pipeline) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, pipeline is null");
+            return;
+        }
+        auto executor = pipeline->GetTaskExecutor();
+        if (!executor) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
+            return;
+        }
+        auto cb = ndkLayoutCallback_;
+        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
+    }
+}
 } // namespace OHOS::Ace::NG

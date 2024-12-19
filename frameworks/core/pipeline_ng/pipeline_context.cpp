@@ -683,9 +683,15 @@ void PipelineContext::InspectDrew()
         auto needRenderNode = std::move(needRenderNode_);
         for (auto&& nodeWeak : needRenderNode) {
             auto node = nodeWeak.Upgrade();
-            if (node) {
+            if (!node) {
+                return;
+            }
+            if (node->GetInspectorId().has_value()) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
+            auto eventHub = node->GetEventHub<NG::EventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireDrawCompletedNDKCallback(this);
         }
     }
 }
