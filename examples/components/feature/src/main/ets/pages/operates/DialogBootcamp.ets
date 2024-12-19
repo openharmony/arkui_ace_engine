@@ -141,7 +141,7 @@ export struct DialogBootcamp {
       Column({ space: 8 }) {
 
         RadioBlock({
-          title: 'ShowDialogOptions.buttons',
+          title: 'showDialog.buttons',
           isEnabled: $enableDialogType,
           value: $dialogType,
           dataSource: [
@@ -151,7 +151,7 @@ export struct DialogBootcamp {
         })
 
         RadioBlock({
-          title: 'ShowDialogOptions.alignment',
+          title: 'showDialog.alignment',
           isEnabled: $enableAlignment,
           value: $alignment,
           dataSource: [
@@ -169,7 +169,7 @@ export struct DialogBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowDialogOptions.offsetX',
+          title: 'showDialog.offsetX',
           isEnabled: $enableAlignmentOffsetX,
           value: $alignmentOffsetX,
           min: 0,
@@ -177,7 +177,7 @@ export struct DialogBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowDialogOptions.offsetY',
+          title: 'showDialog.offsetY',
           isEnabled: $enableAlignmentOffsetY,
           value: $alignmentOffsetY,
           min: 0,
@@ -185,7 +185,7 @@ export struct DialogBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowDialogOptions.MaskRectX',
+          title: 'MaskRectX',
           isEnabled: $enableMaskRectX,
           value: $maskRectX,
           min: 0,
@@ -193,7 +193,7 @@ export struct DialogBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowDialogOptions.MaskRectY',
+          title: 'MaskRectY',
           isEnabled: $enableMaskRectY,
           value: $maskRectY,
           min: 0,
@@ -201,7 +201,7 @@ export struct DialogBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowDialogOptions.MaskRectWidth',
+          title: 'MaskRectWidth',
           isEnabled: $enableMaskRectWidth,
           value: $maskRectWidth,
           min: 100,
@@ -209,7 +209,7 @@ export struct DialogBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowDialogOptions.MaskRectHeight',
+          title: 'MaskRectHeight',
           isEnabled: $enableMaskRectHeight,
           value: $maskRectHeight,
           min: 100,
@@ -217,7 +217,7 @@ export struct DialogBootcamp {
         })
 
         RadioBlock({
-          title: 'ShowDialogOptions.isModal',
+          title: 'isModal',
           isEnabled: $enableIsModal,
           value: $isModal,
           dataSource: [
@@ -227,7 +227,7 @@ export struct DialogBootcamp {
         })
 
         RadioBlock({
-          title: 'ShowDialogOptions.showInSubWindow',
+          title: 'showInSubWindow',
           isEnabled: $enableShowInSubWindow,
           value: $showInSubWindow,
           dataSource: [
@@ -237,13 +237,13 @@ export struct DialogBootcamp {
         })
 
         ColorBlock({
-          title: 'ShowDialogOptions.BackgroundColor',
+          title: 'BackgroundColor',
           isEnabled: $enableDialogBackgroundColor,
           color: $dialogBackgroundColor
         })
 
         RadioBlock({
-          title: 'ShowDialogOptions.BackgroundBlurStyle',
+          title: 'BackgroundBlurStyle',
           isEnabled: $enableDialogBackgroundBlurStyle,
           value: $dialogBackgroundBlurStyle,
           dataSource: [
@@ -263,7 +263,7 @@ export struct DialogBootcamp {
         })
 
         RadioBlock({
-          title: 'ShowDialogOptions.shadow',
+          title: 'shadowType',
           isEnabled: $enableShadowType,
           value: $shadowType,
           dataSource: [
@@ -274,7 +274,7 @@ export struct DialogBootcamp {
 
         if (this.shadowType) {
           RadioBlock({
-            title: 'ShowDialogOptions.shadowStyle',
+            title: 'shadowStyle',
             isEnabled: $enableDialogShadowStyle,
             value: $dialogShadowStyle,
             dataSource: [
