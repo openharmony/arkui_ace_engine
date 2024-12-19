@@ -577,7 +577,10 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
+void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty)
+{
+    dirtyPropertyNodes_.emplace(dirty);
+}
 
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
