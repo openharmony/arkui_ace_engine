@@ -141,7 +141,7 @@ export struct DialogBootcamp {
       Column({ space: 8 }) {
 
         RadioBlock({
-          title: '对话框按钮',
+          title: 'buttons',
           isEnabled: $enableDialogType,
           value: $dialogType,
           dataSource: [
@@ -151,7 +151,7 @@ export struct DialogBootcamp {
         })
 
         RadioBlock({
-          title: '弹窗在竖直方向上的对齐方式',
+          title: 'alignment',
           isEnabled: $enableAlignment,
           value: $alignment,
           dataSource: [
