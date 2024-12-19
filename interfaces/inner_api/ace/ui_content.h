@@ -463,6 +463,13 @@ public:
     virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
 
     virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
+
+    virtual int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback)
+    {
+        return 0;
+    }
+
+    virtual void RemoveFocusActiveChangeCallback(int32_t handler) {};
 };
 
 } // namespace OHOS::Ace

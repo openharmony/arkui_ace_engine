@@ -2916,6 +2916,28 @@ void UIContentImpl::SetOnWindowFocused(const std::function<void()>& callback)
     pipeline->SetOnWindowFocused(callback);
 }
 
+int32_t UIContentImpl::AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, 0);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    auto focusManager = pipelineContext->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(focusManager, 0);
+    return focusManager->AddFocusActiveChangeListener(callback);
+}
+
+void UIContentImpl::RemoveFocusActiveChangeCallback(int32_t handler)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto focusManager = pipelineContext->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->RemoveFocusActiveChangeListener(handler);
+}
+
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, "

@@ -2364,6 +2364,10 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
+    if (!SystemProperties::GetFocusCanBeActive()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusActive false");
+        return false;
+    }
     auto containerId = Container::CurrentId();
     auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
     if (subWindowContainerId >= 0) {
@@ -2386,6 +2390,9 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
     isFocusActive_ = isFocusActive;
+    auto focusManager = GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    focusManager->TriggerFocusActiveChangeCallback(isFocusActive);
     for (auto& pair : isFocusActiveUpdateEvents_) {
         if (pair.second) {
             pair.second(isFocusActive_);
