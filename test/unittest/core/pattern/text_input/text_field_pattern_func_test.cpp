@@ -717,7 +717,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc041, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    TextContentType type = TextContentType(30);
+    TextContentType type = TextContentType(38);
     auto state = pattern->TextContentTypeToAceAutoFillType(type);
     EXPECT_TRUE(state == AceAutoFillType::ACE_UNSPECIFIED);
 }
