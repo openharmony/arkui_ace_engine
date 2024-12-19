@@ -33,6 +33,20 @@ Ark_String ConvContext::Store(const std::string_view& src)
     return result;
 }
 
+void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
+{
+    const auto& localOffset = src.GetTarget().area.GetOffset();
+    const auto& origin = src.GetTarget().origin;
+    dst.position.x = Converter::ArkValue<Opt_Length>(localOffset.GetX().ConvertToVp());
+    dst.position.y = Converter::ArkValue<Opt_Length>(localOffset.GetY().ConvertToVp());
+    dst.globalPosition.x = Converter::ArkValue<Opt_Length>(
+        origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp());
+    dst.globalPosition.y = Converter::ArkValue<Opt_Length>(
+        origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp());
+    dst.width = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetWidth().ConvertToVp());
+    dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
+}
+
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 {
     auto data = JsonUtil::ParseJsonString(src);
@@ -90,6 +104,13 @@ void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
 void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
 {
     dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
+}
+
+void AssignArkValue(Ark_Length& dst, const double& src)
+{
+    dst.type = ARK_RUNTIME_NUMBER;
+    dst.value = src;
+    dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
 
 void AssignArkValue(Ark_Length& dst, const Dimension& src)

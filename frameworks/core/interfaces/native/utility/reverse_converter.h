@@ -122,7 +122,9 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // SORTED_SECTION
+    void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src);
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
+    void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
@@ -146,6 +148,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
     void AssignArkValue(Ark_Length& dst, const Dimension& src);
+    void AssignArkValue(Ark_Length& dst, const double& src);
     void AssignArkValue(Ark_Length& dst, const float& src);
     void AssignArkValue(Ark_Length& dst, const int& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src);
