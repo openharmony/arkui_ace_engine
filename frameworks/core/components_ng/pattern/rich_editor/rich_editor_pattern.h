@@ -1344,6 +1344,7 @@ private:
     bool ReplaceText(const std::string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
+    
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

@@ -834,6 +834,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     AddSpanItem(spanItem, spanIndex);
     SetGestureOptions(options.userGestureOption, spanItem);
     AddSpanHoverEvent(spanItem, imageNode, options);
+    
     placeholderCount_++;
     if (updateCaret) {
         SetCaretPosition(insertIndex + spanItem->content.length());
