@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 if (PUV2ViewBase.contextStack === undefined) {
   Reflect.set(PUV2ViewBase, 'contextStack', []);
