@@ -35,6 +35,8 @@ public:
         bool needSetDefaultValue, NG::NavigationTitlebarOptions& options);
     static void ParseToolbarOptions(const JSCallbackInfo& info, NG::NavigationToolbarOptions& options);
     static void ParseHideToolBarText(const JSCallbackInfo& info, bool& hideText);
+    static void ParseMenuOptions(const JSRef<JSVal>& optObj, NG::NavigationMenuOptions& options);
+    static void ParseToolBarMoreButtonOptions(const JSRef<JSVal>& optObj, NG::MoreButtonOptions& options);
     static void ParseBarItems(const WeakPtr<NG::FrameNode>& targetNode,
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
     static std::optional<NG::NavDestinationTransition> ParseNavDestinationTransition(

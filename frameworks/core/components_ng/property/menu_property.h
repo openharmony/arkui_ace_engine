@@ -76,6 +76,7 @@ struct MenuParam {
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> backgroundBlurStyleOption;
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     std::optional<NG::MarginProperty> layoutRegionMargin;

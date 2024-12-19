@@ -23,14 +23,68 @@
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetBackgroundBlurStyle(RefPtr<FrameNode>& host, const BlurStyleOption& bgBlurStyle)
+{
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(host->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(host->GetId());
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        if (renderContext->GetBackgroundEffect().has_value()) {
+            renderContext->UpdateBackgroundEffect(std::nullopt);
+        }
+        renderContext->UpdateBackBlurStyle(bgBlurStyle);
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+    }
+}
+
+void SetBackgroundEffect(RefPtr<FrameNode>& host, const EffectOption &effectOption)
+{
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(host->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(host->GetId());
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+        if (renderContext->GetBackBlurStyle().has_value()) {
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+        }
+        renderContext->UpdateBackgroundEffect(effectOption);
+    }
+}
+}
 void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
 {
-    if (opt == options_) {
+    bool needUpdateBgOptions = options_ != opt;
+    if (options_.bgOptions.blurStyleOption->blurOption != opt.bgOptions.blurStyleOption->blurOption) {
+        needUpdateBgOptions = true;
+    }
+    if (!needUpdateBgOptions) {
         return;
     }
 
     options_ = std::move(opt);
     UpdateBackgroundStyle();
+}
+
+void NavToolbarPattern::SetToolbarMoreButtonOptions(MoreButtonOptions&& opt)
+{
+    moreButtonOptions_ = std::move(opt);
 }
 
 void NavToolbarPattern::UpdateBackgroundStyle()
@@ -44,12 +98,15 @@ void NavToolbarPattern::UpdateBackgroundStyle()
     } else {
         SetDefaultBackgroundColorIfNeeded(host);
     }
-    if (options_.bgOptions.blurStyle.has_value()) {
-        BlurStyleOption blur;
-        blur.blurStyle = options_.bgOptions.blurStyle.value();
-        renderContext->UpdateBackBlurStyle(blur);
+    if (options_.bgOptions.blurStyleOption.has_value()) {
+        BlurStyleOption styleOption = options_.bgOptions.blurStyleOption.value();
+        SetBackgroundBlurStyle(host, styleOption);
     } else {
         renderContext->ResetBackBlurStyle();
+    }
+    if (options_.bgOptions.effectOption.has_value()) {
+        EffectOption effectOption = options_.bgOptions.effectOption.value();
+        SetBackgroundEffect(host, effectOption);
     }
 }
 

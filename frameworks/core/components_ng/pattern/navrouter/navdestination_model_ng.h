@@ -49,6 +49,7 @@ public:
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
+    void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
@@ -65,6 +66,7 @@ public:
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
+    void SetMenuOptions(NavigationMenuOptions&& opt) override;
     void SetBackgroundColor(const Color& color, bool isVaild = true) override;
     void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);

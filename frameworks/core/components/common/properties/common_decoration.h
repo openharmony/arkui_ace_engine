@@ -47,6 +47,18 @@ enum class TransitionHierarchyStrategy {
 
 struct BlurOption {
     std::vector<float> grayscale;
+    bool operator==(const BlurOption& other) const
+    {
+        if (grayscale.size() != other.grayscale.size()) {
+            return false;
+        }
+        return std::equal(grayscale.begin(), grayscale.end(), other.grayscale.begin());
+    }
+
+    bool operator!= (const BlurOption& other) const
+    {
+        return !(*this == other);
+    }
 };
  
 enum class BlurStyleActivePolicy {

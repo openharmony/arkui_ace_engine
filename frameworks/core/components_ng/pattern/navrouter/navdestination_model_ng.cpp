@@ -679,6 +679,17 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
 }
 
+void NavDestinationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetMenuOptions(std::move(opt));
+}
+
 void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -897,6 +908,16 @@ void NavDestinationModelNG::SetToolBarOptions(NavigationToolbarOptions&& opt)
         AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(navDestinationGroupNode);
     NavigationToolbarUtil::SetToolbarOptions(navDestinationGroupNode, std::move(opt));
+}
+
+void NavDestinationModelNG::SetToolbarMorebuttonOptions(MoreButtonOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navDestinationGroupNode, std::move(opt));
 }
 
 void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)

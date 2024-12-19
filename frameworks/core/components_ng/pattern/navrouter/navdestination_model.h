@@ -58,10 +58,12 @@ public:
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void SetHideItemText(bool isHideItemText) {};
     virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
+    virtual void SetToolbarMorebuttonOptions(NG::MoreButtonOptions&& opt) {}
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
+    virtual void SetMenuOptions(NG::NavigationMenuOptions&& opt) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
     virtual void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
