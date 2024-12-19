@@ -153,19 +153,8 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     if (IsOverlayMode()) {
         localOffset = localOffset - parentGlobalOffset; // original offset
     }
+    SetMagnifierOffset(localOffset, handleRect);
 
-    // update moving handle offset
-    auto movingHandleOffset = pattern->ConvertTouchOffsetToTextOffset(Offset(localOffset.GetX(), localOffset.GetY()));
-    auto movingHandleOffsetF = OffsetF(movingHandleOffset.GetX(), movingHandleOffset.GetY());
-    GetLocalPointWithTransform(movingHandleOffsetF); // do affine transformation
-    pattern->SetMovingHandleOffset(movingHandleOffsetF);
-
-    float x = localOffset.GetX();
-    float handleHeight = IsSingleHandle() ? pattern->CalculateCaretOffsetAndHeight().second : handleRect.Height();
-    float y = localOffset.GetY() + handleRect.Height() - handleHeight / 2; // 2: Half the height of the handle
-    auto magnifierLocalOffset = OffsetF(x, y);
-    GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
-    pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
     bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
         (!pattern->textSelector_.StartGreaterDest());
     IF_TRUE(isChangeSecondHandle, pattern->TriggerAvoidOnCaretChange());
@@ -176,12 +165,17 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     pattern->AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::OUT_BOUNDARY);
 }
 
-void RichEditorSelectOverlay::GetLocalPointWithTransform(OffsetF& localPoint)
+void RichEditorSelectOverlay::SetMagnifierOffset(const OffsetF& localOffset, const RectF& handleRect)
 {
-    if (!IsOverlayMode()) {
-        return;
-    }
-    BaseTextSelectOverlay::GetLocalPointWithTransform(localPoint);
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    float x = localOffset.GetX();
+    float handleHeight = IsSingleHandle() ? pattern->CalculateCaretOffsetAndHeight().second : handleRect.Height();
+    float y = localOffset.GetY() + handleRect.Height() - handleHeight / 2; // 2: Half the height of the handle
+    auto magLocalOffset = OffsetF(x, y);
+    auto magLocalOffsetWithTrans = magLocalOffset;
+    GetLocalPointWithTransform(magLocalOffsetWithTrans); // do affine transformation
+    pattern->magnifierController_->SetLocalOffset(magLocalOffsetWithTrans, magLocalOffset);
 }
 
 void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirst)

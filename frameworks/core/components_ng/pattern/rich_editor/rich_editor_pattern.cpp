@@ -6613,11 +6613,17 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     MoveCaretToContentRect();
     StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
-    auto localOffset = OffsetF(offset.GetX(), offset.GetY());
-    if (magnifierController_) {
-        magnifierController_->SetLocalOffset(localOffset);
-    }
+    SetMagnifierLocalOffset(offset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::SetMagnifierLocalOffset(Offset offset)
+{
+    CHECK_NULL_VOID(magnifierController_);
+    auto localOffset = OffsetF{ offset.GetX(), offset.GetY() };
+    auto localOffsetWithTrans = localOffset;
+    selectOverlay_->GetLocalPointWithTransform(localOffsetWithTrans);
+    magnifierController_->SetLocalOffset(localOffsetWithTrans, localOffset);
 }
 
 Offset RichEditorPattern::AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset)
@@ -10640,10 +10646,7 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     int32_t currentPosition = GreatNotEqual(textOffset.GetY(), paragraphs_.GetHeight())
                                 ? GetTextContentLength()
                                 : caretPosition_;
-    auto localOffset = OffsetF(touchOffset.GetX(), touchOffset.GetY());
-    if (magnifierController_ && GetTextContentLength() > 0) {
-        magnifierController_->SetLocalOffset(localOffset);
-    }
+    IF_TRUE(GetTextContentLength() > 0, SetMagnifierLocalOffset(touchOffset));
     auto [initSelectStart, initSelectEnd] = initSelector_;
     int32_t start = std::min(initSelectStart, currentPosition);
     int32_t end = std::max(initSelectEnd, currentPosition);
