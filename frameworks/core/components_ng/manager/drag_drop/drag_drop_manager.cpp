@@ -574,12 +574,26 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     draggedFrameNode_ = preTargetFrameNode_;
     preMovePoint_ = point;
     parentHitNodes_.emplace(frameNode->GetId());
+
+    // Reset hover status when drag start.
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->CleanHoverStatusForDragBegin();
 }
 
 void DragDropManager::OnDragStart(const Point& point)
 {
     dragDropState_ = DragDropMgrState::DRAGGING;
     NotifyDragFrameNode(point, DragEventType::START);
+
+    // Reset hover status when drag start.
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->CleanHoverStatusForDragBegin();
 }
 
 void DragDropManager::PrintDragFrameNode(
