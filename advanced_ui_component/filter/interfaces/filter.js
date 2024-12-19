@@ -21,7 +21,8 @@ let __decorate = (this && this.__decorate) || function (f13, g13, h13, i13) {
         k13 = Reflect.decorate(f13, g13, h13, i13);
     } else {
         for (let m13 = f13.length - 1; m13 >= 0; m13--) {
-            if (l13 = f13[m13]) {
+            l13 = f13[m13];
+            if (l13) {
                 k13 = (j13 < 3 ? l13(k13) : j13 > 3 ? l13(g13, h13, k13) : l13(g13, h13)) || k13;
             }
         }
@@ -72,14 +73,14 @@ const DEFAULT_SYMBOL_FONT_SCALE = 1;
 
 export let FilterType;
 (function (e13) {
-    e13[e13['MULTI_LINE_FILTER'] = 0] = 'MULTI_LINE_FILTER';
-    e13[e13['LIST_FILTER'] = 1] = 'LIST_FILTER';
+    e13[e13.MULTI_LINE_FILTER = 0] = 'MULTI_LINE_FILTER';
+    e13[e13.LIST_FILTER = 1] = 'LIST_FILTER';
 })(FilterType || (FilterType = {}));
 let FilterAccessibilityType;
 (function (z21) {
-    z21[z21['ACCESSIBILITY_TEXT'] = 0] = 'ACCESSIBILITY_TEXT';
-    z21[z21['ACCESSIBILITY_DESC'] = 1] = 'ACCESSIBILITY_DESC';
-    z21[z21['SEND_ACCESSIBILITY'] = 2] = 'SEND_ACCESSIBILITY';
+    z21[z21.ACCESSIBILITY_TEXT = 0] = 'ACCESSIBILITY_TEXT';
+    z21[z21.ACCESSIBILITY_DESC = 1] = 'ACCESSIBILITY_DESC';
+    z21[z21.SEND_ACCESSIBILITY = 2] = 'SEND_ACCESSIBILITY';
 })(FilterAccessibilityType || (FilterAccessibilityType = {}));
 let FontWeightArray = class FontWeightArray extends Array {
 };
@@ -209,20 +210,20 @@ class GradientMask extends ViewPU {
 }
 
 class ListFilterRow extends ViewPU {
-    constructor(d21, e21, f21, g21 = -1, h21 = undefined, i21) {
+    constructor(d21, j12, f21, g21 = -1, h21 = undefined, i21) {
         super(d21, f21, g21, i21);
         if (typeof h21 === 'function') {
             this.paramsGenerator_ = h21;
         }
-        this.__colorRow = new SynchedPropertyNesedObjectPU(e21.colorRow, this, 'colorRow');
-        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(e21.fontWeightRow, this, 'fontWeightRow');
+        this.__colorRow = new SynchedPropertyNesedObjectPU(j12.colorRow, this, 'colorRow');
+        this.__fontWeightRow = new SynchedPropertyNesedObjectPU(j12.fontWeightRow, this, 'fontWeightRow');
         this.__backgroundColorRow =
-            new SynchedPropertyNesedObjectPU(e21.backgroundColorRow, this, 'backgroundColorRow');
+            new SynchedPropertyNesedObjectPU(j12.backgroundColorRow, this, 'backgroundColorRow');
         this.__isBackgroundHoverRow =
-            new SynchedPropertyNesedObjectPU(e21.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
-        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(e21.isSelectedRow, this, 'isSelectedRow');
+            new SynchedPropertyNesedObjectPU(j12.isBackgroundHoverRow, this, 'isBackgroundHoverRow');
+        this.__isSelectedRow = new SynchedPropertyNesedObjectPU(j12.isSelectedRow, this, 'isSelectedRow');
         this.__filterAccessibilityText =
-            new SynchedPropertyNesedObjectPU(e21.filterAccessibilityText, this, 'filterAccessibilityText');
+            new SynchedPropertyNesedObjectPU(j12.filterAccessibilityText, this, 'filterAccessibilityText');
         this.filterRow = { name: '', options: [] };
         this.onItemClick = () => {
         };
@@ -230,7 +231,7 @@ class ListFilterRow extends ViewPU {
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
         this.bundleName = '';
-        this.setInitiallyProvidedValue(e21);
+        this.setInitiallyProvidedValue(j12);
         this.finalizeConstruction();
     }
 
@@ -313,25 +314,24 @@ class ListFilterRow extends ViewPU {
 
     aboutToAppear() {
         try {
-            let z20 = this.getUIContext();
-            this.isFollowingSystemFontScale = z20.isFollowingSystemFontScale();
-            this.maxAppFontScale = z20.getMaxFontScale();
-        }
-        catch (w20) {
-            let x20 = w20.code;
-            let y20 = w20.message;
-            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${x20}, message: ${y20}`);
+            let e12 = this.getUIContext();
+            this.isFollowingSystemFontScale = e12.isFollowingSystemFontScale();
+            this.maxAppFontScale = e12.getMaxFontScale();
+        } catch (b12) {
+            let c12 = b12.code;
+            let d12 = b12.message;
+            hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${c12}, message: ${d12}`);
         }
         this.bundleName = getContext(this)?.abilityInfo?.bundleName;
     }
 
     updateFontScale() {
-        let q20 = this.getUIContext();
-        let r20 = q20.getHostContext()?.config?.fontSizeScale ?? 1;
+        let z11 = this.getUIContext();
+        let a12 = z11.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        return Math.min(r20, this.maxAppFontScale);
+        return Math.min(a12, this.maxAppFontScale);
     }
 
     getAccessibilityText(i20, j20, k20) {
@@ -870,7 +870,6 @@ class MultiFilterRow extends ViewPU {
     }
 
     aboutToAppear() {
-        this.initAccessibilityResource();
         try {
             let r16 = this.getUIContext();
             this.isFollowingSystemFontScale = r16.isFollowingSystemFontScale();
