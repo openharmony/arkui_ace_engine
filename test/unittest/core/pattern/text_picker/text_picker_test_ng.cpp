@@ -266,6 +266,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow001, TestSize.Level1)
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
     dialogEvent["changeId"] = func;
     dialogEvent["acceptId"] = func;
+    dialogEvent["scrollStopId"] = func;
 
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -1878,6 +1879,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
     std::function<void()> onCancel = []() {};
     std::function<void(const std::string&)> onAccept = [](const std::string&) {};
     std::function<void(const std::string&)> onChange = [](const std::string&) {};
+    std::function<void(const std::string&)> onScrollStop = [](const std::string&) {};
     TextPickerDialog textPickerDialog;
     textPickerDialog.alignment = DialogAlignment::CENTER;
     TextPickerDialogEvent textPickerDialogEvent;
@@ -1887,7 +1889,8 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
      * test method SetTextPickerDialogShow.
      */
     textPickerDialogModel.SetTextPickerDialogShow(pickerText, settingData, std::move(onCancel),
-        std::move(onAccept), std::move(onChange), textPickerDialog, textPickerDialogEvent, buttonInfos);
+        std::move(onAccept), std::move(onChange), std::move(onScrollStop), textPickerDialog, textPickerDialogEvent,
+        buttonInfos);
     EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
 }
 

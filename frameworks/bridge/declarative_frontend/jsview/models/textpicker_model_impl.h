@@ -41,6 +41,7 @@ public:
     void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) override {};
     void SetIsCascade(bool isCascade) override {};
     void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override;
+    void SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop) override;
     void SetValues(const std::vector<std::string>& values) override {};
     void SetSelecteds(const std::vector<uint32_t>& values) override {};
     void SetBackgroundColor(const Color& color) override;
@@ -81,8 +82,9 @@ public:
     RefPtr<AceType> CreateObject() override;
     void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
-        TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) override;
+        std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onScrollStop,
+        TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H
