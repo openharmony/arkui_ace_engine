@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -94,6 +95,7 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
             .SetType(host->GetTag())
             .SetIndex(index)
             .SetText(value)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
         if (!inspectorId.empty()) {
@@ -136,6 +138,7 @@ void SelectPattern::OnModifyDone()
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     } else {
@@ -186,42 +189,14 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
 void SelectPattern::ShowSelectMenu()
 {
     CHECK_NULL_VOID(!options_.empty());
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
-    auto menu = GetMenuNode();
-    CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateTargetSize(selectSize_);
-
-    auto select = GetHost();
-    CHECK_NULL_VOID(select);
-    auto selectGeometry = select->GetGeometryNode();
-    CHECK_NULL_VOID(selectGeometry);
-    auto selectProps = select->GetLayoutProperty();
-    CHECK_NULL_VOID(selectProps);
-
-    if (isFitTrigger_) {
-        auto selectWidth = selectSize_.Width();
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->SetIsWidthModifiedBySelect(true);
-        menuLayoutProps->UpdateSelectMenuModifiedWidth(selectWidth);
-        auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
-        CHECK_NULL_VOID(scroll);
-        auto scrollPattern = scroll->GetPattern<ScrollPattern>();
-        CHECK_NULL_VOID(scrollPattern);
-        scrollPattern->SetIsWidthModifiedBySelect(true);
-        auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
-        CHECK_NULL_VOID(scrollLayoutProps);
-        scrollLayoutProps->UpdateScrollWidth(selectWidth);
-        UpdateOptionsWidth(selectWidth);
-    }
-
-    auto offset = GetHost()->GetPaintRectOffset();
+    UpdateTargetSize();
+    auto offset = host->GetPaintRectOffset();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
         offset.AddX(-CALIBERATE_X.ConvertToPx());
@@ -229,22 +204,25 @@ void SelectPattern::ShowSelectMenu()
         offset.AddY(selectSize_.Height());
     }
 
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
-    overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
+    overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
 }
 
 void SelectPattern::UpdateOptionsWidth(float selectWidth)
 {
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto optionGeoNode = options_[i]->GetGeometryNode();
+        auto optionNode = options_[i];
+        CHECK_NULL_VOID(optionNode);
+        auto optionGeoNode = optionNode->GetGeometryNode();
         CHECK_NULL_VOID(optionGeoNode);
         auto optionWidth = selectWidth - OPTION_MARGIN.ConvertToPx();
-        auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
+        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         optionPattern->SetIsWidthModifiedBySelect(true);
-        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
+        auto optionPaintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
+        optionNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -335,6 +313,9 @@ void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -342,6 +323,7 @@ void SelectPattern::RegisterOnPress()
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -1131,7 +1113,38 @@ bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SetSelectSize(geometryNode->GetFrameSize());
+    CHECK_NULL_RETURN(menuWrapper_, false);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    if (wrapperPattern && wrapperPattern->IsShow()) {
+        UpdateTargetSize();
+    }
     return false;
+}
+
+void SelectPattern::UpdateTargetSize()
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateTargetSize(selectSize_);
+    if (isFitTrigger_) {
+        auto selectWidth = selectSize_.Width();
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->SetIsWidthModifiedBySelect(true);
+        menuLayoutProps->UpdateSelectMenuModifiedWidth(selectWidth);
+        auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
+        CHECK_NULL_VOID(scroll);
+        auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+        CHECK_NULL_VOID(scrollPattern);
+        scrollPattern->SetIsWidthModifiedBySelect(true);
+        auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_VOID(scrollLayoutProps);
+        scrollLayoutProps->UpdateScrollWidth(selectWidth);
+        UpdateOptionsWidth(selectWidth);
+    }
+    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SelectPattern::SetSpace(const Dimension& value)

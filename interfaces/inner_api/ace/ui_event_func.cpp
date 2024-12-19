@@ -16,12 +16,14 @@
 #include "interfaces/inner_api/ace/ui_event_func.h"
 
 #include "ace_forward_compatibility.h"
+#include "ui_event_observer.h"
 
 namespace OHOS::Ace {
 constexpr char REGISTER_UI_EVENT_OBSERVER_FUNC[] = "OHOS_ACE_RegisterUIEventObserver";
 constexpr char UNREGISTER_UI_EVENT_OBSERVER_FUNC[] = "OHOS_ACE_UnregisterUIEventObserver";
 constexpr char GET_NODE_PROPERTY_FUNC[] = "OHOS_ACE_GetNodeProperty";
 constexpr char GET_SIMPLIFIED_INSPECTOR_TREE_FUNC[] = "OHOS_ACE_GetSimplifiedInspectorTree";
+constexpr char GET_SIMPLIFIED_INSPECTOR_TREE_ASYNC_FUNC[] = "OHOS_ACE_GetSimplifiedInspectorTreeAsync";
 
 UIEventFunc::UIEventFunc()
 {
@@ -36,6 +38,8 @@ UIEventFunc::UIEventFunc()
     getPropFunc_ = reinterpret_cast<GetNodePropertyFunc>(LOADSYM(handle_, GET_NODE_PROPERTY_FUNC));
     getTreeFunc_ =
         reinterpret_cast<GetSimplifiedInspectorTreeFunc>(LOADSYM(handle_, GET_SIMPLIFIED_INSPECTOR_TREE_FUNC));
+    getTreeAsyncFunc_ = reinterpret_cast<GetSimplifiedInspectorTreeAsyncFunc>(
+        LOADSYM(handle_, GET_SIMPLIFIED_INSPECTOR_TREE_ASYNC_FUNC));
     if (!IsAvailable()) {
         FREELIB(handle_);
         ResetFunc();
@@ -58,7 +62,7 @@ UIEventFunc& UIEventFunc::Get()
 
 bool UIEventFunc::IsAvailable() const
 {
-    return registerFunc_ && unregisterFunc_ && getPropFunc_ && getTreeFunc_;
+    return registerFunc_ && unregisterFunc_ && getPropFunc_ && getTreeFunc_ && getTreeAsyncFunc_;
 }
 
 void UIEventFunc::ResetFunc()
@@ -67,6 +71,7 @@ void UIEventFunc::ResetFunc()
     unregisterFunc_ = nullptr;
     getPropFunc_ = nullptr;
     getTreeFunc_ = nullptr;
+    getTreeAsyncFunc_ = nullptr;
     handle_ = nullptr;
 }
 
@@ -92,10 +97,17 @@ void UIEventFunc::GetNodeProperty(
     }
 }
 
-void UIEventFunc::GetSimplifiedInspectorTree(std::string& tree)
+void UIEventFunc::GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
 {
     if (UIEventFunc::Get().IsAvailable()) {
-        UIEventFunc::Get().getTreeFunc_(tree);
+        UIEventFunc::Get().getTreeFunc_(params, tree);
+    }
+}
+
+void UIEventFunc::GetSimplifiedInspectorTreeAsync(const TreeParams& params, OnInspectorTreeResult&& callback)
+{
+    if (UIEventFunc::Get().IsAvailable()) {
+        UIEventFunc::Get().getTreeAsyncFunc_(params, std::move(callback));
     }
 }
 } // namespace OHOS::Ace

@@ -45,6 +45,8 @@ async function querySnapshotAsync(want, componentId, uiContext) {
     want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
+  } finally {
+    imagePackageApi?.release();
   }
 }
 

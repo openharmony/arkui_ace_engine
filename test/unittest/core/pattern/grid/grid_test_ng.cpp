@@ -51,7 +51,6 @@ void GridTestNg::SetUpTestSuite()
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;
 #endif
-    testing::FLAGS_gmock_verbose = "error";
 }
 
 void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) const
@@ -81,10 +80,12 @@ void GridTestNg::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldNodes(); // Each testcase will create new list at begin
+    positionController_ = nullptr;
+    ClearOldNodes(); // Each testCase will create new list at begin
     MockAnimationManager::GetInstance().Reset();
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(0);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(0);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
 }
 
 void GridTestNg::GetGrid()
@@ -95,6 +96,7 @@ void GridTestNg::GetGrid()
     eventHub_ = frameNode_->GetEventHub<GridEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<GridLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
+    positionController_ = pattern_->GetOrCreatePositionController();
 }
 
 GridModelNG GridTestNg::CreateGrid()
@@ -219,16 +221,10 @@ void GridTestNg::AddFixedHeightItems(int32_t cnt, float height)
     }
 }
 
-void GridTestNg::ScrollTo(float position)
-{
-    pattern_->ScrollTo(position);
-    FlushLayoutTask(frameNode_);
-}
-
 void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize)
@@ -296,7 +292,7 @@ protected:
     {
         GridItemModelNG itemModel;
         itemModel.Create(GridItemStyle::NONE);
-        ViewAbstract::SetWidth(CalcLength(FILL_VALUE));
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
         ViewAbstract::SetFocusable(true);
         auto node = ViewStackProcessor::GetInstance()->Finish();
@@ -308,7 +304,7 @@ private:
     const std::function<float(int32_t)> getHeight_;
 };
 
-void GridTestNg::CreateLazyForEachItems(int32_t itemNumber, std::function<float(uint32_t)>&& getHeight)
+void GridTestNg::CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(uint32_t)>&& getHeight)
 {
     RefPtr<LazyForEachActuator> mockLazy = AceType::MakeRefPtr<GridMockLazy>(itemNumber, std::move(getHeight));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
@@ -320,5 +316,4 @@ RefPtr<FrameNode> GridTestNg::GetItem(int32_t idx, bool asCache)
 {
     return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(idx, asCache));
 }
-
 } // namespace OHOS::Ace::NG

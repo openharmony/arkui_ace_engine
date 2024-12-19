@@ -69,6 +69,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d down, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -127,11 +128,13 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         event.touchEventId, event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS &&
         refereeState_ != RefereeState::SUCCEED) {
+        extraInfo_ += "activeFinger size not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
     }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "refereeState is not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -266,6 +269,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "receive cancel event.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }

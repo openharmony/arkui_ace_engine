@@ -380,7 +380,6 @@ void DragAnimationHelper::UpdateGatherNodeToTop()
 
 void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Show gather animation with menu");
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();

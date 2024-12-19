@@ -884,7 +884,7 @@ ArkUINativeModuleValue ListBridge::SetOnScrollIndex(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(int32_t, int32_t, int32_t )> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(int32_t, int32_t, int32_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
                                                            const int32_t start, const int32_t end,
                                                            const int32_t center) {
         panda::LocalScope pandaScope(vm);
@@ -934,8 +934,8 @@ ArkUINativeModuleValue ListBridge::SetOnScrollVisibleContentChange(ArkUIRuntimeC
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(ListItemIndex, ListItemIndex)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                   const ListItemIndex start, const ListItemIndex end) {
+    std::function<void(ListItemIndex, ListItemIndex)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const ListItemIndex start, const ListItemIndex end) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -945,7 +945,7 @@ ArkUINativeModuleValue ListBridge::SetOnScrollVisibleContentChange(ArkUIRuntimeC
         startParam->SetNativePointerFieldCount(vm, 1);
         startParam->SetNativePointerField(vm, 0, static_cast<void*>(&startParam));
         endParam->SetNativePointerFieldCount(vm, 1);
-        endParam->SetNativePointerField(vm, 0, static_cast<void*>(&endParam));        
+        endParam->SetNativePointerField(vm, 0, static_cast<void*>(&endParam));
         // 2: Array length
         panda::Local<panda::JSValueRef> params[2] = { startParam, endParam };
         func->Call(vm, func.ToLocal(), params, 2); // 2: Array length
@@ -1260,8 +1260,8 @@ ArkUINativeModuleValue ListBridge::SetOnListWillScroll(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<ScrollFrameResult(CalcDimension, ScrollState, ScrollSource)> callback =
-    [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const CalcDimension& scrollOffset, const ScrollState& scrollState,
-                            ScrollSource scrollSource) {
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+            const CalcDimension& scrollOffset, const ScrollState& scrollState, ScrollSource scrollSource) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -1277,7 +1277,8 @@ ArkUINativeModuleValue ListBridge::SetOnListWillScroll(ArkUIRuntimeCallInfo* run
 
         if (result->IsObject(vm)) {
             auto resultObj = result->ToObject(vm);
-            panda::Local<panda::JSValueRef> dxRemainValue = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetRemain"));
+            panda::Local<panda::JSValueRef> dxRemainValue =
+                    resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetRemain"));
             if (dxRemainValue->IsNumber()) {
                 scrollRes.offset = Dimension(dxRemainValue->ToNumber(vm)->Value(), DimensionUnit::VP);
             }
@@ -1303,7 +1304,7 @@ ArkUINativeModuleValue ListBridge::SetOnListDidScroll(ArkUIRuntimeCallInfo* runt
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(Dimension, ScrollState)> callback = [vm, frameNode,func = panda::CopyableGlobal(vm, func)](
+    std::function<void(Dimension, ScrollState)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -1335,7 +1336,7 @@ ArkUINativeModuleValue ListBridge::SetOnListReachStart(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](){
+    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -1361,7 +1362,7 @@ ArkUINativeModuleValue ListBridge::SetOnListReachEnd(ArkUIRuntimeCallInfo* runti
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](){
+    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -1380,7 +1381,7 @@ ArkUINativeModuleValue ListBridge::ResetOnScrollIndex(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetOnListScrollIndex(nativeNode);
-    return panda::JSValueRef::Undefined(vm); 
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue ListBridge::ResetOnScrollVisibleContentChange(ArkUIRuntimeCallInfo* runtimeCallInfo)

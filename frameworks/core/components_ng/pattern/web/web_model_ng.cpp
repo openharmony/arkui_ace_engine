@@ -28,6 +28,9 @@
 #endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#include "nweb_helper.h"
+#endif
 
 namespace OHOS::Ace::NG {
 void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, RenderMode renderMode,

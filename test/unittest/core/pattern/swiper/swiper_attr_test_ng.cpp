@@ -1400,4 +1400,27 @@ HWTEST_F(SwiperAttrTestNg, LoopChange001, TestSize.Level1)
     FlushUITasks();
     EXPECT_NE(pattern_->itemPosition_.find(-1), pattern_->itemPosition_.end());
 }
+
+/**
+ * @tc.name: PageFlipModeTest001
+ * @tc.desc: PageFlipMode property test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, PageFlipModeTest001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    // default mode is PageFlipMode::CONTINUOUS(0)
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 0);
+    // mode is PageFlipMode::SINGLE(0)
+    model.SetPageFlipMode(AceType::RawPtr(frameNode_), 1);
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 1);
+    // exceeding the enum range will reset to default
+    model.SetPageFlipMode(AceType::RawPtr(frameNode_), -1);
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 0);
+    // exceeding the enum range will reset to default
+    model.SetPageFlipMode(AceType::RawPtr(frameNode_), 100);
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 0);
+}
 } // namespace OHOS::Ace::NG

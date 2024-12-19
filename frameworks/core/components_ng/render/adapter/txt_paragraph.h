@@ -173,6 +173,9 @@ private:
     int32_t AdjustIndexForEmoji(int32_t index);
     bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
     void CalculateLeadingMarginOffest(float& x, float& y);
+    int32_t GetIndexWithoutPlaceHolder(int32_t index);
+    bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
+    bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE

@@ -373,7 +373,7 @@ HWTEST_F(ScrollLayoutTestNg, Model001, TestSize.Level1)
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_TOP);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_BOTTOM);
 
     ScrollTo(0.f);
@@ -382,7 +382,7 @@ HWTEST_F(ScrollLayoutTestNg, Model001, TestSize.Level1)
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_LEFT);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_RIGHT);
 
     pattern_->SetAxis(Axis::NONE);
@@ -697,7 +697,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollGetChildrenExpandedSize001, TestSize.Level1)
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(SCROLL_HEIGHT));
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(100.f));
     FlushLayoutTask(frameNode_, true);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(100.f, SCROLL_HEIGHT -padding));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(100.f, SCROLL_HEIGHT - padding));
 
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(2000.f));
     FlushLayoutTask(frameNode_, true);

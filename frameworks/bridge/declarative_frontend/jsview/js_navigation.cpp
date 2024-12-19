@@ -90,6 +90,9 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
 
 void JSNavigation::ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPtr<AceType>>& items)
 {
+    if (info[0]->IsUndefined()) {
+        return;
+    }
     JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(info[0]);
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -276,6 +279,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
     JSClass<JSNavigation>::StaticMethod("recoverable", &JSNavigation::SetRecoverable);
     JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
+    JSClass<JSNavigation>::StaticMethod("enableModeChangeAnimation", &JSNavigation::SetEnableModeChangeAnimation);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -362,6 +366,18 @@ void JSNavigation::SetHideTitleBar(const JSCallbackInfo& info)
         isAnimated = info[1]->ToBoolean();
     }
     NavigationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
+}
+
+void JSNavigation::SetEnableModeChangeAnimation(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        NavigationModel::GetInstance()->SetEnableModeChangeAnimation(info[0]->ToBoolean());
+        return;
+    }
+    NavigationModel::GetInstance()->SetEnableModeChangeAnimation(true);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)

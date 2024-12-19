@@ -36,15 +36,14 @@ class ACE_EXPORT SpanString : public SpanStringBase {
     DECLARE_ACE_TYPE(SpanString, SpanStringBase);
 
 public:
-    explicit SpanString(const std::string& text);
+    explicit SpanString(const std::u16string& text);
     explicit SpanString(const ImageSpanOptions& options);
     explicit SpanString(RefPtr<CustomSpan>& span);
     ~SpanString() override;
-    const std::string& GetString() const;
-    std::wstring GetWideString();
-    std::u16string GetU16string();
+    const std::string GetString() const;
+    const std::u16string& GetU16string() const;
     int32_t GetLength() const;
-    void SetString(const std::string& text);
+    void SetString(const std::u16string& text);
     void SetGroupId(const RefPtr<SpanBase>& span);
     void SetFramNode(const WeakPtr<NG::FrameNode>& frameNode);
     void MarkDirtyFrameNode();
@@ -84,9 +83,6 @@ public:
         const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<FontSpan> ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
-    void ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end);
-    void ChangeStartToCorrectNum(int32_t& start);
-    void ChangeEndToCorrectNum(int32_t& end);
     std::string ToString();
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
@@ -97,7 +93,7 @@ protected:
     void ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation);
     void SortSpans(std::list<RefPtr<SpanBase>>& spans);
     bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
-    static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
+    static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::u16string& text);
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
     void AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type, int32_t start);
     int32_t GetStepsByPosition(int32_t pos);
@@ -107,8 +103,8 @@ protected:
     void RemoveSpecialSpan(int32_t start, int32_t end, SpanType type);
     // For the scene after image remove
     bool CheckRange(const RefPtr<SpanBase>& spanBase) const;
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    static std::u16string GetWideStringSubstr(const std::u16string& content, int32_t start);
+    static std::u16string GetWideStringSubstr(const std::u16string& content, int32_t start, int32_t length);
     std::list<RefPtr<NG::SpanItem>>::iterator SplitSpansAndForward(std::list<RefPtr<NG::SpanItem>>::iterator& it);
     RefPtr<NG::ImageSpanItem> MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan);
     RefPtr<NG::CustomSpanItem> MakeCustomSpanItem(const RefPtr<CustomSpan>& customSpan);
@@ -117,7 +113,7 @@ protected:
     bool ContainSpecialNode(int32_t start, int32_t length);
     bool IsSpecialNode(RefPtr<SpanBase> span);
 
-    std::string text_;
+    std::u16string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
     int32_t groupId_ = 0;

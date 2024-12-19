@@ -80,6 +80,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
         refereeState_ = RefereeState::READY;
     }
@@ -149,6 +150,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         event.touchEventId, event.id, refereeState_, static_cast<int32_t>(activeFingers_.size()), fingers_);
     extraInfo_ = "activeSize: " + std::to_string(static_cast<int32_t>(activeFingers_.size()));
     if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
+        extraInfo_ += "activeFinger size not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -156,6 +158,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     lastTouchEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "refereeState not satisfy.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;

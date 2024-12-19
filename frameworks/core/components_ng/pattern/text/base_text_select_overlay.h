@@ -254,6 +254,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
     bool GetClipHandleViewPort(RectF& rect);
+    bool CalculateClippedRect(RectF& rect);
     void MarkOverlayDirty();
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void UpdateHandleColor();
@@ -288,8 +289,7 @@ protected:
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
     bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
-    virtual RectF GetFirstHandleLocalPaintRect();
-    virtual RectF GetSecondHandleLocalPaintRect();
+    virtual RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex);
     virtual void CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect);
     bool IsAncestorNodeStartAnimation(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);

@@ -807,7 +807,7 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
     }
 
     const float average = GetAverageItemHeight();
-    for (uint32_t i = GetSegment(endIndex_ + 1); i < lanes_.size(); ++i) {
+    for (uint32_t i = static_cast<uint32_t>(GetSegment(endIndex_ + 1)); i < lanes_.size(); ++i) {
         height += EstimateSectionHeight(i, average, endIndex_ + 1, INT_MAX);
     }
     return std::max(height, maxHeight_);

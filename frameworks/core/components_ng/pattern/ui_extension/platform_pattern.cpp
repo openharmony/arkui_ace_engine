@@ -79,6 +79,7 @@ void PlatformPattern::OnModifyDone()
 
 void PlatformPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    focusHub->SetIsNodeNeedKey(true);
     focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {

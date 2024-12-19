@@ -266,6 +266,7 @@ private:
     void InitSpinner(const RefPtr<FrameNode>& spinner, const RefPtr<SelectTheme>& selectTheme);
     void ResetParams();
     void UpdateOptionsWidth(float selectWidth);
+    void UpdateTargetSize();
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;

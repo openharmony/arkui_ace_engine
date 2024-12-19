@@ -450,6 +450,7 @@ public:
             return;
         }
         json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
+        json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
     }
 
     void CreateAmPmNode();

@@ -856,6 +856,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     if (IsUIExtensionComponent(dragFrameNode)) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
+        NotifyDragFrameNode(point, DragEventType::DROP);
         return;
     }
 
@@ -1454,8 +1455,8 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
     if (!addDataCallback_) {
         auto callback = [weakManager = WeakClaim(this)](const std::string& data) {
             auto dragDropManager = weakManager.Upgrade();
-            auto addData = dragDropManager->newData_->ToString();
             CHECK_NULL_VOID(dragDropManager);
+            auto addData = dragDropManager->newData_->ToString();
             auto clipboardAllData = JsonUtil::Create(true);
             clipboardAllData->Put("preData", data.c_str());
             clipboardAllData->Put("newData", addData.c_str());

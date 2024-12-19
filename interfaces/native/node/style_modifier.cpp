@@ -30,6 +30,8 @@ const std::regex COLOR_WITH_MAGIC("#[0-9A-Fa-f]{8}");
 const std::regex BRACKETS("\\(.*?\\)");
 const std::regex FLOAT_MAGIC("^[0-9]+(\\.[0-9]+)?$");
 const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
+const char *COLORING_STRATEGY = "invert";
+const char *COLOR_MARKERS = "color";
 constexpr char PARAMS_SEPARATOR_LEVEL1 = ';';
 constexpr int UNIT_PX = 0;
 constexpr int UNIT_VP = 1;
@@ -3124,11 +3126,25 @@ const ArkUI_AttributeItem* GetContrast(ArkUI_NodeHandle node)
 
 int32_t SetForegroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    auto* fullImpl = GetFullImpl();
+    bool isColor = true;
+    if (item->string) {
+        if (std::strcmp(item->string, COLORING_STRATEGY) == 0) {
+            isColor = false;
+            fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
+                node->uiNodeHandle, isColor, static_cast<uint32_t>(ForegroundColorStrategy::INVERT));
+            return ERROR_CODE_NO_ERROR;
+        }
+        if (std::strcmp(item->string, COLOR_MARKERS) == 0 && item->size > 0) {
+            isColor = true;
+            fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
+                node->uiNodeHandle, isColor, item->value[0].u32);
+            return ERROR_CODE_NO_ERROR;
+        }
+    }
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto* fullImpl = GetFullImpl();
-    bool isColor = true;
     if (item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_INVERT ||
         item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_AVERAGE ||
         item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_PRIMARY) {
@@ -5235,7 +5251,7 @@ void ResetScrollScrollBarColor(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollScrollBarColor(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowScrollBarColor(node->uiNodeHandle);
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(node->uiNodeHandle);
     }
 }
 
@@ -7446,6 +7462,33 @@ const ArkUI_AttributeItem* GetSwiperIndicatorInteractive(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetSwiperPageFlipMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperPageFlipMode(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSwiperPageFlipMode(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperPageFlipMode(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSwiperPageFlipMode(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Int32 value = fullImpl->getNodeModifiers()->getSwiperModifier()->getSwiperPageFlipMode(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
 int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->string == nullptr) {
@@ -8915,6 +8958,9 @@ int32_t SetAccessibilityValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     uiValue.min = ArkUIOptionalInt { valuePtr->min.isSet, valuePtr->min.value };
     uiValue.max = ArkUIOptionalInt { valuePtr->max.isSet, valuePtr->max.value };
     uiValue.current = ArkUIOptionalInt { valuePtr->current.isSet, valuePtr->current.value };
+    uiValue.rangeMin = ArkUIOptionalInt { valuePtr->rangeMin.isSet, valuePtr->rangeMin.value };
+    uiValue.rangeMax = ArkUIOptionalInt { valuePtr->rangeMax.isSet, valuePtr->rangeMax.value };
+    uiValue.rangeCurrent = ArkUIOptionalInt { valuePtr->rangeCurrent.isSet, valuePtr->rangeCurrent.value };
     uiValue.text = ArkUIOptionalCharPtr { valuePtr->text.isSet, valuePtr->text.value };
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityValue(node->uiNodeHandle, uiValue);
@@ -8930,6 +8976,9 @@ const ArkUI_AttributeItem* GetAccessibilityValue(ArkUI_NodeHandle node)
     value.min = ArkUI_OptionalInt { uiValue.min.isSet, uiValue.min.value };
     value.max = ArkUI_OptionalInt { uiValue.max.isSet, uiValue.max.value };
     value.current = ArkUI_OptionalInt { uiValue.current.isSet, uiValue.current.value };
+    value.rangeMin = ArkUI_OptionalInt { uiValue.rangeMin.isSet, uiValue.rangeMin.value };
+    value.rangeMax = ArkUI_OptionalInt { uiValue.rangeMax.isSet, uiValue.rangeMax.value };
+    value.rangeCurrent = ArkUI_OptionalInt { uiValue.rangeCurrent.isSet, uiValue.rangeCurrent.value };
     value.text = ArkUI_OptionalCharPtr { uiValue.text.isSet, uiValue.text.value };
     g_attributeItem.object = &value;
     g_attributeItem.size = NUM_0;
@@ -11984,6 +12033,7 @@ int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->resetCachedCount(node->uiNodeHandle);
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
@@ -13781,7 +13831,7 @@ int32_t SetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetSwiperVertical, SetSwiperDuration, SetSwiperCurve, SetSwiperItemSpace, SetSwiperIndex, SetSwiperDisplayCount,
         SetSwiperDisableSwipe, SetSwiperShowDisplayArrow, SetSwiperEffectMode, SetSwiperNodeAdapter,
         SetSwiperCachedCount, SetSwiperPrevMargin, SetSwiperNextMargin, SetSwiperIndicator, SetSwiperNestedScroll,
-        SetSwiperToIndex, SetSwiperIndicatorInteractive };
+        SetSwiperToIndex, SetSwiperIndicatorInteractive, SetSwiperPageFlipMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13795,8 +13845,8 @@ void ResetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSwiperInterval, ResetSwiperVertical, ResetSwiperDuration, ResetSwiperCurve, ResetSwiperItemSpace,
         ResetSwiperIndex, ResetSwiperDisplayCount, ResetSwiperDisableSwipe, ResetSwiperShowDisplayArrow,
         ResetSwiperEffectMode, ResetSwiperNodeAdapter, ResetSwiperCachedCount, ResetSwiperPrevMargin,
-        ResetSwiperNextMargin, ResetSwiperIndicator, ResetSwiperNestedScroll, nullptr,
-        ResetSwiperIndicatorInteractive };
+        ResetSwiperNextMargin, ResetSwiperIndicator, ResetSwiperNestedScroll, nullptr, ResetSwiperIndicatorInteractive,
+        ResetSwiperPageFlipMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -13810,7 +13860,7 @@ const ArkUI_AttributeItem* GetSwiperAttribute(ArkUI_NodeHandle node, int32_t sub
         GetSwiperVertical, GetSwiperDuration, GetSwiperCurve, GetSwiperItemSpace, GetSwiperIndex, GetSwiperDisplayCount,
         GetSwiperDisableSwipe, GetSwiperShowDisplayArrow, GetSwiperEffectMode, GetSwiperNodeAdapter,
         GetSwiperCachedCount, GetSwiperPrevMargin, GetSwiperNextMargin, GetSwiperIndicator, GetSwiperNestedScroll,
-        nullptr, GetSwiperIndicatorInteractive };
+        nullptr, GetSwiperIndicatorInteractive, GetSwiperPageFlipMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
