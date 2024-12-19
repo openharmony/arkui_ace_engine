@@ -684,13 +684,7 @@ void RichEditorPattern::FireOnReady()
 void RichEditorPattern::MoveCaretOnLayoutSwap()
 {
     MoveCaretAfterTextChange();
-    auto context = GetContext();
-    bool isResize = false;
-    if (context) {
-        isResize = context->GetEnableKeyBoardAvoidMode() == KeyBoardAvoidMode::RESIZE;
-    }
-    bool needScroll = (needMoveCaretToContentRect_ || isEditing_) && !isResize;
-    if (needScroll) {
+    if (needMoveCaretToContentRect_ || isEditing_) {
         MoveCaretToContentRect();
         needMoveCaretToContentRect_ = false;
     }
