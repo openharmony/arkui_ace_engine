@@ -23,6 +23,20 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src)
+{
+    switch (src) {
+        case AccessibilityHoverAction::HOVER_ENTER: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER; break;
+        case AccessibilityHoverAction::HOVER_MOVE: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE; break;
+        case AccessibilityHoverAction::HOVER_EXIT: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT; break;
+        case AccessibilityHoverAction::HOVER_CANCEL: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL; break;
+        default:
+            dst = static_cast<Ark_AccessibilityHoverType>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src)
 {
     switch (src) {

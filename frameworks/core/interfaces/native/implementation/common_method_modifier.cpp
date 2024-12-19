@@ -1962,8 +1962,41 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnAccessibilityHover(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnAccessibilityHover(frameNode);
+    }
+    auto weakeNode = AceType::WeakClaim(frameNode);
+    auto onAccessibilityHover = [arkCallback = CallbackHelper(*value), node = weakeNode](
+        bool isHover, AccessibilityHoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        Ark_AccessibilityHoverEvent event;
+        event.timestamp = Converter::ArkValue<Ark_Number>(static_cast<double>(
+            hoverInfo.GetTimeStamp().time_since_epoch().count()));
+        event.source = Converter::ArkValue<Ark_SourceType>(hoverInfo.GetSourceDevice());
+        event.target.area = Converter::ArkValue<Ark_Area>(hoverInfo);
+        event.sourceTool = Converter::ArkValue<Ark_SourceTool>(hoverInfo.GetSourceTool());
+        event.axisVertical = Converter::ArkValue<Opt_Number>(0.0f);
+        event.axisHorizontal = Converter::ArkValue<Opt_Number>(0.0f);
+        event.tiltX = Converter::ArkValue<Ark_Number>(hoverInfo.GetTiltX().value_or(0.0f));
+        event.tiltY = Converter::ArkValue<Ark_Number>(hoverInfo.GetTiltY().value_or(0.0f));
+        const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
+        event.windowX = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+        event.windowY = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+        const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
+        event.x = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
+        event.y = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+        const OHOS::Ace::Offset& screenLocation = hoverInfo.GetScreenLocation();
+        event.displayX = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
+        event.displayY = Converter::ArkValue<Ark_Number>(
+            PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+        event.type = Converter::ArkValue<Ark_AccessibilityHoverType>(hoverInfo.GetActionType());
+        arkCallback.Invoke(arkIsHover, event);
+    };
+    ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      Ark_HoverEffect value)
