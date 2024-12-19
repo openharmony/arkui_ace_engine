@@ -31,7 +31,7 @@ namespace {
     using TabBarOptionsVariant = std::variant<
         Ark_String,
         Ark_Resource,
-        Callback_Any,
+        CustomNodeBuilder,
         Ark_TabBarOptions
     >;
 } // namespace
@@ -237,7 +237,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else if (auto arkText = std::get_if<Ark_Resource>(&options.value());
         arkText != nullptr) {
         label = Converter::OptConvert<std::string>(*arkText);
-    } else if (auto arkText = std::get_if<Callback_Any>(&options.value());
+    } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value());
         arkText != nullptr) {
         LOGE("ARKOALA TabContentAttributeModifier.CustomBuilder not implemented.");
     } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value());

@@ -42,7 +42,7 @@ MenuItemGroupType Convert(const Ark_String& src)
 }
 
 template<>
-MenuItemGroupType Convert(const Callback_Any& src)
+MenuItemGroupType Convert(const CustomNodeBuilder& src)
 {
     return nullptr;
 }

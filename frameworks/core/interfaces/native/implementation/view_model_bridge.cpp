@@ -42,7 +42,6 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createCommonNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCommonMethodNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCommonShapeMethodNode(Ark_Int32 nodeId);
-    Ark_NodeHandle createCommonTransitionNode(Ark_Int32 nodeId);
     Ark_NodeHandle createComponent3DNode(Ark_Int32 nodeId);
     Ark_NodeHandle createComponentRootNode(Ark_Int32 nodeId);
     Ark_NodeHandle createContainerSpanNode(Ark_Int32 nodeId);
@@ -173,7 +172,6 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_COMMON: return GeneratedViewModel::createCommonNode(id);
             case GENERATED_ARKUI_COMMON_METHOD: return GeneratedViewModel::createCommonMethodNode(id);
             case GENERATED_ARKUI_COMMON_SHAPE_METHOD: return GeneratedViewModel::createCommonShapeMethodNode(id);
-            case GENERATED_ARKUI_COMMON_TRANSITION: return GeneratedViewModel::createCommonTransitionNode(id);
             case GENERATED_ARKUI_COMPONENT_3D: return GeneratedViewModel::createComponent3DNode(id);
             case GENERATED_ARKUI_COMPONENT_ROOT: return GeneratedViewModel::createComponentRootNode(id);
             case GENERATED_ARKUI_CONTAINER_SPAN: return GeneratedViewModel::createContainerSpanNode(id);

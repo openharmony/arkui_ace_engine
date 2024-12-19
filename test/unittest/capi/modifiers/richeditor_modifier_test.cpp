@@ -535,7 +535,8 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     // Prepare callbacks
-    auto onBuiltCallback = [](const Ark_Int32 resourceId, const Callback_Any_Void continuation) {
+    auto onBuiltCallback = [](const Ark_Int32 resourceId,
+        const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
         g_onBuilt = true;
     };
     auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
@@ -547,7 +548,7 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     // Prepare options
     auto responseType = Converter::ArkUnion<Ark_Union_ResponseType_RichEditorResponseType, Ark_ResponseType>(
         Ark_ResponseType::ARK_RESPONSE_TYPE_LONG_PRESS);
-    auto buildFunc = Converter::ArkValue<Callback_Any>(onBuiltCallback, TEST_RESOURCE_ID);
+    auto buildFunc = Converter::ArkValue<CustomNodeBuilder>(onBuiltCallback, TEST_RESOURCE_ID);
     Ark_SelectionMenuOptions value;
     value.menuType = Converter::ArkValue<Opt_MenuType>(Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU);
     auto onAppearCb = Converter::ArkValue<MenuOnAppearCallback>(onAppearCallback, TEST_RESOURCE_ID);
@@ -592,10 +593,11 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_KB_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_KB_DEFAULT_VALUE);
 
-    auto onCallback = [](const Ark_Int32 resourceId, const Callback_Any_Void continuation) {
+    auto onCallback = [](const Ark_Int32 resourceId,
+        const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
         g_keyboardCallbackCalled = true;
     };
-    auto keyboardBuilderCallback = Converter::ArkValue<Callback_Any>(onCallback, TEST_RESOURCE_ID);
+    auto keyboardBuilderCallback = Converter::ArkValue<CustomNodeBuilder>(onCallback, TEST_RESOURCE_ID);
 
     Ark_KeyboardOptions keyboardOptions;
     keyboardOptions.supportAvoidance = Converter::ArkValue<Opt_Boolean>(true);

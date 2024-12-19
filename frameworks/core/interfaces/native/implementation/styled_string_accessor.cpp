@@ -17,12 +17,15 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct StyledStringPeer {};
+struct StyledStringPeer {
+    virtual ~StyledStringPeer() = default;
+};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringAccessor {
 void DestroyPeerImpl(StyledStringPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                            const Opt_Array_StyleOptions* styles)
@@ -63,7 +66,7 @@ void ToHtmlImpl(const Ark_StyledString* styledString)
 void MarshallingImpl(const Ark_StyledString* styledString)
 {
 }
-void UnmarshallingImpl(Ark_Buffer buffer,
+void UnmarshallingImpl(const Ark_Buffer* buffer,
                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }

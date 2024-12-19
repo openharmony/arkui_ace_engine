@@ -19,7 +19,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
-
 namespace OHOS::Ace::NG::Converter {
 
 void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src)

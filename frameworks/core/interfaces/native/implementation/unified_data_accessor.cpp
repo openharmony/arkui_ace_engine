@@ -17,36 +17,43 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct TimePickerDialogPeer {
-    virtual ~TimePickerDialogPeer() = default;
+struct UnifiedDataPeer {
+    virtual ~UnifiedDataPeer() = default;
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace TimePickerDialogAccessor {
-void DestroyPeerImpl(TimePickerDialogPeer* peer)
+namespace UnifiedDataAccessor {
+void DestroyPeerImpl(UnifiedDataPeer* peer)
 {
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TimePickerDialogPeer();
+    return new UnifiedDataPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ShowImpl(const Opt_TimePickerDialogOptions* options)
+Ark_Boolean HasTypeImpl(UnifiedDataPeer* peer,
+                        const Ark_String* type)
+{
+    return 0;
+}
+void GetTypesImpl(UnifiedDataPeer* peer)
 {
 }
-} // TimePickerDialogAccessor
-const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
+} // UnifiedDataAccessor
+const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor()
 {
-    static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
-        TimePickerDialogAccessor::DestroyPeerImpl,
-        TimePickerDialogAccessor::CtorImpl,
-        TimePickerDialogAccessor::GetFinalizerImpl,
-        TimePickerDialogAccessor::ShowImpl,
+    static const GENERATED_ArkUIUnifiedDataAccessor UnifiedDataAccessorImpl {
+        UnifiedDataAccessor::DestroyPeerImpl,
+        UnifiedDataAccessor::CtorImpl,
+        UnifiedDataAccessor::GetFinalizerImpl,
+        UnifiedDataAccessor::HasTypeImpl,
+        UnifiedDataAccessor::GetTypesImpl,
     };
-    return &TimePickerDialogAccessorImpl;
+    return &UnifiedDataAccessorImpl;
 }
 
 }
