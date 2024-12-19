@@ -2363,6 +2363,23 @@ void SwiperPattern::InitOnFocusInternal(const RefPtr<FocusHub>& focusHub)
 void SwiperPattern::HandleFocusInternal()
 {
     currentFocusIndex_ = currentIndex_;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_VOID(lastFocusNode);
+    for (const auto& item : itemPosition_) {
+        auto itemNode = GetCurrentFrameNode(item.first);
+        if (!itemNode) {
+            continue;
+        }
+        if (itemNode->GetFirstFocusHubChild() == lastFocusNode) {
+            currentFocusIndex_ = item.first;
+            return;
+        }
+    }
 }
 
 void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
