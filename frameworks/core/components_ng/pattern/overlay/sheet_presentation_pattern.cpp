@@ -1591,7 +1591,9 @@ void SheetPresentationPattern::InitSheetDetents()
                 sheetDetentHeight_.emplace_back(height);
                 break;
             }
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() <= 0) {
                 height = InitialSingleGearHeight(sheetStyle);
