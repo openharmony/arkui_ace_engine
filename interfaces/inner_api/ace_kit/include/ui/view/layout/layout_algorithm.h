@@ -21,7 +21,6 @@
 
 #include "ui/base/ace_type.h"
 #include "ui/base/geometry/ng/size_t.h"
-#include "ui/base/referenced.h"
 #include "ui/view/frame_node.h"
 
 namespace OHOS::Ace::NG {

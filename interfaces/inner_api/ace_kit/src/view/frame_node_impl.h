@@ -41,6 +41,7 @@ public:
 
     RefPtr<NG::LayoutProperty> GetLayoutProperty() override;
     RefPtr<Pattern> GetPattern() override;
+    void PushAceNode(const RefPtr<AceNode>& node);
     RefPtr<AceNode> PopAceNode();
     RefPtr<AceNode> GetAceNode() const;
     NG::LayoutWrapper* GetLayoutWrapper();

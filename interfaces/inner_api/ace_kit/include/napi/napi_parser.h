@@ -17,14 +17,15 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_NAPI_NAPI_PARSER_H
 
 #include "native_engine/native_value.h"
+#include "ui/base/geometry/calc_dimension.h"
 #include "ui/base/macros.h"
 #include "ui/properties/color.h"
 
 namespace OHOS::Ace::Kit {
 
 bool ACE_FORCE_EXPORT ParseColor(napi_env env, napi_value value, Color& info);
-// bool ParseNapiDimensionNG(
-//     napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent);
+bool ACE_FORCE_EXPORT ParseDimension(
+    napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent);
 
 } // namespace OHOS::Ace::Kit
 

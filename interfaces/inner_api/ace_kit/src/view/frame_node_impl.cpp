@@ -60,6 +60,11 @@ void FrameNodeImpl::InitializePatternAndContext()
     property_->SetHost(WeakClaim(this));
 }
 
+void FrameNodeImpl::PushAceNode(const RefPtr<AceNode>& node)
+{
+    nodeRef_ = node;
+}
+
 RefPtr<AceNode> FrameNodeImpl::PopAceNode()
 {
     RefPtr<AceNode> node;

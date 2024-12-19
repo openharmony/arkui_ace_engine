@@ -181,6 +181,20 @@ RefPtr<ResourceAdapter> CreateResourceWrapper(const ResourceInfo& info)
     return resourceAdapter;
 }
 
+bool ParseIntegerToString(const ResourceInfo& info, std::string& result)
+{
+    auto resourceWrapper = CreateResourceWrapper(info);
+    if (info.type == static_cast<int>(ResourceType::INTEGER)) {
+        if (info.resId == UNKNOWN_RESOURCE_ID) {
+            result = std::to_string(resourceWrapper->GetIntByName(info.params[0]));
+        } else {
+            result = std::to_string(resourceWrapper->GetInt(info.resId));
+        }
+        return true;
+    }
+    return true;
+}
+
 std::string DimensionToString(Dimension dimension)
 {
     static const int32_t unitsNum = 6;
@@ -651,6 +665,45 @@ bool ParseColor(napi_env env, napi_value value, Color& result)
     }
 
     return ParseColorFromResourceObject(env, value, result);
+}
+
+bool ACE_FORCE_EXPORT ParseDimension(
+    napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType == napi_number) {
+        double value = 0;
+        napi_get_value_double(env, napiValue, &value);
+
+        result.SetUnit(defaultUnit);
+        result.SetValue(value);
+        return true;
+    } else if (valueType == napi_string) {
+        std::string valueString;
+        if (!GetNapiString(env, napiValue, valueString, valueType)) {
+            return false;
+        }
+        if (valueString.back() == '%' && !isSupportPercent) {
+            return false;
+        }
+        return StringUtils::StringToCalcDimensionNG(valueString, result, false, defaultUnit);
+    } else if (valueType == napi_object) {
+        ResourceInfo recv;
+        std::string parameterStr;
+        if (!ParseResourceParam(env, napiValue, recv)) {
+            return false;
+        }
+        if (!ParseString(recv, parameterStr)) {
+            return false;
+        }
+        if (!ParseIntegerToString(recv, parameterStr)) {
+            return false;
+        }
+        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::Kit
