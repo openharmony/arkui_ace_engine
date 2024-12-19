@@ -18,7 +18,6 @@ import { LengthMetrics } from '@ohos.arkui.node';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 
 export enum IconType {
   BADGE = 1,
@@ -53,7 +52,7 @@ export declare class OperateItem {
   public checkbox?: OperateCheck;
   public radio?: OperateCheck;
   public image?: ResourceStr;
-  public symbol?: IconResource;
+  public symbolStyle?: SymbolGlyphModifier;
   public text?: ResourceStr;
   public arrow?: OperateIcon;
 }
@@ -61,7 +60,7 @@ export declare class OperateItem {
 export declare class ContentItem {
   public iconStyle?: IconType;
   public icon?: ResourceStr;
-  public symbolIcon?: IconResource;
+  public symbolStyle?: SymbolGlyphModifier;
   public primaryText?: ResourceStr;
   public secondaryText?: ResourceStr;
   public description?: ResourceStr;
@@ -69,20 +68,27 @@ export declare class ContentItem {
 
 export declare class OperateIcon {
   public value: ResourceStr;
-  public symbolValue?: IconResource;
+  public symbolStyle?: SymbolGlyphModifier;
   public action?: () => void;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 export declare class OperateButton {
   public text?: ResourceStr;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 export declare class OperateCheck {
   public isCheck?: boolean;
   public onChange?: (value: boolean) => void;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
-
-export type IconResource = SymbolGlyphModifier;
 
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
@@ -122,6 +128,8 @@ const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
 const RIGHT_ONLY_RADIO_WIDTH = '30vp';
 const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
 const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
+const ACCESSIBILITY_LEVEL_AUTO = 'auto';
+const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
@@ -134,11 +142,31 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.VERTICAL, VERTICAL_SIZE]
 ])
 
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource: Resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
+
 @Component
 struct ContentItemStruct {
   @Prop @Watch('onPropChange') iconStyle: IconType | null = null;
   @Prop @Watch('onPropChange') icon: ResourceStr | null = null;
-  @Prop @Watch('onPropChange') symbolIcon: IconResource | null = null;
+  @Prop @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @Prop @Watch('onPropChange') primaryText: ResourceStr | null = null;
   @Prop @Watch('onPropChange') secondaryText: ResourceStr | null = null;
   @Prop @Watch('onPropChange') description: ResourceStr | null = null;
@@ -158,7 +186,7 @@ struct ContentItemStruct {
   }
 
   onPropChange(): void {
-    if (this.icon === null && this.symbolIcon === null && this.iconStyle === null) {
+    if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
       this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
     } else {
       this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
@@ -171,40 +199,52 @@ struct ContentItemStruct {
 
   @Builder
   createIcon() {
-    if (this.iconStyle !== null && ICON_SIZE_MAP.has(this.iconStyle)) {
-      if (this.symbolIcon !== null) {
+    if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
+      if (this.symbolStyle != null) {
         SymbolGlyph()
-          .attributeModifier(this.symbolIcon)
+          .attributeModifier(this.symbolStyle)
           .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(false)
           .draggable(false)
           .flexShrink(0)
-      } else if (this.icon !== null) {
-        if (this.iconStyle <= IconType.PREVIEW) {
-          Image(this.icon)
-            .objectFit(ImageFit.Contain)
-            .width(ICON_SIZE_MAP.get(this.iconStyle))
-            .height(ICON_SIZE_MAP.get(this.iconStyle))
+      } else if (this.icon != null) {
+        if (Util.isSymbolResource(this.icon)) {
+          SymbolGlyph(this.icon as Resource)
+            .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+            .fontColor([$r('sys.color.ohos_id_color_secondary')])
             .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
             .focusable(false)
             .draggable(false)
-            .fillColor($r('sys.color.ohos_id_color_secondary'))
             .flexShrink(0)
         } else {
-          Image(this.icon)
-            .objectFit(ImageFit.Contain)
-            .constraintSize({
-              minWidth: SPECIAL_ICON_SIZE,
-              maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
-              minHeight: SPECIAL_ICON_SIZE,
-              maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
-            })
-            .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-            .focusable(false)
-            .draggable(false)
-            .fillColor($r('sys.color.ohos_id_color_secondary'))
-            .flexShrink(0)
+          if (this.iconStyle <= IconType.PREVIEW) {
+            Image(this.icon)
+              .objectFit(ImageFit.Contain)
+              .width(ICON_SIZE_MAP.get(this.iconStyle))
+              .height(ICON_SIZE_MAP.get(this.iconStyle))
+              .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor($r('sys.color.ohos_id_color_secondary'))
+              .flexShrink(0)
+          } else {
+            Image(this.icon)
+              .objectFit(ImageFit.Contain)
+              .constraintSize({
+                minWidth: SPECIAL_ICON_SIZE,
+                maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
+                minHeight: SPECIAL_ICON_SIZE,
+                maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
+              })
+              .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor($r('sys.color.ohos_id_color_secondary'))
+              .flexShrink(0)
+          }
         }
       }
     }
@@ -220,14 +260,14 @@ struct ContentItemStruct {
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
-      if (this.secondaryText !== null) {
+      if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.secondaryTextColor)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
       }
-      if (this.description !== null) {
+      if (this.description != null) {
         Text(this.description)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.descriptionColor)
@@ -293,7 +333,7 @@ struct OperateItemStruct {
   @Prop @Watch('onPropChange') checkBox: OperateCheck | null = null;
   @Prop @Watch('onPropChange') radio: OperateCheck | null = null;
   @Prop @Watch('onPropChange') image: ResourceStr | null = null;
-  @Prop @Watch('onPropChange') symbol: IconResource | null = null;
+  @Prop @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @Prop @Watch('onPropChange') text: ResourceStr | null = null;
   @State switchState: boolean = false;
   @State radioState: boolean = false;
@@ -318,18 +358,18 @@ struct OperateItemStruct {
   }
 
   onPropChange(): void {
-    if (this.switch !== null) {
+    if (this.switch != null) {
       this.switchState = this.switch.isCheck as boolean;
     }
-    if (this.radio !== null) {
+    if (this.radio != null) {
       this.radioState = this.radio.isCheck as boolean;
     }
-    if (this.checkBox !== null) {
+    if (this.checkBox != null) {
       this.checkBoxState = this.checkBox.isCheck as boolean;
     }
 
-    if ((this.button === null && this.image === null && this.symbol === null && this.text !== null) &&
-      ((this.icon !== null) || (this.icon === null && this.arrow !== null))) {
+    if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
+      ((this.icon != null) || (this.icon == null && this.arrow != null))) {
       this.rowSpace = SPECICAL_ROW_SPACE;
     } else {
       this.rowSpace = DEFAULT_ROW_SPACE;
@@ -380,24 +420,37 @@ struct OperateItemStruct {
         }
       }
     })
+    .accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''))
   }
 
   @Builder
   createIcon(param: CreateIconParam) {
     Button({ type: ButtonType.Normal }) {
-      if (param.icon?.symbolValue) {
+      if (param.icon?.symbolStyle) {
         SymbolGlyph()
-          .attributeModifier(param.icon?.symbolValue)
+          .attributeModifier(param.icon?.symbolStyle)
           .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
           .draggable(false)
       } else {
-        Image(param.icon?.value)
-          .height(OPERATEITEM_ICONLIKE_SIZE)
-          .width(OPERATEITEM_ICONLIKE_SIZE)
-          .focusable(true)
-          .fillColor($r('sys.color.ohos_id_color_primary'))
-          .draggable(false)
+        if (Util.isSymbolResource(param.icon?.value)) {
+          SymbolGlyph(param.icon?.value as Resource)
+            .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+            .fontColor([$r('sys.color.ohos_id_color_primary')])
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(param.icon?.value)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ICONLIKE_SIZE)
+            .focusable(true)
+            .fillColor($r('sys.color.ohos_id_color_primary'))
+            .draggable(false)
+        }
       }
     }
     .hitTestBehavior(HitTestMode.Block)
@@ -422,23 +475,35 @@ struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
+    .accessibilityLevel(param.icon?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
   }
 
   @Builder
   createImage() {
-    Image(this.image)
-      .height(OPERATEITEM_IMAGE_SIZE)
-      .width(OPERATEITEM_IMAGE_SIZE)
-      .draggable(false)
-      .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
+    if (Util.isSymbolResource(this.image)) {
+      SymbolGlyph(this.image as Resource)
+        .fontSize(OPERATEITEM_IMAGE_SIZE)
+        .draggable(false)
+        .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
+    } else {
+      Image(this.image)
+        .height(OPERATEITEM_IMAGE_SIZE)
+        .width(OPERATEITEM_IMAGE_SIZE)
+        .draggable(false)
+        .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
+    }
   }
 
   @Builder
   createSymbol() {
     SymbolGlyph()
-      .attributeModifier(this.symbol)
+      .attributeModifier(this.symbolStyle)
       .fontSize(OPERATEITEM_IMAGE_SIZE)
+      .effectStrategy(SymbolEffectStrategy.NONE)
+      .symbolEffect(new SymbolEffect(), false)
       .draggable(false)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
   }
@@ -456,20 +521,30 @@ struct OperateItemStruct {
   @Builder
   createArrow() {
     Button({ type: ButtonType.Normal }) {
-      if (this.arrow?.symbolValue) {
+      if (this.arrow?.symbolStyle) {
         SymbolGlyph()
-          .attributeModifier(this.arrow?.symbolValue)
+          .attributeModifier(this.arrow?.symbolStyle)
           .fontSize(OPERATEITEM_ARROW_WIDTH)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
           .draggable(false)
       } else {
-        Image(this.arrow?.value)
-          .height(OPERATEITEM_ICONLIKE_SIZE)
-          .width(OPERATEITEM_ARROW_WIDTH)
-          .focusable(true)
-          .fillColor($r('sys.color.ohos_id_color_fourth'))
-          .draggable(false)
-          .matchTextDirection(true)
+        if (Util.isSymbolResource(this.arrow?.value)) {
+          SymbolGlyph(this.arrow?.value as Resource)
+            .fontSize(OPERATEITEM_ARROW_WIDTH)
+            .fontColor([$r('sys.color.ohos_id_color_fourth')])
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(this.arrow?.value)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ARROW_WIDTH)
+            .focusable(true)
+            .fillColor($r('sys.color.ohos_id_color_fourth'))
+            .draggable(false)
+            .matchTextDirection(true)
+        }
       }
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
@@ -498,6 +573,9 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -527,6 +605,9 @@ struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(this.radio?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -556,6 +637,9 @@ struct OperateItemStruct {
           }
         }
       })
+      .accessibilityLevel(this.checkBox?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -567,6 +651,9 @@ struct OperateItemStruct {
           this.switchState = !this.switchState;
         })
         .hitTestBehavior(HitTestMode.Block)
+        .accessibilityLevel(this.switch?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+        .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
+        .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -603,20 +690,30 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
-          if (this.arrow?.symbolValue) {
+          if (this.arrow?.symbolStyle) {
             SymbolGlyph()
-              .attributeModifier(this.arrow?.symbolValue)
+              .attributeModifier(this.arrow?.symbolStyle)
               .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
               .draggable(false)
           } else {
-            Image(this.arrow?.value)
-              .height(OPERATEITEM_ICONLIKE_SIZE)
-              .width(OPERATEITEM_ARROW_WIDTH)
-              .fillColor($r('sys.color.ohos_id_color_fourth'))
-              .focusable(false)
-              .draggable(false)
-              .matchTextDirection(true)
+            if (Util.isSymbolResource(this.arrow?.value)) {
+              SymbolGlyph(this.arrow?.value as Resource)
+                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .fontColor([$r('sys.color.ohos_id_color_fourth')])
+                .focusable(false)
+                .draggable(false)
+            } else {
+              Image(this.arrow?.value)
+                .height(OPERATEITEM_ICONLIKE_SIZE)
+                .width(OPERATEITEM_ARROW_WIDTH)
+                .fillColor($r('sys.color.ohos_id_color_fourth'))
+                .focusable(false)
+                .draggable(false)
+                .matchTextDirection(true)
+            }
           }
         }
         .padding({
@@ -633,20 +730,30 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
-          if (this.arrow?.symbolValue) {
+          if (this.arrow?.symbolStyle) {
             SymbolGlyph()
-              .attributeModifier(this.arrow?.symbolValue)
+              .attributeModifier(this.arrow?.symbolStyle)
               .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
               .draggable(false)
           } else {
-            Image(this.arrow?.value)
-              .height(OPERATEITEM_ICONLIKE_SIZE)
-              .width(OPERATEITEM_ARROW_WIDTH)
-              .fillColor($r('sys.color.ohos_id_color_fourth'))
-              .focusable(false)
-              .draggable(false)
-              .matchTextDirection(true)
+            if (Util.isSymbolResource(this.arrow?.value)) {
+              SymbolGlyph(this.arrow?.value as Resource)
+                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .fontColor([$r('sys.color.ohos_id_color_fourth')])
+                .focusable(false)
+                .draggable(false)
+            } else {
+              Image(this.arrow?.value)
+                .height(OPERATEITEM_ICONLIKE_SIZE)
+                .width(OPERATEITEM_ARROW_WIDTH)
+                .fillColor($r('sys.color.ohos_id_color_fourth'))
+                .focusable(false)
+                .draggable(false)
+                .matchTextDirection(true)
+            }
           }
         }
         .padding({
@@ -689,6 +796,9 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   getFlexOptions(): FlexOptions {
@@ -704,35 +814,59 @@ struct OperateItemStruct {
 
   build() {
     Flex(this.getFlexOptions()) {
-      if (this.button !== null) {
+      if (this.button != null) {
         this.createButton();
-      } else if (this.symbol !== null) {
+      } else if (this.symbolStyle != null) {
         this.createSymbol();
-      } else if (this.image !== null) {
+      } else if (this.image != null) {
         this.createImage();
-      } else if (this.icon !== null && this.text !== null) {
+      } else if (this.icon != null && this.text != null) {
         this.createText();
         this.createIcon({ icon: this.icon })
-      } else if (this.arrow !== null && this.text === null) {
+      } else if (this.arrow != null && this.text == null) {
         this.createArrow();
-      } else if (this.arrow !== null && this.text !== null) {
+      } else if (this.arrow != null && this.text != null) {
         this.createTextArrow();
-      } else if (this.text !== null) {
+      } else if (this.text != null) {
         this.createText();
-      } else if (this.radio !== null) {
+      } else if (this.radio != null) {
         this.createRadio();
-      } else if (this.checkBox !== null) {
+      } else if (this.checkBox != null) {
         this.createCheckBox();
-      } else if (this.switch !== null) {
+      } else if (this.switch != null) {
         this.createSwitch();
-      } else if (this.icon !== null) {
+      } else if (this.icon != null) {
         this.createIcon({ icon: this.icon });
-        if (this.subIcon !== null) {
+        if (this.subIcon != null) {
           this.createIcon({ icon: this.subIcon });
         }
       }
     }
     .width(this.parentDirection === FlexDirection.Column ? undefined : this.rightWidth)
+  }
+}
+
+/**
+ * 获取无障碍文本
+ *
+ * @param resource 资源
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityText(resource: ResourceStr): string {
+  try {
+    let resourceString: string = '';
+    if (typeof resource === 'string') {
+      resourceString = resource;
+    } else {
+      resourceString = getContext().resourceManager.getStringSync(resource);
+    }
+    return resourceString;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
+    return '';
   }
 }
 
@@ -760,6 +894,7 @@ export struct ComposeListItem {
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
   private callbackId: number | undefined = undefined;
+  @State accessibilityTextBuilder: string = '';
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -773,7 +908,7 @@ export struct ComposeListItem {
     this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItem === undefined) {
       if (this.operateItem?.image !== undefined ||
-        this.operateItem?.symbol !== undefined ||
+        this.operateItem?.symbolStyle !== undefined ||
         this.operateItem?.icon !== undefined ||
         this.operateItem?.subIcon !== undefined) {
         this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
@@ -801,6 +936,21 @@ export struct ComposeListItem {
 
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
+    }
+
+    if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+      `;
+    } else {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+        ${getAccessibilityText(this.operateItem?.text ?? '')}
+      `;
     }
   }
 
@@ -850,7 +1000,7 @@ export struct ComposeListItem {
         return RIGHT_ICON_SUB_ICON_WIDTH;
       }
       return RIGHT_ONLY_ICON_WIDTH;
-    } else if (this.operateItem?.symbol) {
+    } else if (this.operateItem?.symbolStyle) {
       return RIGHT_ONLY_IMAGE_WIDTH;
     } else if (this.operateItem?.image) {
       return RIGHT_ONLY_IMAGE_WIDTH;
@@ -874,7 +1024,7 @@ export struct ComposeListItem {
     }
     if (this.operateItem?.button) {
       return FlexDirection.Column;
-    } else if (this.operateItem?.symbol) {
+    } else if (this.operateItem?.symbolStyle) {
       return FlexDirection.Row;
     } else if (this.operateItem?.image) {
       return FlexDirection.Row;
@@ -974,7 +1124,7 @@ export struct ComposeListItem {
         if (this.contentItem !== null) {
           ContentItemStruct({
             icon: this.contentItem?.icon,
-            symbolIcon: this.contentItem?.symbolIcon,
+            symbolStyle: this.contentItem?.symbolStyle,
             iconStyle: this.contentItem?.iconStyle,
             primaryText: this.contentItem?.primaryText,
             secondaryText: this.contentItem?.secondaryText,
@@ -993,7 +1143,7 @@ export struct ComposeListItem {
             checkBox: this.operateItem?.checkbox,
             radio: this.operateItem?.radio,
             image: this.operateItem?.image,
-            symbol: this.operateItem?.symbol,
+            symbolStyle: this.operateItem?.symbolStyle,
             text: this.operateItem?.text,
             arrow: this.operateItem?.arrow,
             parentCanFocus: this.canFocus,
@@ -1057,6 +1207,8 @@ export struct ComposeListItem {
       .padding(this.containerPadding)
     }
     .width('100%')
+    .accessibilityGroup(true)
+    .accessibilityText(this.accessibilityTextBuilder)
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING

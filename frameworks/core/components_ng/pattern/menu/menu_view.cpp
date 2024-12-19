@@ -19,6 +19,7 @@
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -75,6 +76,28 @@ void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& p
     textNode->MarkModifyDone();
 }
 
+LayoutConstraintF CreatePreviewLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, {});
+    LayoutConstraintF constraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
+
+    auto currentId = Container::CurrentId();
+    auto parentContainerId =
+        currentId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subWindow, constraint);
+    auto subwindowSize = subWindow->GetRect().GetSize();
+    if (!subwindowSize.IsPositive()) {
+        return constraint;
+    }
+
+    if (subwindowSize != constraint.maxSize || subwindowSize != constraint.percentReference) {
+        constraint.maxSize.SetSizeT(subwindowSize);
+        constraint.percentReference.SetSizeT(subwindowSize);
+    }
+    return constraint;
+}
+
 void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam,
     const RefPtr<UINode>& previewCustomNode = nullptr)
 {
@@ -92,7 +115,8 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
     auto pipeline = previewNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     ScopedLayout scope(pipeline);
-    previewNode->Measure(layoutProperty->GetLayoutConstraint());
+    auto layoutConstraint = CreatePreviewLayoutConstraint(layoutProperty);
+    previewNode->Measure(layoutConstraint);
     auto previewSize = previewNode->GetGeometryNode()->GetFrameSize();
     previewPattern->SetIsShowHoverImage(true);
     previewPattern->SetCustomPreviewWidth(previewSize.Width());
@@ -476,7 +500,6 @@ void ShowPixelMapScaleAnimationProc(
     CHECK_NULL_VOID(menuPattern && menuTheme);
     auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
     auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
-    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
     auto previewBeforeAnimationScale =
         LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
     auto previewAfterAnimationScale =
@@ -484,6 +507,7 @@ void ShowPixelMapScaleAnimationProc(
 
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
     auto imageRawSize = imagePattern->GetRawImageSize();
     auto geometryNode = imageNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -571,6 +595,9 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
         auto dragEventActuator = actuator.Upgrade();
         CHECK_NULL_VOID(dragEventActuator);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto touchPoint = Point(
             info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
@@ -706,16 +733,19 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
         if (menuParam.previewBorderRadius) {
             imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
         }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
         DragAnimationHelper::UpdateGatherNodeToTop();
+        DragDropFuncWrapper::UpdatePositionFromFrameNode(imageNode, target, width, height);
+        imageOffset = DragDropFuncWrapper::GetPaintRectCenterToScreen(target) -
+            OffsetF(width / HALF_DIVIDE, height / HALF_DIVIDE);
+        imageOffset -= DragDropFuncWrapper::GetCurrentWindowOffset(imageNode->GetContextRefPtr());
         MountTextNode(wrapperNode, previewNode);
     }
-    
+
     auto geometryNode = imageNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameOffset(imageOffset);
@@ -749,6 +779,10 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
         columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        auto accessibilityProperty = columnNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
+        }
         // set filter
         if (container->IsScenceBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
@@ -1199,6 +1233,16 @@ RefPtr<FrameNode> MenuView::Create(
     return wrapperNode;
 }
 
+EffectOption CreateEffectOption(Dimension radius, double saturation, double brightness, Color color)
+{
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturation;
+    option.brightness = brightness;
+    option.color = color;
+    return option;
+}
+
 void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -1213,7 +1257,7 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
         auto brightness = menuTheme->GetBgEffectBrightness();
         auto radius = menuTheme->GetBgEffectRadius();
         auto color = menuTheme->GetBgEffectColor();
-        EffectOption option = { radius, saturation, brightness, color };
+        EffectOption option = CreateEffectOption(radius, saturation, brightness, color);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->UpdateBackgroundEffect(option);
     }
@@ -1403,7 +1447,7 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
     pastePaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
-    pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
+    pasteLayoutProperty->UpdateBackgroundBorderRadius(BorderRadiusProperty(theme->GetInnerBorderRadius()));
     pasteLayoutProperty->UpdateIconSize(theme->GetIconSideLength());
     pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
     pasteLayoutProperty->UpdateStateEffect(false);

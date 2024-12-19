@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
 constexpr float ROUND_EPSILON = 0.5f;
+constexpr float CUSTOM_MENU_HEIGHT_CONSTRAINT_FACTOR = 0.8;
 }
 
 void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -68,7 +69,9 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
     auto top = safeAreaInsets.top_.Length();
-    auto maxSize = SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight - top);
+    auto bottom = GreatNotEqual(keyboardHeight, 0.0) ? 0.0 : safeAreaInsets.bottom_.Length();
+    auto maxSize =
+        SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight - top - bottom);
     layoutConstraint.maxSize = maxSize;
     bool isMouseCustomMenu = false;
     if (info_->menuInfo.menuBuilder) {
@@ -77,6 +80,11 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
         auto customNode = customMenuLayoutWrapper->GetHostNode();
         if (customNode && customNode->GetTag() != "SelectMenu") {
             auto customMenuLayoutConstraint = layoutConstraint;
+            auto customMenuMaxHeight = GetCustomMenuMaxHeight(top, safeAreaInsets.bottom_.Length());
+            if (GreatNotEqual(customMenuMaxHeight, 0.0)) {
+                auto maxHeight = std::min(maxSize.Height(), customMenuMaxHeight);
+                customMenuLayoutConstraint.maxSize.SetHeight(maxHeight);
+            }
             customMenuLayoutConstraint.selfIdealSize =
                 OptionalSizeF(std::nullopt, customMenuLayoutConstraint.maxSize.Height());
             customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
@@ -91,6 +99,16 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
         }
         child->Measure(layoutConstraint);
     }
+}
+
+float SelectOverlayLayoutAlgorithm::GetCustomMenuMaxHeight(float topSafeArea, float bottomSafeArea)
+{
+    float defaultHeight = 0.0;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, defaultHeight);
+    auto rect = pipelineContext->GetDisplayWindowRectInfo();
+    return std::max(defaultHeight, static_cast<float>(rect.Height() - topSafeArea - bottomSafeArea)) *
+           CUSTOM_MENU_HEIGHT_CONSTRAINT_FACTOR;
 }
 
 void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(

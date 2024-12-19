@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/components_ng/pattern/custom_node_ext/custom_node_ext_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -99,7 +100,7 @@ void* createSymbolNode(ArkUI_Int32 nodeId)
 
 void* createSpanNode(ArkUI_Int32 nodeId)
 {
-    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, "");
+    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, u"");
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
     return AceType::RawPtr(spanNode);
@@ -565,6 +566,22 @@ void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
 void* createRatingNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RatingModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* CreateCustomNode(ArkUI_CharPtr tag)
+{
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag));
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
+{
+    auto frameNode = CustomNodeExtModelNG::GetOrCreateFrameNode(std::string(tag));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

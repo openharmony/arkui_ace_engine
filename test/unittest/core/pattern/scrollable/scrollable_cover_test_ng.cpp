@@ -337,7 +337,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     container->SetUseNewPipeline();
     EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
-    scrollable->Initialize(MockPipelineContext::GetCurrent());
+    scrollable->Initialize(scroll_);
 
     /**
      * @tc.steps: step2. Verify Scrollable initialize success and event trigger
@@ -561,7 +561,7 @@ HWTEST_F(ScrollableCoverTestNg, StartScrollSnapAnimationTest001, TestSize.Level1
     /**
      * @tc.steps: step2. Call StartScrollSnapAnimation
      */
-    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
+    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, false);
 
     /**
      * @tc.expected: The end position should be initialPos + scrollSnapDelta
@@ -617,19 +617,16 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
     scrollable->needScrollSnapChange_ = true;
     scrollable->isDragUpdateStop_ = false;
     scrollable->scrollPause_ = false;
-    scrollable->startSnapAnimationCallback_ = [](float delta, float animationVelocity, float predictVelocity,
-                                                  float dragDistance) { return false; };
+    scrollable->startSnapAnimationCallback_ = [](SnapAnimationOptions snapAnimationOptions) { return false; };
     scrollable->currentVelocity_ = 10.0f;
     auto propertyCallback = [](float offset) {};
     scrollable->frictionOffsetProperty_ =
         AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
-    bool scrollEndCalled = false;
-    scrollable->scrollEnd_ = [&scrollEndCalled]() { scrollEndCalled = true; };
     /**
      * @tc.steps: step2. Call ProcessScrollMotionStop
      * @tc.expected: Verify that the scroll snap change is processed correctly
      */
-    scrollable->ProcessScrollMotionStop(true);
+    scrollable->ProcessScrollMotionStop();
     EXPECT_EQ(scrollable->currentVelocity_, 0.0);
     EXPECT_FALSE(isOverScrollCallbackCalled);
 
@@ -639,7 +636,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
      */
     scrollable->scrollPause_ = true;
     scrollable->edgeEffect_ = EdgeEffect::SPRING;
-    scrollable->ProcessScrollMotionStop(true);
+    scrollable->ProcessScrollMotionStop();
     EXPECT_FALSE(scrollable->scrollPause_);
 
     /**
@@ -653,7 +650,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
         return 0.0f;
     };
     scrollable->scrollPause_ = true;
-    scrollable->ProcessScrollMotionStop(true);
+    scrollable->ProcessScrollMotionStop();
     EXPECT_TRUE(isOverScrollCallbackCalled);
 }
 
@@ -1233,8 +1230,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
     RefPtr<Container> conainer = Container::Current();
     ASSERT_NE(conainer, nullptr);
     conainer->SetUseNewPipeline();
-    auto context = MockPipelineContext::GetCurrent();
-    scrollable->Initialize(AceType::RawPtr(context));
+    scrollable->Initialize(scroll_);
     ASSERT_NE(scrollable->panRecognizerNG_, nullptr);
     auto panRecognizerNG = scrollable->panRecognizerNG_;
     GestureEvent gestureEvent;
@@ -1563,15 +1559,6 @@ HWTEST_F(ScrollableCoverTestNg, ProcessSnapMotion001, TestSize.Level1)
     scrollable->state_ = Scrollable::AnimationState::SNAP;
     scrollable->ProcessListSnapMotion(100.0);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SNAP);
-    /**
-     * @tc.steps: step3. pos gt currentPos and without callback and moved true and touchUp false.
-     */
-    scrollable->currentPos_ = 0.0;
-    scrollable->moved_ = true;
-    scrollable->touchUp_ = false;
-    scrollable->scrollTouchUpCallback_ = []() {};
-    scrollable->ProcessListSnapMotion(100.0);
-    EXPECT_TRUE(scrollable->touchUp_);
 }
 
 /**
@@ -1596,21 +1583,13 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollSnapStop001, TestSize.Level1)
     EXPECT_TRUE(isCalled);
     EXPECT_FALSE(scrollable->scrollPause_);
     /**
-     * @tc.steps: step2. Call scrollPause_ eq false and scrollEnd has callback and isTouching_ eq false.
+     * @tc.steps: step2. Call scrollPause_ eq false and isTouching_ eq true.
      */
-    bool isScrollEndCalled = false;
-    scrollable->scrollEnd_ = [&isScrollEndCalled]() { isScrollEndCalled = true; };
-    scrollable->ProcessScrollSnapStop();
-    EXPECT_TRUE(isScrollEndCalled);
-    /**
-     * @tc.steps: step3. Call scrollPause_ eq false and isTouching_ eq true.
-     */
-    isScrollEndCalled = false;
+    scrollable->moved_ = true;
     scrollable->scrollPause_ = false;
     scrollable->isTouching_ = true;
-    scrollable->scrollEnd_ = [&isScrollEndCalled]() { isScrollEndCalled = true; };
     scrollable->ProcessScrollSnapStop();
-    EXPECT_FALSE(isScrollEndCalled);
+    EXPECT_TRUE(scrollable->moved_);
 }
 
 /**

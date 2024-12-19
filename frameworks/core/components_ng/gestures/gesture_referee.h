@@ -94,6 +94,7 @@ public:
 
     bool IsReady();
     bool HasFailRecognizer();
+    bool IsAnySucceedRecognizerExist();
     void ForceCleanGestureScope();
     void ForceCleanGestureScopeState();
     void CleanGestureScopeState();
@@ -139,6 +140,7 @@ public:
 
     bool IsReady();
     bool HasFailRecognizer(int32_t touchId);
+    bool IsAnySucceedRecognizerExist(int32_t touchId);
     void ForceCleanGestureReferee();
     void ForceCleanGestureRefereeState();
     void CleanGestureRefereeState(int32_t touchId);

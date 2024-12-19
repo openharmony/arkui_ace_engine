@@ -331,4 +331,30 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerDateTimeOptions(ArkUIRun
     GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerDateTimeOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TimepickerBridge::SetTimepickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> enableHapticFeedbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (enableHapticFeedbackArg->IsBoolean()) {
+        bool value = enableHapticFeedbackArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerEnableHapticFeedback(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerEnableHapticFeedback(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TimepickerBridge::ResetTimepickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

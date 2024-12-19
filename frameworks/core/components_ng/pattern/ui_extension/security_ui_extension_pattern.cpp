@@ -29,6 +29,7 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/error/error_code.h"
 #include "base/geometry/offset.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
@@ -205,6 +206,8 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->RemoveChild(contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
+        // reset callback, in order to register childtree call back again when onConnect to new ability
+        ResetAccessibilityChildTreeCallback();
     }
 
     MountPlaceholderNode();
@@ -721,6 +724,29 @@ int64_t SecurityUIExtensionPattern::WrapExtensionAbilityId(
     return uiExtensionId_ * extensionOffset + abilityId;
 }
 
+void SecurityUIExtensionPattern::DumpInfo()
+{
+    UIEXT_LOGI("Dump SecurityUEC Info In String Format");
+    DumpLog::GetInstance().AddDesc(std::string("UecType: ").append("SecurityUIExtensionComponent"));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("eventProxy: ").append(eventProxyStr));
+}
+
+void SecurityUIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(json);
+    UIEXT_LOGI("Dump SecurityUEC Info In Json Format");
+    json->Put("UecType: ", "SecurityUIExtensionComponent");
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    json->Put("eventProxy: ", eventProxyStr.c_str());
+}
+
 const char* SecurityUIExtensionPattern::ToString(AbilityState state)
 {
     switch (state) {
@@ -734,5 +760,93 @@ const char* SecurityUIExtensionPattern::ToString(AbilityState state)
         default:
             return "NONE";
     }
+}
+
+void SecurityUIExtensionPattern::InitializeAccessibility()
+{
+    if (accessibilityChildTreeCallback_ != nullptr) {
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto ngPipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    accessibilityChildTreeCallback_ = std::make_shared<PlatformAccessibilityChildTreeCallback>(
+        WeakClaim(this), accessibilityId);
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto realHostWindowId = ngPipeline->GetRealHostWindowId();
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(
+            realHostWindowId, accessibilityManager->GetTreeId());
+    }
+    UIEXT_LOGI("SecurityUIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+        accessibilityId, realHostWindowId);
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
+}
+
+void SecurityUIExtensionPattern::OnAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId) const
+{
+    UIEXT_LOGI("treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void SecurityUIExtensionPattern::OnAccessibilityChildTreeDeregister() const
+{
+    UIEXT_LOGI("deregister accessibility child tree");
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityChildTreeDeregister();
+}
+
+void SecurityUIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetChildWindowId(childWindowId);
+    accessibilityProperty->SetChildTreeId(childTreeId);
+}
+
+void SecurityUIExtensionPattern::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info) const
+{
+    UIEXT_LOGI("dump accessibility child info");
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityDumpChildInfo(params, info);
+}
+
+void SecurityUIExtensionPattern::ResetAccessibilityChildTreeCallback()
+{
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    ContainerScope scope(instanceId_);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+        accessibilityChildTreeCallback_->GetAccessibilityId());
+    accessibilityChildTreeCallback_.reset();
+    accessibilityChildTreeCallback_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

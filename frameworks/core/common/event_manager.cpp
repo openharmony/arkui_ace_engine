@@ -22,6 +22,7 @@
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_START_NUMBER = 4;
@@ -462,10 +463,10 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     if (touchPoint.type != TouchType::DOWN) {
         return;
     }
+    CHECK_NULL_VOID(textOverlayManager);
     auto coordinateOffset = textOverlayManager->GetCoordinateOffset();
     const Point point { touchPoint.x - coordinateOffset.GetX(), touchPoint.y - coordinateOffset.GetY(),
         touchPoint.sourceType };
-    CHECK_NULL_VOID(textOverlayManager);
     auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
     CHECK_NULL_VOID(textOverlayBase);
     auto targetNode = textOverlayManager->GetTargetNode();
@@ -1257,7 +1258,7 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
             currMouseTestResults_.emplace_back(mouseResult);
         }
         auto hoverResult = AceType::DynamicCast<HoverEventTarget>(result);
-        if (hoverResult) {
+        if (hoverResult && hoverResult->IsHoverTarget()) {
             hoverTestResult.emplace_back(hoverResult);
         }
         if (!hoverNode.Upgrade()) {
@@ -1356,7 +1357,8 @@ void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, con
 bool EventManager::DispatchMouseEventToCurResults(
     const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
 {
-    for (const auto& mouseTarget : currMouseTestResults_) {
+    auto currMouseTestResults = currMouseTestResults_;
+    for (const auto& mouseTarget : currMouseTestResults) {
         if (!mouseTarget) {
             continue;
         }
@@ -1384,7 +1386,8 @@ bool EventManager::DispatchMouseEventToCurResults(
 bool EventManager::DispatchMouseEventToCurResultsInLessAPI13(
     const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
 {
-    for (const auto& mouseTarget : currMouseTestResults_) {
+    auto currMouseTestResults = currMouseTestResults_;
+    for (const auto& mouseTarget : currMouseTestResults) {
         if (!mouseTarget) {
             continue;
         }
@@ -1622,6 +1625,7 @@ EventManager::EventManager()
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
+    mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
 
     auto callback = [weak = WeakClaim(this)](size_t touchId) -> bool {
         auto eventManager = weak.Upgrade();
@@ -1850,7 +1854,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     TouchEvent falsifyEvent = touchPoint;
     falsifyEvent.isFalsified = true;
     falsifyEvent.type = TouchType::CANCEL;
-    for (const auto& iter : downFingerIds_) {
+    auto downFingerIds = downFingerIds_;
+    for (const auto& iter : downFingerIds) {
         falsifyEvent.id = iter.first;
         falsifyEvent.pointers = lastTouchEvent_.pointers;
         if (touchPoint.id != iter.first) {
@@ -2055,6 +2060,9 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
 {
     if (event.eventType == UIInputEventType::KEY) {
         return OnKeyEvent(static_cast<const KeyEvent&>(event));
+    }
+    if (event.eventType == UIInputEventType::FOCUS_AXIS) {
+        return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
     }
     return false;
 }

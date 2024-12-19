@@ -420,8 +420,12 @@ void TxtParagraph::AdjustIndexForward(const Offset& offset, bool compareOffset, 
         index, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
-        --index;
-        AdjustIndexForward(offset, false, index);
+        if (IsTargetCharAtIndex(NEWLINE_CODE, index)) {
+            --index;
+            AdjustIndexForward(offset, false, index);
+        } else if (IsIndexAtLineEnd(offset, index)) {
+            --index;
+        }
         return;
     }
     const auto& textBox = *boxes.begin();
@@ -1089,6 +1093,8 @@ bool TxtParagraph::GetLineMetricsByCoordinate(const Offset& offset, LineMetrics&
         lineMetrics.descender = resMetric.descender;
         lineMetrics.capHeight = resMetric.capHeight;
         lineMetrics.xHeight = resMetric.xHeight;
+        lineMetrics.startIndex = static_cast<int32_t>(resMetric.startIndex);
+        lineMetrics.endIndex = static_cast<int32_t>(resMetric.endIndex);
     }
     return ret;
 }
@@ -1128,5 +1134,28 @@ void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->UpdateColor(from, to, ToRSColor(color));
 #endif
+}
+
+int32_t TxtParagraph::GetIndexWithoutPlaceHolder(int32_t index)
+{
+    int32_t newIndex = index;
+    for (auto placeholderIndex : placeholderPosition_) {
+        if (placeholderIndex < static_cast<size_t>(index)) {
+            newIndex--;
+        }
+    }
+    return newIndex;
+}
+
+bool TxtParagraph::IsTargetCharAtIndex(char16_t targetChar, int32_t index)
+{
+    auto textIndex = GetIndexWithoutPlaceHolder(index);
+    return text_[std::max(0, textIndex)] == targetChar;
+}
+
+bool TxtParagraph::IsIndexAtLineEnd(const Offset& offset, int32_t index)
+{
+    LineMetrics lineMetrics;
+    return GetLineMetricsByCoordinate(offset, lineMetrics) && (index == lineMetrics.endIndex);
 }
 } // namespace OHOS::Ace::NG

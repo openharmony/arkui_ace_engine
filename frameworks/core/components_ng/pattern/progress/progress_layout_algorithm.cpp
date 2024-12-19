@@ -44,7 +44,11 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<ProgressPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            host->GetGeometryNode()->ResetContent();
+        } else {
+            host->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     auto pipeline = PipelineBase::GetCurrentContext();

@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_search_ffi.h"
+
 #include <optional>
 #include <string>
 
@@ -205,22 +206,29 @@ void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
 {
-    auto onChange = [lambda = CJLambda::Create(callback)](const std::u16string& value, PreviewText& previewText) ->
-        void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
+    auto onChange = [lambda = CJLambda::Create(callback)]
+        (const std::u16string& value, PreviewText& previewText) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkSearchOnCopy(void (*callback)(const char* value))
 {
-    auto onCopy = [lambda = CJLambda::Create(callback)](const std::u16string& value) ->
-        void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
+    auto onCopy = [lambda = CJLambda::Create(callback)](const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     SearchModel::GetInstance()->SetOnCopy(std::move(onCopy));
 }
 
 void FfiOHOSAceFrameworkSearchOnCut(void (*callback)(const char* value))
 {
-    auto onCut = [lambda = CJLambda::Create(callback)](const std::u16string& value) ->
-        void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
+    auto onCut = [lambda = CJLambda::Create(callback)](const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     SearchModel::GetInstance()->SetOnCut(std::move(onCut));
 }
 
@@ -228,7 +236,8 @@ void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* value))
 {
     auto onPaste = [lambda = CJLambda::Create(callback)](const std::u16string& val, NG::TextCommonEvent& info) -> void {
         LOGI("OnPaste called.");
-        lambda(UtfUtils::Str16ToStr8(val).c_str());
+        const std::string valStr = UtfUtils::Str16ToStr8(val);
+        lambda(valStr.c_str());
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }

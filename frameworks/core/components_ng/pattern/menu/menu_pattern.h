@@ -462,7 +462,7 @@ public:
     }
 
     void ShowMenuDisappearAnimation();
-    void ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+    void ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
 
     void SetBuilderFunc(SelectMakeCallback&& makeFunc)
@@ -533,14 +533,14 @@ public:
         lastPosition_ = lastPosition;
     }
 
-    void UpdateLastArrowPlacement(std::optional<Placement> lastArrowPlacement)
+    void UpdateLastPlacement(std::optional<Placement> lastPlacement)
     {
-        lastArrowPlacement_ = lastArrowPlacement;
+        lastPlacement_ = lastPlacement;
     }
 
-    std::optional<Placement> GetLastArrowPlacement()
+    std::optional<Placement> GetLastPlacement()
     {
-        return lastArrowPlacement_;
+        return lastPlacement_;
     }
 
     void SetIsEmbedded()
@@ -579,6 +579,7 @@ public:
     {
         return pathParams_;
     }
+    void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
@@ -612,24 +613,27 @@ private:
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event) const;
+    bool OnKeyEvent(const KeyEvent& event);
 
     void DisableTabInMenu();
 
     Offset GetTransformCenter() const;
     OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
-    void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
     void ShowPreviewMenuAnimation();
     void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
     void ShowMenuAppearAnimation();
-    void ShowStackExpandMenu();
-    std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
+    void ShowStackMenuAppearAnimation();
+    std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& mainMenu,
         bool isNeedRestoreNodeId = false) const;
     MenuItemInfo GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
     MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
+    void ShowStackMenuAppearOpacityAndBlurAnimation(const RefPtr<RenderContext>& mainMenuContext) const;
+    void ShowStackMenuDisappearOpacityAndBlurAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
+    std::vector<RefPtr<RenderContext>> GetOtherMenuItemContext(const RefPtr<FrameNode>& subMenuNode) const;
     void ShowArrowRotateAnimation() const;
-    RefPtr<FrameNode> GetImageNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetArrowNode(const RefPtr<FrameNode>& host) const; // arrowNode in subMenu
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
@@ -673,7 +677,7 @@ private:
     bool needHideAfterTouch_ = true;
 
     std::optional<OffsetF> lastPosition_;
-    std::optional<Placement> lastArrowPlacement_;
+    std::optional<Placement> lastPlacement_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF disappearOffset_;

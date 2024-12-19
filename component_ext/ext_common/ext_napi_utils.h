@@ -21,7 +21,7 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-#include "base/utils/macros.h"
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT NapiAsyncEvent {

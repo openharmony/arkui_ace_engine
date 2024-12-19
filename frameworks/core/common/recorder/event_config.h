@@ -20,17 +20,11 @@
 #include <list>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include "base/json/json_util.h"
 
 namespace OHOS::Ace::Recorder {
-enum class EventCategory {
-    CATEGORY_PAGE,
-    CATEGORY_COMPONENT,
-    CATEGORY_EXPOSURE,
-    CATEGORY_PAGE_PARAM,
-};
-
 struct ExposureCfg {
     std::string id;
     double ratio = 0.0;
@@ -55,7 +49,6 @@ struct PageCfg {
 };
 
 using Config = std::unordered_map<std::string, PageCfg>;
-using Switch = std::unordered_map<EventCategory, bool>;
 
 class EventConfig final {
 public:
@@ -64,17 +57,35 @@ public:
 
     void Init(const std::string& config);
     bool IsEnable() const;
-    bool IsCategoryEnable(EventCategory category) const;
+    bool IsCategoryEnable(int32_t index) const;
     const std::shared_ptr<Config>& GetConfig() const;
+    std::string GetWebCategory() const
+    {
+        return webCategory_;
+    }
+
+    std::string GetWebIdentifier() const
+    {
+        return webIdentifier_;
+    }
+
+    const std::string& GetWebJsCode() const
+    {
+        return webJsCode_;
+    }
 
 private:
     inline void ParseSwitch(const std::unique_ptr<JsonValue>& jsonObj);
+    inline void ParseJsCode(const std::unique_ptr<JsonValue>& jsonObj);
     inline void ParseShareNode(const std::unique_ptr<JsonValue>& shareNodeArray, PageCfg& pageCfg);
     inline void ParseExposureCfg(const std::unique_ptr<JsonValue>& exposureCfgArray, PageCfg& pageCfg);
     bool enable_ = false;
-    std::shared_ptr<Switch> switches_;
+    std::vector<bool> switches_;
 
     std::shared_ptr<Config> config_;
+    std::string webCategory_;
+    std::string webIdentifier_;
+    std::string webJsCode_;
 };
 } // namespace OHOS::Ace::Recorder
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_EVENT_CONFIG_H

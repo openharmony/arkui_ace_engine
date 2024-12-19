@@ -40,8 +40,9 @@ private:
         OffsetF& offset);
     void MeasureButton(LayoutWrapper* layoutWrapper,
         RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty);
-    void UpdateHorizontalOffset(LayoutWrapper* layoutWrapper, OffsetF& offsetIcon, OffsetF& offsetText);
-    void UpdateVerticalOffset(OffsetF& offsetIcon, OffsetF& offsetText);
+    void UpdateHorizontalOffset(LayoutWrapper* layoutWrapper, OffsetF& offsetIcon, OffsetF& offsetText,
+        SizeF& childSize);
+    void UpdateVerticalOffset(OffsetF& offsetIcon, OffsetF& offsetText, SizeF& childSize);
     void InitPadding(RefPtr<SecurityComponentLayoutProperty>& property);
     double ShrinkWidth(double diff);
     double EnlargeWidth(double diff);
@@ -68,6 +69,7 @@ private:
     bool BottomLeftCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool BottomRightCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool IsTextOutOfOneColumn(RefPtr<FrameNode>& frameNode, float threshold);
+    Alignment ParseAlignmentRTL(LayoutWrapper* layoutWrapper, Alignment align);
 
     void UpdateTextSize();
 

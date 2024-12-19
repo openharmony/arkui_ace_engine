@@ -247,6 +247,7 @@ struct DialogProperties {
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
     std::optional<HoverModeAreaType> hoverModeArea;
+    std::optional<int32_t> controllerId;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>

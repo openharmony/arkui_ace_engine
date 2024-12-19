@@ -134,13 +134,17 @@ SecuritySessionWrapperImpl::~SecuritySessionWrapperImpl() {}
 void SecuritySessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     int32_t callSessionId = GetSessionId();
+    if (!taskExecutor_) {
+        LOGE("Get taskExecutor_ is nullptr, the sessionid = %{public}d", callSessionId);
+        return;
+    }
+    auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
     foregroundCallback_ =
         [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
         if (errcode != OHOS::Rosen::WSError::WS_OK) {
             taskExecutor->PostTask(
-                [weak, errcode, callSessionId] {
+                [weak, callSessionId] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     if (callSessionId != pattern->GetSessionId()) {
@@ -159,7 +163,7 @@ void SecuritySessionWrapperImpl::InitAllCallback()
         taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
             if (errcode != OHOS::Rosen::WSError::WS_OK) {
                 taskExecutor->PostTask(
-                    [weak, errcode, callSessionId] {
+                    [weak, callSessionId] {
                         auto pattern = weak.Upgrade();
                         CHECK_NULL_VOID(pattern);
                         if (callSessionId != pattern->GetSessionId()) {
@@ -178,7 +182,7 @@ void SecuritySessionWrapperImpl::InitAllCallback()
         taskExecutor = taskExecutor_, callSessionId](OHOS::Rosen::WSError errcode) {
             if (errcode != OHOS::Rosen::WSError::WS_OK) {
                 taskExecutor->PostTask(
-                    [weak, errcode, callSessionId] {
+                    [weak, callSessionId] {
                         auto pattern = weak.Upgrade();
                         CHECK_NULL_VOID(pattern);
                         if (callSessionId != pattern->GetSessionId()) {
@@ -194,9 +198,9 @@ void SecuritySessionWrapperImpl::InitAllCallback()
             }
         };
     sessionCallbacks->transferAbilityResultFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_,
-        sessionType = sessionType_, callSessionId](int32_t code, const AAFwk::Want& want) {
+        callSessionId](int32_t code, const AAFwk::Want& want) {
             taskExecutor->PostTask(
-                [weak, code, want, sessionType, callSessionId]() {
+                [weak, code, want, callSessionId]() {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     if (callSessionId != pattern->GetSessionId()) {
@@ -521,7 +525,7 @@ void SecuritySessionWrapperImpl::OnDisconnect(bool isAbnormal)
 {
     int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, sessionType = sessionType_, isAbnormal, callSessionId]() {
+        [weak = hostPattern_, isAbnormal, callSessionId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (callSessionId != pattern->GetSessionId()) {
@@ -597,15 +601,21 @@ void SecuritySessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX,
 void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeRegister(
     uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
 void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeDeregister()
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeUnregister();
 }
 
 void SecuritySessionWrapperImpl::TransferAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityDumpChildInfo(params, info);
 }
 /************************ End: The interface about the accessibility **************************/
 

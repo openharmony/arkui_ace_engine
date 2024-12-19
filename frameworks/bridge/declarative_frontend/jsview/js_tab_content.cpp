@@ -538,6 +538,7 @@ void SetBuilderNode(const JSRef<JSObject>& paramObject)
         return;
     }
     const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_VOID(nodeptr->GetLocalHandle()->IsNativePointer(vm));
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

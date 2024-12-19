@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
@@ -73,7 +74,11 @@ public:
             theme->maskColor_ = pattern->GetAttr<Color>("popup_mask_color", Color());
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("popup_text_color", Color()));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("popup_text_font_size", 0.0_vp));
-            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->backgroundColor_ = pattern->GetAttr<Color>("bg_color_version_twelve", Color(0xffffffff));
+            } else {
+                theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
+            }
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
             theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
             theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::WHITE);

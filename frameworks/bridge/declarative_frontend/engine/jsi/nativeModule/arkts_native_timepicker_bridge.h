@@ -35,6 +35,8 @@ public:
     static ArkUINativeModuleValue ResetTimepickerLoop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTimepickerDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTimepickerDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTimepickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTimepickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

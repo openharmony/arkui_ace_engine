@@ -427,10 +427,6 @@ public:
     bool HasBackwardFocusMovementInChildren();
     bool HasForwardFocusMovementInChildren();
     void ClearFocusMovementFlagsInChildren();
-    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
-    {
-        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
-    }
 
     Dimension GetFocusPadding() const
     {
@@ -531,11 +527,6 @@ public:
 
     void SetFocusable(bool focusable, bool isExplicit = true);
 
-    void SetTabStop(bool tabStop)
-    {
-        tabStop_ = tabStop;
-    }
-
     bool GetFocusable() const
     {
         return focusable_;
@@ -548,10 +539,6 @@ public:
 
     bool IsEnabled() const;
 
-    bool IsTabStop() const
-    {
-        return tabStop_;
-    }
     bool IsCurrentFocusWholePath();
 
     bool HasFocusedChild();
@@ -853,6 +840,10 @@ public:
         return enableDirectionalKeyFocus_;
     }
 
+    void SetIsNodeNeedKey(bool isNodeNeedKey)
+    {
+        isNodeNeedKey_ = isNodeNeedKey;
+    }
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -865,12 +856,12 @@ protected:
     bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
-    bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocus(FocusStep moveStep);
     bool RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect);
     bool RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
-    void OnFocusNode();
+    void OnFocusNode(bool currentHasFocused = false);
     void OnFocusScope(bool currentHasFocused = false);
     void OnBlur();
     void OnBlurNode();
@@ -971,7 +962,6 @@ private:
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
     bool arrowKeyStepOut_ { true };
-    bool tabStop_ { false };
     bool isSwitchByEnter_ { false };
     bool enableDirectionalKeyFocus_ { false };
 };

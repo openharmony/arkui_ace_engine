@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textarea_ffi.h"
+
 #include "base/utils/utf_helper.h"
 
 
@@ -44,9 +45,9 @@ void FfiOHOSAceFrameworkTextAreaCreate(const char* placeholder, const char* text
         LOGE("FfiTextArea invalid controllerId");
         return;
     }
-    std::string placeHolderStr8(placeholder);
+    std::string placeholderStr8(placeholder);
     std::string textStr8(text);
-    auto nativeController = TextFieldModel::GetInstance()->CreateTextArea(UtfUtils::Str8ToStr16(placeHolderStr8),
+    auto nativeController = TextFieldModel::GetInstance()->CreateTextArea(UtfUtils::Str8ToStr16(placeholderStr8),
         UtfUtils::Str8ToStr16(textStr8));
     controller->SetController(nativeController);
 }

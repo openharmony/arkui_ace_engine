@@ -653,7 +653,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
         listSizeValues.prevContentMainSize, listSizeValues.forward);
     host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
-    FrameNode::ProcessOffscreenNode(host);
+    FrameNode::ProcessOffscreenNode(host, true);
     if ((!NearZero(adjustRefPos_) || !NearZero(adjustTotalSize_)) && !(childrenSize_ && ListChildrenSizeExist())) {
         listPattern->UpdateChildPosInfo(indexInList_, adjustRefPos_, adjustTotalSize_);
         adjustRefPos_ = 0.0f;
