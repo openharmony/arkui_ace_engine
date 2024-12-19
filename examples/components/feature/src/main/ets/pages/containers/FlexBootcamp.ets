@@ -2209,7 +2209,6 @@ export struct FlexBootcamp {
           compBorderImageFill: $compBorderImageFill
         })
 
-        // 背景没写
         CompBackgroundBlocks({
           enableCompBackgroundAlign: $enableCompBackgroundAlign,
           compBackgroundAlign: $compBackgroundAlign,
@@ -2226,26 +2225,17 @@ export struct FlexBootcamp {
           compBackgroundImagePositionY: $compBackgroundImagePositionY,
           enableCompBackgroundBlurStyle: $enableCompBackgroundBlurStyle,
           compBackgroundBlurStyle: $compBackgroundBlurStyle,
-          enableCompBackgroundBlurStyleOptions: $enableCompBackgroundBlurStyleOptions,
-          enableCompBackgroundBlurStyleOptionsColorMode:
-          $enableCompBackgroundBlurStyleOptionsColorMode,
-          compBackgroundBlurStyleOptionsColorMode:
-          $compBackgroundBlurStyleOptionsColorMode,
-          enableCompBackgroundBlurStyleOptionsAdaptiveColor:
-          $enableCompBackgroundBlurStyleOptionsAdaptiveColor,
-          compBackgroundBlurStyleOptionsAdaptiveColor:
-          $compBackgroundBlurStyleOptionsAdaptiveColor,
-          enableCompBackgroundBlurStyleOptionsBlurOptionsLeft:
-          $enableCompBackgroundBlurStyleOptionsBlurOptionsLeft,
-          compBackgroundBlurStyleOptionsBlurOptionsLeft:
-          $compBackgroundBlurStyleOptionsBlurOptionsLeft,
-          enableCompBackgroundBlurStyleOptionsBlurOptionsRight:
-          $enableCompBackgroundBlurStyleOptionsBlurOptionsRight,
-          compBackgroundBlurStyleOptionsBlurOptionsRight:
-          $compBackgroundBlurStyleOptionsBlurOptionsRight,
-          enableCompBackgroundBlurStyleOptionsScale:
-          $enableCompBackgroundBlurStyleOptionsScale,
-          compBackgroundBlurStyleOptionsScale: $compBackgroundBlurStyleOptionsScale,
+          enableCompBackgroundBlurStyleParams: $enableCompBackgroundBlurStyleParams,
+          enableCompBackgroundBlurStyleParamsColorMode: $enableCompBackgroundBlurStyleParamsColorMode,
+          compBackgroundBlurStyleParamsColorMode: $compBackgroundBlurStyleParamsColorMode,
+          enableCompBackgroundBlurStyleParamsAdaptiveColor: $enableCompBackgroundBlurStyleParamsAdaptiveColor,
+          compBackgroundBlurStyleParamsAdaptiveColor: $compBackgroundBlurStyleParamsAdaptiveColor,
+          enableCompBackgroundBlurStyleParamsBlurOptionsLeft: $enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
+          compBackgroundBlurStyleParamsBlurOptionsLeft: $compBackgroundBlurStyleParamsBlurOptionsLeft,
+          enableCompBackgroundBlurStyleParamsBlurOptionsRight: $enableCompBackgroundBlurStyleParamsBlurOptionsRight,
+          compBackgroundBlurStyleParamsBlurOptionsRight: $compBackgroundBlurStyleParamsBlurOptionsRight,
+          enableCompBackgroundBlurStyleParamsScale: $enableCompBackgroundBlurStyleParamsScale,
+          compBackgroundBlurStyleParamsScale: $compBackgroundBlurStyleParamsScale,
           enableCompBackdropBlur: $enableCompBackdropBlur,
           compBackdropBlur: $compBackdropBlur,
           enableCompBackdropBlurGrayscale: $enableCompBackdropBlurGrayscale,
@@ -2264,11 +2254,9 @@ export struct FlexBootcamp {
           compBackgroundEffectColor: $compBackgroundEffectColor,
           enableCompBackgroundEffectAdaptiveColor: $enableCompBackgroundEffectAdaptiveColor,
           compBackgroundEffectAdaptiveColor: $compBackgroundEffectAdaptiveColor,
-          enableCompBackgroundEffectBlurOptionsGrayscaleLeft:
-          $enableCompBackgroundEffectBlurOptionsGrayscaleLeft,
+          enableCompBackgroundEffectBlurOptionsGrayscaleLeft: $enableCompBackgroundEffectBlurOptionsGrayscaleLeft,
           compBackgroundEffectBlurOptionsGrayscaleLeft: $compBackgroundEffectBlurOptionsGrayscaleLeft,
-          enableCompBackgroundEffectBlurOptionsGrayscaleRight:
-          $enableCompBackgroundEffectBlurOptionsGrayscaleRight,
+          enableCompBackgroundEffectBlurOptionsGrayscaleRight: $enableCompBackgroundEffectBlurOptionsGrayscaleRight,
           compBackgroundEffectBlurOptionsGrayscaleRight: $compBackgroundEffectBlurOptionsGrayscaleRight,
           enableCompBackgroundImageResizable: $enableCompBackgroundImageResizable,
           enableCompBackgroundImageResizableSliceTop: $enableCompBackgroundImageResizableSliceTop,
@@ -2288,19 +2276,14 @@ export struct FlexBootcamp {
           compBackgroundImageResizableLatticeFXCount: $compBackgroundImageResizableLatticeFXCount,
           enableCompBackgroundImageResizableLatticeFYCount: $enableCompBackgroundImageResizableLatticeFYCount,
           compBackgroundImageResizableLatticeFYCount: $compBackgroundImageResizableLatticeFYCount,
-          enableCompBackgroundImageResizableLatticeFBounds:
-          $enableCompBackgroundImageResizableLatticeFBounds,
-          enableCompBackgroundImageResizableLatticeFBoundsLeft:
-          $enableCompBackgroundImageResizableLatticeFBoundsLeft,
-          compBackgroundImageResizableLatticeFBoundsLeft:
-          $compBackgroundImageResizableLatticeFBoundsLeft,
+          enableCompBackgroundImageResizableLatticeFBounds: $enableCompBackgroundImageResizableLatticeFBounds,
+          enableCompBackgroundImageResizableLatticeFBoundsLeft: $enableCompBackgroundImageResizableLatticeFBoundsLeft,
+          compBackgroundImageResizableLatticeFBoundsLeft: $compBackgroundImageResizableLatticeFBoundsLeft,
           enableCompBackgroundImageResizableLatticeFBoundsTop: $enableCompBackgroundImageResizableLatticeFBoundsTop,
-          compBackgroundImageResizableLatticeFBoundsTop:
-          $compBackgroundImageResizableLatticeFBoundsTop,
+          compBackgroundImageResizableLatticeFBoundsTop: $compBackgroundImageResizableLatticeFBoundsTop,
           enableCompBackgroundImageResizableLatticeFBoundsRight:
           $enableCompBackgroundImageResizableLatticeFBoundsRight,
-          compBackgroundImageResizableLatticeFBoundsRight:
-          $compBackgroundImageResizableLatticeFBoundsRight,
+          compBackgroundImageResizableLatticeFBoundsRight: $compBackgroundImageResizableLatticeFBoundsRight,
           enableCompBackgroundImageResizableLatticeFBoundsBottom:
           $enableCompBackgroundImageResizableLatticeFBoundsBottom,
           compBackgroundImageResizableLatticeFBoundsBottom: $compBackgroundImageResizableLatticeFBoundsBottom,
@@ -2709,58 +2692,6 @@ export struct FlexBootcamp {
         CompRestoreIdBlocks({
           enableCompRestoreId: $enableCompRestoreId,
           compRestoreId: $compRestoreId,
-        })
-
-        CompForegroundEffectBlocks({
-          enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
-          compForegroundEffectRadius: $compForegroundEffectRadius
-        })
-
-        CompForegroundBlurBlocks({
-          enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
-          compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
-          enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
-          compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
-          enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
-          compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
-          enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
-          compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
-          enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
-          compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
-        })
-
-        CompMotionBlurBlocks({
-          enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
-          compMotionBlurRadius: $compMotionBlurRadius,
-          enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
-          compMotionBlurAnchorX: $compMotionBlurAnchorX,
-          enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
-          compMotionBlurAnchorY: $compMotionBlurAnchorY,
-        })
-
-        CompClickEffectBlocks({
-          enableCompClickEffect: $enableCompClickEffect,
-          compClickEffect: $compClickEffect,
-          enableCompClickEffectLevel: $enableCompClickEffectLevel,
-          compClickEffectLevel: $compClickEffectLevel,
-          enableCompClickEffectScale: $enableCompClickEffectScale,
-          compClickEffectScale: $compClickEffectScale,
-        })
-
-        CompAccessibilityBlocks({
-          enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
-          compAccessibilityGroup: $compAccessibilityGroup,
-          enableCompAccessibilityText: $enableCompAccessibilityText,
-          compAccessibilityText: $compAccessibilityText,
-          enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
-          compAccessibilityDescription: $compAccessibilityDescription,
-          enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
-          compAccessibilityLevel: $compAccessibilityLevel,
-        })
-
-        CompAttributeModifierBlocks({
-          enableCompAttributeModifier: $enableCompAttributeModifier,
-          compAttributeModifier: $compAttributeModifier,
         })
 
         CompForegroundEffectBlocks({
