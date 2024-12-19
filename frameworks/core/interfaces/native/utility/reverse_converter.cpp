@@ -105,4 +105,61 @@ void AssignArkValue(Ark_Length& dst, const float& src)
     dst.value = src;
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
+
+void AssignArkValue(Ark_Number& dst, const int32_t& src)
+{
+    dst.tag = ARK_TAG_INT32;
+    dst.i32 = src;
+}
+
+void AssignArkValue(Ark_Number& dst, const long& src)
+{
+    LOGE("Ark_Number doesn`t support long");
+    dst.tag = ARK_TAG_INT32;
+    dst.i32 = static_cast<int32_t>(src);
+}
+
+void AssignArkValue(Ark_Number& dst, const long long& src)
+{
+    LOGE("Ark_Number doesn`t support long long");
+    dst.tag = ARK_TAG_INT32;
+    dst.i32 = static_cast<int32_t>(src);
+}
+
+void AssignArkValue(Ark_Number& dst, const uint32_t& src)
+{
+    dst.tag = ARK_TAG_INT32;
+    dst.i32 = src;
+}
+
+void AssignArkValue(Ark_Number& dst, const float& src)
+{
+    dst.tag = ARK_TAG_FLOAT32;
+    dst.f32 = src;
+}
+
+void AssignArkValue(Ark_Number& dst, const double& src)
+{
+    dst.tag = ARK_TAG_FLOAT32;
+    dst.f32 = static_cast<float>(src);
+}
+
+void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
+{
+    dst.offset = ArkValue<Ark_Number>(src.offset);
+    dst.value = ArkValue<Ark_String>(src.value);
+}
+
+void AssignArkValue(Ark_Length& dst, const int& src)
+{
+    dst.type = ARK_RUNTIME_NUMBER;
+    dst.value = src;
+    dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
+}
+
+void AssignArkValue(Ark_Number& dst, const Dimension& src)
+{
+    auto value = static_cast<float>(src.ConvertToVp());
+    AssignArkValue(dst, value);
+}
 } // namespace OHOS::Ace::NG::Converter

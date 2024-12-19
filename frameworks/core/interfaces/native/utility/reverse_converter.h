@@ -30,6 +30,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/components/image/image_event.h"
+#include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
@@ -115,67 +116,9 @@ namespace OHOS::Ace::NG::Converter {
         dst.length = src.size();
     }
 
-    inline void AssignArkValue(Ark_Number& dst, const int32_t& src)
-    {
-        dst.tag = ARK_TAG_INT32;
-        dst.i32 = src;
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const long& src)
-    {
-        LOGE("Ark_Number doesn`t support long");
-        dst.tag = ARK_TAG_INT32;
-        dst.i32 = static_cast<int32_t>(src);
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const long long& src)
-    {
-        LOGE("Ark_Number doesn`t support long long");
-        dst.tag = ARK_TAG_INT32;
-        dst.i32 = static_cast<int32_t>(src);
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const uint32_t& src)
-    {
-        dst.tag = ARK_TAG_INT32;
-        dst.i32 = src;
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const float& src)
-    {
-        dst.tag = ARK_TAG_FLOAT32;
-        dst.f32 = src;
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const double& src)
-    {
-        dst.tag = ARK_TAG_FLOAT32;
-        dst.f32 = static_cast<float>(src);
-    }
-
     inline void AssignArkValue(Ark_NativePointer& dst, void *src)
     {
         dst = src;
-    }
-
-    // Complex types
-    inline void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
-    {
-        dst.offset = ArkValue<Ark_Number>(src.offset);
-        dst.value = ArkValue<Ark_String>(src.value);
-    }
-
-    inline void AssignArkValue(Ark_Length& dst, const int& src)
-    {
-        dst.type = ARK_RUNTIME_NUMBER;
-        dst.value = src;
-        dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
-    }
-
-    inline void AssignArkValue(Ark_Number& dst, const Dimension& src)
-    {
-        auto value = static_cast<float>(src.ConvertToVp());
-        AssignArkValue(dst, value);
     }
 
     // SORTED_SECTION
@@ -192,6 +135,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
+    void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
@@ -203,6 +147,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
     void AssignArkValue(Ark_Length& dst, const Dimension& src);
     void AssignArkValue(Ark_Length& dst, const float& src);
+    void AssignArkValue(Ark_Length& dst, const int& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src);
     void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
@@ -212,14 +157,25 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src);
     void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
+    void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);
+    void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src);
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
     void AssignArkValue(Ark_NavigationTitleMode& dst, const NavigationTitleMode& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
+    void AssignArkValue(Ark_Number& dst, const Dimension& src);
+    void AssignArkValue(Ark_Number& dst, const double& src);
+    void AssignArkValue(Ark_Number& dst, const float& src);
+    void AssignArkValue(Ark_Number& dst, const int32_t& src);
+    void AssignArkValue(Ark_Number& dst, const long long& src);
+    void AssignArkValue(Ark_Number& dst, const long& src);
+    void AssignArkValue(Ark_Number& dst, const uint32_t& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
-    void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
+    void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src);
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
+    void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
+    void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
     void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);
@@ -240,6 +196,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
+    void AssignArkValue(Ark_SourceTool& dst, const SourceTool& src);
+    void AssignArkValue(Ark_SourceType& dst, const SourceType& src);
     void AssignArkValue(Ark_SslError& dst, const SslError& src);
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
@@ -252,11 +210,16 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
+    void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
     void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
+    void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
+    void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src);
+    void AssignArkValue(Ark_ViewportFit& dst, const ViewportFit& src);
     void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src);
+    void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
 

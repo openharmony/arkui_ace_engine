@@ -1756,4 +1756,256 @@ HWTEST_F(WebModifierTest, onDataResubmittedTest, TestSize.Level1)
     delete checkEvent->peer;
 }
 
+/*
+ * @tc.name: onAudioStateChangedTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onAudioStateChangedTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    bool playing = true;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        bool playing;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnAudioStateChangedEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .playing = Converter::Convert<bool>(parameter.playing)
+        };
+    };
+
+    Callback_OnAudioStateChangedEvent_Void arkCallback =
+        Converter::ArkValue<Callback_OnAudioStateChangedEvent_Void>(checkCallback, contextId);
+
+    modifier_->setOnAudioStateChanged(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnAudioStateChangedEvent(std::make_shared<AudioStateChangedEvent>(playing));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->playing, playing);
+}
+
+/*
+ * @tc.name: onFirstContentfulPaintTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onFirstContentfulPaintTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    int64_t navigationStartTick = 1000;
+    int64_t firstContentfulPaintMs = 4000;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        int64_t navigationStartTick;
+        int64_t firstContentfulPaintMs;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnFirstContentfulPaintEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .navigationStartTick = Converter::Convert<int64_t>(parameter.navigationStartTick),
+            .firstContentfulPaintMs = Converter::Convert<int64_t>(parameter.firstContentfulPaintMs)
+        };
+    };
+
+    Callback_OnFirstContentfulPaintEvent_Void arkCallback =
+        Converter::ArkValue<Callback_OnFirstContentfulPaintEvent_Void>(checkCallback, contextId);
+
+    modifier_->setOnFirstContentfulPaint(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnFirstContentfulPaintEvent(std::make_shared<FirstContentfulPaintEvent>(
+        navigationStartTick, firstContentfulPaintMs));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->navigationStartTick, navigationStartTick);
+    EXPECT_EQ(checkEvent->firstContentfulPaintMs, firstContentfulPaintMs);
+}
+
+/*
+ * @tc.name: onFirstMeaningfulPaintTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onFirstMeaningfulPaintTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    int64_t navigationStartTime = 1000;
+    int64_t firstMeaningfulPaintTime = 4000;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        int64_t navigationStartTime;
+        int64_t firstMeaningfulPaintTime;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_FirstMeaningfulPaint parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .navigationStartTime = Converter::OptConvert<int64_t>(parameter.navigationStartTime)
+                .value_or(0),
+            .firstMeaningfulPaintTime = Converter::OptConvert<int64_t>(parameter.firstMeaningfulPaintTime)
+                .value_or(0)
+        };
+    };
+
+    OnFirstMeaningfulPaintCallback arkCallback =
+        Converter::ArkValue<OnFirstMeaningfulPaintCallback>(checkCallback, contextId);
+
+    modifier_->setOnFirstMeaningfulPaint(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnFirstMeaningfulPaintEvent(std::make_shared<FirstMeaningfulPaintEvent>(
+        navigationStartTime, firstMeaningfulPaintTime));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->navigationStartTime, navigationStartTime);
+    EXPECT_EQ(checkEvent->firstMeaningfulPaintTime, firstMeaningfulPaintTime);
+}
+
+/*
+ * @tc.name: onLargestContentfulPaintTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onLargestContentfulPaintTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    int64_t navigationStartTime = 5000;
+    int64_t largestImagePaintTime = 6000;
+    int64_t largestTextPaintTime = 7000;
+    int64_t largestImageLoadStartTime = 8000;
+    int64_t largestImageLoadEndTime = 9000;
+    double_t imageBPP = 5.5;
+
+    struct CheckEvent {
+        int32_t resourceId;
+        int64_t navigationStartTime;
+        int64_t largestImagePaintTime;
+        int64_t largestTextPaintTime;
+        int64_t largestImageLoadStartTime;
+        int64_t largestImageLoadEndTime;
+        double_t imageBPP;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_LargestContentfulPaint parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .navigationStartTime = Converter::OptConvert<int64_t>(parameter.navigationStartTime).value_or(0),
+            .largestImagePaintTime = Converter::OptConvert<int64_t>(parameter.largestImagePaintTime).value_or(0),
+            .largestTextPaintTime = Converter::OptConvert<int64_t>(parameter.largestTextPaintTime).value_or(0),
+            .largestImageLoadStartTime = Converter::OptConvert<int64_t>(parameter.largestImageLoadStartTime)
+                .value_or(0),
+            .largestImageLoadEndTime = Converter::OptConvert<int64_t>(parameter.largestImageLoadEndTime).value_or(0),
+            .imageBPP = Converter::OptConvert<double>(parameter.imageBPP).value_or(2)
+        };
+    };
+
+    auto arkCallback = Converter::ArkValue<OnLargestContentfulPaintCallback>(checkCallback, contextId);
+
+    modifier_->setOnLargestContentfulPaint(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnLargestContentfulPaintEvent(std::make_shared<LargestContentfulPaintEvent>(navigationStartTime,
+        largestImagePaintTime, largestTextPaintTime, largestImageLoadStartTime, largestImageLoadEndTime, imageBPP));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->navigationStartTime, navigationStartTime);
+    EXPECT_EQ(checkEvent->largestImagePaintTime, largestImagePaintTime);
+    EXPECT_EQ(checkEvent->largestTextPaintTime, largestTextPaintTime);
+    EXPECT_EQ(checkEvent->largestImageLoadStartTime, largestImageLoadStartTime);
+    EXPECT_EQ(checkEvent->largestImageLoadEndTime, largestImageLoadEndTime);
+    EXPECT_DOUBLE_EQ(checkEvent->imageBPP, imageBPP);
+}
+
+/*
+ * @tc.name: onLoadInterceptTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onLoadInterceptTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    std::map<std::string, std::string> headers = {};
+    std::string method = "method";
+    std::string url = "url";
+    bool hasGesture = true;
+    bool isMainFrame = true;
+    bool isRedirect = true;
+    RefPtr<WebRequest> webRequest = Referenced::MakeRefPtr<WebRequest>(
+        headers, method, url, hasGesture, isMainFrame, isRedirect);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        WebResourceRequestPeer* peer;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId,
+        const Ark_OnLoadInterceptEvent parameter, const Callback_Boolean_Void continuation) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.data.ptr)
+        };
+    };
+
+    Callback_OnLoadInterceptEvent_Boolean arkCallback =
+        Converter::ArkValue<Callback_OnLoadInterceptEvent_Boolean>(checkCallback, contextId);
+
+    modifier_->setOnLoadIntercept(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    webEventHub->FireOnLoadInterceptEvent(std::make_shared<LoadInterceptEvent>(webRequest));
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->peer->webRequest, webRequest);
+    delete checkEvent->peer;
+}
+
+/*
+ * @tc.name: onControllerAttachedTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, onControllerAttachedTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        checkEvent = {
+            .resourceId = resourceId
+        };
+    };
+
+    Callback_Void arkCallback =
+        Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+
+    modifier_->setOnControllerAttached(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    auto callback = webPattern->GetOnControllerAttachedCallback();
+    callback();
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+}
+
 } // namespace OHOS::Ace::NG
