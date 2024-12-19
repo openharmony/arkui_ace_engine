@@ -45,7 +45,7 @@ export class ProgressButton extends ViewPU {
     this.progressButtonWidth = BUTTON_NORMARL_WIDTH;
     this.clickCallback = () => { };
     this.__enable = new SynchedPropertySimpleOneWayPU(l1.enable, this, 'enable');
-    this.colorOption = undefined;
+    this.colorOptions = undefined;
     this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, 'progressColor');
     this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, 'containerBorderColor');
     this.__containerBackgroundColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'containerBackgroundColor');
@@ -75,8 +75,8 @@ export class ProgressButton extends ViewPU {
     if (j1.enable === undefined) {
       this.__enable.set(true);
     }
-    if (j1.colorOption !== undefined) {
-      this.colorOption = j1.colorOption;
+    if (j1.colorOptions !== undefined) {
+      this.colorOptions = j1.colorOptions;
     }
     if (j1.progressColor !== undefined) {
       this.progressColor = j1.progressColor;
@@ -235,7 +235,9 @@ export class ProgressButton extends ViewPU {
       Button.clip(false);
       Button.hoverEffect(HoverEffect.None);
       Button.key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY);
-      Button.backgroundColor(this.colorOption?.backgroundColor ? this.colorOption?.backgroundColor : this.containerBackgroundColor);
+      Button.backgroundColor(this.colorOptions?.backgroundColor
+        ? this.colorOptions?.backgroundColor
+        : this.containerBackgroundColor);
       Button.constraintSize({ minWidth: 44 });
       Button.padding({ top: 0, bottom: 0 });
       Button.width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?
@@ -274,7 +276,7 @@ export class ProgressButton extends ViewPU {
       Progress.hoverEffect(HoverEffect.None);
       Progress.clip(false);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
-      Progress.color(this.colorOption?.progressColor ? this.colorOption?.progressColor : this.progressColor);
+      Progress.color(this.colorOptions?.progressColor ? this.colorOptions?.progressColor : this.progressColor);
       if (!q) {
         Progress.pop();
       }
@@ -295,7 +297,7 @@ export class ProgressButton extends ViewPU {
       Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Text.fontWeight(FontWeight.Medium);
       Text.key(PROGRESS_BUTTON_PRIMARY_FONT_KEY);
-      Text.fontColor(this.colorOption?.textColor);
+      Text.fontColor(this.colorOptions?.textColor);
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.padding({ top: 4, left: 8, right: 8, bottom: 4 });
@@ -321,7 +323,7 @@ export class ProgressButton extends ViewPU {
       Row.backgroundColor(Color.Transparent);
       Row.border({
         width: 1,
-        color: this.colorOption?.borderColor ? this.colorOption?.borderColor : this.containerBorderColor
+        color: this.colorOptions?.borderColor ? this.colorOptions?.borderColor : this.containerBorderColor
       });
       Row.height(ObservedObject.GetRawObject(this.textHeight));
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });

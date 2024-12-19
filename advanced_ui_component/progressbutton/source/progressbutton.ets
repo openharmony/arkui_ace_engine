@@ -41,7 +41,7 @@ export struct ProgressButton {
   progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH;
   clickCallback: () => void = () => {};
   @Prop enable: boolean = true;
-  colorOption: ProgressButtonColorOptions | undefined = undefined;
+  colorOptions: ProgressButtonColorOptions | undefined = undefined;
 
   @State progressColor: ResourceColor = '#330A59F7'
   @State containerBorderColor: ResourceColor = '#330A59F7'
@@ -101,13 +101,13 @@ export struct ProgressButton {
           .hoverEffect(HoverEffect.None)
           .clip(false)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
-          .color(this.colorOption?.progressColor ? this.colorOption?.progressColor : this.progressColor)
+          .color(this.colorOptions?.progressColor ? this.colorOptions?.progressColor : this.progressColor)
         Row() {
           Text(this.isLoading ? this.textProgress: this.content)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
             .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
-            .fontColor(this.colorOption?.textColor)
+            .fontColor(this.colorOptions?.textColor)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .padding({ top: 4, left: 8, right: 8, bottom: 4})
@@ -126,7 +126,7 @@ export struct ProgressButton {
           .backgroundColor(Color.Transparent)
           .border({
             width: 1,
-            color: this.colorOption?.borderColor ? this.colorOption?.borderColor : this.containerBorderColor
+            color: this.colorOptions?.borderColor ? this.colorOptions?.borderColor : this.containerBorderColor
           })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
