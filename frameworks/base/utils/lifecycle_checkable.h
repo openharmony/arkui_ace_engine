@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_LIFECYCLE_CHECKABLE_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_LIFECYCLE_CHECKABLE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_LIFECYCLE_CHECKABLE_H
+#define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_LIFECYCLE_CHECKABLE_H
 
 #include <atomic>
 #include <cstdlib>
-
-#include "ui/base/macros.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT LifeCycleCheckable {
+class LifeCycleCheckable {
 public:
     template<class T>
     class PtrHolder {
@@ -46,11 +45,17 @@ public:
     };
 
 protected:
-    ~LifeCycleCheckable();
+    ~LifeCycleCheckable()
+    {
+        if (usingCount_) {
+            LOGF("this object is still in use, use_count=%{public}d", usingCount_.load());
+            abort();
+        }
+    }
 
 private:
     std::atomic_int usingCount_ = 0;
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_LIFECYCLE_CHECKABLE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_LIFECYCLE_CHECKABLE_H

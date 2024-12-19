@@ -24,7 +24,6 @@
 #include <utility>
 #include <vector>
 
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"

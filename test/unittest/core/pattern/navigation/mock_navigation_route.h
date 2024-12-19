@@ -18,7 +18,6 @@
 
 #include "frameworks/core/components_ng/pattern/navigation/navigation_route.h"
 
-namespace OHOS::Ace {
 class MockNavigationRoute : public OHOS::Ace::NG::NavigationRoute {
     DECLARE_ACE_TYPE(MockNavigationRoute, OHOS::Ace::NG::NavigationRoute);
 
@@ -47,5 +46,4 @@ public:
 private:
     std::vector<std::string> names_;
 };
-} // namespace OHOS::Ace
 #endif

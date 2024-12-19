@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_ASSET_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_ASSET_MANAGER_H
 
-#include <vector>
-
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 

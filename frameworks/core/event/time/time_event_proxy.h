@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_TIME_EVENT_PROXY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_TIME_EVENT_PROXY_H
 
-#include <memory>
 #include <mutex>
 #include <set>
 

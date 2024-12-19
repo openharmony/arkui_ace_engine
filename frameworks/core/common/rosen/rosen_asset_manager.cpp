@@ -15,8 +15,6 @@
 
 #include "rosen_asset_manager.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 RefPtr<Asset> RSAssetManager::GetAsset(const std::string& assetName)
 {

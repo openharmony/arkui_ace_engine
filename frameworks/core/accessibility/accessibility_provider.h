@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_PROVIDER_H
 
 #include <map>
-#include <memory>
 #include <vector>
 
 #include "base/memory/ace_type.h"

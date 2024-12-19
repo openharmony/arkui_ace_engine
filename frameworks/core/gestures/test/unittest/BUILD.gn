@@ -25,10 +25,7 @@ ohos_unittest("GesturesTest") {
 
   sources = [ "gestures_test.cpp" ]
 
-  configs = [
-    "$ace_root:ace_test_config",
-    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
-  ]
+  configs = [ "$ace_root:ace_test_config" ]
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
