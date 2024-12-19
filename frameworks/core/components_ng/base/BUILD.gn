@@ -35,6 +35,9 @@ build_component_ng("base_ng") {
   if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode)) {
     sources += vendor_configs.ace_engine_advanced_split_mode
+  } else if (ace_engine_feature_wearable &&
+             defined(vendor_configs.ace_engine_advanced_wearable_pattern)) {
+    sources += vendor_configs.ace_engine_advanced_wearable_pattern
   } else {
     sources += [ "view_advanced_register.cpp" ]
   }
