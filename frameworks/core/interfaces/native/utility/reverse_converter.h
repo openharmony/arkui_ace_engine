@@ -33,6 +33,7 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
@@ -132,6 +133,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
+    void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
