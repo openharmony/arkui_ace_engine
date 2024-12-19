@@ -145,10 +145,6 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute {
     throw new Error('Method not implemented.');
   }
-  enableDargBar(value: boolean | undefined): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
-    return this;
-  }
   ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): NavigationAttribute {
     let opts = new ArkSafeAreaExpandOpts();
     if (types && types.length >= 0) {
@@ -188,6 +184,11 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     } else {
       modifierWithKey(this._modifiersWithKeys, IgnoreNavLayoutSafeAreaModifier.identity, IgnoreNavLayoutSafeAreaModifier, opts);
     }
+    return this;
+  }
+
+  enableDargBar(value: boolean | undefined): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
     return this;
   }
 }
