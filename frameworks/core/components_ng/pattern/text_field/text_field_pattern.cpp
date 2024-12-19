@@ -1411,7 +1411,9 @@ void TextFieldPattern::HandleOnUndoAction()
     if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
         redoOperationRecords_.erase(redoOperationRecords_.begin());
     }
-    redoOperationRecords_.push_back(value);
+    if (operationRecords_.size() >= 1) {
+        redoOperationRecords_.push_back(value); // the initial status is not recorded
+    }
     auto textEditingValue = operationRecords_.back(); // each record includes text and caret
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->MoveCaretToContentRect(textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
@@ -1439,6 +1441,11 @@ void TextFieldPattern::HandleOnRedoAction()
 bool TextFieldPattern::CanUndo()
 {
     return operationRecords_.size() > 1;
+}
+
+bool TextFieldPattern::HasOperationRecords()
+{
+    return !operationRecords_.empty();
 }
 
 bool TextFieldPattern::CanRedo()
@@ -4470,9 +4477,10 @@ void TextFieldPattern::InsertValue(const std::u16string& insertValue, bool isIME
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "curFocusNode:%{public}s, ", curFocusNode->GetTag().c_str());
         return;
     }
-    if (!isEdit_) {
+    if (!isEdit_ || IsDragging()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "textfield %{public}d NOT allow physical keyboard input in preview state", host->GetId());
+            "textfield %{public}d NOT allow input, isEdit_ = %{public}d, IsDragging = %{public}d", host->GetId(),
+            isEdit_, IsDragging());
         return;
     }
     if (focusIndex_ != FocuseIndex::TEXT && insertValue == u" ") {
@@ -5469,6 +5477,7 @@ void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
 
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
+    CHECK_NULL_VOID(!IsDragging());
     ResetObscureTickCountDown();
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
@@ -5536,6 +5545,7 @@ void TextFieldPattern::DeleteForwardOperation(int32_t length)
 
 void TextFieldPattern::DeleteForward(int32_t length)
 {
+    CHECK_NULL_VOID(!IsDragging());
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
         auto end = selectController_->GetEndIndex();

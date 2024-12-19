@@ -173,6 +173,7 @@ void JSLocationButton::JSBind(BindingTarget globalObj)
     JSClass<JSLocationButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
     JSClass<JSLocationButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
     JSClass<JSLocationButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
+    JSClass<JSLocationButton>::StaticMethod("align", &JSSecButtonBase::SetAlign);
     JSClass<JSLocationButton>::StaticMethod("onClick", &JSLocationButton::JsOnClick);
     JSClass<JSLocationButton>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSLocationButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
@@ -184,6 +185,9 @@ void JSLocationButton::JSBind(BindingTarget globalObj)
     JSClass<JSLocationButton>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSLocationButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSLocationButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSLocationButton>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+    JSClass<JSLocationButton>::StaticMethod("id", &JSViewAbstract::JsId);
+    JSClass<JSLocationButton>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
     JSClass<JSLocationButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

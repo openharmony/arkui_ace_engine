@@ -134,7 +134,7 @@ public:
                    static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
 
-    bool IsHandleSamePosition()
+    bool IsHandleSamePosition() const
     {
         bool sameX = NearEqual(firstHandleInfo_.rect.GetX(), secondHandleInfo_.rect.GetX());
         bool sameY = NearEqual(firstHandleInfo_.rect.GetY(), secondHandleInfo_.rect.GetY());
@@ -172,7 +172,7 @@ public:
         return caretInfo_;
     }
 
-    bool HasReverse()
+    bool HasReverse() const
     {
         return firstHandleInfo_.index > secondHandleInfo_.index;
     }
@@ -182,7 +182,7 @@ public:
         return caretInfo_.index == static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
     
-    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
+    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false) const;
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
@@ -211,7 +211,7 @@ public:
     std::vector<RectF> GetSelectedRects() const;
     RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
-    bool IsTouchAtLineEnd(const Offset& localOffset);
+    bool IsTouchAtLineEnd(const Offset& localOffset) const;
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
     void UpdateSelectWithBlank(const Offset& localOffset);
 
@@ -233,7 +233,7 @@ private:
     void AdjustCursorPosition(int32_t& index, const Offset& touchOffset);
     bool AdjustWordSelection(int32_t& index, int32_t& start, int32_t& end, const Offset& touchOffset);
     bool IsClickAtBoundary(int32_t index, const Offset& touchOffset);
-    const TimeStamp& GetLastClickTime();
+    const TimeStamp& GetLastClickTime() const;
     void UpdateCaretOriginalRect(const OffsetF& offset);
     void SetCaretRectAtEmptyValue();
 

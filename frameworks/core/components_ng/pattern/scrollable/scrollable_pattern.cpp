@@ -1482,6 +1482,7 @@ void ScrollablePattern::InitCurveOffsetProperty()
             stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_) {
                 pattern->isAnimateOverScroll_ = false;
+                pattern->isScrollToOverAnimation_  = true;
                 auto pauseVelocity = -pattern->currentVelocity_;
                 auto context = pattern->GetContext();
                 CHECK_NULL_VOID(context);
@@ -2423,9 +2424,10 @@ void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& ve
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
+    if (!isScrollToOverAnimation_ && parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    isScrollToOverAnimation_ = false;
     SetIsNestedInterrupt(false);
 }
 

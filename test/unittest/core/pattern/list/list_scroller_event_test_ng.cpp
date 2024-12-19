@@ -360,7 +360,7 @@ HWTEST_F(ListScrollerEventTestNg, Event004, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll down to end
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -462,9 +462,10 @@ HWTEST_F(ListScrollerEventTestNg, Event008, TestSize.Level1)
     CreateDone();
 
     /**
-     * @tc.steps: step1. Scroll down to end
+     * @tc.steps: step1. When unScrollable, call ScrollToEdge
+     * @tc.expected: Would not trigger onScroll event
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_FALSE(isTrigger);
 }
 
@@ -857,8 +858,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange001, TestSize.Leve
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -881,8 +881,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange001, TestSize.Leve
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -903,8 +902,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange001, TestSize.Leve
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -939,8 +937,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      * @tc.cases: indexChanged == startChanged == endChanged == false
      * @tc.expected: startExpect.index = 0
      */
-    pattern_->ScrollTo(30);
-    FlushUITasks();
+    ScrollTo(30);
     EXPECT_EQ(pattern_->GetTotalOffset(), 30);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
@@ -951,8 +948,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      * @tc.expected: startExpect.indexInGroup = 0
      */
     startExpect = { 0, 1, 0 };
-    pattern_->ScrollTo(60);
-    FlushUITasks();
+    ScrollTo(60);
     EXPECT_EQ(pattern_->GetTotalOffset(), 60);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
@@ -963,8 +959,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      * @tc.expected: endExpect.indexInGroup = 3
      */
     endExpect = { 1, 1, 1 };
-    pattern_->ScrollTo(120);
-    FlushUITasks();
+    ScrollTo(120);
     EXPECT_EQ(pattern_->GetTotalOffset(), 120);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
@@ -975,8 +970,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      */
     startExpect = { 0, 1, 1 };
     endExpect = { 2, 2, -1 };
-    pattern_->ScrollTo(240);
-    FlushUITasks();
+    ScrollTo(240);
     EXPECT_EQ(pattern_->GetTotalOffset(), 240);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));

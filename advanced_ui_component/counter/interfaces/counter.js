@@ -1065,7 +1065,7 @@ export class CounterComponent extends ViewPU {
                 this.step = 1;
             }
             else {
-                this.step = this.dateStyleOptions.step;
+                this.step = Math.floor(this.dateStyleOptions.step);
             }
         }
         if (this.dateStyleOptions.onHoverIncrease !== undefined) {

@@ -959,7 +959,7 @@ LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper
 
 void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
 {
-    if (scrollSnapAlign_ != ScrollSnapAlign::CENTER || childrenSize_) {
+    if (scrollSnapAlign_ == ScrollSnapAlign::NONE || childrenSize_) {
         return;
     }
     auto startChild = itemPosition_.begin();

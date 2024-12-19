@@ -276,18 +276,6 @@ void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
     FlushUITasks();
 }
 
-void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    pattern_->ScrollToEdge(scrollEdgeType, false);
-    FlushUITasks();
-}
-
-void ListTestNg::ScrollTo(float position)
-{
-    pattern_->ScrollTo(position);
-    FlushUITasks();
-}
-
 void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc)
 {
     RepeatVirtualScrollModelNG repeatModel;
@@ -360,10 +348,6 @@ RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
 
 AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
-    if (!MockAnimationManager::GetInstance().AllFinished()) {
-        MockAnimationManager::GetInstance().Tick();
-        FlushUITasks();
-    }
     Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
     if (AceType::InstanceOf<ListItemPattern>(frameNode->GetPattern())) {
         auto pattern = frameNode->GetPattern<ListItemPattern>();
@@ -377,27 +361,9 @@ AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float e
     return IsEqual(-(pattern->GetTotalOffset()), expectOffset);
 }
 
-AssertionResult ListTestNg::VelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
-{
-    MockAnimationManager::GetInstance().TickByVelocity(velocity);
-    FlushUITasks();
-    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
-}
-
 AssertionResult ListTestNg::Position(float expectOffset)
 {
     return Position(frameNode_, expectOffset);
-}
-
-AssertionResult ListTestNg::VelocityPosition(float velocity, float expectOffset)
-{
-    return VelocityPosition(frameNode_, velocity, expectOffset);
-}
-
-void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
-{
-    positionController_->ScrollToIndex(index, smooth, align, extraOffset);
-    FlushUITasks();
 }
 
 void ListTestNg::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)

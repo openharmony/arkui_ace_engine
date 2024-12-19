@@ -28,12 +28,14 @@ arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
 
 es2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
-  src_js = rebase_path(
-          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js")
+  src_js = rebase_path(base_output_path + "../../../stateMgmt.js")
   dst_file = rebase_path(base_output_path + "/stateMgmt.abc")
-
-  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js" ]
+  in_puts = [ rebase_path(base_output_path + "../../../stateMgmt.js") ]
   out_puts = [ base_output_path + "/stateMgmt.abc" ]
+
+  extra_dependencies = [
+    "$ace_root/frameworks/bridge/declarative_frontend:run_state_mgmt_build",
+  ]
 }
 
 es2abc_gen_abc("gen_jsEnumStyle_abc") {

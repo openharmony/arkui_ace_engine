@@ -562,7 +562,9 @@ int32_t GetImageDraggable(ArkUINodeHandle node)
  */
 void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length)
 {
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(node, values, units, length);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->setBorderRadius(node, values, units, length);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -584,7 +586,9 @@ void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, con
 
 void ResetImageBorderRadius(ArkUINodeHandle node)
 {
-    GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(node);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->resetBorderRadius(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -632,7 +636,9 @@ void ResetImageBorder(ArkUINodeHandle node)
         ImageModelNG::SetBackBorder(frameNode);
         return;
     }
-    GetArkUINodeModifiers()->getCommonModifier()->resetBorder(node);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->resetBorder(node);
     CalcDimension borderRadius;
     ImageModelNG::SetBorderRadius(frameNode, borderRadius);
 }

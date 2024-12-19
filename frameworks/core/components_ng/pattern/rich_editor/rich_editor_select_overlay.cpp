@@ -22,7 +22,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLE = 2.0f;
-constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 }
 
 bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -606,11 +605,24 @@ void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_SELECT_AREA);
-    if (IsSingleHandleShow()) {
-        auto pattern = GetPattern<RichEditorPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->StopTwinkling();
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    IF_TRUE(IsSingleHandleShow(), pattern->StopTwinkling());
+    if (IsRightButtonCustomMenuShow()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Change mouse style to default after right-button custom menu show");
+        pattern->ChangeMouseStyle(MouseFormat::DEFAULT);
     }
+}
+
+bool RichEditorSelectOverlay::IsRightButtonCustomMenuShow()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager && manager->IsMenuShow(), false);
+    auto overlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    auto menuInfo = overlayInfo->menuInfo;
+    auto responseType = menuInfo.responseType.value_or(static_cast<int>(TextResponseType::NONE));
+    return responseType == static_cast<int>(TextResponseType::RIGHT_CLICK) && menuInfo.menuBuilder != nullptr;
 }
 
 float RichEditorSelectOverlay::GetHandleHotZoneRadius()
@@ -632,7 +644,7 @@ void RichEditorSelectOverlay::OnHandleMarkInfoChange(
     std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
 {
     IF_TRUE((flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE, SwitchCaretState(info));
-    CHECK_NULL_VOID((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG);
+    CHECK_NULL_VOID((flag & DIRTY_HANDLE_COLOR_FLAG) == DIRTY_HANDLE_COLOR_FLAG);
     CHECK_NULL_VOID(info);
 
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -647,7 +659,7 @@ void RichEditorSelectOverlay::UpdateHandleColor()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+    manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
 }
 
 } // namespace OHOS::Ace::NG

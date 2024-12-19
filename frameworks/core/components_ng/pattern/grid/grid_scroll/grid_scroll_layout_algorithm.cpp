@@ -1096,6 +1096,9 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     }
     if (!cacheValid) {
         info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
+        // run out of record, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
+        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
+                                                                                  : info.startMainLineIndex_);
         // If only the height of the GridItem is changed, keep the prevOffset_ and currentOffset_ equal.
         ResetOffsetWhenHeightChanged();
     }
@@ -1127,9 +1130,10 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         if (lineHeight == info_.lineHeightMap_.end()) {
             break;
         }
-        info_.startMainLineIndex_--;
+        --info_.startMainLineIndex_;
         info_.startIndex_ = line->second.begin()->second;
         info_.currentOffset_ -= lineHeight->second + mainGap_;
+        info_.currentHeight_ -= lineHeight->second + mainGap_;
     }
 
     // skip lines not in matrix
@@ -1170,9 +1174,10 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         if (lineHeight == info_.lineHeightMap_.end()) {
             break;
         }
-        info_.startMainLineIndex_++;
-        info_.endMainLineIndex_++;
+        ++info_.startMainLineIndex_;
+        ++info_.endMainLineIndex_;
         info_.currentOffset_ += lineHeight->second + mainGap_;
+        info_.currentHeight_ += lineHeight->second + mainGap_;
     }
     info_.UpdateStartIndexByStartLine();
 

@@ -35,33 +35,33 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Align001, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::START;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
     EXPECT_TRUE(pattern_->IsAtTop());
 
     // Scroll to the middle item in view
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // Scroll to the item out of view
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(-500.0f));
+    EXPECT_TRUE(TickPosition(-500.0f));
 
     // Scroll back
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // Scroll with invalid index
     ScrollToIndex(-100, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
     ScrollToIndex(100, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // Scroll to the last item
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-100.0f));
+        EXPECT_TRUE(TickPosition(-100.0f));
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
     }
 }
 
@@ -81,26 +81,26 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Align002, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::CENTER;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the middle item in view
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the item out of view
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(-350.0f));
+    EXPECT_TRUE(TickPosition(-350.0f));
 
     // Scroll back
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the last item
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(0));
+        EXPECT_TRUE(TickPosition(0));
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
     }
 }
 
@@ -120,26 +120,26 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Align003, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::END;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the middle item in view
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the item out of view
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 
     // Scroll back
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the last item
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(0));
+        EXPECT_TRUE(TickPosition(0));
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
     }
 }
 
@@ -159,26 +159,26 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Align004, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::AUTO;
     ScrollToIndex(0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the middle item in view
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the item out of view
     ScrollToIndex(5, smooth, align);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 
     // Scroll back
     ScrollToIndex(1, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // Scroll to the last item
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-100.0f));
+        EXPECT_TRUE(TickPosition(-100.0f));
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
     }
 }
 
@@ -197,19 +197,19 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Space001, TestSize.Level1)
     // ScrollAlign::START
     bool smooth = GetParam();
     ScrollToIndex(1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-110.0f));
+    EXPECT_TRUE(TickPosition(-110.0f));
 
     // ScrollAlign::CENTER
     ScrollToIndex(5, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     // ScrollAlign::END
     ScrollToIndex(5, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-250.0f));
+    EXPECT_TRUE(TickPosition(-250.0f));
 
     // ScrollAlign::AUTO
     ScrollToIndex(8, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-580.0f));
+    EXPECT_TRUE(TickPosition(-580.0f));
 }
 
 /**
@@ -227,16 +227,16 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Lanes001, TestSize.Level1)
 
     bool smooth = GetParam();
     ScrollToIndex(2, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     ScrollToIndex(9, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-250.0f));
+    EXPECT_TRUE(TickPosition(-250.0f));
 
     ScrollToIndex(10, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 
     ScrollToIndex(16, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-500.0f));
+    EXPECT_TRUE(TickPosition(-500.0f));
 }
 
 /**
@@ -255,19 +255,19 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_ContentOffset001, TestSize.Level1)
 
     bool smooth = GetParam();
     ScrollToIndex(1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-75.0f));
+    EXPECT_TRUE(TickPosition(-75.0f));
 
     ScrollToIndex(5, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-350.0f));
+    EXPECT_TRUE(TickPosition(-350.0f));
 
     ScrollToIndex(5, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-225.0f));
+    EXPECT_TRUE(TickPosition(-225.0f));
 
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, ScrollAlign::AUTO);
     if (smooth) {
-        EXPECT_TRUE(Position(-225.0f));
+        EXPECT_TRUE(TickPosition(-225.0f));
     } else {
-        EXPECT_TRUE(Position(-625.0f));
+        EXPECT_TRUE(TickPosition(-625.0f));
     }
 }
 
@@ -296,19 +296,19 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_AddItem001, TestSize.Level1)
 
     bool smooth = GetParam();
     ScrollToIndex(1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     ScrollToIndex(5, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-350.0f));
+    EXPECT_TRUE(TickPosition(-350.0f));
 
     ScrollToIndex(5, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, ScrollAlign::AUTO);
     if (smooth) {
-        EXPECT_TRUE(Position(-200.0f));
+        EXPECT_TRUE(TickPosition(-200.0f));
     } else {
-        EXPECT_TRUE(Position(-700.0f));
+        EXPECT_TRUE(TickPosition(-700.0f));
     }
 }
 
@@ -326,40 +326,40 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_ExtraOffset001, TestSize.Level1)
     float extraOffset = -200.0f;
     ScrollToIndex(1, smooth, ScrollAlign::START, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     ScrollToIndex(18, smooth, ScrollAlign::START, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
 
     ScrollToIndex(18, smooth, ScrollAlign::END, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(-1300.0f));
+    EXPECT_TRUE(TickPosition(-1300.0f));
 
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, ScrollAlign::END, extraOffset);
     FlushUITasks();
     if (smooth) {
-        EXPECT_TRUE(Position(-1300.0f));
+        EXPECT_TRUE(TickPosition(-1300.0f));
     } else {
-        EXPECT_TRUE(Position(-1400.0f));
+        EXPECT_TRUE(TickPosition(-1400.0f));
     }
 
     extraOffset = 200.0f;
     ScrollToIndex(1, smooth, ScrollAlign::START, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(-300.0f));
+    EXPECT_TRUE(TickPosition(-300.0f));
 
     ScrollToIndex(1, smooth, ScrollAlign::END, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     ScrollToIndex(18, smooth, ScrollAlign::END, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
 
     ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, ScrollAlign::END, extraOffset);
     FlushUITasks();
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
 }
 
 /**
@@ -376,20 +376,20 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_ListItemGroup001, TestSize.Level1)
     // groupHeight: 310
     bool smooth = GetParam();
     ScrollToIndex(1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-310.0f));
+    EXPECT_TRUE(TickPosition(-310.0f));
 
     ScrollToIndex(3, smooth, ScrollAlign::CENTER);
     if (smooth) {
-        EXPECT_TRUE(Position(-885.0f));
+        EXPECT_TRUE(TickPosition(-885.0f));
     } else {
-        EXPECT_TRUE(Position(-785.0f));
+        EXPECT_TRUE(TickPosition(-785.0f));
     }
 
     ScrollToIndex(3, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-840.0f));
+    EXPECT_TRUE(TickPosition(-840.0f));
 
     ScrollToIndex(4, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-1150.0f));
+    EXPECT_TRUE(TickPosition(-1150.0f));
 }
 
 /**
@@ -407,33 +407,33 @@ HWTEST_P(ListControllerTestNg, JumpToItemInGroup_Align001, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::START;
     JumpToItemInGroup(0, 0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(0, 1, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     JumpToItemInGroup(3, 1, smooth, align);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     JumpToItemInGroup(ListLayoutAlgorithm::LAST_ITEM, 0, smooth, align);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 
     JumpToItemInGroup(0, 1, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     JumpToItemInGroup(-100, -100, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     JumpToItemInGroup(100, 100, smooth, align);
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 
     // NONE equal to START
     align = ScrollAlign::NONE;
     JumpToItemInGroup(3, 1, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-100.0f));
+        EXPECT_TRUE(TickPosition(-100.0f));
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
     }
 }
 
@@ -451,23 +451,23 @@ HWTEST_P(ListControllerTestNg, JumpToItemInGroup_Align002, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::CENTER;
     JumpToItemInGroup(0, 0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(0, 1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(3, 1, smooth, align);
-    EXPECT_TRUE(Position(-550.0f));
+    EXPECT_TRUE(TickPosition(-550.0f));
 
     JumpToItemInGroup(ListLayoutAlgorithm::LAST_ITEM, 0, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-550.0f));
+        EXPECT_TRUE(TickPosition(-550.0f));
     } else {
-        EXPECT_TRUE(Position(-600.0f));
+        EXPECT_TRUE(TickPosition(-600.0f));
     }
 
     JumpToItemInGroup(0, 1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -484,23 +484,23 @@ HWTEST_P(ListControllerTestNg, JumpToItemInGroup_Align003, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::END;
     JumpToItemInGroup(0, 0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(0, 1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(3, 1, smooth, align);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     JumpToItemInGroup(ListLayoutAlgorithm::LAST_ITEM, 0, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-400.0f));
+        EXPECT_TRUE(TickPosition(-400.0f));
     } else {
-        EXPECT_TRUE(Position(-500.0f));
+        EXPECT_TRUE(TickPosition(-500.0f));
     }
 
     JumpToItemInGroup(0, 1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -517,26 +517,26 @@ HWTEST_P(ListControllerTestNg, JumpToItemInGroup_Align004, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::AUTO;
     JumpToItemInGroup(0, 0, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(0, 1, smooth, align);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(3, 1, smooth, align);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     JumpToItemInGroup(ListLayoutAlgorithm::LAST_ITEM, 0, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-400.0f));
+        EXPECT_TRUE(TickPosition(-400.0f));
     } else {
-        EXPECT_TRUE(Position(-500.0f));
+        EXPECT_TRUE(TickPosition(-500.0f));
     }
 
     JumpToItemInGroup(0, 1, smooth, align);
     if (smooth) {
-        EXPECT_TRUE(Position(-400.0f));
+        EXPECT_TRUE(TickPosition(-400.0f));
     } else {
-        EXPECT_TRUE(Position(-100.0f));
+        EXPECT_TRUE(TickPosition(-100.0f));
     }
 }
 
@@ -556,16 +556,16 @@ HWTEST_P(ListControllerTestNg, JumpToItemInGroup_Space001, TestSize.Level1)
     // groupHeight: 310
     bool smooth = GetParam();
     JumpToItemInGroup(0, 1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(-160.0f));
+    EXPECT_TRUE(TickPosition(-160.0f));
 
     JumpToItemInGroup(3, 1, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-970.0f));
+    EXPECT_TRUE(TickPosition(-970.0f));
 
     JumpToItemInGroup(3, 1, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-820.0f));
+    EXPECT_TRUE(TickPosition(-820.0f));
 
     JumpToItemInGroup(5, 0, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-820.0f));
+    EXPECT_TRUE(TickPosition(-820.0f));
 }
 
 /**
@@ -582,16 +582,16 @@ HWTEST_P(ListControllerTestNg, JumpToItemInGroup_Lanes001, TestSize.Level1)
 
     bool smooth = GetParam();
     JumpToItemInGroup(0, 1, smooth, ScrollAlign::START);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     JumpToItemInGroup(6, 1, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-450.0f));
+    EXPECT_TRUE(TickPosition(-450.0f));
 
     JumpToItemInGroup(6, 1, smooth, ScrollAlign::END);
-    EXPECT_TRUE(Position(-300.0f));
+    EXPECT_TRUE(TickPosition(-300.0f));
 
     JumpToItemInGroup(9, 0, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
 }
 
 /**
@@ -611,25 +611,22 @@ HWTEST_P(ListControllerTestNg, AnimateTo001, TestSize.Level1)
      * @tc.expected: AnimateTo the position
      */
     bool smooth = GetParam();
-    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
-    positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+    AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step3. AnimateTo the top
      * @tc.expected: AnimateTo the top
      */
-    positionController_->AnimateTo(Dimension(0), 0, nullptr, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    AnimateTo(Dimension(0), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -650,17 +647,15 @@ HWTEST_P(ListControllerTestNg, AnimateTo002, TestSize.Level1)
      * @tc.expected: AnimateTo the position
      */
     bool smooth = GetParam();
-    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position with animation
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
-    positionController_->AnimateTo(Dimension(0), 0, nullptr, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    AnimateTo(Dimension(0), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -676,24 +671,22 @@ HWTEST_P(ListControllerTestNg, AnimateTo003, TestSize.Level1)
     CreateListItems();
     CreateDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step1. AnimateTo the position without animation
      * @tc.expected: AnimateTo the position
      */
     bool smooth = GetParam();
-    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position with animation
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
-    positionController_->AnimateTo(Dimension(0), 0, nullptr, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    AnimateTo(Dimension(0), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -713,33 +706,29 @@ HWTEST_P(ListControllerTestNg, ScrollBy001, TestSize.Level1)
      * @tc.expected: ScrollBy the position
      */
     bool smooth = GetParam();
-    positionController_->ScrollBy(0, ITEM_MAIN_SIZE, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    ScrollBy(0, ITEM_MAIN_SIZE, smooth);
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. ScrollBy the position over the scroll
      * @tc.expected: ScrollBy the bottom, can not over scroll
      */
-    positionController_->ScrollBy(0, CONTENT_MAIN_SIZE, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+    ScrollBy(0, CONTENT_MAIN_SIZE, smooth);
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step3. ScrollBy the position 0
      * @tc.expected: Not scroll
      */
-    positionController_->ScrollBy(0, 0, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+    ScrollBy(0, 0, smooth);
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step4. ScrollBy the position to top
      * @tc.expected: ScrollBy the top
      */
-    positionController_->ScrollBy(0, -CONTENT_MAIN_SIZE, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    ScrollBy(0, -CONTENT_MAIN_SIZE, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -760,7 +749,7 @@ HWTEST_P(ListControllerTestNg, ScrollToEdge001, TestSize.Level1)
     bool smooth = GetParam();
     model.ScrollToEdge(AceType::RawPtr(frameNode_), ScrollEdgeType::SCROLL_BOTTOM, smooth);
     FlushUITasks();
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step2. ScrollToEdge to Top in Axis::NONE
@@ -769,7 +758,7 @@ HWTEST_P(ListControllerTestNg, ScrollToEdge001, TestSize.Level1)
     pattern_->axis_ = Axis::NONE;
     model.ScrollToEdge(AceType::RawPtr(frameNode_), ScrollEdgeType::SCROLL_TOP, smooth);
     FlushUITasks();
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
@@ -789,17 +778,15 @@ HWTEST_P(ListControllerTestNg, ScrollPage001, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     bool smooth = GetParam();
-    positionController_->ScrollPage(false, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-LIST_HEIGHT));
+    ScrollPage(false, smooth);
+    EXPECT_TRUE(TickPosition(-LIST_HEIGHT));
 
     /**
      * @tc.steps: step2. ScrollPage up
      * @tc.expected: Scroll up
      */
-    positionController_->ScrollPage(true, smooth);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    ScrollPage(true, smooth);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 INSTANTIATE_TEST_SUITE_P(Smooth, ListControllerTestNg, testing::Bool());
@@ -820,25 +807,22 @@ HWTEST_F(ListControllerTestNg, AnimateTo004, TestSize.Level1)
      * @tc.steps: step1. AnimateTo the position in the scroll
      * @tc.expected: AnimateTo the position
      */
-    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 1000.0f, Curves::EASE, false);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 1000.0f, Curves::EASE, false);
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
      */
-    positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 1000.0f, Curves::EASE, false);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+    AnimateTo(Dimension(CONTENT_MAIN_SIZE), 1000.0f, Curves::EASE, false);
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step3. AnimateTo the top
      * @tc.expected: AnimateTo the top
      */
-    positionController_->AnimateTo(Dimension(0), 1000.0f, Curves::EASE, false);
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
+    AnimateTo(Dimension(0), 1000.0f, Curves::EASE, false);
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -860,17 +844,16 @@ HWTEST_F(ListControllerTestNg, AnimateTo005, TestSize.Level1)
      */
     bool canOverScroll = true;
     MockAnimationManager::GetInstance().SetTicks(5);
-    positionController_->AnimateTo(Dimension(1000.0f), 1000.0f, Curves::EASE, false, canOverScroll);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-200.0f));
-    EXPECT_TRUE(Position(-400.0f));
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(Position(-800.0f)); // Tick doesn't advance new animations created within the same tick
-    EXPECT_TRUE(Position(-760.0f));
-    EXPECT_TRUE(Position(-720.0f));
-    EXPECT_TRUE(Position(-680.0f));
-    EXPECT_TRUE(Position(-640.0f));
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
+    AnimateTo(Dimension(1000.0f), 1000.0f, Curves::EASE, false, canOverScroll);
+    EXPECT_TRUE(TickPosition(-200.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-800.0f)); // Tick doesn't advance new animations created within the same tick
+    EXPECT_TRUE(TickPosition(-760.0f));
+    EXPECT_TRUE(TickPosition(-720.0f));
+    EXPECT_TRUE(TickPosition(-680.0f));
+    EXPECT_TRUE(TickPosition(-640.0f));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
@@ -887,9 +870,9 @@ HWTEST_F(ListControllerTestNg, ScrollBy002, TestSize.Level1)
     const double y = 2.0;
     model.SetScrollBy(AceType::RawPtr(frameNode_), x, y);
     FlushUITasks();
-    EXPECT_TRUE(Position(-(y)));
+    EXPECT_TRUE(Position(-y));
     model.SetScrollBy(AceType::RawPtr(frameNode_), x, 0.0);
-    EXPECT_TRUE(Position(-(y)));
+    EXPECT_TRUE(Position(-y));
 }
 
 /**
@@ -908,16 +891,14 @@ HWTEST_F(ListControllerTestNg, ScrollToEdge002, TestSize.Level1)
      * @tc.steps: step1. SCROLL_BOTTOM
      * @tc.expected: Scroll to bottom with animation
      */
-    positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.0f);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.0f);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step2. SCROLL_TOP
      * @tc.expected: Scroll to top with animation
      */
-    positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.0f);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.0f);
     EXPECT_TRUE(Position(0));
 }
 
@@ -940,19 +921,17 @@ HWTEST_F(ListControllerTestNg, Fling001, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     const float finalPosition = 100.0f;
     const float flingVelocity = finalPosition * FRICTION * FRICTION_SCALE;
-    positionController_->Fling(flingVelocity);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-finalPosition / TICK));
-    EXPECT_TRUE(Position(-finalPosition));
+    Fling(flingVelocity);
+    EXPECT_TRUE(TickPosition(-finalPosition / TICK));
+    EXPECT_TRUE(TickPosition(-finalPosition));
 
     /**
      * @tc.steps: step2. Fling, the flingVelocity less than 0
      * @tc.expected: Scroll up
      */
-    positionController_->Fling(-flingVelocity);
-    FlushUITasks();
-    EXPECT_TRUE(Position(-finalPosition / TICK));
-    EXPECT_TRUE(Position(0));
+    Fling(-flingVelocity);
+    EXPECT_TRUE(TickPosition(-finalPosition / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -966,10 +945,10 @@ HWTEST_F(ListControllerTestNg, GetInfo001, TestSize.Level1)
     CreateListItems();
     CreateDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
-    EXPECT_EQ(positionController_->GetScrollDirection(), Axis::VERTICAL);
-    EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset()));
-    EXPECT_FALSE(positionController_->IsAtEnd());
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(0), Rect(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_EQ(GetScrollDirection(), Axis::VERTICAL);
+    EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset()));
+    EXPECT_FALSE(IsAtEnd());
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE)));
     EXPECT_EQ(pattern_->GetItemIndex(100000, -100000), -1);
     EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(1, 1), 0));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, 0), Rect())); // no group
@@ -977,21 +956,19 @@ HWTEST_F(ListControllerTestNg, GetInfo001, TestSize.Level1)
     /**
      * @tc.steps: step1. AnimateTo the position
      */
-    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
-    FlushUITasks();
-    EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset(0, ITEM_MAIN_SIZE)));
-    EXPECT_FALSE(positionController_->IsAtEnd());
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(0), Rect()));
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
+    EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, ITEM_MAIN_SIZE)));
+    EXPECT_FALSE(IsAtEnd());
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(1, 1), 1));
 
     /**
      * @tc.steps: step2. AnimateTo bottom
      */
-    positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, false);
-    FlushUITasks();
-    EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset(0, VERTICAL_SCROLLABLE_DISTANCE)));
-    EXPECT_TRUE(positionController_->IsAtEnd());
-    EXPECT_TRUE(IsEqual(positionController_->GetItemRect(0), Rect()));
+    AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, false);
+    EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, VERTICAL_SCROLLABLE_DISTANCE)));
+    EXPECT_TRUE(IsAtEnd());
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(1, 1), 6));
 }
 
