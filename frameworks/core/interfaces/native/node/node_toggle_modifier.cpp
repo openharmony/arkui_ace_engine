@@ -421,7 +421,7 @@ void SetOnToggleChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TOGGLE_CHANGE;
         event.componentAsyncEvent.data[0].u32 = isOn;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ToggleModelNG::OnChange(frameNode, std::move(onChange));
 }

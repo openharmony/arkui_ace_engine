@@ -80,9 +80,10 @@ OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRec
 
 SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
+    SizeF size(0, 0);
+    CHECK_NULL_RETURN(layoutWrapper, size);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    SizeF size(0, 0);
     CHECK_NULL_RETURN(textfieldLayoutProperty, size);
     auto childLayoutConstraint = textfieldLayoutProperty->CreateChildConstraint();
     CHECK_NULL_RETURN(childWrapper, size);
@@ -110,6 +111,21 @@ Alignment TextInputResponseArea::GetStackAlignment(const TextDirection& userDire
         return Alignment::CENTER_RIGHT;
     }
     return Alignment::CENTER_LEFT;
+}
+
+RefPtr<FrameNode> TextInputResponseArea::CreateResponseAreaImageNode(const ImageSourceInfo& imageSourceInfo,
+    ImageFit imageFit, const CalcSize& userDefinedIdealSize)
+{
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    imageNode->SetDraggable(false);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr); // return nullptr as this is severe situation
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    imageLayoutProperty->UpdateImageFit(imageFit);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(userDefinedIdealSize);
+    return imageNode;
 }
 // TextInputResponseArea end
 
@@ -172,16 +188,12 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
         return stackNode;
     }
 
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    imageNode->SetDraggable(false);
     LoadImageSourceInfo();
     auto currentImageSourceInfo = GetCurrentSourceInfo();
     CHECK_NULL_RETURN(currentImageSourceInfo, nullptr);
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateImageSourceInfo(currentImageSourceInfo.value());
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    auto imageNode = CreateResponseAreaImageNode(currentImageSourceInfo.value(), ImageFit::FILL,
+        CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    CHECK_NULL_RETURN(imageNode, nullptr);
 
     passwordNode_ = imageNode;
     AddImageEventOnError();
@@ -268,6 +280,18 @@ void PasswordResponseArea::Refresh()
     ReplaceNode();
 }
 
+void PasswordResponseArea::ClearArea()
+{
+    auto hostPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(hostPattern);
+    auto host = hostPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(stackNode_);
+    host->RemoveChildAndReturnIndex(stackNode_);
+    passwordNode_.Reset();
+    areaRect_.Reset();
+}
+
 void PasswordResponseArea::ReplaceNode()
 {
     auto oldFrameNode = passwordNode_.Upgrade();
@@ -285,18 +309,13 @@ void PasswordResponseArea::ReplaceNode()
     }
 
     auto iconSize = GetIconSize();
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_VOID(imageNode);
-    imageNode->SetDraggable(false);
     LoadImageSourceInfo();
     auto currentImageSourceInfo = GetCurrentSourceInfo();
     CHECK_NULL_VOID(currentImageSourceInfo);
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(currentImageSourceInfo.value());
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    auto imageNode = CreateResponseAreaImageNode(currentImageSourceInfo.value(), ImageFit::FILL,
+        CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    CHECK_NULL_VOID(imageNode);
+
     stackNode_->ReplaceChild(oldFrameNode, imageNode);
     passwordNode_ = imageNode;
     AddImageEventOnError();
@@ -416,6 +435,7 @@ void PasswordResponseArea::AddImageEventOnError()
         auto imagePattern = host->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(imagePattern);
         auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateImageSourceInfo(area->GetDefaultSourceInfo(area->isObscured_));
         imagePattern->LoadImageDataIfNeed();
     });
@@ -604,7 +624,7 @@ SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     return TextInputResponseArea::Measure(layoutWrapper, index);
 }
 
-bool CleanNodeResponseArea::IsShowClean()
+bool CleanNodeResponseArea::IsShowClean() const
 {
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -613,7 +633,7 @@ bool CleanNodeResponseArea::IsShowClean()
     return textFieldPattern->IsShowCancelButtonMode();
 }
 
-bool CleanNodeResponseArea::IsShowSymbol()
+bool CleanNodeResponseArea::IsShowSymbol() const
 {
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -622,7 +642,7 @@ bool CleanNodeResponseArea::IsShowSymbol()
     return textFieldLayoutProperty->GetIsShowSymbolValue(true);
 }
 
-bool CleanNodeResponseArea::IsSymbolIcon()
+bool CleanNodeResponseArea::IsSymbolIcon() const
 {
     CHECK_NULL_RETURN(cleanNode_, false);
     CHECK_NULL_RETURN(cleanNode_->GetFirstChild(), false);
@@ -671,18 +691,14 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
         return stackNode;
     }
 
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_RETURN(imageNode, nullptr);
-    imageNode->SetDraggable(false);
-    cleanNode_ = stackNode;
     auto info = CreateImageSourceInfo();
+    auto imageNode = CreateResponseAreaImageNode(info, ImageFit::COVER, CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    CHECK_NULL_RETURN(imageNode, nullptr);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
     imageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+
+    cleanNode_ = stackNode;
     imageNode->MarkModifyDone();
     imageNode->MountToParent(stackNode);
     InitClickEvent(stackNode);
@@ -929,16 +945,10 @@ void CleanNodeResponseArea::ReplaceNode()
     }
 
     LoadingImageProperty();
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_VOID(imageNode);
-    imageNode->SetDraggable(false);
     auto info = CreateImageSourceInfo();
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    auto imageNode = CreateResponseAreaImageNode(info, ImageFit::COVER, CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    CHECK_NULL_VOID(imageNode);
+
     cleanNode_->ReplaceChild(oldFrameNode, imageNode);
     imageNode->MarkModifyDone();
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

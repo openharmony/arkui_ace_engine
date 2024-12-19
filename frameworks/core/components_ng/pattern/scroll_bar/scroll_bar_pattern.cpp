@@ -74,9 +74,8 @@ void ScrollBarPattern::OnModifyDone()
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SetScrollBar(DisplayMode::ON);
     }
-    if (!panRecognizer_) {
-        InitPanRecognizer();
-    }
+    // After changing the axis direction, modify the direction of the pan gesture.
+    InitPanRecognizer();
     if (!clickRecognizer_) {
         InitClickEvent();
     }
@@ -93,6 +92,10 @@ void ScrollBarPattern::InitScrollPositionCallback()
         if (source == SCROLL_FROM_START) {
             pattern->isScrolling_ = true;
             pattern->StopDisappearAnimator();
+            auto scrollBarProxy = pattern->scrollBarProxy_;
+            if (scrollBarProxy) {
+                scrollBarProxy->NotifyScrollStart();
+            }
             // AccessibilityEventType::SCROLL_START
             return true;
         }
@@ -291,13 +294,6 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
     CHECK_NULL_VOID(scrollBar_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gestureHub = GetGestureHub();
-    auto inputHub = GetInputHub();
-    CHECK_NULL_VOID(gestureHub);
-    CHECK_NULL_VOID(inputHub);
-    scrollBar_->SetGestureEvent();
-    scrollBar_->SetMouseEvent();
-    scrollBar_->SetHoverEvent();
     scrollBar_->SetMarkNeedRenderFunc([weak = AceType::WeakClaim(AceType::RawPtr(host))]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
@@ -316,10 +312,35 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto scrollEndCallback = pattern->scrollEndCallback_;
+        if (scrollEndCallback) {
+            scrollEndCallback();
+        }
         pattern->scrollBarProxy_->NotifyScrollStop();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
+    auto startSnapAnimationCallback = [weak = WeakClaim(this)](SnapAnimationOptions snapAnimationOptions) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->isScrolling_ = false;
+        auto scrollBarProxy = pattern->scrollBarProxy_;
+        CHECK_NULL_RETURN(scrollBarProxy, false);
+        return scrollBarProxy->NotifySnapScrollWithoutChild(snapAnimationOptions);
+    };
+    scrollBar_->SetStartSnapAnimationCallback(std::move(startSnapAnimationCallback));
+    InitScrollBarGestureEvent();
+}
 
+void ScrollBarPattern::InitScrollBarGestureEvent()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    auto gestureHub = GetGestureHub();
+    auto inputHub = GetInputHub();
+    CHECK_NULL_VOID(gestureHub);
+    CHECK_NULL_VOID(inputHub);
+    scrollBar_->SetGestureEvent();
+    scrollBar_->SetMouseEvent();
+    scrollBar_->SetHoverEvent();
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
     auto onHover = [weak = WeakClaim(this)](bool isHover, HoverInfo&) {
@@ -707,7 +728,6 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
     ACE_SCOPED_TRACE("outer scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
-            scrollBarProxy_->NotifyScrollStart();
             scrollBarProxy_->SetScrollSnapTrigger_(true);
         }
         scrollPositionCallback_(0, SCROLL_FROM_START);
@@ -747,8 +767,11 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
             scrollBar->ProcessFrictionMotion(value);
         });
     }
-    CHECK_NULL_VOID(!scrollBarProxy_ || !scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
-        velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset())));
+    if (scrollBarProxy_ && scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
+        velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset()))) {
+        scrollBarProxy_->SetScrollSnapTrigger_(false);
+        return;
+    }
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             if (scrollBarProxy_) {

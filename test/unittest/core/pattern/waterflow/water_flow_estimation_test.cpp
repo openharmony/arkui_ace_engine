@@ -32,18 +32,15 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->Offset(), 0.0f);
 
-    pattern_->ScrollToIndex(80);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(80, false, ScrollAlign::START);
     EXPECT_NEAR(info->Offset(), -4050.0f, 100.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5200.0f, 100.0f);
 
-    pattern_->ScrollToIndex(10);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(10, false, ScrollAlign::START);
     EXPECT_NEAR(info->Offset(), -637.0f, 1.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5200.0f, 100.0f);
 
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(info->startIndex_, 0);
     FlushLayoutTask(frameNode_);
@@ -57,8 +54,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     EXPECT_NEAR(info->Offset(), 150.0f, 1.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5100.0f, 100.0f);
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_NEAR(info->Offset(), -4400.0f, 100.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5150.0f, 100.0f);
 
@@ -83,8 +79,7 @@ HWTEST_F(WaterFlowTestNg, Offset002, TestSize.Level1)
     auto info = pattern_->layoutInfo_;
     pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(info->Offset(), 0.0f);
     EXPECT_EQ(info->EstimateTotalHeight(), 300.0F);
     EXPECT_EQ(GetChildHeight(frameNode_, 0), 100.0f);

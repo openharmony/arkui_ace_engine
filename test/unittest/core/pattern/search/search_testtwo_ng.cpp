@@ -1662,4 +1662,39 @@ HWTEST_F(SearchTestTwoNg, CreateSearchNode, TestSize.Level1)
     searchModelInstance.SetSearchDefaultIcon();
     searchModelInstance.CreateSearchNode(nodeId, u"", u"", "");
 }
+
+/**
+ * @tc.name: SymbolColorToString001
+ * @tc.desc: SymbolColorToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SymbolColorToString001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<SearchPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::vector<Color> colors;
+    colors.push_back(Color::BLUE);
+    auto result = searchPattern->SymbolColorToString(colors);
+    EXPECT_NE(result, "");
+}
+
+/**
+ * @tc.name: SymbolColorToString002
+ * @tc.desc: SymbolColorToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SymbolColorToString002, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<SearchPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::vector<Color> colors;
+    auto result = searchPattern->SymbolColorToString(colors);
+    EXPECT_EQ(result, "");
+}
 } // namespace OHOS::Ace::NG

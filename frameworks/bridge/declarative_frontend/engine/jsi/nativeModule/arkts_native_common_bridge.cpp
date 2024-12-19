@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -4213,6 +4214,62 @@ ArkUINativeModuleValue CommonBridge::ResetMargin(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetSafeAreaPadding(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType end = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType start = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    CalcDimension topDimen(0, DimensionUnit::VP);
+    CalcDimension endDimen(0, DimensionUnit::VP);
+    CalcDimension bottomDimen(0, DimensionUnit::VP);
+    CalcDimension startDimen(0, DimensionUnit::VP);
+    bool isLengthMetrics = false;
+    if (secondArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, secondArg, topDimen, top);
+    }
+    if (thirdArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, thirdArg, endDimen, end);
+    }
+    if (forthArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, forthArg, bottomDimen, bottom);
+    }
+    if (fifthArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, fifthArg, startDimen, start);
+    }
+    if (!isLengthMetrics) {
+        ParsePadding(vm, secondArg, topDimen, top);
+        ParsePadding(vm, thirdArg, endDimen, end);
+        ParsePadding(vm, forthArg, bottomDimen, bottom);
+        ParsePadding(vm, fifthArg, startDimen, start);
+    }
+    struct ArkUIPaddingType localizedPadding;
+    localizedPadding.top = top;
+    localizedPadding.end = end;
+    localizedPadding.bottom = bottom;
+    localizedPadding.start = start;
+    GetArkUINodeModifiers()->getCommonModifier()->setSafeAreaPadding(nativeNode, &localizedPadding, isLengthMetrics);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetSafeAreaPadding(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetSafeAreaPadding(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetMarkAnchor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -6447,25 +6504,33 @@ void CommonBridge::SetOnGestureEvent(
     auto obj = eventArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
 
     if (action == Ace::GestureEventAction::CANCEL) {
-        auto onActionCancelFunc = [vm, func = panda::CopyableGlobal(vm, func), containerId]() {
+        auto onActionCancelFunc = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), containerId]() {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             ContainerScope scope(containerId);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            auto function = func.Lock();
+            if (!function.IsEmpty() && function->IsFunction(vm)) {
+                function->Call(vm, function.ToLocal(), nullptr, 0);
+            }
         };
         auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
         gesturePtr->SetOnActionCancelId(onActionCancelFunc);
         return;
     }
-    auto event = [vm, func = panda::CopyableGlobal(vm, func), containerId](GestureEvent& info) {
+    auto event = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), containerId](GestureEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
-        auto obj = CreateCommonGestureEventInfo(vm, info);
-        panda::Local<panda::JSValueRef> params[1] = { obj };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto function = func.Lock();
+        if (!function.IsEmpty() && function->IsFunction(vm)) {
+            auto obj = CreateCommonGestureEventInfo(vm, info);
+            panda::Local<panda::JSValueRef> params[1] = { obj };
+            function->Call(vm, function.ToLocal(), params, 1);
+        }
     };
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
     switch (action) {
@@ -8180,6 +8245,77 @@ ArkUINativeModuleValue CommonBridge::ResetFocusBox(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetFocusBoxStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info)
+{
+    auto axisMap = panda::MapRef::New(vm);
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_X)),
+        panda::NumberRef::New(vm, info.GetAbsXValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_Y)),
+        panda::NumberRef::New(vm, info.GetAbsYValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_Z)),
+        panda::NumberRef::New(vm, info.GetAbsZValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_RZ)),
+        panda::NumberRef::New(vm, info.GetAbsRzValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_GAS)),
+        panda::NumberRef::New(vm, info.GetAbsGasValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_BRAKE)),
+        panda::NumberRef::New(vm, info.GetAbsBrakeValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT0X)),
+        panda::NumberRef::New(vm, info.GetAbsHat0XValue()));
+    axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT0Y)),
+        panda::NumberRef::New(vm, info.GetAbsHat0YValue()));
+    const char* keys[] = { "axisMap", "target", "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool",
+        "deviceId", "getModifierKeyState", "stopPropagation" };
+    Local<JSValueRef> values[] = { axisMap, FrameNodeBridge::CreateEventTargetObject(vm, info),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
+        panda::NumberRef::New(vm, info.GetForce()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))),
+        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))),
+        panda::NumberRef::New(vm, info.GetDeviceId()), panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
+        panda::FunctionRef::New(vm, Framework::JsStopPropagation) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    return obj;
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto onFocusAxisEvent = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode),
+                                containerId](FocusAxisEventInfo& info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        PipelineContext::SetCallBackNode(node);
+        auto obj = CreateFocusAxisEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[] = { obj };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    NG::ViewAbstract::SetOnFocusAxisEvent(frameNode, std::move(onFocusAxisEvent));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnFocusAxisEvent(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

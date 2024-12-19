@@ -494,75 +494,75 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryPointerId"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryX"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryY"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryWindowX"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryWindowY"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryDisplayX"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryDisplayY"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryPressure"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryTiltX"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryTiltY"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryTouchAreaWidth"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_GetHistoryTouchAreaHeight"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetEventType"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetTargetId"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetNodeHandle"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetInputEvent"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetNodeComponentEvent"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetStringAsyncEvent"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetUserData"
@@ -576,7 +576,7 @@
         "name": "OH_ArkUI_GetModuleInterface"
     },
     {
-        "first_introduced": "12",    
+        "first_introduced": "12",
         "name": "OH_ArkUI_NodeAdapter_Create"
     },
     {
@@ -786,7 +786,7 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_SetItemCount"
-    },    
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_SetCrossCount"
@@ -1386,6 +1386,30 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_AccessibilityValue_GetCurrent"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_AccessibilityValue_SetRangeMin"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_AccessibilityValue_GetRangeMin"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_AccessibilityValue_SetRangeMax"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_AccessibilityValue_GetRangeMax"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_AccessibilityValue_SetRangeCurrent"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_AccessibilityValue_GetRangeCurrent"
     },
     {
         "first_introduced": "12",
@@ -2474,5 +2498,13 @@
     {
         "first_introduced": "14",
         "name": "OH_ArkUI_KeyEvent_SetConsumed"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_GetAxisValue"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
     }
 ]

@@ -28,31 +28,29 @@ bool ExecuteCustomTitleAbc()
     int32_t binarySize = 0;
     std::vector<uint8_t> buffer;
 
-    auto filePath = SystemProperties::GetCustomTitleFilePath();
-    if (!filePath.empty()) {
-        // read abc file
-        std::ifstream readFile(filePath, std::ifstream::binary);
-        if (!readFile.is_open()) {
-            TAG_LOGE(AceLogTag::ACE_APPBAR, "open abc file failed!");
-            return false;
-        }
+    auto filePath = "/system/etc/abc/arkui/customtitle.abc";
+    // read abc file
+    std::ifstream readFile(filePath, std::ifstream::binary);
+    bool isLoadSuccess = false;
+    if (readFile.is_open()) {
         readFile.seekg(0, std::ios::end);
         binarySize = static_cast<int32_t>(readFile.tellg());
         readFile.seekg(0, std::ios::beg);
         buffer.resize(binarySize);
-        if (!readFile.read((char*)buffer.data(), binarySize)) {
-            TAG_LOGE(AceLogTag::ACE_APPBAR, "read abc file failed!");
+        if (readFile.read((char*)buffer.data(), binarySize)) {
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "read abc file success!");
+            binaryBuff = buffer.data();
             readFile.close();
-            return false;
+            isLoadSuccess = true;
+        } else {
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "open abc file failed!");
         }
-        binaryBuff = buffer.data();
-        readFile.close();
-    } else {
+    }
+    if (!isLoadSuccess) {
         // use default abc file
         binaryBuff = (uint8_t*)_binary_customtitle_abc_start;
         binarySize = _binary_customtitle_abc_end - _binary_customtitle_abc_start;
     }
-
     // run abc file
     auto jsEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(jsEngine, false);

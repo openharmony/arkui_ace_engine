@@ -35,7 +35,8 @@ enum class SourceType : int32_t {
     MOUSE = 1,
     TOUCH = 2,
     TOUCH_PAD = 3,
-    KEYBOARD = 4
+    KEYBOARD = 4,
+    JOYSTICK = 5,
 };
 
 enum class SourceTool : int32_t {

@@ -36,8 +36,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto toolbarLayoutAlgorithm = MakeRefPtr<ToolbarLayoutAlgorithm>();
-        return toolbarLayoutAlgorithm;
+        return MakeRefPtr<ToolbarLayoutAlgorithm>();
     }
 
     bool IsAtomicNode() const override

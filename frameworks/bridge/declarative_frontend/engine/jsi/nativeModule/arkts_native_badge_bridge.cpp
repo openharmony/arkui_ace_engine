@@ -174,6 +174,7 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithNumber(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(12);    // 12: parameter index
     Local<JSValueRef> maxCountArg = runtimeCallInfo->GetCallArgRef(13); // 13: parameter index
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     ArkUIBadgeParam style;
@@ -194,8 +195,9 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithNumber(ArkUIRuntimeCallInfo
     } else {
         maxCount = badgeTheme->GetMaxCount();
     }
-
-    GetArkUINodeModifiers()->getBadgeModifier()->setBadgeParamWithNumber(nativeNode, &style, count, hasValue, maxCount);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getBadgeModifier()->setBadgeParamWithNumber(nativeNode, &style, count, hasValue, maxCount);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -205,6 +207,7 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithString(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(12); // 12: parameter index
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     ArkUIBadgeParam style;
@@ -218,7 +221,9 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithString(ArkUIRuntimeCallInfo
         value = valueArg->ToString(vm)->ToString(vm).c_str();
     }
 
-    GetArkUINodeModifiers()->getBadgeModifier()->setBadgeParamWithString(nativeNode, &style, value);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getBadgeModifier()->setBadgeParamWithString(nativeNode, &style, value);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

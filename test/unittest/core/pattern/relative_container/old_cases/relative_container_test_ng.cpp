@@ -20,7 +20,7 @@
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/pattern/relative_container/relative_container_common_ng.h"
+#include "test/unittest/core/pattern/relative_container/old_cases/relative_container_common_ng.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/memory/ace_type.h"

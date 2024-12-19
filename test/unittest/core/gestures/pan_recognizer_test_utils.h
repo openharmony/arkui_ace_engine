@@ -16,16 +16,11 @@
 #ifndef TEST_UNITTEST_CORE_GESTURES_PAN_RECOGNIZER_TEST_UTILS_H
 #define TEST_UNITTEST_CORE_GESTURES_PAN_RECOGNIZER_TEST_UTILS_H
 
-#include "gtest/gtest.h"
-
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t FORTY_FIVE_DEGREES = 45;
 constexpr int32_t TWENTY_DEGREES = 20;
 constexpr int32_t QUADRANT_COUNT = 8;
-constexpr int32_t STEP_COUNT = 5;
 constexpr float HALF_CIRCLE = 180.0f;
 
 enum class PanQuadrantDirection {
@@ -46,22 +41,6 @@ enum class PanQuadrantDirection {
     LINE_SIX = 14,
     LINE_SEVEN = 15,
 };
-
-enum class PanDistanceComparationResult {
-    LESS = 0,
-    EQUAL = 1,
-    GREAT = 2,
-};
-
-testing::AssertionResult IsRecognizerStateEqual(int caseNum, RefereeState actualState, RefereeState expectState)
-{
-    if (actualState == expectState) {
-        return testing::AssertionSuccess();
-    }
-    return testing::AssertionFailure() << "TestCaseNum:  " << caseNum << " actual state "
-                                       << static_cast<int32_t>(actualState) << " expect state "
-                                       << static_cast<int32_t>(expectState);
-}
 
 } // namespace
 

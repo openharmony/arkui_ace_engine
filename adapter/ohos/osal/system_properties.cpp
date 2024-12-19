@@ -359,6 +359,12 @@ bool IsFaultInjectEnabled()
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
 }
 
+double ReadScrollableDistance()
+{
+    auto ret = system::GetParameter("persist.scrollable.distance", "");
+    return StringUtils::StringToDouble(ret);
+}
+
 std::pair<float, float> GetPercent()
 {
     std::vector<double> result;
@@ -446,6 +452,7 @@ float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThre
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
+double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -839,6 +846,7 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
 
 float SystemProperties::GetDefaultResolution()
 {
+    // always return density of main screen, don't use this interface unless you need density when no window exists
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
@@ -932,8 +940,7 @@ double SystemProperties::GetSrollableFriction()
 
 double SystemProperties::GetScrollableDistance()
 {
-    auto ret = system::GetParameter("persist.scrollable.distance", "");
-    return StringUtils::StringToDouble(ret);
+    return scrollableDistance_;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

@@ -16,6 +16,7 @@
 #include "scrollable_nested_test_ng.h"
 
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -45,6 +46,7 @@ namespace {
     constexpr float SCROLLABLE_HEIGHT = 400.f;
     constexpr float SCROLL_HEAD_HEIGHT = 200.f;
     constexpr float LIST_ITEM_HEIGHT = 600.f;
+    constexpr uint64_t MS = 1000 * 1000;
 }
 void ScrollableNestedTestNg::SetUpTestSuite()
 {
@@ -52,6 +54,7 @@ void ScrollableNestedTestNg::SetUpTestSuite()
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    MockAnimationManager::Enable(true);
 }
 
 void ScrollableNestedTestNg::TearDownTestSuite()
@@ -66,6 +69,7 @@ void ScrollableNestedTestNg::SetUp()
 
 void ScrollableNestedTestNg::TearDown()
 {
+    MockAnimationManager::GetInstance().Reset();
 }
 
 RefPtr<Scrollable> ScrollableNestedTestNg::GetScrollable(RefPtr<FrameNode> node)
@@ -623,6 +627,183 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest007, TestSize.Level1)
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
+}
+
+/**
+ * @tc.name: NestedScrollTest008
+ * @tc.desc: Scroll nested List, Scroll spring animate back to top, remain velocity start list fling animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List, edge effect is none
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE, NestedScrollOptions {
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    });
+    FlushLayoutTask(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    scrollScrollable->ratio_ = 0;
+    scrollPattern->ratio_ = 0;
+
+    /**
+     * @tc.steps: step2. Scroll backward
+     * @tc.expected: parent over scroll
+     */
+    auto listScrollable = GetScrollable(listNode);
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, 100);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step3. Scroll forward
+     * @tc.expected: parent and child reach bottom, parent over scroll
+     */
+    MockAnimationManager::GetInstance().SetTicks(2);
+    DragEnd(listScrollable, 1000);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 100);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 50);
+
+    /*
+     * @tc.steps: step4. TickByVelocity
+     * @tc.expected: Scroll spring animate back to top, remain velocity start list fling animation.
+     */
+    MockPipelineContext::GetCurrent()->SetVsyncTime(scrollScrollable->lastVsyncTime_ + 50 * MS);
+    MockAnimationManager::GetInstance().TickByVelocity(-60);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
+
+    /*
+     * @tc.steps: step5. Tick
+     * @tc.expected: start list fling animation.
+     */
+    float distance = 1200 / (Scrollable::sFriction_.value_or(0.6) * -FRICTION_SCALE);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, distance / 2 - 200);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -(distance - 200));
+}
+
+/**
+ * @tc.name: NestedScrollTest009
+ * @tc.desc: Scroll nested List, touch scroll trigger list animate stop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List, edge effect is none
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE, NestedScrollOptions {
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    });
+    FlushLayoutTask(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    scrollScrollable->ratio_ = 0;
+    scrollPattern->ratio_ = 0;
+
+    bool listOnScrollStart = false;
+    bool scrollOnScrollStart = false;
+    bool listOnScrollStop = false;
+    bool scrollOnScrollStop = false;
+    ListModelNG::SetOnScrollStart(AceType::RawPtr(listNode), [&listOnScrollStart]() {
+        listOnScrollStart = true;
+    });
+    ScrollModelNG::SetOnScrollStart(AceType::RawPtr(rootNode), [&scrollOnScrollStart]() {
+        scrollOnScrollStart = true;
+    });
+    ListModelNG::SetOnScrollStop(AceType::RawPtr(listNode), [&listOnScrollStop]() {
+        listOnScrollStop = true;
+    });
+    ScrollModelNG::SetOnScrollStop(AceType::RawPtr(rootNode), [&scrollOnScrollStop]() {
+        scrollOnScrollStop = true;
+    });
+
+    /**
+     * @tc.steps: step2. Scroll forward
+     * @tc.expected: parent process scroll
+     */
+    auto listScrollable = GetScrollable(listNode);
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, -10);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -10);
+
+    /**
+     * @tc.steps: step3. DragEnd with velocity
+     * @tc.expected: start fling animation
+     */
+    MockAnimationManager::GetInstance().SetTicks(3);
+    DragEnd(listScrollable, -252);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -10);
+    EXPECT_TRUE(listOnScrollStart);
+    EXPECT_TRUE(scrollOnScrollStart);
+
+    MockPipelineContext::GetCurrent()->SetVsyncTime(GetSysTimestamp());
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -60);
+    MockPipelineContext::GetCurrent()->SetVsyncTime(scrollPattern->nestedScrollTimestamp_ + 50 * MS);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
+
+    /**
+     * @tc.steps: step4. Scroll touch down
+     * @tc.expected: list stop animation
+     */
+    TouchEventInfo touchEvent = TouchEventInfo("unknown");
+    scrollPattern->OnTouchDown(touchEvent);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_TRUE(listOnScrollStop);
+    EXPECT_TRUE(scrollOnScrollStop);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
 }
 
 /**

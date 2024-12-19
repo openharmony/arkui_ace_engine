@@ -109,6 +109,7 @@ private:
     bool IsTextAreaSelectAll();
     bool IsReverseLayout(LayoutWrapper* layoutWrapper) const;
     void CheckHandleIsInClipViewPort();
+    float GetCustomMenuMaxHeight(float topSafeArea, float bottomSafeArea);
 
     std::shared_ptr<SelectOverlayInfo> info_;
 

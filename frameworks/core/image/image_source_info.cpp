@@ -15,6 +15,7 @@
 
 #include "core/image/image_source_info.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -438,4 +439,18 @@ std::string ImageSourceInfo::GetKey() const
     return cacheKey_;
 }
 
+ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)
+{
+    ImageSourceInfo imageSourceInfo;
+    CHECK_NULL_RETURN(host, imageSourceInfo);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, imageSourceInfo);
+
+    std::string bundleName = context->GetBundleName();
+    std::string moduleName = context->GetModuleName();
+    imageSourceInfo.SetBundleName(bundleName);
+    imageSourceInfo.SetModuleName(moduleName);
+
+    return imageSourceInfo;
+}
 } // namespace OHOS::Ace

@@ -366,7 +366,7 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
-    RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
+    RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false, bool isOffline = true) override;
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     bool CreateThumbnailPixelMapAsyncTask(
         bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
@@ -382,6 +382,7 @@ public:
 
     void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
+    void SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch);
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 

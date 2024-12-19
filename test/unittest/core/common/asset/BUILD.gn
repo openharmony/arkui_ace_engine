@@ -22,6 +22,7 @@ ohos_unittest("asset_test") {
     "$ace_root/frameworks/core/common/asset_manager_impl.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "asset_test.cpp",
   ]

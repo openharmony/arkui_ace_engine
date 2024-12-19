@@ -37,6 +37,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -193,6 +194,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         auto nativeEngine = reinterpret_cast<NativeEngine*>(sharedRuntime);
         auto env = reinterpret_cast<napi_env>(nativeEngine);
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
+    }
+}
+
+void ParseLanguage(ConfigurationChange& configurationChange, const std::string& languageTag)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
 } // namespace
@@ -501,6 +514,46 @@ bool AceContainer::RemoveOverlayBySubwindowManager(int32_t instanceId)
         }
     }
     return false;
+}
+
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContext()
+{
+    auto context = runtimeContext_.lock();
+    if (context == nullptr) {
+        LOGW("runtimeContext_ is null.");
+    }
+
+    return context;
+}
+
+void AceContainer::SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext)
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->SetJsContext(jsContext);
+}
+
+std::shared_ptr<Framework::JsValue> AceContainer::GetJsContext()
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_RETURN(jsEngine, nullptr);
+    return jsEngine->GetJsContext();
 }
 
 bool AceContainer::OnBackPressed(int32_t instanceId)
@@ -1241,12 +1294,15 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
 public:
     FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool isNative = true)
-        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative) {}
+        AceAutoFillType autoFillType, bool isNative = true, const std::function<void()>& onFinish = nullptr)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative),
+          onFinish_(onFinish)
+    {}
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, pageUrl=[%{private}s]", viewData.pageUrl.c_str());
+        ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
         auto taskExecutor = pipelineContext->GetTaskExecutor();
@@ -1278,6 +1334,7 @@ public:
     void OnFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, errCode: %{public}d", errCode);
+        ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
         auto node = node_.Upgrade();
@@ -1414,12 +1471,32 @@ private:
         return safeAreaManager->GetSystemSafeArea().bottom_.Length();
     }
 
+    void ProcessOnFinish()
+    {
+        if (!onFinish_) {
+            return;
+        }
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [onFinish = std::move(onFinish_)]() mutable {
+                if (onFinish) {
+                    onFinish();
+                    onFinish = nullptr;
+                }
+            },
+            TaskExecutor::TaskType::UI, "FillRequestCallbackProcessOnFinish");
+    }
+
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
     Rosen::Rect windowRect_ { 0, 0, 0, 0 };
+    std::function<void()> onFinish_;
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1574,31 +1651,32 @@ void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::R
     }
 }
 
-bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
+int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(pipelineContext, false);
-    CHECK_NULL_RETURN(uiWindow_, false);
+    CHECK_NULL_RETURN(node, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
+    CHECK_NULL_RETURN(pipelineContext, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
+    CHECK_NULL_RETURN(uiWindow_, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto uiContent = uiWindow_->GetUIContent();
-    CHECK_NULL_RETURN(uiContent, false);
+    CHECK_NULL_RETURN(uiContent, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
-    CHECK_NULL_RETURN(uiContentImpl, false);
+    CHECK_NULL_RETURN(uiContentImpl, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
+    CHECK_NULL_RETURN(viewDataWrap, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     FillAutoFillViewData(node, viewDataWrap);
-    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative);
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative, onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewData = viewDataWrapOhos->GetViewData();
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
-        return true;
+        return AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
     }
     if (!isNative) {
         OverwritePageNodeInfo(node, viewData);
@@ -1614,14 +1692,15 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
     autoFillRequest.viewData = viewData;
+    autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
     AbilityRuntime::AutoFill::AutoFillResult result;
-    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(
-        uiContent, autoFillRequest, callback, result) != 0) {
-        return false;
+    auto resultCode =
+        AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(uiContent, autoFillRequest, callback, result);
+    if (resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS) {
+        isPopup = result.isPopup;
+        autoFillSessionId = result.autoFillSessionId;
     }
-    isPopup = result.isPopup;
-    autoFillSessionId = result.autoFillSessionId;
-    return true;
+    return resultCode;
 }
 
 bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
@@ -1637,13 +1716,13 @@ public:
     virtual ~SaveRequestCallback() = default;
     void OnSaveRequestSuccess() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestSuccess called");
         ProcessOnFinish();
     }
 
     void OnSaveRequestFailed() override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "OnSaveRequestFailed called");
         ProcessOnFinish();
     }
 
@@ -2026,6 +2105,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     }
 #endif
 
+    if (isDynamicRender_) {
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
+    }
+
     auto windowDensityCallback = [weak = WeakClaim(this)]() {
         auto container = weak.Upgrade();
         CHECK_NULL_RETURN(container, 0.0);
@@ -2331,8 +2414,9 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
-    windowManager->SetGetWindowStartMoveFlagCallBack(
-        [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
+    windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
+    windowManager->SetWindowIsStartMovingCallBack(
+        [window = uiWindow_]() -> bool { return static_cast<bool>(window->IsStartMoving()); });
     windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
     windowManager->SetWindowSplitSecondaryCallBack(
@@ -2360,10 +2444,6 @@ void AceContainer::InitWindowCallback()
     windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
         [window = uiWindow_]() -> bool {
             return window->GetFreeMultiWindowModeEnabledState();
-        });
-    windowManager->SetPerformBackCallback(
-        [window = uiWindow_]() -> void {
-            return window->PerformBack();
         });
     windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
         window->OnContainerModalEvent(name, value);
@@ -2545,6 +2625,9 @@ void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, Configur
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
         configurationChange.skinUpdate = skinUpdate;
+        if ((isDynamicRender_ || isFormRender_) && fontUpdate) {
+            CheckAndSetFontFamily();
+        }
     }
 }
 
@@ -2569,14 +2652,8 @@ void AceContainer::BuildResConfig(
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
     if (!parsedConfig.languageTag.empty()) {
-        std::string language;
-        std::string script;
-        std::string region;
-        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
-        if (!language.empty() || !script.empty() || !region.empty()) {
-            configurationChange.languageUpdate = true;
-            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-        }
+        ParseLanguage(configurationChange, parsedConfig.languageTag);
+        resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
         auto fontManager = pipelineContext_->GetFontManager();
@@ -2616,8 +2693,8 @@ void AceContainer::UpdateConfiguration(
     auto resConfig = GetResourceConfiguration();
     BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
+        ParseLanguage(configurationChange, parsedConfig.preferredLanguage);
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
-        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
@@ -2727,7 +2804,8 @@ void AceContainer::HotReload()
 
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->FlushReload(ConfigurationChange());
+            ConfigurationChange configurationChange { .hotReloadUpdate = true };
+            pipeline->FlushReload(configurationChange);
         },
         TaskExecutor::TaskType::UI, "ArkUIHotReload");
 }
@@ -3089,7 +3167,7 @@ bool AceContainer::GetCurPointerEventInfo(
     sourceType = currentPointerEvent->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
-    sourceTool = pointerItem.GetToolType();
+    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
     displayId = currentPointerEvent->GetTargetDisplayId();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;

@@ -32,6 +32,8 @@ constexpr float CURVE_DAMPING = 36.0f;
 constexpr float MEDIUM_SIZE = 0.6f;
 constexpr float MEDIUM_SIZE_PRE = 0.5f;
 constexpr float POPUP_LARGE_SIZE = 0.9f;
+constexpr int32_t SHEET_ANIMATION_DURATION = 580;
+
 enum SheetMode {
     MEDIUM,
     LARGE,
