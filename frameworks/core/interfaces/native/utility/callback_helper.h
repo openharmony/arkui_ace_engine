@@ -57,9 +57,14 @@ public:
         }
     }
 
-    bool IsValid()
+    bool IsValid() const
     {
         return callback_.call != nullptr;
+    }
+
+    bool operator == (const CallbackHelper<CallbackType> &other) const
+    {
+        return callback_.call == other.callback_.call;
     }
 protected:
     CallbackType callback_  = {
