@@ -21,6 +21,7 @@ import { LoadingProgressBootcamp } from '../displays/LoadingProgressBootcamp';
 import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
+import { ChipGroupBootcamp } from  './ChipGroupBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
 import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
@@ -38,6 +39,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'loading-progress', label: '加载进度/LoadingProgress' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
+    { name: 'chipGroup', label: '操作块群组/ChipGroup' }
     { name: 'chip', label: '操作块/Chip' }
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
@@ -62,6 +64,8 @@ export function DisplaysDestination(name: string, route: Route) {
     TextBootcamp({ title: route.label })
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
+  } else if (name === 'displays/chipGroup'){
+    ChipGroupBootcamp({ title: route.label })
   } else if (name === 'displays/chip'){
     ChipBootcamp({ title: route.label })
   } else if (name === 'displays/counter') {
