@@ -444,10 +444,12 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
         for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
-            if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
-                OTHER_DURATION();
+            if (SystemProperties::GetDebugEnabled()) {
                 ACE_TEXT_SCOPED_TRACE("ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f][Constraint:%s]",
                     paragraphNewWidth, paragraph->GetMaxWidth(), indentWidth, contentConstraint.ToString().c_str());
+            }
+            if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
+                OTHER_DURATION();
                 paragraph->Layout(std::ceil(paragraphNewWidth));
             }
         }
