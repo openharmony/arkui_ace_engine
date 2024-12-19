@@ -517,7 +517,7 @@ struct TabContentItem {
 
   build() {
     Stack() {
-      Button() {
+      Row() {
         Column() {
           if (this.item.icon === undefined && this.item.symbolStyle === undefined) {
             Text(this.item.title)
@@ -663,6 +663,8 @@ struct TabContentItem {
         .justifyContent(FlexAlign.Center)
       }
       .height(TabTitleBar.totalHeight)
+      .alignItems(VerticalAlign.Center)
+      .justifyContent(FlexAlign.Center)
       .borderRadius(TabContentItem.buttonBorderRadius)
       .backgroundColor(this.getBgColor())
       .onAreaChange((_oldValue, newValue) => {
