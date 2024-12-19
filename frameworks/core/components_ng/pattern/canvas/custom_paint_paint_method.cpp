@@ -833,7 +833,7 @@ void CustomPaintPaintMethod::Path2DStroke()
 void CustomPaintPaintMethod::Clip()
 {
     CHECK_NULL_VOID(rsCanvas_);
-    rsCanvas_->ClipPath(rsPath_, RSClipOp::INTERSECT);
+    rsCanvas_->ClipPath(rsPath_, RSClipOp::INTERSECT, antiAlias_);
 }
 
 void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
@@ -850,7 +850,7 @@ void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
 void CustomPaintPaintMethod::Path2DClip()
 {
     CHECK_NULL_VOID(rsCanvas_);
-    rsCanvas_->ClipPath(rsPath2d_, RSClipOp::INTERSECT);
+    rsCanvas_->ClipPath(rsPath2d_, RSClipOp::INTERSECT, antiAlias_);
 }
 
 void CustomPaintPaintMethod::BeginPath()

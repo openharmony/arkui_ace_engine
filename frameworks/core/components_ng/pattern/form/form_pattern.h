@@ -116,7 +116,7 @@ public:
         formLinkInfos_ = infos;
     }
 
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
 
     bool IsJsCard() const
     {
@@ -261,6 +261,7 @@ private:
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
+    bool ShouldAddChildAtReuildFrame();
 };
 } // namespace NG
 } // namespace Ace

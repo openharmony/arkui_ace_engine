@@ -25,6 +25,7 @@ ohos_unittest("thread_test") {
     "$ace_root/frameworks/core/common/thread_container.cpp",
     "$ace_root/frameworks/core/common/thread_model_impl.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
     "$ace_root/test/unittest/core/common/task/thread_test.cpp",

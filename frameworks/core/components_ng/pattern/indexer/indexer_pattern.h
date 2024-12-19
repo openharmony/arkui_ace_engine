@@ -70,7 +70,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>(static_cast<int32_t>(fullArrayValue_.size()));
+        auto indexerLayoutAlgorithm = MakeRefPtr<IndexerLayoutAlgorithm>();
         return indexerLayoutAlgorithm;
     }
 

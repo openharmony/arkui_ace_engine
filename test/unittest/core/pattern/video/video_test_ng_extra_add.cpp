@@ -1081,7 +1081,7 @@ HWTEST_F(VideoTestExtraAddNg, EnableDrag001, TestSize.Level1)
     auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     ASSERT_NE(unifiedData, nullptr);
     std::vector<uint8_t> arr;
-    auto spanString = AceType::MakeRefPtr<SpanString>("Test");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Test");
     spanString->EncodeTlv(arr);
     UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
     event->SetData(unifiedData);

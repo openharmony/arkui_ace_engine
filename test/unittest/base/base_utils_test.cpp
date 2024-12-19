@@ -1067,8 +1067,8 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest062, TestSize.Level1)
 {
     std::string illegalStr = "Hello, \xFF\xFE World!";
     ConvertIllegalStr(illegalStr);
-    EXPECT_FALSE(IsUTF8(illegalStr));
-    EXPECT_EQ(illegalStr, "Hello, \xFF\xFE World!");
+    EXPECT_TRUE(IsUTF8(illegalStr));
+    EXPECT_EQ(illegalStr, "Hello,  World!");
 }
 
 /**

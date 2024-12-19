@@ -188,12 +188,13 @@ bool SubwindowOhos::InitContainer()
         bool isAppSubwindow = false;
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
+            windowTag = "TOAST_SYSTEM_";
         } else if (GetAboveApps()) {
             auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
             isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
             auto mainWindowId = GetMainWindowId();
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
-            windowTag = "TOPMOST_TOAST_";
+            windowTag = "TOAST_TOPMOST_";
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
@@ -1023,6 +1024,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
     }
     ResizeWindow();
     ShowWindow();
@@ -1056,6 +1058,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
     }
     ResizeWindow();
     ShowWindow();
@@ -1101,6 +1104,7 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlay);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetModalDialogDisplayId(GetDisplayId());
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
             parentContainerId_, GetSubwindowId());
     }
@@ -1798,6 +1802,7 @@ bool SubwindowOhos::IsFocused()
 
 void SubwindowOhos::HideFilter(bool isInSubWindow)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "HideFilter enter, subWindow: %{public}d", isInSubWindow);
     RefPtr<Container> aceContainer = nullptr;
     if (isInSubWindow) {
         aceContainer = Platform::AceContainer::GetContainer(childContainerId_);

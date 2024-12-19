@@ -52,8 +52,6 @@ public:
     static bool IsKeycapBase(uint32_t codePoint);
     static bool IsIndexInEmoji(int32_t index, const std::u16string& content, int32_t& startIndex, int32_t& endIndex);
     static EmojiRelation GetIndexRelationToEmoji(int32_t index,
-        const std::string& content, int32_t& startIndex, int32_t& endIndex);
-    static EmojiRelation GetIndexRelationToEmoji(int32_t index,
         const std::u16string& content, int32_t& startIndex, int32_t& endIndex);
     static bool IsIndexBeforeOrInEmoji(int32_t index, const std::u16string& content);
     static bool IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content);

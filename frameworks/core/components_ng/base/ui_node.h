@@ -142,7 +142,7 @@ public:
         return children_;
     }
 
-    RefPtr<UINode> GetLastChild()
+    RefPtr<UINode> GetLastChild() const
     {
         if (children_.empty()) {
             return nullptr;
@@ -150,7 +150,7 @@ public:
         return children_.back();
     }
 
-    RefPtr<UINode> GetFirstChild()
+    RefPtr<UINode> GetFirstChild() const
     {
         if (children_.empty()) {
             return nullptr;
@@ -176,7 +176,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    virtual void SetParent(const WeakPtr<UINode>& parent)
+    void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -374,6 +374,8 @@ public:
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
+
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 

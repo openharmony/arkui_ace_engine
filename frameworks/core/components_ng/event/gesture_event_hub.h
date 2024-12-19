@@ -83,7 +83,7 @@ struct BindMenuStatus {
 struct PreparedInfoForDrag {
     bool isMenuShow = false;
     int32_t badgeNumber = 0;
-    float defaultScale = 1.0f;
+    float previewScale = 1.0f;
     OffsetF dragPreviewOffsetToScreen = { 0.0f, 0.0f };
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;

@@ -48,6 +48,17 @@ struct KeyboardShortcut {
     }
 };
 
+enum class VisibleAreaChangeTriggerReason : int32_t {
+    IDLE = 0,
+    VISIBLE_AREA_CHANGE = 1,
+    DETACH_FROM_MAINTREE = 2,
+    BACKGROUND = 3,
+    SELF_INVISIBLE = 4,
+    FRAMENODE_DESTROY = 5,
+    IS_NOT_ON_MAINTREE = 6,
+    ANCESTOR_INVISIBLE = 7,
+};
+
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class ACE_FORCE_EXPORT EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)

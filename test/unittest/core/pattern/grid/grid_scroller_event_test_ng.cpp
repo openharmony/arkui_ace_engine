@@ -103,67 +103,67 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg001, TestSize.Level1)
     CreateDone();
 
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_MAIN_SIZE);
     EXPECT_EQ(scrollState, ScrollState::SCROLL);
 
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_MAIN_SIZE);
     EXPECT_EQ(scrollState, ScrollState::FLING);
 
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_MAIN_SIZE);
     EXPECT_EQ(scrollState, ScrollState::FLING);
 
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_MAIN_SIZE);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR_FLING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
     pattern_->scrollStop_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), 0);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
     pattern_->scrollStop_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), 0);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
     pattern_->scrollStop_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), 0);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
     pattern_->scrollStop_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_MAIN_SIZE);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
     pattern_->scrollStop_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
     pattern_->scrollStop_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->SetScrollAbort(true);
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -219,65 +219,65 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg003, TestSize.Level1)
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_JUMP);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_BAR_FLING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR_FLING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
 }
 
@@ -305,74 +305,74 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg004, TestSize.Level1)
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_AXIS);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_JUMP);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_BAR_FLING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_BAR_FLING);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_NONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isTrigger);
 }
 
@@ -402,7 +402,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg005, TestSize.Level1)
     EXPECT_FALSE(isScrollStopCalled);
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isScrollStopCalled);
 }
 
@@ -426,7 +426,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg006, TestSize.Level1)
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
     EXPECT_NE(scrollableEvent->GetScrollable()->callback_, nullptr);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -464,7 +464,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg007, TestSize.Level1)
     EXPECT_FALSE(isScrollStopCalled);
 
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isScrollStopCalled);
 }
 
@@ -538,8 +538,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 1);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_MAIN_SIZE * 1);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -600,8 +599,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 9);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_MAIN_SIZE * 9);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -661,7 +659,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation001, 
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -723,7 +721,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation002, 
     pattern_->UpdateCurrentOffset(-20 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
 
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * 20);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -778,8 +776,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 1);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_MAIN_SIZE * 1);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -834,8 +831,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_MAIN_SIZE * 10);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -896,7 +892,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation001
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -957,7 +953,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation002
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -1011,9 +1007,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation001, 
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1068,9 +1062,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1132,7 +1124,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation001, Tes
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -1194,7 +1186,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation002, Tes
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -1249,9 +1241,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation001
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll call back function should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1305,9 +1295,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation002
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
-    auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
@@ -1369,7 +1357,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithAnimation001, T
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -1431,7 +1419,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithAnimation002, T
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10 * ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_CONTROLLER);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnScrollStartCallBack);
     EXPECT_TRUE(isOnScrollStopCallBack);
@@ -1494,8 +1482,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
      *                   three kinds of call back functions are triggered or not.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_MAIN_SIZE * 5);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_EQ(offsetY.Value(), ITEM_MAIN_SIZE * 5);
     EXPECT_EQ(willScrollOffset.Value(), ITEM_MAIN_SIZE * 5 * 2);
@@ -1559,8 +1546,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
      *                   three kinds of call back functions are triggered or not.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_MAIN_SIZE * 5);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -1627,7 +1613,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
      * @tc.expected: All functions should be triggered
      */
     pattern_->ScrollBy(ITEM_MAIN_SIZE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -1693,8 +1679,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1
      *                   three kinds of call back functions are triggered and values are correct.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 10);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(ITEM_MAIN_SIZE * 10);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -1760,8 +1745,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1
      *                   three kinds of call back functions are triggered and values are correct.
      * @tc.expected: All functions should be triggered
      */
-    pattern_->ScrollTo(-ITEM_MAIN_SIZE);
-    FlushLayoutTask(frameNode_);
+    ScrollTo(-ITEM_MAIN_SIZE);
     EXPECT_FALSE(isOnScrollCallBack);
     EXPECT_FALSE(isOnWillScrollCallBack);
     EXPECT_FALSE(isOnDidScrollCallBack);
@@ -1829,7 +1813,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1
      * @tc.expected: All functions should be triggered
      */
     pattern_->OnScrollCallback(ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_FALSE(isOnDidScrollCallBack);

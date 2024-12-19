@@ -124,7 +124,7 @@ void RefreshPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         InitOffsetProperty();
     } else {
         triggerLoadingDistance_ = static_cast<float>(
@@ -141,7 +141,7 @@ RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
     auto refreshLayoutAlgorithm = MakeRefPtr<RefreshLayoutAlgorithm>();
     if (isCustomBuilderExist_) {
         refreshLayoutAlgorithm->SetCustomBuilderIndex(0);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
             refreshLayoutAlgorithm->SetBuilderMeasureBaseHeight(builderMeasureBaseHeight_);
         } else {
             refreshLayoutAlgorithm->SetCustomBuilderOffset(customBuilderOffset_);
@@ -326,7 +326,7 @@ void RefreshPattern::InitChildNode()
     auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (!progressChild_) {
         InitProgressNode();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
             CHECK_NULL_VOID(progressChild_);
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
@@ -381,7 +381,7 @@ void RefreshPattern::RefreshStatusChangeEffect()
 void RefreshPattern::QuickStartFresh()
 {
     UpdateRefreshStatus(RefreshStatus::REFRESH);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         QuickFirstChildAppear();
         return;
     }
@@ -396,7 +396,7 @@ void RefreshPattern::QuickStartFresh()
 void RefreshPattern::QuickEndFresh()
 {
     SwitchToFinish();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         QuickFirstChildDisappear();
         return;
     }
@@ -421,7 +421,7 @@ bool RefreshPattern::OnKeyEvent(const KeyEvent& event)
 
 void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         isSourceFromAnimation_ = !isDrag;
         ResetAnimation();
     } else {
@@ -433,7 +433,7 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
     UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
             return { delta, true };
@@ -462,7 +462,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 
 void RefreshPattern::HandleDragEnd(float speed)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         SpeedTriggerAnimation(speed);
     } else {
         HandleDragEndLowVersion();
@@ -527,6 +527,7 @@ void RefreshPattern::FireStateChange(int32_t value)
         builder.SetId(inspectorId)
             .SetType(host->GetTag())
             .SetEventType(Recorder::EventType::REFRESH)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
@@ -926,7 +927,7 @@ void RefreshPattern::ResetAnimation()
 {
     float currentOffset = scrollOffset_;
     AnimationUtils::StopAnimation(animation_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         CHECK_NULL_VOID(offsetProperty_);
         offsetProperty_->Set(currentOffset);
     } else {

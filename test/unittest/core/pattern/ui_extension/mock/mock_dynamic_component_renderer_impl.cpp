@@ -47,6 +47,23 @@ bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& event)
     return true;
 }
 
+void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType) {}
+
+bool DynamicComponentRendererImpl::IsRestrictedWorkerThread() { return false; }
+
+bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker) { return false; }
+
+void DynamicComponentRendererImpl::AddWorkerUsing(void *worker) {}
+
+void DynamicComponentRendererImpl::DeleteWorkerUsing(void *worker) {}
+
+void DynamicComponentRendererImpl::CreateIsolatedContent() {}
+
+void DynamicComponentRendererImpl::CreateDynamicContent() {}
+
+void DynamicComponentRendererImpl::SetUIContentJsContext(
+    const std::shared_ptr<Framework::JsValue>& jsContext) {}
+
 void DynamicComponentRendererImpl::TransferFocusState(bool isFocus) {}
 
 void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus) {}

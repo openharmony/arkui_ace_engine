@@ -50,6 +50,10 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
       TimepickerDateTimeOptionsModifier, value);
     return this;
   }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 
 class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
@@ -180,6 +184,20 @@ class TimepickerDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions>
       getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
     } else {
       getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
+    }
+  }
+}
+
+class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
     }
   }
 }

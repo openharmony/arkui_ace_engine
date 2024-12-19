@@ -61,8 +61,8 @@ ListModel* ListModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-const std::vector<V2::ScrollSnapAlign> SCROLL_SNAP_ALIGN = { V2::ScrollSnapAlign::NONE, V2::ScrollSnapAlign::START,
-    V2::ScrollSnapAlign::CENTER, V2::ScrollSnapAlign::END };
+const std::vector<ScrollSnapAlign> SCROLL_SNAP_ALIGN = { ScrollSnapAlign::NONE, ScrollSnapAlign::START,
+    ScrollSnapAlign::CENTER, ScrollSnapAlign::END };
 
 namespace {
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
@@ -410,11 +410,11 @@ void JSList::SetContentEndOffset(const JSCallbackInfo& info)
 
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
 {
-    V2::ScrollSnapAlign param;
+    ScrollSnapAlign param;
     if (scrollSnapAlign < 0 || scrollSnapAlign >= static_cast<int32_t>(SCROLL_SNAP_ALIGN.size())) {
-        param = V2::ScrollSnapAlign::NONE;
+        param = ScrollSnapAlign::NONE;
     } else {
-        param = V2::ScrollSnapAlign(scrollSnapAlign);
+        param = ScrollSnapAlign(scrollSnapAlign);
     }
     ListModel::GetInstance()->SetScrollSnapAlign(param);
 }

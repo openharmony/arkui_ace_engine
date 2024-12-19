@@ -31,9 +31,9 @@ namespace OHOS::Ace::NG {
 struct SwiperItemInfo {
     float startPos = 0.0f;
     float endPos = 0.0f;
-    RefPtr<FrameNode> node;
-    OffsetF finalOffset;
-    CancelableCallback<void()> task;
+    RefPtr<FrameNode> node = nullptr;
+    OffsetF finalOffset = OffsetF();
+    CancelableCallback<void()> task = CancelableCallback<void()>();
     bool isFinishAnimation = false;
 };
 

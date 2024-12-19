@@ -243,7 +243,7 @@ void SearchPattern::SetAccessibilityClearAction()
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->IsOperation());
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->HasText());
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
@@ -741,7 +741,7 @@ int32_t SearchPattern::HandleTextContentLines()
     CHECK_NULL_RETURN(textFieldFrameNode, lines);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, lines);
-    if (!textFieldPattern->IsOperation()) {
+    if (!textFieldPattern->HasText()) {
         return lines;
     }
     RectF textRect = textFieldPattern->GetTextRect();
@@ -930,7 +930,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::SEARCH && event.IsShiftWith(KeyCode::KEY_TAB)) {
-            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH && !isAllTextSelected && !isTextEmpty) {
@@ -947,7 +946,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
                 event.code == KeyCode::KEY_DPAD_RIGHT) {
                 return true;
             } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
-                textFieldPattern->CloseKeyboard(true);
                 return false;
             }
             if (NearZero(cancelButtonSize_.Height())) {
@@ -985,7 +983,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON &&
             (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
-            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON && isSearchButtonEnabled_ &&

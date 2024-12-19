@@ -79,8 +79,15 @@ public:
         isScenceBoardWindow_ = isScenceBoardWindow;
     }
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
+    int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+        bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr) override;
+
+    ResourceConfiguration GetResourceConfiguration() const override
+    {
+        return ResourceConfiguration();
+    }
 
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));

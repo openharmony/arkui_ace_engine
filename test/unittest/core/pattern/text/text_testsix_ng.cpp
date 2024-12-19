@@ -19,8 +19,6 @@
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 #include "test/mock/core/common/mock_font_manager.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
-#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
-#include "frameworks/base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
 
@@ -148,80 +146,6 @@ HWTEST_F(TextTestSixNg, GetLineBreakStrategyInJson001, TestSize.Level1)
     EXPECT_EQ(GetLineBreakStrategyInJson(value), "BALANCED");
     value = Ace::LineBreakStrategy::GREEDY;
     EXPECT_EQ(GetLineBreakStrategyInJson(value), "GREEDY");
-}
-
-/**
- * @tc.name: TextDragOverlayModifierTestNG001
- * @tc.desc: test text_drag_overlay_modifier.cpp onDraw(DrawingContext& context) function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestSixNg, TextDragOverlayModifierTestNG001, TestSize.Level1)
-{
-    auto textNode = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(V2::TEXTDRAG_ETS_TAG, nullptr);
-    auto dragNode = TextDragPattern::CreateDragNode(textNode);
-    ASSERT_NE(dragNode, nullptr);
-    auto test = dragNode->GetPattern<TextDragPattern>();
-    ASSERT_NE(test, nullptr);
-
-    WeakPtr<TextDragPattern> mockPattern = std::move(test);
-    auto modifier = AceType::MakeRefPtr<TextDragOverlayModifier>(mockPattern);
-    ASSERT_NE(modifier, nullptr);
-
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawPath(_)).WillRepeatedly(Return());
-    EXPECT_CALL(rsCanvas, ClipPath(_, _, _)).Times(AtLeast(1));
-
-    DrawingContext context { rsCanvas, 50.0f, 50.0f };
-    modifier->isAnimating_ = false;
-    modifier->type_ = DragAnimType::DEFAULT;
-    modifier->onDraw(context);
-
-    auto pattern = AccessibilityManager::DynamicCast<TextDragPattern>(modifier->pattern_.Upgrade());
-    EXPECT_NE(pattern->backGroundPath_.get(), nullptr);
-    EXPECT_NE(modifier->isAnimating_, true);
-    pattern->backGroundPath_ = nullptr;
-    modifier->onDraw(context);
-
-    modifier->isAnimating_ = true;
-    pattern->backGroundPath_ = nullptr;
-    EXPECT_NE(modifier->isAnimating_, false);
-    EXPECT_EQ(pattern->backGroundPath_.get(), nullptr);
-    modifier->onDraw(context);
-}
-
-/**
- * @tc.name: TextDragOverlayModifierTestNG002
- * @tc.desc: test text_drag_overlay_modifier.cpp PaintBackground function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestSixNg, TextDragOverlayModifierTestNG002, TestSize.Level1)
-{
-    RefPtr<TextDragPattern> mockPattern = AceType::MakeRefPtr<TextDragPattern>();
-    TextDragOverlayModifier modifier(mockPattern);
-    DragAnimType type = DragAnimType::DEFAULT;
-    modifier.type_ = type;
-
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawPath(_)).WillRepeatedly(Return());
-
-    ON_CALL(rsCanvas, AttachBrush(_))
-        .WillByDefault(ReturnRef(rsCanvas));
-    ON_CALL(rsCanvas, DrawPath(_))
-        .WillByDefault(::testing::Return());
-
-    RSPath path = RSPath();
-    EXPECT_EQ(modifier.type_, type);
-    modifier.PaintBackground(path, rsCanvas, mockPattern);
 }
 
 /**

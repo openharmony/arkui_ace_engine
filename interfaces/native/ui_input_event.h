@@ -39,6 +39,7 @@
 #include <cstdint>
 #else
 #include <stdint.h>
+#include <stdbool.h>
 #endif
 
 #ifdef __cplusplus
@@ -197,6 +198,30 @@ typedef enum {
     /** Fn. */
     ARKUI_MODIFIER_KEY_FN = 1 << 3,
 } ArkUI_ModifierKeyName;
+
+/**
+ * @brief Defines an enum for the axis types for focus axis events.
+ *
+ * @since 15
+ */
+enum {
+    /** ABS_X. */
+    UI_FOCUS_AXIS_EVENT_ABS_X = 0,
+    /** ABS_Y. */
+    UI_FOCUS_AXIS_EVENT_ABS_Y = 1,
+    /** ABS_Z. */
+    UI_FOCUS_AXIS_EVENT_ABS_Z = 2,
+    /** ABS_RZ. */
+    UI_FOCUS_AXIS_EVENT_ABS_RZ = 3,
+    /** ABS_GAS. */
+    UI_FOCUS_AXIS_EVENT_ABS_GAS = 4,
+    /** ABS_BRAKE. */
+    UI_FOCUS_AXIS_EVENT_ABS_BRAKE = 5,
+    /** ABS_HAT0X. */
+    UI_FOCUS_AXIS_EVENT_ABS_HAT0X = 6,
+    /** ABS_HAT0Y. */
+    UI_FOCUS_AXIS_EVENT_ABS_HAT0Y = 7,
+};
 
 /**
  * @brief Obtains the type of this UI input event.
@@ -742,6 +767,28 @@ int32_t OH_ArkUI_UIInputEvent_GetDeviceId(const ArkUI_UIInputEvent* event);
  */
 int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
     const ArkUI_UIInputEvent* event, int32_t* pressedKeyCodes, int32_t* length);
+
+/**
+ * @brief Obtains the axis value of a focus axis event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param axis Axis type of the focus axis event.
+ * @return Returns the axis value of the focus axis event; returns <b>0.0</b> if any parameter error occurs.
+ * @since 15
+ */
+double OH_ArkUI_FocusAxisEvent_GetAxisValue(const ArkUI_UIInputEvent* event, int32_t axis);
+
+/**
+ * @brief Sets whether to prevent a focus axis event from bubbling up.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param stopPropagation Indicates whether to stop event propagation.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 15
+ */
+int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation);
 
 #ifdef __cplusplus
 };
