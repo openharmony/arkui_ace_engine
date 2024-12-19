@@ -86,8 +86,9 @@ export struct WaterFlowBootcamp {
   @State enableCompClip: boolean = false;
   @State compClip: boolean = false;
 
-  @State totalCount: number = 20;
+  @State totalCount: number = 30;
   scroller: Scroller = new Scroller();
+  private listScroller: ListScroller = new ListScroller()
 
   getElements() {
     return Array.from({ length: this.totalCount }, (_: ESObject, index: number) => `${index}`);
@@ -112,61 +113,84 @@ export struct WaterFlowBootcamp {
 
   @Builder
   Content() {
-    Column() {
-      WaterFlow({
-        scroller: this.scroller,
-        layoutMode: useEnabled(this.enableLayoutMode, this.layoutMode)
-      }) {
-        ForEach(this.getElements(), (item: number) => {
-          FlowItem() {
-          }
-          .width('100%')
-          .height(80)
-          .margin({ bottom: 20 })
-          .backgroundColor('#510A59F7')
-          .borderRadius(12)
-        }, (item: string) => item)
+    List({scroller: this.listScroller}) {
+      ListItem() {
+        Text('1').width('90%').textAlign(TextAlign.Center)
       }
-      .columnsTemplate(useEnabled(this.enableColumnsTemplate, this.columnsTemplate))
-      .rowsTemplate(useEnabled(this.enableRowsTemplate, this.rowsTemplate))
-      .itemConstraintSize(
-        {
-          minWidth: useEnabled(this.enableItemConstraintSizeMinWidth, this.itemConstraintSizeMinWidth),
-          maxWidth: useEnabled(this.enableItemConstraintSizeMaxWidth, this.itemConstraintSizeMaxWidth),
-          minHeight: useEnabled(this.enableItemConstraintSizeMinHeight, this.itemConstraintSizeMinHeight),
-          maxHeight: useEnabled(this.enableItemConstraintSizeMaxHeight, this.itemConstraintSizeMaxHeight),
+      .height(200).backgroundColor(Color.Green).margin(10)
+
+      ListItem() {
+        Text('2').width('90%').textAlign(TextAlign.Center)
+      }
+      .height(200).backgroundColor(Color.Green).margin(10)
+
+      ListItem() {
+        WaterFlow({
+          scroller: this.scroller,
+          layoutMode: useEnabled(this.enableLayoutMode, this.layoutMode)
+        }) {
+          ForEach(this.getElements(), (item: number) => {
+            FlowItem() {
+            }
+            .width('100%')
+            .height(item % 2 ? 80 : 50)
+            .margin({ bottom: 20 })
+            .backgroundColor('#510A59F7')
+            .borderRadius(12)
+          }, (item: string) => item)
         }
-      )
-      .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
-      .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
-      .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
-      .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
-      .nestedScroll({
-        scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
-        scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
-      })
-      .friction(useEnabled(this.enableFriction, this.friction))
-      .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
-      .width(useEnabled(this.enableCompWidth, this.compWidth))
-      .height(useEnabled(this.enableCompHeight, this.compHeight))
-      .padding(useEnabled(this.enableCompPadding, this.compPadding))
-      .margin(useEnabled(this.enableCompMargin, this.compMargin))
-      .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
-      .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
-      .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
-      .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
-      .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
-      .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
-      .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
-      .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
-      .direction(useEnabled(this.enableCompDirection, this.compDirection))
-      .clip(useEnabled(this.enableCompClip, this.compClip))
-      .fadingEdge(
-        useEnabled(this.enableFadingEdge, this.fadingEdge),
-        useEnabled<FadingEdgeOptions>(this.fadingEdge, {
-          fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
+        .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
+        .columnsTemplate(useEnabled(this.enableColumnsTemplate, this.columnsTemplate))
+        .rowsTemplate(useEnabled(this.enableRowsTemplate, this.rowsTemplate))
+        .itemConstraintSize(
+          {
+            minWidth: useEnabled(this.enableItemConstraintSizeMinWidth, this.itemConstraintSizeMinWidth),
+            maxWidth: useEnabled(this.enableItemConstraintSizeMaxWidth, this.itemConstraintSizeMaxWidth),
+            minHeight: useEnabled(this.enableItemConstraintSizeMinHeight, this.itemConstraintSizeMinHeight),
+            maxHeight: useEnabled(this.enableItemConstraintSizeMaxHeight, this.itemConstraintSizeMaxHeight),
+          }
+        )
+        .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
+        .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
+        .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
+        .nestedScroll({
+          scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
+          scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
         })
-      )
+        .friction(useEnabled(this.enableFriction, this.friction))
+        .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
+        .width(useEnabled(this.enableCompWidth, this.compWidth))
+        .height(useEnabled(this.enableCompHeight, this.compHeight))
+        .padding(useEnabled(this.enableCompPadding, this.compPadding))
+        .margin(useEnabled(this.enableCompMargin, this.compMargin))
+        .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+        .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+        .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+        .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+        .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+        .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
+        .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
+        .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
+        .direction(useEnabled(this.enableCompDirection, this.compDirection))
+        .clip(useEnabled(this.enableCompClip, this.compClip))
+        .fadingEdge(
+          useEnabled(this.enableFadingEdge, this.fadingEdge),
+          useEnabled<FadingEdgeOptions>(this.fadingEdge, {
+            fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
+          })
+        )
+      }
+      .height(300)
+
+      ListItem() {
+        Text('4').width('90%').textAlign(TextAlign.Center)
+      }
+      .height(200).backgroundColor(Color.Green).margin(10)
+
+      ListItem() {
+        Text('5').width('90%').textAlign(TextAlign.Center)
+      }
+      .height(200).backgroundColor(Color.Green).margin(10)
     }
     .height('80%')
   }
@@ -186,32 +210,44 @@ export struct WaterFlowBootcamp {
         })
 
         RadioBlock({
-          title: 'columnsTemplate',
-          isEnabled: $enableColumnsTemplate,
-          value: $columnsTemplate,
+          title: 'layoutDirection',
+          isEnabled: $enableLayoutDirection,
+          value: $layoutDirection,
           dataSource: [
-            { label: '1fr', value: '1fr' },
-            { label: '1fr 1fr', value: '1fr 1fr' },
-            { label: '1fr 1fr 1fr', value: '1fr 1fr 1fr' },
-            { label: '1fr 1fr 2fr', value: '1fr 1fr 2fr' },
-            { label: '1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr' },
-            { label: '1fr 1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr 1fr' }
+            { label: 'Column', value: FlexDirection.Column },
+            { label: 'Row', value: FlexDirection.Row }
           ]
         })
 
-        RadioBlock({
-          title: 'rowsTemplate',
-          isEnabled: $enableRowsTemplate,
-          value: $rowsTemplate,
-          dataSource: [
-            { label: '1fr', value: '1fr' },
-            { label: '1fr 1fr', value: '1fr 1fr' },
-            { label: '1fr 1fr 1fr', value: '1fr 1fr 1fr' },
-            { label: '1fr 1fr 2fr', value: '1fr 1fr 2fr' },
-            { label: '1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr' },
-            { label: '1fr 1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr 1fr' }
-          ]
-        })
+        if (FlexDirection.Column === this.layoutDirection) {
+          RadioBlock({
+            title: 'columnsTemplate',
+            isEnabled: $enableColumnsTemplate,
+            value: $columnsTemplate,
+            dataSource: [
+              { label: '1fr', value: '1fr' },
+              { label: '1fr 1fr', value: '1fr 1fr' },
+              { label: '1fr 1fr 1fr', value: '1fr 1fr 1fr' },
+              { label: '1fr 1fr 2fr', value: '1fr 1fr 2fr' },
+              { label: '1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr' },
+              { label: '1fr 1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr 1fr' }
+            ]
+          })
+        } else if (FlexDirection.Row === this.layoutDirection) {
+          RadioBlock({
+            title: 'rowsTemplate',
+            isEnabled: $enableRowsTemplate,
+            value: $rowsTemplate,
+            dataSource: [
+              { label: '1fr', value: '1fr' },
+              { label: '1fr 1fr', value: '1fr 1fr' },
+              { label: '1fr 1fr 1fr', value: '1fr 1fr 1fr' },
+              { label: '1fr 1fr 2fr', value: '1fr 1fr 2fr' },
+              { label: '1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr' },
+              { label: '1fr 1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr 1fr' }
+            ]
+          })
+        }
 
         SliderBlock({
           title: 'itemConstraintSize.minWidth',
@@ -342,16 +378,6 @@ export struct WaterFlowBootcamp {
             ]
           })
         }
-
-        RadioBlock({
-          title: 'layoutDirection',
-          isEnabled: $enableLayoutDirection,
-          value: $layoutDirection,
-          dataSource: [
-            { label: 'Column', value: FlexDirection.Column },
-            { label: 'Row', value: FlexDirection.Row }
-          ]
-        })
 
         SliderBlock({
           title: 'width',
