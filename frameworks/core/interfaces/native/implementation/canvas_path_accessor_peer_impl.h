@@ -19,6 +19,7 @@
 #include "core/common/container_consts.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components/common/properties/decoration.h"
+#include "matrix2d_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class CanvasPathPeerImpl : public Referenced {
