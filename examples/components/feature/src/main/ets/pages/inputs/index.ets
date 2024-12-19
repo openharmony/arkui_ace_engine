@@ -19,10 +19,6 @@ import { RichEditorBootcamp } from './RichEditorBootcamp';
 import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { SpanBootcamp } from './SpanBootcamp';
 
-
-
-
-
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
   label: '输入类',
