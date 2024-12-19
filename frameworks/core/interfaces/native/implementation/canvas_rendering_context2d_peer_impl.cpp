@@ -29,19 +29,19 @@ void CanvasRenderingContext2DPeerImpl::SetCanvasPattern(const RefPtr<AceType>& p
     if (pattern_ == canvasPattern) {
         return;
     }
-    auto OnAttach = [weakCtx = WeakClaim(this)]() {
+    auto onAttach = [weakCtx = WeakClaim(this)]() {
         auto ctx = weakCtx.Upgrade();
         CHECK_NULL_VOID(ctx);
         ctx->OnAttachToCanvas();
     };
-    auto OnDetach = [weakCtx = WeakClaim(this)]() {
+    auto onDetach = [weakCtx = WeakClaim(this)]() {
         auto ctx = weakCtx.Upgrade();
         CHECK_NULL_VOID(ctx);
         ctx->OnDetachFromCanvas();
     };
     pattern_ = canvasPattern;
-    pattern_->SetOnContext2DAttach(OnAttach);
-    pattern_->SetOnContext2DDetach(OnDetach);
+    pattern_->SetOnContext2DAttach(onAttach);
+    pattern_->SetOnContext2DDetach(onDetach);
     pattern_->AttachRenderContext();
 }
 
@@ -65,12 +65,15 @@ void CanvasRenderingContext2DPeerImpl::OnDetachFromCanvas()
     }
 }
 
-CanvasCallbackList::const_iterator CanvasRenderingContext2DPeerImpl::FindCallbackInList(const CanvasCallbackList& callbackFuncPairList, const CallbackHelper<Callback_Void>& callback) const
+CanvasCallbackList::const_iterator CanvasRenderingContext2DPeerImpl::FindCallbackInList(
+    const CanvasCallbackList& callbackFuncPairList,
+    const CallbackHelper<Callback_Void>& callback) const
 {
     return std::find(callbackFuncPairList.begin(), callbackFuncPairList.end(), callback);
 }
 
-void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(const CallbackHelper<Callback_Void>& callback, const CanvasCallbackType& type)
+void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(const CallbackHelper<Callback_Void>& callback,
+    const CanvasCallbackType& type)
 {
     if (!callback.IsValid()) {
         if (type == CanvasCallbackType::ON_ATTACH) {
@@ -78,7 +81,7 @@ void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(const CallbackHelp
         } else if (type == CanvasCallbackType::ON_DETACH) {
             detachCallback_.clear();
         }
-        return;    
+        return;
     }
     if (type == CanvasCallbackType::ON_ATTACH) {
         auto iter = FindCallbackInList(attachCallback_, callback);
@@ -93,7 +96,8 @@ void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(const CallbackHelp
     }
 }
 
-void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type)
+void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CallbackHelper<Callback_Void> &&callback,
+    const CanvasCallbackType& type)
 {
     if (type == CanvasCallbackType::ON_ATTACH) {
         auto iter = FindCallbackInList(attachCallback_, callback);
@@ -108,11 +112,13 @@ void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CallbackHelper<Callback
     }
 }
 
-void CanvasRenderingContext2DPeerImpl::On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type) {
+void CanvasRenderingContext2DPeerImpl::On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type)
+{
     AddCallbackToList(std::move(callback), type);
 }
 
-void CanvasRenderingContext2DPeerImpl::Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type) {
+void CanvasRenderingContext2DPeerImpl::Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type)
+{
     DeleteCallbackFromList(callback, type);
 }
 
