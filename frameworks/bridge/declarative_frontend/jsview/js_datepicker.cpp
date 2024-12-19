@@ -865,7 +865,7 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(c
 
 JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
 {
-    std::tm dateTime = { 0 };
+    std::tm dateTime {};
     auto year = selectedJson->GetValue("year");
     if (year && year->IsNumber()) {
         dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900

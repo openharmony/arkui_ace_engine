@@ -109,7 +109,7 @@ bool TossAnimationController::Play()
 
 double TossAnimationController::GetCurrentTime() const
 {
-    struct timeval tv = { 0 };
+    struct timeval tv {};
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
         LOGE("toss gettimeofday failed.");
