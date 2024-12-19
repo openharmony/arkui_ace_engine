@@ -463,10 +463,10 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     if (touchPoint.type != TouchType::DOWN) {
         return;
     }
+    CHECK_NULL_VOID(textOverlayManager);
     auto coordinateOffset = textOverlayManager->GetCoordinateOffset();
     const Point point { touchPoint.x - coordinateOffset.GetX(), touchPoint.y - coordinateOffset.GetY(),
         touchPoint.sourceType };
-    CHECK_NULL_VOID(textOverlayManager);
     auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
     CHECK_NULL_VOID(textOverlayBase);
     auto targetNode = textOverlayManager->GetTargetNode();

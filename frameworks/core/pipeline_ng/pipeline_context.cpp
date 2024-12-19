@@ -79,6 +79,9 @@ constexpr int32_t MAX_MISS_COUNT = 3;
 } // namespace
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension CARET_AVOID_OFFSET = 24.0_vp;
+} // namespace
 
 std::unordered_set<int32_t> PipelineContext::aliveInstanceSet_;
 
@@ -1073,8 +1076,12 @@ void PipelineContext::RegisterRootEvent()
 void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
+    auto rootPattern = ViewAdvancedRegister::GetInstance()->GeneratePattern(V2::ROOT_ETS_TAG);
+    if (!rootPattern) {
+        rootPattern = MakeRefPtr<RootPattern>();
+    }
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), rootPattern);
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
     rootNode_->SetActive(true);
@@ -1173,8 +1180,12 @@ void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
     appBgColor_ = Color::TRANSPARENT;
+    auto rootPattern = ViewAdvancedRegister::GetInstance()->GeneratePattern(V2::ROOT_ETS_TAG);
+    if (!rootPattern) {
+        rootPattern = MakeRefPtr<RootPattern>();
+    }
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), rootPattern);
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
     rootNode_->SetActive(true);
@@ -2168,7 +2179,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     auto paintOffset = host->GetPaintRectOffset();
     auto frameSize = geometryNode->GetFrameSize();
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
-        frameSize.Height(), rootSize);
+        frameSize.Height() + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
     return std::max(offset, newKeyboardOffset);
 }
 
@@ -5333,5 +5344,13 @@ std::string PipelineContext::GetModuleName()
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, "");
     return container->GetModuleName();
+}
+
+void PipelineContext::SetEnableSwipeBack(bool isEnable)
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto rootPattern = rootNode_->GetPattern<RootPattern>();
+    CHECK_NULL_VOID(rootPattern);
+    rootPattern->SetEnableSwipeBack(isEnable);
 }
 } // namespace OHOS::Ace::NG

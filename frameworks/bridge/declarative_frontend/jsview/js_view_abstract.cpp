@@ -2440,7 +2440,7 @@ void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>
         }
         const auto* vm = nodePtr->GetEcmaVM();
         auto localHandle = nodePtr->GetLocalHandle();
-        if (localHandle.IsEmpty()) {
+        if (!localHandle->IsNativePointer(vm)) {
             return;
         }
         auto* node = localHandle->ToNativePointer(vm)->Value();

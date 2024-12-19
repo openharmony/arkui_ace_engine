@@ -29,10 +29,6 @@ FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>&
     : nodeRef_(node), pattern_(pattern)
 {
     frameNode_ = AceType::RawPtr(node);
-    auto layoutProperty = node->GetLayoutProperty();
-    // TODO: pass real layout constraint and ideal size
-    auto len = NG::CalcLength(200);
-    layoutProperty->UpdateUserDefinedIdealSize({ len, len });
     node->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_RENDER);
 }
 

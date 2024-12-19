@@ -2560,7 +2560,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     pipeline->AddAfterLayoutTask([weakNavigation = WeakClaim(this),
         weakPreDestination = WeakPtr<NavDestinationGroupNode>(preDestination),
         weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
-        isPopPage, isAnimated, isNeedVisible]() {
+        isPopPage, isNeedVisible]() {
         auto navigationPattern = AceType::DynamicCast<NavigationPattern>(weakNavigation.Upgrade());
         CHECK_NULL_VOID(navigationPattern);
         auto preDestination = weakPreDestination.Upgrade();

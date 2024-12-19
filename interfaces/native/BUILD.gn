@@ -45,6 +45,7 @@ ohos_shared_library("ace_ndk") {
   include_dirs = [
     "//foundation/arkui/ace_engine",
     "//foundation/arkui/ace_engine/frameworks",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include",
     "//foundation/arkui/ace_engine/interfaces/native",
   ]
 

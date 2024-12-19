@@ -328,11 +328,11 @@ void GridLayoutInfo::GetLineHeights(
         if (options.irregularIndexes.find(lineStart) != options.irregularIndexes.end()) {
             irregularHeight = item.second + mainGap;
         } else {
-            if (NearZero(regularHeight)) {
+            if (NonPositive(regularHeight)) {
                 regularHeight = item.second + mainGap;
             }
         }
-        if (!(NearZero(irregularHeight) || NearZero(regularHeight))) {
+        if (Positive(irregularHeight) && Positive(regularHeight)) {
             break;
         }
     }
@@ -347,20 +347,21 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
         return GetContentHeight(mainGap);
     }
 
-    float irregularHeight = 0.0f;
-    float regularHeight = 0.0f;
+    float irregularHeight = -1.0f;
+    float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);
-    if (NearZero(irregularHeight)) {
+    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
         irregularHeight = lastIrregularMainSize_;
     }
     if (NearZero(regularHeight)) {
         regularHeight = lastRegularMainSize_;
     }
-
+    if (Negative(irregularHeight)) {
+        irregularHeight = regularHeight;
+    }
     // get line count
-    auto firstIrregularIndex = *(options.irregularIndexes.begin());
-    float totalHeight = AddLinesInBetween(-1, firstIrregularIndex, crossCount_, regularHeight);
-    auto lastIndex = firstIrregularIndex;
+    float totalHeight = 0;
+    auto lastIndex = -1;
     for (int32_t idx : options.irregularIndexes) {
         if (idx >= endIdx) {
             break;
@@ -421,10 +422,10 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         return;
     }
 
-    float irregularHeight = 0.0f;
-    float regularHeight = 0.0f;
+    float irregularHeight = -1.0f;
+    float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);
-    if (NearZero(irregularHeight)) {
+    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
         irregularHeight = lastIrregularMainSize_;
     } else {
         lastIrregularMainSize_ = irregularHeight;
@@ -434,17 +435,17 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     } else {
         lastRegularMainSize_ = regularHeight;
     }
+    if (Negative(irregularHeight)) {
+        irregularHeight = regularHeight;
+    }
 
-    int32_t firstIrregularIndex = *(options.irregularIndexes.begin());
-    float totalHeight = AddLinesInBetween(-1, firstIrregularIndex, crossCount_, regularHeight);
-    int32_t lastIndex = GreatNotEqual(totalHeight, targetContent) ? 0 : firstIrregularIndex;
-    float lastHeight = 0.0f;
+    float totalHeight = 0;
+    int32_t lastIndex = -1;
 
     for (int32_t idx : options.irregularIndexes) {
         if (GreatOrEqual(totalHeight, targetContent)) {
             break;
         }
-        lastHeight = totalHeight;
         float height = AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         if (GreatOrEqual(totalHeight + height, targetContent)) {
             break;
@@ -453,9 +454,9 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         totalHeight += irregularHeight;
         lastIndex = idx;
     }
-    int32_t lines = static_cast<int32_t>(std::floor((targetContent - lastHeight) / regularHeight));
-    currentOffset_ = lastHeight + lines * regularHeight - targetContent;
-    int32_t startIdx = lines * crossCount_ + lastIndex;
+    int32_t lines = static_cast<int32_t>(std::floor((targetContent - totalHeight) / regularHeight));
+    currentOffset_ = totalHeight + lines * regularHeight - targetContent;
+    int32_t startIdx = lines * crossCount_ + lastIndex + 1;
     startIndex_ = std::min(startIdx, childrenCount_ - 1);
 }
 

@@ -24,6 +24,7 @@ ohos_unittest("rosen_test") {
     "$ace_root/frameworks/core/common/rosen/rosen_convert_helper.cpp",
     "$ace_root/frameworks/core/common/rosen/rosen_window.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "rosen_test.cpp",
   ]

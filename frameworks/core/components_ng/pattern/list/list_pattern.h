@@ -299,9 +299,14 @@ public:
         lastSnapTargetIndex_ = lastSnapTargetIndex;
     }
 
-    int32_t GetLastSnapTargetIndex() override
+    std::optional<int32_t> GetLastSnapTargetIndex() override
     {
         return lastSnapTargetIndex_;
+    }
+
+    void ResetLastSnapTargetIndex() override
+    {
+        lastSnapTargetIndex_.reset();
     }
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
@@ -460,7 +465,7 @@ private:
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
-    int32_t lastSnapTargetIndex_ = -1;
+    std::optional<int32_t> lastSnapTargetIndex_;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
