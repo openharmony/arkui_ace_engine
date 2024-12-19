@@ -61,7 +61,9 @@ std::optional<std::string> RepeatVirtualScrollCaches::GetKey4Index(uint32_t inde
     if (rebuildL1) {
         // check for each L1 entry if its key is includes in newly received keys
         // only keep these in L1
-        RebuildL1WithKey([&](const std::string &key) { return index4Key_.find(key) != index4Key_.end(); });
+        isModified_ = RebuildL1WithKey([&](const std::string &key) {
+            return index4Key_.find(key) != index4Key_.end();
+        });
     }
 
     return GetKey4Index(index, false);
@@ -492,6 +494,10 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
         result += l1Key + ",";
     }
     TAG_LOGD(AceLogTag::ACE_REPEAT, "RebuildL1 done. %{public}s", result.c_str());
+    if (isModified_) {
+        modified = isModified_;
+        isModified_ = false;
+    }
     return modified;
 }
 
@@ -761,6 +767,18 @@ bool RepeatVirtualScrollCaches::Purge()
         TAG_LOGD(AceLogTag::ACE_REPEAT, "Purged total %d items.",  static_cast<int32_t>(deletedCount));
         ACE_SCOPED_TRACE("RepeatVirtualScrollCaches::Purge %d items",  static_cast<int32_t>(deletedCount));
     }
+
+    // freeze the remaining nodes in L2
+    for (const auto& [key, cacheItem] : node4key_) {
+        const auto& indexIter = index4Key_.find(key);
+        if (indexIter == index4Key_.end()) {
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "about to freeze the node for key[%{public}s] in L2", key.c_str());
+            if (cacheItem.item) {
+                cacheItem.item->SetJSViewActive(false);
+            }
+        }
+    }
+
     return (deletedCount > 0);
 }
 
