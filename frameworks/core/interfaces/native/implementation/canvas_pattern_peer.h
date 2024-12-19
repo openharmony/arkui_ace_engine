@@ -20,17 +20,20 @@
 
 struct CanvasPatternPeer {
 public:
+    using CanvasPatternPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>;
+    using TransformParamCls = OHOS::Ace::TransformParam;
+
     CanvasPatternPeer() = default;
     virtual ~CanvasPatternPeer() = default;
-    const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>& GetPattern() const
+    const CanvasPatternPtr& GetPattern() const
     {
         return pattern_;
     }
-    void SetPattern(const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>& pattern)
+    void SetPattern(const CanvasPatternPtr& pattern)
     {
         pattern_ = pattern;
     }
-    virtual void SetTransform(const OHOS::Ace::TransformParam& param)
+    virtual void SetTransform(const TransformParamCls& param)
     {
         if (!pattern_) {
         LOGE("ARKOALA CanvasPatternPeer::SetTransform pattern "
@@ -40,6 +43,7 @@ public:
         pattern_->SetTransform(param);
     }
 private:
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern> pattern_ = nullptr;
+    CanvasPatternPtr pattern_ = nullptr;
 };
+
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
