@@ -718,6 +718,12 @@ class UIContext {
         Context.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    enableSwipeBack(enabled) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.enableSwipeBack(enabled);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {

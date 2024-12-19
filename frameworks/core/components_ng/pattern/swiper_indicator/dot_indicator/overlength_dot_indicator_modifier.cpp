@@ -99,7 +99,7 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
     leftCenter -= (centerDilateDistance - centerDistance) * HALF_FLOAT;
     rightCenter += (centerDilateDistance - centerDistance) * HALF_FLOAT;
     PaintSelectedIndicator(
-        canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
+        canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio, true);
 }
 
 void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty)

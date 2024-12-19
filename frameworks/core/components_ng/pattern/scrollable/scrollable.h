@@ -527,6 +527,11 @@ public:
         return getSnapTypeCallback_();
     }
 
+    void ResetSnapDirection()
+    {
+        snapDirection_ = SnapDirection::NONE;
+    }
+
 private:
     void InitPanRecognizerNG();
     void SetOnActionStart();

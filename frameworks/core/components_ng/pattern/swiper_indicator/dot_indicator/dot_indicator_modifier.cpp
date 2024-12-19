@@ -271,7 +271,7 @@ void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const Offs
 }
 
 void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
-    const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes)
+    const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes, bool isOverlong)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
@@ -279,7 +279,7 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
     canvas.AttachBrush(brush);
 
     auto selectedItemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-    if (isCustomSize_) {
+    if (isCustomSize_ && !isOverlong) {
         selectedItemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * HALF_FLOAT;
     }
 
