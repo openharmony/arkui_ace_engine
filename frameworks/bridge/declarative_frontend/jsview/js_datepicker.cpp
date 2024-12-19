@@ -952,6 +952,26 @@ std::function<void()> JSDatePickerDialog::GetCancelEvent(
     return cancelEvent;
 }
 
+void JSDatePickerDialog::UpdateLunarSwitchSettingData(
+    const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
+{
+    auto selectedColorValue = paramObject->GetProperty("selectedColor");
+    auto unselectedColorValue = paramObject->GetProperty("unselectedColor");
+    auto strokeColorValue = paramObject->GetProperty("strokeColor");
+    Color selectedColor;
+    if (JSViewAbstract::ParseJsColor(selectedColorValue, selectedColor)) {
+        settingData.checkboxSettingData.selectedColor = selectedColor;
+    }
+    Color unselectedColor;
+    if (JSViewAbstract::ParseJsColor(unselectedColorValue, unselectedColor)) {
+        settingData.checkboxSettingData.unselectedColor = unselectedColor;
+    }
+    Color strokeColor;
+    if (JSViewAbstract::ParseJsColor(strokeColorValue, strokeColor)) {
+        settingData.checkboxSettingData.strokeColor = strokeColor;
+    }
+}
+
 void JSDatePickerDialog::UpdateDatePickerSettingData(
     const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
 {
@@ -961,6 +981,13 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
     auto useMilitary = paramObject->GetProperty("useMilitaryTime");
     settingData.isLunar = lunar->ToBoolean();
     settingData.lunarswitch = lunarSwitch->ToBoolean();
+    if (settingData.lunarswitch) {
+        auto lunarSwitchStyle = paramObject->GetProperty("lunarSwitchStyle");
+        if ((!lunarSwitchStyle->IsUndefined()) && lunarSwitchStyle->IsObject()) {
+            auto style = JSRef<JSObject>::Cast(lunarSwitchStyle);
+            UpdateLunarSwitchSettingData(style, settingData);
+        }
+    }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");

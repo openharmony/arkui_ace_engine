@@ -78,6 +78,8 @@ private:
     static std::function<void()> GetCancelEvent(
         const JSRef<JSObject>& paramObject, const JSCallbackInfo& info, const WeakPtr<NG::FrameNode>& frameNode);
     static void UpdateDatePickerSettingData(const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData);
+    static void UpdateLunarSwitchSettingData(
+        const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData);
     static void UpdatePickerDialogTimeInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
     static void UpdatePickerDialogPositionInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
     static void UpdatePickerDialogInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
