@@ -40,8 +40,9 @@ export struct ProgressButtonV2 {
   @Param content: ResourceStr = EMPTY_STRING;
   @Local isLoading: boolean = false;
   @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
-  @Param onClicked: ClickCallBack = () => {};
+  @Param onClicked: ClickCallback = () => {};
   @Param enable: boolean = true;
+  @Param colorOptions?: ProgressButtonV2Color | undefined = undefined;
 
   @Local progressColor: ResourceColor = '#330A59F7'
   @Local containerBorderColor: ResourceColor = '#330A59F7'
@@ -104,12 +105,12 @@ export struct ProgressButtonV2 {
           .clip(false)
           .enabled(this.enable)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
-          .color(this.progressColor)
+          .color(this.colorOptions?.progressColor?.color ? this.colorOptions?.progressColor?.color : this.progressColor)
         Row() {
           Text(this.isLoading ? this.textProgress: this.content)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
-            .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
+            .fontColor(this.colorOptions?.textColor?.color)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .padding({ top: 4, left: 8, right: 8, bottom: 4})
@@ -126,7 +127,10 @@ export struct ProgressButtonV2 {
         Row()
           .key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY)
           .backgroundColor(Color.Transparent)
-          .border({ width: 1, color: this.containerBorderColor})
+          .border({
+            width: 1,
+            color: this.colorOptions?.borderColor?.color ? this.colorOptions?.borderColor?.color : this.containerBorderColor
+          })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
           .borderRadius(this.buttonBorderRadius)
@@ -137,10 +141,13 @@ export struct ProgressButtonV2 {
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
-    .backgroundColor(this.containerBackgroundColor)
+    .backgroundColor(
+      this.colorOptions?.backgroundColor?.color
+        ? this.colorOptions?.backgroundColor?.color
+        : this.containerBackgroundColor)
     .padding({ top: 0, bottom: 0})
     .width(this.toLengthString(this.progressButtonWidth))
-    .constraintSize({minWidth: 44})
+    .constraintSize({minWidth: BUTTON_NORMARL_WIDTH})
     .stateEffect(this.enable)
     .onClick(() => {
       if (!this.enable) {
@@ -183,4 +190,25 @@ export struct ProgressButtonV2 {
   }
 }
 
-export type ClickCallBack = () => void;
+@ObservedV2
+export class ProgressButtonV2Color {
+  @Trace progressColor?: ColorMetrics;
+  @Trace borderColor?: ColorMetrics;
+  @Trace textColor?: ColorMetrics;
+  @Trace backgroundColor?: ColorMetrics;
+  constructor (options: ProgressButtonV2ColorOptions) {
+    this.progressColor = options.progressColor;
+    this.borderColor = options.borderColor;
+    this.textColor = options.textColor;
+    this.backgroundColor = options.backgroundColor;
+  }
+}
+
+export type ClickCallback = () => void;
+
+export interface ProgressButtonV2ColorOptions {
+  progressColor?: ColorMetrics;
+  borderColor?: ColorMetrics;
+  textColor?: ColorMetrics;
+  backgroundColor?: ColorMetrics;
+}
