@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
-#include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 
-struct StyledStringPeer {
-    virtual ~StyledStringPeer() = default;
-
-    OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString;
+struct MutableStyledStringPeer : public StyledStringPeer {
+    ~MutableStyledStringPeer() override = default;
+    
+    OHOS::Ace::RefPtr<OHOS::Ace::MutableSpanString> GetMutableString()
+    {
+        return OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(spanString);
+    }
 };

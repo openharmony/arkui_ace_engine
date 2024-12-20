@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
-struct StyledStringPeer {
-    virtual ~StyledStringPeer() = default;
-
-    OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString;
-};
+namespace OHOS::Ace::NG::Converter {
+    template<>
+    RefPtr<SpanBase> Convert(const Ark_StyleOptions& src);
+}
