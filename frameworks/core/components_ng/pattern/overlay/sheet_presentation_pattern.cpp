@@ -2992,7 +2992,7 @@ Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, Shadow());
-    auto pipelineContext = host->GetContextRefPtr();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, Shadow());
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, Shadow());
