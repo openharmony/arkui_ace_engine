@@ -219,12 +219,12 @@ public:
         return closeIconSource_;
     }
 
-    const int32_t GetSheetShadowConfig() const
+    int32_t GetSheetShadowConfig() const
     {
         return sheetShadowConfig_;
     }
 
-    const int32_t GetSheetShadowConfigS() const
+    int32_t GetSheetShadowConfigS() const
     {
         return sheetShadowConfigS_;
     }
