@@ -405,6 +405,15 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(
     return UIContentErrorCode::NULL_POINTER;
 }
 
+UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name, const std::string& params)
+{
+    if (delegate_) {
+        delegate_->RunPage(name, params, pageProfile_, true);
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    return UIContentErrorCode::NULL_POINTER;
+}
+
 void DeclarativeFrontendNG::ReplacePage(const std::string& url, const std::string& params)
 {
     if (delegate_) {

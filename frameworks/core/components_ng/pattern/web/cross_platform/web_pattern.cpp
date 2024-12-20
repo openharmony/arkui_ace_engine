@@ -773,7 +773,7 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-#if !defined(IOS_PLATFORM) && defined(ANDROID_PLATFORM)
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     RegistVirtualKeyBoardListener();
 #endif
     if (!delegate_) {
@@ -1187,6 +1187,11 @@ void WebPattern::OnRootLayerChanged(int width, int height)
 }
 
 void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt)
 {
     // cross platform is not support now;
 }
