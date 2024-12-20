@@ -567,7 +567,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         hostLayoutProperty->ResetTextAlignChanged();
     }
     ProcessOverlayAfterLayout(oldParentGlobalOffset);
-    if (inlineSelectAllFlag_) {
+    if (inlineSelectAllFlag_ && (requestFocusReason_ != RequestFocusReason::DRAG_SELECT)) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
         showSelect_ = true;
@@ -588,7 +588,35 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
     SetAccessibilityUnitAction();
+    if (needSelect_) {
+        UpdateSelectionAndHandleVisibility();
+        needSelect_ = false;
+    }
+    releaseInDrop_ = false;
     return true;
+}
+
+void TextFieldPattern::UpdateSelectionAndHandleVisibility()
+{
+    TextFieldRequestFocus(RequestFocusReason::DRAG_SELECT);
+    auto start = dragTextStart_;
+    auto end = dragTextEnd_;
+    if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
+        start = selectController_->GetCaretIndex()
+        - contentController_->GetInsertValue().length();
+        end = selectController_->GetCaretIndex();
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]",
+        start, end);
+    UpdateSelection(start, end);
+    showSelect_ = true;
+
+    if (!isMouseOrTouchPad(sourceTool_)) {
+        ProcessOverlay({ .menuIsShow = false });
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
@@ -990,7 +1018,6 @@ void TextFieldPattern::HandleFocusEvent()
 void TextFieldPattern::ProcessAutoFillOnFocus()
 {
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        requestFocusReason_ = RequestFocusReason::UNKNOWN;
         return;
     }
 
@@ -1001,7 +1028,6 @@ void TextFieldPattern::ProcessAutoFillOnFocus()
     if (needToRequestKeyboardOnFocus_ && !isIgnoreFocusReason && !IsModalCovered() && IsTriggerAutoFillPassword()) {
         DoProcessAutoFill();
     }
-    requestFocusReason_ = RequestFocusReason::UNKNOWN;
 }
 
 void TextFieldPattern::ProcessFocusStyle()
@@ -2037,6 +2063,7 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         CHECK_NULL_RETURN(hub, itemInfo);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_RETURN(gestureHub, itemInfo);
+        pattern->sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
         if (!gestureHub->GetIsTextDraggable()) {
             return itemInfo;
         }
@@ -2095,6 +2122,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->StopContentScroll();
+        pattern->sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2105,6 +2133,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             host->GetId(), static_cast<int32_t>(pattern->dragStatus_),
             static_cast<int32_t>(pattern->dragRecipientStatus_));
         if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState() || !pattern->HasFocus()) {
+            event->SetResult(DragRet::DRAG_FAIL);
             return;
         }
         if (extraParams.empty()) {
@@ -2112,7 +2141,17 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             pattern->textFieldContentModifier_->ChangeDragStatus();
             host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                          : PROPERTY_UPDATE_MEASURE);
+            event->SetResult(DragRet::DRAG_FAIL);
             return;
+        }
+        bool isCopy = false;
+        if (pattern->dragStatus_ == DragStatus::DRAGGING) {
+            CHECK_NULL_VOID(event);
+            auto gesturePressedCodes = event->GetPressedKeyCodes();
+            if ((gesturePressedCodes.size() == 1) && ((gesturePressedCodes[0] == KeyCode::KEY_CTRL_LEFT) ||
+                (gesturePressedCodes[0] == KeyCode::KEY_CTRL_RIGHT))) {
+                isCopy = true;
+            }
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
@@ -2147,19 +2186,22 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             auto current = pattern->selectController_->GetCaretIndex();
             auto dragTextStart = pattern->dragTextStart_;
             auto dragTextEnd = pattern->dragTextEnd_;
-            if (current < dragTextStart) {
+            if (current < dragTextStart && !isCopy) {
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->InsertValue(str);
-            } else if (current > dragTextEnd) {
+            } else if (current > dragTextEnd && !isCopy) {
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->selectController_->UpdateCaretIndex(current - (dragTextEnd - dragTextStart));
+                pattern->InsertValue(str);
+            } else if (isCopy) {
                 pattern->InsertValue(str);
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
-        FocusHub::LostFocusToViewRoot();
+        pattern->needSelect_ = isMouseOrTouchPad(pattern->sourceTool_);
+        pattern->releaseInDrop_ = true;
     };
 }
 
@@ -2317,7 +2359,9 @@ void TextFieldPattern::InitDragDropCallBack()
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
-        FocusHub::LostFocusToViewRoot();
+        if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
+            pattern->needSelect_ = true;
+        }
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 

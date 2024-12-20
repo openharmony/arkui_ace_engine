@@ -256,9 +256,17 @@ public:
         return false;
     }
     static std::u16string ConvertStr8toStr16(const std::string& value);
+    static bool isMouseOrTouchPad(SourceTool sourceTool)
+    {
+        return (sourceTool == SourceTool::MOUSE || sourceTool == SourceTool::TOUCHPAD);
+    }
+
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
+    bool needSelect_ = false;
+    bool releaseInDrop_ = false;
+    SourceTool sourceTool_ = SourceTool::UNKNOWN;
     std::vector<std::u16string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     RectF contentRect_;

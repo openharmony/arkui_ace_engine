@@ -1260,10 +1260,10 @@ private:
     RectF GetSelectArea();
     void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
-    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void DeleteForward(int32_t currentPosition, int32_t length);
     int32_t HandleOnDragDeleteForward();
-    void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect);
+    void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect, bool isCopy = false);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
     void HandleOnDragInsertValueOperation(const std::string& insertValue);
@@ -1287,11 +1287,11 @@ private:
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
     void CompleteStyledString(RefPtr<SpanString>& spanString);
     void InsertStyledStringByPaste(const RefPtr<SpanString>& spanString);
-    void HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString);
+    void HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy = false);
     void AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans);
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     void HandleOnCopyStyledString();
-    void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
@@ -1334,6 +1334,7 @@ private:
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
     void SetMagnifierLocalOffset(Offset localOffset);
+    void UpdateSelectionAndHandleVisibility();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1366,6 +1367,8 @@ private:
     bool isOnlyRequestFocus_ = false;
 
     int32_t moveLength_ = 0;
+    int32_t insertValueLength_ = 0;
+    int32_t lastCaretPosition_ = 0;
     int32_t caretPosition_ = 0;
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
