@@ -28,11 +28,11 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1904,45 +1904,6 @@ void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bo
     }
 }
 
-void NavigationPattern::CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode)
-{
-    auto dragBarNode = FrameNode::GetOrCreateFrameNode("DragBar", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<NavigationDragBarPattern>(); });
-    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
-    CHECK_NULL_VOID(dragBarLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto renderContext = dragBarNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackBlurRadius(DRAG_BAR_BLUR_RADIUS);
-    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_RADIUS));
-    renderContext->UpdateZIndex(1);
-    dragBarNode->MarkModifyDone();
-    auto dragBarItem = CreateDragBarItemNode();
-    dragBarItem->MountToParent(dragBarNode);
-    dragBarNode->MountToParent(navigationGroupNode);
-    navigationGroupNode->SetDragBarNode(dragBarNode);
-
-    auto dragBarPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
-    CHECK_NULL_VOID(dragBarPattern);
-    dragBarPattern->UpdateDefaultColor();
-}
-
-RefPtr<FrameNode> NavigationPattern::CreateDragBarItemNode()
-{
-    auto dragBarItemNode = FrameNode::GetOrCreateFrameNode("DragBarItem",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto dragBarItemLayoutProperty = dragBarItemNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(dragBarItemLayoutProperty, nullptr);
-    dragBarItemLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    auto renderContext = dragBarItemNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateZIndex(SECOND_ZINDEX_VALUE);
-    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_ITEM_RADIUS));
-    dragBarItemNode->MarkModifyDone();
-    return dragBarItemNode;
-}
-
 void NavigationPattern::DumpInfo()
 {
     if (!navigationStack_) {
@@ -2948,6 +2909,45 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
     FollowStdNavdestinationAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
 }
 
+void NavigationPattern::CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode)
+{
+    auto dragBarNode = FrameNode::GetOrCreateFrameNode("DragBar", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationDragBarPattern>(); });
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarLayoutProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = dragBarNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurRadius(DRAG_BAR_BLUR_RADIUS);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_RADIUS));
+    renderContext->UpdateZIndex(1);
+    dragBarNode->MarkModifyDone();
+    auto dragBarItem = CreateDragBarItemNode();
+    dragBarItem->MountToParent(dragBarNode);
+    dragBarNode->MountToParent(navigationGroupNode);
+    navigationGroupNode->SetDragBarNode(dragBarNode);
+
+    auto dragBarPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    CHECK_NULL_VOID(dragBarPattern);
+    dragBarPattern->UpdateDefaultColor();
+}
+
+RefPtr<FrameNode> NavigationPattern::CreateDragBarItemNode()
+{
+    auto dragBarItemNode = FrameNode::GetOrCreateFrameNode("DragBarItem",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto dragBarItemLayoutProperty = dragBarItemNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(dragBarItemLayoutProperty, nullptr);
+    dragBarItemLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    auto renderContext = dragBarItemNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateZIndex(SECOND_ZINDEX_VALUE);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_ITEM_RADIUS));
+    dragBarItemNode->MarkModifyDone();
+    return dragBarItemNode;
+}
+
 RefPtr<NavigationTransitionProxy> NavigationPattern::GetProxyById(uint64_t id) const
 {
     for (auto proxy : proxyList_) {
@@ -2966,21 +2966,6 @@ void NavigationPattern::RemoveProxyById(uint64_t id)
             return;
         }
     }
-}
-
-void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)
-{
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(node);
-    CHECK_NULL_VOID(navigationNode);
-    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    if (!NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty)) {
-        return;
-    }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation height is auto, content need to measure after pushAnimation ends");
-    auto contentNode = navigationNode->GetContentNode();
-    CHECK_NULL_VOID(contentNode);
-    contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavigationPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -3048,5 +3033,20 @@ void NavigationPattern::HandleTouchUp()
     gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
     dividerNode->GetRenderContext()->UpdateLinearGradient(gradient);
     dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+}
+
+void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+    if (!NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty)) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation height is auto, content need to measure after pushAnimation ends");
+    auto contentNode = navigationNode->GetContentNode();
+    CHECK_NULL_VOID(contentNode);
+    contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

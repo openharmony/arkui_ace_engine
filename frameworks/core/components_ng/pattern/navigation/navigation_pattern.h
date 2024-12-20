@@ -198,9 +198,6 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
-    void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
-    RefPtr<FrameNode> CreateDragBarItemNode();
-
     void OnColorConfigurationUpdate() override;
     void AddDragBarHotZoneRect();
 
@@ -541,6 +538,9 @@ private:
         NavigationTransition navigationTransition);
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
 
+    void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    RefPtr<FrameNode> CreateDragBarItemNode();
+
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -575,10 +575,10 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
 #if defined(ENABLE_NAV_SPLIT_MODE)
     bool isBackPage_ = false;
 #endif
-    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;

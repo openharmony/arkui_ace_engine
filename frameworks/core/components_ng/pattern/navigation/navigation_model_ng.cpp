@@ -1374,11 +1374,11 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     titleBarNode->AddChild(backButtonNode, 0);
 }
 
-void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
+void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
     DeviceType deviceType = SystemProperties::GetDeviceType();
     if (deviceType == DeviceType::TWO_IN_ONE) {
@@ -1387,11 +1387,11 @@ void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
     pattern->SetEnableDragBar(enableDragBar);
 }
 
-void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
+void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
 {
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
     DeviceType deviceType = SystemProperties::GetDeviceType();
     if (deviceType == DeviceType::TWO_IN_ONE) {

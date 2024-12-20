@@ -832,17 +832,6 @@ void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
     NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }
 
-void JSNavigation::SetEnableDragBar(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsBoolean()) {
-        // the default value of navigation's drag bar is false
-        NavigationModel::GetInstance()->SetEnableDragBar(false);
-        return;
-    }
-    auto enableDragBar = info[0]->ToBoolean();
-    NavigationModel::GetInstance()->SetEnableDragBar(enableDragBar);
-}
-
 void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)
 {
     RefPtr<SystemBarStyle> style = nullptr;
@@ -854,5 +843,16 @@ void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)
         }
     }
     NavigationModel::GetInstance()->SetSystemBarStyle(style);
+}
+
+void JSNavigation::SetEnableDragBar(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navigation's drag bar is false
+        NavigationModel::GetInstance()->SetEnableDragBar(false);
+        return;
+    }
+    auto enableDragBar = info[0]->ToBoolean();
+    NavigationModel::GetInstance()->SetEnableDragBar(enableDragBar);
 }
 } // namespace OHOS::Ace::Framework
