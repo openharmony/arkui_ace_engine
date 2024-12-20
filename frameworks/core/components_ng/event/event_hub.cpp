@@ -115,12 +115,26 @@ void EventHub::PostEnabledTask()
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto eventHub = weak.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
-        }, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)]() {
+        auto eventHub = weak.Upgrade();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
+    };
+    if (!host->IsOnMainTree()) {
+        enabledFunc_ = callback;
+        return;
+    }
+    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
+}
+
+void EventHub::FireEnabledTask()
+{
+    if (enabledFunc_) {
+        enabledFunc_();
+        enabledFunc_ = nullptr;
+    }
 }
 
 void EventHub::MarkModifyDone()

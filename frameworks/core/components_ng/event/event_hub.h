@@ -241,6 +241,7 @@ public:
     bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
     void PostEnabledTask();
+    void FireEnabledTask();
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
     void RemoveInnerOnAreaChangedCallback(int32_t id);
     void ClearOnAreaChangedInnerCallbacks();
@@ -342,6 +343,7 @@ private:
     VisibleCallbackInfo throttledVisibleAreaCallback_;
     std::function<void()> ndkDrawCompletedCallback_;
     std::function<void()> ndkLayoutCallback_;
+    std::function<void()> enabledFunc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };
