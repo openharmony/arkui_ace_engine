@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
-#include "base/perfmonitor/perf_constants.h"
 #include "base/log/log_wrapper.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
