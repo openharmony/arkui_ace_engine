@@ -3549,8 +3549,8 @@ function __Button__setButtonProperties(u3, v3, w3) {
         if (!event) {
             return;
         }
-        if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER)
-            && event.type === KeyType.Down) {
+        if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) && 
+            event.type === KeyType.Down) {
             if (buttonOptions.action) {
                 buttonOptions.action();
             }
