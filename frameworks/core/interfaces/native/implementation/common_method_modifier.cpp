@@ -1076,15 +1076,6 @@ NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
     return NG::LinearGradientBlurPara(blurRadius, fractionStops, direction);
 }
 template<>
-    void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src)
-{
-    switch (src) {
-        case ARK_BLEND_APPLY_TYPE_FAST: dst = BlendApplyType::FAST; break;
-        case ARK_BLEND_APPLY_TYPE_OFFSCREEN: dst = BlendApplyType::OFFSCREEN; break;
-        default: dst.reset(); // Handle unexpected values by resetting the optional
-    }
-}
-template<>
 void AssignCast(std::optional<Matrix4>& dst, const Ark_CustomObject& src)
 {
     LOGE("This converter is created for testing purposes only. Custom objects are not supported.");
@@ -2486,8 +2477,12 @@ void OnAttachImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnAttach(frameNode, convValue);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onAttach = [arkCallback = CallbackHelper(*value), node = weakNode]() {
+        PipelineContext::SetCallBackNode(node);
+        arkCallback.Invoke();
+    };
+    ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
 void OnDetachImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -2495,8 +2490,12 @@ void OnDetachImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDetach(frameNode, convValue);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onDetach = [arkCallback = CallbackHelper(*value), node = weakNode]() {
+        PipelineContext::SetCallBackNode(node);
+        arkCallback.Invoke();
+    };
+    ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
 void OnAreaChangeImpl(Ark_NativePointer node,
                       const Callback_Area_Area_Void* value)
@@ -3381,7 +3380,7 @@ void MonopolizeEventsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetMonopolizeEvents(frameNode, convValue);
+    ViewAbstract::SetMonopolizeEvents(frameNode, convValue);
 }
 void OnTouchInterceptImpl(Ark_NativePointer node,
                           const Callback_TouchEvent_HitTestMode* value)
@@ -3655,9 +3654,23 @@ void DragPreviewOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetDragPreviewOptions(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto previewOption = Converter::Convert<DragPreviewOption>(*value);
+    auto optionsOpt = options ? Converter::OptConvert<Ark_DragInteractionOptions>(*options) : std::nullopt;
+    if (optionsOpt) {
+        auto defaultAnimationBeforeLifting = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().defaultAnimationBeforeLifting);
+        if (defaultAnimationBeforeLifting) {
+            previewOption.defaultAnimationBeforeLifting = defaultAnimationBeforeLifting.value();
+        }
+        auto isMultiSelectionEnabled = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().isMultiSelectionEnabled);
+        if (isMultiSelectionEnabled) {
+            previewOption.isMultiSelectionEnabled = isMultiSelectionEnabled.value();
+        }
+    }
+    LOGE("CommonMethodModifier::DragPreviewOptionsImpl Ark_ImageModifier is not supported yet.");
+    ViewAbstract::SetDragPreviewOptions(frameNode, previewOption);
 }
 void OverlayImpl(Ark_NativePointer node,
                  const Ark_Union_String_CustomBuilder_ComponentContent* value,
@@ -3695,9 +3708,24 @@ void AdvancedBlendModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(effect);
-    //auto convValue = Converter::OptConvert<type>(effect); // for enums
-    //CommonMethodModelNG::SetAdvancedBlendMode(frameNode, convValue);
+    CHECK_NULL_VOID(effect);
+    BlendMode blendMode = BlendMode::NONE;
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    Converter::VisitUnion(*effect,
+        [&blendMode, &blendApplyType, frameNode](const Ark_BlendMode& value) {
+            blendMode = Converter::OptConvert<BlendMode>(value).value_or(blendMode);
+            blendApplyType = BlendApplyType::OFFSCREEN;
+            ViewAbstract::SetBlendMode(frameNode, blendMode);
+        },
+        [](const Ark_Blender& value) {
+            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_Blender is not supported yet.");
+        },
+        []() {}
+    );
+    std::optional<BlendApplyType> blendApplyTypeOpt = type ?
+        Converter::OptConvert<BlendApplyType>(*type) : std::nullopt;
+    blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
+    ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
 }
 void BindPopupImpl(Ark_NativePointer node,
                    Ark_Boolean show,
@@ -3825,9 +3853,33 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetKeyboardShortcut(frameNode, convValue);
+    if (!value || !keys) {
+        ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+        return;
+    }
+    auto strValue = Converter::OptConvert<std::string>(*value);
+    if (!strValue.has_value() || strValue.value().size() != 1) {
+        ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+        return;
+    }
+    auto keysOptVect = Converter::Convert<std::vector<std::optional<ModifierKey>>>(*keys);
+    std::vector<ModifierKey> keysVect(keysOptVect.size());
+    for (auto item : keysOptVect) {
+        if (item.has_value()) {
+            keysVect.emplace_back(item.value());
+        }
+    }
+    auto actionOpt = action ? Converter::OptConvert<Callback_Void>(*action) : std::nullopt;
+    if (actionOpt) {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        auto onKeyboardShortcutAction = [arkCallback = CallbackHelper(actionOpt.value()), node = weakNode]() {
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.Invoke();
+        };
+        ViewAbstract::SetKeyboardShortcut(frameNode, strValue.value(), keysVect, std::move(onKeyboardShortcutAction));
+        return;
+    }
+    ViewAbstract::SetKeyboardShortcut(frameNode, strValue.value(), keysVect, nullptr);
 }
 } // CommonMethodModifier
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()

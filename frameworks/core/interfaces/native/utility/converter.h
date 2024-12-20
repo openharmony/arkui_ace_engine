@@ -413,6 +413,7 @@ namespace Converter {
     template<> Dimension Convert(const Ark_Length& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> DimensionRect Convert(const Ark_Rectangle &src);
+    template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
@@ -509,6 +510,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
+    template<> void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src);
     template<> void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src);
@@ -529,6 +531,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
+    template<> void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
     template<> void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src);
@@ -561,6 +564,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src);
     template<> void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src);
     template<> void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src);
+    template<> void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
     template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
@@ -587,6 +591,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
     template<> void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src);
     template<> void AssignCast(std::optional<SslError>& dst, const Ark_SslError& src);
+    template<> void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src);
     template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
     template<> void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
