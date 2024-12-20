@@ -169,7 +169,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
         FailCallback(src.GetKey(), "Failed to create image loader.", sync);
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
         FailCallback(src.GetKey(), "Failed to load image data", sync);
