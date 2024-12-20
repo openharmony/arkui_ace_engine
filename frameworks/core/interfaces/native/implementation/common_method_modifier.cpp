@@ -1410,7 +1410,7 @@ void OnChildTouchTestImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnChildTouchTest(frameNode, convValue);
+    LOGE("ARKOALA: CommonMethod::OnChildTouchTestImpl: Callbacks with return values are not supported.");
 }
 void LayoutWeightImpl(Ark_NativePointer node,
                       const Ark_Union_Number_String* value)
@@ -1446,8 +1446,21 @@ void SafeAreaPaddingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSafeAreaPadding(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_Padding& value) {
+            auto convValue = Converter::Convert<PaddingProperty>(value);
+            ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+        },
+        [frameNode](const Ark_LocalizedPadding& value) {
+            auto convValue = Converter::Convert<PaddingProperty>(value);
+             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+        },
+        [frameNode](const Ark_LengthMetrics& value) {
+            auto convValue = Converter::Convert<CalcLength>(value);
+             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
+        },
+        []() {}
+    );
 }
 void MarginImpl(Ark_NativePointer node,
                 const Ark_Union_Margin_Length_LocalizedMargin* value)
