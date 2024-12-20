@@ -346,6 +346,7 @@ enum class PropertyInfo {
     HALFLEADING,
     VARIABLE_FONT_WEIGHT,
     ENABLE_VARIABLE_FONT_WEIGHT,
+    BACKGROUNDCOLOR,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {

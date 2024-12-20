@@ -40,6 +40,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -1546,5 +1547,68 @@ void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
 JSRef<JSObject>& JSExtSpan::GetJsExtSpanObject()
 {
     return extSpanObj_;
+}
+
+void JSBackgroundColorSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSBackgroundColorSpan>::Declare("BackgroundColorStyle");
+    JSClass<JSBackgroundColorSpan>::CustomProperty(
+        "textBackgroundStyle", &JSBackgroundColorSpan::GetBackgroundColor, &JSBackgroundColorSpan::SetBackgroundColor);
+    JSClass<JSBackgroundColorSpan>::Bind(
+        globalObj, JSBackgroundColorSpan::Constructor, JSBackgroundColorSpan::Destructor);
+}
+
+void JSBackgroundColorSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto backgroundColor = Referenced::MakeRefPtr<JSBackgroundColorSpan>();
+    CHECK_NULL_VOID(backgroundColor);
+    backgroundColor->IncRefCount();
+    RefPtr<BackgroundColorSpan> span;
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        span = AceType::MakeRefPtr<BackgroundColorSpan>();
+    } else {
+        span = JSBackgroundColorSpan::ParseJSBackgroundColorSpan(args);
+    }
+    CHECK_NULL_VOID(span);
+    backgroundColor->backgroundColorSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(backgroundColor));
+}
+
+void JSBackgroundColorSpan::Destructor(JSBackgroundColorSpan* backgroundColor)
+{
+    if (backgroundColor != nullptr) {
+        backgroundColor->DecRefCount();
+    }
+}
+
+RefPtr<BackgroundColorSpan> JSBackgroundColorSpan::ParseJSBackgroundColorSpan(const JSCallbackInfo& info)
+{
+    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(info);
+    return AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundValue);
+}
+
+void JSBackgroundColorSpan::GetBackgroundColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(backgroundColorSpan_);
+    auto backgroundColorStyle = backgroundColorSpan_->GetBackgroundColor();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> backgroundColorObj = objectTemplate->NewInstance();
+    backgroundColorObj->SetProperty<std::string>("color", backgroundColorStyle.backgroundColor->ColorToString());
+    backgroundColorObj->SetProperty<std::string>(
+        "BorderRadiusProperty", backgroundColorStyle.backgroundRadius->ToString());
+    info.SetReturnValue(backgroundColorObj);
+}
+
+void JSBackgroundColorSpan::SetBackgroundColor(const JSCallbackInfo& info) {};
+
+RefPtr<BackgroundColorSpan>& JSBackgroundColorSpan::GetBackgroundColorSpan()
+{
+    return backgroundColorSpan_;
+}
+
+void JSBackgroundColorSpan::SetBackgroundColorSpan(const RefPtr<BackgroundColorSpan>& backgroundColorSpan)
+{
+    backgroundColorSpan_ = backgroundColorSpan;
 }
 } // namespace OHOS::Ace::Framework

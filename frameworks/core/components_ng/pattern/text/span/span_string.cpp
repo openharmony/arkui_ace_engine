@@ -157,6 +157,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
 void SpanString::ApplyToSpans(
     const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation)
 {
+    SetGroupId(span);
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto intersection = (*it)->GetIntersectionInterval(interval);
         if (!intersection) {
@@ -532,6 +533,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<LineHeightSpan>();
         case SpanType::ExtSpan:
             return MakeRefPtr<ExtSpan>();
+        case SpanType::BackgroundColor:
+            return MakeRefPtr<BackgroundColorSpan>();
         default:
             return nullptr;
     }
@@ -592,6 +595,14 @@ void SpanString::SetString(const std::string& text)
     text_ = text;
 }
 
+void SpanString::SetGroupId(const RefPtr<SpanBase>& span)
+{
+    if (span->GetSpanType() == SpanType::BackgroundColor) {
+        auto backgroundColorSpan = DynamicCast<BackgroundColorSpan>(span);
+        CHECK_NULL_VOID(backgroundColorSpan);
+        backgroundColorSpan->SetBackgroundColorGroupId(groupId_++);
+    }
+}
 void SpanString::SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems)
 {
     spans_ = spanItems;
