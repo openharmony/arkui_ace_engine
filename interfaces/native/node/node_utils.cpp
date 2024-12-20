@@ -357,7 +357,7 @@ ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildren
         LOGF("ActiveChildrenInfo is nullptr");
         abort();
     }
-     if (index < handle->nodeCount && index >= 0) {
+    if (index < handle->nodeCount && index >= 0) {
         return handle->nodeList[index];
     }
     return nullptr;
