@@ -1237,6 +1237,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
+    eventHub_->FireEnabledTask();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
 
