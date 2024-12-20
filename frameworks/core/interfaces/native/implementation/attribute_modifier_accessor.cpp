@@ -68,4 +68,7 @@ const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor()
     return &AttributeModifierAccessorImpl;
 }
 
+struct AttributeModifierPeer {
+    virtual ~AttributeModifierPeer() = default;
+};
 }

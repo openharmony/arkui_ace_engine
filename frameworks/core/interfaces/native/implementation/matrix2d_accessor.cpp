@@ -242,4 +242,7 @@ const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
     return &Matrix2DAccessorImpl;
 }
 
+struct Matrix2DPeer {
+    virtual ~Matrix2DPeer() = default;
+};
 }

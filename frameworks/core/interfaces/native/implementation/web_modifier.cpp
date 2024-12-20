@@ -1767,7 +1767,7 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_WebElementType elementType,
-                           const Callback_Any* content,
+                           const CustomNodeBuilder* content,
                            Ark_WebResponseType responseType,
                            const Opt_SelectionMenuOptionsExt* options)
 {

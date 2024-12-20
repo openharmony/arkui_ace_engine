@@ -151,4 +151,7 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
     return &UIExtensionProxyAccessorImpl;
 }
 
+struct UIExtensionProxyPeer {
+    virtual ~UIExtensionProxyPeer() = default;
+};
 }

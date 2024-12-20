@@ -67,4 +67,7 @@ const GENERATED_ArkUIScreenCaptureHandlerAccessor* GetScreenCaptureHandlerAccess
     return &ScreenCaptureHandlerAccessorImpl;
 }
 
+struct ScreenCaptureHandlerPeer {
+    virtual ~ScreenCaptureHandlerPeer() = default;
+};
 }

@@ -199,4 +199,7 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
     return &XComponentControllerAccessorImpl;
 }
 
+struct XComponentControllerPeer {
+    virtual ~XComponentControllerPeer() = default;
+};
 }

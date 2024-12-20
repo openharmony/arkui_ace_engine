@@ -78,4 +78,7 @@ const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccess
     return &TextEditControllerExAccessorImpl;
 }
 
+struct TextEditControllerExPeer {
+    virtual ~TextEditControllerExPeer() = default;
+};
 }

@@ -58,4 +58,7 @@ const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor
     return &TextClockControllerAccessorImpl;
 }
 
+struct TextClockControllerPeer {
+    virtual ~TextClockControllerPeer() = default;
+};
 }

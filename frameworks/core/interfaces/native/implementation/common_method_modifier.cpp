@@ -1128,9 +1128,9 @@ void AssignCast(std::optional<ClickEffectLevel>& dst, const Ark_ClickEffectLevel
         std::optional<ClickEffectLevel>(arkVal);
 }
 template<>
-void AssignCast(std::optional<DragDropInfo>& dst, const Callback_Any& src)
+void AssignCast(std::optional<DragDropInfo>& dst, const CustomNodeBuilder& src)
 {
-    LOGE("ARKOALA: Convert to [DragDropInfo] from [Callback_Any] is not supported\n");
+    LOGE("ARKOALA: Convert to [DragDropInfo] from [CustomNodeBuilder] is not supported\n");
 }
 template<>
 void AssignCast(std::optional<DragDropInfo>& dst, const Ark_DragItemInfo& src)
@@ -3259,7 +3259,7 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
     ViewAbstractModelNG::SetAccessibilityImportance(frameNode, convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
-                                  const Callback_Any* value)
+                                  const CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3447,7 +3447,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 void BackgroundImpl(Ark_NativePointer node,
-                    const Callback_Any* builder,
+                    const CustomNodeBuilder* builder,
                     const Opt_Literal_Alignment_align* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3731,7 +3731,7 @@ void BindMenu1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindMenu1(frameNode, convValue);
 }
 void BindContextMenu0Impl(Ark_NativePointer node,
-                          const Callback_Any* content,
+                          const CustomNodeBuilder* content,
                           Ark_ResponseType responseType,
                           const Opt_ContextMenuOptions* options)
 {
@@ -3743,7 +3743,7 @@ void BindContextMenu0Impl(Ark_NativePointer node,
 }
 void BindContextMenu1Impl(Ark_NativePointer node,
                           Ark_Boolean isShown,
-                          const Callback_Any* content,
+                          const CustomNodeBuilder* content,
                           const Opt_ContextMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3754,7 +3754,7 @@ void BindContextMenu1Impl(Ark_NativePointer node,
 }
 void BindContentCover0Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,
-                           const Callback_Any* builder,
+                           const CustomNodeBuilder* builder,
                            const Opt_ModalTransition* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3765,7 +3765,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
 }
 void BindContentCover1Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,
-                           const Callback_Any* builder,
+                           const CustomNodeBuilder* builder,
                            const Opt_ContentCoverOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3776,7 +3776,7 @@ void BindContentCover1Impl(Ark_NativePointer node,
 }
 void BindSheetImpl(Ark_NativePointer node,
                    const Opt_Boolean* isShow,
-                   const Callback_Any* builder,
+                   const CustomNodeBuilder* builder,
                    const Opt_SheetOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

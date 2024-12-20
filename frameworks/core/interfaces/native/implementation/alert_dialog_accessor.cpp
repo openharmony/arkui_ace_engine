@@ -47,4 +47,7 @@ const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
     return &AlertDialogAccessorImpl;
 }
 
+struct AlertDialogPeer {
+    virtual ~AlertDialogPeer() = default;
+};
 }

@@ -47,4 +47,7 @@ const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
     return &DatePickerDialogAccessorImpl;
 }
 
+struct DatePickerDialogPeer {
+    virtual ~DatePickerDialogPeer() = default;
+};
 }

@@ -17,39 +17,43 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct PixelMapMockPeer {};
+struct UnifiedDataPeer {
+    virtual ~UnifiedDataPeer() = default;
+};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace PixelMapMockAccessor {
-void DestroyPeerImpl(PixelMapMockPeer* peer)
+namespace UnifiedDataAccessor {
+void DestroyPeerImpl(UnifiedDataPeer* peer)
 {
     delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
-    return new PixelMapMockPeer();
+    return new UnifiedDataPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void ReleaseImpl(PixelMapMockPeer* peer)
+Ark_Boolean HasTypeImpl(UnifiedDataPeer* peer,
+                        const Ark_String* type)
 {
-    // do nothing
+    return 0;
 }
-} // PixelMapMockAccessor
-const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor()
+void GetTypesImpl(UnifiedDataPeer* peer)
 {
-    static const GENERATED_ArkUIPixelMapMockAccessor PixelMapMockAccessorImpl {
-        PixelMapMockAccessor::DestroyPeerImpl,
-        PixelMapMockAccessor::CtorImpl,
-        PixelMapMockAccessor::GetFinalizerImpl,
-        PixelMapMockAccessor::ReleaseImpl,
+}
+} // UnifiedDataAccessor
+const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor()
+{
+    static const GENERATED_ArkUIUnifiedDataAccessor UnifiedDataAccessorImpl {
+        UnifiedDataAccessor::DestroyPeerImpl,
+        UnifiedDataAccessor::CtorImpl,
+        UnifiedDataAccessor::GetFinalizerImpl,
+        UnifiedDataAccessor::HasTypeImpl,
+        UnifiedDataAccessor::GetTypesImpl,
     };
-    return &PixelMapMockAccessorImpl;
+    return &UnifiedDataAccessorImpl;
 }
 
-struct PixelMapMockPeer {
-    virtual ~PixelMapMockPeer() = default;
-};
 }

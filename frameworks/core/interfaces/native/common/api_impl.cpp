@@ -74,6 +74,10 @@ void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle nodePtr, Ark_Int32 
 {
 }
 
+void SetCustomNodeDestroyCallback(void (*destroy)(Ark_NodeHandle nodeId))
+{
+}
+
 Ark_NodeHandle GetNodeByViewStack()
 {
     auto node = ViewStackProcessor::GetInstance()->Finish();

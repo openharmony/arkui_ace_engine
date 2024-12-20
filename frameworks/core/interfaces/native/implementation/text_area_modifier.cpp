@@ -605,7 +605,7 @@ void ShowCounterImpl(Ark_NativePointer node,
     TextFieldModelNG::SetShowCounter(frameNode, showCounter);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Callback_Any* value,
+                        const CustomNodeBuilder* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

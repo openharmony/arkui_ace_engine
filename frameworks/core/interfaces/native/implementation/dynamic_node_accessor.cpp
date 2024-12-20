@@ -48,4 +48,7 @@ const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor()
     return &DynamicNodeAccessorImpl;
 }
 
+struct DynamicNodePeer {
+    virtual ~DynamicNodePeer() = default;
+};
 }

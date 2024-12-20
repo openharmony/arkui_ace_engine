@@ -234,6 +234,10 @@ void onPreDragImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void accessibilityVirtualNodeImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onGestureJudgeBeginImpl(Ark_Int32 nodeId,
                              const Ark_GestureInfo gestureInfo,
                              const Ark_BaseGestureEvent event)
@@ -268,6 +272,30 @@ void onTouchInterceptImpl(Ark_Int32 nodeId,
 void onSizeChangeImpl(Ark_Int32 nodeId,
                       const Ark_SizeOptions oldValue,
                       const Ark_SizeOptions newValue)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void backgroundImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void bindContextMenu0Impl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void bindContextMenu1Impl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void bindContentCover0Impl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void bindContentCover1Impl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void bindSheetImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -365,6 +393,12 @@ void onUninstallImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onLoadImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+}
+namespace Gauge {
+void descriptionImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -822,6 +856,14 @@ void onCopyImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void bindSelectionMenuImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void customKeyboardImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace RichText {
 void onStartImpl(Ark_Int32 nodeId)
@@ -940,6 +982,10 @@ void onWillDeleteImpl(Ark_Int32 nodeId,
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
                      const Ark_DeleteValue parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void customKeyboardImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1094,6 +1140,10 @@ void onTextSelectionChangeImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void bindSelectionMenuImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace TextArea {
 void onSubmit0Impl(Ark_Int32 nodeId,
@@ -1166,6 +1216,10 @@ void onDidDeleteImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void customKeyboardImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace TextClock {
 void onDateChangeImpl(Ark_Int32 nodeId,
@@ -1225,6 +1279,10 @@ void onPasteImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void showUnitImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onSecurityStateChangeImpl(Ark_Int32 nodeId,
                                const Ark_Boolean parameter)
 {
@@ -1247,6 +1305,10 @@ void onWillDeleteImpl(Ark_Int32 nodeId,
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
                      const Ark_DeleteValue parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void customKeyboardImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1653,6 +1715,10 @@ void onAdsBlockedImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void bindSelectionMenuImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace XComponent {
 void onLoadImpl(Ark_Int32 nodeId,
@@ -1816,12 +1882,19 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onDropImpl,
         CommonMethod::onDragEndImpl,
         CommonMethod::onPreDragImpl,
+        CommonMethod::accessibilityVirtualNodeImpl,
         CommonMethod::onGestureJudgeBeginImpl,
         CommonMethod::onGestureRecognizerJudgeBegin0Impl,
         CommonMethod::onGestureRecognizerJudgeBegin1Impl,
         CommonMethod::shouldBuiltInRecognizerParallelWithImpl,
         CommonMethod::onTouchInterceptImpl,
         CommonMethod::onSizeChangeImpl,
+        CommonMethod::backgroundImpl,
+        CommonMethod::bindContextMenu0Impl,
+        CommonMethod::bindContextMenu1Impl,
+        CommonMethod::bindContentCover0Impl,
+        CommonMethod::bindContentCover1Impl,
+        CommonMethod::bindSheetImpl,
         CommonMethod::onVisibleAreaChangeImpl,
     };
 
@@ -1885,6 +1958,14 @@ const GENERATED_ArkUIFormComponentEventsReceiver* GetFormComponentEventsReceiver
     };
 
     return &GENERATED_ArkUIFormComponentEventsReceiverImpl;
+}
+const GENERATED_ArkUIGaugeEventsReceiver* GetGaugeEventsReceiver()
+{
+    static const GENERATED_ArkUIGaugeEventsReceiver GENERATED_ArkUIGaugeEventsReceiverImpl {
+        Gauge::descriptionImpl,
+    };
+
+    return &GENERATED_ArkUIGaugeEventsReceiverImpl;
 }
 const GENERATED_ArkUIGridEventsReceiver* GetGridEventsReceiver()
 {
@@ -2111,6 +2192,8 @@ const GENERATED_ArkUIRichEditorEventsReceiver* GetRichEditorEventsReceiver()
         RichEditor::onDidChangeImpl,
         RichEditor::onCutImpl,
         RichEditor::onCopyImpl,
+        RichEditor::bindSelectionMenuImpl,
+        RichEditor::customKeyboardImpl,
     };
 
     return &GENERATED_ArkUIRichEditorEventsReceiverImpl;
@@ -2161,6 +2244,7 @@ const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
         Search::onDidInsertImpl,
         Search::onWillDeleteImpl,
         Search::onDidDeleteImpl,
+        Search::customKeyboardImpl,
     };
 
     return &GENERATED_ArkUISearchEventsReceiverImpl;
@@ -2241,6 +2325,7 @@ const GENERATED_ArkUITextEventsReceiver* GetTextEventsReceiver()
     static const GENERATED_ArkUITextEventsReceiver GENERATED_ArkUITextEventsReceiverImpl {
         Text::onCopyImpl,
         Text::onTextSelectionChangeImpl,
+        Text::bindSelectionMenuImpl,
     };
 
     return &GENERATED_ArkUITextEventsReceiverImpl;
@@ -2261,6 +2346,7 @@ const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver()
         TextArea::onDidInsertImpl,
         TextArea::onWillDeleteImpl,
         TextArea::onDidDeleteImpl,
+        TextArea::customKeyboardImpl,
     };
 
     return &GENERATED_ArkUITextAreaEventsReceiverImpl;
@@ -2285,11 +2371,13 @@ const GENERATED_ArkUITextInputEventsReceiver* GetTextInputEventsReceiver()
         TextInput::onCopyImpl,
         TextInput::onCutImpl,
         TextInput::onPasteImpl,
+        TextInput::showUnitImpl,
         TextInput::onSecurityStateChangeImpl,
         TextInput::onWillInsertImpl,
         TextInput::onDidInsertImpl,
         TextInput::onWillDeleteImpl,
         TextInput::onDidDeleteImpl,
+        TextInput::customKeyboardImpl,
     };
 
     return &GENERATED_ArkUITextInputEventsReceiverImpl;
@@ -2412,6 +2500,7 @@ const GENERATED_ArkUIWebEventsReceiver* GetWebEventsReceiver()
         Web::onViewportFitChangedImpl,
         Web::onInterceptKeyboardAttachImpl,
         Web::onAdsBlockedImpl,
+        Web::bindSelectionMenuImpl,
     };
 
     return &GENERATED_ArkUIWebEventsReceiverImpl;
@@ -2478,6 +2567,7 @@ const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
         GetEmbeddedComponentEventsReceiver,
         GetFolderStackEventsReceiver,
         GetFormComponentEventsReceiver,
+        GetGaugeEventsReceiver,
         GetGridEventsReceiver,
         GetGridItemEventsReceiver,
         GetGridRowEventsReceiver,

@@ -57,4 +57,7 @@ const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandler
     return &DataResubmissionHandlerAccessorImpl;
 }
 
+struct DataResubmissionHandlerPeer {
+    virtual ~DataResubmissionHandlerPeer() = default;
+};
 }

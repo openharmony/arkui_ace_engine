@@ -47,4 +47,7 @@ const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
     return &ActionSheetAccessorImpl;
 }
 
+struct ActionSheetPeer {
+    virtual ~ActionSheetPeer() = default;
+};
 }

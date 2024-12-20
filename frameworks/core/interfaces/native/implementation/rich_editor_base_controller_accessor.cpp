@@ -187,4 +187,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
     return &RichEditorBaseControllerAccessorImpl;
 }
 
+struct RichEditorBaseControllerPeer {
+    virtual ~RichEditorBaseControllerPeer() = default;
+};
 }

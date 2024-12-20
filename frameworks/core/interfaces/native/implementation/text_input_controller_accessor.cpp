@@ -82,4 +82,7 @@ const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor
     return &TextInputControllerAccessorImpl;
 }
 
+struct TextInputControllerPeer {
+    virtual ~TextInputControllerPeer() = default;
+};
 }

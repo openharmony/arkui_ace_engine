@@ -540,12 +540,12 @@ void MarshallingImpl(const Ark_StyledString* styledString)
     auto data = tlvData.data();
     LOGE("StyledStringAccessor::MarshallingImpl - return value need to be supported");
 }
-void UnmarshallingImpl(Ark_Buffer buffer,
+void UnmarshallingImpl(const Ark_Buffer* buffer,
                        const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(outputArgumentForReturningPromise);
     std::vector<std::string> errorsStr;
-    auto str = Converter::Convert<std::string>(buffer);
+    auto str = Converter::Convert<std::string>(*buffer);
     std::vector<uint8_t> vec(str.begin(), str.end());
     auto spanString = SpanString::DecodeTlv(vec);
     StyledStringPeer *peer = new StyledStringPeer();
@@ -584,4 +584,7 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
     return &StyledStringAccessorImpl;
 }
 
+struct StyledStringPeer {
+    virtual ~StyledStringPeer() = default;
+};
 }

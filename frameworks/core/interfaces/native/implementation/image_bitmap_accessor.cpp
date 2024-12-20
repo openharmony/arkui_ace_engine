@@ -72,4 +72,7 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
     return &ImageBitmapAccessorImpl;
 }
 
+struct ImageBitmapPeer {
+    virtual ~ImageBitmapPeer() = default;
+};
 }
