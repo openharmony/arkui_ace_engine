@@ -127,6 +127,7 @@ if (is_arkui_x) {
       "$ace_root",
       "$ace_root/frameworks",
       "$ace_root/interfaces/native",
+      "$ace_root/interfaces/inner_api/ace_kit/include",
     ]
 
     sources = [

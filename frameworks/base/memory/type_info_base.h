@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_TYPE_INFO_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_TYPE_INFO_BASE_H
 
-#include "interfaces/inner_api/ace_kit/include/ui/base/type_info_base.h"
+#include "ui/base/type_info_base.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_TYPE_INFO_BASE_H
