@@ -373,7 +373,7 @@ bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
 
 void JSImage::JsBorder(const JSCallbackInfo& info)
 {
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         JSViewAbstract::JsBorder(info);
         ImageModel::GetInstance()->SetBackBorder();
         return;
@@ -507,7 +507,7 @@ void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableS
 
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 {
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         JSViewAbstract::JsBorderRadius(info);
         ImageModel::GetInstance()->SetBackBorder();
         return;
