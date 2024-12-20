@@ -14,6 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
+import { ProgressButtonColorOptions } from '@ohos.arkui.advanced.ProgressButton';
 
 const EMPTY_STRING: string = '';
 const MAX_PROGRESS: number = 100;
@@ -40,6 +41,7 @@ export struct ProgressButton {
   progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH;
   clickCallback: () => void = () => {};
   @Prop enable: boolean = true;
+  colorOptions: ProgressButtonColorOptions | undefined = undefined;
 
   @State progressColor: ResourceColor = '#330A59F7'
   @State containerBorderColor: ResourceColor = '#330A59F7'
@@ -98,14 +100,14 @@ export struct ProgressButton {
           .width('100%')
           .hoverEffect(HoverEffect.None)
           .clip(false)
-          .enabled(this.enable)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
-          .color(this.progressColor)
+          .color(this.colorOptions?.progressColor ? this.colorOptions?.progressColor : this.progressColor)
         Row() {
           Text(this.isLoading ? this.textProgress: this.content)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
             .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
+            .fontColor(this.colorOptions?.textColor)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .padding({ top: 4, left: 8, right: 8, bottom: 4})
@@ -122,7 +124,10 @@ export struct ProgressButton {
         Row()
           .key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY)
           .backgroundColor(Color.Transparent)
-          .border({ width: 1, color: this.containerBorderColor})
+          .border({
+            width: 1,
+            color: this.colorOptions?.borderColor ? this.colorOptions?.borderColor : this.containerBorderColor
+          })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
           .borderRadius(this.buttonBorderRadius)
@@ -133,7 +138,10 @@ export struct ProgressButton {
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
-    .backgroundColor(this.containerBackgroundColor)
+    .backgroundColor(
+      this.colorOptions?.backgroundColor
+        ? this.colorOptions?.backgroundColor
+        : this.containerBackgroundColor)
     .constraintSize({minWidth: 44})
     .padding({ top: 0, bottom: 0})
     .width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?
