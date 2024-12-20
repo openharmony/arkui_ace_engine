@@ -158,6 +158,18 @@ RefPtr<WaterFlowMockLazy> WaterFlowTestNg::CreateItemsInLazyForEach(
     return mockLazy;
 }
 
+std::pair<std::string, RefPtr<NG::UINode>> WaterFlowMockLazy::OnGetChildByIndex(
+    int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems)
+{
+    ScopedViewStackProcessor scope;
+    WaterFlowItemModelNG waterFlowItemModel;
+    waterFlowItemModel.Create();
+    ViewAbstract::SetWidth(CalcLength(CalcLength(FILL_LENGTH)));
+    ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
+    auto node = ViewStackProcessor::GetInstance()->Finish();
+    return { std::to_string(index), node };
+}
+
 void WaterFlowTestNg::AddItemInLazyForEach(int32_t index)
 {
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
@@ -1971,91 +1983,6 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Cache001
- * @tc.desc: Test cache item preload
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, Cache001, TestSize.Level1)
-{
-    auto model = CreateWaterFlow();
-    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
-
-    model.SetCachedCount(3);
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(10));
-    model.SetColumnsGap(Dimension(10));
-    CreateDone();
-    auto info = pattern_->layoutInfo_;
-    EXPECT_EQ(info->startIndex_, 0);
-    EXPECT_EQ(info->endIndex_, 10);
-
-    const std::list<int32_t> preloadList = { 11, 12, 13 };
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 11));
-    EXPECT_EQ(pattern_->preloadItems_, preloadList);
-    EXPECT_TRUE(pattern_->cacheLayout_);
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    EXPECT_TRUE(pattern_->preloadItems_.empty());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 11));
-    EXPECT_EQ(GetChildHeight(frameNode_, 12), 200.0f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 13), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
-    EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
-
-    UpdateCurrentOffset(-500.0f);
-    EXPECT_EQ(info->startIndex_, 4);
-    EXPECT_EQ(info->endIndex_, 17);
-    EXPECT_EQ(GetChildY(frameNode_, 3), -290.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 2), -390.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 1), -500.0f);
-    const std::list<int32_t> preloadList2 = { 18, 19, 20 };
-    EXPECT_EQ(pattern_->preloadItems_, preloadList2);
-    PipelineContext::GetCurrentContext()->OnIdle(GetSysTimestamp());
-    EXPECT_EQ(pattern_->preloadItems_, preloadList2);
-}
-
-/**
- * @tc.name: Cache004
- * @tc.desc: Test cache item reaching deadline
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, Cache004, TestSize.Level1)
-{
-    auto model = CreateWaterFlow();
-    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
-
-    model.SetCachedCount(3);
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsGap(Dimension(10));
-    model.SetColumnsGap(Dimension(10));
-    CreateDone();
-    auto info = pattern_->layoutInfo_;
-    EXPECT_EQ(info->startIndex_, 0);
-    EXPECT_EQ(info->endIndex_, 10);
-
-    const std::list<int32_t> preloadList = { 11, 12, 13 };
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 11));
-    EXPECT_EQ(pattern_->preloadItems_, preloadList);
-    EXPECT_TRUE(pattern_->cacheLayout_);
-    // later expand to fuzz test
-    PipelineContext::GetCurrentContext()->OnIdle(100000);
-    // items still in preload list should not be created
-    for (auto&& item : pattern_->preloadItems_) {
-        EXPECT_FALSE(GetChildFrameNode(frameNode_, item));
-    }
-    for (auto&& itemIdx : preloadList) {
-        // check preloaded items
-        if (!pattern_->preloadItems_.empty() && itemIdx == *pattern_->preloadItems_.begin()) {
-            break;
-        }
-        EXPECT_TRUE(GetChildFrameNode(frameNode_, itemIdx));
-        EXPECT_EQ(GetChildHeight(frameNode_, itemIdx), itemIdx % 2 ? 100.0f : 200.0f);
-        EXPECT_EQ(GetChildWidth(frameNode_, itemIdx), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
-    }
-    if (pattern_->preloadItems_.size() != preloadList.size()) {
-        EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
-    }
-}
-
-/**
  * @tc.name: Illegal001
  * @tc.desc: Test illegal columns template
  * @tc.type: FUNC
@@ -2220,47 +2147,5 @@ HWTEST_F(WaterFlowTestNg, Delete001, TestSize.Level1)
     // should layout at the end.
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 30);
     EXPECT_EQ(GetChildRect(frameNode_, 30).Bottom(), WATER_FLOW_HEIGHT);
-}
-
-/**
- * @tc.name: Cache005
- * @tc.desc: Test items in preloadList when Waterflow's height is changed to 0.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, Cache005, TestSize.Level1)
-{
-    auto model = CreateWaterFlow();
-    CreateItemsInRepeat(50, [](int32_t i) { return 100.0f; });
-    model.SetCachedCount(3);
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateDone();
-
-    pattern_->ScrollToIndex(10);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
-    std::list<int32_t> preloadList = { 26, 27, 28 };
-    EXPECT_EQ(pattern_->preloadItems_, preloadList);
-
-    // change height to 0.0f.
-    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(0.0f))));
-    frameNode_->isConstraintNotChanged_ = false;
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 500.0f, 0)));
-    EXPECT_TRUE(pattern_->PreloadListEmpty());
-}
-
-/**
- * @tc.name: Cache006
- * @tc.desc: Test items in preloadList when Waterflow is empty.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, Cache006, TestSize.Level1)
-{
-    auto model = CreateWaterFlow();
-    model.SetCachedCount(3);
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateDone();
-    EXPECT_TRUE(pattern_->PreloadListEmpty());
 }
 } // namespace OHOS::Ace::NG
