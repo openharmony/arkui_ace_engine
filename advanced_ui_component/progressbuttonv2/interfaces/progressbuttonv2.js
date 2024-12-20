@@ -50,6 +50,7 @@ export class ProgressButtonV2 extends ViewV2 {
     this.initParam("progressButtonWidth", (z && "progressButtonWidth" in z) ? z.progressButtonWidth : LengthMetrics.vp(BUTTON_NORMARL_WIDTH));
     this.initParam("onClicked", (z && "onClicked" in z) ? z.onClicked : () => { });
     this.initParam("enable", (z && "enable" in z) ? z.enable : true);
+    this.initParam("colorOptions", (z && "colorOptions" in z) ? z.colorOptions : undefined);
     this.progressColor = '#330A59F7';
     this.containerBorderColor = '#330A59F7';
     this.containerBackgroundColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
@@ -105,10 +106,12 @@ export class ProgressButtonV2 extends ViewV2 {
       Button.clip(false);
       Button.hoverEffect(HoverEffect.None);
       Button.key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY);
-      Button.backgroundColor(this.containerBackgroundColor);
+      Button.backgroundColor(this.colorOptions?.backgroundColor?.color
+        ? this.colorOptions?.backgroundColor?.color
+        : this.containerBackgroundColor);
       Button.padding({ top: 0, bottom: 0 });
       Button.width(this.toLengthString(this.progressButtonWidth));
-      Button.constraintSize({ minWidth: 44 });
+      Button.constraintSize({ minWidth: BUTTON_NORMARL_WIDTH });
       Button.stateEffect(this.enable);
       Button.onClick(() => {
         if (!this.enable) {
@@ -134,7 +137,7 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.clip(false);
       Progress.enabled(this.enable);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
-      Progress.color(this.progressColor);
+      Progress.color(this.colorOptions?.progressColor?.color ? this.colorOptions?.progressColor?.color : this.progressColor);
     }, Progress);
     this.observeComponentCreation2((o, p) => {
       Row.create();
@@ -145,6 +148,7 @@ export class ProgressButtonV2 extends ViewV2 {
       Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Text.fontWeight(FontWeight.Medium);
       Text.key(PROGRESS_BUTTON_PRIMARY_FONT_KEY);
+      Text.fontColor(this.colorOptions?.textColor?.color);
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.padding({ top: 4, left: 8, right: 8, bottom: 4 });
@@ -163,7 +167,10 @@ export class ProgressButtonV2 extends ViewV2 {
       Row.create();
       Row.key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY);
       Row.backgroundColor(Color.Transparent);
-      Row.border({ width: 1, color: this.containerBorderColor });
+      Row.border({
+        width: 1,
+        color: this.colorOptions?.borderColor?.color ? this.colorOptions?.borderColor?.color : this.containerBorderColor
+      });
       Row.height(this.textHeight);
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
       Row.borderRadius(this.buttonBorderRadius);
@@ -220,6 +227,9 @@ export class ProgressButtonV2 extends ViewV2 {
     if ("enable" in a) {
       this.updateParam("enable", a.enable);
     }
+    if ("colorOptions" in a) {
+      this.updateParam("colorOptions", a.colorOptions);
+    }
   }
   rerender() {
     this.updateDirtyElements();
@@ -248,6 +258,9 @@ __decorate([
   Param
 ], ProgressButtonV2.prototype, "enable", void 0);
 __decorate([
+    Param
+], ProgressButtonV2.prototype, "colorOptions", void 0);
+__decorate([
   Local
 ], ProgressButtonV2.prototype, "progressColor", void 0);
 __decorate([
@@ -268,5 +281,28 @@ __decorate([
 __decorate([
   Monitor('isLoading')
 ], ProgressButtonV2.prototype, "getLoadingProgress", null);
+let ProgressButtonV2Color = class ProgressButtonV2Color {
+    constructor(e) {
+        this.progressColor = e.progressColor;
+        this.borderColor = e.borderColor;
+        this.textColor = e.textColor;
+        this.backgroundColor = e.backgroundColor;
+    }
+};
+__decorate([
+    Trace
+], ProgressButtonV2Color.prototype, "progressColor", void 0);
+__decorate([
+    Trace
+], ProgressButtonV2Color.prototype, "borderColor", void 0);
+__decorate([
+    Trace
+], ProgressButtonV2Color.prototype, "textColor", void 0);
+__decorate([
+    Trace
+], ProgressButtonV2Color.prototype, "backgroundColor", void 0);
+ProgressButtonV2Color = __decorate([
+    ObservedV2
+], ProgressButtonV2Color);
 
-export default { ProgressButtonV2 };
+export default { ProgressButtonV2,ProgressButtonV2Color,ProgressButtonV2ColorOptions,ClickCallback };

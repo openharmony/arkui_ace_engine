@@ -110,6 +110,7 @@ export struct ProgressButtonV2 {
           Text(this.isLoading ? this.textProgress: this.content)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
+            .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
             .fontColor(this.colorOptions?.textColor?.color)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -196,6 +197,7 @@ export class ProgressButtonV2Color {
   @Trace borderColor?: ColorMetrics;
   @Trace textColor?: ColorMetrics;
   @Trace backgroundColor?: ColorMetrics;
+
   constructor (options: ProgressButtonV2ColorOptions) {
     this.progressColor = options.progressColor;
     this.borderColor = options.borderColor;
