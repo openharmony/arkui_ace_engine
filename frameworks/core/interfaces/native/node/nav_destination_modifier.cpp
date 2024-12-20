@@ -185,7 +185,6 @@ void SetMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
         if (items[i].isEnable.isSet) {
             menuItem.isEnabled = items[i].isEnable.value;
         }
-        menuItems.push_back(menuItem);
         if (items[i].text.value) {
             delete[] items[i].text.value;
             items[i].text.value = nullptr;
@@ -194,6 +193,7 @@ void SetMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
             delete[] items[i].icon.value;
             items[i].icon.value = nullptr;
         }
+        menuItems.push_back(menuItem);
     }
     NavDestinationModelNG::SetMenuItems(frameNode, std::move(menuItems));
 }
