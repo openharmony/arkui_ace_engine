@@ -652,6 +652,16 @@ public:
         return customerSet_;
     }
 
+    float GetPreGrayedOpacity() const
+    {
+        return preOpacity_;
+    }
+
+    void SetPreGrayedOpacity(float preOpacity)
+    {
+        preOpacity_ = preOpacity;
+    }
+
     void SetAllowDrop(const std::set<std::string>& allowDrop)
     {
         allowDrop_ = allowDrop;
@@ -1407,7 +1417,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
@@ -1432,6 +1442,7 @@ private:
 
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
+    float preOpacity_ = 1.0f;
 
     friend class RosenRenderContext;
     friend class RenderContext;

@@ -294,18 +294,27 @@ bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
 
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
 {
-    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
-        previewOption.ResetDragPreviewMode();
-        isAuto = true;
-        return;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-        previewOption.isScaleEnabled = false;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
-        previewOption.isDefaultShadowEnabled = true;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
-        previewOption.isDefaultRadiusEnabled = true;
-    }
     isAuto = false;
+    switch (modeValue) {
+        case static_cast<int32_t>(NG::DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            break;
+        default:
+            break;
+    }
 }
 
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
