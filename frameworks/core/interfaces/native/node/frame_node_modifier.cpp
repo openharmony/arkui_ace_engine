@@ -63,9 +63,8 @@ RefPtr<FrameNode> GetParentNode(UINode* node)
     while (parent != nullptr && !AceType::InstanceOf<FrameNode>(parent)) {
         parent = parent->GetParent();
     }
-    return (parent == nullptr || parent->GetTag() == "page" || parent->GetTag() == "stage")
-               ? nullptr
-               : AceType::DynamicCast<FrameNode>(parent);
+    return (parent == nullptr || parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::STAGE_ETS_TAG)
+               ? nullptr : AceType::DynamicCast<FrameNode>(parent);
 }
 
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
@@ -533,26 +532,70 @@ void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* g
 
 void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto pipeline = uiNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("AddCustomProperty doesn't run on UI thread");
         return;
     }
-    ViewAbstract::AddCustomProperty(frameNode, key, value);
+    ViewAbstract::AddCustomProperty(uiNode, key, value);
 }
 
 void RemoveCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto pipeline = uiNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("RemoveCustomProperty doesn't run on UI thread");
         return;
     }
-    ViewAbstract::RemoveCustomProperty(frameNode, key);
+    ViewAbstract::RemoveCustomProperty(uiNode, key);
+}
+
+ArkUINodeHandle GetCurrentPageRootNode(ArkUINodeHandle node)
+{
+    auto uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    auto rootNode = uiNode->GetCurrentPageRootNode();
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(rootNode));
+}
+
+ArkUI_Int32 GetNodeTag(ArkUINodeHandle node)
+{
+    auto uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, 0);
+    return uiNode->IsCNode();
+}
+
+void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Int32* size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(handle);
+    CHECK_NULL_VOID(frameNode);
+    auto childList = frameNode->GetActiveChildren();
+    *size = childList.size();
+    *items = new ArkUINodeHandle[*size];
+    int32_t i = 0;
+    for (auto& child : childList) {
+        (*items)[i++] = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(child));
+    }
+}
+
+void GetCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, char** value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string capiCustomProperty;
+    if (frameNode->IsCNode()) {
+        frameNode->GetCapiCustomProperty(key, capiCustomProperty);
+    } else {
+        frameNode->GetJSCustomProperty(key, capiCustomProperty);
+    }
+    auto size = capiCustomProperty.size();
+    *value = new char[size + 1];
+    capiCustomProperty.copy(*value, size);
+    (*value)[size] = '\0';
 }
 
 namespace NodeModifier {
@@ -567,7 +610,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey, GetAttachedFrameNodeById, GetFirstUINode,
         GetLayoutSize, GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
         SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
-        SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr };
+        SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
+        GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty };
     return &modifier;
 }
 
