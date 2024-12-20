@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_NONCOPYABLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_NONCOPYABLE_H
 
-#include "foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include/ui/base/noncopyable.h"
+#include "ui/base/noncopyable.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_NONCOPYABLE_H

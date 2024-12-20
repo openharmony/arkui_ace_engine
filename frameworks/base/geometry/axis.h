@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_AXIS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_AXIS_H
 
-#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/axis.h"
+#include "ui/base/geometry/axis.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_AXIS_H
