@@ -3229,18 +3229,19 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
     }
-    DispatchMouseToTouchEvent(event, node);
     CancelDragIfRightBtnPressed(event);
+
+    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
+        event.action == MouseAction::WINDOW_LEAVE) {
+        lastMouseTime_ = GetTimeFromExternalTimer();
+        CompensateMouseMoveEvent(event, node);
+    }
+    DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
-    }
-    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
-        event.action == MouseAction::WINDOW_LEAVE) {
-        lastMouseTime_ = GetTimeFromExternalTimer();
-        CompensateMouseMoveEvent(event, node);
     }
     DispatchMouseEvent(event, node);
 }
@@ -3430,6 +3431,7 @@ void PipelineContext::OnFlushMouseEvent(
             historyMousePointsById_[idIter.first] = idIter.second.history;
         }
     }
+    nodeToMousePoints_ = std::move(nodeToMousePoints);
     DispatchMouseEvent(idToMousePoints, newIdMousePoints, mouseEvents, touchRestrict, node);
 }
 
