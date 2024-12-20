@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/property/property.h"
 
 #ifndef ACE_UNITTEST
@@ -329,6 +330,8 @@ public:
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
     void FinishTextPreviewOperation();
+    TextDragInfo CreateRichEditorDragInfo(const SelectOverlayInfo& selectOverlayInfo,
+        const TextFieldPaintProperty& paintProperty, const TextFieldTheme& textFieldTheme) const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
     {

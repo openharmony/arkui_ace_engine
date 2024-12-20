@@ -158,7 +158,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG001, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
@@ -218,7 +218,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG002, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
@@ -253,7 +253,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG003, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
@@ -314,7 +314,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG004, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
@@ -347,7 +347,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode001, TestSize.Level1)
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto textPattern = richEditorNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     std::list<RefPtr<FrameNode>> imageChildren;
@@ -380,7 +380,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode002, TestSize.Level1)
     auto hostNode =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(hostNode, nullptr);
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto textPattern = hostNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     std::list<RefPtr<FrameNode>> imageChildren;
@@ -426,7 +426,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode003, TestSize.Level1)
     auto hostNode =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(hostNode, nullptr);
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto textPattern = hostNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     std::list<RefPtr<FrameNode>> imageChildren;
