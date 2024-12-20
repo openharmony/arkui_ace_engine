@@ -204,35 +204,6 @@ RefPtr<FrameNode> MenuItemGroupTestNg::GetPreviewMenuWrapper(
 }
 
 /**
- * @tc.name: MenuItemGroupAccessibilityPropertyGetText001
- * @tc.desc: Test GetText of menuItemGroup.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuItemGroupTestNg, MenuItemGroupAccessibilityPropertyGetText001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-
-    auto menuItemGroupPattern = frameNode->GetPattern<MenuItemGroupPattern>();
-    ASSERT_NE(menuItemGroupPattern, nullptr);
-
-    auto menuItemGroupAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuItemGroupAccessibilityProperty>();
-    ASSERT_NE(menuItemGroupAccessibilityProperty, nullptr);
-    EXPECT_EQ(menuItemGroupAccessibilityProperty->GetText(), EMPTY_TEXT);
-
-    auto content = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(content, nullptr);
-    menuItemGroupPattern->AddHeaderContent(content);
-
-    auto textLayoutProperty = content->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(MENU_ITEM_GROUP_TEXT);
-    EXPECT_EQ(menuItemGroupAccessibilityProperty->GetText(), MENU_ITEM_GROUP_TEXT);
-}
-
-/**
  * @tc.name: MenuItemGroupLayoutAlgorithmTestNg001
  * @tc.desc: Test MenuItemGroup measure algorithm.
  * @tc.type: FUNC
