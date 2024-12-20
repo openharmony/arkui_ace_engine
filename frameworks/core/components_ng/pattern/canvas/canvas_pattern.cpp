@@ -813,6 +813,18 @@ void CanvasPattern::UpdateFontSize(const Dimension& size)
     paintMethod_->SetMeasureFontSize(size);
 }
 
+void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
+{
+#ifndef USE_FAST_TASKPOOL
+    auto task = [letterSpacing](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetLetterSpacing(letterSpacing);
+    };
+    paintMethod_->PushTask(task);
+#else
+    paintMethod_->PushTask<SetLetterSpacingOp>(letterSpacing);
+#endif
+}
+
 void CanvasPattern::UpdateFillColor(const Color& color)
 {
 #ifndef USE_FAST_TASKPOOL

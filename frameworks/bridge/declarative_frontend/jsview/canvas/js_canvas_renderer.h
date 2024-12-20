@@ -121,6 +121,7 @@ public:
     void JsSetFilter(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
     void JsReset(const JSCallbackInfo& info);
+    void JsSetLetterSpacing(const JSCallbackInfo& info);
 
     void JSGetEmpty(const JSCallbackInfo& info)
     {
@@ -223,6 +224,7 @@ private:
     bool isOffscreenInitializeShadow_ = false;
     Dimension GetDimensionValue(const std::string& str);
     bool IsCustomFont(const std::string& fontName);
+    bool IsValidLetterSpacing(const std::string& letterSpacing);
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double density_ = 1.0;
     int32_t densityCallbackId_ = 0;
