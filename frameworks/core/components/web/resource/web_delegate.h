@@ -669,7 +669,7 @@ private:
 
 class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
 public:
-    NWebMouseEventImpl(int32_t x, int32_t y,
+    NWebMouseEventImpl(int32_t x, int32_t y, int32_t rawX, int32_t rawY,
         int32_t buttton, int32_t action,
         int32_t clickNum, std::vector<int32_t> pressedCodes)
         : x_(x), y_(y), buttton_(buttton), action_(action),
@@ -706,9 +706,21 @@ public:
         return pressedCodes_;
     }
 
+    int32_t GetRawX() override
+    {
+        return raw_x_;
+    }
+
+    int32_t GetRawY() override
+    {
+        return raw_y_;
+    }
+
 private:
     int32_t x_ = 0;
     int32_t y_ = 0;
+    int32_t raw_x_ = 0;
+    int32_t raw_y_ = 0;
     int32_t buttton_ = 0;
     int32_t action_ = 0;
     int32_t clickNum_ = 0;
