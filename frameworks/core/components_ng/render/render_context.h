@@ -166,13 +166,7 @@ public:
 #endif
     };
 
-    enum class PatternType : int8_t {
-        DEFAULT,
-        VIDEO,
-#ifdef PLATFORM_VIEW_SUPPORTED
-        PLATFORM_VIEW,
-#endif
-    };
+    enum class PatternType : int8_t { DEFAULT, VIDEO };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;

@@ -18,7 +18,6 @@
 
 #include <functional>
 #include <string>
-#include <optional>
 
 #include "interfaces/inner_api/xcomponent_controller/xcomponent_controller.h"
 

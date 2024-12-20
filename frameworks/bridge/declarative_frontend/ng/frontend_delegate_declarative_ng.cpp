@@ -167,7 +167,7 @@ void FrontendDelegateDeclarativeNG::AttachSubPipelineContext(const RefPtr<Pipeli
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
-    const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
+    const std::string& url, const std::string& params, const std::string& profile)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage");
 
@@ -189,15 +189,11 @@ void FrontendDelegateDeclarativeNG::RunPage(
     }
     taskExecutor_->PostTask(
         [manifestParser = manifestParser_, delegate = Claim(this),
-            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
+            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             pageRouterManager->SetManifestParser(manifestParser);
-            if (isNamedRouter) {
-                pageRouterManager->RunPageByNamedRouter(url, params);
-            } else {
-                pageRouterManager->RunPage(url, params);
-            }
+            pageRouterManager->RunPage(url, params);
             auto pipeline = delegate->GetPipelineContext();
             // TODO: get platform version from context, and should stored in AceApplicationInfo.
             if (manifestParser->GetMinPlatformVersion() > 0) {
