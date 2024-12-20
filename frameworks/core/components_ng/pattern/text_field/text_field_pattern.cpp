@@ -5459,6 +5459,70 @@ void TextFieldPattern::HandleOnDelete(bool backward)
     }
 }
 
+bool TextFieldPattern::HandleOnDeleteComb(bool backward)
+{
+    if (backward) {
+        DeleteBackwardWord(); // LTR is left word，RTL is right word
+    } else {
+        DeleteForwardWord(); // LTR is right word，RTL is left word
+    }
+    return true;
+}
+
+void TextFieldPattern::DeleteBackwardWord()
+{
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    int32_t leftWordLength = GetWordLength(originCaretPosition, 0);
+    if (leftWordLength < 0) {
+        // delete 1 char
+        leftWordLength = 1;
+    }
+    if (leftWordLength > textLength || selectController_->GetCaretIndex() - leftWordLength < 0) {
+        // delete left
+        leftWordLength = std::max(1, originCaretPosition);
+    }
+    DeleteBackward(leftWordLength);
+}
+
+void TextFieldPattern::DeleteForwardWord()
+{
+    int32_t originCaretPosition = selectController_->GetCaretIndex();
+    int32_t textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    int32_t rightWordLength = GetWordLength(originCaretPosition, 1);
+    if (rightWordLength < 0) {
+        // delete 1 char
+        rightWordLength = 1;
+    }
+    if (rightWordLength > textLength || rightWordLength + selectController_->GetCaretIndex() > textLength) {
+        // delete right
+        rightWordLength = std::max(1, textLength - originCaretPosition);
+    }
+    DeleteForward(rightWordLength);
+}
+
+void TextFieldPattern::HandleOnPageUp()
+{
+    auto border = GetBorderWidthProperty();
+    float maxFrameHeight =
+        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
+    OnScrollCallback(maxFrameHeight, SCROLL_FROM_JUMP);
+    auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
+    Offset offset(caretRectOffset.GetX(), GetPaddingTop() + GetBorderTop(border));
+    selectController_->UpdateCaretInfoByOffset(offset, true);
+}
+
+void TextFieldPattern::HandleOnPageDown()
+{
+    auto border = GetBorderWidthProperty();
+    float maxFrameHeight =
+        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
+    OnScrollCallback(-maxFrameHeight, SCROLL_FROM_JUMP);
+    auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
+    Offset offset(caretRectOffset.GetX(), maxFrameHeight);
+    selectController_->UpdateCaretInfoByOffset(offset, true);
+}
+
 void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
 {
     TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
