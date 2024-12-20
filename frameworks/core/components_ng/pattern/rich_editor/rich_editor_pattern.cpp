@@ -6461,6 +6461,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     } else if (touchType == TouchType::MOVE) {
         HandleTouchMove(touchInfo);
     } else if (touchType == TouchType::CANCEL) {
+        IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
         ResetTouchAndMoveCaretState();
     }
 }
