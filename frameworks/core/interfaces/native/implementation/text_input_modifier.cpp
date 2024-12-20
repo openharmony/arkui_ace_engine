@@ -438,7 +438,10 @@ void ShowUnitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("TextInputInterfaceModifier::ShowUnitImpl not implemented");
+    auto builder = [callback = CallbackHelper(*value, frameNode), node]() -> RefPtr<UINode> {
+        return callback.BuildSync(node);
+    };
+    TextFieldModelNG::SetShowUnit(frameNode, std::move(builder));
 }
 void ShowUnderlineImpl(Ark_NativePointer node,
                        Ark_Boolean value)

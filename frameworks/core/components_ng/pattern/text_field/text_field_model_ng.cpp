@@ -2313,4 +2313,13 @@ void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
 }
+
+void TextFieldModelNG::SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<UINode> unitNode = builder();
+    pattern->SetUnitNode(unitNode);
+}
 } // namespace OHOS::Ace::NG
