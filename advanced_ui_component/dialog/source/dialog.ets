@@ -117,6 +117,7 @@ export struct TipsDialog {
   imageIndex: number = 0;
   textIndex: number = 1;
   checkBoxIndex: number = 2;
+  appMaxFontScale: number = 3.2;
 
   build() {
     CustomDialogContentComponent({
@@ -222,6 +223,7 @@ export struct TipsDialog {
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
               .maxLines(CONTENT_MAX_LINES)
+              .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
           }
@@ -257,6 +259,8 @@ export struct TipsDialog {
   aboutToAppear() {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    let uiContext: UIContext = this.getUIContext();
+    this.appMaxFontScale = uiContext.getMaxFontScale();
     this.initButtons();
     this.initMargin();
   }
@@ -818,7 +822,7 @@ export struct AlertDialog {
           .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
-          .onAreaChange((oldValue: Area, newValue: Area) => {
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             this.updateTextAlign(Number(newValue.width));
           })
           .onKeyEvent((event: KeyEvent) => {
@@ -1667,9 +1671,9 @@ export struct LoadingDialog {
 @Component
 export struct PopoverDialog {
   @Link visible: boolean;
-  @Prop popover: PopoverDialogOptions;
+  @Prop popover: PopoverOptions;
   @BuilderParam targetBuilder: Callback<void>;
-  @State dialogWidth: Dimension | undefined = this.popover.width;
+  @State dialogWidth: Dimension | undefined = this.popover?.width;
 
   @Builder
   emptyBuilder() {
@@ -1725,4 +1729,4 @@ export struct PopoverDialog {
   }
 }
 
-export declare interface PopoverDialogOptions extends CustomPopupOptions {}
+export declare interface PopoverOptions extends CustomPopupOptions {}
