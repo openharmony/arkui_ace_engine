@@ -377,6 +377,14 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
         }
     };
     swiperPattern->SetStopIndicatorAnimationCb(stopAnimationCb);
+
+    auto updateOverlongForceStopPageRateCb = [weak = WeakClaim(this)](float forceStopPageRate) {
+        auto pattern = weak.Upgrade();
+        if (pattern && pattern->overlongDotIndicatorModifier_) {
+            pattern->overlongDotIndicatorModifier_->SetForceStopPageRate(forceStopPageRate);
+        }
+    };
+    swiperPattern->SetUpdateOverlongForceStopPageRateCb(updateOverlongForceStopPageRateCb);
 }
 
 void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
