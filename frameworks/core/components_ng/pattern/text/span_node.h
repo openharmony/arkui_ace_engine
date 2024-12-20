@@ -399,6 +399,11 @@ public:
         return true;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;

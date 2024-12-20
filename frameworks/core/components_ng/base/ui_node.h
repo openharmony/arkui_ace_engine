@@ -118,6 +118,11 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    virtual bool IsSyntaxNode() const
+    {
+        return false;
+    }
+
     void UpdateModalUiextensionCount(bool addNode)
     {
         if (addNode) {
