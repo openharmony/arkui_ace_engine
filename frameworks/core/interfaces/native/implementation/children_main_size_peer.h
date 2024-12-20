@@ -47,6 +47,12 @@ public:
         return defaultSize_;
     }
 
+    void SetDefaultSize(float defaultSize)
+    {
+        defaultSize_ = defaultSize;
+        handler_->UpdateDefaultSize(defaultSize);
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ChildrenMainSizePeer);
     ohos::Ace::RefPtr<ohos::Ace::NG::ListChildrenMainSize> handler_;
