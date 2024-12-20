@@ -13419,6 +13419,24 @@ class TextAreaEnableHapticFeedbackModifier extends ModifierWithKey {
 }
 TextAreaEnableHapticFeedbackModifier.identity = Symbol('textAreaEnableHapticFeedback');
 
+class TextAreaEllipsisModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetEllipsisMode(node);
+    }
+    else {
+      getUINativeModule().textArea.setEllipsisMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaEllipsisModeModifier.identity = Symbol('textEllipsisMode');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -13741,6 +13759,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableHapticFeedback(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableHapticFeedbackModifier.identity, TextAreaEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  ellipsisMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEllipsisModeModifier.identity, TextAreaEllipsisModeModifier, value);
     return this;
   }
 }
@@ -15106,6 +15128,24 @@ class TextInputEnableHapticFeedbackModifier extends ModifierWithKey {
 }
 TextInputEnableHapticFeedbackModifier.identity = Symbol('textInputEnableHapticFeedback');
 
+class TextInputEllipsisModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetEllipsisMode(node);
+    }
+    else {
+      getUINativeModule().textInput.setEllipsisMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputEllipsisModeModifier.identity = Symbol('textInputEllipsisMode');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15484,6 +15524,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableHapticFeedback(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableHapticFeedbackModifier.identity, TextInputEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  ellipsisMode(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEllipsisModeModifier.identity, TextInputEllipsisModeModifier, value);
     return this;
   }
 }

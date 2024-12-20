@@ -1946,6 +1946,11 @@ void TextFieldModelNG::SetEnableHapticFeedback(bool state)
     pattern->SetEnableHapticFeedback(state);
 }
 
+void TextFieldModelNG::SetEllipsisMode(EllipsisMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value);
+}
+
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
@@ -2191,5 +2196,11 @@ void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

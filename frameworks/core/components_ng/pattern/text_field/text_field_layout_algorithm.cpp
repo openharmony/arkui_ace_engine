@@ -66,6 +66,10 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
         showPlaceHolder = true;
     }
+
+    if (textFieldLayoutProperty->HasEllipsisMode()) {
+        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
+    }
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -652,6 +656,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = fontSize
@@ -692,6 +697,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
         .fontSize = paragraphData.fontSize };

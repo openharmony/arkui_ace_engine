@@ -42,6 +42,7 @@ constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
@@ -58,6 +59,7 @@ constexpr bool DEFAULT_SELECT_ALL = false;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 std::string g_strValue;
+constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -1837,6 +1839,23 @@ void ResetTextInputEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetEllipsisMode(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODALS.size()) {
+        ellipsisMode = ELLIPSIS_MODE_TAIL;
+    }
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ellipsisMode]);
+}
+
+void ResetEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ELLIPSIS_MODE_TAIL]);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -2035,6 +2054,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputEnableHapticFeedback = ResetTextInputEnableHapticFeedback,
         .getTextInputLetterSpacing = GetTextInputLetterSpacing,
         .getTextInputEnablePreviewText = GetTextInputEnablePreviewText,
+        .setEllipsisMode = SetEllipsisMode,
+        .resetEllipsisMode = ResetEllipsisMode,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
