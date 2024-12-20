@@ -133,9 +133,8 @@ void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    std::function<void()> cb = nullptr;
     auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
-    auto arkCallback = CallbackHelper(*optCallback);
+    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
 void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
@@ -153,7 +152,7 @@ void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
-    auto arkCallback = CallbackHelper(*optCallback);
+    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
 Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)
