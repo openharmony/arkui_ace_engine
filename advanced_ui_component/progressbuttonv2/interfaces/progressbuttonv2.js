@@ -305,4 +305,4 @@ ProgressButtonV2Color = __decorate([
     ObservedV2
 ], ProgressButtonV2Color);
 
-export default { ProgressButtonV2,ProgressButtonV2Color,ProgressButtonV2ColorOptions,ClickCallback };
+export default { ProgressButtonV2,ProgressButtonV2Color };
