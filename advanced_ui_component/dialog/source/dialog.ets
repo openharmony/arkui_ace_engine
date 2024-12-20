@@ -23,6 +23,7 @@ import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import { accessibility } from '@kit.AccessibilityKit';
+import { KeyCode } from '@kit.InputKit';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -1505,8 +1506,8 @@ function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOp
         buttonOptions.action();
       }
       controller?.close();
+      event.stopPropagation();
     }
-    event.stopPropagation();
   })
   .onClick(() => {
     if (buttonOptions.action) {
