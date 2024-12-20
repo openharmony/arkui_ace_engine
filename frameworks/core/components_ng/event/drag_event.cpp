@@ -921,7 +921,6 @@ void DragEventActuator::ResetDragStatus()
     overlayManager->RemoveGatherNode();
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
-    overlayManager->RemoveFilter();
 }
 
 void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId)
