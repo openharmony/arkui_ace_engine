@@ -78,6 +78,7 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
         auto spans = spanString->GetSpanItems();
         textPattern->SetSpanItemChildren(spans);
         textPattern->SetSpanStringMode(true);
+        textPattern->AllocStyledString();
     }
 }
 
@@ -1153,6 +1154,14 @@ bool TextModelNG::GetHalfLeading(FrameNode* frameNode)
 void TextModelNG::SetEnableHapticFeedback(bool state)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetEnableHapticFeedback(state);
+}
+
+void TextModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetEnableHapticFeedback(state);
 }

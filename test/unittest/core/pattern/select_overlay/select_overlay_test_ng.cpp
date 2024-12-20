@@ -4346,9 +4346,10 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams001, TestSize.Level1)
     info.menuInfo.showPaste = true;
     info.menuInfo.showCut = true;
     info.menuInfo.showCopyAll = true;
+    info.menuInfo.showSearch = true;
     info.menuInfo.showCameraInput = true;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
-    EXPECT_EQ(params.size(), 5);
+    EXPECT_EQ(params.size(), 6);
 }
 
 /**
@@ -4366,6 +4367,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams002, TestSize.Level1)
     info.menuInfo.showPaste = false;
     info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = false;
+    info.menuInfo.showSearch = false;
     info.menuInfo.showCameraInput = false;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 0);
@@ -4386,9 +4388,10 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams003, TestSize.Level1)
     info.menuInfo.showPaste = false;
     info.menuInfo.showCut = true;
     info.menuInfo.showCopyAll = false;
+    info.menuInfo.showSearch = true;
     info.menuInfo.showCameraInput = true;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
-    EXPECT_EQ(params.size(), 3);
+    EXPECT_EQ(params.size(), 4);
 }
 
 /**
@@ -4406,6 +4409,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams004, TestSize.Level1)
     info.menuInfo.showPaste = true;
     info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = true;
+    info.menuInfo.showSearch = false;
     info.menuInfo.showCameraInput = false;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 2);
@@ -4426,6 +4430,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams005, TestSize.Level1)
     info.menuInfo.showPaste = true;
     info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = false;
+    info.menuInfo.showSearch = false;
     info.menuInfo.showCameraInput = false;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 1);
@@ -4446,9 +4451,10 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams006, TestSize.Level1)
     info.menuInfo.showPaste = true;
     info.menuInfo.showCut = true;
     info.menuInfo.showCopyAll = true;
+    info.menuInfo.showSearch = true;
     info.menuInfo.showCameraInput = true;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
-    EXPECT_EQ(params.size(), 4);
+    EXPECT_EQ(params.size(), 5);
 }
 
 /**

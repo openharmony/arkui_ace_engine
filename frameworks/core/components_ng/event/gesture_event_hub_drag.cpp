@@ -446,7 +446,8 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
         context = frameNode->GetRenderContext();
     }
     CHECK_NULL_VOID(context);
-    auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+    bool isOffline = GetTextDraggable() ? true : false;
+    auto thumbnailPixelMap = context->GetThumbnailPixelMap(false, isOffline);
     CHECK_NULL_VOID(thumbnailPixelMap);
     SetPixelMap(thumbnailPixelMap);
 }
@@ -631,6 +632,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     float scale = windowScale * defaultPixelMapScale;
     PreparedInfoForDrag data = { isMenuShow, recordsSize, defaultPixelMapScale, OffsetF(),
         dragDropManager->GetUpdateDragMovePosition(), pixelMap };
+    dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         auto imageNode = overlayManager->GetPixelMapContentNode();
@@ -638,13 +640,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         CHECK_NULL_VOID(imageNode);
         data.imageNode = imageNode;
         data.dragPreviewOffsetToScreen = GetDragPreviewInitPositionToScreen(context, data);
-        dragDropManager->ResetContextMenuDragPosition();
         float previewScale =
             info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
         }
+        data.previewScale = previewScale;
         // use menu preview scale replace default pixelMap scale.
         if (isMenuShow) {
             ProcessMenuPreviewScale(imageNode, scale, previewScale * windowScale, defaultPixelMapScale);
@@ -1277,8 +1279,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
 
     // create text node
     auto subWindowOffset = isExpandDisplay ? subWindow->GetWindowRect().GetOffset() : OffsetF();
-    auto  textNode = DragEventActuator::CreateBadgeTextNode(frameNode, data.badgeNumber, data.defaultScale, true,
-        data.dragPreviewOffsetToScreen - subWindowOffset);
+    auto textNode = DragEventActuator::CreateBadgeTextNode(data.badgeNumber);
     
     // create gatherNode
     auto originGatherNode = overlayManager->GetGatherNode();
@@ -1298,6 +1299,8 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
         subWindowOverlayManager, eventHub->GetGestureEventHub(), data.imageNode, textNode, true);
 
     // update position
+    DragEventActuator::UpdateBadgeTextNodePosition(frameNode, textNode, data.badgeNumber, data.previewScale,
+        data.dragPreviewOffsetToScreen - subWindowOffset);
     DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
     
     auto subwindowContext = data.imageNode->GetContext();

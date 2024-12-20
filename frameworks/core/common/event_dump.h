@@ -57,7 +57,22 @@ struct TouchPointSnapshot {
     std::unordered_map<int32_t, int32_t> downFingerIds;
 };
 
+struct AxisSnapshot {
+    AxisSnapshot() = default;
+    AxisSnapshot(const AxisEvent& event);
+
+    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
+    void Dump(std::unique_ptr<JsonValue>& json) const;
+    int32_t id = -1;
+    OffsetF point;
+    OffsetF screenPoint;
+    AxisAction action = AxisAction::NONE;
+    int64_t timestamp = 0;
+    bool isInjected = false;
+};
+
 struct EventTree {
+    std::list<AxisSnapshot> axis;
     std::list<TouchPointSnapshot> touchPoints;
     std::list<FrameNodeSnapshot> hitTestTree;
 
@@ -65,10 +80,14 @@ struct EventTree {
     std::map<uint64_t, RefPtr<GestureSnapshot>> gestureMap;
 
     int32_t touchDownCount = 0;
+    int32_t axisUpdateCount = 0;
     std::set<int32_t> downFingerIds_;
+    std::set<int32_t> updateAxisIds_;
 };
 
 struct EventTreeRecord {
+    void AddAxis(const AxisEvent& event);
+
     void AddTouchPoint(const TouchEvent& event);
 
     void AddFrameNodeSnapshot(FrameNodeSnapshot&& node);
@@ -85,6 +104,8 @@ struct EventTreeRecord {
 
     void Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber = 0) const;
     void BuildTouchPoints(std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const;
+    void BuildAxis(std::list<AxisSnapshot> axis, std::unique_ptr<JsonValue>& json) const;
+
     void BuildGestureTree(
         std::map<int32_t, std::list<RefPtr<GestureSnapshot>>> gestureTreeMap, std::unique_ptr<JsonValue>& json) const;
     void BuildHitTestTree(std::list<FrameNodeSnapshot> hitTestTree, std::unique_ptr<JsonValue>& json) const;

@@ -329,13 +329,6 @@ void AccessibilityHoverManagerForThirdNG::DeregisterJsThirdProviderInteractionOp
 }
 
 namespace {
-enum class DumpMode {
-    TREE,
-    NODE,
-    HANDLE_EVENT,
-    HOVER_TEST
-};
-
 struct DumpInfoArgument {
     bool useWindowId = false;
     DumpMode mode = DumpMode::TREE;
@@ -391,6 +384,146 @@ bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgumen
     }
     return true;
 }
+
+void DumpTreeNodeInfoForThird(
+    Accessibility::AccessibilityElementInfo& info, int32_t depth)
+{
+    DumpLog::GetInstance().AddDesc("ID: " + std::to_string(info.GetAccessibilityId()));
+    DumpLog::GetInstance().AddDesc("compid: " + info.GetInspectorKey());
+    DumpLog::GetInstance().AddDesc("text: " + info.GetContent());
+    DumpLog::GetInstance().AddDesc(
+        "accessibilityText: " + info.GetAccessibilityText());
+    DumpLog::GetInstance().AddDesc("accessibilityGroup: " +
+        std::to_string(info.GetAccessibilityGroup()));
+    DumpLog::GetInstance().AddDesc(
+        "accessibilityLevel: " + info.GetAccessibilityLevel());
+    auto rectInScreen = info.GetRectInScreen();
+    DumpLog::GetInstance().AddDesc("top: " + std::to_string(rectInScreen.GetLeftTopYScreenPostion()));
+    DumpLog::GetInstance().AddDesc("left: " + std::to_string(rectInScreen.GetLeftTopXScreenPostion()));
+    DumpLog::GetInstance().AddDesc("width: " +
+        std::to_string(rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion()));
+    DumpLog::GetInstance().AddDesc("height: " +
+        std::to_string(rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion()));
+    DumpLog::GetInstance().AddDesc("visible: " + std::to_string(info.IsVisible()));
+    DumpLog::GetInstance().AddDesc(
+        "clickable: " + std::to_string(info.IsClickable()));
+    DumpLog::GetInstance().AddDesc("longclickable: " +
+        std::to_string(info.IsLongClickable()));
+    DumpLog::GetInstance().AddDesc(
+        "checkable: " + std::to_string(info.IsCheckable()));
+    DumpLog::GetInstance().AddDesc(
+        "scrollable: " + std::to_string(info.IsScrollable()));
+    DumpLog::GetInstance().AddDesc(
+        "checked: " + std::to_string(info.IsChecked()));
+    DumpLog::GetInstance().AddDesc(
+        "hint: " + info.GetHint());
+    DumpLog::GetInstance().Print(depth, info.GetComponentType(), info.GetChildCount());
+}
+
+void DumpTreeForThird(
+    int64_t elementId,
+    const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator,
+    int32_t depth)
+{
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        elementId, splitElementId, splitTreeId);
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+    bool ret = jsThirdProviderOperator->FindAccessibilityNodeInfosByIdFromProvider(
+        splitElementId, 0, 0, infos);
+    if ((!ret) || (infos.size() == 0)) {
+        return;
+    }
+    Accessibility::AccessibilityElementInfo info = infos.front();
+    DumpTreeNodeInfoForThird(info, depth);
+    auto childrenIds = info.GetChildIds();
+    for (auto childId = childrenIds.rbegin(); childId != childrenIds.rend(); ++childId) {
+        DumpTreeForThird(*childId, jsThirdProviderOperator, depth+1);
+    }
+}
+
+bool IsDumpTreeForThird(
+    int64_t inputRootId,
+    const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator
+)
+{
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        inputRootId, splitElementId, splitTreeId);
+    if (splitTreeId == jsThirdProviderOperator->GetBelongTreeId()) {
+        return true;
+    }
+    return false;
+}
+
+class MockDumpOperatorCallBack : public Accessibility::AccessibilityElementOperatorCallback {
+public:
+    ~MockDumpOperatorCallBack() = default;
+
+    void SetSearchElementInfoByAccessibilityIdResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
+        const int32_t requestId)  override
+    {
+    }
+
+    void SetSearchElementInfoByTextResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
+        const int32_t requestId) override
+    {
+    }
+
+    void SetFindFocusedElementInfoResult(
+        const Accessibility::AccessibilityElementInfo &info,
+        const int32_t requestId) override
+    {
+    }
+
+    void SetFocusMoveSearchResult(const Accessibility::AccessibilityElementInfo &info, const int32_t requestId) override
+    {
+    }
+
+    void SetExecuteActionResult(const bool succeeded, const int32_t requestId) override
+    {
+        if (succeeded) {
+            DumpLog::GetInstance().Print("Result: action execute succeeded");
+        } else {
+            DumpLog::GetInstance().Print("Result: action execute fail");
+        }
+    }
+
+    void SetCursorPositionResult(const int32_t cursorPosition, const int32_t requestId) override
+    {
+    }
+};
+
+void DumpHandleAction(
+    const std::vector<std::string>& params,
+    const WeakPtr<JsAccessibilityManager>& jsAccessibilityManager,
+    const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator)
+{
+    auto jsAccessibilityManagerTemp = jsAccessibilityManager.Upgrade();
+    CHECK_NULL_VOID(jsAccessibilityManagerTemp);
+    if (!jsAccessibilityManagerTemp->CheckDumpHandleEventParams(params)) {
+        return;
+    }
+
+    ActionType op;
+    int64_t nodeId;
+    if (!jsAccessibilityManagerTemp->CheckGetActionIdAndOp(params, nodeId, op)) {
+        return DumpLog::GetInstance().Print("Error: params is illegal!");
+    }
+
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(nodeId, splitElementId, splitTreeId);
+    nodeId = splitElementId;
+
+    std::map<std::string, std::string> paramsMap;
+    jsAccessibilityManagerTemp->ProcessParameters(op, params, paramsMap);
+    
+    MockDumpOperatorCallBack operatorCallback;
+    jsThirdProviderOperator->ExecuteAction(nodeId, op, paramsMap, 0, operatorCallback);
+}
 } // namespace
 
 void AccessibilityHoverManagerForThirdNG::DumpPropertyForThird(
@@ -430,6 +563,7 @@ bool AccessibilityHoverManagerForThirdNG::OnDumpChildInfoForThirdRecursive(
     auto jsThirdProviderOperator =
         GetJsThirdProviderInteractionOperation(hostElementId).lock();
     if (jsThirdProviderOperator == nullptr) {
+        DumpLog::GetInstance().Print("Error: need start screenReader first");
         return true;
     }
     switch (argument.mode) {
@@ -437,7 +571,14 @@ bool AccessibilityHoverManagerForThirdNG::OnDumpChildInfoForThirdRecursive(
             DumpPropertyForThird(argument.nodeId, jsAccessibilityManager, jsThirdProviderOperator);
             break;
         case DumpMode::TREE:
+            if (!IsDumpTreeForThird(argument.rootId, jsThirdProviderOperator)) {
+                break;
+            }
+            DumpTreeForThird(argument.rootId, jsThirdProviderOperator, 0);
+            break;
         case DumpMode::HANDLE_EVENT:
+            DumpHandleAction(params, jsAccessibilityManager, jsThirdProviderOperator);
+            break;
         case DumpMode::HOVER_TEST:
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");

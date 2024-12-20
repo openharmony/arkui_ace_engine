@@ -88,6 +88,7 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
     "$ace_root/test/mock/base/mock_background_task_executor.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",

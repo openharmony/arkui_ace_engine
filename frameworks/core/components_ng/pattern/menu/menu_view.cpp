@@ -500,7 +500,6 @@ void ShowPixelMapScaleAnimationProc(
     CHECK_NULL_VOID(menuPattern && menuTheme);
     auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
     auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
-    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
     auto previewBeforeAnimationScale =
         LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
     auto previewAfterAnimationScale =
@@ -508,6 +507,7 @@ void ShowPixelMapScaleAnimationProc(
 
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
     auto imageRawSize = imagePattern->GetRawImageSize();
     auto geometryNode = imageNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -1233,6 +1233,16 @@ RefPtr<FrameNode> MenuView::Create(
     return wrapperNode;
 }
 
+EffectOption CreateEffectOption(Dimension radius, double saturation, double brightness, Color color)
+{
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturation;
+    option.brightness = brightness;
+    option.color = color;
+    return option;
+}
+
 void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -1247,7 +1257,7 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
         auto brightness = menuTheme->GetBgEffectBrightness();
         auto radius = menuTheme->GetBgEffectRadius();
         auto color = menuTheme->GetBgEffectColor();
-        EffectOption option = { radius, saturation, brightness, color };
+        EffectOption option = CreateEffectOption(radius, saturation, brightness, color);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->UpdateBackgroundEffect(option);
     }
@@ -1437,7 +1447,7 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
     pastePaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
-    pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
+    pasteLayoutProperty->UpdateBackgroundBorderRadius(BorderRadiusProperty(theme->GetInnerBorderRadius()));
     pasteLayoutProperty->UpdateIconSize(theme->GetIconSideLength());
     pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
     pasteLayoutProperty->UpdateStateEffect(false);

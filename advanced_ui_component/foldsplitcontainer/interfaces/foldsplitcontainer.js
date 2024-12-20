@@ -24,14 +24,14 @@ const curves = globalThis.requireNativeModule('ohos.curves');
 const mediaQuery = requireNapi('mediaquery');
 export var ExtraRegionPosition;
 (function (k3) {
-  k3[(k3['TOP'] = 1)] = 'TOP';
-  k3[(k3['BOTTOM'] = 2)] = 'BOTTOM';
+  k3[(k3.TOP = 1)] = 'TOP';
+  k3[(k3.BOTTOM = 2)] = 'BOTTOM';
 })(ExtraRegionPosition || (ExtraRegionPosition = {}));
 export var PresetSplitRatio;
 (function (s4) {
-  s4[(s4['LAYOUT_1V1'] = 1)] = 'LAYOUT_1V1';
-  s4[(s4['LAYOUT_2V3'] = 0.6666666666666666)] = 'LAYOUT_2V3';
-  s4[(s4['LAYOUT_3V2'] = 1.5)] = 'LAYOUT_3V2';
+  s4[(s4.LAYOUT_1V1 = 1)] = 'LAYOUT_1V1';
+  s4[(s4.LAYOUT_2V3 = 0.6666666666666666)] = 'LAYOUT_2V3';
+  s4[(s4.LAYOUT_3V2 = 1.5)] = 'LAYOUT_3V2';
 })(PresetSplitRatio || (PresetSplitRatio = {}));
 function withDefaultValue(h3, i3) {
   if (h3 === void 0 || h3 === null) {
@@ -287,41 +287,53 @@ export class FoldSplitContainer extends ViewPU {
       Logger.error('Failed getFoldStatus. code:%{public}d, message:%{public}s',
         exception.code, exception.message);
     }
-    display.on('foldStatusChange', (j4) => {
-      if (this.foldStatus !== j4) {
-        this.foldStatus = j4;
-        this.updateLayout();
+    try {
+      display.on('foldStatusChange', (j4) => {
+        if (this.foldStatus !== j4) {
+          this.foldStatus = j4;
+          this.updateLayout();
+          this.updatePreferredOrientation();
+        }
+      });
+    } catch (exception) {
+      Logger.error('Failed display.on foldStatusChange. code:%{public}d, message:%{public}s',
+        exception.code, exception.message);
+    }
+    try {
+      window.getLastWindow(this.getUIContext().getHostContext(), (e4, f4) => {
+        if (e4 && e4.code) {
+          Logger.error(
+            'Failed to get window instance, error code: %{public}d',
+            e4.code
+          );
+          return;
+        }
+        const g4 = f4.getWindowProperties().id;
+        if (g4 < 0) {
+          Logger.error(
+            'Failed to get window instance because the window id is invalid. window id: %{public}d', g4);
+          return;
+        }
+        this.windowInstance = f4;
         this.updatePreferredOrientation();
-      }
-    });
-    window.getLastWindow(this.getUIContext().getHostContext(), (e4, f4) => {
-      if (e4 && e4.code) {
-        Logger.error(
-          'Failed to get window instance, error code: %{public}d',
-          e4.code
-        );
-        return;
-      }
-      const g4 = f4.getWindowProperties().id;
-      if (g4 < 0) {
-        Logger.error(
-          'Failed to get window instance because the window id is invalid. window id: %{public}d',
-          g4
-        );
-        return;
-      }
-      this.windowInstance = f4;
-      this.updatePreferredOrientation();
-      try {
-        this.windowInstance.on('windowStatusChange', (i4) => {
-          this.windowStatusType = i4;
-        });
-      } catch (exception) {
-        Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
-          exception.code, exception.message);
-      }
-    });
+        this.dealWindowStatusChange();
+      });
+    } catch (exception) {
+      Logger.error('Failed getLastWindow code:%{public}d, message:%{public}s', exception.code, exception.message);
+    }
   }
+  
+  dealWindowStatusChange() {
+    try {
+      this.windowInstance.on('windowStatusChange', (i4) => {
+        this.windowStatusType = i4;
+      });
+    } catch (exception) {
+      Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
+        exception.code, exception.message);
+    }
+  }
+
   aboutToDisappear() {
     if (this.listener) {
       this.listener.off('change');
@@ -681,8 +693,9 @@ export class FoldSplitContainer extends ViewPU {
     return { left: d, top: e, width: f, height: g };
   }
   isPortraitOrientation() {
+    let a;
     try {
-      const a = display.getDefaultDisplaySync();      
+      a = display.getDefaultDisplaySync();      
     } catch (exception) {
       Logger.error('Failed getDefaultDisplaySync. code:%{public}d, message:%{public}s',
         exception.code, exception.message);

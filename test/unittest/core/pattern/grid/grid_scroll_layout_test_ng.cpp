@@ -724,8 +724,7 @@ HWTEST_F(GridScrollLayoutTestNg, SupplyAllData2ZeroIndex001, TestSize.Level1)
     CreateFixedItems(30);
     CreateDone();
 
-    pattern_->ScrollToIndex(20, true, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(20, true, ScrollAlign::END);
 
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
@@ -745,10 +744,8 @@ HWTEST_F(GridScrollLayoutTestNg, SupplyAllData2ZeroIndex002, TestSize.Level1)
     CreateFixedItems(30);
     CreateDone();
 
-    pattern_->ScrollToIndex(20, true, ScrollAlign::START);
-    FlushUITasks();
-    pattern_->ScrollToIndex(10, true, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(20, true, ScrollAlign::START);
+    ScrollToIndex(10, true, ScrollAlign::CENTER);
 
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
@@ -1558,8 +1555,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
     CreateFixedItems(21);
     CreateDone();
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1612,8 +1608,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(pattern_->IsAtBottom());
 
     /**
@@ -1802,8 +1797,7 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridWithScrollToIndex001, TestSize
     CreateBigItem(9, 9, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
 
-    pattern_->ScrollToIndex(10, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(10, false, ScrollAlign::START);
 
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE / 2, SCROLL_FROM_UPDATE);
     FlushUITasks();
@@ -1827,8 +1821,7 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridMeasureForward001, TestSize.Le
     CreateFixedItems(30);
     CreateDone();
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 0);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
     for (int i = 0; i < 15; i++) {

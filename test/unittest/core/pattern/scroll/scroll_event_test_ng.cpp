@@ -71,7 +71,7 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent001, TestSize.Level1)
      * @tc.steps: step3. ScrollTo bottom
      * @tc.expected: Trigger onScrollEvent/scrollEdgeEvent/reachEndEvent
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(scrollY, VERTICAL_SCROLLABLE_DISTANCE - ITEM_MAIN_SIZE);
     EXPECT_TRUE(isToEdge);
     EXPECT_TRUE(isReachEnd);
@@ -82,7 +82,7 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent001, TestSize.Level1)
      */
     isToEdge = false;
     isReachStart = false;
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_EQ(scrollY, -VERTICAL_SCROLLABLE_DISTANCE);
     EXPECT_TRUE(isToEdge);
     EXPECT_TRUE(isReachStart);
@@ -130,7 +130,7 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent002, TestSize.Level1)
      * @tc.steps: step2. ScrollTo bottom
      * @tc.expected: Trigger onScrollEvent/scrollEdgeEvent/reachEndEvent
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(scrollX, HORIZONTAL_SCROLLABLE_DISTANCE - ITEM_MAIN_SIZE);
     EXPECT_TRUE(isToEdge);
     EXPECT_TRUE(isReachEnd);
@@ -141,7 +141,7 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent002, TestSize.Level1)
      */
     isToEdge = false;
     isReachStart = false;
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_EQ(scrollX, -HORIZONTAL_SCROLLABLE_DISTANCE);
     EXPECT_TRUE(isToEdge);
     EXPECT_TRUE(isReachStart);
@@ -223,7 +223,7 @@ HWTEST_F(ScrollEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
      * @tc.steps: step1. Trigger event by ScrollToEdge
      * @tc.expected: WillScrollEvent and DisScrollEvent are both triggered
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(willOffsetY, VERTICAL_SCROLLABLE_DISTANCE);
     EXPECT_EQ(didOffsetY, VERTICAL_SCROLLABLE_DISTANCE);
 }
@@ -257,7 +257,7 @@ HWTEST_F(ScrollEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
      * @tc.steps: step1. Trigger event by ScrollToEdge
      * @tc.expected: WillScrollEvent and DisScrollEvent are both triggered
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(willOffsetX, HORIZONTAL_SCROLLABLE_DISTANCE);
     EXPECT_EQ(didOffsetX, HORIZONTAL_SCROLLABLE_DISTANCE);
 }
@@ -314,16 +314,16 @@ HWTEST_F(ScrollEventTestNg, HandleDrag002, TestSize.Level1)
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
     CreateScrollDone();
-    EXPECT_TRUE(Position(-HORIZONTAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(Position(0));
 
     Offset startOffset = Offset();
     float dragDelta = 10.f;
     float velocityDelta = 200;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
-    EXPECT_TRUE(Position(dragDelta - HORIZONTAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK - HORIZONTAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta - HORIZONTAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(Position(-dragDelta));
+    EXPECT_TRUE(TickPosition(-dragDelta - velocityDelta / TICK));
+    EXPECT_TRUE(TickPosition(-dragDelta - velocityDelta));
 }
 
 /**
@@ -414,7 +414,7 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll001, TestSize.Level1)
     float velocityDelta = 100;
     DragEnd(velocityDelta);
     EXPECT_TRUE(Position(currentOffset));
-    EXPECT_TRUE(TickByVelocityPosition(velocityDelta, currentOffset + velocityDelta));
+    EXPECT_TRUE(TickPosition(velocityDelta, currentOffset + velocityDelta));
     EXPECT_TRUE(TickPosition((currentOffset + velocityDelta) / TICK));
     EXPECT_TRUE(TickPosition(0));
 }
@@ -435,7 +435,7 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll002, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll to bottom
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -458,8 +458,8 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll002, TestSize.Level1)
     float velocityDelta = -100;
     DragEnd(velocityDelta);
     EXPECT_TRUE(Position(currentOffset));
-    EXPECT_TRUE(TickByVelocityPosition(velocityDelta, currentOffset + velocityDelta));
-    EXPECT_TRUE(TickPosition(
+    EXPECT_TRUE(TickPosition(velocityDelta, currentOffset + velocityDelta));
+    EXPECT_TRUE(TickPosition(frameNode_,
         -VERTICAL_SCROLLABLE_DISTANCE + (currentOffset + VERTICAL_SCROLLABLE_DISTANCE + velocityDelta) / TICK));
     EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 }
@@ -496,8 +496,8 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll003, TestSize.Level1)
     float velocityDelta = -100;
     DragEnd(velocityDelta);
     EXPECT_TRUE(Position(currentOffset));
-    EXPECT_TRUE(TickByVelocityPosition(velocityDelta, 0));
-    EXPECT_TRUE(TickByVelocityPosition(velocityDelta + currentOffset, velocityDelta + currentOffset));
+    EXPECT_TRUE(TickPosition(velocityDelta, 0));
+    EXPECT_TRUE(TickPosition(velocityDelta + currentOffset, velocityDelta + currentOffset));
 }
 
 /**
@@ -522,7 +522,7 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll004, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, Offset(), dragDelta, DRAG_VELOCITY);
     EXPECT_TRUE(Position(dragDelta));
-    EXPECT_TRUE(TickByVelocityPosition(DRAG_VELOCITY, dragDelta + DRAG_VELOCITY));
+    EXPECT_TRUE(TickPosition(DRAG_VELOCITY, dragDelta + DRAG_VELOCITY));
     EXPECT_TRUE(TickPosition((dragDelta + DRAG_VELOCITY) / TICK));
     EXPECT_TRUE(TickPosition(0));
 }
@@ -553,7 +553,7 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll005, TestSize.Level1)
      * @tc.steps: step2. Scroll to bottom and drag over the bottom
      * @tc.expected: Can not drag over
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     DragAction(frameNode_, Offset(), -10, -DRAG_VELOCITY);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
@@ -583,7 +583,7 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll006, TestSize.Level1)
      * @tc.steps: step2. Scroll to bottom and drag over the bottom
      * @tc.expected: Can not drag over
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     DragAction(frameNode_, Offset(), -10, -DRAG_VELOCITY);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
@@ -701,7 +701,7 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap001, TestSize.Level1)
      * @tc.steps: step4. Scroll to bottom
      * @tc.expected: Align end
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -768,7 +768,6 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
     const float endAlignOffset = 40;
     float delta = -1;
     ScrollBy(0, delta);
-    EXPECT_TRUE(Position(delta));
     EXPECT_TRUE(TickPosition((endAlignOffset - intervalSize + delta) / TICK));
     EXPECT_TRUE(TickPosition(endAlignOffset - intervalSize));
 
@@ -779,7 +778,6 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
     float currentOffset = GetChildY(frameNode_, 0);
     delta = 1 - halfInterval;
     ScrollBy(0, delta);
-    EXPECT_TRUE(Position(currentOffset + delta));
     EXPECT_TRUE(TickPosition(currentOffset + delta / TICK));
     EXPECT_TRUE(TickPosition(currentOffset));
 
@@ -789,7 +787,6 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
      */
     delta = -halfInterval;
     ScrollBy(0, delta);
-    EXPECT_TRUE(Position(currentOffset + delta));
     EXPECT_TRUE(TickPosition(currentOffset - intervalSize + (intervalSize + delta) / TICK));
     EXPECT_TRUE(TickPosition(currentOffset - intervalSize));
 
@@ -797,7 +794,7 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
      * @tc.steps: step5. Scroll to top
      * @tc.expected: Align start
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(Position(0));
 }
 
@@ -860,7 +857,7 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
      * @tc.steps: step5. Scroll to bottom
      * @tc.expected: Align end
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
@@ -894,6 +891,56 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
     EXPECT_TRUE(Position(delta + currentOffset));
     EXPECT_TRUE(TickPosition(intervalSize + currentOffset - (intervalSize - delta) / TICK));
     EXPECT_TRUE(TickPosition(intervalSize + currentOffset));
+}
+
+/**
+ * @tc.name: CalcPredictNextSnapOffset001
+ * @tc.desc: Test CalcPredictNextSnapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, CalcPredictNextSnapOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set intervalSize to generate snapOffsets_.
+     */
+    const float intervalSize = 100.f; // check align start
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollSnap(ScrollSnapAlign::START, Dimension(intervalSize), snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+
+    const float delta = -40.f;
+    auto predictSnapOffset = pattern_->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), 0.f);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, 0.f, 0.f, SnapDirection::BACKWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), -intervalSize);
+
+    pattern_->currentOffset_ = -100.f;
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(-60.f, 0.f, 0.f, SnapDirection::BACKWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), -intervalSize);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(-100.f, 0.f, 0.f, SnapDirection::BACKWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), -2 * intervalSize);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, 0.f, 0.f, SnapDirection::FORWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), intervalSize);
+
+    pattern_->currentOffset_ = -200.f;
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(60.f, 0.f, 0.f, SnapDirection::FORWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), intervalSize);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(100.f, 0.f, 0.f, SnapDirection::FORWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), 2 * intervalSize);
 }
 
 /**
@@ -1004,7 +1051,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations002, TestSize.Level1)
      * @tc.steps: step3. Scroll to top
      * @tc.expected: Align start
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(Position(0));
 }
 
@@ -1075,7 +1122,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations003, TestSize.Level1)
      * @tc.steps: step5. Scroll to bottom
      * @tc.expected: Align end
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
@@ -1181,7 +1228,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations005, TestSize.Level1)
     delta += 1 - (secondPagination - firstPagination) / 2;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(delta - firstPagination / 2));
-    EXPECT_TRUE(TickPosition((delta + firstPagination / 2) / TICK) - firstPagination);
+    EXPECT_TRUE(TickPosition(frameNode_, (delta + firstPagination / 2) / TICK) - firstPagination);
     EXPECT_TRUE(TickPosition(-firstPagination));
 
     /**
@@ -1198,7 +1245,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations005, TestSize.Level1)
      * @tc.steps: step4. Scroll to bottom, than scroll up greater than half of last snapPaginations
      * @tc.expected: Not continue scroll in last snapPaginations
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     delta = thirdPagination / 2 + 1;
     ScrollBy(0, delta);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE + delta));
@@ -1475,7 +1522,6 @@ HWTEST_F(ScrollEventTestNg, EnablePaging005, TestSize.Level1)
     DragStart(frameNode_, Offset());
     DragUpdate(-10);
     DragEnd(-SCROLL_PAGING_SPEED_THRESHOLD - 1);
-    MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(TickPosition(-viewPortLength));
     EXPECT_TRUE(pattern_->IsScrollableStopped());
 
@@ -1501,9 +1547,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging006, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEnablePaging(true);
     ScrollState state = ScrollState::IDLE;
-    auto didEvent = [&state](Dimension, Dimension, ScrollState value) {
-        state = value;
-    };
+    auto didEvent = [&state](Dimension, Dimension, ScrollState value) { state = value; };
     model.SetOnDidScroll(std::move(didEvent));
     CreateContent();
     CreateScrollDone();
@@ -1569,15 +1613,13 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop001, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     int32_t isScrollStartCalled = 0;
-    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() {
-        isScrollStartCalled++;
-    };
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() { isScrollStartCalled++; };
     model.SetOnScrollStart(std::move(scrollStart));
     int32_t isScrollStopCalled = 0;
     int32_t stopHasStart = 0;
     OnScrollStopEvent scrollStop = [&isScrollStopCalled, &isScrollStartCalled, &stopHasStart]() {
         if (isScrollStartCalled - isScrollStopCalled == 1) {
-            stopHasStart ++;
+            stopHasStart++;
         }
         isScrollStopCalled++;
     };
@@ -1589,7 +1631,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop001, TestSize.Level1)
      * @tc.steps: step2. Trigger fling and velocity = 200.
      * @tc.expected: isScrollStopCalled should be true.
      */
-    
+
     pattern_->Fling(200.f);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
@@ -1624,9 +1666,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop002, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     int32_t isScrollStartCalled = 0;
-    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() {
-        isScrollStartCalled++;
-    };
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() { isScrollStartCalled++; };
     model.SetOnScrollStart(std::move(scrollStart));
     int32_t isScrollStopCalled = 0;
     int32_t stopHasStart = 0;
@@ -1682,15 +1722,13 @@ HWTEST_F(ScrollEventTestNg, OnScrollStartStop003, TestSize.Level1)
      */
     ScrollModelNG model = CreateScroll();
     int32_t isScrollStartCalled = 0;
-    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() {
-        isScrollStartCalled++;
-    };
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() { isScrollStartCalled++; };
     model.SetOnScrollStart(std::move(scrollStart));
     int32_t isScrollStopCalled = 0;
     int32_t stopHasStart = 0;
     OnScrollStopEvent scrollStop = [&isScrollStopCalled, &isScrollStartCalled, &stopHasStart]() {
         if (isScrollStartCalled - isScrollStopCalled == 1) {
-            stopHasStart ++;
+            stopHasStart++;
         }
         isScrollStopCalled++;
     };

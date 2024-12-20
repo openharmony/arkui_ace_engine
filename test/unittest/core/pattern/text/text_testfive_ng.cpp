@@ -1453,7 +1453,7 @@ HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
     ASSERT_NE(textSelectOverlay, nullptr);
 
     auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
-    SelectOverlayDirtyFlag flag = UPDATE_HANDLE_COLOR_FLAG;
+    SelectOverlayDirtyFlag flag = DIRTY_HANDLE_COLOR_FLAG;
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->handlerColor, std::nullopt);
 }

@@ -22,6 +22,9 @@ import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 import { AlphabetIndexerBootcamp } from './AlphabetIndexerBootcamp'
+import { BadgeBootcamp } from './BadgeBootcamp'
+import { ChipGroupBootcamp } from  './ChipGroupBootcamp';
+import { ChipBootcamp } from './ChipBootcamp';
 import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 import { DataPanelBootcamp } from './DataPanelBootcamp';
@@ -39,6 +42,9 @@ export const displaysRoute: RouteGroup = {
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
     { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' }
+    { name: 'badge', label: '信息标记/Badge' }
+    { name: 'chipGroup', label: '操作块群组/ChipGroup' }
+    { name: 'chip', label: '操作块/Chip' }
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
     { name: 'dataPanel', label: '数据面板/DataPanel'}
@@ -64,6 +70,12 @@ export function DisplaysDestination(name: string, route: Route) {
     TextSpanUrlBootcamp({ title: route.label })
   } else if (name === 'displays/alphabetIndexer'){
     AlphabetIndexerBootcamp({ title: route.label })
+  } else if (name === 'displays/badge'){
+    BadgeBootcamp({ title: route.label })
+  } else if (name === 'displays/chipGroup'){
+    ChipGroupBootcamp({ title: route.label })
+  } else if (name === 'displays/chip'){
+    ChipBootcamp({ title: route.label })
   } else if (name === 'displays/counter') {
     CounterBootcamp({ title: route.label})
   } else if (name === 'displays/advancedCounter'){

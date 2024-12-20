@@ -688,6 +688,7 @@ struct custombutton {
       .onAreaChange((oldValue: Area, newValue: Area) => {
         this.onAreaChangeEvent(oldValue, newValue)
       })
+      .gesture(PanGesture())
     }
     .justifyContent(FlexAlign.End)
     .visibility(this.rowVisibility)

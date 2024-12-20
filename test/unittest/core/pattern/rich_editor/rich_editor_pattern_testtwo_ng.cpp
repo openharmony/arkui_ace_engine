@@ -17,6 +17,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_clipboard.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -1421,5 +1422,109 @@ HWTEST_F(RichEditorPatternTestTwoNg, GetSelectSpansPositionInfo002, TestSize.Lev
     end = 6;
     richEditorPattern->GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
     EXPECT_EQ(endPositionSpanInfo.spanIndex_, startPositionSpanInfo.spanIndex_);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto rendenContext = richEditorNode_->GetRenderContext();
+    ASSERT_NE(rendenContext, nullptr);
+    rendenContext->ResetClipEdge();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    DirtySwapConfig config;
+    richEditorPattern->isModifyingContent_ = true;
+    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CloseSystemMenu002
+ * @tc.desc: test CloseSystemMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, CloseSystemMenu002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CloseSystemMenu();
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+
+    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
+    selectOverlayInfo->menuInfo.menuBuilder = []() { return; };
+    EXPECT_TRUE(selectOverlayInfo->menuInfo.menuBuilder);
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    ASSERT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    richEditorPattern->CloseSystemMenu();
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: GetParagraphInfo001
+ * @tc.desc: test GetParagraphInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetParagraphInfo001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t start = 1;
+    int32_t end = 24;
+    ClearSpan();
+    auto size = richEditorPattern->GetParagraphInfo(start, end).size();
+    AddSpan(INIT_VALUE_2);
+    AddSpan(INIT_VALUE_2 + "\n");
+    AddSpan(INIT_VALUE_2);
+    AddSpan(INIT_VALUE_2);
+    EXPECT_NE(size, richEditorPattern->GetParagraphInfo(start, end).size());
+}
+
+/**
+ * @tc.name: UpdateCaretByTouchMove001
+ * @tc.desc: test UpdateCaretByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateCaretByTouchMove001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    Offset offset(1, 1);
+    richEditorPattern->moveCaretState_.isMoveCaret = true;
+    bool exist = richEditorPattern->magnifierController_->magnifierNodeExist_;
+    richEditorPattern->magnifierController_ = nullptr;
+    richEditorPattern->UpdateCaretByTouchMove(offset);
+    EXPECT_FALSE(exist);
+}
+
+/**
+ * @tc.name: HandleOnCopy001
+ * @tc.desc: test HandleOnCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleOnCopy001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->clipboard_ = AceType::MakeRefPtr<MockClipBoard>(taskExecutor);
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    bool isUsingExternalKeyboard = true;
+    richEditorPattern->selectOverlay_->isUsingMouse_ = true;
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    richEditorPattern->HandleOnCopy(isUsingExternalKeyboard);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 } // namespace OHOS::Ace::NG

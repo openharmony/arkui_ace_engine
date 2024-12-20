@@ -2363,6 +2363,23 @@ void SwiperPattern::InitOnFocusInternal(const RefPtr<FocusHub>& focusHub)
 void SwiperPattern::HandleFocusInternal()
 {
     currentFocusIndex_ = currentIndex_;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_VOID(lastFocusNode);
+    for (const auto& item : itemPosition_) {
+        auto itemNode = GetCurrentFrameNode(item.first);
+        if (!itemNode) {
+            continue;
+        }
+        if (itemNode->GetFirstFocusHubChild() == lastFocusNode) {
+            currentFocusIndex_ = item.first;
+            return;
+        }
+    }
 }
 
 void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -4260,6 +4277,22 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea(
         SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
 }
 
+int32_t SwiperPattern::GetFirstIndexInVisibleArea() const
+{
+    if (itemPosition_.empty()) {
+        return 0;
+    }
+    for (const auto& item : itemPosition_) {
+        if (Negative(item.second.startPos) && Negative(item.second.endPos)) {
+            continue;
+        }
+        if (Positive(item.second.endPos)) {
+            return item.first;
+        }
+    }
+    return itemPosition_.begin()->first;
+}
+
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetLastItemInfoInVisibleArea() const
 {
     if (itemPosition_.empty()) {
@@ -5844,6 +5877,15 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float addition
     }
 
     return std::make_pair(currentTurnPageRate, firstIndex);
+}
+
+float SwiperPattern::CalcCurrentTurnPageRate() const
+{
+    if (IsHorizontalAndRightToLeft()) {
+        return CalcCurrentPageStatusOnRTL(0.0f).first;
+    }
+
+    return CalcCurrentPageStatus(0.0f).first;
 }
 
 std::pair<float, float> SwiperPattern::CalcCurrentPageStatus(float additionalOffset) const

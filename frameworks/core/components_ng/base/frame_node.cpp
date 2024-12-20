@@ -1329,6 +1329,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     FireFontNDKCallback(configurationChange);
+    OnPropertyChangeMeasure();
+}
+
+void FrameNode::OnPropertyChangeMeasure() const
+{
     auto layoutProperty = GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->OnPropertyChangeMeasure();
@@ -1444,10 +1449,13 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || dirty->SkipMeasureContent();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+    if ((config.skipMeasure == false) && (config.skipLayout == false)) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        eventHub_->FireLayoutNDKCallback(pipeline);
+        if (GetInspectorId().has_value()) {
+            pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        }
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
     needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
@@ -2025,8 +2033,8 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
-
-        if (self->GetInspectorId()) {
+        auto eventHub = self->GetEventHub<NG::EventHub>();
+        if (self->GetInspectorId() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
@@ -4420,10 +4428,13 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
+    if (!config.skipMeasure && !config.skipLayout) {
         auto pipeline = GetContext();
         CHECK_NULL_RETURN(pipeline, false);
-        pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        if (GetInspectorId()) {
+            pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+        }
+        eventHub_->FireLayoutNDKCallback(pipeline);
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
     needRerender =
@@ -4597,7 +4608,7 @@ void FrameNode::RemoveChildInRenderTree(uint32_t index)
 
 bool FrameNode::SkipMeasureContent() const
 {
-    return layoutAlgorithm_->SkipMeasure();
+    return layoutAlgorithm_ && layoutAlgorithm_->SkipMeasure();
 }
 
 bool FrameNode::CheckNeedForceMeasureAndLayout()

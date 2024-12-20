@@ -826,10 +826,13 @@ float GridPattern::GetTotalHeight() const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto viewScopeSize = geometryNode->GetPaddingSize();
-    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info_.axis_);
+    auto props = host->GetLayoutProperty<GridLayoutProperty>();
+    auto mainGap = GridUtils::GetMainGap(props, viewScopeSize, info_.axis_);
     if (UseIrregularLayout()) {
         return info_.GetIrregularHeight(mainGap);
+    }
+    if (props->HasLayoutOptions()) {
+        return info_.GetContentHeight(*props->GetLayoutOptions(), info_.childrenCount_, mainGap);
     }
     return info_.GetContentHeight(mainGap);
 }
@@ -975,7 +978,7 @@ float GridPattern::GetEndOffset()
     const bool irregular = UseIrregularLayout();
     float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
-    if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
+    if (GetAlwaysEnabled() && LessNotEqual(GetTotalHeight(), contentHeight)) {
         // overScroll with contentHeight < viewport
         if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);

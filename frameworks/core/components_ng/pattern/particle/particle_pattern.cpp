@@ -354,7 +354,12 @@ void ParticlePattern::ParseParticleObject(std::unique_ptr<JsonValue>& json,
     const InspectorFilter& filter) const
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetParticleOptionArray().has_value()) {
+        return;
+    }
     auto particleArray = context->GetParticleOptionArray().value();
     auto objectParticlesArrayJson = JsonUtil::CreateArray(true);
     for (auto& particle : particleArray) {

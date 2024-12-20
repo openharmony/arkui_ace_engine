@@ -2345,6 +2345,28 @@ class PaddingModifier extends ModifierWithKey<ArkPadding> {
   }
 }
 
+class SafeAreaPaddingModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('safeAreaPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSafeAreaPadding(node);
+    } else {
+      getUINativeModule().common.setSafeAreaPadding(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
 class VisibilityModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -3596,6 +3618,37 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, PaddingModifier.identity, PaddingModifier, arkValue);
     } else {
       modifierWithKey(this._modifiersWithKeys, PaddingModifier.identity, PaddingModifier, undefined);
+    }
+    return this;
+  }
+
+  safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isObject(value) && (Object.keys(value).indexOf('value') >= 0)) {
+        arkValue.top = <LengthMetrics>value;
+        arkValue.right = <LengthMetrics>value;
+        arkValue.bottom = <LengthMetrics>value;
+        arkValue.left = <LengthMetrics>value;
+      } else {
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
+      }
+      modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SafeAreaPaddingModifier.identity, SafeAreaPaddingModifier, undefined);
     }
     return this;
   }

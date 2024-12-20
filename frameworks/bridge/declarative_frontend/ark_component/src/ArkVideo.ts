@@ -111,6 +111,23 @@ class VideoOpacityModifier extends ModifierWithKey<number | Resource> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class VideoSurfaceBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoSurfaceBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetVideoSurfaceBackgroundColor(node);
+    } else {
+      getUINativeModule().video.setVideoSurfaceBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class VideoTransitionModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);

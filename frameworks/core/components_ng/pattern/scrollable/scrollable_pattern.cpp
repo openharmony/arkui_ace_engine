@@ -1453,7 +1453,7 @@ void ScrollablePattern::InitSpringOffsetProperty()
         bool stopAnimation = false;
         auto delta = pattern->GetScrollDelta(offset, stopAnimation);
         auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
-        if (pattern->GetLastSnapTargetIndex() >= 0) {
+        if (pattern->GetLastSnapTargetIndex().has_value()) {
             source = SCROLL_FROM_ANIMATION;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
@@ -1482,6 +1482,7 @@ void ScrollablePattern::InitCurveOffsetProperty()
             stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_) {
                 pattern->isAnimateOverScroll_ = false;
+                pattern->isScrollToOverAnimation_  = true;
                 auto pauseVelocity = -pattern->currentVelocity_;
                 auto context = pattern->GetContext();
                 CHECK_NULL_VOID(context);
@@ -2423,9 +2424,10 @@ void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& ve
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
+    if (!isScrollToOverAnimation_ && parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    isScrollToOverAnimation_ = false;
     SetIsNestedInterrupt(false);
 }
 
@@ -2704,7 +2706,8 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             onScrollStop();
             AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
             SetScrollSource(SCROLL_FROM_NONE);
-            SetLastSnapTargetIndex(-1);
+            ResetLastSnapTargetIndex();
+            ResetScrollableSnapDirection();
         }
         auto scrollBar = GetScrollBar();
         if (scrollBar) {

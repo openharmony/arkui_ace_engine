@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_DRAWING_COLOR_FILTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_DRAWING_COLOR_FILTER_H
 
+#include <vector>
+
 #include "base/memory/ace_type.h"
 
 namespace OHOS {

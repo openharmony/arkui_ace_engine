@@ -145,13 +145,6 @@ struct GridLayoutInfo {
     void PrepareJumpToBottom();
 
     /**
-     * @brief optimized function (early exit) to compare total height to [other].
-     * @param other height to compare to.
-     * @return true if total height is less than [other].
-     */
-    bool HeightSumSmaller(float other, float mainGap) const;
-
-    /**
      * @return height sum of lines in range [startLine, endLine).
      */
     float GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const;
@@ -239,6 +232,20 @@ struct GridLayoutInfo {
      * @param idx starting line index
      */
     void ClearMapsToEndContainsMultiLineItem(int32_t idx);
+
+    /**
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStart(int32_t idx);
+
+    /**
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStartContainsMultiLineItem(int32_t idx);
 
     /**
      * @brief clears lineHeightMap_ starting from line [idx]

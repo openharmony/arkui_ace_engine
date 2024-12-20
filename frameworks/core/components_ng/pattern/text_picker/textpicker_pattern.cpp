@@ -374,6 +374,8 @@ void TextPickerPattern::InitDisabled()
     CHECK_NULL_VOID(renderContext);
     if (!enabled_) {
         renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    } else {
+        renderContext->UpdateOpacity(curOpacity_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -623,6 +625,10 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
                       FOUCS_WIDTH.ConvertToPx();
         } else {
             centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
+        }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+            centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
         }
         AdjustFocusBoxOffset(centerX, centerY);
     } else {

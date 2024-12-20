@@ -51,19 +51,19 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex001, TestSize.Level1)
 
     float groupHeight = ITEM_MAIN_SIZE * GROUP_ITEM_NUMBER; // 200.0f
     ScrollToIndex(index, true, ScrollAlign::START);
-    EXPECT_TRUE(Position(-(index * groupHeight - offset)));
+    EXPECT_TRUE(TickPosition(-(index * groupHeight - offset)));
     ScrollToIndex(index, true, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
     ScrollToIndex(index, true, ScrollAlign::END);
-    EXPECT_TRUE(Position(-(200 + offset)));
+    EXPECT_TRUE(TickPosition(-(200.0f + offset)));
 
     layoutProperty_->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
     ScrollToIndex(index, true, ScrollAlign::START);
-    EXPECT_TRUE(Position(-index * groupHeight));
+    EXPECT_TRUE(TickPosition(-index * groupHeight));
     ScrollToIndex(index, true, ScrollAlign::CENTER);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
     ScrollToIndex(index, true, ScrollAlign::END);
-    EXPECT_TRUE(Position(-200.0f));
+    EXPECT_TRUE(TickPosition(-200.0f));
 }
 
 /**
@@ -89,7 +89,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     ScrollTo(800);
     EXPECT_EQ(pattern_->GetTotalOffset(), 800);
     ScrollToIndex(1, true, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-1000.0f));
+    EXPECT_TRUE(TickPosition(-1000.0f));
 
     /**
      * @tc.cases: bottomOffset > topOffset == 0
@@ -98,7 +98,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     ScrollTo(1000);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1000);
     ScrollToIndex(1, true, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-1000.0f));
+    EXPECT_TRUE(TickPosition(-1000.0f));
 
     /**
      * @tc.cases: bottomOffset > 0 > topOffset and |topOffset| < |bottomOffset|
@@ -107,7 +107,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     ScrollTo(1050);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1050);
     ScrollToIndex(1, true, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-1050.0f));
+    EXPECT_TRUE(TickPosition(-1050.0f));
 
     /**
      * @tc.cases: bottomOffset > 0 > topOffset and |topOffset| == |bottomOffset|
@@ -117,7 +117,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 1300);
     ScrollToIndex(1, true, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
 
     /**
      * @tc.cases: bottomOffset == 0 > topOffset
@@ -126,7 +126,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     ScrollTo(1400);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1400);
     ScrollToIndex(1, true, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
 
     /**
      * @tc.cases: 0 > bottomOffset > topOffset
@@ -135,7 +135,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     ScrollTo(1700);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1700);
     ScrollToIndex(1, true, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
 }
 
 /**
@@ -233,23 +233,23 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex005, TestSize.Level1)
     CreateDone();
     std::optional<float> extraOffset = -200.0f;
     ScrollToIndex(1, true, ScrollAlign::START, extraOffset);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
     ScrollToIndex(18, true, ScrollAlign::START, extraOffset);
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
     ScrollToIndex(18, true, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(-1300.0f));
+    EXPECT_TRUE(TickPosition(-1300.0f));
     ScrollToIndex(LAST_ITEM, true, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(-1300.0f));
+    EXPECT_TRUE(TickPosition(-1300.0f));
 
     extraOffset = 200.0f;
     ScrollToIndex(1, true, ScrollAlign::START, extraOffset);
-    EXPECT_TRUE(Position(-300.0f));
+    EXPECT_TRUE(TickPosition(-300.0f));
     ScrollToIndex(1, true, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
     ScrollToIndex(18, true, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
     ScrollToIndex(LAST_ITEM, true, ScrollAlign::END, extraOffset);
-    EXPECT_TRUE(Position(-1600.0f));
+    EXPECT_TRUE(TickPosition(-1600.0f));
 }
 
 /**
@@ -281,16 +281,16 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex006, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200);
 
     ScrollToIndex(2, true, ScrollAlign::CENTER, 0);
-    EXPECT_TRUE(Position(-600.0f));
+    EXPECT_TRUE(TickPosition(-600.0f));
     MockAnimationManager::GetInstance().SetTicks(4);
     ScrollToIndex(1, true, ScrollAlign::CENTER, 0);
-    EXPECT_TRUE(Position(-550.0f));
-    EXPECT_TRUE(Position(-500.0f));
-    EXPECT_TRUE(Position(-150.0f));
-    EXPECT_TRUE(Position(-137.5)); // Update Animation
-    EXPECT_TRUE(Position(-125));
-    EXPECT_TRUE(Position(-112.5));
-    EXPECT_TRUE(Position(-100.0f));
+    EXPECT_TRUE(TickPosition(-550.0f));
+    EXPECT_TRUE(TickPosition(-500.0f));
+    EXPECT_TRUE(TickPosition(-150.0f));
+    EXPECT_TRUE(TickPosition(-137.5f)); // Update Animation
+    EXPECT_TRUE(TickPosition(-125.0f));
+    EXPECT_TRUE(TickPosition(-112.5f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 }
 
 /**
@@ -322,13 +322,12 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex007, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 600); // estimate:600, real:690
 
     MockAnimationManager::GetInstance().SetTicks(12);
-    positionController_->AnimateTo(Dimension(0), 100, nullptr, true);
-    FlushUITasks();
+    AnimateTo(Dimension(0), 100.0f, nullptr, true);
     for (int32_t i = 0; i < 10; i++) {
-        EXPECT_TRUE(Position(-550 + i * 50));
+        EXPECT_TRUE(TickPosition(-550.0f + i * 50));
     }
-    EXPECT_TRUE(Position(-140)); // estimate:50, real:140
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(-140.0f)); // estimate:50, real:140
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -894,8 +893,7 @@ HWTEST_F(ListScrollerTestNg, PositionController009, TestSize.Level1)
      * @tc.steps: step8. bottomOffset > topOffset == 0
      * expected: top Align
      */
-    pattern_->ScrollTo(1000);
-    FlushUITasks();
+    ScrollTo(1000);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1000);
 }
 
@@ -1106,7 +1104,7 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
     ScrollTo(1200);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1200);
     ScrollToIndex(1, true, ScrollAlign::AUTO);
-    EXPECT_TRUE(Position(-400.0f));
+    EXPECT_TRUE(TickPosition(-400.0f));
 
     /**
      * @tc.cases: JumpIndex == StartIndex == EndIndex
@@ -1114,7 +1112,7 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
      */
     ScrollTo(800);
     ScrollToIndex(1, false, ScrollAlign::AUTO);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 400);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 400.0f);
 }
 
 /**

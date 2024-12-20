@@ -994,7 +994,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetStartAndEndIndex002, TestSize.Level1)
 
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
-    expectVal = std::pair<int32_t, int32_t>(index, index);
+    expectVal = std::pair<int32_t, int32_t>(1, 1);
     EXPECT_EQ(paintMethod->GetStartAndEndIndex(1), expectVal);
 
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;

@@ -500,7 +500,6 @@ public:
     void ClearContent(const RefPtr<UINode>& child);
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition) override;
-    void ResetFirstNodeStyle();
     bool DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
@@ -532,6 +531,8 @@ public:
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
+    void AddOnPlaceholderHoverEvent(const RefPtr<PlaceholderSpanNode>& placeholderSpanNode);
+    void OnPlaceholderHover(bool isHover);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
@@ -825,17 +826,6 @@ public:
     int32_t GetContentWideTextLength() override
     {
         return GetTextContentLength();
-    }
-
-    OffsetF GetCaretOffset() const override
-    {
-        // only used in magnifier, return position of the handle that is currently moving
-        return movingHandleOffset_;
-    }
-
-    void SetMovingHandleOffset(const OffsetF& handleOffset)
-    {
-        movingHandleOffset_ = handleOffset;
     }
 
     OffsetF GetParentGlobalOffset() const override
@@ -1161,6 +1151,7 @@ private:
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     void OnHover(bool isHover);
+    void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     void UpdateCaretInfoToController();
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1342,6 +1333,7 @@ private:
     bool ReplaceText(const std::string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
+    void SetMagnifierLocalOffset(Offset localOffset);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

@@ -28,7 +28,10 @@ ohos_unittest("UIMgrServiceTest") {
     "//foundation/arkui/ace_engine/frameworks",
   ]
 
-  sources = [ "ui_mgr_service_test.cpp" ]
+  sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "ui_mgr_service_test.cpp",
+  ]
 
   configs = [ "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservicems_config" ]
   cflags = []

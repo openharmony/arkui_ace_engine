@@ -176,7 +176,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    virtual void SetParent(const WeakPtr<UINode>& parent)
+    void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }

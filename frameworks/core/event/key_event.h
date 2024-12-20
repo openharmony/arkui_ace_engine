@@ -554,6 +554,10 @@ struct KeyEvent final : public NonPointerEvent {
     {
         return KeyCode::KEY_ESCAPE == code;
     }
+    bool IsPreIme() const
+    {
+        return isPreIme;
+    }
 
     std::string ConvertInputCodeToString() const;
     std::string ConvertCodeToString() const;
@@ -585,7 +589,8 @@ struct KeyEvent final : public NonPointerEvent {
         ss << "pressedCodes=[";
         std::for_each(pressedCodes.begin(), pressedCodes.end(),
             [&ss](const KeyCode& code) { ss << static_cast<int32_t>(code) << ", "; });
-        ss << "]";
+        ss << "]" << ", ";
+        ss << "isPreIme = " << isPreIme;
         return ss.str();
     }
 };

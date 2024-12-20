@@ -124,6 +124,21 @@ public:
         sizeChangeByRotateCallback_ = callback;
     }
 
+    void SetLinkJumpCallback(const std::function<void(const std::string& link)>& callback)
+    {
+        linkJumpCallback_ = callback;
+    }
+
+    void ExecuteLinkJumpCallback(const std::string& link)
+    {
+        linkJumpCallback_(link);
+    }
+
+    bool GetIsLinkJumpOpen()
+    {
+        return linkJumpCallback_ != nullptr;
+    }
+
     void FireSizeChangeByRotateCallback(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
     {
@@ -1026,6 +1041,8 @@ public:
     std::string GetBundleName();
     std::string GetModuleName();
 
+    void SetEnableSwipeBack(bool isEnable) override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1109,6 +1126,8 @@ private:
     bool CompensatePointerMoveEventFromUnhandledEvents(const DragPointerEvent& event, const RefPtr<FrameNode>& node);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
+
+    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1237,6 +1256,7 @@ private:
     std::function<void()> focusOnNodeCallback_;
     std::function<void(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
+    std::function<void(const std::string&)> linkJumpCallback_ = nullptr;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
@@ -1300,7 +1320,7 @@ private:
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
-    
+
     friend class ScopedLayout;
     friend class FormGestureManager;
 };
