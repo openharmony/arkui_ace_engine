@@ -116,6 +116,10 @@ const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
 const SizeF INVALID_SIZE(MAX_WIDTH, 0.0f);
 constexpr uint32_t VIDEO_CHILDREN_NUM = 3;
+constexpr uint32_t VIDEO_DURATION = 10u;
+constexpr uint32_t VIDEO_CURRENT_TIME = 5u;
+constexpr float VOLUME_STEP = 0.05f;
+constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
 TestProperty testProperty;
 } // namespace
 
@@ -1296,5 +1300,72 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest030, TestSize.Level1)
 
     videoPattern->imageAnalyzerManager_ = nullptr;
     EXPECT_FALSE(videoPattern->IsSupportImageAnalyzer());
+}
+
+/**
+ * @tc.name: VideoPatternTest031
+ * @tc.desc: VideoEnableShortcutKeyTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    videoPattern->duration_ = VIDEO_DURATION;
+    videoPattern->currentPos_ = VIDEO_CURRENT_TIME;
+    ASSERT_NE(videoPattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+
+    /**
+     * @tc.steps: step2. call onKeyEvent when isEnableShortcutKey_ is false/code is incorrect/action is incorrect
+     * @tc.expected: will not response
+     */
+    KeyEvent keyEvent0 { KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Seek(_, _)).Times(0);
+    videoPattern->OnKeyEvent(keyEvent0);
+    videoPattern->isEnableShortcutKey_ = true;
+    keyEvent0.code = KeyCode::KEY_CTRL_LEFT;
+    videoPattern->OnKeyEvent(keyEvent0);
+    keyEvent0.action = KeyAction::UP;
+    videoPattern->OnKeyEvent(keyEvent0);
+
+    /**
+     * @tc.steps: step3. call onKeyEvent when isEnableShortcutKey_ is true and code&action is right
+     * @tc.expected: response as expected
+     */
+    videoPattern->isPrepared_ = true;
+    KeyEvent keyEvent1 { KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)),
+        Seek((VIDEO_CURRENT_TIME - 1) * MILLISECONDS_TO_SECONDS, _))
+        .Times(1);
+    videoPattern->OnKeyEvent(keyEvent1);
+    KeyEvent keyEvent2 { KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)),
+        Seek((VIDEO_CURRENT_TIME + 1) * MILLISECONDS_TO_SECONDS, _))
+        .Times(1);
+    videoPattern->OnKeyEvent(keyEvent2);
+    KeyEvent keyEvent3 { KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)),
+        SetVolume(1.0f - VOLUME_STEP, 1.0f - VOLUME_STEP))
+        .Times(1);
+    videoPattern->OnKeyEvent(keyEvent3);
+    KeyEvent keyEvent4 { KeyCode::KEY_DPAD_UP, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetVolume(1.0f, 1.0f)).Times(1);
+    videoPattern->OnKeyEvent(keyEvent4);
+    KeyEvent keyEvent5 { KeyCode::KEY_SPACE, KeyAction::DOWN };
+    videoPattern->isPaused_ = true;
+    videoPattern->OnKeyEvent(keyEvent5);
+    EXPECT_FALSE(videoPattern->isPaused_);
+    videoPattern->isPlaying_ = true;
+    KeyEvent keyEvent6 { KeyCode::KEY_SPACE, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Pause()).Times(1);
+    videoPattern->OnKeyEvent(keyEvent6);
 }
 } // namespace OHOS::Ace::NG
