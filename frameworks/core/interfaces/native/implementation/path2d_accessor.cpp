@@ -43,12 +43,14 @@ void AddPathImpl(Path2DPeer* peer,
     CHECK_NULL_VOID(transform);
     auto peer2 = reinterpret_cast<Path2DPeer*>(path->ptr);
     CHECK_NULL_VOID(peer2);
-
+    peer->path2d->AddPath(peer2->path2d);
     auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
     CHECK_NULL_VOID(opt);
     auto matrix = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
     CHECK_NULL_VOID(matrix);
- }
+    auto tr = matrix->transform;
+    peer->path2d->SetTransform(tr.scaleX, tr.skewX, tr.skewY, tr.scaleY, tr.translateX, tr.translateY);
+}
 } // Path2DAccessor
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
 {
