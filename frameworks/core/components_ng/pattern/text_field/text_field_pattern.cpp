@@ -1962,8 +1962,12 @@ void TextFieldPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t 
 
 void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
 {
-    scrollable_ = false;
-    SetScrollEnabled(scrollable_);
+    if (contentScroller_.isScrolling) {
+        CheckScrollable();
+    } else {
+        scrollable_ = false;
+        SetScrollEnabled(scrollable_);
+    }
     // limit move when preview text is shown
     auto touchOffset = info.GetLocalLocation();
     int32_t preCaretIndex = selectController_->GetCaretIndex();
@@ -3121,11 +3125,19 @@ void TextFieldPattern::ProcessSelection()
             CloseSelectOverlay();
             StartTwinkling();
         }
-    } else if (HasFocus() && !IsSelected()) {
-        StartTwinkling();
-    } else {
-        needToRefreshSelectOverlay_ = false;
+        return;
     }
+    if (HasFocus()) {
+        if (IsGestureSelectingText()) {
+            UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
+                std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        }
+        if (!IsSelected()) {
+            StartTwinkling();
+        }
+        return;
+    }
+    needToRefreshSelectOverlay_ = false;
 }
 
 void TextFieldPattern::OnModifyDone()
@@ -8939,6 +8951,9 @@ void TextFieldPattern::StartGestureSelection(int32_t start, int32_t end, const O
 
 void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
+    if (!HasText()) {
+        return;
+    }
     auto localOffset = info.GetTouches().front().GetLocalLocation();
     UpdateContentScroller(localOffset);
     if (contentScroller_.isScrolling) {
@@ -8978,13 +8993,25 @@ void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, co
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextFieldPattern::OnTextGenstureSelectionEnd()
+void TextFieldPattern::OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo)
 {
     SetIsSingleHandle(!IsSelected());
-    if (!IsContentRectNonPositive()) {
-        ProcessOverlay({ .animation = true });
-    }
+    bool isScrolling = contentScroller_.isScrolling;
     StopContentScroll();
+    if (IsContentRectNonPositive()) {
+        return;
+    }
+    if (!isScrolling) {
+        auto localLocation = locationInfo.GetLocalLocation();
+        if (LessNotEqual(localLocation.GetX(), contentRect_.Left()) ||
+            LessNotEqual(localLocation.GetY(), contentRect_.Top())) {
+            selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex(), false);
+        } else if (GreatNotEqual(localLocation.GetX(), contentRect_.Right()) ||
+                   GreatNotEqual(localLocation.GetY(), contentRect_.Bottom())) {
+            selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
+        }
+    }
+    ProcessOverlay({ .animation = true });
 }
 
 PositionWithAffinity TextFieldPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)

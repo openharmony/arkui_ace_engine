@@ -461,11 +461,11 @@ HWTEST_F(TextFieldPatternTestThree, OnTextGenstureSelectionEnd001, TestSize.Leve
 {
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-
-    pattern_->OnTextGenstureSelectionEnd();
+    TouchLocationInfo locationInfo(0);
+    pattern_->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_FALSE(pattern_->IsContentRectNonPositive());
     pattern_->contentRect_.SetRect(10, 10, 0, 0);
-    pattern_->OnTextGenstureSelectionEnd();
+    pattern_->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_TRUE(pattern_->IsContentRectNonPositive());
 }
 
