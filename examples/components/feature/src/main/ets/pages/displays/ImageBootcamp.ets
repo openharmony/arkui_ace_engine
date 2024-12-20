@@ -1931,7 +1931,8 @@ export struct ImageboxGroupBootcamp {
                       useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
                         this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin),
                       expected:
-                      useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
+                      useEnabled(
+                        this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
                         this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected),
                     }
                   })
