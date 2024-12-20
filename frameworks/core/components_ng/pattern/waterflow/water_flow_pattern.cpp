@@ -667,7 +667,7 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
         } else {
             host->ReplaceChild(prevFooter, footer);
         }
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     footer_ = footer;
     if (footer) {
